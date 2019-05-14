@@ -36,10 +36,20 @@ Express will provide :
 
 #### Datasets
 
+##### List of Datasets
+
 ![datasets list of a given document](/doc/dataset_list.jpg "datasets list of a given document")
+
+##### Form to update a Dataset
+
 ![dataset form of a given document](/doc/dataset_form.jpg "dataset form of a given document")
 
 #### Finish
 
+##### Case document is "not DataSeer"
+
 ![finished result of a given document (non dataseer)](/doc/finish.jpg "finished result of a given document (non dataseer)")
+
+##### Case document is "DataSeer"
+
 ![finished result of a given document (dataseer)](/doc/finish_dataseer.jpg "finished result of a given document (dataseer)")
