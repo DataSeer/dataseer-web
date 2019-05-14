@@ -25,13 +25,21 @@ Express will provide :
 
 ### API
 
-  ![api result of a given document](/doc/api.jpg "api result of a given document")
+![api result of a given document](/doc/api.jpg "api result of a given document")
 
 
-### Web view
+### Web Application
 
-  ![metadata of a given document](/doc/metadata.jpg "metadata of a given document")
-  ![datasets list of a given document](/doc/api.jpg "datasets list of a given document")
-  ![dataset form of a given document](/doc/api.jpg "dataset form of a given document")
-  ![finished result of a given document (non dataseer)](/doc/api.jpg "finished result of a given document (non dataseer)")
-  ![finished result of a given document (dataseer)](/doc/api.jpg "finished result of a given document (dataseer)")
+#### Metadata
+
+![metadata of a given document](/doc/metadata.jpg "metadata of a given document")
+
+#### Datasets
+
+![datasets list of a given document](/doc/dataset_list.jpg "datasets list of a given document")
+![dataset form of a given document](/doc/dataset_form.jpg "dataset form of a given document")
+
+#### Finish
+
+![finished result of a given document (non dataseer)](/doc/finish.jpg "finished result of a given document (non dataseer)")
+![finished result of a given document (dataseer)](/doc/finish_dataseer.jpg "finished result of a given document (dataseer)")
