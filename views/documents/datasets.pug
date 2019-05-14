@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+
+  div(class='container-fluid')
+    div(class='row')
+      div(class='col-12 text-center')
+        div(class='header') DATASEER
+
+    div(class='row')
+      div(class='col-6')
+        div(class='container-fluid document') !{document.xhtml}
+      div(class='col-6')
+        div(class='fixed')
+          div(id='datasets-list' class='form')
+            include ../forms/listDatasets.pug
+          div(id='dataset-update-form' class='form')
+              include ../forms/updateDataset.pug
+
+    div(class='row')
+      div(class='col-6 text-center')
+        button(id='datasets_validation' class='btn btn-primary') All Datasets processed : Finish

@@ -1,0 +1,49 @@
+extends ../layout
+
+block content
+
+  div(class='container-fluid')
+    div(class='row')
+      div(class='col-12')
+        h1(class='text-center header') Welcome to DATASEER
+
+    div(class='row metadata-view')
+      div(class='col-12')
+        div(class='key d-inline font-weight-bold') Manuscript #: 
+        div(class='value d-inline') #{document.metadata.ManuscriptId}
+      div(class='col-12')
+        div(class='key d-inline font-weight-bold') Article Title : 
+        div(class='value d-inline') #{document.metadata.ArticleTitle}
+      div(class='col-12')
+        div(class='key d-inline font-weight-bold') Journal : 
+        div(class='value d-inline') #{document.metadata.Journal}
+
+    div(class='row metadata-view')
+      div(class='col-12')
+        div(class='key d-inline font-weight-bold') Authors : 
+        div(class='value d-inline') #{document.metadata.Authors}
+
+    div(class='row metadata-view')
+      div(class='col-12')
+        div(class='key d-inline font-weight-bold') Submitting Author : 
+        div(class='value d-inline') #{document.metadata.SubmittingAuthor}
+      div(class='col-12')
+        div(class='key d-inline font-weight-bold') Submitting Author email : 
+        div(class='value d-inline') #{document.metadata.SubmittingAuthoremail}
+
+    div(class='row metadata-view')
+      div(class='col-12')
+        div(class='key d-inline font-weight-bold') Institutions : 
+        each val, index in document.metadata.Institutions
+          div(class='value d-block') #{(index + 1)} #{val}
+
+    div(class='row metadata-view')
+      div(class='col-12')
+        div(class='key d-inline font-weight-bold') Funders : 
+        div(class='value d-inline') #{document.metadata.Funders}
+
+    div(class='row crud-button-action')
+      div(class='col-6 text-center')
+        button(id='metadata_validation' class='btn btn-primary') This info is correct : Continue
+      div(class='col-6 text-center')
+        button(id='metadata_contest' class='btn btn-primary') Something is wrong : Contact Journal

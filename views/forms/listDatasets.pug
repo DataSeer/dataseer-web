@@ -1,0 +1,5 @@
+div(class='container-fluid')
+  each val, index in document.datasets
+    div(class='row dataset-item')
+      div(class='col-12')
+        div(class='d-block dataset-link' value=(index + 1)) Dataset #{(index + 1)}

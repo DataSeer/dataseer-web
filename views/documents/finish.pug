@@ -1,0 +1,87 @@
+extends ../layout
+
+block content
+  div(class='splash')
+
+  if document.isDataSeer
+
+    div(class='container-fluid')
+      
+      div(class='row')
+        div(class='col-12') Many thanks for using DataSeer. The Data Accessibility section for your article is below, please paste this into the next version your article.
+
+          div(class='container-fluid')
+
+            div(class='row metadata-view')
+              div(class='col-12')
+                div(class='key d-inline') Data Availability Statement : 
+                each val, index in document.datasets
+
+                  div(class='row')
+                    div(class='col-12')
+                      if val.DOI
+                        div(class='value d-block') #{val.name} : 
+                          a(href='#{val.DOI}') #{val.DOI}
+                      else
+                        div(class='value d-block') #{val.name} : n/a
+
+      div(class='row')
+        div(class='col-12') The report below has been sent to the journal Editorial Office :
+          div(class='container-fluid')
+
+            div(class='row')
+              div(class='col-12') Manuscript #: #{document.metadata.ManuscriptId}
+
+            div(class='row metadata-view')
+              div(class='col-12')
+                div(class='key d-inline') Data Availability Statement : 
+                each val, index in document.datasets
+
+                  div(class='row')
+                    div(class='col-12')
+                      if val.DOI
+                        div(class='value d-block') #{val.name} : 
+                          a(href='#{val.DOI}') #{val.DOI}
+                      else
+                        div(class='value d-block') #{val.name} : n/a
+
+            div(class='row metadata-view')
+              div(class='col-12') Author Comments : 
+                each val, index in document.datasets
+
+                  div(class='row')
+                    div(class='col-12')
+                      if val.comments
+                        div(class='value d-block') #{val.name} : #{val.comments}
+                      else
+                        div(class='value d-block') #{val.name} : n/a
+
+  else
+
+    div(class='container-fluid')
+
+      div(class='row metadata-view')
+        div(class='col-12')
+          div(class='key d-inline font-weight-bold') Manuscript #: 
+          div(class='value d-inline') #{document.metadata.ManuscriptId}
+        div(class='col-12')
+          div(class='key d-inline font-weight-bold') Submitting Author : 
+          div(class='value d-inline') #{document.metadata.SubmittingAuthor}
+        div(class='col-12')
+          div(class='key d-inline font-weight-bold') Submitting Author email : 
+          div(class='value d-inline') #{document.metadata.SubmittingAuthoremail}
+
+      div(class='row')
+        div(class='col-12')
+          div(class='key d-inline')
+          each val, index in document.datasets
+
+            div(class='row dataset-view')
+              div(class='col-12')
+                div(class='value d-block font-weight-bold') Dataset #{index + 1} :
+              div(class='col-12')
+                div(class='value d-inline font-weight-bold') Data Type : 
+                div(class='value d-inline') #{val.dataType}
+              div(class='col-12')
+                div(class='value d-inline font-weight-bold') Data Sentence : 
+                div(class='value d-inline') #{val.text}
