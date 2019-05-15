@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var mongoose = require('mongoose');
-var Documents = require('../../models/Documents.js');
+var Documents = require('../../models/documents.js');
 
 /* GET ALL Documents */
 router.get('/', function(req, res, next) {

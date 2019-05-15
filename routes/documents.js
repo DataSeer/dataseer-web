@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var path = require('path');
 var mongoose = require('mongoose');
-var Documents = require('../models/Documents.js');
+var Documents = require('../models/documents.js');
 var dataTypes = require('../resources/dataTypes.json');
 
 
