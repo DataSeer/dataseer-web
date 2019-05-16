@@ -3,7 +3,6 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-
 .btn {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -38,6 +37,23 @@ root dataset {
 .header {
   margin-top: 25px !important;
   margin-bottom: 50px !important;
+}
+
+#dataset-poperties-update-form .form-row {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+#dataset-poperties-update-form #remove_current_datatype {
+  margin-left: 5px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-right: 0px;
+  line-height: 1em;
+}
+
+.form-row .value {
+  margin-left: 5px;
 }
 
 #datasets-list {
@@ -80,3 +96,6 @@ root dataset {
   margin-bottom: 20px !important;
 }
 
+.demo {
+  background-color: lightgray;
+}

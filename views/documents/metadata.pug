@@ -46,4 +46,7 @@ block content
       div(class='col-6 text-center')
         button(id='metadata_validation' class='btn btn-primary') This info is correct : Continue
       div(class='col-6 text-center')
-        button(id='metadata_contest' class='btn btn-primary') Something is wrong : Contact Journal
+        button(id='metadata_contest' class='btn btn-primary' disabled) Something is wrong : Contact Journal
+
+  if demo
+    include ../forms/demo/metadata.pug

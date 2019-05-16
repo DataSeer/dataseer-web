@@ -54,7 +54,7 @@
     // Update dataset properties with inputs form
     function fillFormWithDatasetPropertiesOf(index) {
       console.log(currentDocument.datasets[index]);
-      $('#dataset-update-form div.dataType').text(currentDocument.datasets[index].dataType);
+      $('#dataType').text(currentDocument.datasets[index].dataType);
       $('#descritpion').text(currentDocument.datasets[index].descritpion);
       $('#bestDataForSharing').text(currentDocument.datasets[index].bestDataForSharing);
       $('#mostSuitableRepositories').text(currentDocument.datasets[index].mostSuitableRepositories);
@@ -117,7 +117,7 @@
     $('.dataset-link').click(function() {
       var index = $(this).attr('value') - 1;
       RefreshDatasetIndexLabelIndicators(index);
-      fillFormWithDatasetPropertiesOf(index)
+      fillFormWithDatasetPropertiesOf(index);
       toggleDatasetListToForms(index);
     });
 
@@ -125,7 +125,7 @@
     $('dataset').click(function() {
       var index = $(this).attr('id') - 1;
       RefreshDatasetIndexLabelIndicators(index);
-      fillFormWithDatasetPropertiesOf(index)
+      fillFormWithDatasetPropertiesOf(index);
       toggleDatasetListToForms(index);
     });
 
@@ -133,10 +133,21 @@
     $('#dataType_validation').click(function() {
       console.log('dataType_validation');
       var index = $('#currentDatasetIndex').attr('value'),
-        value = $('#dataType option:selected').text();
+        value = $('#selectedDataType option:selected').val();
       currentDocument.datasets[index].dataType = value;
+      fillFormWithDatasetPropertiesOf(index);
       toggleDatasetListToForms(index);
     });
+
+    // On remove_current_datatype click
+    $('#remove_current_datatype').click(function() {
+      console.log('remove_current_datatype');
+      var index = $('#currentDatasetIndex').attr('value');
+      currentDocument.datasets[index].dataType = '';
+      fillFormWithDatasetPropertiesOf(index);
+      toggleDatasetListToForms(index);
+    });
+
 
     // On dataset_validation click
     $('#dataset_validation').click(function() {
@@ -155,6 +166,55 @@
     $('#datasets_validation').click(function() {
       console.log('datasets_validation');
       currentDocument.status = 'finish';
+      updateDocument(currentDocument, function(err, res) {
+        console.log(err, res);
+        if (err) return err; // Need to define error behavior
+        return location.reload();
+      });
+    });
+
+    // Get the previous status of current document object
+    function getPreviousStatus(status) {
+      var result = status;
+      if (status === "finish") result = "datasets";
+      else if (status === "datasets") result = "metadata";
+      return result;
+    }
+
+    // Get the next status of current document object
+    function getNextStatus(status) {
+      var result = status;
+      if (status === "metadata") result = "datasets";
+      else if (status === "datasets") result = "finish";
+      return result;
+    }
+
+    // On metadata_validation click
+    $('#demo_previous_step').click(function() {
+      console.log('demo_previous_step');
+      currentDocument.status = getPreviousStatus(currentDocument.status);
+      updateDocument(currentDocument, function(err, res) {
+        console.log(err, res);
+        if (err) return err; // Need to define error behavior
+        return location.reload();
+      });
+    });
+
+    // On metadata_validation click
+    $('#demo_switch_view').click(function() {
+      console.log('demo_switch_view');
+      currentDocument.isDataSeer = !currentDocument.isDataSeer;
+      updateDocument(currentDocument, function(err, res) {
+        console.log(err, res);
+        if (err) return err; // Need to define error behavior
+        return location.reload();
+      });
+    });
+
+    // On metadata_validation click
+    $('#demo_next_step').click(function() {
+      console.log('demo_next_step');
+      currentDocument.status = getNextStatus(currentDocument.status);
       updateDocument(currentDocument, function(err, res) {
         console.log(err, res);
         if (err) return err; // Need to define error behavior

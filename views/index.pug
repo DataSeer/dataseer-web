@@ -1,5 +1,55 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+
+  div(class='container-fluid')
+    div(class='row')
+      div(class='col-12')
+        div(class='d-block text-center')
+          h1= title
+        div(class='d-block text-center')
+          p Welcome to #{title}
+    div(class='row')
+      div(class='col-4')
+        div(class='d-block')
+          h2 Web Application
+        div(class='d-block')
+          h3
+            a(href='documents') Get the list of documents
+      div(class='col-8')
+        div(class='d-block')
+          h2 API
+        div(class='d-block')
+          h3 You can request thoses API routes :
+        div(class='d-block')
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Method</th>
+                <th scope="col">URL structure</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>GET</td>
+                <td>api/document/:id</td>
+                <td>Get a single Document object with Id :id</td>
+              </tr>
+              <tr>
+                <td>POST</td>
+                <td>api/document/</td>
+                <td>Add a document (structure of data available in documentation)</td>
+              </tr>
+              <tr>
+                <td>PUT</td>
+                <td>api/document/:id</td>
+                <td>Modify the Document object with :id</td>
+              </tr>
+              <tr>
+                <td>DELETE</td>
+                <td>api/document/:id</td>
+                <td>Delete the Document object with :id</td>
+              </tr>
+            </tbody>
+          </table>

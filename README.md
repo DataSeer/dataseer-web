@@ -8,6 +8,12 @@
 
 ``npm start``
 
+To enable "demonstration mode" run :
+
+``DEMO=true npm start``
+
+``set DEMO=true & npm start``
+
 ## Dependancies
 
 Application need an instance of mongoDB running on port 27017, with an "app" database, filled with "documents" collection. (conf/conf.json to set complete URL)

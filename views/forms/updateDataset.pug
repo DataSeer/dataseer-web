@@ -11,7 +11,7 @@ div(id='dataType-update-form' class='container-fluid')
     label(for='dataType') Please select the data type from the pull down menu : 
 
   div(class='form-row')
-    select(class='form-control dataType' id='dataType')
+    select(class='form-control dataType' id='selectedDataType')
       option(value='' selected) Select a data type
       each val, index in dataTypes
         option(value=(val)) #{val}
@@ -21,8 +21,10 @@ div(id='dataType-update-form' class='container-fluid')
 
 div(id='dataset-poperties-update-form' class='container-fluid')
   div(class='form-row')
-    div(class='key font-weight-bold') Data type : 
-    div(class='value' id='dataType') #{document.datasets[0].dataType}
+    div(class='key d-inline font-weight-bold') Data type : 
+    div(class='value d-inline' id='dataType') #{document.datasets[0].dataType}
+    div(class='d-inline')
+      button(id='remove_current_datatype' class='btn btn-danger btn-sm') Edit
 
   div(class='form-row')
     div(class='key d-inline font-weight-bold') Description : 
