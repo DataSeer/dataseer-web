@@ -10,7 +10,11 @@
 
 To enable "demonstration mode" run :
 
+On Linux/MacOS :
+
 ``DEMO=true npm start``
+
+On Windows :
 
 ``set DEMO=true & npm start``
 
