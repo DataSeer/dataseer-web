@@ -22,7 +22,7 @@ const conf = require('./conf/conf.json');
 var urlmongo = conf.services.mongodb;
 
 // API connection
-mongoose.connect(urlmongo, { useNewUrlParser: true });
+mongoose.connect(urlmongo, { useNewUrlParser: true, useFindAndModify: false });
 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Failed to connect to MongoDB'));
