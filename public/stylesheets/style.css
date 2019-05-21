@@ -25,7 +25,7 @@ root subtitle {
   margin-right: 10px;
 }
 
-root dataset {
+root span.dataset {
   cursor: pointer;
   background-color: lightyellow;
 }
@@ -37,6 +37,14 @@ root dataset {
 .header {
   margin-top: 25px !important;
   margin-bottom: 50px !important;
+}
+
+#datasets-list .delete_dataset {
+  margin-left: 5px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-right: 0px;
+  line-height: 1em;
 }
 
 #dataset-poperties-update-form .form-row {
