@@ -171,7 +171,6 @@
         name = $('#name').val(),
         DOI = $('#DOI').val(),
         comments = $('#comments').val();
-        xhtml = $('#xhtml').text();
       currentDocument.datasets[index].name = name;
       currentDocument.datasets[index].DOI = DOI;
       currentDocument.datasets[index].comments = comments;
@@ -182,6 +181,7 @@
     $('#datasets_validation').click(function() {
       console.log('datasets_validation');
       currentDocument.status = 'finish';
+      currentDocument.xhtml = $('#xhtml').html();
       updateDocument(currentDocument, function(err, res) {
         console.log(err, res);
         if (err) return err; // Need to define error behavior
