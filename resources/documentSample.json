@@ -1,8 +1,8 @@
 {
   "__v": 0,
   "_id": "5ccf54381a6a4e2eb490b728",
-  "datasets": [
-    {
+  "datasets": {
+    "1": {
       "DOI": "https://doi.org/10.5061/dryad.rv71c.3",
       "bestDataForSharing": "Please share each of the .hrt pressure files; along with the .prm and .stg files generated for each run.",
       "comments": "",
@@ -12,7 +12,7 @@
       "name": "Heart pressure data",
       "text": "The heart rate (HR), left ventricular systolic pressure (LVSP), left ventricular diastolic pressure (LVDP), the maximum rate of rise of left ventricular pressure (dP/dtmax) and maximum rate of pressure decrease (-dP/dtmax) were monitored continuously, recorded and analyzed after 10 min of stabilization by using the MS4000U-1C Quantitative Recording of Biological Signals analysis system (Guangzhou Feilong Numerical Control Technologies Co., Ltd. Guangzhou, China)."
     },
-    {
+    "2": {
       "DOI": "https://doi.org/10.5061/dryad.rv71c.3",
       "bestDataForSharing": "",
       "comments": "",
@@ -22,7 +22,7 @@
       "name": "SPO2 data ",
       "text": "The SPO2 was recorded via a sensor placed at the end of the extremity."
     },
-    {
+    "3": {
       "DOI": "",
       "bestDataForSharing": "",
       "comments": "we cannot share this data due to privacy concerns",
@@ -32,7 +32,7 @@
       "name": "ECG data",
       "text": "Body surface electrocardiograms (ECGs) were obtained with rats in the supine position."
     }
-  ],
+  },
   "isDataSeer": false,
   "metadata": {
     "Article_Title": "Beta-adrenergic activation induces cardiac collapse by aggravating cardiomyocyte contractile dysfunction in bupivacaine intoxication",
@@ -52,5 +52,5 @@
   },
   "status": "metadata",
   "updated_at": "2019-05-05T23:18:52.781Z",
-  "xhtml": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?><root><title>Chronotropic and inotropic effect of Beta-adrenergic agnoniists bupivacaine-intoxicated rats</title><subtitle>Drugs and animals.</subtitle><body>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.<dataset id=\"1\">(DATASET_1) The heart rate (HR), left ventricular systolic pressure (LVSP), left ventricular diastolic pressure (LVDP), the maximum rate of rise of left ventricular pressure (dP/dtmax) and maximum rate of pressure decrease (-dP/dtmax) were monitored continuously, recorded and analyzed after 10 min of stabilization by using the MS4000U-1C Quantitative Recording of Biological Signals analysis system (Guangzhou Feilong Numerical Control Technologies Co., Ltd. Guangzhou, China).</dataset>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.<dataset id=\"2\">(DATASET_2) The SPO2 was recorded via a sensor placed at the end of the extremity.</dataset><dataset id=\"3\">(DATASET_3) Body surface electrocardiograms (ECGs) were obtained with rats in the supine position.</body></root>"
+  "xhtml": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?><root><title>Chronotropic and inotropic effect of Beta-adrenergic agnoniists bupivacaine-intoxicated rats</title><subtitle>Drugs and animals.</subtitle><body><text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</text><span class=\"dataset\" id=\"1\">(DATASET_1) The heart rate (HR), left ventricular systolic pressure (LVSP), left ventricular diastolic pressure (LVDP), the maximum rate of rise of left ventricular pressure (dP/dtmax) and maximum rate of pressure decrease (-dP/dtmax) were monitored continuously, recorded and analyzed after 10 min of stabilization by using the MS4000U-1C Quantitative Recording of Biological Signals analysis system (Guangzhou Feilong Numerical Control Technologies Co., Ltd. Guangzhou, China).</span><text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</text><span class=\"dataset\" id=\"2\">(DATASET_2) The SPO2 was recorded via a sensor placed at the end of the extremity.</span><span class=\"dataset\" id=\"3\">(DATASET_3) Body surface electrocardiograms (ECGs) were obtained with rats in the supine position.</span></body></root>"
 }
