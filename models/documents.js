@@ -6,7 +6,7 @@ var DocumentsSchema = new mongoose.Schema({
   status: String,
   isDataSeer: Boolean,
   xhtml: String,
-  datasets: Array,
+  datasets: Object,
   updated_at: { type: Date, default: Date.now },
 });
 
