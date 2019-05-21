@@ -9,9 +9,9 @@ block content
 
     div(class='row')
       div(class='col-6')
-        div(class='container-fluid document') !{document.xhtml}
+        div(class='container-fluid document' id='xhtml') !{document.xhtml}
       div(class='col-6')
-        div(class='fixed')
+        div
           div(id='datasets-list' class='form')
             include ../forms/listDatasets.pug
           div(id='dataset-update-form' class='form')
