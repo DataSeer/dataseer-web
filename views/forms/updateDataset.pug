@@ -4,7 +4,7 @@ div(class='container-fluid')
 
   div(class='form-row')
     label DataSet 
-      label(class='datasetNumber') 1
+      label(class='datasetNumber') 
 
 div(id='dataType-update-form' class='container-fluid')
   div(class='form-row')
@@ -22,25 +22,25 @@ div(id='dataType-update-form' class='container-fluid')
 div(id='dataset-poperties-update-form' class='container-fluid')
   div(class='form-row')
     div(class='key d-inline font-weight-bold') Data type : 
-    div(class='value d-inline' id='dataType') #{document.datasets[0].dataType}
+    div(class='value d-inline' id='dataType') 
     div(class='d-inline')
       button(id='remove_current_datatype' class='btn btn-danger btn-sm') Edit
 
   div(class='form-row')
     div(class='key d-inline font-weight-bold') Description : 
-    div(class='value d-inline' id='descritpion') #{document.datasets[0].descritpion}
+    div(class='value d-inline' id='descritpion') 
 
   div(class='form-row')
     div(class='key d-inline font-weight-bold') Best data format for sharing : 
-    div(class='value d-inline' id='bestDataForSharing') #{document.datasets[0].bestDataForSharing}
+    div(class='value d-inline' id='bestDataForSharing') 
 
   div(class='form-row')
     div(class='key d-inline font-weight-bold') Most suitable Repositories : 
-    div(class='value d-inline' id='mostSuitableRepositories') #{document.datasets[0].mostSuitableRepositories}
+    div(class='value d-inline' id='mostSuitableRepositories') 
 
   div(class='form-row')
     label(for='name') Please provide a name for this dataset (e.g. 'heart pressure data') : 
-    input(type='text' class='form-control name' id='name' placeholder=(document.datasets[0].dataType + ' data') value=(document.datasets[0].dataType + ' data'))
+    input(type='text' class='form-control name' id='name' placeholder='' value='')
 
   div(class='form-row')
     label(for='DOI') Please provide the DOI (or other stable link) to this dataset : 
