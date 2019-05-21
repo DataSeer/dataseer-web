@@ -1,5 +1,11 @@
 div(class='container-fluid')
-  each val, index in document.datasets
+  each val, key in document.datasets
     div(class='row dataset-item')
       div(class='col-12')
-        div(class='d-block dataset-link' value=(index + 1)) Dataset #{(index + 1)}
+        div(class='d-inline dataset-link' value=(key)) Dataset #{key}
+        div(class='d-inline')
+          button(class='delete_dataset btn btn-danger btn-sm' value=(key)) Delete
+  div(class='row dataset-item')
+    div(class='col-12')
+      div(class='d-inline')
+        button(class='add_datatype btn btn-primary btn-sm') Add new dataset

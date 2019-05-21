@@ -24,17 +24,24 @@
     });
   }
 
-  function colorDatasets(colorsCount) {
-    var colors = randomColor({ luminosity: 'light', hue: 'random', count: colorsCount });
-    for (var i = 1; i <= colorsCount; i++) {
-      console.log(i, colors[i - 1]);
-      colorDataset(i, colors[i - 1]);
+  function colorDatasets(ids) {
+    var colors = randomColor({ luminosity: 'light', hue: 'random', count: ids.length });
+    for (var i = 0; i < ids.length; i++) {
+      colorDataset(ids[i], colors[i]);
     }
   }
 
   function colorDataset(index, color) {
-    $('dataset[id*=' + index + ']').attr('style', 'background-color:' + color);
+    $('.dataset[id*=' + index + ']').attr('style', 'background-color:' + color);
     $('.dataset-link[value*=' + index + ']').attr('style', 'background-color:' + color);
+  }
+
+  function removeDataset(index) {
+    var dataset = $('.dataset[id*=' + index + ']'),
+      text = $('<text>').text(dataset.text());
+      console.log(text);
+      dataset.replaceWith(text); // Replace dataset in XHTML data
+      $('.dataset-link[value*=' + index + ']').parents('.row.dataset-item').remove(); // Remove dataset-link
   }
 
   // Get the current Object
@@ -42,7 +49,7 @@
 
     var currentDocument = data;
 
-    colorDatasets(currentDocument.datasets.length);
+    colorDatasets(Object.keys(currentDocument.datasets));
 
     // Fill dataset_validation Forms input with correct data
     function fillCurrentDatasetWithFormValues(index) {
@@ -64,8 +71,8 @@
     }
 
     // Refresh value of dataset index indocators
-    function RefreshDatasetIndexLabelIndicators(index) {
-      $('.datasetNumber').text((index + 1));
+    function refreshDatasetIndexLabelIndicators(index) {
+      $('.datasetNumber').text((index));
       $('#currentDatasetIndex').attr('value', (index));
     }
 
@@ -95,8 +102,8 @@
     // Check Datasets of a given Document
     function checkDatasetsOf(doc) {
       var result = true;
-      for (var i = 0; i < doc.datasets.length; i++) {
-        var currentDataset = doc.datasets[i];
+      for (var key in doc.datasets) {
+        var currentDataset = doc.datasets[key];
         result &= checkDataset(currentDataset);
       }
       return result;
@@ -115,16 +122,16 @@
 
     // On dataset-link click
     $('.dataset-link').click(function() {
-      var index = $(this).attr('value') - 1;
-      RefreshDatasetIndexLabelIndicators(index);
+      var index = $(this).attr('value');
+      refreshDatasetIndexLabelIndicators(index);
       fillFormWithDatasetPropertiesOf(index);
       toggleDatasetListToForms(index);
     });
 
     // On dataset click
-    $('dataset').click(function() {
-      var index = $(this).attr('id') - 1;
-      RefreshDatasetIndexLabelIndicators(index);
+    $('span.dataset').click(function() {
+      var index = $(this).attr('id');
+      refreshDatasetIndexLabelIndicators(index);
       fillFormWithDatasetPropertiesOf(index);
       toggleDatasetListToForms(index);
     });
@@ -148,6 +155,14 @@
       toggleDatasetListToForms(index);
     });
 
+    // On delete_dataset click
+    $('.delete_dataset').click(function() {
+      console.log('delete_dataset');
+      var index = $(this).attr('value');
+      currentDocument.datasets[index] = undefined;
+      removeDataset(index);
+    });
+
 
     // On dataset_validation click
     $('#dataset_validation').click(function() {
@@ -156,10 +171,11 @@
         name = $('#name').val(),
         DOI = $('#DOI').val(),
         comments = $('#comments').val();
+        xhtml = $('#xhtml').text();
       currentDocument.datasets[index].name = name;
       currentDocument.datasets[index].DOI = DOI;
       currentDocument.datasets[index].comments = comments;
-      toggleFormsToDatasetList()
+      toggleFormsToDatasetList();
     });
 
     // On datasets_validation click
