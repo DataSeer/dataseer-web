@@ -9,7 +9,9 @@ html
     block content
 
 if document
-  div(id='currentId' class='data' value=(document._id))
+  div(id='document.id' class='data' value=(document._id))
   script(src='/javascripts/jquery.js')
   script(src='/javascripts/randomColor.min.js')
+  script(src='/javascripts/mongoDB.js')
   script(src='/javascripts/main.js')
+  script(src='/javascripts/process/'+ document.status + '.js')
