@@ -224,7 +224,7 @@
 
     // On dataset click
     $('span.dataset').click(function() {
-      let id = $(this).attr('DocumentId');
+      let id = $(this).attr('datasetId');
       refreshDatasetIndexLabelIndicators(id);
       fillFormWithDatasetPropertiesOf(id);
       toggleDatasetListToForms(id);
