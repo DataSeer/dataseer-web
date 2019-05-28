@@ -3,7 +3,7 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-.btn {
+.btn-primary {
   margin-top: 10px;
   margin-bottom: 10px;
 }
@@ -25,7 +25,7 @@ root subtitle {
   margin-right: 10px;
 }
 
-root dataset {
+root span.dataset {
   cursor: pointer;
   background-color: lightyellow;
 }
@@ -39,12 +39,20 @@ root dataset {
   margin-bottom: 50px !important;
 }
 
-#dataset-poperties-update-form .form-row {
+#datasets-list .delete_dataset {
+  margin-left: 5px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-right: 0px;
+  line-height: 1em;
+}
+
+#dataset-poperties-form .form-row {
   margin-top: 5px;
   margin-bottom: 5px;
 }
 
-#dataset-poperties-update-form #remove_current_datatype {
+#dataset-poperties-form #remove_current_datatype {
   margin-left: 5px;
   margin-top: 0px;
   margin-bottom: 0px;
@@ -62,11 +70,11 @@ root dataset {
   margin-bottom: 25px !important;
 }
 
-#dataset-poperties-update-form {
+#dataset-poperties-form {
   display: none;
 }
 
-#dataset-update-form {
+#dataset-form {
   display: none;
   margin-top: 25 !important;
   margin-bottom: 25px !important;
