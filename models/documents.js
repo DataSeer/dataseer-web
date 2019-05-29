@@ -1,12 +1,12 @@
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-var DocumentsSchema = new mongoose.Schema({
+let DocumentsSchema = new mongoose.Schema({
   _id: String,
   metadata: Object,
+  datasets: Object,
+  source: String,
   status: String,
   isDataSeer: Boolean,
-  xhtml: String,
-  datasets: Object,
   updated_at: { type: Date, default: Date.now },
 });
 

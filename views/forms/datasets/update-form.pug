@@ -18,14 +18,15 @@ div(id='dataset-dataType-form' class='container-fluid')
 
 div(id='dataset-poperties-form' class='container-fluid')
   div(class='form-row')
-    div(class='key d-inline font-weight-bold') Trust factor : 
-    div(class='value d-inline' id='dataset.factor')
+    div(class='key d-inline font-weight-bold') Confidence : 
+    div(class='value d-inline' id='dataset.confidence')
 
   div(class='form-row')
     div(class='key d-inline font-weight-bold') Data type : 
     div(class='value d-inline' id='dataset.dataType')
     div(class='d-inline')
-      button(id='remove_current_datatype' class='btn btn-danger btn-sm') Edit
+      button(id='remove_current_datatype' class='btn btn-primary btn-sm')
+        i(class='far fa-edit')
 
   div(class='form-row')
     div(class='key d-inline font-weight-bold') Description : 

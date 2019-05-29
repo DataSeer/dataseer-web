@@ -4,22 +4,35 @@ block content
 
   div(class='container-fluid')
     div(class='row')
-      div(class='col-12 text-center')
-        div(class='header') DATASEER
+      div(class='col-12')
+        h1(class='text-center') DATASEER
 
     div(class='row')
-      div(class='col-6')
-        div(class='container-fluid document' id='dataset.xhtml') !{document.xhtml}
-      div(class='col-6')
-        div
-          div(id='datasets-list' class='form')
-            include ../forms/datasets/list.pug
-          div(id='dataset-form' class='form')
-              include ../forms/datasets/update-form.pug
+      div(class='offset-2')
+      div(class='col-3')
+        div(class='row row-margin')
+          div(class='col-4 text-center')
+            button(id='tei_all_visible' class='btn btn-sm btn-primary') All Visible
+          div(class='col-4 text-center')
+            button(id='tei_only_dataseer' class='btn btn-sm btn-primary') Only Dataseer
+          div(class='col-4 text-center')
+            button(id='tei_only_datasets' class='btn btn-sm btn-primary') Only Datasets
+    div(class='row')
+      div(class='col-7')
+        div(class='row')
+          div(class='col-12')
+            div(id='document-view')
+              div(class='container-fluid document' id='dataset.source') !{document.source}
+      div(class='col-5')
+        div(id='datasets-list' class='form')
+          include ../forms/datasets/list.pug
+        div(id='dataset-form' class='form')
+            include ../forms/datasets/update-form.pug
 
     div(class='row')
       div(class='col-6 text-center')
-        button(id='datasets_validation' class='btn btn-primary') All Datasets processed : Finish
+        button(id='datasets_validation' class='btn btn-primary') Finish 
+          i(class='far fa-save')
 
   if demo
     include ../forms/demo/datasets.pug

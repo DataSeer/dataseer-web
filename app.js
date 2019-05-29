@@ -1,38 +1,39 @@
-// var createError = require('http-errors');
-var express = require('express');
-var app = express();
-var http = require('http').Server(app);
-var routes = require('./routes');
-var path = require('path');
-
+const express = require('express'),
+  app = express(),
+  http = require('http').Server(app),
+  routes = require('./routes'),
+  path = require('path'),
+  fileUpload = require('express-fileupload'),
+  logger = require('morgan'),
+  methodOverride = require('method-override'),
+  session = require('express-session'),
+  bodyParser = require('body-parser'),
+  multer = require('multer'),
+  errorHandler = require('errorhandler');
+// const  createError = require('http-errors');
 // var favicon = require('serve-favicon');
-var logger = require('morgan');
-var methodOverride = require('method-override');
-var session = require('express-session');
-var bodyParser = require('body-parser');
-var multer = require('multer');
-var errorHandler = require('errorhandler');
-
-// mongoose object
-var mongoose = require('mongoose');
 
 const conf = require('./conf/conf.json');
 
+// mongoose object
+const mongoose = require('mongoose');
+
 // URL to mongoDB
-var urlmongo = conf.services.mongodb;
+const urlmongo = conf.services.mongodb;
 
 // API connection
 mongoose.connect(urlmongo, { useNewUrlParser: true });
 
-var db = mongoose.connection;
+let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Failed to connect to MongoDB'));
 db.once('open', function() {
   console.log("Connection to MongoDB succed");
 });
 
-var indexRouter = require('./routes/index');
-var documentsRouter = require('./routes/api/documents');
-var viewsRouter = require('./routes/documents');
+const indexRouter = require('./routes/index'),
+  documentsRouter = require('./routes/api/documents'),
+  backOfficeRouter = require('./routes/backoffice'),
+  viewsRouter = require('./routes/documents');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -46,14 +47,18 @@ app.use(session({
   saveUninitialized: true,
   secret: 'uwotm8'
 }));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(fileUpload({
+  limits: { fileSize: 50 * 1024 * 1024 },
+}));
+app.use(bodyParser.json({ limit: '10mb', extended: true }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 // app.use(multer());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/documents', viewsRouter);
+app.use('/backoffice', backOfficeRouter);
 
 // error handling middleware should be loaded after the loading the routes
 if ('development' == app.get('env')) {

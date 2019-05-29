@@ -18,8 +18,8 @@
       'getDOI': function() { // input
         return $(document.getElementById('dataset.DOI')).val();
       },
-      'getfactor': function() { // div
-        return $(document.getElementById('dataset.factor')).text();
+      'getConfidence': function() { // div
+        return $(document.getElementById('dataset.confidence')).text();
       },
       'getDataType': function() { // div
         return $(document.getElementById('dataset.dataType')).text();
@@ -46,8 +46,8 @@
       'setDOI': function(value) { // input
         return $(document.getElementById('dataset.DOI')).val(value);
       },
-      'setfactor': function(value) { // div
-        return $(document.getElementById('dataset.factor')).text(value);
+      'setConfidence': function(value) { // div
+        return $(document.getElementById('dataset.confidence')).text(value);
       },
       'setDataType': function(value) { // div
         return $(document.getElementById('dataset.dataType')).text(value);
@@ -61,9 +61,9 @@
       'setMostSuitableRepositories': function(value) { // div
         return $(document.getElementById('dataset.mostSuitableRepositories')).text(value);
       },
-      // Fill dataset with values of currentDataset, its factor & index
-      'fill': function(currentDataset, factor, index) {
-        HtmlInterface['dataset-form'].setfactor(factor);
+      // Fill dataset with values of currentDataset, its confidence & index
+      'fill': function(currentDataset, confidence, index) {
+        HtmlInterface['dataset-form'].setConfidence(confidence);
         HtmlInterface['dataset-form'].setIndex(index);
         HtmlInterface['dataset-form'].setDataType(currentDataset.dataType);
         HtmlInterface['dataset-form'].setDescritpion(currentDataset.descritpion);
@@ -72,6 +72,9 @@
         HtmlInterface['dataset-form'].setName(currentDataset.name);
         HtmlInterface['dataset-form'].setDOI(currentDataset.DOI);
         HtmlInterface['dataset-form'].setComments(currentDataset.comments);
+      },
+      'setStyle': function(style) { // div
+        return $(document.getElementById('dataset.id')).attr('style', style);
       },
       'show': function(dataType) { // Show dataset-form
         if (dataType) {
@@ -120,17 +123,45 @@
       }
     },
     'document-view': {
-      // Get Xhtml
-      'getXHTML': function() {
-        return $(document.getElementById('dataset.xhtml')).html();
+      // Get Source of document
+      'getSource': function() {
+        return $(document.getElementById('dataset.source')).html();
+      },
+      // Get Source of document
+      'getDocumentView': function() {
+        return $(document.getElementById('document-view'));
       },
       // Get dataset with given id
       'getDataset': function(id) {
-        return $('span.dataset[datasetId*=' + id + ']');
+        return $('tei text div[subtype="dataseer"] s[id=' + id + ']');
       },
-      // Get dataset factor with given id
-      'getDatasetFactor': function(id) {
-        return parseFloat($('span.dataset[datasetId*=' + id + ']').attr('factor'));
+      // Get dataset with given id
+      'getStyleOfDataset': function(id) {
+        return HtmlInterface['document-view'].getDataset(id).attr('style');
+      },
+      // Get dataset confidence with given id
+      'getDatasetConfidence': function(id) {
+        let confidence = parseFloat($('tei text div[subtype="dataseer"] s[id=' + id + ']').attr('confidence'));
+        if (!confidence || confidence <= 0.5) confidence = 0.5;
+        return confidence;
+      },
+      // Remove class of tei .document
+      'setAllVisible': function() {
+        return HtmlInterface['document-view'].getDocumentView().removeClass();
+      },
+      // Set class of tei .document
+      'setOnlyDataseer': function() {
+        HtmlInterface['document-view'].setAllVisible();
+        return HtmlInterface['document-view'].getDocumentView().addClass('tei-only-dataseer');
+      },
+      // Set class of tei .document
+      'setOnlyDataets': function() {
+        HtmlInterface['document-view'].setAllVisible();
+        return HtmlInterface['document-view'].getDocumentView().addClass('tei-only-datasets');
+      },
+      'scrollToDataset': function(id) {
+        let position = HtmlInterface['document-view'].getDataset(id).position().top + HtmlInterface['document-view'].getDocumentView().scrollTop() - 14;
+        return HtmlInterface['document-view'].getDocumentView().animate({scrollTop: position});
       },
       // Create a new Text Element
       'newTextElement': function() {
@@ -145,11 +176,11 @@
     },
     // Color dataset (span & "link")
     'setColorOfDataset': function(id) {
-      let factor = HtmlInterface['document-view'].getDatasetFactor(id),
-        color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: factor }),
+      let confidence = HtmlInterface['document-view'].getDatasetConfidence(id),
+        color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: confidence }),
         dataset = HtmlInterface['document-view'].getDataset(id),
         datasetLink = HtmlInterface['datasets-list'].getDatasetLink(id);
-      dataset.attr('title', 'trust factor : ' + factor);
+      dataset.attr('title', 'confidence : ' + confidence);
       dataset.attr('style', 'background-color:' + color);
       datasetLink.attr('style', 'background-color:' + color);
     },
@@ -179,8 +210,10 @@
 
     // Update dataset properties with inputs form
     function fillFormWithDatasetPropertiesOf(id) {
-      let factor = HtmlInterface['document-view'].getDatasetFactor(id);
-      HtmlInterface['dataset-form'].fill(currentDocument.datasets[id], factor, id);
+      let confidence = HtmlInterface['document-view'].getDatasetConfidence(id),
+        style = HtmlInterface['document-view'].getStyleOfDataset(id);
+      HtmlInterface['dataset-form'].setStyle(style);
+      HtmlInterface['dataset-form'].fill(currentDocument.datasets[id], confidence, id);
     }
 
     // Refresh value of dataset id indocators
@@ -191,6 +224,7 @@
     function toggleDatasetListToForms(id) {
       HtmlInterface['datasets-list'].hide();
       HtmlInterface['dataset-form'].show(currentDocument.datasets[id].dataType);
+      HtmlInterface['document-view'].scrollToDataset(id);
     }
 
     function toggleFormsToDatasetList() {
@@ -223,8 +257,8 @@
     });
 
     // On dataset click
-    $('span.dataset').click(function() {
-      let id = $(this).attr('datasetId');
+    $('s[id]').click(function() {
+      let id = $(this).attr('id');
       refreshDatasetIndexLabelIndicators(id);
       fillFormWithDatasetPropertiesOf(id);
       toggleDatasetListToForms(id);
@@ -254,7 +288,6 @@
       HtmlInterface.removeDataset(id);
     });
 
-
     // On dataset_validation click
     $('#dataset_validation').click(function() {
       let id = HtmlInterface['dataset-form'].getIndex(),
@@ -270,12 +303,27 @@
     // On datasets_validation click
     $('#datasets_validation').click(function() {
       currentDocument.status = MongoDB.getNextStatus(currentDocument);
-      currentDocument.xhtml = HtmlInterface['document-view'].getXHTML();
+      currentDocument.source = HtmlInterface['document-view'].getSource();
       MongoDB.updateDocument(currentDocument, function(err, res) {
         console.log(err, res);
         if (err) return err; // Need to define error behavior
         return location.reload();
       });
+    });
+
+    // On tei_all_visible click
+    $('#tei_all_visible').click(function() {
+      HtmlInterface['document-view'].setAllVisible();
+    });
+
+    // On tei_only_dataseer click
+    $('#tei_only_dataseer').click(function() {
+      HtmlInterface['document-view'].setOnlyDataseer();
+    });
+
+    // On tei_only_datasets click
+    $('#tei_only_datasets').click(function() {
+      HtmlInterface['document-view'].setOnlyDataets();
     });
   });
 })();

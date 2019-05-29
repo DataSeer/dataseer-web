@@ -5,9 +5,9 @@ block content
   div(class='container-fluid')
     div(class='row')
       div(class='col-12')
-        h1(class='text-center header') Welcome to DATASEER
+        h1(class='text-center') Welcome to DATASEER
 
-    div(class='row metadata-view')
+    div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Manuscript #: 
         div(class='value d-inline') #{document.metadata.ManuscriptId}
@@ -18,12 +18,12 @@ block content
         div(class='key d-inline font-weight-bold') Journal : 
         div(class='value d-inline') #{document.metadata.Journal}
 
-    div(class='row metadata-view')
+    div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Authors : 
         div(class='value d-inline') #{document.metadata.Authors}
 
-    div(class='row metadata-view')
+    div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Submitting Author : 
         div(class='value d-inline') #{document.metadata.SubmittingAuthor}
@@ -31,13 +31,13 @@ block content
         div(class='key d-inline font-weight-bold') Submitting Author email : 
         div(class='value d-inline') #{document.metadata.SubmittingAuthoremail}
 
-    div(class='row metadata-view')
+    div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Institutions : 
         each val, index in document.metadata.Institutions
           div(class='value d-block') #{(index + 1)} #{val}
 
-    div(class='row metadata-view')
+    div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Funders : 
         div(class='value d-inline') #{document.metadata.Funders}

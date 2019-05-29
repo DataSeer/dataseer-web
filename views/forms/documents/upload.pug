@@ -1,0 +1,11 @@
+div(class='container-fluid')
+  form(ref='uploadForm' id='uploadForm' action='' method='post' encType='multipart/form-data')
+    div(class='row')
+      div(class='col-12')
+        div(class='d-inline')
+          label(for='uploadedFile') Document File (xml/tei)
+          input(type='file' class='form-control-file' name='uploadedFile' id='uploadedFile')
+    div(class='row')
+      div(class='col-12')
+        div(class='d-inline')
+          button(type='submit' class='btn btn-primary btn-sm' id='addDocument') Add new document
