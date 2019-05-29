@@ -10,37 +10,37 @@ block content
     div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Manuscript #: 
-        div(class='value d-inline') #{document.metadata.ManuscriptId}
+        div(class='value d-inline') #{document.metadata.manuscriptId}
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Article Title : 
-        div(class='value d-inline') #{document.metadata.ArticleTitle}
+        div(class='value d-inline') #{document.metadata.articleTitle}
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Journal : 
-        div(class='value d-inline') #{document.metadata.Journal}
+        div(class='value d-inline') #{document.metadata.journal}
 
     div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Authors : 
-        div(class='value d-inline') #{document.metadata.Authors}
+        div(class='value d-inline') #{document.metadata.authors}
 
     div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Submitting Author : 
-        div(class='value d-inline') #{document.metadata.SubmittingAuthor}
+        div(class='value d-inline') #{document.metadata.submittingAuthor}
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Submitting Author email : 
-        div(class='value d-inline') #{document.metadata.SubmittingAuthoremail}
+        div(class='value d-inline') #{document.metadata.submittingAuthoremail}
 
     div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Institutions : 
-        each val, index in document.metadata.Institutions
+        each val, index in document.metadata.institutions
           div(class='value d-block') #{(index + 1)} #{val}
 
     div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Funders : 
-        div(class='value d-inline') #{document.metadata.Funders}
+        div(class='value d-inline') #{document.metadata.funders}
 
     div(class='row crud-button-action')
       div(class='col-6 text-center')
