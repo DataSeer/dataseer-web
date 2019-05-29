@@ -33,6 +33,9 @@
       'getMostSuitableRepositories': function() { // div
         return $(document.getElementById('dataset.mostSuitableRepositories')).text();
       },
+      'getIndexElement': function() {
+        return $(document.getElementById('dataset.id'));
+      },
       // Dataset Form Setters
       'setIndex': function(value) { // div
         return $(document.getElementById('dataset.id')).text(value);
@@ -247,6 +250,11 @@
       }
       return result;
     }
+
+    HtmlInterface['dataset-form'].getIndexElement().click(function() {
+      let id = $(this).text();
+      HtmlInterface['document-view'].scrollToDataset(id);
+    });
 
     // On dataset-link click
     $('.dataset-link').click(function() {
