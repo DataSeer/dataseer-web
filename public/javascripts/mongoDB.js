@@ -15,7 +15,7 @@ const MongoDB = {
       headers: {
         'X-HTTP-Method-Override': 'PUT'
       },
-      url: '/api/documents/' + doc._id,
+      url: '../api/documents/' + doc._id,
       data: JSON.stringify(doc),
       complete: function(data) { 'updateDocument complete' },
       success: function(data) { done(null, data); },
