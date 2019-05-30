@@ -3,7 +3,7 @@ const express = require('express'),
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { 'root':'./', 'title': 'DataSeer' });
+  res.render('index', { 'title': 'DataSeer' });
 });
 
 module.exports = router;

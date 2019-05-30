@@ -9,7 +9,7 @@ const express = require('express'),
 router.get('/', function(req, res, next) {
   Documents.find({}, function(err, post) {
     if (err) return next(err);
-    res.render(path.join('documents', 'all'), { 'root':'../', 'documents': post });
+    res.render(path.join('documents', 'all'), { 'documents': post });
   });
 });
 
@@ -17,7 +17,7 @@ router.get('/', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
   Documents.findById(req.params.id, function(err, post) {
     if (err) return next(err);
-    res.render(path.join('documents', post.status), { 'root':'../../', 'document': post, 'dataTypes': dataTypes, 'demo': process.env.DEMO });
+    res.render(path.join('documents', post.status), { 'document': post, 'dataTypes': dataTypes, 'demo': process.env.DEMO });
   });
 });
 

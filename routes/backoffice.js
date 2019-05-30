@@ -6,7 +6,7 @@ const express = require('express'),
 
 /* UPLOAD Document */
 router.get('/upload', function(req, res, next) {
-  res.render(path.join('backoffice', 'upload'), { 'root': '../', 'title': 'DataSeer' });
+  res.render(path.join('backoffice', 'upload'), { 'title': 'DataSeer' });
 });
 
 /* UPLOAD Document */
