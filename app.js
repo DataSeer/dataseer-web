@@ -3,6 +3,7 @@ const express = require('express'),
   http = require('http').Server(app),
   routes = require('./routes'),
   path = require('path'),
+  url = require('url'),
   fileUpload = require('express-fileupload'),
   logger = require('morgan'),
   methodOverride = require('method-override'),
@@ -39,6 +40,7 @@ const indexRouter = require('./routes/index'),
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
+app.set('baseUrl', conf.baseUrl);
 // app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(methodOverride());
@@ -53,12 +55,13 @@ app.use(fileUpload({
 app.use(bodyParser.json({ limit: '10mb', extended: true }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 // app.use(multer());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(app.get('baseUrl'), express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/api/documents', documentsRouter);
-app.use('/documents', viewsRouter);
-app.use('/backoffice', backOfficeRouter);
+
+app.use(url.resolve(app.get('baseUrl'), ''), indexRouter);
+app.use(url.resolve(app.get('baseUrl'), 'api/documents'), documentsRouter);
+app.use(url.resolve(app.get('baseUrl'), 'documents'), viewsRouter);
+app.use(url.resolve(app.get('baseUrl'), 'backoffice'), backOfficeRouter);
 
 // error handling middleware should be loaded after the loading the routes
 if ('development' == app.get('env')) {
