@@ -2,22 +2,20 @@
 const MongoDB = {
   // Get the current object
   'getCurrentDocument': function(done) {
-    let currentId = $(document.getElementById('document.id')).attr('value'),
-      apiUrl = $(document.getElementById('apiUrl')).attr('value');
-    $.get(apiUrl + currentId, function(data) {
+    let currentId = $(document.getElementById('document.id')).attr('value');
+    $.get('/api/documents/' + currentId, function(data) {
       done(data);
     });
   },
   // Update a gicen document
   'updateDocument': function(doc, done) {
-    let apiUrl = $(document.getElementById('apiUrl')).attr('value');
     $.ajax({
       type: 'PUT',
       contentType: 'application/json; charset=utf-8',
       headers: {
         'X-HTTP-Method-Override': 'PUT'
       },
-      url: apiUrl + doc._id,
+      url: '/api/documents/' + doc._id,
       data: JSON.stringify(doc),
       complete: function(data) { 'updateDocument complete' },
       success: function(data) { done(null, data); },
