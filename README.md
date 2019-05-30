@@ -22,7 +22,9 @@ On Windows :
 
 Application need an instance of mongoDB running on port 27017, with an "app" database, filled with "documents" collection. (conf/conf.json to set complete URL)
 
-An object of "documents" collection looks like file : resources/documentSample.json
+An object of "documents" collection looks like file : resources/sampleDocument.json
+
+A set of documents is available at : resources/importMongoDB.json
 
 ## How it works
 
@@ -39,6 +41,18 @@ Express will provide :
 
 
 ### Web Application
+
+#### Index
+
+![index of web app](/doc/index.jpg "Index of web app")
+
+#### BackOffice
+
+![backOffice of web app](/doc/backoffice.jpg "BackOffice of web app")
+
+#### List of Documents
+
+![list of documents](/doc/documents_list.jpg "List of documents")
 
 #### Metadata
 

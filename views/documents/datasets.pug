@@ -4,22 +4,32 @@ block content
 
   div(class='container-fluid')
     div(class='row')
-      div(class='col-12 text-center')
-        div(class='header') DATASEER
+      div(class='col-12')
+        h1(class='text-center') DATASEER
 
     div(class='row')
       div(class='col-6')
-        div(class='container-fluid document') !{document.xhtml}
-      div(class='col-6')
-        div(class='fixed')
-          div(id='datasets-list' class='form')
-            include ../forms/listDatasets.pug
-          div(id='dataset-update-form' class='form')
-              include ../forms/updateDataset.pug
-
+        div(class='row row-margin')
+          div(class='col-12 text-center')
+            div(class='btn-group btn-group-toggle' data-toggle='buttons')
+              label(class='btn btn-success btn-sm active') full text
+                input(type='radio' name='options' id='tei_all_visible' autocomplete='off' checked)
+              label(class='btn btn-success btn-sm') section
+                input(type='radio' name='options' id='tei_only_dataseer' autocomplete='off')
+              label(class='btn btn-success btn-sm') paragraph
+                input(type='radio' name='options' id='tei_only_datasets' autocomplete='off')
     div(class='row')
-      div(class='col-6 text-center')
-        button(id='datasets_validation' class='btn btn-primary') All Datasets processed : Finish
+      div(class='col-6')
+        div(class='row')
+          div(class='col-12')
+            div(id='document-view')
+              div(class='container-fluid document' id='dataset.source') !{document.source}
+      div(class='col-4')
+        div(id='dataset-form' class='form')
+            include ../forms/datasets/update-form.pug
+      div(class='col-2')
+        div(id='datasets-list' class='form')
+          include ../forms/datasets/list.pug
 
   if demo
     include ../forms/demo/datasets.pug

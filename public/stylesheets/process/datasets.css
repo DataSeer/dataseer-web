@@ -1,0 +1,161 @@
+/*body > .container-fluid > div.row:nth-child(3) {*/
+#document-view {
+  position: fixed;
+  height: 75%;
+  width: 45%;
+  overflow: scroll;
+}
+
+#datasets-list {
+  position: fixed;
+  height: 75%;
+  width: 15%;
+  overflow: scroll;
+}
+
+#dataset-form {
+  position: fixed;
+  height: 75%;
+  width: 30%;
+  overflow: scroll;
+}
+
+#dataset-form #dataset\.id {
+  cursor: pointer;
+}
+
+body>.container-fluid>div.row:nth-child(4) {
+  position: fixed;
+  right: 0;
+  bottom: 3%;
+  left: 0;
+}
+
+.row>*,
+.form-row>* {
+  vertical-align: middle;
+}
+
+#dataset-poperties-form {
+  /*display: none;*/
+}
+
+#datasets-list {
+  overflow: auto;
+  position: fixed;
+  display: block;
+  margin-top: 25 !important;
+  margin-bottom: 25px !important;
+}
+
+#dataset-form {
+  overflow: auto;
+  position: fixed;
+  /*display: none;*/
+  margin-top: 25 !important;
+  margin-bottom: 25px !important;
+}
+
+.dataset-item {
+  margin-top: 15px !important;
+  margin-bottom: 15px !important;
+}
+
+.dataset-link {
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.delete_dataset,
+.warning,
+.success {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.warning-color-dark {
+  color: #FF8800;
+}
+
+.success-color-dark {
+  color: #007E33;
+}
+
+#datasets-list .delete_dataset {
+  margin-left: 5px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-right: 0px;
+  line-height: 1em;
+}
+
+#dataset-poperties-form .form-row {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+#remove_current_datatype {
+  margin-left: 5px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-right: 0px;
+  line-height: 1em;
+}
+
+#dataset-dataType-form {
+  display: inline-block;
+}
+
+#dataset-dataType-form select {
+  width: 70%;
+  margin-left: 5px;
+  margin-right: 5px;
+  display: inline-block;
+}
+
+#dataset-dataType-form #dataType_validation {
+  display: inline-block;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+/* TEI CUSTOMIZATION */
+
+/* Title of section like introductionor results */
+#document-view tei>text>div {
+  font-weight: bold;
+}
+
+#document-view tei>text>div>* {
+  margin-top: 10px;
+  font-weight: normal;
+}
+
+#document-view tei>text>div>p>* {
+  margin-top: 5px;
+}
+
+#document-view tei teiHeader,
+#document-view tei back {
+  display: none;
+}
+
+#document-view tei title {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 20px;
+}
+
+#document-view tei s {
+  text-decoration: none;
+}
+
+#document-view tei s[corresp],
+#document-view tei s[id] {
+  cursor: pointer;
+  background-color: lightyellow;
+}
+
+#document-view.tei-only-dataseer tei>text>div:not([subtype="dataseer"]) {
+  display: none;
+}
