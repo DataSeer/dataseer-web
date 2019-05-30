@@ -3,7 +3,7 @@ const MongoDB = {
   // Get the current object
   'getCurrentDocument': function(done) {
     let currentId = $(document.getElementById('document.id')).attr('value');
-    $.get('/api/documents/' + currentId, function(data) {
+    $.get('../api/documents/' + currentId, function(data) {
       done(data);
     });
   },
@@ -15,7 +15,7 @@ const MongoDB = {
       headers: {
         'X-HTTP-Method-Override': 'PUT'
       },
-      url: '/api/documents/' + doc._id,
+      url: '../api/documents/' + doc._id,
       data: JSON.stringify(doc),
       complete: function(data) { 'updateDocument complete' },
       success: function(data) { done(null, data); },
