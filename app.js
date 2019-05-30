@@ -14,6 +14,11 @@ const express = require('express'),
 // const  createError = require('http-errors');
 // var favicon = require('serve-favicon');
 
+const indexRouter = require('./routes/index'),
+  documentsRouter = require('./routes/api/documents'),
+  backOfficeRouter = require('./routes/backoffice'),
+  viewsRouter = require('./routes/documents');
+
 const conf = require('./conf/conf.json');
 
 // mongoose object
@@ -30,11 +35,6 @@ db.on('error', console.error.bind(console, 'Failed to connect to MongoDB'));
 db.once('open', function() {
   console.log("Connection to MongoDB succed");
 });
-
-const indexRouter = require('./routes/index'),
-  documentsRouter = require('./routes/api/documents'),
-  backOfficeRouter = require('./routes/backoffice'),
-  viewsRouter = require('./routes/documents');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -55,13 +55,12 @@ app.use(fileUpload({
 app.use(bodyParser.json({ limit: '10mb', extended: true }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 // app.use(multer());
-app.use(app.get('baseUrl'), express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 
-
-app.use(url.resolve(app.get('baseUrl'), ''), indexRouter);
-app.use(url.resolve(app.get('baseUrl'), 'api/documents'), documentsRouter);
-app.use(url.resolve(app.get('baseUrl'), 'documents'), viewsRouter);
-app.use(url.resolve(app.get('baseUrl'), 'backoffice'), backOfficeRouter);
+app.use('/', indexRouter);
+app.use('/api/documents', documentsRouter);
+app.use('/documents', viewsRouter);
+app.use('/backoffice', backOfficeRouter);
 
 // error handling middleware should be loaded after the loading the routes
 if ('development' == app.get('env')) {

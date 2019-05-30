@@ -113,7 +113,7 @@ body>.container-fluid>div.row:nth-child(4) {
   display: inline-block;
 }
 
-#dataset-dataType-form #dataType_validation, #dataset-dataType-form #dataType_validation  {
+#dataset-dataType-form #dataType_validation {
   display: inline-block;
   margin-left: 5px;
   margin-right: 5px;

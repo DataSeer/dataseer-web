@@ -2,12 +2,11 @@ const express = require('express'),
   router = express.Router(),
   extractor = require('../lib/extractor.js'),
   Documents = require('../models/documents.js'),
-  conf = require('../conf/conf.json'),
   path = require('path');
 
 /* UPLOAD Document */
 router.get('/upload', function(req, res, next) {
-  res.render(path.join('backoffice', 'upload'), { 'baseUrl' : conf.baseUrl, 'title': 'DataSeer' });
+  res.render(path.join('backoffice', 'upload'), { 'root': '../', 'title': 'DataSeer' });
 });
 
 /* UPLOAD Document */
