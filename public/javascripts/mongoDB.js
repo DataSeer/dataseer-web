@@ -3,7 +3,7 @@ const MongoDB = {
   // Get the current object
   'getCurrentDocument': function(done) {
     let currentId = $(document.getElementById('document.id')).attr('value');
-    $.get('/api/documents/' + currentId, function(data) {
+    $.get('../api/documents/' + currentId, function(data) {
       done(data);
     });
   },
