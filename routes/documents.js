@@ -3,13 +3,14 @@ const express = require('express'),
   path = require('path'),
   mongoose = require('mongoose'),
   Documents = require('../models/documents.js'),
+  conf = require('../conf/conf.json'),
   dataTypes = require('../resources/dataTypes.json');
 
 /* GET ALL Documents */
 router.get('/', function(req, res, next) {
   Documents.find({}, function(err, post) {
     if (err) return next(err);
-    res.render(path.join('documents', 'all'), { documents: post });
+    res.render(path.join('documents', 'all'), { 'baseUrl' : conf.baseUrl, 'documents': post });
   });
 });
 
@@ -17,7 +18,7 @@ router.get('/', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
   Documents.findById(req.params.id, function(err, post) {
     if (err) return next(err);
-    res.render(path.join('documents', post.status), { document: post, dataTypes: dataTypes, demo: process.env.DEMO });
+    res.render(path.join('documents', post.status), { 'baseUrl' : conf.baseUrl, 'document': post, 'dataTypes': dataTypes, 'demo': process.env.DEMO });
   });
 });
 

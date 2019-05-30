@@ -46,17 +46,32 @@
         return $(document.getElementById('dataset.mostSuitableRepositories')).text();
       },
       // Dataset Element getters
+      'getDataTypeElement': function() {
+        return $(document.getElementById('dataset.dataType'));
+      },
       'getSelectedDataTypeElement': function() {
         return $(document.getElementById('dataset.selectedDataType'));
+      },
+      'getSelectedDataTypeSelectedOptionElement': function() {
+        return $(document.getElementById('dataset.selectedDataType')).children('option:selected');
       },
       'getSelectedDescritpionElement': function() {
         return $(document.getElementById('dataset.selectedDescritpion'));
       },
+      'getSelectedDescritpionSelectedOptionElement': function() {
+        return $(document.getElementById('dataset.selectedDescritpion')).children('option:selected');
+      },
       'getSelectedBestDataFormatForSharingElement': function() {
         return $(document.getElementById('dataset.selectedBestDataFormatForSharing'));
       },
+      'getSelectedBestDataFormatForSharingSelectedOptionElement': function() {
+        return $(document.getElementById('dataset.selectedBestDataFormatForSharing')).children('option:selected');
+      },
       'getSelectedMostSuitableRepositoriesElement': function() {
         return $(document.getElementById('dataset.selectedMostSuitableRepositories'));
+      },
+      'getSelectedMostSuitableRepositoriesSelectedOptionElement': function() {
+        return $(document.getElementById('dataset.selectedMostSuitableRepositories')).children('option:selected');
       },
       'getIndexElement': function() {
         return $(document.getElementById('dataset.id'));
@@ -126,7 +141,7 @@
         HtmlInterface['dataset-form'].setName(currentDataset.name);
         HtmlInterface['dataset-form'].setDOI(currentDataset.DOI);
         HtmlInterface['dataset-form'].setComments(currentDataset.comments);
-        HtmlInterface['dataset-form'].getNameElement().attr('placeholder', index + ' data');
+        HtmlInterface['dataset-form'].getNameElement().attr('placeholder', currentDataset.dataType);
         HtmlInterface['dataset-form'].getDOIElement().attr('placeholder', 'n/a');
         HtmlInterface['dataset-form'].getCommentsElement().attr('placeholder', 'n/a');
       },
@@ -326,7 +341,8 @@
 
     // Set dataset colors
     HtmlInterface.setColorOfDatasets(Object.keys(currentDocument.datasets));
-    toggleFormsToDatasetList();
+    refreshDatasetsIndicators();
+    fillFormWithDatasetPropertiesOf(Object.keys(currentDocument.datasets)[0]);
 
     // Fill dataset Forms input with correct data
     function fillCurrentDatasetWithFormValues(id) {
@@ -341,6 +357,8 @@
         style = HtmlInterface['document-view'].getStyleOfDataset(id);
       HtmlInterface['dataset-form'].setStyle(style);
       HtmlInterface['dataset-form'].fill(currentDocument.datasets[id], confidence, id);
+      HtmlInterface['document-view'].scrollToDataset(id);
+      hideDatatypesSelection();
     }
 
     // Refresh value of dataset id indocators
@@ -351,12 +369,40 @@
     function toggleDatasetListToForms(id) {
       HtmlInterface['datasets-list'].hide();
       HtmlInterface['dataset-form'].show(currentDocument.datasets[id].dataType);
-      HtmlInterface['document-view'].scrollToDataset(id);
     }
 
-    function toggleFormsToDatasetList() {
-      HtmlInterface['datasets-list'].show();
-      HtmlInterface['dataset-form'].hide();
+    function displayDatatypesSelection(id) {
+      HtmlInterface['dataset-dataType-form'].show();
+      HtmlInterface['dataset-form'].getSelectedDataTypeElement().val(currentDocument.datasets[id].dataType).change();
+    }
+
+    function hideDatatypesSelection() {
+      HtmlInterface['dataset-dataType-form'].hide();
+    }
+
+    function toggleSelectDatatypesToCurrentDatatype() {
+      hideDatatypesSelection();
+      displayCurrentDatatype();
+    }
+
+    function toggleCurrentDatatypeToSelectDatatypes(id) {
+      displayDatatypesSelection(id);
+      hideCurrentDatatype();
+    }
+
+
+    function displayCurrentDatatype() {
+      $('#currentDataType').show();
+    }
+
+    function hideCurrentDatatype() {
+      $('#currentDataType').hide();
+    }
+
+    function refreshDatasetsIndicators(id) {
+      // HtmlInterface['datasets-list'].show();
+      // HtmlInterface['dataset-form'].hide();
+      if (id) HtmlInterface['dataset-form'].setStatus(currentDocument.datasets[id].status);
       HtmlInterface['datasets-list'].refreshDatasetsIndicators(currentDocument.datasets);
     }
 
@@ -412,7 +458,7 @@
       let id = $(this).attr('value');
       refreshDatasetIndexLabelIndicators(id);
       fillFormWithDatasetPropertiesOf(id);
-      toggleDatasetListToForms(id);
+      // toggleDatasetListToForms(id);
     });
 
     // On dataset click
@@ -420,7 +466,7 @@
       let id = $(this).attr('id');
       refreshDatasetIndexLabelIndicators(id);
       fillFormWithDatasetPropertiesOf(id);
-      toggleDatasetListToForms(id);
+      // toggleDatasetListToForms(id);
     });
 
     // On dataset click
@@ -428,7 +474,7 @@
       let id = $(this).attr('corresp').replace('#', '');
       refreshDatasetIndexLabelIndicators(id);
       fillFormWithDatasetPropertiesOf(id);
-      toggleDatasetListToForms(id);
+      // toggleDatasetListToForms(id);
     });
 
     // On dataType_validation click
@@ -443,16 +489,26 @@
       currentDocument.datasets[id].descritpion = selectedDescritpion;
       currentDocument.datasets[id].bestDataFormatForSharing = selectedBestDataFormatForSharing;
       currentDocument.datasets[id].mostSuitableRepositories = selectedMostSuitableRepositories;
+      currentDocument.datasets[id].status = 'warning';
+      refreshDatasetsIndicators(id);
       fillFormWithDatasetPropertiesOf(id);
-      toggleDatasetListToForms(id);
+      toggleSelectDatatypesToCurrentDatatype();
+      // toggleDatasetListToForms(id);
     });
 
     // On remove_current_datatype click
     $('#remove_current_datatype').click(function() {
       let id = HtmlInterface['dataset-form'].getIndex();
-      currentDocument.datasets[id].dataType = '';
+      toggleCurrentDatatypeToSelectDatatypes(id);
+      // toggleDatasetListToForms(id);
+    });
+
+    // On dataType_cancel click
+    $('#dataType_cancel').click(function() {
+      let id = HtmlInterface['dataset-form'].getIndex();
+      refreshDatasetsIndicators();
+      toggleSelectDatatypesToCurrentDatatype();
       fillFormWithDatasetPropertiesOf(id);
-      toggleDatasetListToForms(id);
     });
 
     // On delete_dataset click
@@ -463,10 +519,6 @@
     });
 
     // On dataset_validation click
-    $('#dataset_cancel').click(function() {
-      toggleFormsToDatasetList();
-    });
-    // On dataset_validation click
     $('#dataset_validation').click(function() {
       let id = HtmlInterface['dataset-form'].getIndex(),
         name = HtmlInterface['dataset-form'].getName(),
@@ -476,17 +528,16 @@
       currentDocument.datasets[id].DOI = (DOI) ? DOI : '';
       currentDocument.datasets[id].comments = (comments) ? comments : '';
       currentDocument.datasets[id].status = 'success';
-      toggleFormsToDatasetList();
-    });
-
-    // On datasets_validation click
-    $('#datasets_save').click(function() {
       currentDocument.source = HtmlInterface['document-view'].getSource();
       MongoDB.updateDocument(currentDocument, function(err, res) {
         console.log(err, res);
         if (err) return err; // Need to define error behavior
-        return location.reload();
       });
+      refreshDatasetsIndicators(id);
+    });
+
+    // On datasets_validation click
+    $('#datasets_save').click(function() {
     });
 
     // On datasets_validation click

@@ -18,6 +18,25 @@ On Windows :
 
 ``set DEMO=true & npm start``
 
+## Config
+
+You can set config parameters into file : conf/conf.json
+
+```
+{
+  "baseUrl": "/dataseer/",
+  "services": {
+    "mongodb": "mongodb://localhost:27017/app"
+  }
+}
+```
+
+baseUrl : application "root url"
+
+With "/dataseer/" value, access url will be : http://www.mydomain.com/dataseer/
+To have url like this : "http://www.mydomain.com/", set baseUrl to "/".
+
+
 ## Dependancies
 
 Application need an instance of mongoDB running on port 27017, with an "app" database, filled with "documents" collection. (conf/conf.json to set complete URL)

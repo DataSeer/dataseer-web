@@ -1,31 +1,43 @@
 /*body > .container-fluid > div.row:nth-child(3) {*/
 #document-view {
   position: fixed;
-  height: 65%;
-  width: 50%;
+  height: 75%;
+  width: 45%;
   overflow: scroll;
 }
 
-#datasets-list,
+#datasets-list {
+  position: fixed;
+  height: 75%;
+  width: 15%;
+  overflow: scroll;
+}
+
 #dataset-form {
   position: fixed;
-  height: 65%;
-  width: 35%;
+  height: 75%;
+  width: 30%;
   overflow: scroll;
 }
 
-body > .container-fluid > div.row:nth-child(4) {
+#dataset-form #dataset\.id {
+  cursor: pointer;
+}
+
+body>.container-fluid>div.row:nth-child(4) {
   position: fixed;
   right: 0;
   bottom: 3%;
   left: 0;
 }
-.row > * , .form-row > * {
+
+.row>*,
+.form-row>* {
   vertical-align: middle;
 }
 
 #dataset-poperties-form {
-  display: none;
+  /*display: none;*/
 }
 
 #datasets-list {
@@ -39,7 +51,7 @@ body > .container-fluid > div.row:nth-child(4) {
 #dataset-form {
   overflow: auto;
   position: fixed;
-  display: none;
+  /*display: none;*/
   margin-top: 25 !important;
   margin-bottom: 25px !important;
 }
@@ -54,7 +66,9 @@ body > .container-fluid > div.row:nth-child(4) {
   cursor: pointer;
 }
 
-.delete_dataset, .warning, .success {
+.delete_dataset,
+.warning,
+.success {
   margin-left: 5px;
   margin-right: 5px;
 }
@@ -80,7 +94,7 @@ body > .container-fluid > div.row:nth-child(4) {
   margin-bottom: 5px;
 }
 
-#dataset-poperties-form #remove_current_datatype {
+#remove_current_datatype {
   margin-left: 5px;
   margin-top: 0px;
   margin-bottom: 0px;
@@ -88,19 +102,36 @@ body > .container-fluid > div.row:nth-child(4) {
   line-height: 1em;
 }
 
+#dataset-dataType-form {
+  display: inline-block;
+}
+
+#dataset-dataType-form select {
+  width: 70%;
+  margin-left: 5px;
+  margin-right: 5px;
+  display: inline-block;
+}
+
+#dataset-dataType-form #dataType_validation, #dataset-dataType-form #dataType_validation  {
+  display: inline-block;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
 /* TEI CUSTOMIZATION */
 
 /* Title of section like introductionor results */
-#document-view tei > text > div {
+#document-view tei>text>div {
   font-weight: bold;
 }
 
-#document-view tei > text > div > * {
+#document-view tei>text>div>* {
   margin-top: 10px;
   font-weight: normal;
 }
 
-#document-view tei > text > div > p > * {
+#document-view tei>text>div>p>* {
   margin-top: 5px;
 }
 
@@ -125,6 +156,6 @@ body > .container-fluid > div.row:nth-child(4) {
   background-color: lightyellow;
 }
 
-#document-view.tei-only-dataseer tei > text > div:not([subtype="dataseer"]) {
+#document-view.tei-only-dataseer tei>text>div:not([subtype="dataseer"]) {
   display: none;
 }
