@@ -278,6 +278,7 @@
       },
       // Remove class of tei .document
       'setAllVisible': function() {
+        HtmlInterface['document-view'].getParagraphsWithoutDatasets().removeClass();
         return HtmlInterface['document-view'].getDocumentView().removeClass();
       },
       // Set class of tei .document
@@ -285,10 +286,16 @@
         HtmlInterface['document-view'].setAllVisible();
         return HtmlInterface['document-view'].getDocumentView().addClass('tei-only-dataseer');
       },
+      getParagraphsWithoutDatasets: function() {
+        let paragraphs = $('#document-view div[subtype="dataseer"] > div > p');
+        return paragraphs.map(function(i, el) {
+          if ($(el).children('s').length === 0) return el;
+        });
+      },
       // Set class of tei .document
       'setOnlyDataets': function() {
-        HtmlInterface['document-view'].setAllVisible();
-        return HtmlInterface['document-view'].getDocumentView().addClass('tei-only-datasets');
+        HtmlInterface['document-view'].setOnlyDataseer();
+        return HtmlInterface['document-view'].getParagraphsWithoutDatasets().addClass('hidden');
       },
       'scrollToDataset': function(id) {
         let position = HtmlInterface['document-view'].getDataset(id).position().top + HtmlInterface['document-view'].getDocumentView().scrollTop() - 14;
@@ -321,8 +328,8 @@
     'removeDataset': function(id) {
       let dataset = HtmlInterface['document-view'].getDataset(id),
         datasetLinkRow = HtmlInterface['datasets-list'].getDatasetLinkRow(id),
-      //   text = HtmlInterface['document-view'].newTextElement().text(dataset.text());
-      // dataset.replaceWith(text); // Replace dataset in XHTML data
+        //   text = HtmlInterface['document-view'].newTextElement().text(dataset.text());
+        // dataset.replaceWith(text); // Replace dataset in XHTML data
         datasetCorrespList = HtmlInterface['document-view'].getDatasetCorrespList(id),
         text = dataset.text();
       dataset.replaceWith(text); // Replace dataset in XHTML data
@@ -537,8 +544,7 @@
     });
 
     // On datasets_validation click
-    $('#datasets_save').click(function() {
-    });
+    $('#datasets_save').click(function() {});
 
     // On datasets_validation click
     $('#datasets_validation').click(function() {
@@ -559,6 +565,7 @@
     $('#tei_all_visible').click(function() {
       HtmlInterface['document-view'].setAllVisible();
       $('#tei_only_dataseer').parent('label').removeClass('active');
+      $('#tei_all_visible').parent('label').removeClass('active');
       $(this).parent('label').addClass('active');
     });
 
@@ -566,12 +573,16 @@
     $('#tei_only_dataseer').click(function() {
       HtmlInterface['document-view'].setOnlyDataseer();
       $('#tei_all_visible').parent('label').removeClass('active');
+      $('#tei_only_datasets').parent('label').removeClass('active');
       $(this).parent('label').addClass('active');
     });
 
     // On tei_only_datasets click
     $('#tei_only_datasets').click(function() {
-      // HtmlInterface['document-view'].setOnlyDataets();
+      HtmlInterface['document-view'].setOnlyDataets();
+      $('#tei_all_visible').parent('label').removeClass('active');
+      $('#tei_only_dataseer').parent('label').removeClass('active');
+      $(this).parent('label').addClass('active');
     });
   });
 })();
