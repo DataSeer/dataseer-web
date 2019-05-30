@@ -42,6 +42,18 @@ Express will provide :
 
 ### Web Application
 
+#### Index
+
+![index of web app](/doc/index.jpg "Index of web app")
+
+#### BackOffice
+
+![backOffice of web app](/doc/backoffice.jpg "BackOffice of web app")
+
+#### List of Documents
+
+![list of documents](/doc/documents_list.jpg "List of documents")
+
 #### Metadata
 
 ![metadata of a given document](/doc/metadata.jpg "metadata of a given document")

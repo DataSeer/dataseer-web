@@ -2,6 +2,11 @@ div(class='container-fluid')
   div(class='form-row')
     div(class='key d-inline') DataSet 
     div(id='dataset.id' class='value d-inline')
+    div(id='dataset.status' class='value d-inline')
+      div(class='d-inline warning warning-color-dark hidden')
+        i(class='fas fa-cogs')
+      div(class='d-inline success success-color-dark hidden')
+        i(class='fas fa-check')
 
 div(id='dataset-dataType-form' class='container-fluid')
   div(class='form-row')
@@ -9,23 +14,36 @@ div(id='dataset-dataType-form' class='container-fluid')
 
   div(class='form-row')
     select(class='form-control dataType' id='dataset.selectedDataType')
-      option(value='' selected) Select a data type
-      each val, index in dataTypes
-        option(value=(val)) #{val}
+      option(value='-1' selected) Select a data type
+      each dataType, index in dataTypes
+        option(value=(index)) #{dataType.dataType}
+    select(class='form-control hidden' id='dataset.selectedDescritpion')
+      option(value='-1' selected)
+      each dataType, index in dataTypes
+        option(value=(index)) #{dataType.descritpion}
+    select(class='form-control hidden' id='dataset.selectedBestDataFormatForSharing')
+      option(value='-1' selected)
+      each dataType, index in dataTypes
+        option(value=(index)) #{dataType.bestDataFormatForSharing}
+    select(class='form-control hidden' id='dataset.selectedMostSuitableRepositories')
+      option(value='-1' selected)
+      each dataType, index in dataTypes
+        option(value=(index)) #{dataType.mostSuitableRepositories}
 
   div(class='form-row')
     button(id='dataType_validation' class='btn btn-primary') Select this DataType : Continue 
 
 div(id='dataset-poperties-form' class='container-fluid')
   div(class='form-row')
-    div(class='key d-inline font-weight-bold') Trust factor : 
-    div(class='value d-inline' id='dataset.factor')
+    div(class='key d-inline font-weight-bold') Confidence : 
+    div(class='value d-inline' id='dataset.confidence')
 
   div(class='form-row')
     div(class='key d-inline font-weight-bold') Data type : 
     div(class='value d-inline' id='dataset.dataType')
     div(class='d-inline')
-      button(id='remove_current_datatype' class='btn btn-danger btn-sm') Edit
+      button(id='remove_current_datatype' class='btn btn-primary btn-sm')
+        i(class='far fa-edit')
 
   div(class='form-row')
     div(class='key d-inline font-weight-bold') Description : 
@@ -33,7 +51,7 @@ div(id='dataset-poperties-form' class='container-fluid')
 
   div(class='form-row')
     div(class='key d-inline font-weight-bold') Best data format for sharing : 
-    div(class='value d-inline' id='dataset.bestDataForSharing')
+    div(class='value d-inline' id='dataset.bestDataFormatForSharing')
 
   div(class='form-row')
     div(class='key d-inline font-weight-bold') Most suitable Repositories : 
@@ -52,4 +70,7 @@ div(id='dataset-poperties-form' class='container-fluid')
     textarea(class='form-control comments' id='dataset.comments' rows='3')
 
   div(class='form-row')
-    button(id='dataset_validation' class='btn btn-primary') This info is correct : Continue 
+    div(class='col-6')
+      button(id='dataset_validation' class='btn btn-primary btn-sm') This info is correct : Continue 
+    div(class='col-6')
+      button(id='dataset_cancel' class='float-right btn btn-primary btn-sm') Cancel 

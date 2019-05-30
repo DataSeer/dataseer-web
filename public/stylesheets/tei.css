@@ -1,0 +1,67 @@
+ab {display:block;}
+choice > expan + abbr:before {content:"("} /* Assumes inside choice and expan before abbr */
+choice > expan + abbr:after {content:")"} /* Assumes inside choice and expan before abbr */
+accMat {display: block;} accMat:before {content: "Accompanying material: "; font-weight: bold;}
+history acquisition:before {content: "Acquisition: ";font-weight: bold;} history acquisition {display: block;}
+actor {display:inline; font-style: italic;}
+add[place="sup"] {vertical-align:super;} add[place="sub"] {vertical-align:sub;}
+additional {padding-top: 3pt; padding-bottom: 2pt; display: block;} additional>listBibl>bibl:after {content: ".";} additional:before {content: "Additional:";display: block;font-weight: 600;   font-variant: small-caps;font-size: 120%;} additional>listBibl {display: block;list-style-type: none;margin-top: 10pt;} additional>listBibl:before {content: "Bibliography:";display: block;font-weight: 600;font-variant: small-caps;font-size: 120%;} additional>listBibl>bibl {text-align: left;display: list-item;margin-left: 30pt;}
+additions {display: block;} additions:before {content: "Additions: ";font-weight: bold;}
+addrLine {display:block;}
+address {display:block; /* font-style:italic; If wish to appear as HTML addresses are rendered by default, at least in Firefox */}
+att {display:inline; font-weight:bold;} att:before {content:"@"}
+byline {display:block;}
+caesura:before {display:inline; content:"\\a0\\a0\\a0\\a0"; /* could be :after too */}
+camera {display:inline; font-style: italic;}
+caption {display:inline; font-style: italic;}
+ castList {} /* Note: has additional rules: */
+castList {display:block;} /* applies whether children are head or not */
+/* Note: for this to mirror the XSL exactly, head would always need to be preceding other elements as a direct child castList */
+castList > head {display:inline; font-style:italic;}
+castList > *:not(head) {margin-left: 40px;} /* If children of castList needed their own indents, then it should be relative to this (if possible) */
+ catRef {} /* Note: has additional rules: */
+catRef + catRef:before {'\\A'} /* Add line break if preceded by another catRef */
+catRef:after {content:attr(scheme); display:inline; font-style:italic;} /* Add scheme in italics */
+/* 
+Commenting out as XPath not currently supported in CSS as needed by third 'after'
+catRef:after(2) {content:':'}*//* Requires CSS3 to add such additional 'after' content? (Firefox allows content: '123'attr(class)'456' at least); See http://www.w3.org/TR/css3-content/#nesting or http://www.w3.org/TR/css3-content/#inserting0 */
+/* 
+catRef:after(3) {content: <not possible to reference target's catDesc unless XPath gets added to CSS>} */
+ code {display:inline; font-family:monospace;}
+ del {display:inline; text-decoration: line-through;}
+ emph {display:inline; font-style:italic;}
+ epigraph {display:block;}
+ choice > expan + abbr:before {content:"("} /* Assumes inside choice and expan before abbr */
+choice > expan + abbr:after {content:")"} /* Assumes inside choice and expan before abbr */
+ foreign {display:inline;}
+ genName {display:inline;}
+ geogName {display:inline;}
+gi:before {display:inline;content:"<"}  gi:after {display:inline;content:">"}
+gloss {display:inline;}
+ hi {display:inline; font-weight:bold;}
+ ident[type] {display:inline; font-weight:bold;} ident:not([type]) {display:inline; } /* Just as the stylesheet allows for different types; a specific type could be styled by ident[type="XXX"] */
+ l {display:block;}
+label {display:inline;}
+ lb {display:block;}
+ lg {display:block;}
+ mentioned {display:inline;}
+ name {display:inline;}
+ persName {display:inline;}
+ placeName {display:inline;}
+ resp:after {content:" ";}
+respStmt {display:inline;}
+ role {display:inline; font-style: italic;}
+roleDesc { margin-left: 40px; margin-right: 40px; } roleDesc > *:not(p) {display:block; margin-bottom:1em; /* Latter is to act like a paragraph*/}
+roleName {display:inline;}
+ salute {text-align:left; display:block; margin-bottom:1em; /* Latter is to act like a paragraph*/}
+ seg {display:inline;}
+ set {display:inline; font-style: italic;}
+ sic {display:inline;} sic:after {content: " (sic)"}
+ signed {text-align:left; display:block; margin-bottom:1em; /* Latter is to act like a paragraph*/}
+soCalled:before {content:'‘'} soCalled {display:inline;} soCalled:after {content:'’'} /* Quote style is parameterized in XSL; note: content can also accept 'open-quote' and 'close-quote', but the default is as already included in the rule */
+ sound {display:inline; font-style: italic;}
+ stage {font-style: italic; display:block; margin-bottom:1em; /* Latter is to act like a paragraph*/}
+ tech {display:inline; font-style: italic;}
+ term {display:inline;}
+ unclear {display:inline;}
+ view {display:inline; font-style: italic;}

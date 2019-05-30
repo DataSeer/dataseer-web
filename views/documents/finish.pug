@@ -12,7 +12,7 @@ block content
 
           div(class='container-fluid')
 
-            div(class='row metadata-view')
+            div(class='row row-margin')
               div(class='col-12')
                 div(class='key d-inline') Data Availability Statement : 
                 each val, index in document.datasets
@@ -30,9 +30,9 @@ block content
           div(class='container-fluid')
 
             div(class='row')
-              div(class='col-12') Manuscript #: #{document.metadata.ManuscriptId}
+              div(class='col-12') Manuscript #: #{document.metadata.manuscriptId}
 
-            div(class='row metadata-view')
+            div(class='row row-margin')
               div(class='col-12')
                 div(class='key d-inline') Data Availability Statement : 
                 each val, index in document.datasets
@@ -45,7 +45,7 @@ block content
                       else
                         div(class='value d-block') #{val.name} : n/a
 
-            div(class='row metadata-view')
+            div(class='row row-margin')
               div(class='col-12') Author Comments : 
                 each val, index in document.datasets
 
@@ -58,23 +58,23 @@ block content
 
     else
 
-      div(class='row metadata-view')
+      div(class='row row-margin')
         div(class='col-12')
           div(class='key d-inline font-weight-bold') Manuscript #: 
-          div(class='value d-inline') #{document.metadata.ManuscriptId}
+          div(class='value d-inline') #{document.metadata.manuscriptId}
         div(class='col-12')
           div(class='key d-inline font-weight-bold') Submitting Author : 
-          div(class='value d-inline') #{document.metadata.SubmittingAuthor}
+          div(class='value d-inline') #{document.metadata.submittingAuthor}
         div(class='col-12')
           div(class='key d-inline font-weight-bold') Submitting Author email : 
-          div(class='value d-inline') #{document.metadata.SubmittingAuthoremail}
+          div(class='value d-inline') #{document.metadata.submittingAuthoremail}
 
       div(class='row')
         div(class='col-12')
           div(class='key d-inline')
           each val, index in document.datasets
 
-            div(class='row dataset-view')
+            div(class='row row-margin')
               div(class='col-12')
                 div(class='value d-block font-weight-bold') Dataset #{index} :
               div(class='col-12')
