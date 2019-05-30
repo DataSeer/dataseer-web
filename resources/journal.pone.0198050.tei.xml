@@ -344,7 +344,7 @@
         <div xml:id="sec004">
           <head>Core sample collection</head>
           <p>
-            <s id="dataset-1" type="Generic">Core samples used in this study were obtained from the reference core collection of Mae Soon reservoir of Fang oil field, Chiang Mai, Thailand (19°50'N, 99°09'E) (
+            <s id="dataset-1" type="Generic data">Core samples used in this study were obtained from the reference core collection of Mae Soon reservoir of Fang oil field, Chiang Mai, Thailand (19°50'N, 99°09'E) (
               <ref target="#pone.0198050.g001" type="fig">Fig 1</ref>
               ).</s>This reservoir has been in production for more than 50 years, with average productivity of 900 barrels of oil per day (bbl/d), and is currently experiencing a decline in its production rate. 
             <s corresp="#dataset-1">Six oil-bearing sandstone samples were aseptically drawn from the six-foot-long cylindrical cores drilled from 6 oil wells in the reservoir.</s>
@@ -366,7 +366,7 @@
               ].</s>
           </p>
           <p>
-            <s id="dataset-3" type="Generic">Produced water (the water found in the same formations as oil and gas, which is brought to the surface with the petroleum products) from the production wells was analysed for pH and salinity using a standard pH meter (Ohaus starter 3100, USA) and an electrochemical analyser (Consort C933, Belgium).</s>
+            <s id="dataset-3" type="Generic data">Produced water (the water found in the same formations as oil and gas, which is brought to the surface with the petroleum products) from the production wells was analysed for pH and salinity using a standard pH meter (Ohaus starter 3100, USA) and an electrochemical analyser (Consort C933, Belgium).</s>
             <s id="dataset-4" type="Chromatography data">Concentrations of sulfate and nitrate in the produced water were determined using ion chromatography (Dionex ICS-3000, USA).</s>
             <s id="dataset-5" type="Spectrometry data">Iron content was analysed using inductively coupled plasma optical emission spectrometry (ICP-OES) [
               <ref target="#pone.0198050.ref013" type="bibr">13</ref>
@@ -395,7 +395,7 @@
           <p>The purified metagenomic DNA was used as a template for amplification of the partial 16S rRNA gene. Universal bacterial primers E785F () and E1081R () attached with tagged barcode sequences [
             <ref target="#pone.0198050.ref016" type="bibr">16</ref>
             ] were used for amplifying the V5 and V6 regions of prokaryotic 16S rRNA genes. Polymerase chain reactions were performed using Phusion High-Fidelity DNA polymerase (Thermo Scientific, Massachusetts, USA) on a MyCycler thermocycler (Bio-Rad, Hercules, CA) under the following conditions: initial denaturation at 98°C for 30 sec, 25 cycles of denaturation at 98°C for 10 sec, annealing at 66°C for 30 sec, and extension at 72°C for 30 sec, with a final extension at 72°C for 5 min. 
-            <s id="dataset-6" type="Generic">The PCR products were analysed on a 2% (w/v) agarose gel and purified using the GF-1 ambiclean kit (Vivantis, Malaysia).</s>
+            <s id="dataset-6" type="Generic data">The PCR products were analysed on a 2% (w/v) agarose gel and purified using the GF-1 ambiclean kit (Vivantis, Malaysia).</s>
             <s id="dataset-7" type="Spectrometry data">Then, all amplified products were quantified using a Nanodrop spectrophotometer (LabX, CA).</s>
             <s id="dataset-8" type="DNA sequence data">The sequences were analysed using the ION PGM system with ion 316 chip kit V2 (Life Technologies, CA, USA) following the manufacturer’s recommended protocols.</s>
             All 16S rRNA gene sequences of the oil sand samples were deposited in the NCBI Sequence Read Archive (SRA) with the project accession number SRP071710.</p>

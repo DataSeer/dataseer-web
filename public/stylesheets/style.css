@@ -3,6 +3,10 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+.hidden {
+  display: none !important;
+}
+
 .btn-primary {
   margin-top: 10px;
   margin-bottom: 10px;

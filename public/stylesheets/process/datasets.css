@@ -1,7 +1,7 @@
 /*body > .container-fluid > div.row:nth-child(3) {*/
 #document-view {
   position: fixed;
-  height: 50%;
+  height: 65%;
   width: 50%;
   overflow: scroll;
 }
@@ -9,7 +9,7 @@
 #datasets-list,
 #dataset-form {
   position: fixed;
-  height: 50%;
+  height: 65%;
   width: 35%;
   overflow: scroll;
 }
@@ -17,7 +17,7 @@
 body > .container-fluid > div.row:nth-child(4) {
   position: fixed;
   right: 0;
-  bottom: 5%;
+  bottom: 3%;
   left: 0;
 }
 .row > * , .form-row > * {
@@ -54,13 +54,17 @@ body > .container-fluid > div.row:nth-child(4) {
   cursor: pointer;
 }
 
-.delete_dataset, .dataset_status {
-  margin-left: 3px;
-  margin-right: 3px;
+.delete_dataset, .warning, .success {
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
-.dataset_status {
+.warning-color-dark {
   color: #FF8800;
+}
+
+.success-color-dark {
+  color: #007E33;
 }
 
 #datasets-list .delete_dataset {
@@ -115,6 +119,7 @@ body > .container-fluid > div.row:nth-child(4) {
   text-decoration: none;
 }
 
+#document-view tei s[corresp],
 #document-view tei s[id] {
   cursor: pointer;
   background-color: lightyellow;

@@ -1,1 +1,68 @@
-["Heart pressures", "SPO2", "ECG"]
+{
+  "Generic data": {
+    "dataType": "Generic data",
+    "descritpion": "",
+    "bestDataFormatForSharing": "",
+    "mostSuitableRepositories": ""
+  },
+  "DNA sequence data": {
+    "dataType": "DNA sequence data",
+    "descritpion": "",
+    "bestDataFormatForSharing": "",
+    "mostSuitableRepositories": ""
+  },
+  "Spectrometry data": {
+    "dataType": "Spectrometry data",
+    "descritpion": "",
+    "bestDataFormatForSharing": "",
+    "mostSuitableRepositories": ""
+  },
+  "Tabular data": {
+    "dataType": "Tabular data",
+    "descritpion": "Tabular data consist of a table with rows and columns. Each cell of the table contains numbers or text.",
+    "bestDataFormatForSharing": "Tabular data should saved as a .txt or .csv file. The first row(s) should contain information about the dataset, such as the data file name, author, today's date, when the data within the file were last modified, and companion file names. Please also state which symbol has been used to denote missing data (NA is preferred). Column headings should describe the content of each column and contain only numbers, letters, and underscores - no spaces or special characters. Lowercase letters are preferred. Row names should be consistent with those used in the article and in other related datasets.",
+    "mostSuitableRepositories": "Many repositories are suitable for tabular data. Your institution, journal, or funder may recommend specific repositories, otherwise Dryad <https://datadryad.org/>, Zenodo, <https://zenodo.org/> and FigShare <https://figshare.com/> are good choices."
+  },
+  "Tabular data : Sample table": {
+    "dataType": "Tabular data : Sample table",
+    "descritpion": "Tabular data consist of a table with rows and columns. Each cell of the table contains numbers or text. A sample table contains data about one or more entities gathered during a research project. These entities might be biological organisms, soil samples, ceramic dishes, or human organs.",
+    "bestDataFormatForSharing": "Tabular data should saved as a .txt or .csv file. The first row(s) should contain information about the dataset, such as the data file name, author, today's date, when the data within the file were last modified, and companion file names. Please also state which symbol has been used to denote missing data (NA is preferred). Column headings should describe the content of each column and contain only numbers, letters, and underscores - no spaces or special characters. Lowercase letters are preferred. Row names should be consistent with those used in the article and in other related datasets. For a sample table, the rows contain information about individual samples, and the columns contain the measured variables and other information. Sample tables must contain detailed information about exactly when and where each sample was obtained, and columns indicating any subgroup each sample belongs to (e.g. 'sand dunes', or 'control group').",
+    "mostSuitableRepositories": "Many repositories are suitable for tabular data. Your institution, journal, or funder may recommend specific repositories, otherwise Dryad <https://datadryad.org/>, Zenodo, <https://zenodo.org/> and FigShare <https://figshare.com/> are good choices."
+  },
+  "Spectrum Analysis": {
+    "dataType": "Spectrum Analysis",
+    "descritpion": "The measurement of the amplitude of the components of a complex waveform throughout the frequency range of the waveform. (McGraw-Hill Dictionary of Scientific and Technical Terms, 6th ed)",
+    "bestDataFormatForSharing": "The spectra for each sample should be concatenated into tabular data <link to Tabular Data>. The table should list the dilution factor and other loading data for each sample. A separate .txt file should provide detailed information on the machine itself, including make, model, software versions, and the settings used during sample collection.",
+    "mostSuitableRepositories": "Atmospheric spectroscopy data should be added to HITRAN (https://hitran.org/), spectrometry data from other fields can be added to any other repository able to host generic file types (e.g. Dryad <https://datadryad.org/>, Zenodo, <https://zenodo.org/> and FigShare <https://figshare.com/>)"
+  },
+  "Chromatography data": {
+    "dataType": "Chromatography data",
+    "descritpion": "Separation technique in which the stationary phase consists of ion exchange resins. The resins contain loosely held small ions that easily exchange places with other small ions of like charge present in solutions washed over the resins.",
+    "bestDataFormatForSharing": "Chromatograph data for each run should be preserved in ANDI-MS format (https://www.astm.org/Standards/E1947.htm). Numerical output from downstream analysis of the chromatograph should be shared as Tabular data",
+    "mostSuitableRepositories": "Chromatography data can be added to any repository able to host generic file types (e.g. Dryad <https://datadryad.org/>, Zenodo, <https://zenodo.org/> and FigShare <https://figshare.com/>)"
+  },
+  "Image : Electrophoresis": {
+    "dataType": "Image : Electrophoresis",
+    "descritpion": "An electrochemical process in which macromolecules or colloidal particles with a net electric charge migrate in a solution under the influence of an electric current.",
+    "bestDataFormatForSharing": "Gel images should be high resolution 16-bit grayscale images, saved as GEL or IMG/IMF files (these contain additional grayscale calibration data) or as a 16-bit TIFF file. Ensure that the same imaging parameters are used for all gels from that study, and process them all in the same orientation. Limit image editing to cropping, mirroring, or rotation.",
+    "mostSuitableRepositories": "Gel image data can be added to any repository able to host generic file types (e.g. Dryad <https://datadryad.org/>, Zenodo, <https://zenodo.org/> and FigShare <https://figshare.com/>)"
+  },
+  "Genetic data : High-Throughput Nucleotide Sequencing": {
+    "dataType": "Genetic data : High-Throughput Nucleotide Sequencing",
+    "descritpion": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
+    "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
+    "mostSuitableRepositories": "The BAM files should be uploaded to the NCBI-SRA database <https://www.ncbi.nlm.nih.gov/sra/docs/submit/> in accordance with their guidelines <https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/>. The accompanying code should be shared at CodeOcean <https://codeocean.com/>"
+  },
+  "Sound data": {
+    "dataType": "Sound data",
+    "descritpion": "A type of non-ionizing radiation in which energy is transmitted through solid, liquid, or gas as compression waves. Sound (acoustic or sonic) radiation with frequencies above the audible range is classified as ultrasonic. Sound radiation below the audible range is classified as infrasonic.",
+    "bestDataFormatForSharing": "Digital audio files should be saved as Free Lossless Audio Codec files (FLAC), or as Broadcast WAVE Audio File Format [BWF or BWAV] with uncompressed linear pulse-code modulation (PCM) saved at 96 or 48 kHz/24 bits.",
+    "mostSuitableRepositories": "Many different repositories host sound data; some are country and field specific, while others are more general. See re3data.org for a complete listing"
+  },
+  "Video Recording": {
+    "dataType": "Video Recording",
+    "descritpion": "The storing or preserving of video signals to be played back later via a transmitter or receiver.",
+    "bestDataFormatForSharing": "Video should be preserved in a MXF container format, with uncompressed YCbCr or JPEG2000 lossless encoding (codecs). A 640:480 resolution is preferred, with a 4:4:4 sampling scheme, 30 bit sampling scheme, progressive scanning and a 30 MBps data rate. An alternative minimum is Audio Video Interleave [AVI] or QuickTime [MOV] container format with H.264/MPEG-4 AVC or DV encoding (codecs).",
+    "mostSuitableRepositories": "Many different repositories host video data; some are country and field specific, while others are more general. See re3data.org for a complete listing"
+  }
+}

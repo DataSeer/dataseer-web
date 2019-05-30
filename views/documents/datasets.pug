@@ -8,15 +8,21 @@ block content
         h1(class='text-center') DATASEER
 
     div(class='row')
-      div(class='offset-2')
-      div(class='col-3')
+      div(class='col-7')
         div(class='row row-margin')
-          div(class='col-4 text-center')
-            button(id='tei_all_visible' class='btn btn-sm btn-primary') All Visible
-          div(class='col-4 text-center')
-            button(id='tei_only_dataseer' class='btn btn-sm btn-primary') Only Dataseer
-          div(class='col-4 text-center')
-            button(id='tei_only_datasets' class='btn btn-sm btn-primary') Only Datasets
+          div(class='col-12 text-center')
+            div(class='btn-group btn-group-toggle' data-toggle='buttons')
+              label(class='btn btn-success btn-sm active') FullText
+                input(type='radio' name='options' id='tei_all_visible' autocomplete='off' checked)
+              label(class='btn btn-success btn-sm') Dataseer Only
+                input(type='radio' name='options' id='tei_only_dataseer' autocomplete='off')
+              label(class='btn btn-success btn-sm disabled') Datasets only
+                input(type='radio' name='options' id='tei_only_datasets' autocomplete='off')
+      div(class='col-5')
+        div(class='row row-margin')
+          div(class='col-2 text-center')
+            button(id='datasets_save' class='btn btn-sm btn-success') Save 
+              i(class='far fa-save')
     div(class='row')
       div(class='col-7')
         div(class='row')
@@ -31,8 +37,7 @@ block content
 
     div(class='row')
       div(class='col-6 text-center')
-        button(id='datasets_validation' class='btn btn-primary') Finish 
-          i(class='far fa-save')
+        button(id='datasets_validation' class='btn btn-primary') This info is correct : Continue  
 
   if demo
     include ../forms/demo/datasets.pug
