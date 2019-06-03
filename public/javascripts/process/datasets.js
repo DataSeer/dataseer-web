@@ -223,6 +223,23 @@
       'getDatasetLinkRow': function(id) {
         return $('.dataset-link[value*=' + id + ']').parents('.row.dataset-item');
       },
+      // Get datasetLink with given id
+      'getLastDatasetLinkRowElement': function() {
+        return $('#datasets-list>.container-fluid>div:nth-last-child(2)');
+      },
+      // Get datasetLink with given id
+      'insertNewDatasetLink': function(row) {
+        return HtmlInterface['datasets-list'].getLastDatasetLinkRowElement().after(row);
+      },
+      // Get new datasetLink with given id
+      'newDatasetLinkRow': function(id) {
+        let datasetLink = $('<div>').addClass('col-12')
+            .append($('<div>').addClass('d-inline dataset-link').attr('value', id).text('Dataset ' + id))
+            .append($('<div>').addClass('d-inline').append($('<button>').addClass('delete_dataset btn btn-danger btn-sm').attr('value', id).append($('<i>').addClass('far fa-trash-alt'))))
+            .append($('<div>').addClass('d-inline warning warning-color-dark hidden').attr('value', id).append($('<i>').addClass('fas fa-cogs')))
+            .append($('<div>').addClass('d-inline success success-color-dark hidden').attr('value', id).append($('<i>').addClass('fas fa-check')));
+        return $('<div>').addClass('row dataset-item').append(datasetLink);
+      },
       'show': function() { // Show datasets-list
         return $('#datasets-list').show();
       },
@@ -347,6 +364,12 @@
         $(el).replaceWith($(el).text());
       }); // Replace all dataset corresp in XHTML data
       datasetLinkRow.remove(); // Remove dataset-link
+    },
+    // add dataset with given id
+    'addDataset': function(id) {
+      let newRow = HtmlInterface['datasets-list'].insertNewDatasetLink(HtmlInterface['datasets-list'].newDatasetLinkRow(id));
+      // add color & refresh indicators
+      HtmlInterface.setColorOfDataset(id);
     },
     // get HTML of new dataset with given id
     'newDatasetHTML': function(id, html) {
@@ -489,29 +512,35 @@
       currentDocument.datasets[id].comments = HtmlInterface['dataset-form'].getComments();
     });
 
-    // On dataset-link click
-    $('.dataset-link').click(function() {
+    function datasetLink_click() {
       let id = $(this).attr('value');
       refreshDatasetIndexLabelIndicators(id);
       fillFormWithDatasetPropertiesOf(id);
       // toggleDatasetListToForms(id);
-    });
+    }
 
-    // On dataset click
-    $('s[id]').click(function() {
+    // On dataset-link click
+    $('.dataset-link').click(datasetLink_click);
+
+    function dataset_click() {
       let id = $(this).attr('id');
       refreshDatasetIndexLabelIndicators(id);
       fillFormWithDatasetPropertiesOf(id);
       // toggleDatasetListToForms(id);
-    });
+    }
 
     // On dataset click
-    $('s[corresp]').click(function() {
+    $('s[id]').click(dataset_click);
+
+    function datasetCorresp_click() {
       let id = $(this).attr('corresp').replace('#', '');
       refreshDatasetIndexLabelIndicators(id);
       fillFormWithDatasetPropertiesOf(id);
       // toggleDatasetListToForms(id);
-    });
+    }
+
+    // On dataset click
+    $('s[corresp]').click(datasetCorresp_click);
 
     // On dataType_validation click
     $('#dataType_validation').click(function() {
@@ -547,8 +576,7 @@
       fillFormWithDatasetPropertiesOf(id);
     });
 
-    // On delete_dataset click
-    $('.delete_dataset').click(function() {
+    function deleteDataset_click() {
       let id = $(this).attr('value');
       currentDocument.datasets[id] = undefined;
       HtmlInterface.removeDataset(id);
@@ -556,9 +584,12 @@
       MongoDB.updateDocument(currentDocument, function(err, res) {
         console.log(err, res);
         if (err) return err; // Need to define error behavior
-        return location.reload();
+        // return location.reload();
       });
-    });
+    }
+
+    // On delete_dataset click
+    $('.delete_dataset').click(deleteDataset_click);
 
     // On dataset_validation click
     $('#dataset_validation').click(function() {
@@ -606,10 +637,16 @@
               anchorParent.html(html.replace(nodesHtml, HtmlInterface.newDatasetHTML(newDatasetId, nodesHtml)));
               currentDocument.datasets[newDatasetId] = HtmlInterface.newDataset(nodesHtml);
               currentDocument.source = HtmlInterface['document-view'].getSource();
+              HtmlInterface.addDataset(newDatasetId);
+              let lastRow = HtmlInterface['datasets-list'].getLastDatasetLinkRowElement();
+              lastRow.find('.delete_dataset').click(deleteDataset_click);
+              lastRow.find('.dataset-link').click(datasetLink_click);
+              $('s[id=' + newDatasetId + ']').click(dataset_click);
+              refreshDatasetsIndicators();
               MongoDB.updateDocument(currentDocument, function(err, res) {
                 console.log(err, res);
                 if (err) return err; // Need to define error behavior
-                return location.reload();
+                // return location.reload();
               });
             } else { // case selectioned elements had not same parent
               alert('case of selectioned elements had not same parent');
