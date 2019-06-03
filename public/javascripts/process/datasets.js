@@ -9,6 +9,9 @@
       'getSelectedDataTypeValue': function() {
         return $(document.getElementById('dataset.selectedDataType')).children('option:selected').val();
       },
+      'getSelectedDataTypeFirstOptionValue': function() {
+        return $(document.getElementById('dataset.selectedDataType')).children('option:first').val();
+      },
       'getSelectedDescritpion': function() {
         return $(document.getElementById('dataset.selectedDescritpion')).children('option:selected').text();
       },
@@ -54,6 +57,9 @@
       },
       'getSelectedDataTypeSelectedOptionElement': function() {
         return $(document.getElementById('dataset.selectedDataType')).children('option:selected');
+      },
+      'getSelectedDataTypeFirstOptionELement': function() {
+        return $(document.getElementById('dataset.selectedDataType')).children('option:first');
       },
       'getSelectedDescritpionElement': function() {
         return $(document.getElementById('dataset.selectedDescritpion'));
@@ -350,7 +356,7 @@
     // get HTML of new dataset with given id
     'newDataset': function(text) {
       return {
-        'dataType': 'Generic data',
+        'dataType': HtmlInterface['dataset-form'].getSelectedDataTypeFirstOptionValue(),
         'descritpion': '',
         'bestDataFormatForSharing': '',
         'mostSuitableRepositories': '',
