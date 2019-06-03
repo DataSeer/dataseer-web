@@ -199,6 +199,10 @@
       }
     },
     'datasets-list': {
+      // Get new dataset id
+      'getNewDatasetId': function() {
+        return $(document.getElementById('newDataset.id')).val();
+      },
       // Get dataset with given id
       'getDatasetLink': function(id) {
         return $('.dataset-link[value*=' + id + ']');
@@ -209,7 +213,7 @@
       'getDatasetLinkSuccessStatus': function(id) {
         return $('.success[value*=' + id + ']');
       },
-      // Get dataset with given id
+      // Get datasetLink with given id
       'getDatasetLinkRow': function(id) {
         return $('.dataset-link[value*=' + id + ']').parents('.row.dataset-item');
       },
@@ -337,6 +341,25 @@
         $(el).replaceWith($(el).text());
       }); // Replace all dataset corresp in XHTML data
       datasetLinkRow.remove(); // Remove dataset-link
+    },
+    // get HTML of new dataset with given id
+    'newDatasetHTML': function(id, html) {
+      let result = $('<s>').attr('id', id).attr('type', '').html(html);
+      return result.wrap('<p/>').parent().html();
+    },
+    // get HTML of new dataset with given id
+    'newDataset': function(text) {
+      return {
+        'dataType': 'Generic data',
+        'descritpion': '',
+        'bestDataFormatForSharing': '',
+        'mostSuitableRepositories': '',
+        'DOI': '',
+        'name': '',
+        'comments': '',
+        'text': text,
+        'status': 'warning',
+      };
     }
   };
 
@@ -522,11 +545,18 @@
     $('.delete_dataset').click(function() {
       let id = $(this).attr('value');
       currentDocument.datasets[id] = undefined;
-      HtmlInterface.removeDataset(id);
+      // HtmlInterface.removeDataset(id);
+      currentDocument.source = HtmlInterface['document-view'].getSource();
+      MongoDB.updateDocument(currentDocument, function(err, res) {
+        console.log(err, res);
+        if (err) return err; // Need to define error behavior
+        return location.reload();
+      });
     });
 
     // On dataset_validation click
     $('#dataset_validation').click(function() {
+      $('#dataType_cancel').click();
       let id = HtmlInterface['dataset-form'].getIndex(),
         name = HtmlInterface['dataset-form'].getName(),
         DOI = HtmlInterface['dataset-form'].getDOI(),
@@ -543,8 +573,51 @@
       refreshDatasetsIndicators(id);
     });
 
-    // On datasets_validation click
+    // On datasets_save click
     $('#datasets_save').click(function() {});
+
+    // On add_dataset click
+    $('#add_dataset').click(function() {
+      let selection = window.getSelection(),
+        focusNode = $(selection.focusNode),
+        focusParent = focusNode.parent(),
+        anchorNode = $(selection.anchorNode),
+        anchorParent = anchorNode.parent(),
+        newDatasetId = HtmlInterface['datasets-list'].getNewDatasetId();
+      if (newDatasetId !== '') {
+        if (typeof currentDocument.datasets[newDatasetId] === 'undefined') {
+          if (!selection.isCollapsed && selection.anchorNode && selection.focusNode) {
+            if (anchorParent.is(focusParent)) { // case selectioned elements had same parent
+              let html = anchorParent.html(),
+                nodes = selection.getRangeAt(0).cloneContents().childNodes,
+                nodesHtml = '';
+              for (let i = 0; i < nodes.length; i++) {
+                if (nodes[i].outerHTML) nodesHtml += nodes[i].outerHTML;
+                else if (nodes[i].wholeText) nodesHtml += nodes[i].wholeText;
+              }
+              nodesHtml = nodesHtml.replace(/(\r\n|\n|\r)/gm, '');
+              html = html.replace(/(\r\n|\n|\r)/gm, '');
+              anchorParent.html(html.replace(nodesHtml, HtmlInterface.newDatasetHTML(newDatasetId, nodesHtml)));
+              currentDocument.datasets[newDatasetId] = HtmlInterface.newDataset(nodesHtml);
+              currentDocument.source = HtmlInterface['document-view'].getSource();
+              MongoDB.updateDocument(currentDocument, function(err, res) {
+                console.log(err, res);
+                if (err) return err; // Need to define error behavior
+                return location.reload();
+              });
+            } else { // case selectioned elements had not same parent
+              alert('case of selectioned elements had not same parent');
+            }
+          } else {
+            alert('You need to select text of the document');
+          }
+        } else {
+          alert('ID of new dataset already used');
+        }
+      } else {
+        alert('ID of new dataset required');
+      }
+    });
 
     // On datasets_validation click
     $('#datasets_validation').click(function() {

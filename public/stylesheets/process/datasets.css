@@ -24,6 +24,10 @@
   cursor: pointer;
 }
 
+#newDataset\.id {
+  margin-top: 7px;
+}
+
 body>.container-fluid>div.row:nth-child(4) {
   position: fixed;
   right: 0;
