@@ -545,7 +545,7 @@
     $('.delete_dataset').click(function() {
       let id = $(this).attr('value');
       currentDocument.datasets[id] = undefined;
-      // HtmlInterface.removeDataset(id);
+      HtmlInterface.removeDataset(id);
       currentDocument.source = HtmlInterface['document-view'].getSource();
       MongoDB.updateDocument(currentDocument, function(err, res) {
         console.log(err, res);
