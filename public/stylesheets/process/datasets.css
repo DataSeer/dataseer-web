@@ -1,38 +1,11 @@
-/*body > .container-fluid > div.row:nth-child(3) {*/
-#document-view {
-  position: fixed;
-  height: 75%;
-  width: 45%;
-  overflow: scroll;
+.row-margin {
+  margin-top: 20px !important;
+  margin-bottom: 20px !important;
 }
 
-#datasets-list {
-  position: fixed;
-  height: 75%;
-  width: 15%;
-  overflow: scroll;
-}
-
-#dataset-form {
-  position: fixed;
-  height: 75%;
-  width: 30%;
-  overflow: scroll;
-}
-
-#dataset-form #dataset\.id {
-  cursor: pointer;
-}
-
-#newDataset\.id {
-  margin-top: 7px;
-}
-
-body>.container-fluid>div.row:nth-child(4) {
-  position: fixed;
-  right: 0;
-  bottom: 3%;
-  left: 0;
+i {
+  margin-left: 4px;
+  margin-right: 4px; 
 }
 
 .row>*,
@@ -40,92 +13,82 @@ body>.container-fluid>div.row:nth-child(4) {
   vertical-align: middle;
 }
 
-#dataset-poperties-form {
-  /*display: none;*/
-}
-
-#datasets-list {
-  overflow: auto;
-  position: fixed;
-  display: block;
-  margin-top: 25 !important;
-  margin-bottom: 25px !important;
-}
+/*dataset-form*/
 
 #dataset-form {
-  overflow: auto;
   position: fixed;
-  /*display: none;*/
+  height: 75%;
+  width: 27.5%;
+  overflow: auto;
   margin-top: 25 !important;
   margin-bottom: 25px !important;
 }
 
-.dataset-item {
-  margin-top: 15px !important;
-  margin-bottom: 15px !important;
-}
-
-.dataset-link {
-  vertical-align: middle;
+#dataset-form #dataset\.id {
+  display: inline-block;
+  width: auto;
   cursor: pointer;
 }
 
-.delete_dataset,
-.warning,
-.success {
-  margin-left: 5px;
-  margin-right: 5px;
+#dataset-form #dataset\.status {
+  display: inline-block;
+  width: auto;
 }
 
-.warning-color-dark {
-  color: #FF8800;
-}
-
-.success-color-dark {
-  color: #007E33;
-}
-
-#datasets-list .delete_dataset {
-  margin-left: 5px;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  margin-right: 0px;
-  line-height: 1em;
-}
-
-#dataset-poperties-form .form-row {
-  margin-top: 5px;
-  margin-bottom: 5px;
-}
-
-#remove_current_datatype {
-  margin-left: 5px;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  margin-right: 0px;
-  line-height: 1em;
-}
-
-#dataset-dataType-form {
+#dataset-form #dataset\.id .key,
+#dataset-form #dataset\.confidence .key,
+#dataset-form #dataset\.dataType .key {
   display: inline-block;
 }
 
-#dataset-dataType-form select {
-  width: 70%;
-  margin-left: 5px;
+#dataset-form .form-row {
+  margin-bottom: 20px; 
+}
+
+#dataset-form .form-row > div {
+  width: 100%;
+  display: block;
+}
+
+#dataset-form .form-row .key {
+  margin-bottom: 4px; 
   margin-right: 5px;
+  display: block;
+  font-weight: bold;
+}
+
+#dataset-form .form-row .value {
   display: inline-block;
 }
 
-#dataset-dataType-form #dataType_validation {
+#dataset-form .form-row button {
   display: inline-block;
-  margin-left: 5px;
-  margin-right: 5px;
+  margin-left: 4px;
+  margin-right: 4px; 
+}
+
+#dataset-form .form-row input {
+  display: inline-block;
+}
+#dataset-form .form-row select {
+  display: inline-block;
+  width: 75%;
+}
+
+/*document-view*/
+
+#document-view {
+  position: fixed;
+  height: 75%;
+  width: 45%;
+  overflow: auto;
+}
+
+#document-view span[type="sentence"][from="dataseer"] {
+  border: 1px solid black;
 }
 
 /* TEI CUSTOMIZATION */
-
-/* Title of section like introductionor results */
 #document-view tei>text>div {
   font-weight: bold;
 }
@@ -162,4 +125,53 @@ body>.container-fluid>div.row:nth-child(4) {
 
 #document-view.tei-only-dataseer tei>text>div:not([subtype="dataseer"]) {
   display: none;
+}
+
+/*datasets-list*/
+
+#datasets-list {
+  overflow: auto;
+  position: fixed;
+  display: block;
+  height: 75%;
+  width: 15%;
+  margin-top: 25 !important;
+  margin-bottom: 25px !important;
+}
+
+#datasets-list .form-row {
+  display: block;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  vertical-align: middle;
+}
+
+#datasets-list .form-row > * {
+  display: inline-block;
+}
+
+#datasets-list .form-row .value {
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#datasets-list .form-row button {
+  display: inline-block;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+#datasets_validation,
+#new_dataset {
+  margin-top: 25px;
+}
+
+.warning-color-dark {
+  color: #FF8800;
+}
+
+.success-color-dark {
+  color: #007E33;
 }

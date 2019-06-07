@@ -18,18 +18,20 @@ block content
                 input(type='radio' name='options' id='tei_only_dataseer' autocomplete='off')
               label(class='btn btn-success btn-sm') paragraph
                 input(type='radio' name='options' id='tei_only_datasets' autocomplete='off')
+              // label(class='btn btn-info btn-sm') segmented
+                // input(type='radio' name='options' id='tei_segmented' autocomplete='off')
     div(class='row')
       div(class='col-6')
         div(class='row')
-          div(class='col-12')
             div(id='document-view')
-              div(class='container-fluid document' id='dataset.source') !{document.source}
       div(class='col-4')
         div(id='dataset-form' class='form')
-            include ../forms/datasets/update-form.pug
       div(class='col-2')
-        div(id='datasets-list' class='form')
-          include ../forms/datasets/list.pug
+        div(class='row')
+          div(id='datasets-list' class='form')
+            div(id='new_dataset' class='container-fluid')
+              button(class='btn btn-primary btn-sm') Add new Dataset 
+                i(class='fas fa-plus')
 
   if demo
     include ../forms/demo/datasets.pug
