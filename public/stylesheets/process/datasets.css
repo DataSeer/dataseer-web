@@ -175,3 +175,21 @@ i {
 .success-color-dark {
   color: #007E33;
 }
+
+#datasets-error-modal .modal-header {
+  color: white;
+  background-color: #0099CC;
+}
+
+#datasets-error-modal .modal-body {
+  color: #CC0000;
+}
+
+#quit-modal .modal-header {
+  color: white;
+  background-color: #ffbb33;
+}
+
+#quit-modal .modal-body {
+  color: #CC0000;
+}

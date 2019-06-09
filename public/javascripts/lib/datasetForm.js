@@ -133,7 +133,7 @@ const DatasetForm = function(events) {
   };
 
   self.init = function(id) {
-    $(id).empty().append(elements.container);
+    jQuery(id).empty().append(elements.container);
     elements['dataset.id'].view();
     elements['dataset.confidence'].view();
     elements['dataset.dataType'].edit(false);

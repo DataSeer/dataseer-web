@@ -11,13 +11,13 @@ block content
       div(class='col-6')
         div(class='row row-margin')
           div(class='col-12 text-center')
-            div(class='btn-group btn-group-toggle' data-toggle='buttons')
+            div(id='view-selection' class='btn-group btn-group-toggle' data-toggle='buttons')
               label(class='btn btn-success btn-sm active') full text
-                input(type='radio' name='options' id='tei_all_visible' autocomplete='off' checked)
+                input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off' checked)
               label(class='btn btn-success btn-sm') section
-                input(type='radio' name='options' id='tei_only_dataseer' autocomplete='off')
+                input(type='radio' name='options' id='tei_only_dataseer' value='onlyDataseer' autocomplete='off')
               label(class='btn btn-success btn-sm') paragraph
-                input(type='radio' name='options' id='tei_only_datasets' autocomplete='off')
+                input(type='radio' name='options' id='tei_only_datasets' value='onlyDatasets' autocomplete='off')
               // label(class='btn btn-info btn-sm') segmented
                 // input(type='radio' name='options' id='tei_segmented' autocomplete='off')
     div(class='row')
@@ -32,6 +32,9 @@ block content
             div(id='new_dataset' class='container-fluid')
               button(class='btn btn-primary btn-sm') Add new Dataset 
                 i(class='fas fa-plus')
+
+  include ../modals/quit.pug
+  include ../modals/documents/datasets.pug
 
   if demo
     include ../forms/demo/datasets.pug

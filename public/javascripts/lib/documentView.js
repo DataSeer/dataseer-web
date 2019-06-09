@@ -9,42 +9,42 @@ const DocumentView = function(events) {
   let paragraphsWithoutDatasets = function() {
       let paragraphs = elements.container.find('div[subtype="dataseer"] > div > p');
       return paragraphs.map(function(i, el) {
-        if ($(el).children('s').length === 0) return el;
+        if (jQuery(el).children('s').length === 0) return el;
       });
     },
     // get selected element (if it is in container)
     selectedElements = function() {
       let selection = window.getSelection(),
-        focusNode = $(selection.focusNode),
+        focusNode = jQuery(selection.focusNode),
         focusParent = focusNode.parent(),
-        anchorNode = $(selection.anchorNode),
+        anchorNode = jQuery(selection.anchorNode),
         anchorParent = anchorNode.parent(),
-        target = $(selection);
+        target = jQuery(selection);
       if (!(!selection.isCollapsed && selection.anchorNode && selection.focusNode)) {
-        alert('You must select some text before add new dataset');
-        return null;
+        return {
+          'err': true,
+          'msg': 'Please select some text before add new dataset'
+        };
       }
-      if (!elements.container.has($(target.focusNode).parent())) {
-        alert('selection must be in document-view');
-        return null;
+      if (!elements.container.has(jQuery(selection.focusNode).parent()).length) {
+        return {
+          'err': true,
+          'msg': 'Text selected must be a part of XML document'
+        };
       }
       if (!anchorParent.is(focusParent)) {
-        alert('selection must be in same paragraph (and not contain part of dataset)');
-        return null;
-      }
-      if (!elements.container.has($(target.focusNode).parent())) {
-        alert('selection must be in document-view');
-        return null;
-      }
-      if (!elements.container.has($(target.focusNode).parent())) {
-        alert('selection must be in document-view');
-        return null;
+        return {
+          'err': true,
+          'msg': 'Text selected must be in same paragraph, and not contain part of an existing dataset'
+        };
       }
       return {
-        'anchorParent': anchorParent,
-        'nodes': selection.getRangeAt(0).cloneContents().childNodes
+        'err': null,
+        'res': {
+          'anchorParent': anchorParent,
+          'nodes': selection.getRangeAt(0).cloneContents().childNodes
+        }
       };
-
     },
     // scroll ot dataset position
     scrollTo = function(el) {
@@ -53,18 +53,18 @@ const DocumentView = function(events) {
     };
 
   self.init = function(id, source) {
-    $(id).empty().append(elements.container);
+    jQuery(id).empty().append(elements.container);
     self.source(source);
 
     datasets.all().click(function() {
-      let id = $(this).attr('id');
-      scrollTo($(this));
+      let id = jQuery(this).attr('id');
+      scrollTo(jQuery(this));
       events.datasets.click(id);
     });
 
     corresps.all().click(function() {
-      let id = $(this).attr('corresp').replace('#', '');
-      scrollTo($(this));
+      let id = jQuery(this).attr('corresp').replace('#', '');
+      scrollTo(jQuery(this));
       events.corresps.click(id);
     });
 
@@ -89,7 +89,7 @@ const DocumentView = function(events) {
   self.colors = function() {
     let styles = {};
     datasets.all().each(function() {
-      let id = $(this).attr('id'),
+      let id = jQuery(this).attr('id'),
         style = datasets.styleOf(id);
       styles[id] = style;
     });
@@ -114,19 +114,19 @@ const DocumentView = function(events) {
 
   let senteces = {
     'process': function() {
-      $('#document-view tei text p').each(function() {
-        let el = $(this),
+      jQuery('#document-view tei text p').each(function() {
+        let el = jQuery(this),
           data = el.clone().children().remove('s').end().html();
         el.html(senteces.semgment(data));
       });
-      $('span[type="sentence"][from="dataseer"]').click(function() {
+      jQuery('span[type="sentence"][from="dataseer"]').click(function() {
         senteces.selected(this);
         events.senteces.click(this);
       });
     },
     'unprocess': function() {
-      $('span[type="sentence"][from="dataseer"]').each(function() {
-        let el = $(this);
+      jQuery('span[type="sentence"][from="dataseer"]').each(function() {
+        let el = jQuery(this);
         el.replaceWith(el.html());
       });
     },
@@ -139,10 +139,10 @@ const DocumentView = function(events) {
       return _sentences.join('');
     },
     'selected': function(el) {
-      let current = $('span[type="sentence"][from="dataseer"][selected="true"]');
+      let current = jQuery('span[type="sentence"][from="dataseer"][selected="true"]');
       if (typeof el === 'undefined') return current;
       current.removeAttr('selected');
-      $(el).attr('selected', true);
+      jQuery(el).attr('selected', true);
       return senteces.selected();
     }
   };
@@ -178,14 +178,14 @@ const DocumentView = function(events) {
     // set colors of datasets
     'colors': function() {
       datasets.all().each(function() {
-        let id = $(this).attr('id'),
+        let id = jQuery(this).attr('id'),
           color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
         datasets.styleOf(id, 'background-color:' + color);
       });
     },
     // new dataset
     'new': function(id, dataType) {
-      return $('<s/>').attr('id', id).attr('type', dataType);
+      return jQuery('<s/>').attr('id', id).attr('type', dataType);
     },
     // add dataset
     'add': function(id, dataType) {
@@ -196,12 +196,13 @@ const DocumentView = function(events) {
       // let color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
       // datasets.styleOf(id, 'background-color:' + color);
       // target.click(function() {
-      //   let id = $(this).attr('id');
-      //   scrollTo($(this));
+      //   let id = jQuery(this).attr('id');
+      //   scrollTo(jQuery(this));
       //   events.datasets.click(id);
       // });
-      let result = selectedElements();
-      if (!result) return null;
+      let selection = selectedElements();
+      if (selection.err) return selection;
+      let result = selection.res;
 
       let html = result.anchorParent.html(),
         nodes = result.nodes,
@@ -211,20 +212,26 @@ const DocumentView = function(events) {
         else if (nodes[i].wholeText) nodesHtml += nodes[i].wholeText;
       }
       let target = datasets.new(id, dataType).html(nodesHtml);
-      result.anchorParent.html(html.replace(nodesHtml, $("<div/>").append(target.clone()).html()));
-      $('s[id="' + id + '"]').parents('div[type]').attr('subtype', 'dataseer');
+      result.anchorParent.html(html.replace(nodesHtml, jQuery("<div/>").append(target.clone()).html()));
+      jQuery('s[id="' + id + '"]').parents('div[type]').attr('subtype', 'dataseer');
       let color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
       datasets.styleOf(id, 'background-color:' + color);
       target.click(function() {
-        let id = $(this).attr('id');
-        scrollTo($(this));
+        let id = jQuery(this).attr('id');
+        scrollTo(jQuery(this));
         events.datasets.click(id);
       });
+      return {
+        'err': false,
+        'res': 'everythings ok'
+      };
     },
     // remove dataset
     'remove': function(id) {
-      let dataset = datasets.get(id);
+      let dataset = datasets.get(id),
+        parent = dataset.parents('div[type]');
       dataset.replaceWith(dataset.html());
+      if (!parent.has('s[id]').length) parent.removeAttr('subtype');
     }
   };
 
@@ -247,14 +254,14 @@ const DocumentView = function(events) {
     // set colors of correps
     'colors': function() {
       corresps.all().each(function() {
-        let id = $(this).attr('corresp').replace('#', ''),
+        let id = jQuery(this).attr('corresp').replace('#', ''),
           style = datasets.styleOf(id);
         corresps.styleOf(id, style);
       });
     },
     // new correp
     'new': function(id) {
-      return $('<s/>').attr('corresp', id);
+      return jQuery('<s/>').attr('corresp', id);
     },
     // add correp
     'add': function(id) {
@@ -267,13 +274,13 @@ const DocumentView = function(events) {
       // let style = datasets.styleOf(id);
       // corresps.styleOf(id, style);
       // corresps.click(function() {
-      //   let id = $(this).attr('corresp').replace('#', '');
-      //   scrollTo($(this));
+      //   let id = jQuery(this).attr('corresp').replace('#', '');
+      //   scrollTo(jQuery(this));
       //   events.corresps.click(id);
       // });
-
-      let result = selectedElements();
-      if (!result) return null;
+      let selection = selectedElements();
+      if (selection.err) return selection;
+      let result = selection.res;
 
       let html = result.anchorParent.html(),
         nodes = result.nodes,
@@ -283,20 +290,24 @@ const DocumentView = function(events) {
         else if (nodes[i].wholeText) nodesHtml += nodes[i].wholeText;
       }
       let target = corresps.new(id).html(nodesHtml);
-      result.anchorParent.html(html.replace(nodesHtml, $("<div/>").append(target.clone()).html()));
-      // $('s[corresp="' + id + '"]').parents('div[type]').attr('subtype', 'dataseer');
+      result.anchorParent.html(html.replace(nodesHtml, jQuery("<div/>").append(target.clone()).html()));
+      // jQuery('s[corresp="' + id + '"]').parents('div[type]').attr('subtype', 'dataseer');
       let color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
       datasets.styleOf(id, 'background-color:' + color);
       target.click(function() {
-        let id = $(this).attr('id');
-        scrollTo($(this));
+        let id = jQuery(this).attr('id');
+        scrollTo(jQuery(this));
         events.corresps.click(id);
       });
+      return {
+        'err': false,
+        'res': 'everythings ok'
+      };
     },
     // remove correp
     'remove': function(id) {
       let _corresps = corresps.get(id).each(function() {
-        let el = $(this);
+        let el = jQuery(this);
         el.replaceWith(el.html());
       });
     }

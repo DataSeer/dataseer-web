@@ -321,7 +321,7 @@ const View = {
         });
 
         self.options = function(values) {
-          if (!values) return elements.input.find('option').map(function() { return $(this).val(); });
+          if (!values) return elements.input.find('option').map(function() { return jQuery(this).val(); });
           elements.input.empty();
           for (var i = 0; i < values.length; i++) {
             elements.input.append(new HtmlBuilder.option({

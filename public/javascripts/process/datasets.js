@@ -1,4 +1,4 @@
-(function() {
+(function($) {
 
   // Get the current Object
   return MongoDB.getCurrentDocument(function(currentDocument) {
@@ -14,6 +14,16 @@
         return result;
       }
 
+      function checkStatusOfDatasets() {
+        let result = true;
+        for (let key in currentDocument.datasets) {
+          if (currentDocument.datasets[key].status === 'warning') return false;
+        }
+        return result;
+      }
+
+      let hasChanged = false; // tell us if there is some change
+
       // Save of validation process because it will be insert into datasetList
       let validationBtn = $('<button/>').attr('id', 'datasets_validation').addClass('btn btn-primary').text('This info is correct : Continue'),
         newDatasetBtn = $('#new_dataset').clone(true);
@@ -25,6 +35,7 @@
             for (var i = 0; i < keys.length; i++) {
               if (typeof dataset['dataset.' + keys[i]] !== 'undefined') currentDocument.datasets[dataset['dataset.id']][keys[i]] = dataset['dataset.' + keys[i]];
             }
+            if (currentDocument.datasets[dataset['dataset.id']].name === '') currentDocument.datasets[dataset['dataset.id']].name = dataset['dataset.id'];
             currentDocument.datasets[dataset['dataset.id']].status = 'success';
             datasetsList.datasets.statusOf(dataset['dataset.id'], currentDocument.datasets[dataset['dataset.id']].status);
             MongoDB.updateDocument(currentDocument, function(err, res) {
@@ -39,6 +50,7 @@
           },
           'onChange': function(element) {
             datasetsList.datasets.statusOf(updateForm.id(), 'warning');
+            hasChanged = true;
           }
         }),
         datasetsList = new DatasetsList(currentDocument.datasets, {
@@ -47,6 +59,7 @@
             documentView.views.scrollTo(id);
           },
           'onDelete': function(id) {
+            hasChanged = true;
             documentView.deleteDataset(id);
             documentView.deleteCorresps(id);
             currentDocument.datasets[id] = undefined;
@@ -63,6 +76,7 @@
             });
           },
           'onAdd': function(id) {
+            hasChanged = true;
             documentView.addCorresp(id);
             currentDocument.source = documentView.source();
             MongoDB.updateDocument(currentDocument, function(err, res) {
@@ -106,8 +120,11 @@
           index += 1;
           newId = 'dataset-' + index;
         }
-        let error = (documentView.addDataset(newId, defaultDataType.dataType) === null);
-        if (!error) {
+        let result = documentView.addDataset(newId, defaultDataType.dataType);
+        if (result.err) {
+          $('#datasets-error-modal-body').html(result.msg);
+          $('#datasets-error-modal-btn').click();
+        } else {
           currentDocument.source = documentView.source();
           currentDocument.datasets[newId] = {
             'status': 'warning',
@@ -132,28 +149,10 @@
         }
       });
 
-      // On tei_all_visible click
-      $('#tei_all_visible').click(function() {
-        documentView.views.allVisible();
-        $('#tei_only_dataseer').parent('label').removeClass('active');
-        $('#tei_all_visible').parent('label').removeClass('active');
-        $(this).parent('label').addClass('active');
-      });
-
-      // On tei_only_dataseer click
-      $('#tei_only_dataseer').click(function() {
-        documentView.views.onlyDataseer();
-        $('#tei_all_visible').parent('label').removeClass('active');
-        $('#tei_only_datasets').parent('label').removeClass('active');
-        $(this).parent('label').addClass('active');
-      });
-
-      // On tei_only_datasets click
-      $('#tei_only_datasets').click(function() {
-        documentView.views.onlyDatasets();
-        $('#tei_all_visible').parent('label').removeClass('active');
-        $('#tei_only_dataseer').parent('label').removeClass('active');
-        $(this).parent('label').addClass('active');
+      // get selection
+      $('#view-selection input[type=radio]').on('change', function() {
+        console.log();
+        documentView.views[this.value]();
       });
 
       // On tei_segmented click
@@ -166,14 +165,31 @@
       });
 
       // On datasets_validation click
-      $('#datasets_validation').click(function() {
-        currentDocument.status = MongoDB.getNextStatus(currentDocument);
+      $('#save-changes').click(function() {
         MongoDB.updateDocument(currentDocument, function(err, res) {
           console.log(err, res);
           if (err) return err; // Need to define error behavior
-          return location.reload();
         });
       });
+
+      // On datasets_validation click
+      $('#datasets_validation').click(function() {
+        if (checkStatusOfDatasets()) {
+          currentDocument.status = MongoDB.getNextStatus(currentDocument);
+          MongoDB.updateDocument(currentDocument, function(err, res) {
+            console.log(err, res);
+            if (err) return err; // Need to define error behavior
+            return location.reload();
+          });
+        } else {
+          $('#datasets-error-modal-body').html('Please, save all datasets before continue');
+          $('#datasets-error-modal-btn').click();
+        }
+      });
+
+      window.onbeforeunload = function() {
+        if(hasChanged) return confirm('Are you sure you want to navigate away from this page? Changes will not be saved !');
+      };
     });
   });
-})();
+})(jQuery);
