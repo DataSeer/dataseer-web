@@ -14,10 +14,26 @@
         return result;
       }
 
+      function nextUnsavedDataset() {
+        let result = IndexOfNextUnsavedDataset()
+        if (result.index > -1) return currentDocument.datasets[result.key];
+        else return null;
+      }
+
+      function IndexOfNextUnsavedDataset() {
+        let result = -1,
+          keys = Object.keys(currentDocument.datasets);
+        for (var i = 0; i < keys.length; i++) {
+          let key = keys[i];
+          if (currentDocument.datasets[key] && currentDocument.datasets[key].status === 'warning') return { 'index': i, 'key': keys[i] };
+        }
+        return result;
+      }
+
       function checkStatusOfDatasets() {
         let result = true;
         for (let key in currentDocument.datasets) {
-          if (currentDocument.datasets[key].status === 'warning') return false;
+          if (currentDocument.datasets[key] && currentDocument.datasets[key].status === 'warning') return false;
         }
         return result;
       }
@@ -41,7 +57,14 @@
             MongoDB.updateDocument(currentDocument, function(err, res) {
               console.log(err, res);
               if (err) return err; // Need to define error behavior
-              updateForm.link(currentDocument.datasets[dataset['dataset.id']], documentView.color(dataset['dataset.id']));
+              let next = nextUnsavedDataset();
+              if (next !== null) {
+                updateForm.link(next, documentView.color(next.id));
+                documentView.views.scrollTo(next.id);
+              } else {
+                updateForm.link(currentDocument.datasets[dataset['dataset.id']], documentView.color(dataset['dataset.id']));
+                documentView.views.scrollTo(dataset['dataset.id']);
+              }
               // return location.reload();
             });
           },
@@ -105,6 +128,7 @@
       updateForm.init('#dataset-form');
       updateForm.setDataTypes(dataTypes);
       updateForm.link(currentDocument.datasets[defaultKey], documentView.color(defaultKey));
+      documentView.views.scrollTo(defaultKey);
 
 
       datasetsList.init('#datasets-list', documentView.colors(), getStatusOfDatasets(currentDocument.datasets));
@@ -188,7 +212,7 @@
       });
 
       window.onbeforeunload = function() {
-        if(hasChanged) return confirm('Are you sure you want to navigate away from this page? Changes will not be saved !');
+        if (hasChanged) return confirm('Are you sure you want to navigate away from this page? Changes will not be saved !');
       };
     });
   });
