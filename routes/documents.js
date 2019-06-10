@@ -2,8 +2,7 @@ const express = require('express'),
   router = express.Router(),
   path = require('path'),
   mongoose = require('mongoose'),
-  Documents = require('../models/documents.js'),
-  dataTypes = require('../resources/dataTypes.json');
+  Documents = require('../models/documents.js');
 
 /* GET ALL Documents */
 router.get('/', function(req, res, next) {
@@ -17,7 +16,7 @@ router.get('/', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
   Documents.findById(req.params.id, function(err, post) {
     if (err) return next(err);
-    res.render(path.join('documents', post.status), { 'document': post, 'dataTypes': dataTypes, 'demo': process.env.DEMO });
+    res.render(path.join('documents', post.status), { 'document': post, 'demo': process.env.DEMO });
   });
 });
 

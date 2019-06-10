@@ -2,14 +2,14 @@
 const MongoDB = {
   // Get the current object
   'getCurrentDocument': function(done) {
-    let currentId = $(document.getElementById('document.id')).attr('value');
-    $.get('../api/documents/' + currentId, function(data) {
+    let currentId = jQuery(document.getElementById('document.id')).attr('value');
+    jQuery.get('../api/documents/' + currentId, function(data) {
       done(data);
     });
   },
   // Update a gicen document
   'updateDocument': function(doc, done) {
-    $.ajax({
+    jQuery.ajax({
       type: 'PUT',
       contentType: 'application/json; charset=utf-8',
       headers: {

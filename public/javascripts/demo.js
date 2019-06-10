@@ -1,4 +1,4 @@
-(function() {
+(function($) {
   // Get the current Object
   return MongoDB.getCurrentDocument(function(currentDocument) {
     // On metadata_validation click
@@ -33,4 +33,4 @@
       });
     });
   });
-})();
+})(jQuery);
