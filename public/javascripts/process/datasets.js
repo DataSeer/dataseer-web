@@ -45,8 +45,8 @@
               // return location.reload();
             });
           },
-          'onIdClick': function() {
-            documentView.views.scrollTo(updateForm.id());
+          'onIdClick': function(id) {
+            documentView.views.scrollTo(id);
           },
           'onChange': function(element) {
             datasetsList.datasets.statusOf(updateForm.id(), 'warning');

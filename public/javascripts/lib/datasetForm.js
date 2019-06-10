@@ -27,6 +27,7 @@ const DatasetForm = function(events) {
       'onEdit': function(element) {},
       'onSave': function(element) {
         elements['dataset.status'].modified();
+        self.dataset.status = elements['dataset.status'].value();
         self.dataset.dataType = elements['dataset.dataType'].value();
         elements['dataset.descritpion'].value(self.dataTypes[self.dataset.dataType].descritpion);
         elements['dataset.bestDataFormatForSharing'].value(self.dataTypes[self.dataset.dataType].bestDataFormatForSharing);
@@ -39,6 +40,7 @@ const DatasetForm = function(events) {
       'onCancel': function(element) {},
       'onChange': function(element) {
         elements['dataset.status'].modified();
+        self.dataset.status = elements['dataset.status'].value();
         self.dataset.dataType = elements['dataset.dataType'].value();
         elements['dataset.descritpion'].value(self.dataTypes[self.dataset.dataType].descritpion);
         elements['dataset.bestDataFormatForSharing'].value(self.dataTypes[self.dataset.dataType].bestDataFormatForSharing);
@@ -73,11 +75,13 @@ const DatasetForm = function(events) {
       'onEdit': function(element) {},
       'onSave': function(element) {
         elements['dataset.status'].modified();
+        self.dataset.status = elements['dataset.status'].value();
         self.dataset.name = element.value();
       },
       'onCancel': function(element) {},
       'onChange': function(element) {
         elements['dataset.status'].modified();
+        self.dataset.status = elements['dataset.status'].value();
         self.dataset.name = element.value();
         events.onChange(element);
       }
@@ -91,11 +95,13 @@ const DatasetForm = function(events) {
       'onEdit': function(element) {},
       'onSave': function(element) {
         elements['dataset.status'].modified();
+        self.dataset.status = elements['dataset.status'].value();
         self.dataset.DOI = element.value();
       },
       'onCancel': function(element) {},
       'onChange': function(element) {
         elements['dataset.status'].modified();
+        self.dataset.status = elements['dataset.status'].value();
         self.dataset.DOI = element.value();
         events.onChange(element);
       }
@@ -109,6 +115,7 @@ const DatasetForm = function(events) {
     }, {
       'onChange': function(element) {
         elements['dataset.status'].modified();
+        self.dataset.status = elements['dataset.status'].value();
         self.dataset.comments = element.value();
         events.onChange(element);
       }
@@ -128,6 +135,15 @@ const DatasetForm = function(events) {
     .append(View.forms.row().append(elements['dataset.comments'].elements().container))
     .append(View.forms.row().append(elements['save']));
 
+  elements.save.click(function() {
+    self.dataset = self.values();
+    events.onValid(self.dataset);
+  });
+
+  elements['dataset.id'].elements().data.click(function() {
+    events.onIdClick(elements['dataset.id'].value());
+  });
+
   self.id = function() {
     if (typeof value === 'undefined') return elements['dataset.id'].value();
   };
@@ -143,16 +159,8 @@ const DatasetForm = function(events) {
     elements['dataset.name'].edit(false);
     elements['dataset.DOI'].edit(false);
     elements['dataset.comments'].view();
-
-    elements['dataset.id'].elements().data.click(function() {
-      events.onIdClick();
-    });
-
-    elements.save.click(function() {
-      self.dataset = self.values();
-      events.onValid(self.dataset);
-    });
   };
+
 
   self.style = function(style) {
     elements['dataset.id'].elements().data.attr('style', style);
@@ -189,6 +197,7 @@ const DatasetForm = function(events) {
   };
 
   self.link = function(dataset, style) {
+    console.log(dataset);
     self.style(style);
     self.dataset = dataset;
     self.values(dataset);
