@@ -98,14 +98,19 @@
             });
           },
           'onAdd': function(id) {
-            hasChanged = true;
-            documentView.addCorresp(id);
-            currentDocument.source = documentView.source();
-            MongoDB.updateDocument(currentDocument, function(err, res) {
-              console.log(err, res);
-              if (err) return err; // Need to define error behavior
-              // return location.reload();
-            });
+            let result = documentView.addCorresp(id);
+            if (result.err) {
+              $('#datasets-error-modal-body').html(result.msg);
+              $('#datasets-error-modal-btn').click();
+            } else {
+              hasChanged = true;
+              currentDocument.source = documentView.source();
+              MongoDB.updateDocument(currentDocument, function(err, res) {
+                console.log(err, res);
+                if (err) return err; // Need to define error behavior
+                // return location.reload();
+              });
+            }
           }
         }), // List of datasets
         documentView = new DocumentView({ // Interactive view od XML document
