@@ -418,8 +418,6 @@ const View = {
         .append(elements['delete'])
         .append(elements['add']);
 
-      elements['add'].prop('disabled', true);
-
       elements.link.click(function() {
         events.onClick(self.value());
       });

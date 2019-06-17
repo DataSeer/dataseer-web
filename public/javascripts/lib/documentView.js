@@ -14,8 +14,23 @@ const DocumentView = function(events) {
     },
     // get selected element (if it is in container)
     selectedElements = function() {
-      let selection = window.getSelection(),
-        focusNode = jQuery(selection.focusNode),
+      let selection = jQuery('s.selected');
+      if (selection.length > 0) {
+        return {
+          'err': null,
+          'res': {
+            'sentence': selection
+          }
+        };
+      } else {
+        return {
+          'err': true,
+          'msg': 'You must select a sentence before adding a new dataset'
+        };
+      }
+      /*
+      selection = window.getSelection();
+      let focusNode = jQuery(selection.focusNode),
         focusParent = focusNode.parent(),
         anchorNode = jQuery(selection.anchorNode),
         anchorParent = anchorNode.parent(),
@@ -45,6 +60,32 @@ const DocumentView = function(events) {
           'nodes': selection.getRangeAt(0).cloneContents().childNodes
         }
       };
+      */
+    },
+    selectionToSenctence = function(selection, constructor, options, clickEvent) {
+      let target = null;
+      if (typeof selection.res.sentence !== 'undefined') {
+        if (options.dataType) target = selection.res.sentence.attr('id', options.id).attr('type', options.dataType); // if dataType is set, then it's not a corresp
+        else target = selection.res.sentence.attr('corresp', '#' + options.id);
+        target.removeAttr('class');
+      }/* else {
+        let result = selection.res;
+        let html = result.anchorParent.html(),
+          nodes = result.nodes,
+          nodesHtml = '';
+        for (let i = 0; i < nodes.length; i++) {
+          if (nodes[i].outerHTML) nodesHtml += nodes[i].outerHTML;
+          else if (nodes[i].wholeText) nodesHtml += nodes[i].wholeText;
+        }
+        target = constructor(options.id, options.dataType).html(nodesHtml);
+        result.anchorParent.html(html.replace(nodesHtml, jQuery('<div/>').append(target.clone()).html()));
+      }*/
+      jQuery(target).parents('div[type]').attr('subtype', 'dataseer');
+      target.click(function() {
+        scrollTo(jQuery(this));
+        clickEvent(options.id);
+      });
+      return target;
     },
     // scroll ot dataset position
     scrollTo = function(el) {
@@ -75,10 +116,11 @@ const DocumentView = function(events) {
   self.source = function(source) {
     if (typeof source === 'undefined') {
       let copy = elements.container.clone();
-      copy.find('s').removeAttr('style');
+      copy.find('s').removeAttr('style').removeAttr('class');
       return copy.html();
     }
     elements.container.html(source.replace(/\s/gm, ' '));
+    elements.container.on('click', 's:not([corresp]):not([id])', sentences.click);
     return self.source();
   };
 
@@ -112,38 +154,43 @@ const DocumentView = function(events) {
     return corresps.remove(id);
   };
 
-  let senteces = {
-    'process': function() {
-      jQuery('#document-view tei text p').each(function() {
-        let el = jQuery(this),
-          data = el.clone().children().remove('s').end().html();
-        el.html(senteces.semgment(data));
-      });
-      jQuery('span[type="sentence"][from="dataseer"]').click(function() {
-        senteces.selected(this);
-        events.senteces.click(this);
-      });
+  self.views = {
+    // scroll ot dataset position
+    'scrollTo': function(id) {
+      let position = datasets.get(id).position().top + elements.container.parent().scrollTop() - 14;
+      return elements.container.parent().animate({ scrollTop: position });
     },
-    'unprocess': function() {
-      jQuery('span[type="sentence"][from="dataseer"]').each(function() {
-        let el = jQuery(this);
-        el.replaceWith(el.html());
-      });
+    // set All elements visible
+    'allVisible': function() {
+      paragraphsWithoutDatasets().removeClass();
+      elements.container.parent().removeClass();
     },
-    'semgment': function(text) {
-      let newSentence = function(html) { return '<span type="sentence" from="dataseer">' + html + '.</span>'; },
-        _sentences = text.split('.');
-      for (var i = 0; i < _sentences.length; i++) {
-        _sentences[i] = newSentence(_sentences[i]);
+    // set only dataseer elements visible
+    'onlyDataseer': function() {
+      self.views.allVisible();
+      elements.container.parent().addClass('tei-only-dataseer');
+    },
+    // set only datasets elements visible
+    'onlyDatasets': function() {
+      self.views.onlyDataseer();
+      paragraphsWithoutDatasets().addClass('hidden');
+    }
+  };
+
+  // Sentences features
+  let sentences = {
+    'new': function(html) {
+      return jQuery('<s/>').html(html);
+    },
+    'click': function() {
+      let previousSelection = elements.container.find('s.selected'),
+        selected = jQuery(this);
+      if (!selected.attr('corresp') && !selected.attr('id')) {
+        selected.addClass('selected');
+        if (previousSelection.length > 0) {
+          previousSelection.removeAttr('class');
+        }
       }
-      return _sentences.join('');
-    },
-    'selected': function(el) {
-      let current = jQuery('span[type="sentence"][from="dataseer"][selected="true"]');
-      if (typeof el === 'undefined') return current;
-      current.removeAttr('selected');
-      jQuery(el).attr('selected', true);
-      return senteces.selected();
     }
   };
 
@@ -189,38 +236,11 @@ const DocumentView = function(events) {
     },
     // add dataset
     'add': function(id, dataType) {
-      // let target = senteces.selected();
-      // alert(target.length);
-      // if (!target.length) return null;
-      // target.replaceWith(datasets.new(id, dataType).html(target.html()));
-      // let color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
-      // datasets.styleOf(id, 'background-color:' + color);
-      // target.click(function() {
-      //   let id = jQuery(this).attr('id');
-      //   scrollTo(jQuery(this));
-      //   events.datasets.click(id);
-      // });
       let selection = selectedElements();
       if (selection.err) return selection;
-      let result = selection.res;
-
-      let html = result.anchorParent.html(),
-        nodes = result.nodes,
-        nodesHtml = '';
-      for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].outerHTML) nodesHtml += nodes[i].outerHTML;
-        else if (nodes[i].wholeText) nodesHtml += nodes[i].wholeText;
-      }
-      let target = datasets.new(id, dataType).html(nodesHtml);
-      result.anchorParent.html(html.replace(nodesHtml, jQuery("<div/>").append(target.clone()).html()));
-      jQuery('s[id="' + id + '"]').parents('div[type]').attr('subtype', 'dataseer');
+      let target = selectionToSenctence(selection, datasets.new, { 'id': id, 'dataType': dataType }, events.datasets.click);
       let color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
       datasets.styleOf(id, 'background-color:' + color);
-      target.click(function() {
-        let id = jQuery(this).attr('id');
-        scrollTo(jQuery(this));
-        events.datasets.click(id);
-      });
       return {
         'err': false,
         'res': 'everythings ok'
@@ -230,8 +250,8 @@ const DocumentView = function(events) {
     'remove': function(id) {
       let dataset = datasets.get(id),
         parent = dataset.parents('div[type]');
-      dataset.replaceWith(dataset.html());
-      if (!parent.has('s[id]').length) parent.removeAttr('subtype');
+      dataset.replaceWith(jQuery('<div/>').append(sentences.new(dataset.html()).clone()).html())/*.click(sentences.click)*/;
+      if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
     }
   };
 
@@ -261,44 +281,15 @@ const DocumentView = function(events) {
     },
     // new correp
     'new': function(id) {
-      return jQuery('<s/>').attr('corresp', id);
+      return jQuery('<s/>').attr('corresp', '#' + id);
     },
     // add correp
     'add': function(id) {
-      // let target = senteces.selected();
-      // let target = selectedElements();
-      // alert(id);
-      // alert(target.length);
-      // if (!target.length) return null;
-      // target.replaceWith(corresps.new(id).html(target.html()));
-      // let style = datasets.styleOf(id);
-      // corresps.styleOf(id, style);
-      // corresps.click(function() {
-      //   let id = jQuery(this).attr('corresp').replace('#', '');
-      //   scrollTo(jQuery(this));
-      //   events.corresps.click(id);
-      // });
       let selection = selectedElements();
       if (selection.err) return selection;
-      let result = selection.res;
-
-      let html = result.anchorParent.html(),
-        nodes = result.nodes,
-        nodesHtml = '';
-      for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].outerHTML) nodesHtml += nodes[i].outerHTML;
-        else if (nodes[i].wholeText) nodesHtml += nodes[i].wholeText;
-      }
-      let target = corresps.new(id).html(nodesHtml);
-      result.anchorParent.html(html.replace(nodesHtml, jQuery("<div/>").append(target.clone()).html()));
-      // jQuery('s[corresp="' + id + '"]').parents('div[type]').attr('subtype', 'dataseer');
+      let target = selectionToSenctence(selection, corresps.new, { 'id': id }, events.corresps.click);
       let color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
-      datasets.styleOf(id, 'background-color:' + color);
-      target.click(function() {
-        let id = jQuery(this).attr('id');
-        scrollTo(jQuery(this));
-        events.corresps.click(id);
-      });
+      corresps.styleOf(id, datasets.styleOf(id));
       return {
         'err': false,
         'res': 'everythings ok'
@@ -307,37 +298,11 @@ const DocumentView = function(events) {
     // remove correp
     'remove': function(id) {
       let _corresps = corresps.get(id).each(function() {
-        let el = jQuery(this);
-        el.replaceWith(el.html());
+        let el = jQuery(this),
+          parent = el.parents('div[type]');
+        el.replaceWith(jQuery('<div/>').append(sentences.new(el.html()).clone()).html())/*.click(sentences.click)*/;
+        if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
       });
-    }
-  };
-
-  self.views = {
-    // scroll ot dataset position
-    'scrollTo': function(id) {
-      let position = datasets.get(id).position().top + elements.container.parent().scrollTop() - 14;
-      return elements.container.parent().animate({ scrollTop: position });
-    },
-    // set All elements visible
-    'allVisible': function() {
-      paragraphsWithoutDatasets().removeClass();
-      elements.container.parent().removeClass();
-    },
-    // set only dataseer elements visible
-    'onlyDataseer': function() {
-      self.views.allVisible();
-      elements.container.parent().addClass('tei-only-dataseer');
-    },
-    // set only datasets elements visible
-    'onlyDatasets': function() {
-      self.views.onlyDataseer();
-      paragraphsWithoutDatasets().addClass('hidden');
-    },
-    // set view for new dataset selection
-    'segmented': function(value) {
-      if (value) senteces.process();
-      else senteces.unprocess();
     }
   };
 

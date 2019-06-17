@@ -115,10 +115,22 @@ i {
 
 #document-view tei s {
   text-decoration: none;
+  margin-right: 3px; 
+}
+
+#document-view tei s:not([corresp]):not([id]):hover {
+  background-color: gainsboro;
+  cursor: pointer;
+}
+
+#document-view tei s:not([corresp]):not([id]).selected {
+  background-color: limegreen;
+  cursor: pointer;
 }
 
 #document-view tei s[corresp],
 #document-view tei s[id] {
+  border: none;
   cursor: pointer;
   background-color: lightyellow;
 }

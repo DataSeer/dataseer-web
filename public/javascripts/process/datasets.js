@@ -3,7 +3,6 @@
   // Get the current Object
   return MongoDB.getCurrentDocument(function(currentDocument) {
 
-
     $.getJSON('../json/dataTypes.json', function(dataTypes) {
 
       function getStatusOfDatasets(datasets) {
@@ -175,17 +174,7 @@
 
       // get selection
       $('#view-selection input[type=radio]').on('change', function() {
-        console.log();
         documentView.views[this.value]();
-      });
-
-      // On tei_segmented click
-      $('#tei_segmented').click(function() {
-        let el = $(this).parent('label'),
-          value = el.hasClass('active');
-        if (value) el.removeClass('active');
-        else el.addClass('active');
-        documentView.views.segmented(!value);
       });
 
       // On datasets_validation click
