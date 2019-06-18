@@ -1,15 +1,15 @@
 const DocumentView = function(events) {
-
   let self = this;
 
   let elements = {
-    'container': HtmlBuilder.div({ 'id': '', 'class': 'container-fluid', 'text': '' })
+    container: HtmlBuilder.div({ 'id': '', 'class': 'container-fluid', 'text': '' })
   };
 
+  // get paragraphs without Datasets
   let paragraphsWithoutDatasets = function() {
-      let paragraphs = elements.container.find('div[subtype="dataseer"] > div > p');
+      let paragraphs = elements.container.find('div[subtype="dataseer"] > div > *');
       return paragraphs.map(function(i, el) {
-        if (jQuery(el).children('s').length === 0) return el;
+        if (jQuery(el).find('s[id], s[corresp]').length === 0) return el;
       });
     },
     // get selected element (if it is in container)
@@ -19,7 +19,7 @@ const DocumentView = function(events) {
         return {
           'err': null,
           'res': {
-            'sentence': selection
+            sentence: selection
           }
         };
       } else {
@@ -28,64 +28,41 @@ const DocumentView = function(events) {
           'msg': 'You must select a sentence before adding a new dataset'
         };
       }
-      /*
-      selection = window.getSelection();
-      let focusNode = jQuery(selection.focusNode),
-        focusParent = focusNode.parent(),
-        anchorNode = jQuery(selection.anchorNode),
-        anchorParent = anchorNode.parent(),
-        target = jQuery(selection);
-      if (!(!selection.isCollapsed && selection.anchorNode && selection.focusNode)) {
-        return {
-          'err': true,
-          'msg': 'Please select some text before add new dataset'
-        };
-      }
-      if (!elements.container.has(jQuery(selection.focusNode).parent()).length) {
-        return {
-          'err': true,
-          'msg': 'Text selected must be a part of XML document'
-        };
-      }
-      if (!anchorParent.is(focusParent)) {
-        return {
-          'err': true,
-          'msg': 'Text selected must be in same paragraph, and not contain part of an existing dataset'
-        };
-      }
-      return {
-        'err': null,
-        'res': {
-          'anchorParent': anchorParent,
-          'nodes': selection.getRangeAt(0).cloneContents().childNodes
-        }
-      };
-      */
     },
-    selectionToSenctence = function(selection, constructor, options, clickEvent) {
+    selectionToSenctence = function(selection, constructor, options, clickEvent, cb) {
       let target = null;
       if (typeof selection.res.sentence !== 'undefined') {
-        if (options.dataType) target = selection.res.sentence.attr('id', options.id).attr('type', options.dataType); // if dataType is set, then it's not a corresp
-        else target = selection.res.sentence.attr('corresp', '#' + options.id);
-        target.removeAttr('class');
-      }/* else {
-        let result = selection.res;
-        let html = result.anchorParent.html(),
-          nodes = result.nodes,
-          nodesHtml = '';
-        for (let i = 0; i < nodes.length; i++) {
-          if (nodes[i].outerHTML) nodesHtml += nodes[i].outerHTML;
-          else if (nodes[i].wholeText) nodesHtml += nodes[i].wholeText;
+        if (options.getdataType) {
+          return dataseerML.getdataType(selection.res.sentence, function(err, res) {
+            if (err) {
+              return cb(err, res);
+            }
+            let dataType = res['dataset-type'] ? res['dataset-type'] : options.dataType;
+            // if dataType is set, then it's not a corresp
+            target = selection.res.sentence.attr('id', options.id).attr('type', dataType);
+            target.removeAttr('class');
+            jQuery(target)
+              .parents('div[type]')
+              .attr('subtype', 'dataseer');
+            target.click(function() {
+              scrollTo(jQuery(this));
+              clickEvent(options.id);
+            });
+            return cb(null, target);
+          });
+        } else {
+          target = selection.res.sentence.attr('corresp', '#' + options.id);
+          target.removeAttr('class');
+          jQuery(target)
+            .parents('div[type]')
+            .attr('subtype', 'dataseer');
+          target.click(function() {
+            scrollTo(jQuery(this));
+            clickEvent(options.id);
+          });
+          return target;
         }
-        target = constructor(options.id, options.dataType).html(nodesHtml);
-        result.anchorParent.html(html.replace(nodesHtml, jQuery('<div/>').append(target.clone()).html()));
-      }*/
-      jQuery(target).parents('div[type]').attr('subtype', 'dataseer');
-      target.click(function() {
-        scrollTo(jQuery(this));
-        clickEvent(options.id);
-      });
-      return target;
+      }
     },
     // scroll ot dataset position
     scrollTo = function(el) {
@@ -94,7 +71,9 @@ const DocumentView = function(events) {
     };
 
   self.init = function(id, source) {
-    jQuery(id).empty().append(elements.container);
+    jQuery(id)
+      .empty()
+      .append(elements.container);
     self.source(source);
 
     datasets.all().click(function() {
@@ -104,7 +83,9 @@ const DocumentView = function(events) {
     });
 
     corresps.all().click(function() {
-      let id = jQuery(this).attr('corresp').replace('#', '');
+      let id = jQuery(this)
+        .attr('corresp')
+        .replace('#', '');
       scrollTo(jQuery(this));
       events.corresps.click(id);
     });
@@ -116,7 +97,10 @@ const DocumentView = function(events) {
   self.source = function(source) {
     if (typeof source === 'undefined') {
       let copy = elements.container.clone();
-      copy.find('s').removeAttr('style').removeAttr('class');
+      copy
+        .find('*')
+        .removeAttr('style')
+        .removeAttr('class');
       return copy.html();
     }
     elements.container.html(source.replace(/\s/gm, ' '));
@@ -138,8 +122,10 @@ const DocumentView = function(events) {
     return styles;
   };
 
-  self.addDataset = function(id, dataType) {
-    return datasets.add(id, dataType);
+  self.addDataset = function(id, dataType, cb) {
+    return datasets.add(id, dataType, function(err, res) {
+      return cb(err, res);
+    });
   };
 
   self.deleteDataset = function(id) {
@@ -226,31 +212,52 @@ const DocumentView = function(events) {
     'colors': function() {
       datasets.all().each(function() {
         let id = jQuery(this).attr('id'),
-          color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
+          color = randomColor({
+            luminosity: 'light',
+            hue: 'blue',
+            format: 'rgba',
+            alpha: datasets.confidenceOf(id)
+          });
         datasets.styleOf(id, 'background-color:' + color);
       });
     },
     // new dataset
     'new': function(id, dataType) {
-      return jQuery('<s/>').attr('id', id).attr('type', dataType);
+      return jQuery('<s/>')
+        .attr('id', id)
+        .attr('type', dataType);
     },
     // add dataset
-    'add': function(id, dataType) {
+    'add': function(id, dataType, cb) {
       let selection = selectedElements();
-      if (selection.err) return selection;
-      let target = selectionToSenctence(selection, datasets.new, { 'id': id, 'dataType': dataType }, events.datasets.click);
-      let color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
-      datasets.styleOf(id, 'background-color:' + color);
-      return {
-        'err': false,
-        'res': 'everythings ok'
-      };
+      if (selection.err) return cb(true, selection.msg);
+      return selectionToSenctence(
+        selection,
+        datasets.new,
+        { 'id': id, 'dataType': dataType, 'getdataType': true },
+        events.datasets.click,
+        function(err, res) {
+          if (err) return cb(err, res);
+          let color = randomColor({
+            luminosity: 'light',
+            hue: 'blue',
+            format: 'rgba',
+            alpha: datasets.confidenceOf(id)
+          });
+          datasets.styleOf(id, 'background-color:' + color);
+          return cb(null, 'everythings ok');
+        }
+      );
     },
     // remove dataset
     'remove': function(id) {
       let dataset = datasets.get(id),
         parent = dataset.parents('div[type]');
-      dataset.replaceWith(jQuery('<div/>').append(sentences.new(dataset.html()).clone()).html())/*.click(sentences.click)*/;
+      dataset.replaceWith(
+        jQuery('<div/>')
+          .append(sentences.new(dataset.html()).clone())
+          .html()
+      ) /*.click(sentences.click)*/;
       if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
     }
   };
@@ -274,7 +281,9 @@ const DocumentView = function(events) {
     // set colors of correps
     'colors': function() {
       corresps.all().each(function() {
-        let id = jQuery(this).attr('corresp').replace('#', ''),
+        let id = jQuery(this)
+            .attr('corresp')
+            .replace('#', ''),
           style = datasets.styleOf(id);
         corresps.styleOf(id, style);
       });
@@ -287,12 +296,22 @@ const DocumentView = function(events) {
     'add': function(id) {
       let selection = selectedElements();
       if (selection.err) return selection;
-      let target = selectionToSenctence(selection, corresps.new, { 'id': id }, events.corresps.click);
-      let color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
+      let target = selectionToSenctence(
+        selection,
+        corresps.new,
+        { 'id': id, 'getdataType': false },
+        events.corresps.click
+      );
+      let color = randomColor({
+        luminosity: 'light',
+        hue: 'blue',
+        format: 'rgba',
+        alpha: datasets.confidenceOf(id)
+      });
       corresps.styleOf(id, datasets.styleOf(id));
       return {
-        'err': false,
-        'res': 'everythings ok'
+        err: false,
+        res: 'everythings ok'
       };
     },
     // remove correp
@@ -300,7 +319,11 @@ const DocumentView = function(events) {
       let _corresps = corresps.get(id).each(function() {
         let el = jQuery(this),
           parent = el.parents('div[type]');
-        el.replaceWith(jQuery('<div/>').append(sentences.new(el.html()).clone()).html())/*.click(sentences.click)*/;
+        el.replaceWith(
+          jQuery('<div/>')
+            .append(sentences.new(el.html()).clone())
+            .html()
+        ) /*.click(sentences.click)*/;
         if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
       });
     }

@@ -93,8 +93,13 @@ i {
   font-weight: bold;
 }
 
-#document-view tei>text>div>* {
+#document-view tei>text>div>p {
   margin-top: 10px;
+  font-weight: normal;
+}
+
+#document-view tei>text>div>*:not(p) {
+  margin-top: 5px;
   font-weight: normal;
 }
 

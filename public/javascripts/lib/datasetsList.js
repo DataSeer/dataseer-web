@@ -1,5 +1,4 @@
 const DatasetsList = function(data, events) {
-
   let datasets = {};
 
   let elements = {
@@ -8,22 +7,25 @@ const DatasetsList = function(data, events) {
 
   self.datasets = {
     'add': function(id) {
-      datasets[id] = new View.links.deletable({
-        'class': 'form-row',
-        'text': 'Dataset ' + id,
-        'value': id
-      }, {
-        'onClick': function(id) {
-          events.onClick(id);
+      datasets[id] = new View.links.deletable(
+        {
+          'class': 'form-row',
+          'text': 'Dataset ' + id,
+          'value': id
         },
-        'onDelete': function(id) {
-          self.datasets.remove(id);
-          events.onDelete(id);
-        },
-        'onAdd': function(id) {
-          events.onAdd(id);
+        {
+          'onClick': function(id) {
+            events.onClick(id);
+          },
+          'onDelete': function(id) {
+            self.datasets.remove(id);
+            events.onDelete(id);
+          },
+          'onAdd': function(id) {
+            events.onAdd(id);
+          }
         }
-      });
+      );
       elements.container.append(datasets[id].elements().container);
     },
     'remove': function(id) {
@@ -33,7 +35,7 @@ const DatasetsList = function(data, events) {
       if (typeof value !== 'undefined') datasets[id].elements().status.value(value);
     },
     'styleOf': function(id, value) {
-      if (typeof value !== 'undefined') datasets[id].elements().link.attr('style', value);;
+      if (typeof value !== 'undefined') datasets[id].elements().link.attr('style', value);
     }
   };
 
@@ -44,7 +46,9 @@ const DatasetsList = function(data, events) {
   };
 
   self.init = function(id, styles, status) {
-    $(id).empty().append(elements.container);
+    $(id)
+      .empty()
+      .append(elements.container);
     for (let key in data) {
       self.datasets.add(data[key].id);
       self.datasets.statusOf(datasets[key].value(), status[key]);
