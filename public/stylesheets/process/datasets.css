@@ -93,8 +93,13 @@ i {
   font-weight: bold;
 }
 
-#document-view tei>text>div>* {
+#document-view tei>text>div>p {
   margin-top: 10px;
+  font-weight: normal;
+}
+
+#document-view tei>text>div>*:not(p) {
+  margin-top: 5px;
   font-weight: normal;
 }
 
@@ -115,10 +120,22 @@ i {
 
 #document-view tei s {
   text-decoration: none;
+  margin-right: 3px; 
+}
+
+#document-view tei s:not([corresp]):not([id]):hover {
+  background-color: gainsboro;
+  cursor: pointer;
+}
+
+#document-view tei s:not([corresp]):not([id]).selected {
+  background-color: limegreen;
+  cursor: pointer;
 }
 
 #document-view tei s[corresp],
 #document-view tei s[id] {
+  border: none;
   cursor: pointer;
   background-color: lightyellow;
 }
@@ -139,10 +156,17 @@ i {
   margin-bottom: 25px !important;
 }
 
+#datasets-list .selected {
+  border: 1px solid lightgray;
+  background-color: #EEEEEE;
+}
+
 #datasets-list .form-row {
   display: block;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   vertical-align: middle;
 }
 

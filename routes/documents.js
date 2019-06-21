@@ -8,7 +8,7 @@ const express = require('express'),
 router.get('/', function(req, res, next) {
   Documents.find({}, function(err, post) {
     if (err) return next(err);
-    res.render(path.join('documents', 'all'), { 'documents': post });
+    return res.render(path.join('documents', 'all'), { 'documents': post });
   });
 });
 
@@ -16,7 +16,7 @@ router.get('/', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
   Documents.findById(req.params.id, function(err, post) {
     if (err) return next(err);
-    res.render(path.join('documents', post.status), { 'document': post, 'demo': process.env.DEMO });
+    return res.render(path.join('documents', post.status), { 'document': post, 'demo': process.env.DEMO });
   });
 });
 

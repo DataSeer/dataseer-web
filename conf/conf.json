@@ -1,5 +1,6 @@
 {
   "services": {
-    "mongodb": "mongodb://localhost:27017/app"
+    "mongodb": "mongodb://localhost:27017/app",
+    "dataseer-ml": "http://localhost:8060/service"
   }
 }

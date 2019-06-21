@@ -24,19 +24,29 @@ const View = {
   },
   'buttons': {
     'edit': function(text = '') {
-      return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' }).text(text).append(View.icons.edit())
+      return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' })
+        .text(text)
+        .append(View.icons.edit());
     },
     'delete': function(text = '') {
-      return HtmlBuilder.button({ 'class': 'btn btn-danger btn-sm' }).text(text).append(View.icons.delete())
+      return HtmlBuilder.button({ 'class': 'btn btn-danger btn-sm' })
+        .text(text)
+        .append(View.icons.delete());
     },
     'save': function(text = '') {
-      return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' }).text(text).append(View.icons.save())
+      return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' })
+        .text(text)
+        .append(View.icons.save());
     },
     'cancel': function(text = '') {
-      return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' }).text(text).append(View.icons.cancel())
+      return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' })
+        .text(text)
+        .append(View.icons.cancel());
     },
     'add': function(text = '') {
-      return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' }).text(text).append(View.icons.add())
+      return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' })
+        .text(text)
+        .append(View.icons.add());
     }
   },
   'status': {
@@ -149,7 +159,7 @@ const View = {
         };
 
         return self;
-      },
+      }
     },
     'editable': {
       'text': function(data, events) {
@@ -321,13 +331,18 @@ const View = {
         });
 
         self.options = function(values) {
-          if (!values) return elements.input.find('option').map(function() { return jQuery(this).val(); });
+          if (!values)
+            return elements.input.find('option').map(function() {
+              return jQuery(this).val();
+            });
           elements.input.empty();
           for (var i = 0; i < values.length; i++) {
-            elements.input.append(new HtmlBuilder.option({
-              'value': values[i].value,
-              'text': values[i].text
-            }));
+            elements.input.append(
+              new HtmlBuilder.option({
+                'value': values[i].value,
+                'text': values[i].text
+              })
+            );
           }
           return self.options();
         };
@@ -417,8 +432,6 @@ const View = {
         .append(elements['status'].elements().container)
         .append(elements['delete'])
         .append(elements['add']);
-
-      elements['add'].prop('disabled', true);
 
       elements.link.click(function() {
         events.onClick(self.value());

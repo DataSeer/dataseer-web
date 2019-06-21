@@ -34,11 +34,9 @@ const HtmlBuilder = {
     return select;
   },
   'button': function(options = {}) {
-    return jQuery('<button/>')
-      .addClass(options.class);
+    return jQuery('<button/>').addClass(options.class);
   },
   'icon': function(options = {}) {
-    return jQuery('<i/>')
-      .addClass(options.class);
+    return jQuery('<i/>').addClass(options.class);
   }
 };

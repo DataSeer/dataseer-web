@@ -7,7 +7,7 @@ const express = require('express'),
 router.get('/', function(req, res, next) {
   Documents.find(function(err, documents) {
     if (err) return next(err);
-    res.json(documents);
+    return res.json(documents);
   });
 });
 
@@ -15,7 +15,7 @@ router.get('/', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
   Documents.findById(req.params.id, function(err, post) {
     if (err) return next(err);
-    res.json(post);
+    return res.json(post);
   });
 });
 
@@ -23,7 +23,7 @@ router.get('/:id', function(req, res, next) {
 router.post('/', function(req, res, next) {
   Documents.create(req.body, function(err, post) {
     if (err) return next(err);
-    res.json(post);
+    return res.json(post);
   });
 });
 
@@ -31,7 +31,7 @@ router.post('/', function(req, res, next) {
 router.put('/:id', function(req, res, next) {
   Documents.findByIdAndUpdate(req.params.id, req.body, function(err, post) {
     if (err) return next(err);
-    res.json(post);
+    return res.json(post);
   });
 });
 
@@ -39,7 +39,7 @@ router.put('/:id', function(req, res, next) {
 router.delete('/:id', function(req, res, next) {
   Documents.findByIdAndRemove(req.params.id, req.body, function(err, post) {
     if (err) return next(err);
-    res.json(post);
+    return res.json(post);
   });
 });
 

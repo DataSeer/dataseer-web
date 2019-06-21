@@ -1,50 +1,68 @@
 const DocumentView = function(events) {
-
   let self = this;
 
   let elements = {
-    'container': HtmlBuilder.div({ 'id': '', 'class': 'container-fluid', 'text': '' })
+    container: HtmlBuilder.div({ 'id': '', 'class': 'container-fluid', 'text': '' })
   };
 
+  // get paragraphs without Datasets
   let paragraphsWithoutDatasets = function() {
-      let paragraphs = elements.container.find('div[subtype="dataseer"] > div > p');
+      let paragraphs = elements.container.find('div[subtype="dataseer"] > div > *');
       return paragraphs.map(function(i, el) {
-        if (jQuery(el).children('s').length === 0) return el;
+        if (jQuery(el).find('s[id], s[corresp]').length === 0) return el;
       });
     },
     // get selected element (if it is in container)
     selectedElements = function() {
-      let selection = window.getSelection(),
-        focusNode = jQuery(selection.focusNode),
-        focusParent = focusNode.parent(),
-        anchorNode = jQuery(selection.anchorNode),
-        anchorParent = anchorNode.parent(),
-        target = jQuery(selection);
-      if (!(!selection.isCollapsed && selection.anchorNode && selection.focusNode)) {
+      let selection = jQuery('s.selected');
+      if (selection.length > 0) {
+        return {
+          'err': null,
+          'res': {
+            sentence: selection
+          }
+        };
+      } else {
         return {
           'err': true,
-          'msg': 'Please select some text before add new dataset'
+          'msg': 'You must select a sentence before adding a new dataset'
         };
       }
-      if (!elements.container.has(jQuery(selection.focusNode).parent()).length) {
-        return {
-          'err': true,
-          'msg': 'Text selected must be a part of XML document'
-        };
-      }
-      if (!anchorParent.is(focusParent)) {
-        return {
-          'err': true,
-          'msg': 'Text selected must be in same paragraph, and not contain part of an existing dataset'
-        };
-      }
-      return {
-        'err': null,
-        'res': {
-          'anchorParent': anchorParent,
-          'nodes': selection.getRangeAt(0).cloneContents().childNodes
+    },
+    selectionToSenctence = function(selection, constructor, options, clickEvent, cb) {
+      let target = null;
+      if (typeof selection.res.sentence !== 'undefined') {
+        if (options.getdataType) {
+          return dataseerML.getdataType(selection.res.sentence, function(err, res) {
+            if (err) {
+              return cb(err, res);
+            }
+            let dataType = res['dataset-type'] ? res['dataset-type'] : options.dataType;
+            // if dataType is set, then it's not a corresp
+            target = selection.res.sentence.attr('id', options.id).attr('type', dataType);
+            target.removeAttr('class');
+            jQuery(target)
+              .parents('div[type]')
+              .attr('subtype', 'dataseer');
+            target.click(function() {
+              scrollTo(jQuery(this));
+              clickEvent(options.id);
+            });
+            return cb(null, target);
+          });
+        } else {
+          target = selection.res.sentence.attr('corresp', '#' + options.id);
+          target.removeAttr('class');
+          jQuery(target)
+            .parents('div[type]')
+            .attr('subtype', 'dataseer');
+          target.click(function() {
+            scrollTo(jQuery(this));
+            clickEvent(options.id);
+          });
+          return target;
         }
-      };
+      }
     },
     // scroll ot dataset position
     scrollTo = function(el) {
@@ -53,7 +71,9 @@ const DocumentView = function(events) {
     };
 
   self.init = function(id, source) {
-    jQuery(id).empty().append(elements.container);
+    jQuery(id)
+      .empty()
+      .append(elements.container);
     self.source(source);
 
     datasets.all().click(function() {
@@ -63,7 +83,9 @@ const DocumentView = function(events) {
     });
 
     corresps.all().click(function() {
-      let id = jQuery(this).attr('corresp').replace('#', '');
+      let id = jQuery(this)
+        .attr('corresp')
+        .replace('#', '');
       scrollTo(jQuery(this));
       events.corresps.click(id);
     });
@@ -75,10 +97,14 @@ const DocumentView = function(events) {
   self.source = function(source) {
     if (typeof source === 'undefined') {
       let copy = elements.container.clone();
-      copy.find('s').removeAttr('style');
+      copy
+        .find('*')
+        .removeAttr('style')
+        .removeAttr('class');
       return copy.html();
     }
     elements.container.html(source.replace(/\s/gm, ' '));
+    elements.container.on('click', 's:not([corresp]):not([id])', sentences.click);
     return self.source();
   };
 
@@ -96,8 +122,10 @@ const DocumentView = function(events) {
     return styles;
   };
 
-  self.addDataset = function(id, dataType) {
-    return datasets.add(id, dataType);
+  self.addDataset = function(id, dataType, cb) {
+    return datasets.add(id, dataType, function(err, res) {
+      return cb(err, res);
+    });
   };
 
   self.deleteDataset = function(id) {
@@ -112,38 +140,43 @@ const DocumentView = function(events) {
     return corresps.remove(id);
   };
 
-  let senteces = {
-    'process': function() {
-      jQuery('#document-view tei text p').each(function() {
-        let el = jQuery(this),
-          data = el.clone().children().remove('s').end().html();
-        el.html(senteces.semgment(data));
-      });
-      jQuery('span[type="sentence"][from="dataseer"]').click(function() {
-        senteces.selected(this);
-        events.senteces.click(this);
-      });
+  self.views = {
+    // scroll ot dataset position
+    'scrollTo': function(id) {
+      let position = datasets.get(id).position().top + elements.container.parent().scrollTop() - 14;
+      return elements.container.parent().animate({ scrollTop: position });
     },
-    'unprocess': function() {
-      jQuery('span[type="sentence"][from="dataseer"]').each(function() {
-        let el = jQuery(this);
-        el.replaceWith(el.html());
-      });
+    // set All elements visible
+    'allVisible': function() {
+      paragraphsWithoutDatasets().removeClass();
+      elements.container.parent().removeClass();
     },
-    'semgment': function(text) {
-      let newSentence = function(html) { return '<span type="sentence" from="dataseer">' + html + '.</span>'; },
-        _sentences = text.split('.');
-      for (var i = 0; i < _sentences.length; i++) {
-        _sentences[i] = newSentence(_sentences[i]);
+    // set only dataseer elements visible
+    'onlyDataseer': function() {
+      self.views.allVisible();
+      elements.container.parent().addClass('tei-only-dataseer');
+    },
+    // set only datasets elements visible
+    'onlyDatasets': function() {
+      self.views.onlyDataseer();
+      paragraphsWithoutDatasets().addClass('hidden');
+    }
+  };
+
+  // Sentences features
+  let sentences = {
+    'new': function(html) {
+      return jQuery('<s/>').html(html);
+    },
+    'click': function() {
+      let previousSelection = elements.container.find('s.selected'),
+        selected = jQuery(this);
+      if (!selected.attr('corresp') && !selected.attr('id')) {
+        selected.addClass('selected');
+        if (previousSelection.length > 0) {
+          previousSelection.removeAttr('class');
+        }
       }
-      return _sentences.join('');
-    },
-    'selected': function(el) {
-      let current = jQuery('span[type="sentence"][from="dataseer"][selected="true"]');
-      if (typeof el === 'undefined') return current;
-      current.removeAttr('selected');
-      jQuery(el).attr('selected', true);
-      return senteces.selected();
     }
   };
 
@@ -179,59 +212,53 @@ const DocumentView = function(events) {
     'colors': function() {
       datasets.all().each(function() {
         let id = jQuery(this).attr('id'),
-          color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
+          color = randomColor({
+            luminosity: 'light',
+            hue: 'blue',
+            format: 'rgba',
+            alpha: datasets.confidenceOf(id)
+          });
         datasets.styleOf(id, 'background-color:' + color);
       });
     },
     // new dataset
     'new': function(id, dataType) {
-      return jQuery('<s/>').attr('id', id).attr('type', dataType);
+      return jQuery('<s/>')
+        .attr('id', id)
+        .attr('type', dataType);
     },
     // add dataset
-    'add': function(id, dataType) {
-      // let target = senteces.selected();
-      // alert(target.length);
-      // if (!target.length) return null;
-      // target.replaceWith(datasets.new(id, dataType).html(target.html()));
-      // let color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
-      // datasets.styleOf(id, 'background-color:' + color);
-      // target.click(function() {
-      //   let id = jQuery(this).attr('id');
-      //   scrollTo(jQuery(this));
-      //   events.datasets.click(id);
-      // });
+    'add': function(id, dataType, cb) {
       let selection = selectedElements();
-      if (selection.err) return selection;
-      let result = selection.res;
-
-      let html = result.anchorParent.html(),
-        nodes = result.nodes,
-        nodesHtml = '';
-      for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].outerHTML) nodesHtml += nodes[i].outerHTML;
-        else if (nodes[i].wholeText) nodesHtml += nodes[i].wholeText;
-      }
-      let target = datasets.new(id, dataType).html(nodesHtml);
-      result.anchorParent.html(html.replace(nodesHtml, jQuery("<div/>").append(target.clone()).html()));
-      jQuery('s[id="' + id + '"]').parents('div[type]').attr('subtype', 'dataseer');
-      let color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
-      datasets.styleOf(id, 'background-color:' + color);
-      target.click(function() {
-        let id = jQuery(this).attr('id');
-        scrollTo(jQuery(this));
-        events.datasets.click(id);
-      });
-      return {
-        'err': false,
-        'res': 'everythings ok'
-      };
+      if (selection.err) return cb(true, selection.msg);
+      return selectionToSenctence(
+        selection,
+        datasets.new,
+        { 'id': id, 'dataType': dataType, 'getdataType': true },
+        events.datasets.click,
+        function(err, res) {
+          if (err) return cb(err, res);
+          let color = randomColor({
+            luminosity: 'light',
+            hue: 'blue',
+            format: 'rgba',
+            alpha: datasets.confidenceOf(id)
+          });
+          datasets.styleOf(id, 'background-color:' + color);
+          return cb(null, 'everythings ok');
+        }
+      );
     },
     // remove dataset
     'remove': function(id) {
       let dataset = datasets.get(id),
         parent = dataset.parents('div[type]');
-      dataset.replaceWith(dataset.html());
-      if (!parent.has('s[id]').length) parent.removeAttr('subtype');
+      dataset.replaceWith(
+        jQuery('<div/>')
+          .append(sentences.new(dataset.html()).clone())
+          .html()
+      ) /*.click(sentences.click)*/;
+      if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
     }
   };
 
@@ -254,90 +281,51 @@ const DocumentView = function(events) {
     // set colors of correps
     'colors': function() {
       corresps.all().each(function() {
-        let id = jQuery(this).attr('corresp').replace('#', ''),
+        let id = jQuery(this)
+            .attr('corresp')
+            .replace('#', ''),
           style = datasets.styleOf(id);
         corresps.styleOf(id, style);
       });
     },
     // new correp
     'new': function(id) {
-      return jQuery('<s/>').attr('corresp', id);
+      return jQuery('<s/>').attr('corresp', '#' + id);
     },
     // add correp
     'add': function(id) {
-      // let target = senteces.selected();
-      // let target = selectedElements();
-      // alert(id);
-      // alert(target.length);
-      // if (!target.length) return null;
-      // target.replaceWith(corresps.new(id).html(target.html()));
-      // let style = datasets.styleOf(id);
-      // corresps.styleOf(id, style);
-      // corresps.click(function() {
-      //   let id = jQuery(this).attr('corresp').replace('#', '');
-      //   scrollTo(jQuery(this));
-      //   events.corresps.click(id);
-      // });
       let selection = selectedElements();
       if (selection.err) return selection;
-      let result = selection.res;
-
-      let html = result.anchorParent.html(),
-        nodes = result.nodes,
-        nodesHtml = '';
-      for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].outerHTML) nodesHtml += nodes[i].outerHTML;
-        else if (nodes[i].wholeText) nodesHtml += nodes[i].wholeText;
-      }
-      let target = corresps.new(id).html(nodesHtml);
-      result.anchorParent.html(html.replace(nodesHtml, jQuery("<div/>").append(target.clone()).html()));
-      // jQuery('s[corresp="' + id + '"]').parents('div[type]').attr('subtype', 'dataseer');
-      let color = randomColor({ luminosity: 'light', hue: 'blue', format: 'rgba', alpha: datasets.confidenceOf(id) });
-      datasets.styleOf(id, 'background-color:' + color);
-      target.click(function() {
-        let id = jQuery(this).attr('id');
-        scrollTo(jQuery(this));
-        events.corresps.click(id);
+      let target = selectionToSenctence(
+        selection,
+        corresps.new,
+        { 'id': id, 'getdataType': false },
+        events.corresps.click
+      );
+      let color = randomColor({
+        luminosity: 'light',
+        hue: 'blue',
+        format: 'rgba',
+        alpha: datasets.confidenceOf(id)
       });
+      corresps.styleOf(id, datasets.styleOf(id));
       return {
-        'err': false,
-        'res': 'everythings ok'
+        err: false,
+        res: 'everythings ok'
       };
     },
     // remove correp
     'remove': function(id) {
       let _corresps = corresps.get(id).each(function() {
-        let el = jQuery(this);
-        el.replaceWith(el.html());
+        let el = jQuery(this),
+          parent = el.parents('div[type]');
+        el.replaceWith(
+          jQuery('<div/>')
+            .append(sentences.new(el.html()).clone())
+            .html()
+        ) /*.click(sentences.click)*/;
+        if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
       });
-    }
-  };
-
-  self.views = {
-    // scroll ot dataset position
-    'scrollTo': function(id) {
-      let position = datasets.get(id).position().top + elements.container.parent().scrollTop() - 14;
-      return elements.container.parent().animate({ scrollTop: position });
-    },
-    // set All elements visible
-    'allVisible': function() {
-      paragraphsWithoutDatasets().removeClass();
-      elements.container.parent().removeClass();
-    },
-    // set only dataseer elements visible
-    'onlyDataseer': function() {
-      self.views.allVisible();
-      elements.container.parent().addClass('tei-only-dataseer');
-    },
-    // set only datasets elements visible
-    'onlyDatasets': function() {
-      self.views.onlyDataseer();
-      paragraphsWithoutDatasets().addClass('hidden');
-    },
-    // set view for new dataset selection
-    'segmented': function(value) {
-      if (value) senteces.process();
-      else senteces.unprocess();
     }
   };
 

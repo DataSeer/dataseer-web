@@ -1,5 +1,4 @@
 (function($) {
   // Get the current Object
-  return MongoDB.getCurrentDocument(function(currentDocument) {
-  });
+  return MongoDB.getCurrentDocument(function(currentDocument) {});
 })(jQuery);
