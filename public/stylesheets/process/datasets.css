@@ -156,10 +156,17 @@ i {
   margin-bottom: 25px !important;
 }
 
+#datasets-list .selected {
+  border: 1px solid lightgray;
+  background-color: #EEEEEE;
+}
+
 #datasets-list .form-row {
   display: block;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   vertical-align: middle;
 }
 

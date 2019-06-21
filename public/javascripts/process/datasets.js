@@ -66,9 +66,11 @@
               hasChanged = false;
               let next = nextUnsavedDataset();
               if (next !== null) {
+                datasetsList.select(next.id);
                 updateForm.link(next, documentView.color(next.id));
                 documentView.views.scrollTo(next.id);
               } else {
+                datasetsList.select(dataset['dataset.id']);
                 updateForm.link(
                   currentDocument.datasets[dataset['dataset.id']],
                   documentView.color(dataset['dataset.id'])
@@ -88,6 +90,7 @@
         }),
         datasetsList = new DatasetsList(currentDocument.datasets, {
           'onClick': function(id) {
+            datasetsList.select(id);
             updateForm.link(currentDocument.datasets[id], documentView.color(id));
             documentView.views.scrollTo(id);
           },
@@ -104,6 +107,7 @@
               let keys = Object.keys(currentDocument.datasets);
               if (id === updateForm.id() && keys.length > 0) {
                 let key = keys.length > 1 ? keys[1] : keys[0];
+                datasetsList.select(key);
                 updateForm.link(currentDocument.datasets[key], documentView.color(key));
                 documentView.views.scrollTo(key);
               }
@@ -130,11 +134,13 @@
           // Interactive view od XML document
           datasets: {
             'click': function(id) {
+              datasetsList.select(id);
               updateForm.link(currentDocument.datasets[id], documentView.color(id));
             }
           },
           corresps: {
             'click': function(id) {
+              datasetsList.select(id);
               updateForm.link(currentDocument.datasets[id], documentView.color(id));
             }
           }
@@ -142,13 +148,14 @@
         defaultKey = Object.keys(currentDocument.datasets)[0];
 
       documentView.init('#document-view', currentDocument.source);
+      documentView.views.scrollTo(defaultKey);
 
       updateForm.init('#dataset-form');
       updateForm.setDataTypes(dataTypes);
       updateForm.link(currentDocument.datasets[defaultKey], documentView.color(defaultKey));
-      documentView.views.scrollTo(defaultKey);
 
       datasetsList.init('#datasets-list', documentView.colors(), getStatusOfDatasets(currentDocument.datasets));
+      datasetsList.select(defaultKey);
 
       // Insert validation btn after datasetList
       $('#datasets-list')
@@ -182,6 +189,7 @@
               'comments': ''
             };
             datasetsList.add(newId, documentView.color(newId), currentDocument.datasets[newId].status);
+            datasetsList.select(newId);
             updateForm.link(currentDocument.datasets[newId], documentView.color(newId));
             documentView.views.scrollTo(newId);
             MongoDB.updateDocument(currentDocument, function(err, res) {
