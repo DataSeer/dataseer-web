@@ -2,13 +2,15 @@ const DatasetsList = function(data, events) {
   let datasets = {};
 
   let elements = {
-      'container': HtmlBuilder.div({ 'id': '', 'class': 'container-fluid', 'text': '' })
+      'container': HtmlBuilder.div({ 'id': '', 'class': 'container-fluid', 'text': '' }),
+      'datasetsList': HtmlBuilder.div({ 'id': '', 'class': '', 'text': '' }),
+      'newDataset': new View.buttons.add('Add new Dataset')
     },
     mapping = {};
 
   self.datasets = {
     'add': function(id) {
-      datasets[id] = new View.links.deletable(
+      datasets[id] = new View.links.static(
         {
           'class': 'form-row',
           'text': '# ' + id,
@@ -19,7 +21,6 @@ const DatasetsList = function(data, events) {
             events.onClick(id);
           },
           'onDelete': function(id) {
-            self.datasets.remove(id);
             events.onDelete(id);
           },
           'onAdd': function(id) {
@@ -29,9 +30,10 @@ const DatasetsList = function(data, events) {
       );
       let container = datasets[id].elements().container;
       mapping[id] = container;
-      elements.container.append(container);
+      elements.datasetsList.append(container);
     },
     'remove': function(id) {
+      datasets[id].delete();
       datasets[id] = undefined;
       mapping[id] = undefined;
     },
@@ -49,6 +51,13 @@ const DatasetsList = function(data, events) {
     return elements.container.parent().animate({ scrollTop: position });
   };
 
+  // Add all elements
+  elements.container.append(elements.datasetsList).append(elements.newDataset);
+
+  elements.newDataset.click(function() {
+    events.onNewDataset();
+  });
+
   self.select = function(id) {
     elements.container.find('.selected').removeClass('selected');
     mapping[id].addClass('selected');
@@ -65,6 +74,7 @@ const DatasetsList = function(data, events) {
     jQuery(id)
       .empty()
       .append(elements.container);
+    // Add all inputs
     for (let key in data) {
       self.datasets.add(data[key].id);
       self.datasets.statusOf(datasets[key].value(), status[key]);
