@@ -7,7 +7,7 @@
         status = {
           'modified': 'modified',
           'saved': 'saved',
-          'valided': 'valided'
+          'valid': 'valid'
         },
         getStatusOfDatasets = function(datasets) {
           let result = {};
@@ -94,7 +94,7 @@
         checkStatusOfDatasets = function() {
           let result = true;
           for (let key in currentDocument.datasets) {
-            if (currentDocument.datasets[key] && currentDocument.datasets[key].status !== status.valided) return false;
+            if (currentDocument.datasets[key] && currentDocument.datasets[key].status !== status.valid) return false;
           }
           return result;
         };
@@ -120,8 +120,8 @@
               );
               $('#datasets-error-modal-btn').click();
             } else {
-              datasetsList.datasets.statusOf(updateForm.id(), status.valided);
-              saveDataset(dataset, status.valided);
+              datasetsList.datasets.statusOf(updateForm.id(), status.valid);
+              saveDataset(dataset, status.valid);
             }
           },
           // On save

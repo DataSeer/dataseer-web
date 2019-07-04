@@ -18,7 +18,7 @@ const View = {
     'check': function() {
       return HtmlBuilder.icon({ 'class': 'fas fa-check' });
     },
-    'valided': function() {
+    'valid': function() {
       return HtmlBuilder.icon({ 'class': 'fas fa-check success-color-dark' });
     },
     'cogs': function() {
@@ -68,14 +68,14 @@ const View = {
           'container': HtmlBuilder.div({ 'id': id, 'class': '', 'text': '' }),
           'modified': View.icons.modified(),
           'saved': View.icons.saved(),
-          'valided': View.icons.valided()
+          'valid': View.icons.valid()
         },
         _value = '';
 
       self.status = {
         'modified': 'modified',
         'saved': 'saved',
-        'valided': 'valided'
+        'valid': 'valid'
       };
 
       self.id = function(value) {
@@ -93,7 +93,7 @@ const View = {
 
       self.removeChildrens = function() {
         elements.modified.detach();
-        elements.valided.detach();
+        elements.valid.detach();
         elements.saved.detach();
       };
 
@@ -116,8 +116,8 @@ const View = {
         return self.elements().container;
       };
 
-      self.valided = function() {
-        self.value(self.status.valided);
+      self.valid = function() {
+        self.value(self.status.valid);
         return self.elements().container;
       };
 
