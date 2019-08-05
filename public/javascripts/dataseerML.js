@@ -1,3 +1,7 @@
+/*
+ * @prettier
+ */
+
 // API Interface Object
 const dataseerML = {
   // Get the dataType of a given sentence

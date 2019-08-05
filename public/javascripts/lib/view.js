@@ -1,3 +1,7 @@
+/*
+ * @prettier
+ */
+
 const View = {
   'icons': {
     'delete': function() {

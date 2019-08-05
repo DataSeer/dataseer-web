@@ -18,3 +18,18 @@ body {
 .hidden {
   display: none;
 }
+
+.title {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.routes {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}

@@ -1,3 +1,7 @@
+/*
+ * @prettier
+ */
+
 const express = require('express'),
   router = express.Router(),
   path = require('path'),
@@ -6,10 +10,14 @@ const express = require('express'),
 
 /* GET ALL Documents */
 router.get('/', function(req, res, next) {
-  Documents.find({}, function(err, post) {
-    if (err) return next(err);
-    return res.render(path.join('documents', 'all'), { 'documents': post });
-  });
+  let limit = parseInt(req.query.limit);
+  if (isNaN(limit)) limit = 20;
+  Documents.find({})
+    .limit(limit)
+    .exec(function(err, post) {
+      if (err) return next(err);
+      return res.render(path.join('documents', 'all'), { 'documents': post });
+    });
 });
 
 /* GET SINGLE Document BY ID */

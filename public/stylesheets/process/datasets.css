@@ -146,7 +146,22 @@ i {
 
 #document-view tei s {
   text-decoration: none;
-  margin-right: 3px;
+  margin-right: 2px;
+  padding-right: 2px;
+}
+
+#document-view tei s {
+  text-decoration: none;
+}
+
+#document-view tei p > s:not(:first-child) {
+  margin-left: 1px;
+  padding-left: 1px;
+}
+
+#document-view tei p > s:not(:last-child) {
+  margin-right: 1px;
+  padding-right: 1px;
 }
 
 #document-view tei s.hover {

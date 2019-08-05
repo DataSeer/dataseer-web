@@ -1,3 +1,7 @@
+/*
+ * @prettier
+ */
+
 const DatasetForm = function(events) {
   let self = this;
 

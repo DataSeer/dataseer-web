@@ -1,3 +1,7 @@
+/*
+ * @prettier
+ */
+
 const DatasetsList = function(data, events) {
   let datasets = {};
 

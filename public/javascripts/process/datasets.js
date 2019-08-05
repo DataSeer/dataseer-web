@@ -1,10 +1,14 @@
+/*
+ * @prettier
+ */
+
 (function($) {
   // Get the current Object
   return MongoDB.getCurrentDocument(function(currentDocument) {
     $.getJSON('../json/dataTypes.json', function(data) {
       let dataTypes = data.dataTypes,
         metadata = data.metadata,
-        status = {
+        _status = {
           'modified': 'modified',
           'saved': 'saved',
           'valid': 'valid'
@@ -16,17 +20,17 @@
           }
           return result;
         },
-        nextUnsavedDataset = function() {
-          let result = IndexOfNextUnsavedDataset();
+        nextDataset = function(status) {
+          let result = IndexOfNextDataset(status);
           if (result.index > -1) return currentDocument.datasets[result.key];
           else return null;
         },
-        IndexOfNextUnsavedDataset = function() {
+        IndexOfNextDataset = function(status) {
           let result = -1,
             keys = Object.keys(currentDocument.datasets);
           for (var i = 0; i < keys.length; i++) {
             let key = keys[i];
-            if (currentDocument.datasets[key] && currentDocument.datasets[key].status === status.modified)
+            if (currentDocument.datasets[key] && currentDocument.datasets[key].status === status)
               return {
                 'index': i,
                 'key': keys[i]
@@ -49,14 +53,15 @@
             if (err) return err; // Need to define error behavior
             // Update dataType in XML
             let fullDataType =
-              currentDocument.datasets[dataset['dataset.id']].subType === ''
-                ? currentDocument.datasets[dataset['dataset.id']].dataType
-                : currentDocument.datasets[dataset['dataset.id']].dataType +
-                  ' : ' +
-                  currentDocument.datasets[dataset['dataset.id']].subType;
+                currentDocument.datasets[dataset['dataset.id']].subType === ''
+                  ? currentDocument.datasets[dataset['dataset.id']].dataType
+                  : currentDocument.datasets[dataset['dataset.id']].dataType +
+                    ' : ' +
+                    currentDocument.datasets[dataset['dataset.id']].subType,
+              nextStatus = status === _status.saved ? _status.modified : _status.saved;
             documentView.updateDataset(dataset['dataset.id'], fullDataType);
             hasChanged = false;
-            let next = nextUnsavedDataset();
+            let next = nextDataset(nextStatus);
             if (next !== null) {
               datasetsList.select(next.id);
               updateForm.link(next, documentView.color(next.id));
@@ -94,7 +99,7 @@
         checkStatusOfDatasets = function() {
           let result = true;
           for (let key in currentDocument.datasets) {
-            if (currentDocument.datasets[key] && currentDocument.datasets[key].status !== status.valid) return false;
+            if (currentDocument.datasets[key] && currentDocument.datasets[key].status !== _status.valid) return false;
           }
           return result;
         };
@@ -120,20 +125,20 @@
               );
               $('#datasets-error-modal-btn').click();
             } else {
-              datasetsList.datasets.statusOf(updateForm.id(), status.valid);
-              saveDataset(dataset, status.valid);
+              datasetsList.datasets.statusOf(updateForm.id(), _status.valid);
+              saveDataset(dataset, _status.valid);
             }
           },
           // On save
           'onSave': function(dataset) {
-            datasetsList.datasets.statusOf(updateForm.id(), status.saved);
-            saveDataset(dataset, status.saved);
+            datasetsList.datasets.statusOf(updateForm.id(), _status.saved);
+            saveDataset(dataset, _status.saved);
           },
           'onIdClick': function(id) {
             documentView.views.scrollTo(id);
           },
           'onChange': function(element) {
-            datasetsList.datasets.statusOf(updateForm.id(), status.modified);
+            datasetsList.datasets.statusOf(updateForm.id(), _status.modified);
             hasChanged = true;
           }
         }),
@@ -154,7 +159,7 @@
               } else {
                 currentDocument.source = documentView.source();
                 currentDocument.datasets[newId] = {
-                  'status': status.saved,
+                  'status': _status.saved,
                   'id': newId,
                   'confidence': '0',
                   'dataType': defaultDataType,

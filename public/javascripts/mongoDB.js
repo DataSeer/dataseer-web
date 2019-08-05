@@ -1,3 +1,7 @@
+/*
+ * @prettier
+ */
+
 // API Interface Object
 const MongoDB = {
   // Get the current object
