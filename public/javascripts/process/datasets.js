@@ -164,8 +164,8 @@
                   'confidence': '0',
                   'dataType': defaultDataType,
                   'subType': '',
-                  'descritpion':
-                    typeof metadata[defaultDataType] !== 'undefined' ? metadata[defaultDataType].descritpion : '',
+                  'description':
+                    typeof metadata[defaultDataType] !== 'undefined' ? metadata[defaultDataType].description : '',
                   'bestDataFormatForSharing':
                     typeof metadata[defaultDataType] !== 'undefined'
                       ? metadata[defaultDataType].bestDataFormatForSharing
