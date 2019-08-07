@@ -24,6 +24,7 @@ router.get('/', function(req, res, next) {
 router.get('/:id', function(req, res, next) {
   Documents.findById(req.params.id, function(err, post) {
     if (err) return next(err);
+    if (post === null) return res.status(400).send('error 404');
     return res.render(path.join('documents', post.status), { 'document': post, 'demo': process.env.DEMO });
   });
 });

@@ -176,6 +176,10 @@ const DocumentView = function(events) {
     });
   };
 
+  self.getTextOfDataset = function(id) {
+    return datasets.get(id).text();
+  };
+
   self.deleteDataset = function(id) {
     return datasets.remove(id);
   };
@@ -312,7 +316,6 @@ const DocumentView = function(events) {
           let backgroundColor = colors.backgroundColor(datasets.confidenceOf(id)),
             color = colors.color(backgroundColor),
             parent = res.parents('div').first();
-          console.log(parent);
           parent.attr('subtype', 'dataseer');
           datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
           return cb(null, 'everythings ok');

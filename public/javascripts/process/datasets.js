@@ -3,15 +3,41 @@
  */
 
 (function($) {
+  let currentDocument;
   // Get the current Object
-  return MongoDB.getCurrentDocument(function(currentDocument) {
+  return MongoDB.getCurrentDocument(function(doc) {
     $.getJSON('../json/dataTypes.json', function(data) {
+      currentDocument = doc;
       let dataTypes = data.dataTypes,
         metadata = data.metadata,
         _status = {
           'modified': 'modified',
           'saved': 'saved',
           'valid': 'valid'
+        },
+        defaultDataType = Object.keys(dataTypes)[0],
+        defaultDataset = {
+          'status': _status.modified,
+          'id': '',
+          'confidence': '0',
+          'dataType': defaultDataType,
+          'subType': '',
+          'description':
+            typeof metadata[defaultDataType] !== 'undefined' && metadata[defaultDataType].description
+              ? metadata[defaultDataType].description
+              : '',
+          'bestDataFormatForSharing':
+            typeof metadata[defaultDataType] !== 'undefined' && metadata[defaultDataType].bestDataFormatForSharing
+              ? metadata[defaultDataType].bestDataFormatForSharing
+              : '',
+          'mostSuitableRepositories':
+            typeof metadata[defaultDataType] !== 'undefined' && metadata[defaultDataType].mostSuitableRepositories
+              ? metadata[defaultDataType].mostSuitableRepositories
+              : '',
+          'name': '',
+          'DOI': '',
+          'comments': '',
+          'text': ''
         },
         getStatusOfDatasets = function(datasets) {
           let result = {};
@@ -56,7 +82,7 @@
                 currentDocument.datasets[dataset['dataset.id']].subType === ''
                   ? currentDocument.datasets[dataset['dataset.id']].dataType
                   : currentDocument.datasets[dataset['dataset.id']].dataType +
-                    ' : ' +
+                    ':' +
                     currentDocument.datasets[dataset['dataset.id']].subType,
               nextStatus = status === _status.saved ? _status.modified : _status.saved;
             documentView.updateDataset(dataset['dataset.id'], fullDataType);
@@ -81,7 +107,7 @@
           hasChanged = true;
           documentView.deleteDataset(id);
           documentView.deleteCorresps(id);
-          currentDocument.datasets[id] = undefined;
+          delete currentDocument.datasets[id];
           currentDocument.source = documentView.source();
           MongoDB.updateDocument(currentDocument, function(err, res) {
             console.log(err, res);
@@ -93,6 +119,8 @@
               datasetsList.select(key);
               updateForm.link(currentDocument.datasets[key], documentView.color(key));
               documentView.views.scrollTo(key);
+            } else {
+              updateForm.link(defaultDataset);
             }
           });
         },
@@ -117,22 +145,41 @@
       let updateForm = new DatasetForm({
           // On final validation
           'onValidation': function(dataset) {
-            console.log(dataset);
-            if (dataset['dataset.DOI'] === '' && dataset['dataset.comments'] === '') {
+            let currentId = updateForm.id();
+            if (
+              currentId === '' ||
+              typeof currentDocument.datasets === 'undefined' ||
+              typeof currentDocument.datasets[currentId] === 'undefined'
+            ) {
+              $('#datasets-error-modal-label').html('Final validation');
+              $('#datasets-error-modal-body').html('Please, add at least one dataset before validate');
+              $('#datasets-error-modal-btn').click();
+            } else if (dataset['dataset.DOI'] === '' && dataset['dataset.comments'] === '') {
               $('#datasets-error-modal-label').html('Final validation');
               $('#datasets-error-modal-body').html(
                 'Please, provide the DOI before validate (or enter any comments to explain why this dataset cannot be shared)'
               );
               $('#datasets-error-modal-btn').click();
             } else {
-              datasetsList.datasets.statusOf(updateForm.id(), _status.valid);
+              datasetsList.datasets.statusOf(currentId, _status.valid);
               saveDataset(dataset, _status.valid);
             }
           },
           // On save
           'onSave': function(dataset) {
-            datasetsList.datasets.statusOf(updateForm.id(), _status.saved);
-            saveDataset(dataset, _status.saved);
+            let currentId = updateForm.id();
+            if (
+              currentId === '' ||
+              typeof currentDocument.datasets === 'undefined' ||
+              typeof currentDocument.datasets[currentId] === 'undefined'
+            ) {
+              $('#datasets-error-modal-label').html('Save dataset');
+              $('#datasets-error-modal-body').html('Please, add at least one dataset before saving');
+              $('#datasets-error-modal-btn').click();
+            } else {
+              datasetsList.datasets.statusOf(currentId, _status.saved);
+              saveDataset(dataset, _status.saved);
+            }
           },
           'onIdClick': function(id) {
             documentView.views.scrollTo(id);
@@ -144,9 +191,9 @@
         }),
         datasetsList = new DatasetsList(currentDocument.datasets, {
           'onNewDataset': function() {
+            if (typeof currentDocument.datasets === 'undefined') currentDocument.datasets = {};
             let index = Object.keys(currentDocument.datasets).length + 1,
-              newId = 'dataset-' + index,
-              defaultDataType = Object.keys(dataTypes)[0];
+              newId = 'dataset-' + index;
             while (typeof currentDocument.datasets[newId] !== 'undefined') {
               index += 1;
               newId = 'dataset-' + index;
@@ -158,35 +205,21 @@
                 $('#datasets-error-modal-btn').click();
               } else {
                 currentDocument.source = documentView.source();
-                currentDocument.datasets[newId] = {
-                  'status': _status.saved,
-                  'id': newId,
-                  'confidence': '0',
-                  'dataType': defaultDataType,
-                  'subType': '',
-                  'description':
-                    typeof metadata[defaultDataType] !== 'undefined' ? metadata[defaultDataType].description : '',
-                  'bestDataFormatForSharing':
-                    typeof metadata[defaultDataType] !== 'undefined'
-                      ? metadata[defaultDataType].bestDataFormatForSharing
-                      : '',
-                  'mostSuitableRepositories':
-                    typeof metadata[defaultDataType] !== 'undefined'
-                      ? metadata[defaultDataType].mostSuitableRepositories
-                      : '',
-                  'name': '',
-                  'DOI': '',
-                  'comments': ''
-                };
-                datasetsList.add(newId, documentView.color(newId), currentDocument.datasets[newId].status);
-                datasetsList.select(newId);
-                updateForm.link(currentDocument.datasets[newId], documentView.color(newId));
-                documentView.views.scrollTo(newId);
+                currentDocument.datasets[newId] = Object.assign(
+                  Object.create(Object.getPrototypeOf(defaultDataset)),
+                  defaultDataset
+                );
+                currentDocument.datasets[newId].id = newId;
+                currentDocument.datasets[newId].text = documentView.getTextOfDataset(newId);
+                currentDocument.datasets[newId].status = _status.saved;
                 MongoDB.updateDocument(currentDocument, function(err, res) {
                   console.log(err, res);
                   if (err) return err; // Need to define error behavior
                   hasChanged = false;
-                  // return location.reload();
+                  datasetsList.add(newId, documentView.color(newId), currentDocument.datasets[newId].status);
+                  datasetsList.select(newId);
+                  updateForm.link(currentDocument.datasets[newId], documentView.color(newId));
+                  documentView.views.scrollTo(newId);
                 });
               }
             });
@@ -235,17 +268,18 @@
             }
           }
         }),
-        defaultKey = Object.keys(currentDocument.datasets)[0];
+        keys = currentDocument.datasets ? Object.keys(currentDocument.datasets) : undefined;
+      defaultKey = keys ? keys[0] : undefined;
 
       documentView.init('#document-view', currentDocument.source);
-      documentView.views.scrollTo(defaultKey);
+      if (defaultKey) documentView.views.scrollTo(defaultKey);
 
       updateForm.init('#dataset-form');
       updateForm.loadData(data);
-      updateForm.link(currentDocument.datasets[defaultKey], documentView.color(defaultKey));
+      if (defaultKey) updateForm.link(currentDocument.datasets[defaultKey], documentView.color(defaultKey));
 
       datasetsList.init('#datasets-list', documentView.colors(), getStatusOfDatasets(currentDocument.datasets));
-      datasetsList.select(defaultKey);
+      if (defaultKey) datasetsList.select(defaultKey);
 
       $('#new_dataset > button').click();
 

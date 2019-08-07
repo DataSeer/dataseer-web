@@ -161,12 +161,18 @@ const DatasetForm = function(events) {
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.subType = elements['dataset.subType'].value();
           if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
-            elements['dataset.description'].value(self.metadata[self.dataset.subType].description);
+            elements['dataset.description'].value(
+              self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
+            );
             elements['dataset.bestDataFormatForSharing'].value(
               self.metadata[self.dataset.subType].bestDataFormatForSharing
+                ? self.metadata[self.dataset.subType].bestDataFormatForSharing
+                : ''
             );
             elements['dataset.mostSuitableRepositories'].value(
               self.metadata[self.dataset.subType].mostSuitableRepositories
+                ? self.metadata[self.dataset.subType].mostSuitableRepositories
+                : ''
             );
           } else if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
             elements['dataset.description'].value(
@@ -379,7 +385,6 @@ const DatasetForm = function(events) {
   };
 
   self.link = function(dataset, style) {
-    console.log(dataset);
     self.style(style);
     self.dataset = dataset;
     self.setSubTypes(self.dataTypes[dataset.dataType]);
