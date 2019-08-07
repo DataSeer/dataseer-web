@@ -310,7 +310,10 @@ const DocumentView = function(events) {
         function(err, res) {
           if (err) return cb(err, res);
           let backgroundColor = colors.backgroundColor(datasets.confidenceOf(id)),
-            color = colors.color(backgroundColor);
+            color = colors.color(backgroundColor),
+            parent = res.parents('div').first();
+          console.log(parent);
+          parent.attr('subtype', 'dataseer');
           datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
           return cb(null, 'everythings ok');
         }
@@ -323,7 +326,7 @@ const DocumentView = function(events) {
     // remove dataset
     'remove': function(id) {
       let dataset = datasets.get(id),
-        parent = dataset.parents('div[type]'),
+        parent = dataset.parents('div[subtype]'),
         newElement = sentences.new(dataset.html()).clone();
       dataset.replaceWith(newElement);
       newElement.click(sentences.click).hover(sentences.hover, sentences.endHover);
@@ -366,11 +369,13 @@ const DocumentView = function(events) {
       let selection = selectedElements();
       if (selection.err) return selection;
       let target = selectionToSenctence(
-        selection,
-        corresps.new,
-        { 'id': id, 'getdataType': false },
-        events.corresps.click
-      );
+          selection,
+          corresps.new,
+          { 'id': id, 'getdataType': false },
+          events.corresps.click
+        ),
+        parent = target.parents('div').first();
+      parent.attr('subtype', 'dataseer');
       corresps.styleOf(id, datasets.styleOf(id));
       return {
         err: false,
@@ -381,7 +386,7 @@ const DocumentView = function(events) {
     'remove': function(id) {
       let _corresps = corresps.get(id).each(function() {
         let el = jQuery(this),
-          parent = el.parents('div[type]'),
+          parent = el.parents('div[subtype]'),
           newElement = sentences.new(el.html()).clone();
         el.replaceWith(newElement);
         newElement.click(sentences.click).hover(sentences.hover, sentences.endHover);
