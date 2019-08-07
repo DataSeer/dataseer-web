@@ -42,7 +42,13 @@ const DocumentView = function(events) {
 
   // get paragraphs without Datasets
   let paragraphsWithoutDatasets = function() {
-      let paragraphs = elements.container.find('div[subtype="dataseer"] > div > *');
+      let paragraphs = elements.container.find('text > div > div, text > div > *:not(div)');
+      return paragraphs.map(function(i, el) {
+        if (jQuery(el).find('s[id], s[corresp]').length === 0) return el;
+      });
+    },
+    sectionsWithoutDatasets = function() {
+      let paragraphs = elements.container.find('text > div, text > *:not(div)');
       return paragraphs.map(function(i, el) {
         if (jQuery(el).find('s[id], s[corresp]').length === 0) return el;
       });
@@ -191,16 +197,18 @@ const DocumentView = function(events) {
     // set All elements visible
     'allVisible': function() {
       paragraphsWithoutDatasets().removeClass();
+      sectionsWithoutDatasets().removeClass();
       elements.container.parent().removeClass();
       elements.container.parent().addClass('bordered');
     },
     // set only dataseer elements visible
     'onlyDataseer': function() {
       self.views.allVisible();
-      elements.container.parent().addClass('tei-only-dataseer');
+      sectionsWithoutDatasets().addClass('hidden');
     },
     // set only datasets elements visible
     'onlyDatasets': function() {
+      self.views.allVisible();
       self.views.onlyDataseer();
       paragraphsWithoutDatasets().addClass('hidden');
     }

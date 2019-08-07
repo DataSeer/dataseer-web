@@ -379,6 +379,7 @@ const DatasetForm = function(events) {
   };
 
   self.link = function(dataset, style) {
+    console.log(dataset);
     self.style(style);
     self.dataset = dataset;
     self.setSubTypes(self.dataTypes[dataset.dataType]);

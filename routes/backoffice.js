@@ -40,7 +40,6 @@ router.post('/upload', function(req, res, next) {
     function(file, callback) {
       // Perform operation on file here.
       return processFile(file, dataseerML, function(error, result) {
-        console.log(error, result);
         if (error) results.errors.push(error);
         if (result) results.successes.push(result);
         return callback();

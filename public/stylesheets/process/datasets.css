@@ -181,10 +181,6 @@ i {
   background-color: lightyellow;
 }
 
-#document-view.tei-only-dataseer tei>text>div:not([subtype="dataseer"]) {
-  display: none;
-}
-
 /*datasets-list*/
 
 #datasets-list {

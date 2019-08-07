@@ -129,77 +129,77 @@
       "mesh_id": "D005838",
       "mesh_tree": "G05.380"
     },
-    "High-Throughput Nucleotide Sequencing : 454": {
+    "High-Throughput Nucleotide Sequencing:454": {
       "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
       "description": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
       "mesh_id": "D059014",
       "mesh_tree": "E05.393.760.319",
       "mostSuitableRepositories": "The BAM files should be uploaded to the NCBI-SRA database <https://www.ncbi.nlm.nih.gov/sra/docs/submit/> in accordance with their guidelines <https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/>. The accompanying code should be shared at CodeOcean <https://codeocean.com/>"
     },
-    "High-Throughput Nucleotide Sequencing : BGI": {
+    "High-Throughput Nucleotide Sequencing:BGI": {
       "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
       "description": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
       "mesh_id": "D059014",
       "mesh_tree": "E05.393.760.319",
       "mostSuitableRepositories": "The BAM files should be uploaded to the NCBI-SRA database <https://www.ncbi.nlm.nih.gov/sra/docs/submit/> in accordance with their guidelines <https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/>. The accompanying code should be shared at CodeOcean <https://codeocean.com/>"
     },
-    "High-Throughput Nucleotide Sequencing : Genome Analyzer": {
+    "High-Throughput Nucleotide Sequencing:Genome Analyzer": {
       "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
       "description": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
       "mesh_id": "D059014",
       "mesh_tree": "E05.393.760.319",
       "mostSuitableRepositories": "The BAM files should be uploaded to the NCBI-SRA database <https://www.ncbi.nlm.nih.gov/sra/docs/submit/> in accordance with their guidelines <https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/>. The accompanying code should be shared at CodeOcean <https://codeocean.com/>"
     },
-    "High-Throughput Nucleotide Sequencing : HiSeq": {
+    "High-Throughput Nucleotide Sequencing:HiSeq": {
       "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
       "description": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
       "mesh_id": "D059014",
       "mesh_tree": "E05.393.760.319",
       "mostSuitableRepositories": "The BAM files should be uploaded to the NCBI-SRA database <https://www.ncbi.nlm.nih.gov/sra/docs/submit/> in accordance with their guidelines <https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/>. The accompanying code should be shared at CodeOcean <https://codeocean.com/>"
     },
-    "High-Throughput Nucleotide Sequencing : Ion Torrent": {
+    "High-Throughput Nucleotide Sequencing:Ion Torrent": {
       "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
       "description": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
       "mesh_id": "D059014",
       "mesh_tree": "E05.393.760.319",
       "mostSuitableRepositories": "The BAM files should be uploaded to the NCBI-SRA database <https://www.ncbi.nlm.nih.gov/sra/docs/submit/> in accordance with their guidelines <https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/>. The accompanying code should be shared at CodeOcean <https://codeocean.com/>"
     },
-    "High-Throughput Nucleotide Sequencing : MassARRAY": {
+    "High-Throughput Nucleotide Sequencing:MassARRAY": {
       "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
       "description": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
       "mesh_id": "D059014",
       "mesh_tree": "E05.393.760.319",
       "mostSuitableRepositories": "The BAM files should be uploaded to the NCBI-SRA database <https://www.ncbi.nlm.nih.gov/sra/docs/submit/> in accordance with their guidelines <https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/>. The accompanying code should be shared at CodeOcean <https://codeocean.com/>"
     },
-    "High-Throughput Nucleotide Sequencing : MiSeq": {
+    "High-Throughput Nucleotide Sequencing:MiSeq": {
       "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
       "description": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
       "mesh_id": "D059014",
       "mesh_tree": "E05.393.760.319",
       "mostSuitableRepositories": "The BAM files should be uploaded to the NCBI-SRA database <https://www.ncbi.nlm.nih.gov/sra/docs/submit/> in accordance with their guidelines <https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/>. The accompanying code should be shared at CodeOcean <https://codeocean.com/>"
     },
-    "High-Throughput Nucleotide Sequencing : MinION": {
+    "High-Throughput Nucleotide Sequencing:MinION": {
       "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
       "description": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
       "mesh_id": "D059014",
       "mesh_tree": "E05.393.760.319",
       "mostSuitableRepositories": "The BAM files should be uploaded to the NCBI-SRA database <https://www.ncbi.nlm.nih.gov/sra/docs/submit/> in accordance with their guidelines <https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/>. The accompanying code should be shared at CodeOcean <https://codeocean.com/>"
     },
-    "High-Throughput Nucleotide Sequencing : NextSeq": {
+    "High-Throughput Nucleotide Sequencing:NextSeq": {
       "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
       "description": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
       "mesh_id": "D059014",
       "mesh_tree": "E05.393.760.319",
       "mostSuitableRepositories": "The BAM files should be uploaded to the NCBI-SRA database <https://www.ncbi.nlm.nih.gov/sra/docs/submit/> in accordance with their guidelines <https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/>. The accompanying code should be shared at CodeOcean <https://codeocean.com/>"
     },
-    "High-Throughput Nucleotide Sequencing : PacBio": {
+    "High-Throughput Nucleotide Sequencing:PacBio": {
       "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
       "description": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
       "mesh_id": "D059014",
       "mesh_tree": "E05.393.760.319",
       "mostSuitableRepositories": "The BAM files should be uploaded to the NCBI-SRA database <https://www.ncbi.nlm.nih.gov/sra/docs/submit/> in accordance with their guidelines <https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/>. The accompanying code should be shared at CodeOcean <https://codeocean.com/>"
     },
-    "High-Throughput Nucleotide Sequencing : TruSeq": {
+    "High-Throughput Nucleotide Sequencing:TruSeq": {
       "bestDataFormatForSharing": "The BAM file for each run should be made available, along with a .txt file of the settings used in the run. Sample names must be consistent with those in downstream analyses. The code used for data preparation and analysis must also be stored. ",
       "description": "Techniques of nucleotide sequence analysis that increase the range, complexity, sensitivity, and accuracy of results by greatly increasing the scale of operations and thus the number of nucleotides, and the number of copies of each nucleotide sequenced. The sequencing may be done by analysis of the synthesis or ligation products, hybridization to preexisting sequences, etc.",
       "mesh_id": "D059014",
@@ -524,31 +524,31 @@
       "Assembly",
       "DNA Packaging",
       "Genotype",
-      "High-Throughput Nucleotide Sequencing : 454",
-      "High-Throughput Nucleotide Sequencing : BGI",
-      "High-Throughput Nucleotide Sequencing : Genome Analyzer",
-      "High-Throughput Nucleotide Sequencing : HiSeq",
-      "High-Throughput Nucleotide Sequencing : Ion Torrent",
-      "High-Throughput Nucleotide Sequencing : MassARRAY",
-      "High-Throughput Nucleotide Sequencing : MiSeq",
-      "High-Throughput Nucleotide Sequencing : MinION",
-      "High-Throughput Nucleotide Sequencing : NextSeq",
-      "High-Throughput Nucleotide Sequencing : PacBio",
-      "High-Throughput Nucleotide Sequencing : TruSeq",
-      "Metagenome : Feature table",
+      "High-Throughput Nucleotide Sequencing:454",
+      "High-Throughput Nucleotide Sequencing:BGI",
+      "High-Throughput Nucleotide Sequencing:Genome Analyzer",
+      "High-Throughput Nucleotide Sequencing:HiSeq",
+      "High-Throughput Nucleotide Sequencing:Ion Torrent",
+      "High-Throughput Nucleotide Sequencing:MassARRAY",
+      "High-Throughput Nucleotide Sequencing:MiSeq",
+      "High-Throughput Nucleotide Sequencing:MinION",
+      "High-Throughput Nucleotide Sequencing:NextSeq",
+      "High-Throughput Nucleotide Sequencing:PacBio",
+      "High-Throughput Nucleotide Sequencing:TruSeq",
+      "Metagenome:Feature table",
       "Microarray Analysis",
       "Microsatellite Repeats",
       "Molecular Sequence Annotation",
       "Polymorphism, Single Nucleotide",
       "Read Counts",
       "Sequence Alignment",
-      "Sequence Analysis : Sanger"
+      "Sequence Analysis:Sanger"
     ],
     "Image": [
       "Computerized Tomography scan",
       "Diagnostic Imaging",
       "Electrophoresis",
-      "Magnetic Resonance Imaging : Functional MRI",
+      "Magnetic Resonance Imaging:Functional MRI",
       "Microscopy",
       "Photography",
       "Radiography",
