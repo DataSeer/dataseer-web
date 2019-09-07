@@ -98,8 +98,10 @@ function callDataseerML(file, cb) {
     function(error, response, body) {
       if (!error && response.statusCode == 200) {
         return cb(null, body);
-      } else {
+      } else if (error) {
         return cb({ 'filename': file.name, 'msg': error.toString() });
+      } else {
+        return cb({ 'filename': file.name, 'msg': 'unspecified error' });
       }
     }
   );
