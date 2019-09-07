@@ -1,0 +1,50 @@
+.header {
+  font-size: 50px;
+}
+
+.title {
+  font-size: 25px;
+  margin-bottom: 10px;
+  text-decoration: underline;
+}
+
+#uploadForm label {
+  display: inline;
+}
+
+#uploadForm button {
+  margin-top: 10px;
+  margin-bottom: 10px; 
+}
+
+#uploadForm input[type="checkbox"] {
+  margin-right: 5px;
+  display: inline;
+  width: auto;
+}
+
+#uploadForm .row {
+  margin-top: 10px; 
+}
+
+.success div {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  color: darkgreen;
+  border: 1px solid darkgreen;
+}
+
+.error div {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  color: red;
+  border: 1px solid red;
+}
+
+.continue {
+  border-top: 1px solid black;
+}
+
+.continue a {
+  font-size: 20px;
+}

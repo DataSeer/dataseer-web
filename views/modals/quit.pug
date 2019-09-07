@@ -1,0 +1,17 @@
+// Modal
+div(class='modal fade' id='quit-modal' tabindex='-1' role='dialog' aria-labelledby='quit-modal-lg' aria-hidden='true')
+  div(class='modal-dialog modal-lg modal-dialog-centered quit-modal-lg' role='document')
+    div(class='modal-content')
+      div(class='modal-header')
+        h5(class='modal-title' id='quit-modal-lg')
+          Datasets no saved !
+        button(type='button' class='close' data-dismiss='modal' aria-label='Close') x
+      div(class='modal-body')
+        You did not save your changes... They will be lost if you do not save them before leaving the application
+      div(class='modal-footer')
+        button(type='button' class='btn btn-secondary' data-dismiss='modal')
+          Close
+        button(type='button' class='btn btn-primary' id='save-changes')
+          Save changes
+
+

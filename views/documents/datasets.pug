@@ -4,32 +4,29 @@ block content
 
   div(class='container-fluid')
     div(class='row')
-      div(class='col-12')
-        h1(class='text-center') DATASEER
-
-    div(class='row')
-      div(class='col-6')
-        div(class='row row-margin')
-          div(class='col-12 text-center')
-            div(class='btn-group btn-group-toggle' data-toggle='buttons')
-              label(class='btn btn-success btn-sm active') full text
-                input(type='radio' name='options' id='tei_all_visible' autocomplete='off' checked)
-              label(class='btn btn-success btn-sm') section
-                input(type='radio' name='options' id='tei_only_dataseer' autocomplete='off')
-              label(class='btn btn-success btn-sm') paragraph
-                input(type='radio' name='options' id='tei_only_datasets' autocomplete='off')
-    div(class='row')
       div(class='col-6')
         div(class='row')
+          div(class='col-12 text-center')
+            div(id='view-selection' class='btn-group btn-group-toggle bordered' data-toggle='buttons')
+              label(class='btn btn-success btn-sm active') full text
+                input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off' checked)
+              label(class='btn btn-success btn-sm') section
+                input(type='radio' name='options' id='tei_only_dataseer' value='onlyDataseer' autocomplete='off')
+              label(class='btn btn-success btn-sm') paragraph
+                input(type='radio' name='options' id='tei_only_datasets' value='onlyDatasets' autocomplete='off')
+        div(class='row')
           div(class='col-12')
-            div(id='document-view')
-              div(class='container-fluid document' id='dataset.source') !{document.source}
+            div(id='document-view' class='bordered')
       div(class='col-4')
-        div(id='dataset-form' class='form')
-            include ../forms/datasets/update-form.pug
+        div(id='dataset-form' class='form bordered')
       div(class='col-2')
-        div(id='datasets-list' class='form')
-          include ../forms/datasets/list.pug
+        div(class='row')
+          div(id='datasets-list' class='form bordered')
+        div(class='row')
+          button(id='datasets_validation' class='btn btn-primary') This info is correct : Continue
+
+  include ../modals/quit.pug
+  include ../modals/documents/datasets.pug
 
   if demo
     include ../forms/demo/datasets.pug

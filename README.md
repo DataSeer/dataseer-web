@@ -22,8 +22,6 @@ On Windows :
 
 Application need an instance of mongoDB running on port 27017, with an "app" database, filled with "documents" collection. (conf/conf.json to set complete URL)
 
-An object of "documents" collection looks like file : resources/sampleDocument.json
-
 A set of documents is available at : resources/importMongoDB.json
 
 ## How it works

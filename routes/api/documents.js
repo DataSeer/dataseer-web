@@ -1,3 +1,7 @@
+/*
+ * @prettier
+ */
+
 const express = require('express'),
   router = express.Router(),
   mongoose = require('mongoose'),
@@ -5,17 +9,21 @@ const express = require('express'),
 
 /* GET ALL Documents */
 router.get('/', function(req, res, next) {
-  Documents.find(function(err, documents) {
-    if (err) return next(err);
-    res.json(documents);
-  });
+  let limit = parseInt(req.query.limit);
+  if (isNaN(limit)) limit = 20;
+  Documents.find({})
+    .limit(limit)
+    .exec(function(err, post) {
+      if (err) return next(err);
+      return res.json(post);
+    });
 });
 
 /* GET SINGLE Document BY ID */
 router.get('/:id', function(req, res, next) {
   Documents.findById(req.params.id, function(err, post) {
     if (err) return next(err);
-    res.json(post);
+    return res.json(post);
   });
 });
 
@@ -23,7 +31,7 @@ router.get('/:id', function(req, res, next) {
 router.post('/', function(req, res, next) {
   Documents.create(req.body, function(err, post) {
     if (err) return next(err);
-    res.json(post);
+    return res.json(post);
   });
 });
 
@@ -31,7 +39,7 @@ router.post('/', function(req, res, next) {
 router.put('/:id', function(req, res, next) {
   Documents.findByIdAndUpdate(req.params.id, req.body, function(err, post) {
     if (err) return next(err);
-    res.json(post);
+    return res.json(post);
   });
 });
 
@@ -39,7 +47,7 @@ router.put('/:id', function(req, res, next) {
 router.delete('/:id', function(req, res, next) {
   Documents.findByIdAndRemove(req.params.id, req.body, function(err, post) {
     if (err) return next(err);
-    res.json(post);
+    return res.json(post);
   });
 });
 

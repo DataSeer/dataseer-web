@@ -1,34 +1,19 @@
-/*body > .container-fluid > div.row:nth-child(3) {*/
-#document-view {
-  position: fixed;
-  height: 75%;
-  width: 45%;
-  overflow: scroll;
+.row-margin {
+  margin-top: 20px !important;
+  margin-bottom: 20px !important;
 }
 
-#datasets-list {
-  position: fixed;
-  height: 75%;
-  width: 15%;
-  overflow: scroll;
+i {
+  margin-left: 4px;
+  margin-right: 4px; 
 }
 
-#dataset-form {
-  position: fixed;
-  height: 75%;
-  width: 30%;
-  overflow: scroll;
-}
-
-#dataset-form #dataset\.id {
-  cursor: pointer;
-}
-
-body>.container-fluid>div.row:nth-child(4) {
-  position: fixed;
-  right: 0;
-  bottom: 3%;
-  left: 0;
+.btn-lite {
+  border: none;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
 
 .row>*,
@@ -36,98 +21,111 @@ body>.container-fluid>div.row:nth-child(4) {
   vertical-align: middle;
 }
 
-#dataset-poperties-form {
-  /*display: none;*/
+.bordered {
+  border: 3px solid lightgray;
+  border-radius: 5px;
 }
 
-#datasets-list {
-  overflow: auto;
-  position: fixed;
-  display: block;
-  margin-top: 25 !important;
-  margin-bottom: 25px !important;
+/*view-selection*/
+
+#view-selection {
+  border-bottom: 3px solid lightgray;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  padding: 20px;
+  width: 100%;
+  text-align: center;
 }
+
+#view-selection label {
+  width: 34%;
+}
+
+/*dataset-form*/
 
 #dataset-form {
+  width: 100%;
+  height: 90vh;
   overflow: auto;
-  position: fixed;
-  /*display: none;*/
-  margin-top: 25 !important;
-  margin-bottom: 25px !important;
+  padding: 15px;
 }
 
-.dataset-item {
-  margin-top: 15px !important;
-  margin-bottom: 15px !important;
-}
-
-.dataset-link {
-  vertical-align: middle;
+#dataset-form #dataset\.id {
+  display: inline-block;
+  width: auto;
   cursor: pointer;
 }
 
-.delete_dataset,
-.warning,
-.success {
-  margin-left: 5px;
-  margin-right: 5px;
+#dataset-form #dataset\.status {
+  display: inline-block;
+  width: auto;
 }
 
-.warning-color-dark {
-  color: #FF8800;
-}
-
-.success-color-dark {
-  color: #007E33;
-}
-
-#datasets-list .delete_dataset {
-  margin-left: 5px;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  margin-right: 0px;
-  line-height: 1em;
-}
-
-#dataset-poperties-form .form-row {
-  margin-top: 5px;
-  margin-bottom: 5px;
-}
-
-#remove_current_datatype {
-  margin-left: 5px;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  margin-right: 0px;
-  line-height: 1em;
-}
-
-#dataset-dataType-form {
+#dataset-form #dataset\.id .key,
+#dataset-form #dataset\.confidence .key,
+#dataset-form #dataset\.dataType .key,
+#dataset-form #dataset\.subType .key {
   display: inline-block;
 }
 
-#dataset-dataType-form select {
-  width: 70%;
-  margin-left: 5px;
+#dataset-form .form-row {
+  margin-bottom: 20px; 
+}
+
+#dataset-form .form-row>div {
+  width: 100%;
+  display: block;
+}
+
+#dataset-form .form-row .key {
+  margin-bottom: 4px; 
   margin-right: 5px;
+  display: block;
+  font-weight: bold;
+}
+
+#dataset-form .form-row .value {
   display: inline-block;
 }
 
-#dataset-dataType-form #dataType_validation {
+#dataset-form .form-row button {
   display: inline-block;
-  margin-left: 5px;
-  margin-right: 5px;
+  margin-left: 4px;
+  margin-right: 4px; 
+}
+
+#dataset-form .form-row input {
+  display: inline-block;
+}
+#dataset-form .form-row select {
+  display: inline-block;
+  width: 75%;
+}
+
+/*document-view*/
+
+#document-view {
+  border-top: 0px solid lightgray;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  padding: 15px;
+  width: 100%;
+  height: 82vh;
+  overflow: auto;
 }
 
 /* TEI CUSTOMIZATION */
-
-/* Title of section like introductionor results */
 #document-view tei>text>div {
   font-weight: bold;
 }
 
-#document-view tei>text>div>* {
+#document-view tei>text>div>p {
   margin-top: 10px;
+  font-weight: normal;
+}
+
+#document-view tei>text>div>*:not(p) {
+  margin-top: 5px;
   font-weight: normal;
 }
 
@@ -148,6 +146,33 @@ body>.container-fluid>div.row:nth-child(4) {
 
 #document-view tei s {
   text-decoration: none;
+  margin-right: 2px;
+  padding-right: 2px;
+}
+
+#document-view tei s {
+  text-decoration: none;
+}
+
+#document-view tei p > s:not(:first-child) {
+  margin-left: 1px;
+  padding-left: 1px;
+}
+
+#document-view tei p > s:not(:last-child) {
+  margin-right: 1px;
+  padding-right: 1px;
+}
+
+#document-view tei s.hover {
+  background-color: gainsboro;
+  cursor: pointer;
+}
+
+#document-view tei s.selected {
+  background-color: rgb(0, 123, 255);
+  color: white;
+  cursor: pointer;
 }
 
 #document-view tei s[corresp],
@@ -156,6 +181,90 @@ body>.container-fluid>div.row:nth-child(4) {
   background-color: lightyellow;
 }
 
-#document-view.tei-only-dataseer tei>text>div:not([subtype="dataseer"]) {
+/*datasets-list*/
+
+#datasets-list {
+  width: 100%;
+  height: 83vh;
+  overflow: auto;
+  padding: 15px;
+}
+
+#datasets-list .selected {
+  border: 1px solid lightgray;
+  background-color: #EEEEEE;
+}
+
+#datasets-list .form-row {
+  text-align: center;
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  vertical-align: middle;
+}
+
+#datasets-list .form-row>* {
+  display: inline-block;
+}
+
+#datasets-list .form-row .value {
+  cursor: pointer;
+  display: inline-block;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#datasets-list>.container-fluid {
+  text-align: center;
+}
+
+#datasets-list .form-row button {
+  display: inline-block;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+#datasets_validation {
+  margin-top: 15px;
+}
+
+.warning-color-dark {
+  color: #FF8800;
+}
+
+.success-color-dark {
+  color: #007E33;
+}
+
+#datasets-error-modal .modal-header {
+  color: white;
+  background-color: rgb(0, 123, 255);
+}
+
+#datasets-error-modal .modal-body {
+  color: #CC0000;
+}
+
+#datasets-confirm-modal .modal-header {
+  color: white;
+  background-color: rgb(0, 123, 255);
+}
+
+#datasets-confirm-modal .modal-data {
   display: none;
+}
+
+#datasets-confirm-modal .modal-body {
+  color: #CC0000;
+}
+
+#quit-modal .modal-header {
+  color: white;
+  background-color: #ffbb33;
+}
+
+#quit-modal .modal-body {
+  color: #CC0000;
 }

@@ -1,37 +1,9 @@
 body {
-  padding: 50px;
+  margin-left: 50px;
+  margin-right: 50px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.btn-primary {
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-
-.data {
-  display: none;
-}
-
-.fixed {
-  position: fixed;
-}
-
-.row-margin {
-  margin-top: 20px !important;
-  margin-bottom: 20px !important;
-}
-
-.key {
-  margin-right: 2px;
-}
-
-.value {
-  margin-left: 2px;
-  display: inline-block;
 }
 
 .crud-button-action {
@@ -41,4 +13,23 @@ body {
 
 .demo {
   background-color: lightgray;
+}
+
+.hidden {
+  display: none;
+}
+
+.title {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.routes {
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
