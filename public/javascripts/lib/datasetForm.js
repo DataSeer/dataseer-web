@@ -402,22 +402,31 @@ const DatasetForm = function(events) {
         'text': key
       });
     }
+    options.sort(function(a, b) {
+      if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
+      else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
+      else return 0;
+    });
     elements['dataset.dataType'].options(options);
   };
 
   self.setSubTypes = function(subTypes) {
-    let options = [
-      {
-        'value': '',
-        'text': 'None'
-      }
-    ];
+    let options = [];
     for (var i = 0; i < subTypes.length; i++) {
       options.push({
         'value': subTypes[i],
         'text': subTypes[i]
       });
     }
+    options.sort(function(a, b) {
+      if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
+      else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
+      else return 0;
+    });
+    options.unshift({
+      'value': '',
+      'text': 'None'
+    });
     elements['dataset.subType'].options(options);
   };
 

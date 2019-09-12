@@ -39,6 +39,14 @@
           'comments': '',
           'text': ''
         },
+        isAnExtractedDataset = function(dataset, extractedDatasets) {
+          for (let key in extractedDatasets) {
+            if (dataset.text === extractedDatasets[key].text) {
+              return true;
+            }
+          }
+          return false;
+        },
         getStatusOfDatasets = function(datasets) {
           let result = {};
           for (let key in datasets) {
@@ -48,15 +56,15 @@
         },
         nextDataset = function(status) {
           let result = IndexOfNextDataset(status);
-          if (result.index > -1) return currentDocument.datasets[result.key];
+          if (result.index > -1) return currentDocument.datasets.current[result.key];
           else return null;
         },
         IndexOfNextDataset = function(status) {
           let result = -1,
-            keys = Object.keys(currentDocument.datasets);
+            keys = Object.keys(currentDocument.datasets.current);
           for (var i = 0; i < keys.length; i++) {
             let key = keys[i];
-            if (currentDocument.datasets[key] && currentDocument.datasets[key].status === status)
+            if (currentDocument.datasets.current[key] && currentDocument.datasets.current[key].status === status)
               return {
                 'index': i,
                 'key': keys[i]
@@ -65,25 +73,28 @@
           return result;
         },
         saveDataset = function(dataset, status) {
-          let keys = Object.keys(currentDocument.datasets[dataset['dataset.id']]);
+          let keys = Object.keys(currentDocument.datasets.current[dataset['dataset.id']]);
           for (var i = 0; i < keys.length; i++) {
             if (typeof dataset['dataset.' + keys[i]] !== 'undefined')
-              currentDocument.datasets[dataset['dataset.id']][keys[i]] = dataset['dataset.' + keys[i]];
+              currentDocument.datasets.current[dataset['dataset.id']][keys[i]] = dataset['dataset.' + keys[i]];
           }
-          if (currentDocument.datasets[dataset['dataset.id']].name === '')
-            currentDocument.datasets[dataset['dataset.id']].name = dataset['dataset.id'];
-          currentDocument.datasets[dataset['dataset.id']].status = status;
-          datasetsList.datasets.statusOf(dataset['dataset.id'], currentDocument.datasets[dataset['dataset.id']].status);
+          if (currentDocument.datasets.current[dataset['dataset.id']].name === '')
+            currentDocument.datasets.current[dataset['dataset.id']].name = dataset['dataset.id'];
+          currentDocument.datasets.current[dataset['dataset.id']].status = status;
+          datasetsList.datasets.statusOf(
+            dataset['dataset.id'],
+            currentDocument.datasets.current[dataset['dataset.id']].status
+          );
           MongoDB.updateDocument(currentDocument, function(err, res) {
             console.log(err, res);
             if (err) return err; // Need to define error behavior
             // Update dataType in XML
             let fullDataType =
-                currentDocument.datasets[dataset['dataset.id']].subType === ''
-                  ? currentDocument.datasets[dataset['dataset.id']].dataType
-                  : currentDocument.datasets[dataset['dataset.id']].dataType +
+                currentDocument.datasets.current[dataset['dataset.id']].subType === ''
+                  ? currentDocument.datasets.current[dataset['dataset.id']].dataType
+                  : currentDocument.datasets.current[dataset['dataset.id']].dataType +
                     ':' +
-                    currentDocument.datasets[dataset['dataset.id']].subType,
+                    currentDocument.datasets.current[dataset['dataset.id']].subType,
               nextStatus = status === _status.saved ? _status.modified : _status.saved;
             documentView.updateDataset(dataset['dataset.id'], fullDataType);
             hasChanged = false;
@@ -95,7 +106,7 @@
             } else {
               datasetsList.select(dataset['dataset.id']);
               updateForm.link(
-                currentDocument.datasets[dataset['dataset.id']],
+                currentDocument.datasets.current[dataset['dataset.id']],
                 documentView.color(dataset['dataset.id'])
               );
               documentView.views.scrollTo(dataset['dataset.id']);
@@ -107,17 +118,22 @@
           hasChanged = true;
           documentView.deleteDataset(id);
           documentView.deleteCorresps(id);
-          delete currentDocument.datasets[id];
+          currentDocument.datasets.current[id].fromDataseerML = isAnExtractedDataset(
+            currentDocument.datasets.current[id],
+            currentDocument.datasets.extracted
+          );
+          currentDocument.datasets.deleted.push(currentDocument.datasets.current[id]);
+          delete currentDocument.datasets.current[id];
           currentDocument.source = documentView.source();
           MongoDB.updateDocument(currentDocument, function(err, res) {
             console.log(err, res);
             if (err) return err; // Need to define error behavior
             hasChanged = false;
-            let keys = Object.keys(currentDocument.datasets);
+            let keys = Object.keys(currentDocument.datasets.current);
             if (id === updateForm.id() && keys.length > 0) {
               let key = keys.length > 1 ? keys[1] : keys[0];
               datasetsList.select(key);
-              updateForm.link(currentDocument.datasets[key], documentView.color(key));
+              updateForm.link(currentDocument.datasets.current[key], documentView.color(key));
               documentView.views.scrollTo(key);
             } else {
               updateForm.link(defaultDataset);
@@ -126,8 +142,9 @@
         },
         checkStatusOfDatasets = function() {
           let result = true;
-          for (let key in currentDocument.datasets) {
-            if (currentDocument.datasets[key] && currentDocument.datasets[key].status !== _status.valid) return false;
+          for (let key in currentDocument.datasets.current) {
+            if (currentDocument.datasets.current[key] && currentDocument.datasets.current[key].status !== _status.valid)
+              return false;
           }
           return result;
         };
@@ -148,8 +165,8 @@
             let currentId = updateForm.id();
             if (
               currentId === '' ||
-              typeof currentDocument.datasets === 'undefined' ||
-              typeof currentDocument.datasets[currentId] === 'undefined'
+              typeof currentDocument.datasets.current === 'undefined' ||
+              typeof currentDocument.datasets.current[currentId] === 'undefined'
             ) {
               $('#datasets-error-modal-label').html('Final validation');
               $('#datasets-error-modal-body').html('Please, add at least one dataset before validate');
@@ -170,8 +187,8 @@
             let currentId = updateForm.id();
             if (
               currentId === '' ||
-              typeof currentDocument.datasets === 'undefined' ||
-              typeof currentDocument.datasets[currentId] === 'undefined'
+              typeof currentDocument.datasets.current === 'undefined' ||
+              typeof currentDocument.datasets.current[currentId] === 'undefined'
             ) {
               $('#datasets-error-modal-label').html('Save dataset');
               $('#datasets-error-modal-body').html('Please, add at least one dataset before saving');
@@ -189,12 +206,12 @@
             hasChanged = true;
           }
         }),
-        datasetsList = new DatasetsList(currentDocument.datasets, {
+        datasetsList = new DatasetsList(currentDocument.datasets.current, {
           'onNewDataset': function() {
-            if (typeof currentDocument.datasets === 'undefined') currentDocument.datasets = {};
-            let index = Object.keys(currentDocument.datasets).length + 1,
+            if (typeof currentDocument.datasets.current === 'undefined') currentDocument.datasets.current = {};
+            let index = Object.keys(currentDocument.datasets.current).length + 1,
               newId = 'dataset-' + index;
-            while (typeof currentDocument.datasets[newId] !== 'undefined') {
+            while (typeof currentDocument.datasets.current[newId] !== 'undefined') {
               index += 1;
               newId = 'dataset-' + index;
             }
@@ -205,20 +222,20 @@
                 $('#datasets-error-modal-btn').click();
               } else {
                 currentDocument.source = documentView.source();
-                currentDocument.datasets[newId] = Object.assign(
+                currentDocument.datasets.current[newId] = Object.assign(
                   Object.create(Object.getPrototypeOf(defaultDataset)),
                   defaultDataset
                 );
-                currentDocument.datasets[newId].id = newId;
-                currentDocument.datasets[newId].text = documentView.getTextOfDataset(newId);
-                currentDocument.datasets[newId].status = _status.saved;
+                currentDocument.datasets.current[newId].id = newId;
+                currentDocument.datasets.current[newId].text = documentView.getTextOfDataset(newId);
+                currentDocument.datasets.current[newId].status = _status.saved;
                 MongoDB.updateDocument(currentDocument, function(err, res) {
                   console.log(err, res);
                   if (err) return err; // Need to define error behavior
                   hasChanged = false;
-                  datasetsList.add(newId, documentView.color(newId), currentDocument.datasets[newId].status);
+                  datasetsList.add(newId, documentView.color(newId), currentDocument.datasets.current[newId].status);
                   datasetsList.select(newId);
-                  updateForm.link(currentDocument.datasets[newId], documentView.color(newId));
+                  updateForm.link(currentDocument.datasets.current[newId], documentView.color(newId));
                   documentView.views.scrollTo(newId);
                 });
               }
@@ -226,7 +243,7 @@
           },
           'onClick': function(id) {
             datasetsList.select(id);
-            updateForm.link(currentDocument.datasets[id], documentView.color(id));
+            updateForm.link(currentDocument.datasets.current[id], documentView.color(id));
             documentView.views.scrollTo(id);
           },
           'onDelete': function(id) {
@@ -258,17 +275,17 @@
           datasets: {
             'click': function(id) {
               datasetsList.select(id);
-              updateForm.link(currentDocument.datasets[id], documentView.color(id));
+              updateForm.link(currentDocument.datasets.current[id], documentView.color(id));
             }
           },
           corresps: {
             'click': function(id) {
               datasetsList.select(id);
-              updateForm.link(currentDocument.datasets[id], documentView.color(id));
+              updateForm.link(currentDocument.datasets.current[id], documentView.color(id));
             }
           }
         }),
-        keys = currentDocument.datasets ? Object.keys(currentDocument.datasets) : undefined;
+        keys = currentDocument.datasets.current ? Object.keys(currentDocument.datasets.current) : undefined;
       defaultKey = keys ? keys[0] : undefined;
 
       documentView.init('#document-view', currentDocument.source);
@@ -276,9 +293,9 @@
 
       updateForm.init('#dataset-form');
       updateForm.loadData(data);
-      if (defaultKey) updateForm.link(currentDocument.datasets[defaultKey], documentView.color(defaultKey));
+      if (defaultKey) updateForm.link(currentDocument.datasets.current[defaultKey], documentView.color(defaultKey));
 
-      datasetsList.init('#datasets-list', documentView.colors(), getStatusOfDatasets(currentDocument.datasets));
+      datasetsList.init('#datasets-list', documentView.colors(), getStatusOfDatasets(currentDocument.datasets.current));
       if (defaultKey) datasetsList.select(defaultKey);
 
       $('#new_dataset > button').click();
