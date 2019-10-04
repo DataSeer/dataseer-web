@@ -27,13 +27,15 @@ const DatasetsList = function(data, events) {
           'onDelete': function(id) {
             events.onDelete(id);
           },
-          'onAdd': function(id) {
-            events.onAdd(id);
+          'onLink': function(id) {
+            events.onLink(id);
           }
         }
       );
-      let container = datasets[id].elements().container;
+      let _elements = datasets[id].elements(),
+        container = _elements.container;
       mapping[id] = container;
+      _elements.link.attr('title', 'Link selected sentence to this dataset');
       elements.datasetsList.append(container);
     },
     'remove': function(id) {
@@ -45,7 +47,7 @@ const DatasetsList = function(data, events) {
       if (typeof value !== 'undefined') datasets[id].elements().status.value(value);
     },
     'styleOf': function(id, value) {
-      if (typeof value !== 'undefined') datasets[id].elements().link.attr('style', value);
+      if (typeof value !== 'undefined') datasets[id].elements().data.attr('style', value);
     }
   };
 
