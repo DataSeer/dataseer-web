@@ -381,6 +381,7 @@
         // FIX POPUP OF mostSuitableRepositories (using client configuration)
         let mostSuitableRepositoriesLink = $('<a/>')
           .attr('href', CONF.mostSuitableRepositories.link.href)
+          .attr('target', '_blank')
           .text(CONF.mostSuitableRepositories.link.text);
         updateForm
           .elements()
