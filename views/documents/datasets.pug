@@ -4,32 +4,26 @@ block content
 
   div(class='container-fluid')
     div(class='row')
-      div(class='col-12')
-        h1(class='text-center') DATASEER
-
-    div(class='row')
       div(class='col-6')
-        div(class='row row-margin')
+        div(class='row')
           div(class='col-12 text-center')
-            div(id='view-selection' class='btn-group btn-group-toggle' data-toggle='buttons')
+            div(id='view-selection' class='btn-group btn-group-toggle bordered' data-toggle='buttons')
               label(class='btn btn-success btn-sm active') full text
                 input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off' checked)
               label(class='btn btn-success btn-sm') section
                 input(type='radio' name='options' id='tei_only_dataseer' value='onlyDataseer' autocomplete='off')
               label(class='btn btn-success btn-sm') paragraph
                 input(type='radio' name='options' id='tei_only_datasets' value='onlyDatasets' autocomplete='off')
-    div(class='row')
-      div(class='col-6')
         div(class='row')
-            div(id='document-view')
+          div(class='col-12')
+            div(id='document-view' class='bordered')
       div(class='col-4')
-        div(id='dataset-form' class='form')
+        div(id='dataset-form' class='form bordered')
       div(class='col-2')
         div(class='row')
-          div(id='datasets-list' class='form')
-            div(id='new_dataset' class='container-fluid')
-              button(class='btn btn-primary btn-sm') Add new Dataset 
-                i(class='fas fa-plus')
+          div(id='datasets-list' class='form bordered')
+        div(class='row')
+          button(id='datasets_validation' class='btn btn-primary') Finish
 
   include ../modals/quit.pug
   include ../modals/documents/datasets.pug

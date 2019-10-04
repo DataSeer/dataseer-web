@@ -1,3 +1,7 @@
+/*
+ * @prettier
+ */
+
 const View = {
   'icons': {
     'delete': function() {
@@ -6,20 +10,35 @@ const View = {
     'edit': function() {
       return HtmlBuilder.icon({ 'class': 'far fa-edit' });
     },
+    'saved': function() {
+      return HtmlBuilder.icon({ 'class': 'far fa-save success-color-dark' });
+    },
     'save': function() {
       return HtmlBuilder.icon({ 'class': 'far fa-save' });
     },
     'cancel': function() {
       return HtmlBuilder.icon({ 'class': 'far fa-window-close' });
     },
-    'success': function() {
+    'check': function() {
+      return HtmlBuilder.icon({ 'class': 'fas fa-check' });
+    },
+    'valid': function() {
       return HtmlBuilder.icon({ 'class': 'fas fa-check success-color-dark' });
     },
-    'warning': function() {
-      return HtmlBuilder.icon({ 'class': 'fas fa-cogs warning-color-dark' });
+    'cogs': function() {
+      return HtmlBuilder.icon({ 'class': 'fas fa-cogs' });
+    },
+    'modified': function() {
+      return HtmlBuilder.icon({ 'class': 'fas fa-pen warning-color-dark' });
     },
     'add': function() {
       return HtmlBuilder.icon({ 'class': 'fas fa-plus' });
+    },
+    'link': function() {
+      return HtmlBuilder.icon({ 'class': 'fas fa-link' });
+    },
+    'unlink': function() {
+      return HtmlBuilder.icon({ 'class': 'fas fa-unlink' });
     }
   },
   'buttons': {
@@ -29,7 +48,7 @@ const View = {
         .append(View.icons.edit());
     },
     'delete': function(text = '') {
-      return HtmlBuilder.button({ 'class': 'btn btn-danger btn-sm' })
+      return HtmlBuilder.button({ 'class': 'btn btn-danger btn-sm btn-lite' })
         .text(text)
         .append(View.icons.delete());
     },
@@ -47,6 +66,19 @@ const View = {
       return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' })
         .text(text)
         .append(View.icons.add());
+    },
+    'link': function(text = '') {
+      return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm btn-lite' })
+        .text(text)
+        .append(View.icons.link());
+    },
+    'unlink': function(text = '') {
+      return HtmlBuilder.button({ 'class': 'btn btn-danger btn-sm btn-lite' })
+        .text(text)
+        .append(View.icons.unlink());
+    },
+    'default': function(text = '') {
+      return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' }).text(text);
     }
   },
   'status': {
@@ -54,14 +86,16 @@ const View = {
       let self = this,
         elements = {
           'container': HtmlBuilder.div({ 'id': id, 'class': '', 'text': '' }),
-          'modified': View.icons.warning(),
-          'saved': View.icons.success()
+          'modified': View.icons.modified(),
+          'saved': View.icons.saved(),
+          'valid': View.icons.valid()
         },
         _value = '';
 
       self.status = {
-        'modified': 'warning',
-        'saved': 'success'
+        'modified': 'modified',
+        'saved': 'saved',
+        'valid': 'valid'
       };
 
       self.id = function(value) {
@@ -79,31 +113,31 @@ const View = {
 
       self.removeChildrens = function() {
         elements.modified.detach();
+        elements.valid.detach();
         elements.saved.detach();
       };
 
       self.refresh = function() {
-        if (self.value() === self.status.saved) {
+        let status = self.status[self.value()];
+        if (typeof status !== 'undefined') {
           self.removeChildrens();
-          elements.saved.appendTo(elements.container);
-        } else {
-          self.removeChildrens();
-          elements.modified.appendTo(elements.container);
+          elements[status].appendTo(elements.container);
         }
         return self.elements().container;
       };
 
       self.modified = function() {
-        self.removeChildrens();
-        elements.modified.appendTo(elements.container);
         self.value(self.status.modified);
         return self.elements().container;
       };
 
       self.saved = function() {
-        self.removeChildrens();
-        elements.saved.appendTo(elements.container);
         self.value(self.status.saved);
+        return self.elements().container;
+      };
+
+      self.valid = function() {
+        self.value(self.status.valid);
         return self.elements().container;
       };
 
@@ -131,8 +165,8 @@ const View = {
         };
 
         self.value = function(value) {
-          if (typeof value === 'undefined') return elements.data.text();
-          elements.data.text(value);
+          if (typeof value === 'undefined') return elements.data.html();
+          elements.data.html(value);
           return self.value();
         };
 
@@ -202,8 +236,8 @@ const View = {
         };
 
         self.value = function(value) {
-          if (typeof value === 'undefined') return elements.data.text();
-          elements.data.text(value);
+          if (typeof value === 'undefined') return elements.data.html();
+          elements.data.html(value);
           elements.input.val(value);
           return self.value();
         };
@@ -403,14 +437,14 @@ const View = {
     }
   },
   'links': {
-    'deletable': function(data, events) {
+    'static': function(data, events) {
       let self = this,
         elements = {
           'container': HtmlBuilder.div({ 'class': data.class, 'text': '' }),
-          'link': HtmlBuilder.div({ 'value': data.value, 'class': 'value', 'text': data.text }),
+          'data': HtmlBuilder.div({ 'value': data.value, 'class': 'value', 'text': data.text }),
           'status': new View.status.edition(),
           'delete': View.buttons.delete(),
-          'add': View.buttons.add()
+          'link': View.buttons.link()
         };
 
       self.status = function() {
@@ -418,8 +452,56 @@ const View = {
       };
 
       self.value = function(value) {
-        if (typeof value === 'undefined') return elements.link.attr('value');
-        elements.link.attr('value', value);
+        if (typeof value === 'undefined') return elements.data.attr('value');
+        elements.data.attr('value', value);
+        return self.value();
+      };
+
+      self.elements = function() {
+        return elements;
+      };
+
+      self.delete = function() {
+        elements.container.remove();
+      };
+
+      elements.container
+        .append(elements['data'])
+        .append(elements['status'].elements().container)
+        .append(elements['link'])
+        .append(elements['delete']);
+
+      elements.data.click(function() {
+        events.onClick(self.value());
+      });
+
+      elements.delete.click(function() {
+        events.onDelete(self.value());
+      });
+
+      elements.link.click(function() {
+        events.onLink(self.value());
+      });
+
+      return self;
+    },
+    'deletable': function(data, events) {
+      let self = this,
+        elements = {
+          'container': HtmlBuilder.div({ 'class': data.class, 'text': '' }),
+          'data': HtmlBuilder.div({ 'value': data.value, 'class': 'value', 'text': data.text }),
+          'status': new View.status.edition(),
+          'delete': View.buttons.delete(),
+          'link': View.buttons.link()
+        };
+
+      self.status = function() {
+        elements.status.value();
+      };
+
+      self.value = function(value) {
+        if (typeof value === 'undefined') return elements.data.attr('value');
+        elements.data.attr('value', value);
         return self.value();
       };
 
@@ -428,12 +510,12 @@ const View = {
       };
 
       elements.container
-        .append(elements['link'])
+        .append(elements['data'])
         .append(elements['status'].elements().container)
-        .append(elements['delete'])
-        .append(elements['add']);
+        .append(elements['link'])
+        .append(elements['delete']);
 
-      elements.link.click(function() {
+      elements.data.click(function() {
         events.onClick(self.value());
       });
 
@@ -442,8 +524,8 @@ const View = {
         events.onDelete(self.value());
       });
 
-      elements.add.click(function() {
-        events.onAdd(self.value());
+      elements.link.click(function() {
+        events.onLink(self.value());
       });
 
       return self;

@@ -1,6 +1,10 @@
+/*
+ * @prettier
+ */
+
 (function($) {
   // On addDocument click
-  $('#addDocument').click(function() {
-    console.log('addDocument');
+  $('#addDocuments').click(function() {
+    console.log('addDocuments');
   });
 })(jQuery);

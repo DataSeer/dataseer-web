@@ -1,12 +1,24 @@
+/*
+ * @prettier
+ */
+
 const DatasetForm = function(events) {
   let self = this;
 
+  self.selectedElement = undefined;
   self.dataset = {};
   self.dataTypes = {};
+  self.metadata = {};
 
   let elements = {
-    'container': HtmlBuilder.div({ 'id': '', 'class': 'container-fluid', 'text': '' }),
-    'save': new View.buttons.save('Save Dataset'),
+    'container': HtmlBuilder.div({
+      'id': '',
+      'class': 'container-fluid',
+      'text': ''
+    }),
+    'save': new View.buttons.save('Save for later '),
+    'validation': new View.buttons.default('Validate'),
+    'unlink': new View.buttons.unlink(),
     'dataset.status': new View.status.edition('dataset.status'),
     'dataset.id': new View.properties.uneditable.text(
       {
@@ -16,10 +28,10 @@ const DatasetForm = function(events) {
       },
       {}
     ),
-    'dataset.confidence': new View.properties.uneditable.text(
+    'dataset.cert': new View.properties.uneditable.text(
       {
-        'id': 'dataset.confidence',
-        'key': 'Confidence : ',
+        'id': 'dataset.cert',
+        'key': 'cert : ',
         'value': ''
       },
       {}
@@ -37,40 +49,162 @@ const DatasetForm = function(events) {
           elements['dataset.status'].modified();
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.dataType = elements['dataset.dataType'].value();
-          elements['dataset.descritpion'].value(self.dataTypes[self.dataset.dataType].descritpion);
-          elements['dataset.bestDataFormatForSharing'].value(
-            self.dataTypes[self.dataset.dataType].bestDataFormatForSharing
-          );
-          elements['dataset.mostSuitableRepositories'].value(
-            self.dataTypes[self.dataset.dataType].mostSuitableRepositories
-          );
-          self.dataset.descritpion = elements['dataset.descritpion'].value();
+          self.setSubTypes(self.dataTypes[self.dataset.dataType]);
+          if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
+            elements['dataset.description'].value(
+              self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
+            );
+            elements['dataset.bestDataFormatForSharing'].value(
+              self.metadata[self.dataset.dataType].bestDataFormatForSharing
+                ? self.metadata[self.dataset.dataType].bestDataFormatForSharing
+                : ''
+            );
+            elements['dataset.mostSuitableRepositories'].value(
+              self.metadata[self.dataset.dataType].mostSuitableRepositories
+                ? self.metadata[self.dataset.dataType].mostSuitableRepositories
+                : ''
+            );
+          } else {
+            elements['dataset.description'].value('');
+            elements['dataset.bestDataFormatForSharing'].value('');
+            elements['dataset.mostSuitableRepositories'].value('');
+          }
+          self.dataset.description = elements['dataset.description'].value();
           self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
           self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
-          events.onChange(element);
+          events.onSave(element);
         },
         'onCancel': function(element) {},
         'onChange': function(element) {
           elements['dataset.status'].modified();
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.dataType = elements['dataset.dataType'].value();
-          elements['dataset.descritpion'].value(self.dataTypes[self.dataset.dataType].descritpion);
-          elements['dataset.bestDataFormatForSharing'].value(
-            self.dataTypes[self.dataset.dataType].bestDataFormatForSharing
-          );
-          elements['dataset.mostSuitableRepositories'].value(
-            self.dataTypes[self.dataset.dataType].mostSuitableRepositories
-          );
-          self.dataset.descritpion = elements['dataset.descritpion'].value();
+          self.setSubTypes(self.dataTypes[self.dataset.dataType]);
+          if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
+            elements['dataset.description'].value(
+              self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
+            );
+            elements['dataset.bestDataFormatForSharing'].value(
+              self.metadata[self.dataset.dataType].bestDataFormatForSharing
+                ? self.metadata[self.dataset.dataType].bestDataFormatForSharing
+                : ''
+            );
+            elements['dataset.mostSuitableRepositories'].value(
+              self.metadata[self.dataset.dataType].mostSuitableRepositories
+                ? self.metadata[self.dataset.dataType].mostSuitableRepositories
+                : ''
+            );
+          } else {
+            elements['dataset.description'].value('');
+            elements['dataset.bestDataFormatForSharing'].value('');
+            elements['dataset.mostSuitableRepositories'].value('');
+          }
+          self.dataset.description = elements['dataset.description'].value();
           self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
           self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
           events.onChange(element);
         }
       }
     ),
-    'dataset.descritpion': new View.properties.uneditable.text(
+    'dataset.subType': new View.properties.editable.select(
       {
-        'id': 'dataset.descritpion',
+        'id': 'dataset.subType',
+        'key': 'Sub type : ',
+        'value': '',
+        'options': []
+      },
+      {
+        'onEdit': function(element) {},
+        'onSave': function(element) {
+          elements['dataset.status'].modified();
+          self.dataset.status = elements['dataset.status'].value();
+          self.dataset.subType = elements['dataset.subType'].value();
+          if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
+            elements['dataset.description'].value(
+              self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
+            );
+            elements['dataset.bestDataFormatForSharing'].value(
+              self.metadata[self.dataset.subType].bestDataFormatForSharing
+                ? self.metadata[self.dataset.subType].bestDataFormatForSharing
+                : ''
+            );
+            elements['dataset.mostSuitableRepositories'].value(
+              self.metadata[self.dataset.subType].mostSuitableRepositories
+                ? self.metadata[self.dataset.subType].mostSuitableRepositories
+                : ''
+            );
+          } else if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
+            elements['dataset.description'].value(
+              self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
+            );
+            elements['dataset.bestDataFormatForSharing'].value(
+              self.metadata[self.dataset.dataType].bestDataFormatForSharing
+                ? self.metadata[self.dataset.dataType].bestDataFormatForSharing
+                : ''
+            );
+            elements['dataset.mostSuitableRepositories'].value(
+              self.metadata[self.dataset.dataType].mostSuitableRepositories
+                ? self.metadata[self.dataset.dataType].mostSuitableRepositories
+                : ''
+            );
+          } else {
+            elements['dataset.description'].value('');
+            elements['dataset.bestDataFormatForSharing'].value('');
+            elements['dataset.mostSuitableRepositories'].value('');
+          }
+          self.dataset.description = elements['dataset.description'].value();
+          self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
+          self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
+          events.onSave(element);
+        },
+        'onCancel': function(element) {},
+        'onChange': function(element) {
+          elements['dataset.status'].modified();
+          self.dataset.status = elements['dataset.status'].value();
+          self.dataset.subType = elements['dataset.subType'].value();
+          if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
+            elements['dataset.description'].value(
+              self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
+            );
+            elements['dataset.bestDataFormatForSharing'].value(
+              self.metadata[self.dataset.subType].bestDataFormatForSharing
+                ? self.metadata[self.dataset.subType].bestDataFormatForSharing
+                : ''
+            );
+            elements['dataset.mostSuitableRepositories'].value(
+              self.metadata[self.dataset.subType].mostSuitableRepositories
+                ? self.metadata[self.dataset.subType].mostSuitableRepositories
+                : ''
+            );
+          } else if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
+            elements['dataset.description'].value(
+              self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
+            );
+            elements['dataset.bestDataFormatForSharing'].value(
+              self.metadata[self.dataset.dataType].bestDataFormatForSharing
+                ? self.metadata[self.dataset.dataType].bestDataFormatForSharing
+                : ''
+            );
+            elements['dataset.mostSuitableRepositories'].value(
+              self.metadata[self.dataset.dataType].mostSuitableRepositories
+                ? self.metadata[self.dataset.dataType].mostSuitableRepositories
+                : ''
+            );
+          } else {
+            elements['dataset.description'].value('');
+            elements['dataset.bestDataFormatForSharing'].value('');
+            elements['dataset.mostSuitableRepositories'].value('');
+          }
+          self.dataset.description = elements['dataset.description'].value();
+          self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
+          self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
+          events.onChange(element);
+        }
+      }
+    ),
+    'dataset.description': new View.properties.uneditable.text(
+      {
+        'id': 'dataset.description',
         'key': 'Description : ',
         'value': ''
       },
@@ -164,20 +298,38 @@ const DatasetForm = function(events) {
         .row()
         .append(elements['dataset.id'].elements().container)
         .append(elements['dataset.status'].elements().container)
+        .append(elements['unlink'])
     )
-    .append(View.forms.row().append(elements['dataset.confidence'].elements().container))
+    .append(View.forms.row().append(elements['dataset.cert'].elements().container))
     .append(View.forms.row().append(elements['dataset.dataType'].elements().container))
-    .append(View.forms.row().append(elements['dataset.descritpion'].elements().container))
+    .append(View.forms.row().append(elements['dataset.subType'].elements().container))
+    .append(View.forms.row().append(elements['dataset.description'].elements().container))
     .append(View.forms.row().append(elements['dataset.bestDataFormatForSharing'].elements().container))
     .append(View.forms.row().append(elements['dataset.mostSuitableRepositories'].elements().container))
     .append(View.forms.row().append(elements['dataset.name'].elements().container))
     .append(View.forms.row().append(elements['dataset.DOI'].elements().container))
     .append(View.forms.row().append(elements['dataset.comments'].elements().container))
-    .append(View.forms.row().append(elements['save']));
+    .append(
+      View.forms
+        .row()
+        .append(elements['save'])
+        .append(elements['validation'])
+    );
+
+  elements.unlink.click(function() {
+    events.onUnlink(self.selectedElement);
+  });
+
+  elements.unlink.attr('title', 'Unlink selected sentence to this dataset');
 
   elements.save.click(function() {
     self.dataset = self.values();
-    events.onValid(self.dataset);
+    events.onSave(self.dataset);
+  });
+
+  elements.validation.click(function() {
+    self.dataset = self.values();
+    events.onValidation(self.dataset);
   });
 
   elements['dataset.id'].elements().data.click(function() {
@@ -192,10 +344,28 @@ const DatasetForm = function(events) {
     jQuery(id)
       .empty()
       .append(elements.container);
+    self.refresh();
+  };
+
+  self.refresh = function(options) {
+    if (typeof options !== 'undefined') {
+      if (typeof options.unlink !== 'undefined') options.unlink ? elements['unlink'].show() : elements['unlink'].hide();
+    }
     elements['dataset.id'].view();
-    elements['dataset.confidence'].view();
+    elements['dataset.cert'].view();
+    if (elements['dataset.cert'].value() === '0')
+      elements['dataset.cert']
+        .elements()
+        .container.parent()
+        .hide();
+    else
+      elements['dataset.cert']
+        .elements()
+        .container.parent()
+        .show();
     elements['dataset.dataType'].edit(false);
-    elements['dataset.descritpion'].view();
+    elements['dataset.subType'].edit(false);
+    elements['dataset.description'].view();
     elements['dataset.bestDataFormatForSharing'].view();
     elements['dataset.mostSuitableRepositories'].view();
     elements['dataset.name'].edit(false);
@@ -216,9 +386,10 @@ const DatasetForm = function(events) {
       return {
         'dataset.status': elements['dataset.status'].value(),
         'dataset.id': elements['dataset.id'].value(),
-        'dataset.confidence': elements['dataset.confidence'].value(),
+        'dataset.cert': elements['dataset.cert'].value(),
         'dataset.dataType': elements['dataset.dataType'].value(),
-        'dataset.descritpion': elements['dataset.descritpion'].value(),
+        'dataset.subType': elements['dataset.subType'].value(),
+        'dataset.description': elements['dataset.description'].value(),
         'dataset.bestDataFormatForSharing': elements['dataset.bestDataFormatForSharing'].value(),
         'dataset.mostSuitableRepositories': elements['dataset.mostSuitableRepositories'].value(),
         'dataset.name': elements['dataset.name'].value(),
@@ -227,9 +398,10 @@ const DatasetForm = function(events) {
       };
     elements['dataset.status'].value(dataset.status);
     elements['dataset.id'].value(dataset.id);
-    elements['dataset.confidence'].value(dataset.confidence);
+    elements['dataset.cert'].value(dataset.cert);
     elements['dataset.dataType'].value(dataset.dataType);
-    elements['dataset.descritpion'].value(dataset.descritpion);
+    elements['dataset.subType'].value(dataset.subType);
+    elements['dataset.description'].value(dataset.description);
     elements['dataset.bestDataFormatForSharing'].value(dataset.bestDataFormatForSharing);
     elements['dataset.mostSuitableRepositories'].value(dataset.mostSuitableRepositories);
     elements['dataset.name'].value(dataset.name);
@@ -238,23 +410,54 @@ const DatasetForm = function(events) {
     return self.values();
   };
 
-  self.link = function(dataset, style) {
+  self.link = function(dataset, style, element) {
     self.style(style);
     self.dataset = dataset;
+    self.setSubTypes(self.dataTypes[dataset.dataType]);
     self.values(dataset);
-    self.init();
+    self.selectedElement = element;
+    self.refresh({
+      'unlink':
+        typeof self.selectedElement !== 'undefined' && typeof self.selectedElement.attr('corresp') !== 'undefined'
+    });
   };
 
-  self.setDataTypes = function(dataTypes) {
-    self.dataTypes = dataTypes;
+  self.loadData = function(data) {
+    self.dataTypes = data.dataTypes;
+    self.metadata = data.metadata;
     let options = [];
-    for (let key in dataTypes) {
+    for (let key in self.dataTypes) {
       options.push({
         'value': key,
         'text': key
       });
     }
+    options.sort(function(a, b) {
+      if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
+      else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
+      else return 0;
+    });
     elements['dataset.dataType'].options(options);
+  };
+
+  self.setSubTypes = function(subTypes) {
+    let options = [];
+    for (var i = 0; i < subTypes.length; i++) {
+      options.push({
+        'value': subTypes[i],
+        'text': subTypes[i]
+      });
+    }
+    options.sort(function(a, b) {
+      if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
+      else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
+      else return 0;
+    });
+    options.unshift({
+      'value': '',
+      'text': 'None'
+    });
+    elements['dataset.subType'].options(options);
   };
 
   return self;

@@ -1,3 +1,7 @@
+/*
+ * @prettier
+ */
+
 const HtmlBuilder = {
   'div': function(options = {}) {
     let result = jQuery('<div/>')

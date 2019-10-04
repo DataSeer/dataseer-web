@@ -1,0 +1,29 @@
+extends ../layout
+
+block content
+
+  div(class='container-fluid')
+    div(class='row')
+      div(class='col-12 text-center')
+        div(class='header') DATASEER BACKOFFICE
+    if results.successes.length
+      div(class='row')
+        div(class='col-12 text-center success')
+          div Success :
+          ul
+            each result in results.successes
+              li
+                a(href='../../documents/' + result.document.id) #{result.filename}
+    if results.errors.length
+      div(class='row')
+        div(class='col-12 text-center error')
+          div Errors :
+          ul
+            each error in results.errors
+              if error.filename
+                li #{error.filename} : #{error.msg}
+              else
+                li #{error.msg}
+    div(class='row')
+      div(class='col-12 text-center continue')
+        a(href="") Continue
