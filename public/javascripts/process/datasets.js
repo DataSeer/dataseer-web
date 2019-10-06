@@ -194,7 +194,7 @@
               } else if (dataset['dataset.DOI'] === '' && dataset['dataset.comments'] === '') {
                 $('#datasets-error-modal-label').html('Final validation');
                 $('#datasets-error-modal-body').html(
-                  'Please, provide the DOI before validate (or enter any comments to explain why this dataset cannot be shared)'
+                  'To validate, please provide a DOI or enter comments explaining why this dataset cannot be shared'
                 );
                 $('#datasets-error-modal-btn').click();
               } else {
