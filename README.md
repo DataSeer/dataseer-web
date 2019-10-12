@@ -8,45 +8,35 @@
 
 ``npm start``
 
-To enable "demonstration mode" run :
+To enable "demonstration mode" run:
 
-On Linux/MacOS :
+On Linux/MacOS:
 
 ``DEMO=true npm start``
 
-On Windows :
+On Windows:
 
 ``set DEMO=true & npm start``
 
 ## Dependancies
 
-Application need an instance of mongoDB running on port 27017, with an "app" database, filled with "documents" collection. (conf/conf.json to set complete URL)
+Application need an instance of mongoDB running on port 27017, with an "app" database containing a collection "documents" (`conf/conf.json` to set complete URL).
 
-A set of documents is available at : resources/importMongoDB.json
+A set of documents is available at: `resources/importMongoDB.json`
 
-## How it works
+## Description
 
-MongoDB will store every documents.
+The project provides: 
 
-Express will provide : 
-
-  - a REST api to modify documents data (CRUD) (localhost:3000/api/documents/:id)
   - a web application to process documents stored in MongoDB database (localhost:3000/documents/:id)
-
-### API
-
-![api result of a given document](/doc/api.jpg "api result of a given document")
-
-
+  - a back office for uploading manually documents to be processed
+  - a REST api to load and modify documents data (CRUD) (localhost:3000/api/documents/:id)
+  
 ### Web Application
 
 #### Index
 
-![index of web app](/doc/index.jpg "Index of web app")
-
-#### BackOffice
-
-![backOffice of web app](/doc/backoffice.jpg "BackOffice of web app")
+![index of web app](/doc/index.png "Index of web app")
 
 #### List of Documents
 
@@ -58,13 +48,9 @@ Express will provide :
 
 #### Datasets
 
-##### List of Datasets
+##### List of Datasets with the form to update a Dataset
 
-![datasets list of a given document](/doc/dataset_list.jpg "datasets list of a given document")
-
-##### Form to update a Dataset
-
-![dataset form of a given document](/doc/dataset_form.jpg "dataset form of a given document")
+![datasets list of a given document](/doc/dataset_list.png "datasets list of a given document")
 
 #### Finish
 
@@ -76,6 +62,21 @@ Express will provide :
 
 ![finished result of a given document (dataseer)](/doc/finish_dataseer.jpg "finished result of a given document (dataseer)")
 
+### BackOffice
+
+![backOffice of web app](/doc/backoffice.png "BackOffice of web app")
+
+### API
+
+![api result of a given document](/doc/api.jpg "api result of a given document")
+
+## Implementation
+
+MongoDB store every documents.
+
+Express is used as web framework. 
+
+GUI is built with `Vue.js`.
 
 ## Contact and License
 
