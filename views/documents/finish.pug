@@ -15,15 +15,13 @@ block content
             div(class='row row-margin')
               div(class='col-12')
                 div(class='key d-inline') Data Availability Statement : 
-                each val, index in document.datasets
+                each val, index in document.datasets.current
 
                   div(class='row')
                     div(class='col-12')
-                      if val.DOI
+                      if val.DOI && val.name
                         div(class='value d-block') #{val.name} : 
                           a(href=val.DOI) #{val.DOI}
-                      else
-                        div(class='value d-block') #{val.name} : n/a
 
       div(class='row')
         div(class='col-12') The report below has been sent to the journal Editorial Office :
@@ -35,30 +33,32 @@ block content
             div(class='row row-margin')
               div(class='col-12')
                 div(class='key d-inline') Data Availability Statement : 
-                each val, index in document.datasets
+                each val, index in document.datasets.current
 
                   div(class='row')
                     div(class='col-12')
-                      if val.DOI
+                      if val.DOI && val.name
                         div(class='value d-block') #{val.name} : 
                           a(href=val.DOI) #{val.DOI}
-                      else
-                        div(class='value d-block') #{val.name} : n/a
 
             div(class='row row-margin')
               div(class='col-12') Author Comments : 
-                each val, index in document.datasets
+                each val, index in document.datasets.current
 
                   div(class='row')
                     div(class='col-12')
                       if val.comments
                         div(class='value d-block') #{val.name} : #{val.comments}
-                      else
-                        div(class='value d-block') #{val.name} : n/a
 
     else
 
       div(class='row row-margin')
+        div(class='col-12')
+          div(class='key d-inline font-weight-bold') Authors: 
+          div(class='value d-inline') #{document.metadata.authors}
+        div(class='col-12')
+          div(class='key d-inline font-weight-bold') Title: 
+          div(class='value d-inline') #{document.metadata.articleTitle}
         div(class='col-12')
           div(class='key d-inline font-weight-bold') Manuscript #: 
           div(class='value d-inline') #{document.metadata.manuscriptId}
@@ -71,8 +71,12 @@ block content
 
       div(class='row')
         div(class='col-12')
+          div(class='key d-inline font-weight-bold') Datasets :
+
+      div(class='row')
+        div(class='col-12')
           div(class='key d-inline')
-          each val, index in document.datasets
+          each val, index in document.datasets.current
 
             div(class='row row-margin')
               div(class='col-12')
@@ -83,6 +87,49 @@ block content
               div(class='col-12')
                 div(class='value d-inline font-weight-bold') Data Sentence : 
                 div(class='value d-inline') #{val.text}
+            div(class='row row-margin')
+              if val.name
+                div(class='col-12')
+                  div(class='value d-inline font-weight-bold') Dataset name : 
+                  div(class='value d-inline') #{val.name}
+              if val.DOI
+                div(class='col-12')
+                  div(class='value d-inline font-weight-bold') Stable Identifier : 
+                  div(class='value d-inline') #{val.DOI}
+              if val.comments
+                div(class='col-12')
+                  div(class='value d-inline font-weight-bold') Comments : 
+                  div(class='value d-inline') #{val.comments}
+
+      div(class='row')
+        div(class='col-12')
+          div(class='key d-inline font-weight-bold') Suggested Data Availability Statement : 
+      
+      div(class='row row-margin')
+        each val, index in document.datasets.current
+          div(class='col-12')
+            if val.DOI && val.name
+              div(class='value d-block') #{val.name} : 
+                a(href=val.DOI) #{val.DOI}
+
+
+    div(class='row row-margin')
+      div(class='col-12')
+        div(class='key d-inline font-weight-bold') Datasets deleted:
+    each val in document.datasets.deleted
+      div(class='row row-margin')
+        div(class='col-12')
+          if val.dataType
+            div(class='value d-inline') Data Type : 
+            div(class='value d-inline') #{val.dataType}
+        div(class='col-12')
+          if val.subType
+            div(class='value d-inline') Data Subtype : 
+            div(class='value d-inline') #{val.subType}
+        div(class='col-12')
+          if val.text
+            div(class='value d-inline') Data Sentence : 
+            div(class='value d-inline') #{val.text}
 
   if demo
     include ../forms/demo/finish.pug

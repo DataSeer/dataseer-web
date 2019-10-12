@@ -33,6 +33,12 @@ const View = {
     },
     'add': function() {
       return HtmlBuilder.icon({ 'class': 'fas fa-plus' });
+    },
+    'link': function() {
+      return HtmlBuilder.icon({ 'class': 'fas fa-link' });
+    },
+    'unlink': function() {
+      return HtmlBuilder.icon({ 'class': 'fas fa-unlink' });
     }
   },
   'buttons': {
@@ -60,6 +66,16 @@ const View = {
       return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' })
         .text(text)
         .append(View.icons.add());
+    },
+    'link': function(text = '') {
+      return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm btn-lite' })
+        .text(text)
+        .append(View.icons.link());
+    },
+    'unlink': function(text = '') {
+      return HtmlBuilder.button({ 'class': 'btn btn-danger btn-sm btn-lite' })
+        .text(text)
+        .append(View.icons.unlink());
     },
     'default': function(text = '') {
       return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' }).text(text);
@@ -425,10 +441,10 @@ const View = {
       let self = this,
         elements = {
           'container': HtmlBuilder.div({ 'class': data.class, 'text': '' }),
-          'link': HtmlBuilder.div({ 'value': data.value, 'class': 'value', 'text': data.text }),
+          'data': HtmlBuilder.div({ 'value': data.value, 'class': 'value', 'text': data.text }),
           'status': new View.status.edition(),
           'delete': View.buttons.delete(),
-          'add': View.buttons.add()
+          'link': View.buttons.link()
         };
 
       self.status = function() {
@@ -436,8 +452,8 @@ const View = {
       };
 
       self.value = function(value) {
-        if (typeof value === 'undefined') return elements.link.attr('value');
-        elements.link.attr('value', value);
+        if (typeof value === 'undefined') return elements.data.attr('value');
+        elements.data.attr('value', value);
         return self.value();
       };
 
@@ -450,12 +466,12 @@ const View = {
       };
 
       elements.container
-        .append(elements['link'])
+        .append(elements['data'])
         .append(elements['status'].elements().container)
+        .append(elements['link'])
         .append(elements['delete']);
-      /*.append(elements['add'])*/
 
-      elements.link.click(function() {
+      elements.data.click(function() {
         events.onClick(self.value());
       });
 
@@ -463,8 +479,8 @@ const View = {
         events.onDelete(self.value());
       });
 
-      elements.add.click(function() {
-        events.onAdd(self.value());
+      elements.link.click(function() {
+        events.onLink(self.value());
       });
 
       return self;
@@ -473,10 +489,10 @@ const View = {
       let self = this,
         elements = {
           'container': HtmlBuilder.div({ 'class': data.class, 'text': '' }),
-          'link': HtmlBuilder.div({ 'value': data.value, 'class': 'value', 'text': data.text }),
+          'data': HtmlBuilder.div({ 'value': data.value, 'class': 'value', 'text': data.text }),
           'status': new View.status.edition(),
           'delete': View.buttons.delete(),
-          'add': View.buttons.add()
+          'link': View.buttons.link()
         };
 
       self.status = function() {
@@ -484,8 +500,8 @@ const View = {
       };
 
       self.value = function(value) {
-        if (typeof value === 'undefined') return elements.link.attr('value');
-        elements.link.attr('value', value);
+        if (typeof value === 'undefined') return elements.data.attr('value');
+        elements.data.attr('value', value);
         return self.value();
       };
 
@@ -494,12 +510,12 @@ const View = {
       };
 
       elements.container
-        .append(elements['link'])
+        .append(elements['data'])
         .append(elements['status'].elements().container)
+        .append(elements['link'])
         .append(elements['delete']);
-      /*.append(elements['add'])*/
 
-      elements.link.click(function() {
+      elements.data.click(function() {
         events.onClick(self.value());
       });
 
@@ -508,8 +524,8 @@ const View = {
         events.onDelete(self.value());
       });
 
-      elements.add.click(function() {
-        events.onAdd(self.value());
+      elements.link.click(function() {
+        events.onLink(self.value());
       });
 
       return self;

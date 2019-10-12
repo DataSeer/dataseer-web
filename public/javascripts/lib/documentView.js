@@ -66,7 +66,7 @@ const DocumentView = function(events) {
       } else {
         return {
           'err': true,
-          'msg': 'Please select the sentence that contains the new dataset'
+          'res': null
         };
       }
     },
@@ -78,16 +78,20 @@ const DocumentView = function(events) {
             if (err) {
               return cb(err, res);
             }
-            let dataType = res['dataset-type'] ? res['dataset-type'] : options.dataType;
+            let dataType = res['datatype'] ? res['datatype'] : options.dataType,
+              cert = res['cert'] ? res['cert'] : 0;
             // if dataType is set, then it's not a corresp
-            target = selection.res.sentence.attr('id', options.id).attr('type', dataType);
+            target = selection.res.sentence
+              .attr('id', options.id)
+              .attr('type', dataType)
+              .attr('cert', cert);
             target.removeAttr('class');
             jQuery(target)
               .parents('div[type]')
               .attr('subtype', 'dataseer');
             target.click(function() {
               scrollTo(jQuery(this));
-              clickEvent(options.id);
+              clickEvent(options.id, this);
             });
             return cb(null, target);
           });
@@ -99,7 +103,7 @@ const DocumentView = function(events) {
             .attr('subtype', 'dataseer');
           target.click(function() {
             scrollTo(jQuery(this));
-            clickEvent(options.id);
+            clickEvent(options.id, this);
           });
           return target;
         }
@@ -120,7 +124,7 @@ const DocumentView = function(events) {
     datasets.all().click(function() {
       let id = jQuery(this).attr('id');
       scrollTo(jQuery(this));
-      events.datasets.click(id);
+      events.datasets.click(id, this);
     });
 
     corresps.all().click(function() {
@@ -128,7 +132,7 @@ const DocumentView = function(events) {
         .attr('corresp')
         .replace('#', '');
       scrollTo(jQuery(this));
-      events.corresps.click(id);
+      events.corresps.click(id, this);
     });
 
     datasets.colors();
@@ -188,8 +192,12 @@ const DocumentView = function(events) {
     return corresps.add(id);
   };
 
-  self.deleteCorresps = function(id) {
-    return corresps.remove(id);
+  self.deleteAllCorresps = function(id) {
+    return corresps.removeAll(id);
+  };
+
+  self.deleteCorresp = function(el) {
+    return corresps.remove(el);
   };
 
   self.views = {
@@ -269,11 +277,11 @@ const DocumentView = function(events) {
     'all': function() {
       return elements.container.find('tei text div[subtype="dataseer"] s[id]');
     },
-    // get confidence of given dataset
-    'confidenceOf': function(id) {
-      let confidence = parseFloat(datasets.get(id).attr('confidence'));
-      if (!confidence || confidence <= 0.5) confidence = 0.5;
-      return confidence;
+    // get cert of given dataset
+    'certOf': function(id) {
+      let cert = parseFloat(datasets.get(id).attr('cert'));
+      if (!cert || cert <= 0.5) cert = 0.5;
+      return cert;
     },
     // get/set dataType of given dataset
     'dataTypeOf': function(id, value) {
@@ -291,7 +299,7 @@ const DocumentView = function(events) {
     'colors': function() {
       datasets.all().each(function() {
         let id = jQuery(this).attr('id'),
-          backgroundColor = colors.backgroundColor(datasets.confidenceOf(id)),
+          backgroundColor = colors.backgroundColor(datasets.certOf(id)),
           color = colors.color(backgroundColor);
         datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
       });
@@ -305,7 +313,7 @@ const DocumentView = function(events) {
     // add dataset
     'add': function(id, dataType, cb) {
       let selection = selectedElements();
-      if (selection.err) return cb(true, selection.msg);
+      if (selection.err) return cb(true, 'Please select the sentence that contains the new dataset');
       return selectionToSenctence(
         selection,
         datasets.new,
@@ -313,12 +321,12 @@ const DocumentView = function(events) {
         events.datasets.click,
         function(err, res) {
           if (err) return cb(err, res);
-          let backgroundColor = colors.backgroundColor(datasets.confidenceOf(id)),
+          let backgroundColor = colors.backgroundColor(datasets.certOf(id)),
             color = colors.color(backgroundColor),
             parent = res.parents('div').first();
           parent.attr('subtype', 'dataseer');
           datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
-          return cb(null, 'everythings ok');
+          return cb(null, { 'datatype': res.attr('type'), 'cert': res.attr('cert') });
         }
       );
     },
@@ -382,11 +390,19 @@ const DocumentView = function(events) {
       corresps.styleOf(id, datasets.styleOf(id));
       return {
         err: false,
-        res: 'everythings ok'
+        res: target
       };
     },
     // remove correp
-    'remove': function(id) {
+    'remove': function(el) {
+      let parent = el.parents('div[subtype]'),
+        newElement = sentences.new(el.html()).clone();
+      el.replaceWith(newElement);
+      newElement.click(sentences.click).hover(sentences.hover, sentences.endHover);
+      if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
+    },
+    // remove all correp
+    'removeAll': function(id) {
       let _corresps = corresps.get(id).each(function() {
         let el = jQuery(this),
           parent = el.parents('div[subtype]'),

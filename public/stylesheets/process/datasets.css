@@ -62,7 +62,7 @@ i {
 }
 
 #dataset-form #dataset\.id .key,
-#dataset-form #dataset\.confidence .key,
+#dataset-form #dataset\.cert .key,
 #dataset-form #dataset\.dataType .key,
 #dataset-form #dataset\.subType .key {
   display: inline-block;
@@ -224,6 +224,11 @@ i {
   display: inline-block;
   margin-left: 4px;
   margin-right: 4px;
+}
+
+#datasets-list .form-row button:has(.fa-unlink) {
+  position:relative;
+  left:0%;
 }
 
 #datasets_validation {

@@ -1,6 +1,7 @@
 {
   "services": {
     "mongodb": "mongodb://localhost:27017/app",
-    "dataseer-ml": "http://localhost:8060/service"
+    "dataseer-ml": "http://localhost:8060/service",
+    "curator-email": "tim@dataseer.io"
   }
 }

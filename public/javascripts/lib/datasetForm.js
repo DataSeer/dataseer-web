@@ -5,6 +5,7 @@
 const DatasetForm = function(events) {
   let self = this;
 
+  self.selectedElement = undefined;
   self.dataset = {};
   self.dataTypes = {};
   self.metadata = {};
@@ -15,8 +16,9 @@ const DatasetForm = function(events) {
       'class': 'container-fluid',
       'text': ''
     }),
-    'save': new View.buttons.save('Save '),
-    'validation': new View.buttons.default('Final validation'),
+    'save': new View.buttons.save('Save for later '),
+    'validation': new View.buttons.default('Validate'),
+    'unlink': new View.buttons.unlink(),
     'dataset.status': new View.status.edition('dataset.status'),
     'dataset.id': new View.properties.uneditable.text(
       {
@@ -26,10 +28,10 @@ const DatasetForm = function(events) {
       },
       {}
     ),
-    'dataset.confidence': new View.properties.uneditable.text(
+    'dataset.cert': new View.properties.uneditable.text(
       {
-        'id': 'dataset.confidence',
-        'key': 'Confidence : ',
+        'id': 'dataset.cert',
+        'key': 'cert : ',
         'value': ''
       },
       {}
@@ -296,8 +298,9 @@ const DatasetForm = function(events) {
         .row()
         .append(elements['dataset.id'].elements().container)
         .append(elements['dataset.status'].elements().container)
+        .append(elements['unlink'])
     )
-    .append(View.forms.row().append(elements['dataset.confidence'].elements().container))
+    .append(View.forms.row().append(elements['dataset.cert'].elements().container))
     .append(View.forms.row().append(elements['dataset.dataType'].elements().container))
     .append(View.forms.row().append(elements['dataset.subType'].elements().container))
     .append(View.forms.row().append(elements['dataset.description'].elements().container))
@@ -312,6 +315,12 @@ const DatasetForm = function(events) {
         .append(elements['save'])
         .append(elements['validation'])
     );
+
+  elements.unlink.click(function() {
+    events.onUnlink(self.selectedElement);
+  });
+
+  elements.unlink.attr('title', 'Unlink selected sentence to this dataset');
 
   elements.save.click(function() {
     self.dataset = self.values();
@@ -335,8 +344,25 @@ const DatasetForm = function(events) {
     jQuery(id)
       .empty()
       .append(elements.container);
+    self.refresh();
+  };
+
+  self.refresh = function(options) {
+    if (typeof options !== 'undefined') {
+      if (typeof options.unlink !== 'undefined') options.unlink ? elements['unlink'].show() : elements['unlink'].hide();
+    }
     elements['dataset.id'].view();
-    elements['dataset.confidence'].view();
+    elements['dataset.cert'].view();
+    if (elements['dataset.cert'].value() === '0')
+      elements['dataset.cert']
+        .elements()
+        .container.parent()
+        .hide();
+    else
+      elements['dataset.cert']
+        .elements()
+        .container.parent()
+        .show();
     elements['dataset.dataType'].edit(false);
     elements['dataset.subType'].edit(false);
     elements['dataset.description'].view();
@@ -360,7 +386,7 @@ const DatasetForm = function(events) {
       return {
         'dataset.status': elements['dataset.status'].value(),
         'dataset.id': elements['dataset.id'].value(),
-        'dataset.confidence': elements['dataset.confidence'].value(),
+        'dataset.cert': elements['dataset.cert'].value(),
         'dataset.dataType': elements['dataset.dataType'].value(),
         'dataset.subType': elements['dataset.subType'].value(),
         'dataset.description': elements['dataset.description'].value(),
@@ -372,7 +398,7 @@ const DatasetForm = function(events) {
       };
     elements['dataset.status'].value(dataset.status);
     elements['dataset.id'].value(dataset.id);
-    elements['dataset.confidence'].value(dataset.confidence);
+    elements['dataset.cert'].value(dataset.cert);
     elements['dataset.dataType'].value(dataset.dataType);
     elements['dataset.subType'].value(dataset.subType);
     elements['dataset.description'].value(dataset.description);
@@ -384,12 +410,16 @@ const DatasetForm = function(events) {
     return self.values();
   };
 
-  self.link = function(dataset, style) {
+  self.link = function(dataset, style, element) {
     self.style(style);
     self.dataset = dataset;
     self.setSubTypes(self.dataTypes[dataset.dataType]);
     self.values(dataset);
-    self.init();
+    self.selectedElement = element;
+    self.refresh({
+      'unlink':
+        typeof self.selectedElement !== 'undefined' && typeof self.selectedElement.attr('corresp') !== 'undefined'
+    });
   };
 
   self.loadData = function(data) {
@@ -402,22 +432,31 @@ const DatasetForm = function(events) {
         'text': key
       });
     }
+    options.sort(function(a, b) {
+      if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
+      else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
+      else return 0;
+    });
     elements['dataset.dataType'].options(options);
   };
 
   self.setSubTypes = function(subTypes) {
-    let options = [
-      {
-        'value': '',
-        'text': 'None'
-      }
-    ];
+    let options = [];
     for (var i = 0; i < subTypes.length; i++) {
       options.push({
         'value': subTypes[i],
         'text': subTypes[i]
       });
     }
+    options.sort(function(a, b) {
+      if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
+      else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
+      else return 0;
+    });
+    options.unshift({
+      'value': '',
+      'text': 'None'
+    });
     elements['dataset.subType'].options(options);
   };
 
