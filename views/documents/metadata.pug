@@ -46,7 +46,8 @@ block content
       div(class='col-6 text-center')
         button(id='metadata_validation' class='btn btn-primary') This info is correct : Continue
       div(class='col-6 text-center')
-        button(id='metadata_contest' class='btn btn-primary' disabled) Something is wrong : Contact Journal
+        a(href="mailto:tim@dataseer.io")
+          button(id='metadata_contest' class='btn btn-primary') Something is wrong : Contact the DataSeer curator
 
   if demo
     include ../forms/demo/metadata.pug
