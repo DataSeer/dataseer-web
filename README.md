@@ -20,7 +20,7 @@ On Windows:
 
 ## Dependancies
 
-Application need an instance of mongoDB running on port 27017, with an "app" database containing a collection "documents" (`conf/conf.json` to set complete URL).
+Application need an instance of mongoDB running on port `27017`, with an `app` database containing a collection `documents` (`conf/conf.json` to set complete URL).
 
 A set of documents is available at: `resources/importMongoDB.json`
 
@@ -28,9 +28,9 @@ A set of documents is available at: `resources/importMongoDB.json`
 
 The project provides: 
 
-  - a web application to process documents stored in MongoDB database (localhost:3000/documents/:id)
+  - a web application to process documents stored in MongoDB database (`localhost:3000/documents/:id`)
   - a back office for uploading manually documents to be processed
-  - a REST api to load and modify documents data (CRUD) (localhost:3000/api/documents/:id)
+  - a REST api to load and modify documents data (CRUD) (`localhost:3000/api/documents/:id`)
   
 ### Web Application
 
