@@ -38,6 +38,8 @@ body {
 
 #document-view {
   background-color: white;
+  font-family: Times, "Times New Roman", serif;
+  font-size: 14px;
 }
 
 #dataset-form {
