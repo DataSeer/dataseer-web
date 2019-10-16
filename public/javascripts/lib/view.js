@@ -79,6 +79,9 @@ const View = {
     },
     'default': function(text = '') {
       return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' }).text(text);
+    },
+    'help': function(text= '') {
+      return HtmlBuilder.button({ 'class': 'btn btn-secondary btn-sm pull-right float-right' }).text(text);
     }
   },
   'status': {
@@ -534,6 +537,9 @@ const View = {
   'forms': {
     'row': function(events) {
       return HtmlBuilder.div({ 'id': '', 'class': 'form-row', 'text': '' });
+    },
+    'row_centered': function(events) {
+      return HtmlBuilder.div({ 'id': '', 'class': 'form-row centered', 'text': '', 'style': 'width:100%;align-text:center;' });
     }
   }
 };

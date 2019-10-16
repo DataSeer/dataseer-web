@@ -379,14 +379,15 @@
         });
 
         // FIX POPUP OF mostSuitableRepositories (using client configuration)
+        let currentDataType = $('.form-control option:selected')[0].innerText;
         let mostSuitableRepositoriesLink = $('<a/>')
-          .attr('href', CONF.mostSuitableRepositories.link.href)
+          .attr('href', CONF.mostSuitableRepositories.link.href + 'data_type:' + currentDataType)
           .attr('target', '_blank')
           .text(CONF.mostSuitableRepositories.link.text);
         updateForm
           .elements()
           ['dataset.mostSuitableRepositories'].elements()
-          .key.attr('title', CONF.mostSuitableRepositories.title)
+          .key.attr('title', CONF.mostSuitableRepositories.title + 'data_type:' + currentDataType)
           .append(mostSuitableRepositoriesLink);
 
         window.onbeforeunload = function() {

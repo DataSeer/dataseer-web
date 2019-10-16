@@ -65,3 +65,11 @@ soCalled:before {content:'‘'} soCalled {display:inline;} soCalled:after {conte
  term {display:inline;}
  unclear {display:inline;}
  view {display:inline; font-style: italic;}
+p {text-align: justify;}
+ref {font-style: italic;}
+figure {font-weight: bold; margin-left: 20px; margin-right: 20px; text-align: justify;}
+figure label {visibility: hidden;}
+figure label:after {content: " ";}
+figure figdesc {text-align: justify; font-weight: normal;}
+note[place="foot"]:before { content: "Note: "; font-weight: bold; }
+note[place="foot"] {margin-left: 20px; margin-right: 20px; text-align: justify;}

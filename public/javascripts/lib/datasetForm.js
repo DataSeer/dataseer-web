@@ -18,6 +18,7 @@ const DatasetForm = function(events) {
     }),
     'save': new View.buttons.save('Save for later '),
     'validation': new View.buttons.default('Validate'),
+    'help': new View.buttons.help('Help'),
     'unlink': new View.buttons.unlink(),
     'dataset.status': new View.status.edition('dataset.status'),
     'dataset.id': new View.properties.uneditable.text(
@@ -295,7 +296,7 @@ const DatasetForm = function(events) {
   elements.container
     .append(
       View.forms
-        .row()
+        .row_centered()
         .append(elements['dataset.id'].elements().container)
         .append(elements['dataset.status'].elements().container)
         .append(elements['unlink'])
@@ -314,6 +315,7 @@ const DatasetForm = function(events) {
         .row()
         .append(elements['save'])
         .append(elements['validation'])
+        .append(elements['help'])
     );
 
   elements.unlink.click(function() {

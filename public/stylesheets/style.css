@@ -4,6 +4,8 @@ body {
   margin-top: 20px;
   margin-bottom: 20px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #063046;
+  background-color: lightgray;
 }
 
 .crud-button-action {
@@ -32,4 +34,16 @@ body {
 .routes {
   margin-top: 20px;
   margin-bottom: 20px;
+}
+
+#document-view {
+  background-color: white;
+}
+
+#dataset-form {
+  background-color: white;
+}
+
+#datasets-list {
+  background-color: white;
 }
