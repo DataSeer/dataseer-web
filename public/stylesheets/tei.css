@@ -72,4 +72,9 @@ figure label {visibility: hidden;}
 figure label:after {content: " ";}
 figure figdesc {text-align: justify; font-weight: normal;}
 note[place="foot"]:before { content: "Note: "; font-weight: bold; }
-note[place="foot"] {margin-left: 20px; margin-right: 20px; text-align: justify;}
+note[place="foot"] { margin-left: 20px; margin-right: 20px; text-align: justify;}
+formula:before { content: "Formula: ";  font-weight: bold;}
+formula { margin-left: 20px; margin-right: 20px;}
+formula label { font-weight: bold; }
+formula label:after { content: " ";}
+title { font-weight: bold; text-align: center; }

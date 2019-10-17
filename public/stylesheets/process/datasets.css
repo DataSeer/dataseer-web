@@ -52,7 +52,7 @@ i {
 
 #dataset-form #dataset\.id {
   display: inline-block;
-  width: 100%;
+  width: auto;
   cursor: pointer;
 }
 
@@ -72,11 +72,11 @@ i {
   margin-bottom: 20px; 
 }
 
-#dataset-form .centered>div{
+/*#dataset-form .centered>div{
   width: 100%;
   text-align: center;
   vertical-align: middle;
-}
+}*/
 
 #dataset-form .form-row>div {
   width: 100%;
@@ -139,7 +139,22 @@ i {
   margin-top: 5px;
 }
 
-#document-view tei teiHeader,
+#document-view tei teiHeader encodingdesc {
+  display: none;
+}
+#document-view tei teiHeader profiledesc {
+  display: none;
+}
+#document-view tei teiHeader filedesc publicationstmt {
+  display: none;
+}
+#document-view tei teiHeader filedesc sourcedesc {
+  display: none;
+}
+#document-view tei teiHeader filedesc titlestmt title {
+  font-weight: bold; !important
+}
+
 #document-view tei back {
   display: none;
 }

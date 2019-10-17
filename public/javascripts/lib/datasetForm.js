@@ -296,7 +296,7 @@ const DatasetForm = function(events) {
   elements.container
     .append(
       View.forms
-        .row_centered()
+        .row()
         .append(elements['dataset.id'].elements().container)
         .append(elements['dataset.status'].elements().container)
         .append(elements['unlink'])
@@ -400,7 +400,7 @@ const DatasetForm = function(events) {
       };
     elements['dataset.status'].value(dataset.status);
     elements['dataset.id'].value(dataset.id);
-    elements['dataset.cert'].value(dataset.cert);
+    elements['dataset.cert'].value(parseFloat(dataset.cert).toFixed(4));
     elements['dataset.dataType'].value(dataset.dataType);
     elements['dataset.subType'].value(dataset.subType);
     elements['dataset.description'].value(dataset.description);
