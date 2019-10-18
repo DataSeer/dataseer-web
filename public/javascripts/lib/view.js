@@ -81,7 +81,7 @@ const View = {
       return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' }).text(text);
     },
     'help': function(text= '') {
-      return HtmlBuilder.button({ 'class': 'btn btn-secondary btn-sm pull-right float-right' }).text(text);
+      return HtmlBuilder.button({ 'class': 'btn btn-secondary btn-sm pull-right float-right', 'data-toggle': 'modal', 'data-target': '#theHelp'}).text(text);
     }
   },
   'status': {

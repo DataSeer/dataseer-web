@@ -38,7 +38,11 @@ const HtmlBuilder = {
     return select;
   },
   'button': function(options = {}) {
-    return jQuery('<button/>').addClass(options.class);
+    let button = jQuery('<button/>').addClass(options.class);;
+    if (options.id) button.attr('id', options.id);
+    if (options['data-toggle']) button.attr('data-toggle', options['data-toggle']);
+    if (options['data-target']) button.attr('data-target', options['data-target']);
+    return button;
   },
   'icon': function(options = {}) {
     return jQuery('<i/>').addClass(options.class);
