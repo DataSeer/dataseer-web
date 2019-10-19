@@ -49,3 +49,35 @@ body {
 #datasets-list {
   background-color: white;
 }
+
+.btn-primary {
+  background-color: #184D7E;
+  border-color: #184D7E;
+}
+
+.btn-primary .active {
+  background-color: #A4A4A4;
+  border-color: #A4A4A4;
+}
+
+.btn-secondary {
+  background-color: #848484;
+  border-color: #848484;
+}
+
+.btn-secondary .active {
+  background-color: #253c44;
+  border-color: #253c44;
+}
+
+
+/*.btn-primary {
+  background-color: #0062CC;
+  border-color: #0062CC;
+}
+
+.btn-primary .hover {
+  background-color: #184D7E;
+  border-color: #184D7E;
+}
+*/
