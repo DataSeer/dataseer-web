@@ -355,7 +355,8 @@ const DatasetForm = function(events) {
     }
     elements['dataset.id'].view();
     elements['dataset.cert'].view();
-    if (elements['dataset.cert'].value() === '0')
+    let certValue = parseFloat(elements['dataset.cert'].value())
+    if (certValue === 0.0)
       elements['dataset.cert']
         .elements()
         .container.parent()
