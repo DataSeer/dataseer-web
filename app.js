@@ -32,7 +32,7 @@ mongoose.connect(urlmongo, { 'useNewUrlParser': true, 'useFindAndModify': false 
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Failed to connect to MongoDB'));
 db.once('open', function() {
-  console.log('Connection to MongoDB succed');
+  console.log('Connection to MongoDB succeeded');
 });
 
 // all environments
