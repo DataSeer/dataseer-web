@@ -5,7 +5,7 @@ block content
   div(class='bordered' style='border-color:#ffffff;border-width:0px;')
     div(class='container-fluid')
       div(class='row')
-        div(class='col-6' style='padding-left:0;')
+        div(class='col-6')
           div(class='row')
             div(class='col-12 text-center')
               div(id='view-selection' class='btn-group btn-group-toggle bordered' data-toggle='buttons' style='padding:0;')
@@ -18,12 +18,13 @@ block content
           div(class='row')
             div(class='col-12')
               div(id='document-view' class='bordered')
-        div(class='col-4' style='padding-left:0;')
-          div(id='dataset-form' class='form bordered')
+        div(class='col-4')
+          div(class='row')
+            div(id='dataset-form' class='form bordered')
         div(class='col-2')
           div(class='row')
-            div(id='datasets-list' class='form bordered' style='padding:0;')
-            button(id='datasets_validation' class='btn btn-primary' style='width:100%;margin-left:3px; margin-right:3px;') Finish
+            div(id='datasets-list' class='form bordered')
+            button(id='datasets_validation' class='btn btn-primary') Finish
 
   div(style='text-align:center;')  
       a(href='https://www.dataseer.io' style='color:#ffffff;' target='_blank') dataseer.io

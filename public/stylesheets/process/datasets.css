@@ -16,8 +16,8 @@ i {
   padding-bottom: 0px;
 }
 
-.row>*,
-.form-row>* {
+.row > *,
+.form-row > * {
   vertical-align: middle;
 }
 
@@ -43,11 +43,41 @@ i {
 
 /*dataset-form*/
 
+body > div > div > div.row > div:nth-child(2) {
+  padding-left: 0;
+}
+
 #dataset-form {
   width: 100%;
   height: 87vh;
   overflow: auto;
   padding: 15px;
+}
+
+#dataset-form .form-row:first-child {
+  display: block;
+  text-align: center;
+}
+
+#dataset-form .form-row:first-child > div,
+#dataset-form .form-row:first-child > button {
+   vertical-align: middle; 
+}
+
+
+#dataset-form .form-row:last-child {
+  display: table;
+  width: 100%;
+}
+
+#dataset-form .form-row:last-child > button {
+  display: table-cell;
+  text-align: left;
+}
+
+#dataset-form .form-row:last-child > button:last-child {
+  display: table-cell;
+  text-align: right;
 }
 
 #dataset-form #dataset\.id {
@@ -69,22 +99,15 @@ i {
 }
 
 #dataset-form .form-row {
-  margin-bottom: 20px; 
+  margin-bottom: 20px;
 }
 
-/*#dataset-form .centered>div{
-  width: 100%;
-  text-align: center;
-  vertical-align: middle;
-}*/
-
-#dataset-form .form-row>div {
+#dataset-form .form-row > div {
   width: 100%;
   display: block;
 }
 
 #dataset-form .form-row .key {
-  margin-bottom: 4px; 
   margin-right: 5px;
   display: inline-block;
   font-weight: bold;
@@ -94,7 +117,7 @@ i {
   display: inline-block;
 }
 
-#dataset-form .form-row button {
+#dataset-form .form-row > button {
   display: inline-block;
   margin-left: 4px;
   margin-right: 4px; 
@@ -110,6 +133,10 @@ i {
 
 /*document-view*/
 
+body > div > div > div.row > div:nth-child(1) {
+  padding-left: 0;
+}
+
 #document-view {
   border-top: 0px solid lightgray;
   border-top-left-radius: 0px;
@@ -121,21 +148,21 @@ i {
 }
 
 /* TEI CUSTOMIZATION */
-#document-view tei>text>div {
+#document-view tei > text > div {
   font-weight: bold;
 }
 
-#document-view tei>text>div>p {
+#document-view tei > text > div > p {
   margin-top: 10px;
   font-weight: normal;
 }
 
-#document-view tei>text>div>*:not(p) {
+#document-view tei > text > div > *:not(p) {
   margin-top: 5px;
   font-weight: normal;
 }
 
-#document-view tei>text>div>p>* {
+#document-view tei > text > div > p > * {
   margin-top: 5px;
 }
 
@@ -205,10 +232,10 @@ i {
 /*datasets-list*/
 
 #datasets-list {
+  padding: 0;
   width: 100%;
   height: 80vh;
   overflow: auto;
-  padding: 15px;
 }
 
 #datasets-list .selected {
@@ -226,8 +253,24 @@ i {
   vertical-align: middle;
 }
 
-#datasets-list .form-row>* {
+#datasets-list > * {
+  text-align: center;
+}
+
+#datasets-list .form-row > * {
   display: inline-block;
+}
+
+#datasets-list > div > button > i {
+  margin-right: 0 !important;
+}
+
+#datasets-list .form-row > *:first-child {
+  margin-left: 0 !important;
+}
+
+#datasets-list .form-row > *:last-child {
+  margin-right: 0!important;
 }
 
 #datasets-list .form-row .value {
@@ -253,6 +296,7 @@ i {
 }
 
 #datasets_validation {
+  width: 100%;
   margin-top: 15px;
 }
 
