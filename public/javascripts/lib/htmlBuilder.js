@@ -38,7 +38,7 @@ const HtmlBuilder = {
     return select;
   },
   'button': function(options = {}) {
-    let button = jQuery('<button/>').addClass(options.class);;
+    let button = jQuery('<button/>').addClass(options.class);
     if (options.id) button.attr('id', options.id);
     if (options['data-toggle']) button.attr('data-toggle', options['data-toggle']);
     if (options['data-target']) button.attr('data-target', options['data-target']);
@@ -46,5 +46,11 @@ const HtmlBuilder = {
   },
   'icon': function(options = {}) {
     return jQuery('<i/>').addClass(options.class);
+  },
+  'a': function(options = {}) {
+    let a = jQuery('<a/>');
+    if (options.href) a.attr('href', encodeURI(options.href));
+    if (options.text) a.text(options.text);
+    return a;
   }
 };

@@ -80,8 +80,12 @@ const View = {
     'default': function(text = '') {
       return HtmlBuilder.button({ 'class': 'btn btn-primary btn-sm' }).text(text);
     },
-    'help': function(text= '') {
-      return HtmlBuilder.button({ 'class': 'btn btn-secondary btn-sm pull-right float-right', 'data-toggle': 'modal', 'data-target': '#theHelp'}).text(text);
+    'help': function(text = '') {
+      return HtmlBuilder.button({
+        'class': 'btn btn-secondary btn-sm pull-right float-right',
+        'data-toggle': 'modal',
+        'data-target': '#theHelp'
+      }).text(text);
     }
   },
   'status': {
@@ -161,6 +165,20 @@ const View = {
             'data': HtmlBuilder.div({ 'class': 'value', 'text': data.value })
           };
 
+        if (typeof data.help === 'object') {
+          self.help = function(options) {
+            if (typeof options !== 'undefined') {
+              if (options.href) elements.help.attr('href', options.href);
+              if (options.title) elements.container.attr('title', options.title);
+              if (options.text) elements.help.text(options.text);
+            }
+            return elements.help;
+          };
+          if (data.help.href && data.help.text)
+            elements.help = HtmlBuilder.a({ 'href': data.help.href, text: data.help.text });
+          if (data.help.title) elements.container.attr('title', data.help.title);
+        }
+
         self.id = function(value) {
           if (typeof value === 'undefined') return elements.container.attr('id');
           elements.container.attr('id', id);
@@ -182,11 +200,13 @@ const View = {
         self.removeChildrens = function() {
           elements.key.detach();
           elements.data.detach();
+          if (typeof elements.help !== 'undefined') elements.help.detach();
         };
 
         self.view = function() {
           self.removeChildrens();
           elements.key.appendTo(elements.container);
+          if (typeof elements.help !== 'undefined') elements.help.appendTo(elements.container);
           elements.data.appendTo(elements.container);
           return self.elements().container;
         };
@@ -210,6 +230,21 @@ const View = {
             'save': View.buttons.save(),
             'cancel': View.buttons.cancel()
           };
+
+        if (typeof data.help === 'object') {
+          self.help = function(options) {
+            console.log(options);
+            if (typeof options !== 'undefined') {
+              if (options.href) elements.help.attr('href', options.href);
+              if (options.title) elements.container.attr('title', options.title);
+              if (options.text) elements.help.text(options.text);
+            }
+            return elements.help;
+          };
+          if (data.help.href && data.help.text)
+            elements.help = HtmlBuilder.a({ 'href': data.help.href, text: data.help.text });
+          if (data.help.title) elements.container.attr('title', data.help.title);
+        }
 
         elements.input.bind('input propertychange', function() {
           self.value(elements.input.val());
@@ -258,11 +293,13 @@ const View = {
           elements.edit.detach();
           elements.save.detach();
           elements.cancel.detach();
+          if (typeof elements.help !== 'undefined') elements.help.detach();
         };
 
         self.view = function() {
           self.removeChildrens();
           elements.key.appendTo(elements.container);
+          if (typeof elements.help !== 'undefined') elements.help.appendTo(elements.container);
           elements.data.appendTo(elements.container);
           elements.edit.appendTo(elements.container);
           return self.elements().container;
@@ -271,6 +308,7 @@ const View = {
         self.edit = function(buttons = true) {
           self.removeChildrens();
           elements.key.appendTo(elements.container);
+          if (typeof elements.help !== 'undefined') elements.help.appendTo(elements.container);
           elements.input.appendTo(elements.container);
           if (buttons) {
             elements.save.appendTo(elements.container);
@@ -539,7 +577,12 @@ const View = {
       return HtmlBuilder.div({ 'id': '', 'class': 'form-row', 'text': '' });
     },
     'row_centered': function(events) {
-      return HtmlBuilder.div({ 'id': '', 'class': 'form-row centered', 'text': '', 'style': 'width:100%;align-text:center;' });
+      return HtmlBuilder.div({
+        'id': '',
+        'class': 'form-row centered',
+        'text': '',
+        'style': 'width:100%;align-text:center;'
+      });
     }
   }
 };
