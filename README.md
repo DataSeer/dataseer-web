@@ -1,5 +1,17 @@
 # DataSeer-Web
 
+![Logo DataSeer](/public/img/DataSeer-logo-75.png "Logo")
+
+## Purpose
+
+This repository corresponds to the Dataseer web application, which aims at driving the authors of scientific article/manuscripts to the best research data sharing practices, i.e. to ensure that the datasets coming with an article are associated with data availability statement, permanent identifiers and in general requirements regarding Open Science and reproducibility. 
+
+Machine learning techniques are used to extract and structure the information of the scientific article, to identify contexts introducting datasets and finally to classify these context into predicted data types and subtypes. These ML predictions are used by the web application to helkp the author to described in an efficient and assisted manner the datasets used in the article and how these data are shared with the scientific community. 
+
+See the [dataseer-ml](https://github.com/kermitt2/dataseer-ml) repository for the machine learning services used by DataSeer web.
+
+Supported article formats are PDF, docx, TEI, JATS/NLM, ScholarOne, and a large variety of additional publisher native XML formats: BMJ, Elsevier staging format, OUP, PNAS, RSC, Sage, Wiley, etc (see [Pub2TEI](https://github.com/kermitt2/Pub2TEI) for the list of native publisher XML format covered).
+
 ## Installation
 
 ``npm i``
@@ -80,7 +92,7 @@ GUI is built with `Vue.js`.
 
 ## Contact and License
 
-Main author and contact: Nicolas Kieffer, Patrice Lopez (<patrice.lopez@science-miner.com>)
+Main authors and contact: Nicolas Kieffer, Patrice Lopez (<patrice.lopez@science-miner.com>)
 
 The development of dataseer-ml is supported by a [Sloan Foundation](https://sloan.org/) grant, see [here](https://coko.foundation/coko-receives-sloan-foundation-grant-to-build-dataseer-a-missing-piece-in-the-data-sharing-puzzle/)
 
