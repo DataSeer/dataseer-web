@@ -2,14 +2,11 @@ div(class='container-fluid')
   form(ref='uploadForm' id='uploadForm' action='' method='post' encType='multipart/form-data')
     div(class='row')
       div(class='col-12')
-          label(for='uploadedFiles') File(s) mimetype(s) must be : xml/tei or application/pdf
+          input(type='file' class='form-control-file' name='uploadedFiles' id='uploadedFiles' multiple style='margin-left:10px;')
     div(class='row')
       div(class='col-12')
-          input(type='file' class='form-control-file' name='uploadedFiles' id='uploadedFiles' multiple)
+          input(type='checkbox' class='form-control-file checked' name='dataseerML' id='dataseerML' value='dataseer-ml' style='margin-left:10px;') 
+          label(for='dataseerML') Identify datasets automatically
     div(class='row')
       div(class='col-12')
-          input(type='checkbox' class='form-control-file' name='dataseerML' id='dataseerML' value='dataseer-ml') 
-          label(for='dataseerML') Process Dataseer-ML on file(s)
-    div(class='row')
-      div(class='col-12')
-          button(type='submit' class='btn btn-primary btn-sm' id='addDocuments') Add new document(s)
+          button(type='submit' class='btn btn-primary btn-sm' id='addDocuments' style='margin-left:10px;') Upload new document

@@ -1,7 +1,6 @@
 /*
  * @prettier
  */
-
 const DatasetForm = function(events) {
   let self = this;
 
@@ -18,6 +17,7 @@ const DatasetForm = function(events) {
     }),
     'save': new View.buttons.save('Save for later '),
     'validation': new View.buttons.default('Validate'),
+    'help': new View.buttons.help('Help'),
     'unlink': new View.buttons.unlink(),
     'dataset.status': new View.status.edition('dataset.status'),
     'dataset.id': new View.properties.uneditable.text(
@@ -51,6 +51,16 @@ const DatasetForm = function(events) {
           self.dataset.dataType = elements['dataset.dataType'].value();
           self.setSubTypes(self.dataTypes[self.dataset.dataType]);
           if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
+            elements['dataset.mostSuitableRepositories'].help({
+              'href': encodeURI(
+                elements['dataset.mostSuitableRepositories']
+                  .help()
+                  .attr('href')
+                  .split('?')[0] +
+                  '?id=' +
+                  self.dataset.dataType
+              )
+            });
             elements['dataset.description'].value(
               self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
             );
@@ -65,6 +75,12 @@ const DatasetForm = function(events) {
                 : ''
             );
           } else {
+            elements['dataset.mostSuitableRepositories'].help({
+              'href': elements['dataset.mostSuitableRepositorieencodeURI(s']
+                .help()
+                .attr('href')
+                .split('?')[0]
+            });
             elements['dataset.description'].value('');
             elements['dataset.bestDataFormatForSharing'].value('');
             elements['dataset.mostSuitableRepositories'].value('');
@@ -81,6 +97,16 @@ const DatasetForm = function(events) {
           self.dataset.dataType = elements['dataset.dataType'].value();
           self.setSubTypes(self.dataTypes[self.dataset.dataType]);
           if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
+            elements['dataset.mostSuitableRepositories'].help({
+              'href': encodeURI(
+                elements['dataset.mostSuitableRepositories']
+                  .help()
+                  .attr('href')
+                  .split('?')[0] +
+                  '?id=' +
+                  self.dataset.dataType
+              )
+            });
             elements['dataset.description'].value(
               self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
             );
@@ -95,6 +121,12 @@ const DatasetForm = function(events) {
                 : ''
             );
           } else {
+            elements['dataset.mostSuitableRepositories'].help({
+              'href': elements['dataset.mostSuitableRepositorieencodeURI(s']
+                .help()
+                .attr('href')
+                .split('?')[0]
+            });
             elements['dataset.description'].value('');
             elements['dataset.bestDataFormatForSharing'].value('');
             elements['dataset.mostSuitableRepositories'].value('');
@@ -120,6 +152,16 @@ const DatasetForm = function(events) {
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.subType = elements['dataset.subType'].value();
           if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
+            elements['dataset.mostSuitableRepositories'].help({
+              'href': encodeURI(
+                elements['dataset.mostSuitableRepositories']
+                  .help()
+                  .attr('href')
+                  .split('?')[0] +
+                  '?id=' +
+                  self.dataset.subType
+              )
+            });
             elements['dataset.description'].value(
               self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
             );
@@ -134,6 +176,16 @@ const DatasetForm = function(events) {
                 : ''
             );
           } else if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
+            elements['dataset.mostSuitableRepositories'].help({
+              'href': encodeURI(
+                elements['dataset.mostSuitableRepositories']
+                  .help()
+                  .attr('href')
+                  .split('?')[0] +
+                  '?id=' +
+                  self.dataset.dataType
+              )
+            });
             elements['dataset.description'].value(
               self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
             );
@@ -148,6 +200,12 @@ const DatasetForm = function(events) {
                 : ''
             );
           } else {
+            elements['dataset.mostSuitableRepositories'].help({
+              'href': elements['dataset.mostSuitableRepositorieencodeURI(s']
+                .help()
+                .attr('href')
+                .split('?')[0]
+            });
             elements['dataset.description'].value('');
             elements['dataset.bestDataFormatForSharing'].value('');
             elements['dataset.mostSuitableRepositories'].value('');
@@ -163,6 +221,16 @@ const DatasetForm = function(events) {
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.subType = elements['dataset.subType'].value();
           if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
+            elements['dataset.mostSuitableRepositories'].help({
+              'href': encodeURI(
+                elements['dataset.mostSuitableRepositories']
+                  .help()
+                  .attr('href')
+                  .split('?')[0] +
+                  '?id=' +
+                  self.dataset.subType
+              )
+            });
             elements['dataset.description'].value(
               self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
             );
@@ -177,6 +245,16 @@ const DatasetForm = function(events) {
                 : ''
             );
           } else if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
+            elements['dataset.mostSuitableRepositories'].help({
+              'href': encodeURI(
+                elements['dataset.mostSuitableRepositories']
+                  .help()
+                  .attr('href')
+                  .split('?')[0] +
+                  '?id=' +
+                  self.dataset.dataType
+              )
+            });
             elements['dataset.description'].value(
               self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
             );
@@ -222,7 +300,13 @@ const DatasetForm = function(events) {
       {
         'id': 'dataset.mostSuitableRepositories',
         'key': 'Most suitable Repositories : ',
-        'value': ''
+        'value': '',
+        'help': {
+          'title':
+            'If you disagree with this information, please edit the Dataseer Wiki available at: http://wiki.dataseer.io/doku.php',
+          'href': 'http://wiki.dataseer.io/doku.php',
+          'text': '?'
+        }
       },
       {}
     ),
@@ -314,6 +398,7 @@ const DatasetForm = function(events) {
         .row()
         .append(elements['save'])
         .append(elements['validation'])
+        .append(elements['help'])
     );
 
   elements.unlink.click(function() {
@@ -351,9 +436,26 @@ const DatasetForm = function(events) {
     if (typeof options !== 'undefined') {
       if (typeof options.unlink !== 'undefined') options.unlink ? elements['unlink'].show() : elements['unlink'].hide();
     }
+    if (typeof self.dataset.dataType !== 'undefined' || typeof self.dataset.subType !== 'undefined') {
+      let param =
+        typeof self.dataset.subType !== 'undefined' && self.dataset.subType !== ''
+          ? self.dataset.subType
+          : self.dataset.dataType;
+      elements['dataset.mostSuitableRepositories'].help({
+        'href': encodeURI(
+          elements['dataset.mostSuitableRepositories']
+            .help()
+            .attr('href')
+            .split('?')[0] +
+            '?id=' +
+            param
+        )
+      });
+    }
     elements['dataset.id'].view();
     elements['dataset.cert'].view();
-    if (elements['dataset.cert'].value() === '0')
+    let certValue = parseFloat(elements['dataset.cert'].value());
+    if (certValue === 0.0)
       elements['dataset.cert']
         .elements()
         .container.parent()
@@ -398,7 +500,7 @@ const DatasetForm = function(events) {
       };
     elements['dataset.status'].value(dataset.status);
     elements['dataset.id'].value(dataset.id);
-    elements['dataset.cert'].value(dataset.cert);
+    elements['dataset.cert'].value(parseFloat(dataset.cert).toFixed(4));
     elements['dataset.dataType'].value(dataset.dataType);
     elements['dataset.subType'].value(dataset.subType);
     elements['dataset.description'].value(dataset.description);

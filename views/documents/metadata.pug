@@ -4,50 +4,56 @@ block content
 
   div(class='container-fluid')
     div(class='row')
-      div(class='col-12')
-        h1(class='text-center') Welcome to DATASEER
+      div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
+        img(src='../img/DataSeer-logo-75.png' style='margin-left:10px;')
+    div(class='row')
+      div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px;')
+        div(class='row row-margin')
+          div(class='col-12')
+            div(class='key d-inline font-weight-bold') Manuscript #: 
+            div(class='value d-inline') #{document.metadata.manuscriptId}
+          div(class='col-12')
+            div(class='key d-inline font-weight-bold') Article Title : 
+            div(class='value d-inline') #{document.metadata.articleTitle}
+          div(class='col-12')
+            div(class='key d-inline font-weight-bold') Journal : 
+            div(class='value d-inline') #{document.metadata.journal}
 
-    div(class='row row-margin')
-      div(class='col-12')
-        div(class='key d-inline font-weight-bold') Manuscript #: 
-        div(class='value d-inline') #{document.metadata.manuscriptId}
-      div(class='col-12')
-        div(class='key d-inline font-weight-bold') Article Title : 
-        div(class='value d-inline') #{document.metadata.articleTitle}
-      div(class='col-12')
-        div(class='key d-inline font-weight-bold') Journal : 
-        div(class='value d-inline') #{document.metadata.journal}
+        div(class='row row-margin')
+          div(class='col-12')
+            div(class='key d-inline font-weight-bold') Authors : 
+            div(class='value d-inline') #{document.metadata.authors}
 
-    div(class='row row-margin')
-      div(class='col-12')
-        div(class='key d-inline font-weight-bold') Authors : 
-        div(class='value d-inline') #{document.metadata.authors}
+        div(class='row row-margin')
+          div(class='col-12')
+            div(class='key d-inline font-weight-bold') Submitting Author : 
+            div(class='value d-inline') #{document.metadata.submittingAuthor}
+          div(class='col-12')
+            div(class='key d-inline font-weight-bold') Submitting Author email : 
+            div(class='value d-inline') #{document.metadata.submittingAuthoremail}
 
-    div(class='row row-margin')
-      div(class='col-12')
-        div(class='key d-inline font-weight-bold') Submitting Author : 
-        div(class='value d-inline') #{document.metadata.submittingAuthor}
-      div(class='col-12')
-        div(class='key d-inline font-weight-bold') Submitting Author email : 
-        div(class='value d-inline') #{document.metadata.submittingAuthoremail}
+        div(class='row row-margin')
+          div(class='col-12')
+            div(class='key d-inline font-weight-bold') Institutions : 
+            each val, index in document.metadata.institutions
+              div(class='value d-block') #{(index + 1)} #{val}
 
-    div(class='row row-margin')
-      div(class='col-12')
-        div(class='key d-inline font-weight-bold') Institutions : 
-        each val, index in document.metadata.institutions
-          div(class='value d-block') #{(index + 1)} #{val}
+        div(class='row row-margin')
+          div(class='col-12')
+            div(class='key d-inline font-weight-bold') Funders : 
+            div(class='value d-inline') #{document.metadata.funders}
 
-    div(class='row row-margin')
-      div(class='col-12')
-        div(class='key d-inline font-weight-bold') Funders : 
-        div(class='value d-inline') #{document.metadata.funders}
+        div(class='row crud-button-action')
+          div(class='col-6 text-center')
+            button(id='metadata_validation' class='btn btn-primary') This info is correct : Continue
+          div(class='col-6 text-center')
+            a(href="mailto:tim@dataseer.io")
+              button(id='metadata_contest' class='btn btn-primary') Something is wrong : Contact the DataSeer curator
 
-    div(class='row crud-button-action')
-      div(class='col-6 text-center')
-        button(id='metadata_validation' class='btn btn-primary') This info is correct : Continue
-      div(class='col-6 text-center')
-        a(href="mailto:tim@dataseer.io")
-          button(id='metadata_contest' class='btn btn-primary') Something is wrong : Contact the DataSeer curator
+  div(style='text-align:center;')  
+      a(href='https://www.dataseer.io' style='color:#ffffff;' target='_blank') dataseer.io
+      a(href='https://github.com/kermitt2/dataseer-web' target='_blank')
+        i(class='fab fa-github' style='color:#8DCB55;margin-left:5px;')
 
   if demo
     include ../forms/demo/metadata.pug

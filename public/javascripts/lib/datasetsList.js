@@ -17,8 +17,9 @@ const DatasetsList = function(data, events) {
       datasets[id] = new View.links.static(
         {
           'class': 'form-row',
-          'text': '# ' + id,
-          'value': id
+          'text': id,
+          'value': id,
+          'style': 'margin-left:0px; margin-right:0px;'
         },
         {
           'onClick': function(id) {

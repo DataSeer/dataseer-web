@@ -4,6 +4,8 @@ body {
   margin-top: 20px;
   margin-bottom: 20px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #063046;
+  background-color: lightgray;
 }
 
 .crud-button-action {
@@ -33,3 +35,38 @@ body {
   margin-top: 20px;
   margin-bottom: 20px;
 }
+
+#document-view {
+  background-color: white;
+  font-family: Times, "Times New Roman", serif;
+  font-size: 14px;
+}
+
+#dataset-form {
+  background-color: white;
+}
+
+#datasets-list {
+  background-color: white;
+}
+
+.btn-primary {
+  background-color: #184D7E;
+  border-color: #184D7E;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary.active, .open>.dropdown-toggle.btn-primary {
+    background-color: #1E3945;
+    border-color: #1E3945; 
+}
+
+.btn-secondary {
+  background-color: #848484;
+  border-color: #848484;
+}
+
+.btn-secondary:hover, .btn-secondary:focus, .btn-secondary:active, .btn-secondary.active {
+  background-color: #1E3945 !important;
+  border-color: #1E3945;
+}
+

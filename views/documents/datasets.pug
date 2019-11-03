@@ -2,31 +2,38 @@ extends ../layout
 
 block content
 
-  div(class='container-fluid')
-    div(class='row')
-      div(class='col-6')
-        div(class='row')
-          div(class='col-12 text-center')
-            div(id='view-selection' class='btn-group btn-group-toggle bordered' data-toggle='buttons')
-              label(class='btn btn-success btn-sm active') full text
-                input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off' checked)
-              label(class='btn btn-success btn-sm') section
-                input(type='radio' name='options' id='tei_only_dataseer' value='onlyDataseer' autocomplete='off')
-              label(class='btn btn-success btn-sm') paragraph
-                input(type='radio' name='options' id='tei_only_datasets' value='onlyDatasets' autocomplete='off')
-        div(class='row')
-          div(class='col-12')
-            div(id='document-view' class='bordered')
-      div(class='col-4')
-        div(id='dataset-form' class='form bordered')
-      div(class='col-2')
-        div(class='row')
-          div(id='datasets-list' class='form bordered')
-        div(class='row')
-          button(id='datasets_validation' class='btn btn-primary') Finish
+  div(class='bordered' style='border-color:#ffffff;border-width:0px;')
+    div(class='container-fluid')
+      div(class='row')
+        div(class='col-6')
+          div(class='row')
+            div(class='col-12 text-center')
+              div(id='view-selection' class='btn-group btn-group-toggle bordered' data-toggle='buttons' style='padding:0;')
+                label(class='btn btn-secondary btn-sm active') full text
+                  input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off' checked)
+                label(class='btn btn-secondary btn-sm') section
+                  input(type='radio' name='options' id='tei_only_dataseer' value='onlyDataseer' autocomplete='off')
+                label(class='btn btn-secondary btn-sm') paragraph
+                  input(type='radio' name='options' id='tei_only_datasets' value='onlyDatasets' autocomplete='off')
+          div(class='row')
+            div(class='col-12')
+              div(id='document-view' class='bordered')
+        div(class='col-4')
+          div(class='row')
+            div(id='dataset-form' class='form bordered')
+        div(class='col-2')
+          div(class='row')
+            div(id='datasets-list' class='form bordered')
+            button(id='datasets_validation' class='btn btn-primary') Finish
+
+  div(style='text-align:center;')  
+      a(href='https://www.dataseer.io' style='color:#ffffff;' target='_blank') dataseer.io
+      a(href='https://github.com/kermitt2/dataseer-web' target='_blank')
+        i(class='fab fa-github' style='color:#8DCB55;margin-left:5px;')
 
   include ../modals/quit.pug
   include ../modals/documents/datasets.pug
+  include ../modals/help.pug
 
   if demo
     include ../forms/demo/datasets.pug
