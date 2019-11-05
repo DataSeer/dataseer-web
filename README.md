@@ -2,7 +2,7 @@
 
 ![Logo DataSeer](/public/img/DataSeer-logo-75.png "Logo")
 
-## Purpose
+## Purposes
 
 This repository corresponds to the Dataseer web application, which aims at driving the authors of scientific article/manuscripts to the best research data sharing practices, i.e. to ensure that the datasets coming with an article are associated with data availability statement, permanent identifiers and in general requirements regarding Open Science and reproducibility. 
 
@@ -12,7 +12,7 @@ See the [dataseer-ml](https://github.com/kermitt2/dataseer-ml) repository for th
 
 Supported article formats are PDF, docx, TEI, JATS/NLM, ScholarOne, and a large variety of additional publisher native XML formats: BMJ, Elsevier staging format, OUP, PNAS, RSC, Sage, Wiley, etc (see [Pub2TEI](https://github.com/kermitt2/Pub2TEI) for the list of native publisher XML format covered).
 
-## Installation
+## Install
 
 ``npm i``
 
@@ -30,7 +30,7 @@ On Windows:
 
 ``set DEMO=true & npm start``
 
-## Dependancies
+## Dependencies
 
 Application need an instance of mongoDB running on port `27017`, with an `app` database containing a collection `documents` (`conf/conf.json` to set complete URL).
 
