@@ -1,7 +1,11 @@
+/*
+ * @prettier
+ */
 const mongoose = require('mongoose');
 
 let DocumentsSchema = new mongoose.Schema({
   '_id': String,
+  'modifiedBy': Object,
   'metadata': Object,
   'datasets': Object,
   'source': String,

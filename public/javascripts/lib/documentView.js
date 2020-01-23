@@ -83,6 +83,7 @@ const DocumentView = function(events) {
             // if dataType is set, then it's not a corresp
             target = selection.res.sentence
               .attr('id', options.id)
+              .attr(options.user.role, options.user.id)
               .attr('type', dataType)
               .attr('cert', cert);
             target.removeAttr('class');
@@ -96,7 +97,7 @@ const DocumentView = function(events) {
             return cb(null, target);
           });
         } else {
-          target = selection.res.sentence.attr('corresp', '#' + options.id);
+          target = selection.res.sentence.attr('corresp', '#' + options.id).attr(options.user.role, options.user.id);
           target.removeAttr('class');
           jQuery(target)
             .parents('div[type]')
@@ -170,12 +171,12 @@ const DocumentView = function(events) {
     return styles;
   };
 
-  self.updateDataset = function(id, dataType) {
-    return datasets.update(id, dataType);
+  self.updateDataset = function(user, id, dataType) {
+    return datasets.update(user, id, dataType);
   };
 
-  self.addDataset = function(id, dataType, cb) {
-    return datasets.add(id, dataType, function(err, res) {
+  self.addDataset = function(user, id, dataType, cb) {
+    return datasets.add(user, id, dataType, function(err, res) {
       return cb(err, res);
     });
   };
@@ -189,7 +190,7 @@ const DocumentView = function(events) {
   };
 
   self.addCorresp = function(id) {
-    return corresps.add(id);
+    return corresps.add(user, id);
   };
 
   self.deleteAllCorresps = function(id) {
@@ -311,13 +312,13 @@ const DocumentView = function(events) {
         .attr('type', dataType);
     },
     // add dataset
-    'add': function(id, dataType, cb) {
+    'add': function(user, id, dataType, cb) {
       let selection = selectedElements();
       if (selection.err) return cb(true, 'Please select the sentence that contains the new dataset');
       return selectionToSenctence(
         selection,
         datasets.new,
-        { 'id': id, 'dataType': dataType, 'getdataType': true },
+        { 'id': id, 'dataType': dataType, 'getdataType': true, 'user': user },
         events.datasets.click,
         function(err, res) {
           if (err) return cb(err, res);
@@ -331,8 +332,10 @@ const DocumentView = function(events) {
       );
     },
     // add dataset
-    'update': function(id, dataType) {
-      jQuery('#' + id).attr('type', dataType);
+    'update': function(user, id, dataType) {
+      jQuery('#' + id)
+        .attr('type', dataType)
+        .attr(user.role, user.id);
     },
     // remove dataset
     'remove': function(id) {
@@ -376,13 +379,13 @@ const DocumentView = function(events) {
       return jQuery('<s/>').attr('corresp', '#' + id);
     },
     // add correp
-    'add': function(id) {
+    'add': function(user, id) {
       let selection = selectedElements();
       if (selection.err) return selection;
       let target = selectionToSenctence(
           selection,
           corresps.new,
-          { 'id': id, 'getdataType': false },
+          { 'id': id, 'getdataType': false, 'user': user },
           events.corresps.click
         ),
         parent = target.parents('div').first();

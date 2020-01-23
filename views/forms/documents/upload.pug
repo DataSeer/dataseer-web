@@ -2,11 +2,15 @@ div(class='container-fluid')
   form(ref='uploadForm' id='uploadForm' action='' method='post' encType='multipart/form-data')
     div(class='row')
       div(class='col-12')
+        if (current_user.role.label === 'standard_user')
+          input(type='file' class='form-control-file' name='uploadedFiles' id='uploadedFiles' style='margin-left:10px;')
+        else
           input(type='file' class='form-control-file' name='uploadedFiles' id='uploadedFiles' multiple style='margin-left:10px;')
-    div(class='row')
-      div(class='col-12')
-          input(type='checkbox' class='form-control-file checked' name='dataseerML' id='dataseerML' value='dataseer-ml' style='margin-left:10px;') 
-          label(for='dataseerML') Identify datasets automatically
+    if (current_user.role.label === 'curator')
+      div(class='row')
+        div(class='col-12')
+            input(type='checkbox' class='form-control-file checked' name='dataseerML' id='dataseerML' value='dataseer-ml' style='margin-left:10px;') 
+            label(for='dataseerML') Identify datasets automatically
     div(class='row')
       div(class='col-12')
           button(type='submit' class='btn btn-primary btn-sm' id='addDocuments' style='margin-left:10px;') Upload new document

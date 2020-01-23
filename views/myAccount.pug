@@ -1,0 +1,17 @@
+extends layout
+
+block content
+
+  h2 Update my Account
+
+  form(role='form', action='/myAccount',method='post', style='max-width: 300px;')
+    if error
+      div(class='alert alert-warning' role='alert') #{error}
+    if success
+      div(class='alert alert-success' role='alert') #{success}
+    .form-group
+       input.form-control(type='password', name='current_password', placeholder='current password')
+    .form-group
+       input.form-control(type='password', name='new_password', placeholder='new password')
+    .btn-group
+       button.blue.btn.btn-default.waves-effect.waves-light(type='submit') update password

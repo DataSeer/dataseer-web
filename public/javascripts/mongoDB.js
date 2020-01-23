@@ -8,11 +8,16 @@ const MongoDB = {
   'getCurrentDocument': function(done) {
     let currentId = jQuery(document.getElementById('document.id')).attr('value');
     jQuery.get('../api/documents/' + currentId, function(data) {
-      done(data);
+      return done(data);
     });
   },
   // Update a gicen document
-  'updateDocument': function(doc, done) {
+  'updateDocument': function(doc, user, done) {
+    if (typeof user !== 'undefined' && !!user) {
+      if (typeof doc.modifiedBy === 'undefined') doc.modifiedBy = {};
+      if (typeof doc.modifiedBy[user.role] === 'undefined') doc.modifiedBy[user.role] = {};
+      doc.modifiedBy[user.role][user.id] = true;
+    }
     jQuery.ajax({
       'type': 'PUT',
       'contentType': 'application/json; charset=utf-8',
@@ -25,10 +30,10 @@ const MongoDB = {
         'updateDocument complete';
       },
       'success': function(data) {
-        done(null, data);
+        return done(null, data);
       },
       'error': function(data) {
-        done(true, data);
+        return done(true, data);
       },
       'dataType': 'json'
     });

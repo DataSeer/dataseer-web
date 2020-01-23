@@ -1,3 +1,7 @@
+/*
+ * @prettier
+ */
+
 const express = require('express'),
   app = express(),
   http = require('http').Server(app),
@@ -10,7 +14,10 @@ const express = require('express'),
   session = require('express-session'),
   bodyParser = require('body-parser'),
   multer = require('multer'),
-  errorHandler = require('errorhandler');
+  errorHandler = require('errorhandler'),
+  passport = require('passport'),
+  LocalStrategy = require('passport-local').Strategy,
+  flash = require('connect-flash');
 
 const indexRouter = require('./routes/index'),
   documentsRouter = require('./routes/api/documents'),
@@ -20,20 +27,7 @@ const indexRouter = require('./routes/index'),
 
 const conf = require('./conf/conf.json');
 
-// mongoose object
-const mongoose = require('mongoose');
-
-// URL to mongoDB
-const urlmongo = conf.services.mongodb;
-
-// API connection
-mongoose.connect(urlmongo, { 'useNewUrlParser': true, 'useFindAndModify': false });
-
-let db = mongoose.connection;
-db.on('error', console.error.bind(console, 'Failed to connect to MongoDB'));
-db.once('open', function() {
-  console.log('Connection to MongoDB succeeded');
-});
+app.disable('x-powered-by');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -42,13 +36,6 @@ app.set('view engine', 'pug');
 app.use(logger('dev'));
 app.use(methodOverride());
 app.use(
-  session({
-    'resave': true,
-    'saveUninitialized': true,
-    'secret': 'uwotm8'
-  })
-);
-app.use(
   fileUpload({
     'limits': { 'fileSize': 50 * 1024 * 1024 }
   })
@@ -56,6 +43,28 @@ app.use(
 app.use(bodyParser.json({ 'limit': '10mb', 'extended': true }));
 app.use(bodyParser.urlencoded({ 'limit': '10mb', 'extended': true }));
 // app.use(multer());
+app.use(
+  session({
+    'cookieName': 'session',
+    'secret': 'uwotm8',
+    'resave': false,
+    'saveUninitialized': false
+  })
+);
+app.use(flash());
+
+// Configure passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Configure passport-local to use account model for authentication
+const Accounts = require('./models/accounts.js');
+passport.use(new LocalStrategy(Accounts.authenticate()));
+
+// use static serialize and deserialize of model for passport session support
+passport.serializeUser(Accounts.serializeUser());
+passport.deserializeUser(Accounts.deserializeUser());
+
 app.use(express.static('public'));
 
 app.use('/', indexRouter);
@@ -63,6 +72,22 @@ app.use('/api/documents', documentsRouter);
 app.use('/api/dataseer-ml', dataseerMLRouter);
 app.use('/documents', viewsRouter);
 app.use('/backoffice', backOfficeRouter);
+
+// mongoose object
+const mongoose = require('mongoose');
+mongoose.set('useCreateIndex', true);
+
+// URL to mongoDB
+const urlmongo = conf.services.mongodb;
+
+// API connection
+mongoose.connect(urlmongo, { 'useNewUrlParser': true, 'useFindAndModify': false, 'useUnifiedTopology': true });
+
+let db = mongoose.connection;
+db.on('error', console.error.bind(console, 'Failed to connect to MongoDB'));
+db.once('open', function() {
+  console.log('Connection to MongoDB succeeded');
+});
 
 // error handling middleware should be loaded after the loading the routes
 if ('development' == app.get('env')) {

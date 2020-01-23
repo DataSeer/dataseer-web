@@ -7,7 +7,11 @@
   return MongoDB.getCurrentDocument(function(doc) {
     $.getJSON('../json/dataTypes.json', function(data) {
       currentDocument = doc;
-      let subTypes = data.subTypes,
+      let user = {
+          'id': $('#user_id').text(),
+          'role': $('#user_role').text()
+        },
+        subTypes = data.subTypes,
         dataTypes = data.dataTypes,
         metadata = data.metadata,
         _status = {
@@ -101,7 +105,7 @@
             dataset['dataset.id'],
             currentDocument.datasets.current[dataset['dataset.id']].status
           );
-          MongoDB.updateDocument(currentDocument, function(err, res) {
+          MongoDB.updateDocument(currentDocument, user, function(err, res) {
             console.log(err, res);
             if (err) return err; // Need to define error behavior
             // Update dataType in XML
@@ -112,7 +116,7 @@
                     ':' +
                     currentDocument.datasets.current[dataset['dataset.id']].subType,
               nextStatus = status === _status.saved ? _status.modified : _status.saved;
-            documentView.updateDataset(dataset['dataset.id'], fullDataType);
+            documentView.updateDataset(user, dataset['dataset.id'], fullDataType);
             hasChanged = false;
             let next = nextDataset(nextStatus);
             if (next !== null) {
@@ -141,7 +145,7 @@
           currentDocument.datasets.deleted.push(currentDocument.datasets.current[id]);
           delete currentDocument.datasets.current[id];
           currentDocument.source = documentView.source();
-          MongoDB.updateDocument(currentDocument, function(err, res) {
+          MongoDB.updateDocument(currentDocument, user, function(err, res) {
             console.log(err, res);
             if (err) return err; // Need to define error behavior
             hasChanged = false;
@@ -179,6 +183,10 @@
           // On final validation
           'onValidation': function(dataset) {
             let currentId = datasetForm.id();
+            if (user.role === 'curator') {
+              datasetsList.datasets.statusOf(currentId, _status.valid);
+              return saveDataset(dataset, _status.valid);
+            }
             if (
               currentId === '' ||
               typeof currentDocument.datasets.current === 'undefined' ||
@@ -201,6 +209,10 @@
           // On save
           'onSave': function(dataset) {
             let currentId = datasetForm.id();
+            if (user.role === 'curator') {
+              datasetsList.datasets.statusOf(currentId, _status.valid);
+              return saveDataset(dataset, _status.valid);
+            }
             if (
               currentId === '' ||
               typeof currentDocument.datasets.current === 'undefined' ||
@@ -239,7 +251,7 @@
               index += 1;
               newId = 'dataset-' + index;
             }
-            return documentView.addDataset(newId, defaultDataType, function(err, res) {
+            return documentView.addDataset(user, newId, defaultDataType, function(err, res) {
               if (err) {
                 $('#datasets-error-modal-label').html('Add Dataset');
                 if (typeof res === 'string') $('#datasets-error-modal-body').html(res);
@@ -261,7 +273,7 @@
                 currentDocument.datasets.current[newId].subType = getSubType(res.datatype);
                 currentDocument.datasets.current[newId].text = documentView.getTextOfDataset(newId);
                 currentDocument.datasets.current[newId].status = _status.saved;
-                MongoDB.updateDocument(currentDocument, function(err, res) {
+                MongoDB.updateDocument(currentDocument, user, function(err, res) {
                   console.log(err, res);
                   if (err) return err; // Need to define error behavior
                   hasChanged = false;
@@ -285,7 +297,7 @@
             $('#datasets-confirm-modal-btn').click();
           },
           'onLink': function(id) {
-            let result = documentView.addCorresp(id);
+            let result = documentView.addCorresp(user, id);
             if (result.err) {
               $('#datasets-error-modal-label').html('Link sentence to Dataset : ' + id);
               $('#datasets-error-modal-body').html('Please select the sentence that will be linked to Dataset : ' + id);
@@ -294,7 +306,7 @@
               hasChanged = true;
               currentDocument.source = documentView.source();
               result.res.click();
-              MongoDB.updateDocument(currentDocument, function(err, res) {
+              MongoDB.updateDocument(currentDocument, user, function(err, res) {
                 console.log(err, res);
                 if (err) return err; // Need to define error behavior
                 hasChanged = false;
@@ -340,9 +352,12 @@
 
       // On datasets_validation click
       $('#datasets_validation').click(function() {
+        if (user.role === 'curator') {
+          return alert('Unauthorized for curator');
+        }
         if (checkStatusOfDatasets()) {
           currentDocument.status = MongoDB.getNextStatus(currentDocument);
-          MongoDB.updateDocument(currentDocument, function(err, res) {
+          MongoDB.updateDocument(currentDocument, user, function(err, res) {
             console.log(err, res);
             if (err) return err; // Need to define error behavior
             hasChanged = false;
@@ -352,7 +367,6 @@
           let list = getUnsavedDatasets(currentDocument.datasets.current).map(function(e) {
             return '<li>' + e + '</li>';
           });
-          console.log(list);
           $('#datasets-error-modal-label').html('Continue');
           $('#datasets-error-modal-body').html(
             '<p>Please validate all following datasets to continue</p><ul>' + list.join('') + '</ul>'
