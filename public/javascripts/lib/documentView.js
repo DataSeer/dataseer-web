@@ -272,11 +272,11 @@ const DocumentView = function(events) {
   let datasets = {
     // get element of given dataset
     'get': function(id) {
-      return elements.container.find('tei text div[subtype="dataseer"] s[id="' + id + '"]');
+      return elements.container.find('tei div[subtype="dataseer"] s[id="' + id + '"]');
     },
     // get elements of all datasets
     'all': function() {
-      return elements.container.find('tei text div[subtype="dataseer"] s[id]');
+      return elements.container.find('tei div[subtype="dataseer"] s[id]');
     },
     // get cert of given dataset
     'certOf': function(id) {
@@ -352,11 +352,11 @@ const DocumentView = function(events) {
   let corresps = {
     // get element of given correp
     'get': function(id) {
-      return elements.container.find('tei text s[corresp="#' + id + '"]');
+      return elements.container.find('tei s[corresp="#' + id + '"]');
     },
     // get elements of all correps
     'all': function() {
-      return elements.container.find('tei text s[corresp]');
+      return elements.container.find('tei s[corresp]');
     },
     // get/set style of given correp
     'styleOf': function(id, value) {

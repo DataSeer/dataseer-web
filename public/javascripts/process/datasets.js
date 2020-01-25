@@ -333,6 +333,9 @@
         keys = currentDocument.datasets.current ? Object.keys(currentDocument.datasets.current) : undefined;
       defaultKey = keys ? keys[0] : undefined;
 
+      console.log(keys);
+      console.log(defaultKey);
+
       documentView.init('#document-view', currentDocument.source);
       if (defaultKey) documentView.views.scrollTo(defaultKey);
 

@@ -148,36 +148,44 @@ body > div > div > div.row > div:nth-child(1) {
 }
 
 /* TEI CUSTOMIZATION */
-#document-view tei > text > div {
+#document-view tei teiHeader profiledesc abstract {
+  display: inline-block;
+}
+
+#document-view tei > text > div,
+#document-view tei teiHeader profiledesc abstract > div {
   font-weight: bold;
 }
 
-#document-view tei > text > div > p {
+#document-view tei > text > div > p,
+#document-view tei teiHeader profiledesc abstract > div > p {
   margin-top: 10px;
   font-weight: normal;
 }
 
-#document-view tei > text > div > *:not(p) {
+#document-view tei > text > div > *:not(p),
+#document-view tei teiHeader profiledesc abstract > div > *:not(p) {
   margin-top: 5px;
   font-weight: normal;
 }
 
-#document-view tei > text > div > p > * {
+#document-view tei > text > div > p > *,
+#document-view tei teiHeader profiledesc abstract > div > p > * {
   margin-top: 5px;
 }
 
 #document-view tei teiHeader encodingdesc {
   display: none;
 }
-#document-view tei teiHeader profiledesc {
-  display: none;
-}
+
 #document-view tei teiHeader filedesc publicationstmt {
   display: none;
 }
+
 #document-view tei teiHeader filedesc sourcedesc {
   display: none;
 }
+
 #document-view tei teiHeader filedesc titlestmt title {
   font-weight: bold; !important
 }

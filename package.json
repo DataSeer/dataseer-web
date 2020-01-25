@@ -16,7 +16,6 @@
     "express-fileupload": "^1.1.6",
     "express-session": "^1.16.1",
     "http-errors": "~1.6.3",
-    "md5": "^2.2.1",
     "method-override": "^3.0.0",
     "mongoose": "^5.7.5",
     "morgan": "^1.9.1",
