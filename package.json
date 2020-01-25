@@ -22,6 +22,7 @@
     "multer": "^1.4.1",
     "pug": "^2.0.3",
     "request": "^2.88.0",
-    "serve-favicon": "^2.5.0"
+    "serve-favicon": "^2.5.0",
+    "async": "^3.1.1"
   }
 }
