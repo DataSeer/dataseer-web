@@ -3,105 +3,262 @@
  */
 
 const express = require('express'),
+  crypto = require('crypto'),
+  nodemailer = require('nodemailer'),
   router = express.Router(),
   passport = require('passport'),
+  smtpConf = require('../conf/smtp.conf.json'),
   Upload = require('../lib/upload.js'),
   AccountsManager = require('../lib/accountsManager.js'),
+  Documents = require('../models/documents.js'),
   Accounts = require('../models/accounts.js');
+
+const passwordRegExp = new RegExp('[\\w^\\w]{6,}'),
+  emailRegExp = new RegExp("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@[A-Za-z0-9-]+(.[A-Za-z0-9-]+)*");
+
+let transporter = nodemailer.createTransport({
+  'host': smtpConf.host,
+  'port': smtpConf.port,
+  'secure': false, // upgrade later with STARTTLS
+  'auth': smtpConf.auth
+});
+
+const getMailTxt = function(url) {
+    return (
+      'Hi,\n' +
+      'You can reset your password here : ' +
+      url +
+      '\n' +
+      "Just ignore this email if you don't want to reset your password\n" +
+      'This email has been automatically generated'
+    );
+  },
+  getMailHtml = function(url) {
+    return (
+      'Hi,<br/>' +
+      `You can reset your password <a href="${url}">here</a><br/>` +
+      "Just ignore this email if you don't want to reset your password<br/>" +
+      'This email has been automatically generated'
+    );
+  };
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
   return res.render('index', { 'title': 'DataSeer', 'current_user': req.user });
 });
 
-router.get('/', function(req, res) {
-  res.render('index', { 'current_user': req.user });
-});
-
-router.get('/register', function(req, res) {
+router.get('/signup', function(req, res) {
   if (typeof req.user !== 'undefined')
     return res.status(401).send('Your current role do not grant access to this part of website');
-  res.render('register', {});
+  res.render('signup', {});
 });
 
-router.post('/register', function(req, res, next) {
+router.post('/signup', function(req, res, next) {
   if (typeof req.user !== 'undefined')
     return res.status(401).send('Your current role do not grant access to this part of website');
-  console.log('registering user');
-  Accounts.register(
+  if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
+    return res.render('signup', { 'error': 'Email incorrect !' });
+  if (typeof req.body.password !== 'string' || !passwordRegExp.test(req.body.password))
+    return res.render('signup', { 'error': 'Password incorrect ! (At least 6 chars)' });
+  return Accounts.register(
     new Accounts({ 'username': req.body.username, 'role': AccountsManager.roles.standard_user }),
     req.body.password,
     function(err) {
-      if (err) {
-        console.log('error while user register!', err);
-        res.render('register', { 'error': err });
+      if (err.name === 'UserExistsError')
+        return res.render('signup', { 'error': 'A user with the given email address is already registered' });
+      else {
+        return res.render('signup', {
+          'error':
+            'Sorry, an error has occured. Try to reset your password later, or send an email to ' + smtpConf.auth.user
+        });
+        console.log(err);
       }
-      console.log('user registered!');
-      return res.render('login', { 'success': 'New account created !', 'username': req.body.username });
+      return res.render('signin', { 'success': 'New account created !', 'username': req.body.username });
     }
   );
 });
 
-router.get('/myAccount', function(req, res) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
+router.get('/forgotPassword', function(req, res) {
+  if (typeof req.user !== 'undefined')
     return res.status(401).send('Your current role do not grant access to this part of website');
-  res.render('myAccount', { 'current_user': req.user });
+  res.render('forgotPassword');
 });
 
-router.post('/myAccount', function(req, res) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
+router.post('/forgotPassword', function(req, res) {
+  if (typeof req.user !== 'undefined')
     return res.status(401).send('Your current role do not grant access to this part of website');
-  if (typeof req.body.current_password === 'undefined')
-    return res.render('myAccount', { 'current_user': user, 'error': 'Current password incorrect !' });
-  if (typeof req.body.new_password === 'undefined')
-    return res.render('myAccount', { 'current_user': user, 'error': 'New password incorrect !' });
-  Accounts.findOne({ 'username': req.user.username }, function(err, user) {
-    if (err) return res.render('myAccount', { 'current_user': user, 'error': err.toString() });
-    if (!user) return res.render('myAccount', { 'current_user': user, 'error': 'Current username is incorrect !' });
-    user.changePassword(req.body.current_password, req.body.new_password, function(err) {
-      if (err) return res.render('myAccount', { 'current_user': user, 'error': 'Current password incorrect !' });
-      return res.render('myAccount', { 'current_user': req.user, 'success': 'Password update succeed !' });
+  if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
+    res.render('forgotPassword', { 'error': 'Email incorrect !' });
+  return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
+    if (err) return res.render('forgotPassword', { 'error': err.toString() });
+    if (!user) return res.render('forgotPassword', { 'error': 'Current username is incorrect !' });
+    user.token = getRandomToken();
+    return user.save(function(err) {
+      if (err) return res.render('forgotPassword', { 'error': err.toString() });
+      let url = smtpConf.dataseerUrl + '/resetPassword?token=' + user.token + '&username=' + user.username;
+      return transporter.sendMail(
+        {
+          'from': smtpConf.from, // sender address
+          'to': user.username, // list of receivers
+          'subject': smtpConf.subject, // Subject line
+          'text': getMailTxt(url), // plain text body
+          'html': getMailHtml(url) // html body
+        },
+        function(err, info) {
+          if (err)
+            return res.render('forgotPassword', {
+              'error':
+                'Sorry, an error has occured. Try to reset your password later, or send an email to ' +
+                smtpConf.auth.user
+            });
+          return res.render('forgotPassword', {
+            'success':
+              'An email (allowing you to redefine your password) has been sent at the following address : ' +
+              user.username
+          });
+        }
+      );
     });
   });
 });
 
-router.get('/login', function(req, res) {
+router.get('/resetPassword', function(req, res) {
+  if (typeof req.user !== 'undefined')
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  res.render('resetPassword', { 'token': req.query.token, 'username': req.query.username });
+});
+
+router.post('/resetPassword', function(req, res) {
+  if (typeof req.user !== 'undefined')
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
+    return res.render('resetPassword', {
+      'error': 'Email incorrect !',
+      'token': req.body.token,
+      'username': req.body.username
+    });
+  if (typeof req.body.token !== 'string')
+    return res.render('resetPassword', {
+      'error': 'Token incorrect !',
+      'token': req.body.token,
+      'username': req.body.username
+    });
+  if (typeof req.body.password !== 'string' || !passwordRegExp.test(req.body.password))
+    return res.render('resetPassword', {
+      'error': 'New password incorrect ! (At least 6 chars)',
+      'token': req.body.token,
+      'username': req.body.username
+    });
+  return Accounts.findOne({ 'username': req.body.username, 'token': req.body.token }, function(err, user) {
+    if (err)
+      return res.render('resetPassword', {
+        'error': err.toString(),
+        'token': req.body.token,
+        'username': req.body.username
+      });
+    if (!user)
+      return res.render('resetPassword', {
+        'error': 'Credentials incorrect !',
+        'token': req.body.token,
+        'username': req.body.username
+      });
+    return user.setPassword(req.body.password, function(err) {
+      if (err)
+        return res.render('resetPassword', {
+          'error': err.toString(),
+          'token': req.body.token,
+          'username': req.body.username
+        });
+      user.token = undefined;
+      return user.save(function(err) {
+        if (err)
+          return res.render('resetPassword', {
+            'error': err.toString(),
+            'token': req.body.token,
+            'username': req.body.username
+          });
+        return res.render('signin', {
+          'success': 'your password has been updated successfully'
+        });
+      });
+    });
+  });
+});
+
+router.get('/settings', function(req, res) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  res.render('settings', { 'current_user': req.user });
+});
+
+router.post('/settings', function(req, res) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  if (typeof req.body.current_password !== 'string' || !passwordRegExp.test(req.body.current_password))
+    return res.render('settings', {
+      'current_user': req.user,
+      'error': 'Current password incorrect ! (At least 6 chars)'
+    });
+  if (typeof req.body.new_password !== 'string' || !passwordRegExp.test(req.body.new_password))
+    return res.render('settings', {
+      'current_user': req.user,
+      'error': 'New password incorrect ! (At least 6 chars)'
+    });
+  return Accounts.findOne({ 'username': req.user.username }, function(err, user) {
+    if (err) return res.render('settings', { 'current_user': user, 'error': err.toString() });
+    if (!user) return res.render('settings', { 'current_user': user, 'error': 'Current username is incorrect !' });
+    user.changePassword(req.body.current_password, req.body.new_password, function(err) {
+      if (err) return res.render('settings', { 'current_user': user, 'error': 'Current password incorrect !' });
+      return res.render('settings', { 'current_user': req.user, 'success': 'Password update succeed !' });
+    });
+  });
+});
+
+router.get('/signin', function(req, res) {
   let errors = req.flash('error');
-  let error = Array.isArray(errors) && errors.length > 0 ? errors[0] : undefined;
-  console.log(errors, error);
-  return res.render('login', { 'current_user': req.user, 'error': error });
+  let error = Array.isArray(errors) && errors.length > 0 ? 'Credentials incorrect !' : undefined;
+  return res.render('signin', { 'current_user': req.user, 'error': error });
 });
 
 router.post(
-  '/login',
+  '/signin',
   passport.authenticate('local', {
-    'failureRedirect': '/login',
+    'failureRedirect': '/signin',
     'failureFlash': true
   }),
   function(req, res) {
-    return res.redirect('/');
+    return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
+      user.token = undefined;
+      return user.save(function(err) {
+        if (err) console.log('Error : token not deleted');
+        return res.redirect('/');
+      });
+    });
   }
 );
 
-router.get('/logout', function(req, res) {
+router.get('/signout', function(req, res) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   req.logout();
   return res.redirect('/');
 });
 
-/* UPLOAD Document */
-router.get('/upload', function(req, res, next) {
-  if (
-    typeof req.user === 'undefined' ||
-    !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
-  )
+router.get('/myDocuments', function(req, res) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  return res.render('/upload', {
-    'title': 'DataSeer',
-    'backoffice': true,
-    'current_user': req.user
+  let key = 'modifiedBy.' + req.user.role.label + '.' + req.user.id,
+    query = {};
+  query[key] = true;
+  console.log(query);
+  Documents.find(query).exec(function(err, post) {
+    if (err) return next(err);
+    return res.render('myDocuments', { 'documents': post, 'current_user': req.user });
   });
 });
+
+function getRandomToken(length = 256) {
+  return crypto.randomBytes(length).toString('hex');
+}
 
 module.exports = router;

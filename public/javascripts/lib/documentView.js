@@ -90,9 +90,10 @@ const DocumentView = function(events) {
             jQuery(target)
               .parents('div[type]')
               .attr('subtype', 'dataseer');
-            target.click(function() {
-              scrollTo(jQuery(this));
-              clickEvent(options.id, this);
+            target.click(function(event) {
+              let el = jQuery(event.target);
+              scrollTo(el);
+              clickEvent(options.id, el);
             });
             return cb(null, target);
           });
@@ -102,9 +103,10 @@ const DocumentView = function(events) {
           jQuery(target)
             .parents('div[type]')
             .attr('subtype', 'dataseer');
-          target.click(function() {
-            scrollTo(jQuery(this));
-            clickEvent(options.id, this);
+          target.click(function(event) {
+            let el = jQuery(event.target);
+            scrollTo(el);
+            clickEvent(options.id, el);
           });
           return target;
         }
@@ -122,18 +124,18 @@ const DocumentView = function(events) {
       .append(elements.container);
     self.source(source);
 
-    datasets.all().click(function() {
-      let id = jQuery(this).attr('id');
-      scrollTo(jQuery(this));
-      events.datasets.click(id, this);
+    datasets.all().click(function(event) {
+      let el = jQuery(event.target),
+        id = el.attr('id');
+      scrollTo(el);
+      events.datasets.click(id, el);
     });
 
-    corresps.all().click(function() {
-      let id = jQuery(this)
-        .attr('corresp')
-        .replace('#', '');
-      scrollTo(jQuery(this));
-      events.corresps.click(id, this);
+    corresps.all().click(function(event) {
+      let el = jQuery(event.target),
+        id = el.attr('corresp').replace('#', '');
+      scrollTo(el);
+      events.datasets.click(id, el);
     });
 
     datasets.colors();
@@ -142,11 +144,19 @@ const DocumentView = function(events) {
 
   self.source = function(source) {
     if (typeof source === 'undefined') {
-      let copy = elements.container.clone();
-      copy
-        .find('*')
-        .removeAttr('style')
-        .removeAttr('class');
+      let copy = $('#document-view > div').clone();
+      console.log(
+        copy
+          .find('s[id="dataset-1"]')
+          .parent()
+          .html()
+      );
+      // copy
+      //   .find('*[style]')
+      //   .removeAttr('style')
+      //   .find('*[class]')
+      //   .removeAttr('class');
+      console.log(copy.find('s[id="dataset-1"]'));
       return copy.html();
     }
     elements.container.html(source.replace(/\s/gm, ' '));
@@ -189,7 +199,7 @@ const DocumentView = function(events) {
     return datasets.remove(id);
   };
 
-  self.addCorresp = function(id) {
+  self.addCorresp = function(user, id) {
     return corresps.add(user, id);
   };
 

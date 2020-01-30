@@ -4,16 +4,7 @@ block content
 
   div(class='container-fluid')
     div(class='row')
-      div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
-        img(src='../../img/DataSeer-logo-75.png' style='margin-left:10px; ')
-    div(class='row')
       div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px;')
         div(style='margin-top:10px;margin-left:10px;') Upload a new document: supported format are PDF, JATS/NLM, TEI XML, ...
-        div(class='row')
-            include ../forms/documents/upload.pug
-        div(class='row')
-
-  div(style='text-align:center;')  
-      a(href='https://www.dataseer.io' style='color:#ffffff;' target='_blank') dataseer.io
-      a(href='https://github.com/kermitt2/dataseer-web' target='_blank')
-        i(class='fab fa-github' style='color:#8DCB55;margin-left:5px;')
+          div(class='row')
+              include ../forms/documents/upload.pug

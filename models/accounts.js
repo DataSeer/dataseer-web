@@ -6,7 +6,8 @@ const mongoose = require('mongoose'),
   passportLocalMongoose = require('passport-local-mongoose');
 
 const Accounts = new Schema({
-  'role': Object
+  'role': Object,
+  'token': String
 });
 
 Accounts.plugin(passportLocalMongoose);

@@ -5,7 +5,6 @@
 const express = require('express'),
   app = express(),
   http = require('http').Server(app),
-  routes = require('./routes'),
   path = require('path'),
   url = require('url'),
   fileUpload = require('express-fileupload'),
@@ -17,6 +16,7 @@ const express = require('express'),
   errorHandler = require('errorhandler'),
   passport = require('passport'),
   LocalStrategy = require('passport-local').Strategy,
+  request = require('request'),
   flash = require('connect-flash');
 
 const indexRouter = require('./routes/index'),
@@ -25,7 +25,8 @@ const indexRouter = require('./routes/index'),
   backOfficeRouter = require('./routes/backoffice'),
   viewsRouter = require('./routes/documents');
 
-const conf = require('./conf/conf.json');
+const conf = require('./conf/conf.json'),
+  extractor = require('./lib/extractor.js');
 
 app.disable('x-powered-by');
 
@@ -87,6 +88,14 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Failed to connect to MongoDB'));
 db.once('open', function() {
   console.log('Connection to MongoDB succeeded');
+});
+
+request.get(conf.services['dataseer-ml'] + '/jsonDataTypes', function(error, response, body) {
+  if (!error && response.statusCode == 200) {
+    app.set('dataTypes.json', extractor.buildDataTypes(JSON.parse(body)));
+  } else {
+    console.log(error);
+  }
 });
 
 // error handling middleware should be loaded after the loading the routes

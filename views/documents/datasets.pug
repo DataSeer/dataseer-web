@@ -2,6 +2,36 @@ extends ../layout
 
 block content
 
+  div(id='user-navbar-lg' class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
+    div
+      div(id='user-lg')
+        if current_user
+          label Connected as : #{current_user.username} (#{current_user.role.label})
+        else
+          label Sign up or Sign in to get access to Dataseer Application
+      div(id='navbar-lg')
+        ul
+          if current_user
+            li
+              a(href='/') Home
+            li
+              a(href='/myDocuments') My documents
+            li
+              a(href='/backoffice/upload') Upload document
+            li
+              a(href='/settings') Settings
+            li
+              a(href='/signout') Sign out
+          else
+            li
+              a(href='/') Home
+            li
+              a(href='/signup') Sign up
+            li
+              a(href='/signin') Sign in
+            li
+              a(href='/forgotPassword') Forgot password
+
   div(class='bordered' style='border-color:#ffffff;border-width:0px;')
     div(class='container-fluid')
       div(class='row')
@@ -28,11 +58,6 @@ block content
               button(id='datasets_validation' class='btn btn-primary' title='Unavailable for curators' disabled) Finish
             else
               button(id='datasets_validation' class='btn btn-primary') Finish
-
-  div(style='text-align:center;')  
-      a(href='https://www.dataseer.io' style='color:#ffffff;' target='_blank') dataseer.io
-      a(href='https://github.com/kermitt2/dataseer-web' target='_blank')
-        i(class='fab fa-github' style='color:#8DCB55;margin-left:5px;')
 
   include ../modals/quit.pug
   include ../modals/documents/datasets.pug

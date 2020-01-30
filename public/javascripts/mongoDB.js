@@ -26,9 +26,6 @@ const MongoDB = {
       },
       'url': '../api/documents/' + doc._id,
       'data': JSON.stringify(doc),
-      'complete': function(data) {
-        'updateDocument complete';
-      },
       'success': function(data) {
         return done(null, data);
       },

@@ -5,7 +5,8 @@
   let currentDocument;
   // Get the current Object
   return MongoDB.getCurrentDocument(function(doc) {
-    $.getJSON('../json/dataTypes.json', function(data) {
+    dataseerML.jsonDataTypes(function(err, data) {
+      if (err) return alert('Error : Datatypes unavailable, dataseer-ml service does not respond');
       currentDocument = doc;
       let user = {
           'id': $('#user_id').text(),
@@ -93,6 +94,13 @@
           return result;
         },
         saveDataset = function(dataset, status) {
+          let fullDataType =
+            currentDocument.datasets.current[dataset['dataset.id']].subType === ''
+              ? currentDocument.datasets.current[dataset['dataset.id']].dataType
+              : currentDocument.datasets.current[dataset['dataset.id']].dataType +
+                ':' +
+                currentDocument.datasets.current[dataset['dataset.id']].subType;
+          documentView.updateDataset(user, dataset['dataset.id'], fullDataType);
           let keys = Object.keys(currentDocument.datasets.current[dataset['dataset.id']]);
           for (var i = 0; i < keys.length; i++) {
             if (typeof dataset['dataset.' + keys[i]] !== 'undefined')
@@ -105,18 +113,12 @@
             dataset['dataset.id'],
             currentDocument.datasets.current[dataset['dataset.id']].status
           );
-          MongoDB.updateDocument(currentDocument, user, function(err, res) {
+          currentDocument.source = documentView.source();
+          return MongoDB.updateDocument(currentDocument, user, function(err, res) {
             console.log(err, res);
             if (err) return err; // Need to define error behavior
             // Update dataType in XML
-            let fullDataType =
-                currentDocument.datasets.current[dataset['dataset.id']].subType === ''
-                  ? currentDocument.datasets.current[dataset['dataset.id']].dataType
-                  : currentDocument.datasets.current[dataset['dataset.id']].dataType +
-                    ':' +
-                    currentDocument.datasets.current[dataset['dataset.id']].subType,
-              nextStatus = status === _status.saved ? _status.modified : _status.saved;
-            documentView.updateDataset(user, dataset['dataset.id'], fullDataType);
+            let nextStatus = status === _status.saved ? _status.modified : _status.saved;
             hasChanged = false;
             let next = nextDataset(nextStatus);
             if (next !== null) {
@@ -145,7 +147,7 @@
           currentDocument.datasets.deleted.push(currentDocument.datasets.current[id]);
           delete currentDocument.datasets.current[id];
           currentDocument.source = documentView.source();
-          MongoDB.updateDocument(currentDocument, user, function(err, res) {
+          return MongoDB.updateDocument(currentDocument, user, function(err, res) {
             console.log(err, res);
             if (err) return err; // Need to define error behavior
             hasChanged = false;
@@ -210,8 +212,8 @@
           'onSave': function(dataset) {
             let currentId = datasetForm.id();
             if (user.role === 'curator') {
-              datasetsList.datasets.statusOf(currentId, _status.valid);
-              return saveDataset(dataset, _status.valid);
+              datasetsList.datasets.statusOf(currentId, _status.saved);
+              return saveDataset(dataset, _status.saved);
             }
             if (
               currentId === '' ||
@@ -262,7 +264,6 @@
                 else $('#datasets-error-modal-body').html('Unknow Error');
                 $('#datasets-error-modal-btn').click();
               } else {
-                currentDocument.source = documentView.source();
                 currentDocument.datasets.current[newId] = Object.assign(
                   Object.create(Object.getPrototypeOf(defaultDataset)),
                   defaultDataset
@@ -273,7 +274,8 @@
                 currentDocument.datasets.current[newId].subType = getSubType(res.datatype);
                 currentDocument.datasets.current[newId].text = documentView.getTextOfDataset(newId);
                 currentDocument.datasets.current[newId].status = _status.saved;
-                MongoDB.updateDocument(currentDocument, user, function(err, res) {
+                currentDocument.source = documentView.source();
+                return MongoDB.updateDocument(currentDocument, user, function(err, res) {
                   console.log(err, res);
                   if (err) return err; // Need to define error behavior
                   hasChanged = false;
@@ -306,7 +308,7 @@
               hasChanged = true;
               currentDocument.source = documentView.source();
               result.res.click();
-              MongoDB.updateDocument(currentDocument, user, function(err, res) {
+              return MongoDB.updateDocument(currentDocument, user, function(err, res) {
                 console.log(err, res);
                 if (err) return err; // Need to define error behavior
                 hasChanged = false;
@@ -333,9 +335,6 @@
         keys = currentDocument.datasets.current ? Object.keys(currentDocument.datasets.current) : undefined;
       defaultKey = keys ? keys[0] : undefined;
 
-      console.log(keys);
-      console.log(defaultKey);
-
       documentView.init('#document-view', currentDocument.source);
       if (defaultKey) documentView.views.scrollTo(defaultKey);
 
@@ -360,7 +359,8 @@
         }
         if (checkStatusOfDatasets()) {
           currentDocument.status = MongoDB.getNextStatus(currentDocument);
-          MongoDB.updateDocument(currentDocument, user, function(err, res) {
+          currentDocument.source = documentView.source();
+          return MongoDB.updateDocument(currentDocument, user, function(err, res) {
             console.log(err, res);
             if (err) return err; // Need to define error behavior
             hasChanged = false;
@@ -384,6 +384,27 @@
         datasetsList.datasets.remove(id);
         deleteDataset(id);
       });
+
+      // If user is annotator
+      if (user.role === 'annotator') {
+        console.log('annotator');
+        let refreshDiv = $('<div/>').addClass('form-row'),
+          refreshBtn = $('<button/>')
+            .addClass('btn btn-primary btn-sm')
+            .text('Refresh Datatypes ')
+            .click(function() {
+              refreshIcon.addClass('fa-spin');
+              dataseerML.resyncJsonDataTypes(function(err, data) {
+                refreshIcon.removeClass('fa-spin');
+                if (err) return console.log(err);
+                subTypes = data.subTypes;
+                dataTypes = data.dataTypes;
+                metadata = data.metadata;
+              });
+            }),
+          refreshIcon = $('<i/>').addClass('fas fa-sync-alt');
+        $('#dataset-form .container-fluid').append(refreshDiv.append(refreshBtn.append(refreshIcon)));
+      }
 
       window.onbeforeunload = function() {
         if (hasChanged)

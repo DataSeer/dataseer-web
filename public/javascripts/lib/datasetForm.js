@@ -52,14 +52,7 @@ const DatasetForm = function(events) {
           self.setSubTypes(self.dataTypes[self.dataset.dataType]);
           if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
             elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(
-                elements['dataset.mostSuitableRepositories']
-                  .help()
-                  .attr('href')
-                  .split('?')[0] +
-                  '?id=' +
-                  self.dataset.dataType
-              )
+              'href': encodeURI(self.metadata[self.dataset.dataType].url)
             });
             elements['dataset.description'].value(
               self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
@@ -76,10 +69,7 @@ const DatasetForm = function(events) {
             );
           } else {
             elements['dataset.mostSuitableRepositories'].help({
-              'href': elements['dataset.mostSuitableRepositorieencodeURI(s']
-                .help()
-                .attr('href')
-                .split('?')[0]
+              'href': 'http://wiki.dataseer.io/doku.php'
             });
             elements['dataset.description'].value('');
             elements['dataset.bestDataFormatForSharing'].value('');
@@ -98,14 +88,7 @@ const DatasetForm = function(events) {
           self.setSubTypes(self.dataTypes[self.dataset.dataType]);
           if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
             elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(
-                elements['dataset.mostSuitableRepositories']
-                  .help()
-                  .attr('href')
-                  .split('?')[0] +
-                  '?id=' +
-                  self.dataset.dataType
-              )
+              'href': encodeURI(self.metadata[self.dataset.dataType].url)
             });
             elements['dataset.description'].value(
               self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
@@ -122,10 +105,7 @@ const DatasetForm = function(events) {
             );
           } else {
             elements['dataset.mostSuitableRepositories'].help({
-              'href': elements['dataset.mostSuitableRepositorieencodeURI(s']
-                .help()
-                .attr('href')
-                .split('?')[0]
+              'href': 'http://wiki.dataseer.io/doku.php'
             });
             elements['dataset.description'].value('');
             elements['dataset.bestDataFormatForSharing'].value('');
@@ -153,14 +133,7 @@ const DatasetForm = function(events) {
           self.dataset.subType = elements['dataset.subType'].value();
           if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
             elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(
-                elements['dataset.mostSuitableRepositories']
-                  .help()
-                  .attr('href')
-                  .split('?')[0] +
-                  '?id=' +
-                  self.dataset.subType
-              )
+              'href': encodeURI(self.metadata[self.dataset.subType].url)
             });
             elements['dataset.description'].value(
               self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
@@ -177,14 +150,7 @@ const DatasetForm = function(events) {
             );
           } else if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
             elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(
-                elements['dataset.mostSuitableRepositories']
-                  .help()
-                  .attr('href')
-                  .split('?')[0] +
-                  '?id=' +
-                  self.dataset.dataType
-              )
+              'href': encodeURI(self.metadata[self.dataset.dataType].url)
             });
             elements['dataset.description'].value(
               self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
@@ -201,10 +167,7 @@ const DatasetForm = function(events) {
             );
           } else {
             elements['dataset.mostSuitableRepositories'].help({
-              'href': elements['dataset.mostSuitableRepositorieencodeURI(s']
-                .help()
-                .attr('href')
-                .split('?')[0]
+              'href': 'http://wiki.dataseer.io/doku.php'
             });
             elements['dataset.description'].value('');
             elements['dataset.bestDataFormatForSharing'].value('');
@@ -222,14 +185,7 @@ const DatasetForm = function(events) {
           self.dataset.subType = elements['dataset.subType'].value();
           if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
             elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(
-                elements['dataset.mostSuitableRepositories']
-                  .help()
-                  .attr('href')
-                  .split('?')[0] +
-                  '?id=' +
-                  self.dataset.subType
-              )
+              'href': encodeURI(self.metadata[self.dataset.subType].url)
             });
             elements['dataset.description'].value(
               self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
@@ -246,14 +202,7 @@ const DatasetForm = function(events) {
             );
           } else if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
             elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(
-                elements['dataset.mostSuitableRepositories']
-                  .help()
-                  .attr('href')
-                  .split('?')[0] +
-                  '?id=' +
-                  self.dataset.dataType
-              )
+              'href': encodeURI(self.metadata[self.dataset.dataType].url)
             });
             elements['dataset.description'].value(
               self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
@@ -302,8 +251,7 @@ const DatasetForm = function(events) {
         'key': 'Most suitable Repositories : ',
         'value': '',
         'help': {
-          'title':
-            'If you disagree with this information, please edit the Dataseer Wiki available at: http://wiki.dataseer.io/doku.php',
+          'title': 'If you disagree with this information, please edit the Dataseer Wiki available at: ',
           'href': 'http://wiki.dataseer.io/doku.php',
           'text': '?'
         }
@@ -396,6 +344,7 @@ const DatasetForm = function(events) {
     .append(
       View.forms
         .row()
+        .addClass('buttons-container')
         .append(elements['save'])
         .append(elements['validation'])
         .append(elements['help'])
@@ -442,14 +391,7 @@ const DatasetForm = function(events) {
           ? self.dataset.subType
           : self.dataset.dataType;
       elements['dataset.mostSuitableRepositories'].help({
-        'href': encodeURI(
-          elements['dataset.mostSuitableRepositories']
-            .help()
-            .attr('href')
-            .split('?')[0] +
-            '?id=' +
-            param
-        )
+        'href': encodeURI(self.metadata[param].url)
       });
     }
     elements['dataset.id'].view();

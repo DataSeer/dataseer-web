@@ -1,0 +1,21 @@
+extends layout
+
+block content
+
+  div(class='container-fluid')
+    div(class='row')
+      div(class='col-12')
+        h2 Sign in
+    div(class='row')
+      div(class='col-12')
+        form(role='form', action='/signin',method='post', style='max-width: 300px;')
+          if error
+            div(class='alert alert-warning' role='alert') #{error}
+          if success
+            div(class='alert alert-success' role='alert') #{success}
+          .form-group
+            input.form-control(type='email', name='username', placeholder='mail address' value=username)
+          .form-group
+            input.form-control(type='password', name='password', placeholder='password')
+          .btn-group
+            button.blue.btn.btn-default.waves-effect.waves-light(type='submit') Sign in to Dataseer

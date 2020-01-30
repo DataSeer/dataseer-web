@@ -1,0 +1,11 @@
+{
+  "host": "smtp.default.com",
+  "port": 587,
+  "auth": {
+    "user": "user@default.com",
+    "pass": "pass"
+  },
+  "from": "\"Fred Foo\" <foo@example.com>",
+  "subject": "Reset Dataseer Password",
+  "dataseerUrl": "http://localhost:3000"
+}

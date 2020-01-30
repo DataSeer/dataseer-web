@@ -13,8 +13,42 @@ body {
   display: none;
 }
 
-.nav li {
-  margin-right: 5px;
+#user-navbar {
+  background-image: url(../../img/DataSeer-logo-75.png);
+  background-repeat: no-repeat;
+  min-height: 195px;
+  min-width: 485px;
+  display: table;
+}
+
+#user-navbar > div {
+  height: 195px;
+  padding: 15px;
+  text-align: center;
+}
+
+#user-navbar > div {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+#user {
+  font-size: 1.5em;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#user > label {
+}
+
+#navbar ul {
+  list-style: none;
+}
+
+#navbar li {
+  display: inline-block;
+  font-size: 1.25em;
+  margin-right: 15px;
 }
 
 .crud-button-action {
@@ -43,6 +77,11 @@ body {
 .routes {
   margin-top: 20px;
   margin-bottom: 20px;
+}
+
+.routes > table > thead:not(:first-child) > tr > th {
+  background-color: gray;
+  text-decoration: underline;
 }
 
 #document-view {
@@ -79,3 +118,6 @@ body {
   border-color: #1E3945;
 }
 
+.list .row {
+  margin-bottom: 15px;
+}
