@@ -116,8 +116,15 @@ router.post('/upload', function(req, res, next) {
     },
     function(err) {
       // if any of the file processing produced an error, err would equal that error
-      if (err) return console.log(err);
-      return res.render(path.join('backoffice', 'results'), {
+      if (err) {
+        console.log(err);
+        return res.render(path.join('backoffice', 'upload'), {
+          'backoffice': true,
+          'results': results,
+          'current_user': req.user
+        });
+      }
+      return res.render(path.join('backoffice', 'upload'), {
         'backoffice': true,
         'results': results,
         'current_user': req.user
