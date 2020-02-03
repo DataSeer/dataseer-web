@@ -473,7 +473,7 @@ const DatasetForm = function(events) {
     for (let key in self.dataTypes) {
       options.push({
         'value': key,
-        'text': key
+        'text': self.metadata[key].label || key
       });
     }
     options.sort(function(a, b) {
@@ -489,7 +489,7 @@ const DatasetForm = function(events) {
     for (var i = 0; i < subTypes.length; i++) {
       options.push({
         'value': subTypes[i],
-        'text': subTypes[i]
+        'text': self.metadata[subTypes[i]].label || subTypes[i]
       });
     }
     options.sort(function(a, b) {

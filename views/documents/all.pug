@@ -6,14 +6,36 @@ block content
     div(class='container-fluid')
       div(class='row')
         div(class='col-12 text-center')
-          div(class='header') All documents
+          div(class='header') Custom search :
+      div(class='row')
+        div(class='col-12 text-center')
+          form#custom-search(role='form', action='/documents',method='get')
+            div pmid : 
+              input(type='text' name='pmid' placeholder='pmid')
+            div doi : 
+              input(type='text' name='doi' placeholder='doi')
+            div limit : 
+              input(type='text' name='limit' placeholder='Maximum number of results')
+            div
+              button.btn.btn-default.waves-effect.waves-light(type='submit') Search for documents
+      div(class='row')
+        div(class='col-12 text-center')
+          div(class='header') Result(s)
       if  documents.length === 0
         div(class='row')
           div(class='col-12 text-center')
             div(class='header') No data
-      each document, index in documents
+      else
         div(class='row')
-          div(class='col-2 offset-1')
-              a(href='../documents/' + document._id) #{document._id}
-          div(class='col-2') #{document.metadata.journal}
-          div(class='col-6') #{document.metadata.articleTitle}
+          div(class='col-10 offset-1')
+            input#search(type='text' name='username' placeholder='Search for document (doi, pmid or title)')
+        div(class='row')
+          div(class='col-2 offset-1') Url
+          div(class='col-2') Journal
+          div(class='col-6') Title
+        each document, index in documents
+          div(class='row' data=document.metadata.doi + ';' + document.metadata.pmid + ';' + document.metadata.articleTitle)
+            div(class='col-2 offset-1')
+                a(href='../documents/' + document._id) #{document._id}
+            div(class='col-2') #{document.metadata.journal}
+            div(class='col-6') #{document.metadata.articleTitle}

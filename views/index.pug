@@ -37,8 +37,7 @@ block content
                 td Sign up form. Email address & password required to signup
               tr
                 td(scope='row') POST
-                td
-                  a(href='/signup') /signup
+                td /signup
                 td [Public]
                 td
                   div Available parameters :
@@ -57,8 +56,7 @@ block content
                 td Sign in form. Email address & password required to access 'private' part of WebApplication
               tr
                 td(scope='row') POST
-                td
-                  a(href='/signin') /signin
+                td /signin
                 td [Public]
                 td
                   div Available parameters :
@@ -97,8 +95,7 @@ block content
                 td Settings form. Allow you to update your password (when you are connected)
               tr
                 td(scope='row') POST
-                td
-                  a(href='/settings') /settings
+                td /settings
                 td [Restricted] Any role
                 td
                   div Available parameters :
@@ -128,10 +125,9 @@ block content
                   a(href='/resetPassword') /resetPassword
                 td [Restricted] Any role
                 td Reset password form. Allow you to update when you forgot password
-              tr
-                td(scope='row') POST
-                td
-                  a(href='/resetPassword') /resetPassword
+              tr 
+                td POST
+                td /resetPassword
                 td [Restricted] Any role
                 td
                   div Available parameters :
@@ -147,8 +143,14 @@ block content
                 td(scope='row') GET
                 td
                   a(href='documents/?limit=20') /documents/?limit=[20]
-                td [Restricted] Any role
-                td List of first [limit] Documents (by default, limit will be set to 20)
+                td [Restricted] annotator OR curator
+                td
+                  div List of first [limit] Documents (by default, limit will be set to 20)
+                  div available parameters :
+                  ul
+                    li limit : maximum number of results
+                    li doi : doi of document
+                    li pmid : pmid of document
               tr
                 td GET
                 td /documents/:id
@@ -177,8 +179,14 @@ block content
                 td(scope='row') GET
                 td
                   a(href='api/documents/?limit=20') /api/documents/?limit=[20]
-                td [Restricted] Any role
-                td List of [limit] first Documents (by default, limit will be set to 20)
+                td [Restricted] annotator OR curator
+                td
+                  div List of first [limit] Documents (by default, limit will be set to 20)
+                  div available parameters :
+                  ul
+                    li limit : maximum number of results
+                    li doi : doi of document
+                    li pmid : pmid of document
               tr
                 td(scope='row') GET
                 td /api/documents/:id
@@ -220,7 +228,7 @@ block content
                 td
                   a(href='backoffice/upload/') /backoffice/upload/
                 td [Restricted] standard_user OR curator
-                td Backoffice User Interface
+                td Upload a document UI (multiple files allowed for curator)
               tr
                 td(scope='row') POST
                 td /backoffice/upload/
@@ -231,3 +239,19 @@ block content
                   ul
                     li uploadedFiles : file or list of files
                     li [only available for curator] dataseerML : "dataseer-ml" to call dataseer-ml on uploaded file(s), or empty
+              tr
+                td(scope='row') GET
+                td
+                  a(href='backoffice/accounts/') /backoffice/accounts/
+                td [Restricted] curator
+                td Manage accounts UI
+              tr
+                td(scope='row') POST
+                td /backoffice/accounts/
+                td [Restricted] curator
+                td
+                  div Update role of given account
+                  div available parameters :
+                  ul
+                    li username : registred username
+                    li role : role

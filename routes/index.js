@@ -250,10 +250,9 @@ router.get('/myDocuments', function(req, res) {
   let key = 'modifiedBy.' + req.user.role.label + '.' + req.user.id,
     query = {};
   query[key] = true;
-  console.log(query);
   Documents.find(query).exec(function(err, post) {
     if (err) return next(err);
-    return res.render('myDocuments', { 'documents': post, 'current_user': req.user });
+    return res.render('myDocuments', { 'search': true, 'documents': post, 'current_user': req.user });
   });
 });
 

@@ -145,18 +145,11 @@ const DocumentView = function(events) {
   self.source = function(source) {
     if (typeof source === 'undefined') {
       let copy = $('#document-view > div').clone();
-      console.log(
-        copy
-          .find('s[id="dataset-1"]')
-          .parent()
-          .html()
-      );
-      // copy
-      //   .find('*[style]')
-      //   .removeAttr('style')
-      //   .find('*[class]')
-      //   .removeAttr('class');
-      console.log(copy.find('s[id="dataset-1"]'));
+      copy
+        .find('*[style]')
+        .removeAttr('style')
+        .find('*[class]')
+        .removeAttr('class');
       return copy.html();
     }
     elements.container.html(source.replace(/\s/gm, ' '));

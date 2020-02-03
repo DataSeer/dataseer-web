@@ -11,9 +11,14 @@ const express = require('express'),
 router.get('/', function(req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  let limit = parseInt(req.query.limit);
+  let limit = parseInt(req.query.limit),
+    doi = req.query.doi,
+    pmid = req.query.pmid,
+    query = {};
+  if (typeof doi !== 'undefined') query['doi'] = doi;
+  if (typeof doi !== 'undefined') query['pmid'] = pmid;
   if (isNaN(limit)) limit = 20;
-  Documents.find({})
+  Documents.find(query)
     .limit(limit)
     .exec(function(err, post) {
       if (err) return next(err);

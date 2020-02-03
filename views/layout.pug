@@ -32,8 +32,14 @@ html
                 a(href='/') Home
               li
                 a(href='/myDocuments') My documents
+              if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
+                li
+                  a(href='/documents') All documents
               li
                 a(href='/backoffice/upload') Upload document
+              if current_user.role.label === 'curator'
+                li
+                  a(href='/backoffice/accounts') Manage accounts
               li
                 a(href='/settings') Settings
               li
@@ -50,7 +56,7 @@ html
 
     block content
 
-    div(style='text-align:center;')  
+    div(style='text-align:center;margin-top: 20px;')  
       a(href='https://www.dataseer.io' style='color:#ffffff;' target='_blank') dataseer.io
       a(href='https://github.com/kermitt2/dataseer-web' target='_blank')
         i(class='fab fa-github' style='color:#8DCB55;margin-left:5px;')
@@ -74,6 +80,9 @@ html
   else if backoffice
     script(src='../../javascripts/lib/jquery.js')
     script(src='../../javascripts/process/backoffice.js')
+  else if search
+    script(src='../../javascripts/lib/jquery.js')
+    script(src='../../javascripts/search.js')
   else
     script(src='../javascripts/lib/jquery.js')
 

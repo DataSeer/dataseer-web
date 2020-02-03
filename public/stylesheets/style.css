@@ -8,6 +8,41 @@ body {
   background-color: lightgray;
 }
 
+.accounts form {
+  max-width: auto;
+}
+
+.accounts .form-group {
+  display: inline-block;
+  width: auto;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.header {
+  font-size: 2em;
+}
+
+#custom-search > div {
+  margin-right: 10px;
+  display: inline-block;
+}
+
+#search {
+  width: 100%; /* Full-width */
+  font-size: 16px; /* Increase font-size */
+  padding: 12px 20px 12px 20px; /* Add some padding */
+  border: 1px solid #ddd; /* Add a grey border */
+  margin-bottom: 12px; /* Add some space below the input */
+}
+
+.accounts .form-group > * {
+  margin-left: 10px;
+  display: inline-block;
+  width: auto;
+  vertical-align: middle;
+}
+
 #user_id,
 #user_role {
   display: none;

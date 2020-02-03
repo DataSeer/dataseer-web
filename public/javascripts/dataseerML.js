@@ -55,7 +55,8 @@ const dataseerML = {
           datatype = keys[i];
         }
       }
-      result.datatype = datatype;
+      // result.datatype = datatype;
+      result.datatype = datatype.toLowerCase(); // lowercase to match with metadata returned by dataseer-ml
       result.cert = max;
     }
     return result;
