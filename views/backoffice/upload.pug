@@ -12,7 +12,6 @@ block content
       if results.errors.length
         each error in results.errors
           div(class='alert alert-warning' role='alert') #{error.filename} : #{error.msg}
-    if current_user.role.label === 'standard_user'
     div(class='row')
       div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px;')
         div(style='margin-top:10px;margin-left:10px;') Upload a new document:
@@ -20,8 +19,9 @@ block content
         
         include ../forms/documents/upload.pug
         
-        div(style='margin-top:10px;margin-left:10px;') DataSeer is powered by AI, which means it’s always learning and improving.
-        div(class='row' style='margin-top:10px;margin-left:10px;margin-bottom: 10px;')
-          div(style='display: inline-block;') At the moment, it’s pretty foolish. By uploading your article and telling it about the things it gets right and gets wrong about your datasets, you’re helping DataSeer improve. It’s currently happiest with published articles.
-          div(style='display: inline-block;') N.B. We define something as its own ‘data type’ if it needs its own sharing instructions. So, ‘Tabular Data’ is one data type, regardless of whether it’s a table of data from physics or from sociology.
-          div(style='display: inline-block;') You may feel an urge to go to the wiki and add a new data type for your data. It’s vital we keep DataSeer simple and easy to use, so please only add a data type if it’s impossible to fit it under any existing type.
+        div(style='margin-top:10px;margin-bottom:10px;margin-left:10px;') DataSeer is powered by AI, which means it’s always learning and improving.
+        if current_user.role.label === 'standard_user'
+          div(class='row' style='margin-left:10px;margin-bottom: 10px;')
+            div(style='display: inline-block;') At the moment, it’s pretty foolish. By uploading your article and telling it about the things it gets right and gets wrong about your datasets, you’re helping DataSeer improve. It’s currently happiest with published articles.
+            div(style='display: inline-block;') N.B. We define something as its own ‘data type’ if it needs its own sharing instructions. So, ‘Tabular Data’ is one data type, regardless of whether it’s a table of data from physics or from sociology.
+            div(style='display: inline-block;') You may feel an urge to go to the wiki and add a new data type for your data. It’s vital we keep DataSeer simple and easy to use, so please only add a data type if it’s impossible to fit it under any existing type.
