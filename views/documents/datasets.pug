@@ -17,20 +17,28 @@ block content
         ul
           if current_user
             li
-              a(href='/myDocuments' style='color:#184D7E;') My documents
+              a(href='/myDocuments' class='nav') My documents
+
+
+            if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
+              li
+                a(href='/documents' class='nav') All documents
             li
-              a(href='/backoffice/upload' style='color:#184D7E;') Upload
+              a(href='/backoffice/upload' class='nav') Upload
+            if current_user.role.label === 'curator'
+              li
+                a(href='/backoffice/accounts' class='nav') Accounts
             li
-              a(href='/settings' style='color:#184D7E;') Settings
+              a(href='/settings' class='nav') Settings
             li
-              a(href='/signout' style='color:#184D7E;') Sign out
+              a(href='/signout' class='nav') Sign out
           else
             li
-              a(href='/signup' style='color:#184D7E;') Sign up
+              a(href='/signup' class='nav') Sign up
             li
-              a(href='/signin' style='color:#184D7E;') Sign in
+              a(href='/signin' class='nav') Sign in
             li
-              a(href='/forgotPassword' style='color:#184D7E;') Forgot password
+              a(href='/forgotPassword' class='nav') Forgot password
 
   div(class='bordered' style='border-color:#ffffff;border-width:0px;')
     div(class='container-fluid')
