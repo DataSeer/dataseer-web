@@ -25,34 +25,34 @@ html
             label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label})
           else
             label Sign up or Sign in to get access to Dataseer Application
-        div(id='navbar')
+        div(id='navbar' style='position:absolute; bottom:0px; right:10px; text-align:right;')
           ul
             if current_user
               li
-                a(href='/') Home
+                a(href='/' style='color:#184D7E;') Home
               li
-                a(href='/myDocuments') My documents
+                a(href='/myDocuments' style='color:#184D7E;') My documents
               if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
                 li
                   a(href='/documents') All documents
               li
-                a(href='/backoffice/upload') Upload document
+                a(href='/backoffice/upload' style='color:#184D7E;') Upload document
               if current_user.role.label === 'curator'
                 li
                   a(href='/backoffice/accounts') Manage accounts
               li
-                a(href='/settings') Settings
+                a(href='/settings' style='color:#184D7E;') Settings
               li
-                a(href='/signout') Sign out
+                a(href='/signout' style='color:#184D7E;') Sign out
             else
               li
-                a(href='/') Home
+                a(href='/' style='color:#184D7E;') Home
               li
-                a(href='/signup') Sign up
+                a(href='/signup' style='color:#184D7E;') Sign up
               li
-                a(href='/signin') Sign in
+                a(href='/signin' style='color:#184D7E;') Sign in
               li
-                a(href='/forgotPassword') Forgot password
+                a(href='/forgotPassword' style='color:#184D7E;') Forgot password
 
     block content
 

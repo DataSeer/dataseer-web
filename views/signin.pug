@@ -4,18 +4,23 @@ block content
 
   div(class='container-fluid')
     div(class='row')
-      div(class='col-12')
-        h2 Sign in
-    div(class='row')
-      div(class='col-12')
-        form(role='form', action='/signin',method='post', style='max-width: 300px;')
-          if error
-            div(class='alert alert-warning' role='alert') #{error}
-          if success
-            div(class='alert alert-success' role='alert') #{success}
-          .form-group
-            input.form-control(type='email', name='username', placeholder='mail address' value=username)
-          .form-group
-            input.form-control(type='password', name='password', placeholder='password')
-          .btn-group
-            button.blue.btn.btn-default.waves-effect.waves-light(type='submit') Sign in to Dataseer
+      div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; ')
+        div(class='row' style='margin-top:20px;')
+          div(class='col-12' style='text-align: center;')
+            h2 Sign in
+        div(class='row')
+          div(class='col-12')
+            form(role='form', action='/signin',method='post', style='max-width: 300px; margin: auto; text-align: center; margin-top:20px;')
+              if error
+                div(class='alert alert-warning' role='alert') #{error}
+              if success
+                div(class='alert alert-success' role='alert') #{success}
+              .form-group
+                input.form-control(type='email', name='username', placeholder='mail address' value=username)
+              .form-group
+                input.form-control(type='password', name='password', placeholder='password')
+              .btn-group
+                button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Sign in to Dataseer
+
+        div(class='row')
+          div(class='col-12' style='margin-top:20px;')
