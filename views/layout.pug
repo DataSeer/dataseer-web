@@ -20,35 +20,36 @@ html
       div#user_role #{current_user.role.label}
     div(id='user-navbar' class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
       div
-        div(id='user' style='position:absolute; top:0px; right:10px; text-align:right;')
-          if current_user
+        if current_user
+          div(id='user' style='position:absolute; top:0px; right:10px; text-align:right;')
             label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label})
-          else
-            label Sign up or Sign in to get access to Dataseer Application
+        else
+          div(id='user' style='position:absolute; top:0px; right:25px; text-align:right;')
+            label(style='font-size:small;') 
+              a(href='/signup') Sign up 
+              | or 
+              a(href='/signin') Sign in 
+              | to access DataSeer
         div(id='navbar' style='position:absolute; bottom:0px; right:10px; text-align:right;')
           ul
             if current_user
               li
-                a(href='/' style='color:#184D7E;') Home
-              li
-                a(href='/myDocuments' style='color:#184D7E;') My documents
+                a(href='/myDocuments' class='nav') My documents
               if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
                 li
-                  a(href='/documents') All documents
+                  a(href='/documents' class='nav') All documents
               li
-                a(href='/backoffice/upload' style='color:#184D7E;') Upload document
+                a(href='/backoffice/upload' class='nav') Upload
               if current_user.role.label === 'curator'
                 li
-                  a(href='/backoffice/accounts') Manage accounts
+                  a(href='/backoffice/accounts' class='nav') Accounts
               li
-                a(href='/settings' style='color:#184D7E;') Settings
+                a(href='/settings' class='nav') Settings
               li
-                a(href='/signout' style='color:#184D7E;') Sign out
+                a(href='/signout' class='nav') Sign out
             else
               li
-                a(href='/' style='color:#184D7E;') Home
-              li
-                a(href='/signup' style='color:#184D7E;') Sign up
+                a(href='/signup' class='nav') Sign up
               li
                 a(href='/signin' style='color:#184D7E;') Sign in
               li

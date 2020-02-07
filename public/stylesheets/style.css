@@ -156,3 +156,12 @@ body {
 .list .row {
   margin-bottom: 15px;
 }
+
+a.nav {
+  color: #184D7E;
+}
+
+a.nav.active {
+  color: #184D7E;
+  font-weight: bold;
+}
