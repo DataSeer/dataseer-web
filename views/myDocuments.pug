@@ -10,23 +10,36 @@ block content
             div(class='col-12 text-center' style='margin-top:10px;')
               div(class='header') My documents
           div(class='row')
-            div(class='col-10 offset-1')
-              input#search(type='text' name='username' placeholder='Search for document (doi, pmid or title)')
-          div(class='row')
-            div(class='col-2 offset-1') Url
+            div(class='col-12')
+              input#search(type='text' name='username' placeholder='Search for document (doi, pmid, title, email, etc)')
+          div(class='row head-list')
+            div(class='col-2') Url
+            div(class='col-2') Status
+            div(class='col-2') Modified by
             div(class='col-2') Journal
-            div(class='col-6') Title
+            div(class='col-4') Title
           if  documents.length === 0
             div(class='row')
               div(class='col-12 text-center')
                 div(class='header') No data
           else
             each document, index in documents
-              div(class='row' data=document.metadata.doi + ';' + document.metadata.pmid + ';' + document.metadata.articleTitle)
-                div(class='col-2 offset-1')
+              div(class='row' data=true)
+                div(class='col-2')
                     a(href='./documents/' + document._id) #{document._id}
+                if document.status === 'metadata'
+                  div(class='col-2') Metadata validation
+                else if document.status === 'datasets'
+                  div(class='col-2') Datasets validation
+                else if document.status === 'finish'
+                  div(class='col-2') Process finished
+                div(class='col-2')
+                  ul
+                    each role, i in document.modifiedBy
+                      each user, j in role
+                        li #{user} (#{i})
                 div(class='col-2') #{document.metadata.journal}
-                div(class='col-6') #{document.metadata.articleTitle}
+                div(class='col-4') #{document.metadata.articleTitle}
 
           div(class='row')
             div(class='col-12' style='margin-top:20px;')

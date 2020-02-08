@@ -16,7 +16,7 @@ const MongoDB = {
     if (typeof user !== 'undefined' && !!user) {
       if (typeof doc.modifiedBy === 'undefined') doc.modifiedBy = {};
       if (typeof doc.modifiedBy[user.role] === 'undefined') doc.modifiedBy[user.role] = {};
-      doc.modifiedBy[user.role][user.id] = true;
+      doc.modifiedBy[user.role][user.id] = user.username;
     }
     jQuery.ajax({
       'type': 'PUT',

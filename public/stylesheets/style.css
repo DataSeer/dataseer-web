@@ -8,6 +8,19 @@ body {
   background-color: lightgray;
 }
 
+.list .head-list {
+  text-decoration: underline;
+}
+
+.row[data] ul {
+  list-style: none;
+  padding: 0px;
+}
+.row[data] ul li {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
 .accounts form {
   max-width: auto;
 }
@@ -44,6 +57,7 @@ body {
 }
 
 #user_id,
+#user_username,
 #user_role {
   display: none;
 }

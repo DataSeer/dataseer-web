@@ -10,6 +10,7 @@
       currentDocument = doc;
       let user = {
           'id': $('#user_id').text(),
+          'username': $('#user_username').text(),
           'role': $('#user_role').text()
         },
         subTypes = data.subTypes,
@@ -400,6 +401,7 @@
                 subTypes = data.subTypes;
                 dataTypes = data.dataTypes;
                 metadata = data.metadata;
+                datasetForm.loadData(data);
               });
             }),
           refreshIcon = $('<i/>').addClass('fas fa-sync-alt');

@@ -18,7 +18,7 @@ block content
           div(class='row')
             div(class='col-10 offset-1')
               input#search(type='text' name='username' placeholder='Search for email adress (or role)')
-          div(class='row')
+          div(class='row head-list')
               div(class='col-2 offset-1') Email
               div(class='col-2') Current role
               div(class='col-6') Update role
@@ -27,7 +27,7 @@ block content
               div(class='col-12 text-center')
                 div(class='header') No data
           each account, index in accounts
-            div(class='row' data=account.username + ';' + account.role.label)
+            div(class='row' data=true)
               div(class='col-2 offset-1') #{account.username}
               div(class='col-2') #{account.role.label}
               div(class='col-6')

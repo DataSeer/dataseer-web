@@ -8,6 +8,7 @@ const express = require('express'),
   async = require('async'),
   AccountsManager = require('../lib/accountsManager.js'),
   Accounts = require('../models/accounts.js'),
+  extractor = require('../lib/extractor.js'),
   Upload = require('../lib/upload.js');
 
 const emailRegExp = new RegExp("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@[A-Za-z0-9-]+(.[A-Za-z0-9-]+)*");
@@ -28,6 +29,7 @@ router.get('/accounts', function(req, res, next) {
     .exec(function(err, post) {
       if (err) return next(err);
       return res.render(path.join('backoffice', 'accounts'), {
+        'route': '/backoffice/accounts',
         'search': true,
         'current_user': req.user,
         'accounts': post,
@@ -72,6 +74,7 @@ router.get('/upload', function(req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   return res.render(path.join('backoffice', 'upload'), {
+    'route': '/backoffice/upload',
     'title': 'DataSeer',
     'backoffice': true,
     'current_user': req.user
@@ -88,15 +91,21 @@ router.post('/upload', function(req, res, next) {
     dataseerML = '';
   if (!req.files) {
     results.errors.push({ 'msg': 'You must send at least one file' });
-    return res
-      .status(400)
-      .render(path.join('backoffice', 'results'), { 'backoffice': true, 'results': results, 'current_user': req.user });
+    return res.status(400).render(path.join('backoffice', 'upload'), {
+      'route': '/backoffice/upload',
+      'backoffice': true,
+      'results': results,
+      'current_user': req.user
+    });
   }
   if (Object.keys(req.files).length == 0) {
     results.errors.push({ 'msg': 'No file(s) were uploaded' });
-    return res
-      .status(400)
-      .render(path.join('backoffice', 'results'), { 'backoffice': true, 'results': results, 'current_user': req.user });
+    return res.status(400).render(path.join('backoffice', 'upload'), {
+      'route': '/backoffice/upload',
+      'backoffice': true,
+      'results': results,
+      'current_user': req.user
+    });
   }
   uploadedFiles = Array.isArray(req.files['uploadedFiles'])
     ? isCurator
@@ -119,12 +128,14 @@ router.post('/upload', function(req, res, next) {
       if (err) {
         console.log(err);
         return res.render(path.join('backoffice', 'upload'), {
+          'route': '/backoffice/upload',
           'backoffice': true,
           'results': results,
           'current_user': req.user
         });
       }
       return res.render(path.join('backoffice', 'upload'), {
+        'route': '/backoffice/upload',
         'backoffice': true,
         'results': results,
         'current_user': req.user
