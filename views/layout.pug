@@ -43,7 +43,7 @@ html
             if current_user
               if current_user.role.label === 'curator'
                 li
-                  a(href='./' class=(route === '/') ? 'nav active' : 'nav') Help
+                  a(href=(route === '/backoffice/upload' || route === '/backoffice/accounts') ? '../' : './' class=(route === '/') ? 'nav active' : 'nav') Help
               li
                 a(href=(route === '/backoffice/upload' || route === '/backoffice/accounts') ? '../myDocuments' : './myDocuments' class=(route === '/myDocuments') ? 'nav active' : 'nav') My documents
               if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
@@ -53,7 +53,7 @@ html
                 a(href=(route === '/backoffice/upload' || route === '/backoffice/accounts') ? 'upload' : './backoffice/upload' class=(route === '/backoffice/upload') ? 'nav active' : 'nav') Upload
               if current_user.role.label === 'curator'
                 li
-                  a(href='./backoffice/accounts' class=(route === '/backoffice/accounts') ? 'nav active' : 'nav') Accounts
+                  a(href=(route === '/backoffice/upload' || route === '/backoffice/accounts') ? 'accounts' : './backoffice/accounts' class=(route === '/backoffice/accounts') ? 'nav active' : 'nav') Accounts
               li
                 a(href=(route === '/backoffice/upload' || route === '/backoffice/accounts') ? '../settings' : './settings' class=(route === '/settings') ? 'nav active' : 'nav') Settings
               li
