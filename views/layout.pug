@@ -47,7 +47,7 @@ html
                 li
                   a(href='./documents' class=(route === '/documents') ? 'nav active' : 'nav') All documents
               li
-                a(href='./backoffice/upload' class=(route === '/backoffice/upload') ? 'nav active' : 'nav') Upload
+                a(href=(route === '/backoffice/upload' || route === '/backoffice/accounts') ? 'upload' : './backoffice/upload') class=(route === '/backoffice/upload') ? 'nav active' : 'nav') Upload
               if current_user.role.label === 'curator'
                 li
                   a(href='./backoffice/accounts' class=(route === '/backoffice/accounts') ? 'nav active' : 'nav') Accounts
@@ -86,7 +86,10 @@ html
       script(src='../javascripts/process/datasets.js')
     else
       script(src='../javascripts/process/'+ document.status + '.js')
-  else if backoffice || route === '/backoffice/upload' || route === '/backoffice/accounts'
+  else if route === '/backoffice/upload' || route === '/backoffice/accounts'
+    script(src='../javascripts/lib/jquery.js')
+    script(src='../javascripts/process/backoffice.js')
+  else if backoffice 
     script(src='../../javascripts/lib/jquery.js')
     script(src='../../javascripts/process/backoffice.js')
   else if search
