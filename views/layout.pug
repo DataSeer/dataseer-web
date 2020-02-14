@@ -5,7 +5,7 @@ html
     title DataSeer
     link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css' integrity='sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ' crossorigin='anonymous')
     link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous')  
-    if route === '/signin' || route === '/signup' || route === '/settings' || route === '/myDocuments' || route === '/resetPassword' || route === '/forgotPassword' || route === '/'
+    if route === '/signin' || route === '/signup' || route === '/settings' || route === '/myDocuments' || route === '/resetPassword' || route === '/forgotPassword' || route === '/' || route === 'documents'
       link(rel='stylesheet' href='./stylesheets/style.css')
     else
       link(rel='stylesheet' href='../stylesheets/style.css')
@@ -98,7 +98,7 @@ html
   else if search
     script(src='../../javascripts/lib/jquery.js')
     script(src='../../javascripts/search.js')
-  else if route === '/signin' || route === '/signup' || route === '/settings' || route === '/myDocuments' || route === '/resetPassword' || route === '/forgotPassword' || route === '/'
+  else if route === '/signin' || route === '/signup' || route === '/settings' || route === '/myDocuments' || route === '/resetPassword' || route === '/forgotPassword' || route === '/' || route === '/documents' 
     script(src='./javascripts/lib/jquery.js')
   else
     script(src='../javascripts/lib/jquery.js')
