@@ -18,6 +18,9 @@ html
     if backoffice
       link(rel='stylesheet' href='../../stylesheets/style.css')
       link(rel='stylesheet' href='../../stylesheets/process/backoffice.css')
+    if route === '/backoffice/upload' || route === '/backoffice/accounts'
+      link(rel='stylesheet' href='../stylesheets/style.css')
+      link(rel='stylesheet' href='../stylesheets/process/backoffice.css')
   body
     if current_user
       div#user_id #{current_user.id}
@@ -45,7 +48,7 @@ html
                 a(href='./myDocuments' class=(route === '/myDocuments') ? 'nav active' : 'nav') My documents
               if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
                 li
-                  a(href='./documents' class=(route === '/documents') ? 'nav active' : 'nav') All documents
+                  a(href=(route === '/backoffice/upload' || route === '/backoffice/accounts') ? '../documents' : './documents') class=(route === '/documents') ? 'nav active' : 'nav') All documents
               li
                 a(href=(route === '/backoffice/upload' || route === '/backoffice/accounts') ? 'upload' : './backoffice/upload') class=(route === '/backoffice/upload') ? 'nav active' : 'nav') Upload
               if current_user.role.label === 'curator'
