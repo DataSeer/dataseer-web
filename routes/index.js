@@ -269,7 +269,7 @@ router.post(
       user.token = undefined;
       return user.save(function(err) {
         if (err) console.log('Error : token not deleted');
-        return res.redirect('/');
+        return res.redirect('../');
       });
     });
   }
@@ -291,7 +291,7 @@ router.get('/myDocuments', function(req, res) {
   query[key] = req.user.username;
   Documents.find(query).exec(function(err, post) {
     if (err) return next(err);
-    if (post.length === 0 && redirect) return res.redirect('/backoffice/upload');
+    if (post.length === 0 && redirect) return res.redirect('../backoffice/upload');
     return res.render('myDocuments', {
       'route': '../myDocuments',
       'search': true,

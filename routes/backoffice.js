@@ -61,10 +61,10 @@ router.post('/accounts', function(req, res, next) {
     return user.save(function(err) {
       if (err) {
         req.flash('error', err);
-        return res.redirect('/backoffice/accounts');
+        return res.redirect('../backoffice/accounts');
       }
       req.flash('success', 'User role has been successfully updateted');
-      return res.redirect('/backoffice/accounts');
+      return res.redirect('../backoffice/accounts');
     });
   });
 });
