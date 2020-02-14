@@ -15,7 +15,7 @@ html
         link(rel='stylesheet' href='../stylesheets/process/datasets.css')
       else
         link(rel='stylesheet' href='../stylesheets/process/'+ document.status + '.css')
-    if backoffice
+    if backoffice && route !== '/documents'
       link(rel='stylesheet' href='../../stylesheets/style.css')
       link(rel='stylesheet' href='../../stylesheets/process/backoffice.css')
     if route === '/backoffice/upload' || route === '/backoffice/accounts'
@@ -95,7 +95,7 @@ html
   else if route === '/backoffice/upload' || route === '/backoffice/accounts'
     script(src='../javascripts/lib/jquery.js')
     script(src='../javascripts/process/backoffice.js')
-  else if backoffice 
+  else if backoffice && route !== '/documents'
     script(src='../../javascripts/lib/jquery.js')
     script(src='../../javascripts/process/backoffice.js')
   else if search
