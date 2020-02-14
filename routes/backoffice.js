@@ -48,23 +48,23 @@ router.post('/accounts', function(req, res, next) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username)) {
     req.flash('error', 'Incorrect Email');
-    return res.redirect('./backoffice/accounts');
+    return res.redirect('./accounts');
   }
 
   return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
     let role = AccountsManager.roles[req.body.role];
     if (typeof role === 'undefined') {
       req.flash('error', 'Incorrect role');
-      return res.redirect('./backoffice/accounts');
+      return res.redirect('./accounts');
     }
     user.role = role;
     return user.save(function(err) {
       if (err) {
         req.flash('error', err);
-        return res.redirect('./backoffice/accounts');
+        return res.redirect('./accounts');
       }
       req.flash('success', 'User role has been successfully updateted');
-      return res.redirect('./backoffice/accounts');
+      return res.redirect('./accounts');
     });
   });
 });
