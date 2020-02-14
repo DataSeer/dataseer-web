@@ -86,7 +86,7 @@ html
       script(src='../javascripts/process/datasets.js')
     else
       script(src='../javascripts/process/'+ document.status + '.js')
-  else if backoffice
+  else if backoffice || route === '/backoffice/upload' || route === '/backoffice/accounts'
     script(src='../../javascripts/lib/jquery.js')
     script(src='../../javascripts/process/backoffice.js')
   else if search
