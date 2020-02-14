@@ -89,6 +89,9 @@ html
       script(src='../javascripts/process/datasets.js')
     else
       script(src='../javascripts/process/'+ document.status + '.js')
+  else if route === '/documents' 
+    script(src='./javascripts/lib/jquery.js')
+    script(src='./javascripts/search.js')
   else if route === '/backoffice/upload' || route === '/backoffice/accounts'
     script(src='../javascripts/lib/jquery.js')
     script(src='../javascripts/process/backoffice.js')
@@ -100,9 +103,6 @@ html
     script(src='../../javascripts/search.js')
   else if route === '/signin' || route === '/signup' || route === '/settings' || route === '/myDocuments' || route === '/resetPassword' || route === '/forgotPassword' || route === '/' 
     script(src='./javascripts/lib/jquery.js')
-  else if route === '/documents' 
-    script(src='./javascripts/lib/jquery.js')
-    script(src='./javascripts/search.js')
   else
     script(src='../javascripts/lib/jquery.js')
 
