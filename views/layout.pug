@@ -4,7 +4,10 @@ html
     title DataSeer
     link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css' integrity='sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ' crossorigin='anonymous')
     link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous')  
-    link(rel='stylesheet' href='../stylesheets/style.css')
+    if signin
+      link(rel='stylesheet' href='./stylesheets/style.css')
+    else
+      link(rel='stylesheet' href='../stylesheets/style.css')
     if document
       link(rel='stylesheet' href='../stylesheets/tei.css')
       if current_user.role.label === 'curator'
@@ -91,7 +94,7 @@ html
     script(src='../../javascripts/lib/jquery.js')
     script(src='../../javascripts/search.js')
   else
-    script(src='./javascripts/lib/jquery.js')
+    script(src='../javascripts/lib/jquery.js')
 
   script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js' integrity='sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1' crossorigin='anonymous')
   script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js' integrity='sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM' crossorigin='anonymous')
