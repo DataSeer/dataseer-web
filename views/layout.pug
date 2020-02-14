@@ -1,7 +1,7 @@
 doctype html
 html
   head      
-    if backoffice && route !== '/documents'
+    if route === '/backoffice/upload' || route === '/backoffice/accounts' || backoffice
       link(rel='shortcut icon' type='image/ico' href='../favicon.ico')
     else
       link(rel='shortcut icon' type='image/ico' href='./favicon.ico')
