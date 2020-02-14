@@ -7,7 +7,7 @@ block content
       if results.successes.length
         each result in results.successes
           div(class='alert alert-success' role='alert')
-            a(href='../../documents/' + result.document.id) #{result.filename}
+            a(href='../documents/' + result.document.id) #{result.filename}
             div(style='display: inline-block; margin-left: 5px;') successfully uploaded
       if results.errors.length
         each error in results.errors
