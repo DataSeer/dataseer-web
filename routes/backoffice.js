@@ -29,7 +29,7 @@ router.get('/accounts', function(req, res, next) {
     .exec(function(err, post) {
       if (err) return next(err);
       return res.render(path.join('backoffice', 'accounts'), {
-        'route': '/backoffice/accounts',
+        'route': '../backoffice/accounts',
         'search': true,
         'current_user': req.user,
         'accounts': post,
@@ -48,7 +48,7 @@ router.post('/accounts', function(req, res, next) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username)) {
     req.flash('error', 'Incorrect Email');
-    return res.redirect('/backoffice/accounts');
+    return res.redirect('../backoffice/accounts');
   }
 
   return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
@@ -74,7 +74,7 @@ router.get('/upload', function(req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   return res.render(path.join('backoffice', 'upload'), {
-    'route': '/backoffice/upload',
+    'route': '../backoffice/upload',
     'title': 'DataSeer',
     'backoffice': true,
     'current_user': req.user
@@ -92,7 +92,7 @@ router.post('/upload', function(req, res, next) {
   if (!req.files) {
     results.errors.push({ 'msg': 'You must send at least one file' });
     return res.status(400).render(path.join('backoffice', 'upload'), {
-      'route': '/backoffice/upload',
+      'route': '../backoffice/upload',
       'backoffice': true,
       'results': results,
       'current_user': req.user
@@ -101,7 +101,7 @@ router.post('/upload', function(req, res, next) {
   if (Object.keys(req.files).length == 0) {
     results.errors.push({ 'msg': 'No file(s) were uploaded' });
     return res.status(400).render(path.join('backoffice', 'upload'), {
-      'route': '/backoffice/upload',
+      'route': '../backoffice/upload',
       'backoffice': true,
       'results': results,
       'current_user': req.user
@@ -128,14 +128,14 @@ router.post('/upload', function(req, res, next) {
       if (err) {
         console.log(err);
         return res.render(path.join('backoffice', 'upload'), {
-          'route': '/backoffice/upload',
+          'route': '../backoffice/upload',
           'backoffice': true,
           'results': results,
           'current_user': req.user
         });
       }
       return res.render(path.join('backoffice', 'upload'), {
-        'route': '/backoffice/upload',
+        'route': '../backoffice/upload',
         'backoffice': true,
         'results': results,
         'current_user': req.user

@@ -31,7 +31,7 @@ router.get('/', function(req, res, next) {
     .exec(function(err, post) {
       if (err) return next(err);
       return res.render(path.join('documents', 'all'), {
-        'route': '/documents',
+        'route': '../documents',
         'search': true,
         'documents': post,
         'current_user': req.user
