@@ -66,7 +66,9 @@ html
       a(href='https://github.com/kermitt2/dataseer-web' target='_blank')
         i(class='fab fa-github' style='color:#8DCB55;margin-left:5px;')
 
-  if document
+  if signin
+    script(src='./javascripts/lib/jquery.js')
+  else if document
     div(id='document.id' class='data' value=(document._id))
     script(src='../javascripts/lib/jquery.js')
     script(src='../javascripts/lib/randomColor.min.js')
@@ -88,8 +90,6 @@ html
   else if search
     script(src='../../javascripts/lib/jquery.js')
     script(src='../../javascripts/search.js')
-  else if signin
-    script(src='./javascripts/lib/jquery.js')
   else
     script(src='../javascripts/lib/jquery.js')
 
