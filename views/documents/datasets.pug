@@ -9,36 +9,36 @@ block content
           label(style='font-size:small;') Connected as : <b>#{current_user.username}</b> (#{current_user.role.label})
         else
           label(style='font-size:small;') 
-            a(href='/signup') Sign up 
+            a(href=deep.url + 'signup') Sign up 
             | or 
-            a(href='/signin') Sign in 
+            a(href=deep.url + 'signin') Sign in 
             | to access DataSeer
       div(id='navbar-lg')
         ul
           if current_user
             li
-              a(href='/myDocuments' class='nav') My documents
+              a(href=deep.url + 'myDocuments' class='nav') My documents
 
 
             if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
               li
-                a(href='/documents' class='nav') All documents
+                a(href=deep.url + 'documents' class='nav') All documents
             li
-              a(href='/backoffice/upload' class='nav') Upload
+              a(href=deep.url + 'backoffice/upload' class='nav') Upload
             if current_user.role.label === 'curator'
               li
-                a(href='/backoffice/accounts' class='nav') Accounts
+                a(href=deep.url + 'backoffice/accounts' class='nav') Accounts
             li
-              a(href='/settings' class='nav') Settings
+              a(href=deep.url + 'settings' class='nav') Settings
             li
-              a(href='/signout' class='nav') Sign out
+              a(href=deep.url + 'signout' class='nav') Sign out
           else
             li
-              a(href='/signup' class='nav') Sign up
+              a(href=deep.url + 'signup' class='nav') Sign up
             li
-              a(href='/signin' class='nav') Sign in
+              a(href=deep.url + 'signin' class='nav') Sign in
             li
-              a(href='/forgotPassword' class='nav') Forgot password
+              a(href=deep.url + 'forgotPassword' class='nav') Forgot password
 
   div(class='bordered' style='border-color:#ffffff;border-width:0px;')
     div(class='container-fluid')

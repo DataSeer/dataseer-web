@@ -46,7 +46,11 @@ const getMailTxt = function(url) {
 router.get('/', function(req, res, next) {
   if (typeof req.user !== 'undefined') {
     if (AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator))
-      return res.render('index', { 'route': '/', 'deep': '../', 'current_user': req.user });
+      return res.render('index', {
+        'route': '/',
+        'deep': { 'resources': '../', 'url': './' },
+        'current_user': req.user
+      });
     else return res.redirect('/myDocuments?redirect=true');
   } else return res.redirect('/signin');
 });
@@ -54,18 +58,22 @@ router.get('/', function(req, res, next) {
 router.get('/signup', function(req, res) {
   if (typeof req.user !== 'undefined')
     return res.status(401).send('Your current role do not grant access to this part of website');
-  res.render('signup', { 'route': '/signup', 'deep': '../' });
+  res.render('signup', { 'route': '/signup', 'deep': { 'resources': '../', 'url': './' } });
 });
 
 router.post('/signup', function(req, res, next) {
   if (typeof req.user !== 'undefined')
     return res.status(401).send('Your current role do not grant access to this part of website');
   if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
-    return res.render('signup', { 'route': '/signup', 'deep': '../', 'error': 'Email incorrect !' });
+    return res.render('signup', {
+      'route': '/signup',
+      'deep': { 'resources': '../', 'url': './' },
+      'error': 'Email incorrect !'
+    });
   if (typeof req.body.password !== 'string' || !passwordRegExp.test(req.body.password))
     return res.render('signup', {
       'route': '/signup',
-      'deep': '../',
+      'deep': { 'resources': '../', 'url': './' },
       'error': 'Password incorrect ! (At least 6 chars)'
     });
   return Accounts.register(
@@ -76,20 +84,20 @@ router.post('/signup', function(req, res, next) {
         console.log(err);
         return res.render('signup', {
           'route': '/signup',
-          'deep': '../',
+          'deep': { 'resources': '../', 'url': './' },
           'error': 'A user with the given email address is already registered'
         });
       } else if (err) {
         console.log(err);
         return res.render('signup', {
           'route': '/signup',
-          'deep': '../',
+          'deep': { 'resources': '../', 'url': './' },
           'error': 'Sorry, an error has occured. Try to signup later, or send an email to ' + smtpConf.auth.user
         });
       } else
         return res.render('signin', {
           'route': '/signin',
-          'deep': '../',
+          'deep': { 'resources': '../', 'url': './' },
           'success': 'New account created !',
           'username': req.body.username
         });
@@ -100,26 +108,34 @@ router.post('/signup', function(req, res, next) {
 router.get('/forgotPassword', function(req, res) {
   if (typeof req.user !== 'undefined')
     return res.status(401).send('Your current role do not grant access to this part of website');
-  res.render('forgotPassword', { 'route': '/forgotPassword', 'deep': '../' });
+  res.render('forgotPassword', { 'route': '/forgotPassword', 'deep': { 'resources': '../', 'url': './' } });
 });
 
 router.post('/forgotPassword', function(req, res) {
   if (typeof req.user !== 'undefined')
     return res.status(401).send('Your current role do not grant access to this part of website');
   if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
-    res.render('forgotPassword', { 'route': '/forgotPassword', 'deep': '../', 'error': 'Email incorrect !' });
+    res.render('forgotPassword', {
+      'route': '/forgotPassword',
+      'deep': { 'resources': '../', 'url': './' },
+      'error': 'Email incorrect !'
+    });
   return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
     if (err) return res.render('forgotPassword', { 'route': '/forgotPassword', 'error': err.toString() });
     if (!user)
       return res.render('forgotPassword', {
         'route': '/forgotPassword',
-        'deep': '../',
+        'deep': { 'resources': '../', 'url': './' },
         'error': 'Current username is incorrect !'
       });
     user.token = getRandomToken();
     return user.save(function(err) {
       if (err)
-        return res.render('forgotPassword', { 'route': '/forgotPassword', 'deep': '../', 'error': err.toString() });
+        return res.render('forgotPassword', {
+          'route': '/forgotPassword',
+          'deep': { 'resources': '../', 'url': './' },
+          'error': err.toString()
+        });
       let url = smtpConf.dataseerUrl + '/resetPassword?token=' + user.token + '&username=' + user.username;
       return transporter.sendMail(
         {
@@ -134,7 +150,7 @@ router.post('/forgotPassword', function(req, res) {
             console.log(err);
             return res.render('forgotPassword', {
               'route': '/forgotPassword',
-              'deep': '../',
+              'deep': { 'resources': '../', 'url': './' },
               'error':
                 'Sorry, an error has occured. Try to reset your password later, or send an email to ' +
                 smtpConf.auth.user
@@ -142,7 +158,7 @@ router.post('/forgotPassword', function(req, res) {
           }
           return res.render('forgotPassword', {
             'route': '/forgotPassword',
-            'deep': '../',
+            'deep': { 'resources': '../', 'url': './' },
             'success':
               'An email (allowing you to redefine your password) has been sent at the following address : ' +
               user.username
@@ -158,7 +174,7 @@ router.get('/resetPassword', function(req, res) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   res.render('resetPassword', {
     'route': '/resetPassword',
-    'deep': '../',
+    'deep': { 'resources': '../', 'url': './' },
     'token': req.query.token,
     'username': req.query.username
   });
@@ -170,7 +186,7 @@ router.post('/resetPassword', function(req, res) {
   if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
     return res.render('resetPassword', {
       'route': '/resetPassword',
-      'deep': '../',
+      'deep': { 'resources': '../', 'url': './' },
       'error': 'Email incorrect !',
       'token': req.body.token,
       'username': req.body.username
@@ -185,7 +201,7 @@ router.post('/resetPassword', function(req, res) {
   if (typeof req.body.password !== 'string' || !passwordRegExp.test(req.body.password))
     return res.render('resetPassword', {
       'route': '/resetPassword',
-      'deep': '../',
+      'deep': { 'resources': '../', 'url': './' },
       'error': 'New password incorrect ! (At least 6 chars)',
       'token': req.body.token,
       'username': req.body.username
@@ -194,7 +210,7 @@ router.post('/resetPassword', function(req, res) {
     if (err)
       return res.render('resetPassword', {
         'route': '/resetPassword',
-        'deep': '../',
+        'deep': { 'resources': '../', 'url': './' },
         'error': err.toString(),
         'token': req.body.token,
         'username': req.body.username
@@ -202,7 +218,7 @@ router.post('/resetPassword', function(req, res) {
     if (!user)
       return res.render('resetPassword', {
         'route': '/resetPassword',
-        'deep': '../',
+        'deep': { 'resources': '../', 'url': './' },
         'error': 'Credentials incorrect !',
         'token': req.body.token,
         'username': req.body.username
@@ -211,7 +227,7 @@ router.post('/resetPassword', function(req, res) {
       if (err)
         return res.render('resetPassword', {
           'route': '/resetPassword',
-          'deep': '../',
+          'deep': { 'resources': '../', 'url': './' },
           'error': err.toString(),
           'token': req.body.token,
           'username': req.body.username
@@ -221,7 +237,7 @@ router.post('/resetPassword', function(req, res) {
         if (err)
           return res.render('resetPassword', {
             'route': '/resetPassword',
-            'deep': '../',
+            'deep': { 'resources': '../', 'url': './' },
             'error': err.toString(),
             'token': req.body.token,
             'username': req.body.username
@@ -235,7 +251,11 @@ router.post('/resetPassword', function(req, res) {
 router.get('/settings', function(req, res) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  return res.render('settings', { 'route': '/settings', 'deep': '../', 'current_user': req.user });
+  return res.render('settings', {
+    'route': '/settings',
+    'deep': { 'resources': '../', 'url': './' },
+    'current_user': req.user
+  });
 });
 
 router.post('/settings', function(req, res) {
@@ -244,14 +264,14 @@ router.post('/settings', function(req, res) {
   if (typeof req.body.current_password !== 'string' || !passwordRegExp.test(req.body.current_password))
     return res.render('settings', {
       'route': '/settings',
-      'deep': '../',
+      'deep': { 'resources': '../', 'url': './' },
       'current_user': req.user,
       'error': 'Current password incorrect ! (At least 6 chars)'
     });
   if (typeof req.body.new_password !== 'string' || !passwordRegExp.test(req.body.new_password))
     return res.render('settings', {
       'route': '/settings',
-      'deep': '../',
+      'deep': { 'resources': '../', 'url': './' },
       'current_user': req.user,
       'error': 'New password incorrect ! (At least 6 chars)'
     });
@@ -259,14 +279,14 @@ router.post('/settings', function(req, res) {
     if (err)
       return res.render('settings', {
         'route': '/settings',
-        'deep': '../',
+        'deep': { 'resources': '../', 'url': './' },
         'current_user': user,
         'error': err.toString()
       });
     if (!user)
       return res.render('settings', {
         'route': '/settings',
-        'deep': '../',
+        'deep': { 'resources': '../', 'url': './' },
         'current_user': user,
         'error': 'Current username is incorrect !'
       });
@@ -274,13 +294,13 @@ router.post('/settings', function(req, res) {
       if (err)
         return res.render('settings', {
           'route': '/settings',
-          'deep': '../',
+          'deep': { 'resources': '../', 'url': './' },
           'current_user': user,
           'error': 'Current password incorrect !'
         });
       return res.render('settings', {
         'route': '/settings',
-        'deep': '../',
+        'deep': { 'resources': '../', 'url': './' },
         'current_user': req.user,
         'success': 'Password update succeed !'
       });
@@ -291,7 +311,12 @@ router.post('/settings', function(req, res) {
 router.get('/signin', function(req, res) {
   let errors = req.flash('error');
   let error = Array.isArray(errors) && errors.length > 0 ? 'Credentials incorrect !' : undefined;
-  return res.render('signin', { 'route': '/signin', 'deep': '../', 'current_user': req.user, 'error': error });
+  return res.render('signin', {
+    'route': '/signin',
+    'deep': { 'resources': '../', 'url': './' },
+    'current_user': req.user,
+    'error': error
+  });
 });
 
 router.post(
@@ -330,7 +355,7 @@ router.get('/myDocuments', function(req, res) {
     if (post.length === 0 && redirect) return res.redirect('/backoffice/upload');
     return res.render('myDocuments', {
       'route': '/myDocuments',
-      'deep': '../',
+      'deep': { 'resources': '../', 'url': './' },
       'search': true,
       'documents': post,
       'current_user': req.user
