@@ -62,10 +62,7 @@ block content
         div(class='col-2')
           div(class='row')
             div(id='datasets-list' class='form bordered')
-            if current_user.role.label === 'curator'
-              button(id='datasets_validation' class='btn btn-primary' title='Unavailable for curators' disabled) Finish
-            else
-              button(id='datasets_validation' class='btn btn-primary') Finish
+            button(id='datasets_validation' class='btn btn-primary') Finish
 
   include ../modals/quit.pug
   include ../modals/documents/datasets.pug

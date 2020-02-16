@@ -355,9 +355,6 @@
 
       // On datasets_validation click
       $('#datasets_validation').click(function() {
-        if (user.role === 'curator') {
-          return alert('Unauthorized for curator');
-        }
         if (checkStatusOfDatasets()) {
           currentDocument.status = MongoDB.getNextStatus(currentDocument);
           currentDocument.source = documentView.source();
