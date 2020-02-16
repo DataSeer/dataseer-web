@@ -31,7 +31,7 @@ block content
               div(class='col-2 offset-1') #{account.username}
               div(class='col-2') #{account.role.label}
               div(class='col-6')
-                form.accounts(role='form', action='/backoffice/accounts',method='post')
+                form.accounts(role='form', action='./accounts',method='post')
                   input.form-control(type='text' name='username' class='hidden' value=account.username)
                   .form-group
                     if account.role.label !== 'standard_user'

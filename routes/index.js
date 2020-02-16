@@ -51,8 +51,8 @@ router.get('/', function(req, res, next) {
         'deep': { 'resources': '../', 'url': './' },
         'current_user': req.user
       });
-    else return res.redirect('/myDocuments?redirect=true');
-  } else return res.redirect('/signin');
+    else return res.redirect('./myDocuments?redirect=true');
+  } else return res.redirect('./signin');
 });
 
 router.get('/signup', function(req, res) {
@@ -322,7 +322,7 @@ router.get('/signin', function(req, res) {
 router.post(
   '/signin',
   passport.authenticate('local', {
-    'failureRedirect': '/signin',
+    'failureRedirect': './signin',
     'failureFlash': true
   }),
   function(req, res) {
@@ -330,7 +330,7 @@ router.post(
       user.token = undefined;
       return user.save(function(err) {
         if (err) console.log('Error : token not deleted');
-        return res.redirect('/');
+        return res.redirect('./');
       });
     });
   }
@@ -340,7 +340,7 @@ router.get('/signout', function(req, res) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   req.logout();
-  return res.redirect('/');
+  return res.redirect('./');
 });
 
 router.get('/myDocuments', function(req, res) {
@@ -352,7 +352,7 @@ router.get('/myDocuments', function(req, res) {
   query[key] = req.user.username;
   Documents.find(query).exec(function(err, post) {
     if (err) return next(err);
-    if (post.length === 0 && redirect) return res.redirect('/backoffice/upload');
+    if (post.length === 0 && redirect) return res.redirect('./backoffice/upload');
     return res.render('myDocuments', {
       'route': '/myDocuments',
       'deep': { 'resources': '../', 'url': './' },

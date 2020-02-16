@@ -31,7 +31,7 @@ const DatasetForm = function(events) {
     'dataset.cert': new View.properties.uneditable.text(
       {
         'id': 'dataset.cert',
-        'key': 'cert : ',
+        'key': 'cert: ',
         'value': ''
       },
       {}
@@ -39,7 +39,7 @@ const DatasetForm = function(events) {
     'dataset.dataType': new View.properties.editable.select(
       {
         'id': 'dataset.dataType',
-        'key': 'Data type : ',
+        'key': 'Data type: ',
         'value': '',
         'options': []
       },
@@ -121,7 +121,7 @@ const DatasetForm = function(events) {
     'dataset.subType': new View.properties.editable.select(
       {
         'id': 'dataset.subType',
-        'key': 'Sub type : ',
+        'key': 'Sub type: ',
         'value': '',
         'options': []
       },
@@ -232,7 +232,7 @@ const DatasetForm = function(events) {
     'dataset.description': new View.properties.uneditable.text(
       {
         'id': 'dataset.description',
-        'key': 'Description : ',
+        'key': 'Description: ',
         'value': ''
       },
       {}
@@ -240,7 +240,7 @@ const DatasetForm = function(events) {
     'dataset.bestDataFormatForSharing': new View.properties.uneditable.text(
       {
         'id': 'dataset.bestDataFormatForSharing',
-        'key': 'Best data format for sharing : ',
+        'key': 'Best data format for sharing: ',
         'value': ''
       },
       {}
@@ -248,7 +248,7 @@ const DatasetForm = function(events) {
     'dataset.mostSuitableRepositories': new View.properties.uneditable.text(
       {
         'id': 'dataset.mostSuitableRepositories',
-        'key': 'Most suitable Repositories : ',
+        'key': 'Most suitable Repositories: ',
         'value': '',
         'help': {
           'title': 'If you disagree with this information, please edit the Dataseer Wiki available at: ',
@@ -261,7 +261,7 @@ const DatasetForm = function(events) {
     'dataset.name': new View.properties.editable.text(
       {
         'id': 'dataset.name',
-        'key': "Please provide a name for this dataset (e.g. 'heart pressure data') : ",
+        'key': "Please provide a name for this dataset (e.g. 'heart pressure data'): ",
         'value': '',
         'placeholder': 'n/a'
       },
@@ -284,7 +284,7 @@ const DatasetForm = function(events) {
     'dataset.DOI': new View.properties.editable.text(
       {
         'id': 'dataset.DOI',
-        'key': 'Please provide the DOI (or other stable link) to this dataset : ',
+        'key': 'Please provide the DOI (or other stable link) to this dataset: ',
         'value': '',
         'placeholder': 'n/a'
       },
@@ -307,7 +307,7 @@ const DatasetForm = function(events) {
     'dataset.comments': new View.properties.editable.textarea(
       {
         'id': 'dataset.comments',
-        'key': 'Please enter any comments here (such as a reason why this dataset cannot be shared) : ',
+        'key': 'Please enter any comments here (such as a reason why this dataset cannot be shared): ',
         'value': '',
         'rows': 3,
         'placeholder': 'n/a'

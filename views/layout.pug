@@ -1,10 +1,15 @@
 doctype html
 html
-  head
+  head      
+    if route === '/backoffice/upload' || route === '/backoffice/accounts' || backoffice
+      link(rel='shortcut icon' type='image/ico' href='../favicon.ico')
+    else
+      link(rel='shortcut icon' type='image/ico' href='./favicon.ico')
     title DataSeer
     link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css' integrity='sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ' crossorigin='anonymous')
     link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous')  
     link(rel='stylesheet' href=deep.resources + 'stylesheets/style.css')
+
     if document
       link(rel='stylesheet' href=deep.resources + 'stylesheets/tei.css')
       if current_user.role.label === 'curator'
@@ -14,6 +19,7 @@ html
     if backoffice
       link(rel='stylesheet' href=deep.resources + 'stylesheets/style.css')
       link(rel='stylesheet' href=deep.resources + 'stylesheets/process/backoffice.css')
+
   body
     if current_user
       div#user_id #{current_user.id}

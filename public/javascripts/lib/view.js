@@ -174,11 +174,14 @@ const View = {
               }
               if (options.title) elements.container.attr('title', options.title);
               if (options.text) elements.help.text(options.text);
+              elements.container.attr('target', '_blank');
             }
             return elements.help;
           };
+          
           if (data.help.href && data.help.text)
-            elements.help = HtmlBuilder.a({ 'href': data.help.href, text: data.help.text });
+            elements.help = HtmlBuilder.a({ 'href': data.help.href, text: data.help.text, target: '_blank' });
+
           if (data.help.title) {
             self.title = data.help.title;
             elements.container.attr('title', data.help.title);
