@@ -23,7 +23,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url) /
+                    a(href=root) /
                   td [Public]
                   td Regroup all available routes.
               thead
@@ -33,7 +33,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url + 'signup') /signup
+                    a(href=root + 'signup') /signup
                   td [Public]
                   td Sign up form. Email address & password required to signup
                 tr
@@ -52,7 +52,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url + 'signin') /signin
+                    a(href=root + 'signin') /signin
                   td [Public]
                   td Sign in form. Email address & password required to access 'private' part of WebApplication
                 tr
@@ -71,7 +71,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url + 'signout') /signout
+                    a(href=root + 'signout') /signout
                   td [Restricted] Any role
                   td  Sign you out. Will redirect on Home Page
               thead
@@ -81,7 +81,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url + 'myDocuments') /myDocuments
+                    a(href=root + 'myDocuments') /myDocuments
                   td [Restricted] Any role
                   td List of your documents (modified at least one time by you)
               thead
@@ -91,7 +91,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url + 'settings') /settings
+                    a(href=root + 'settings') /settings
                   td [Restricted] Any role
                   td Settings form. Allow you to update your password (when you are connected)
                 tr
@@ -110,7 +110,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url + 'forgotPassword') /forgotPassword
+                    a(href=root + 'forgotPassword') /forgotPassword
                   td [Restricted] Any role
                   td
                     div Forgot password form.
@@ -123,7 +123,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url + 'resetPassword') /resetPassword
+                    a(href=root + 'resetPassword') /resetPassword
                   td [Restricted] Any role
                   td Reset password form. Allow you to update when you forgot password
                 tr 
@@ -143,7 +143,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url + 'documents/?limit=20') /documents/?limit=[20]
+                    a(href=root + 'documents/?limit=20') /documents/?limit=[20]
                   td [Restricted] annotator OR curator
                   td
                     div List of first [limit] Documents (by default, limit will be set to 20)
@@ -180,7 +180,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url + 'api/documents/?limit=20') /api/documents/?limit=[20]
+                    a(href=root + 'api/documents/?limit=20') /api/documents/?limit=[20]
                   td [Restricted] annotator OR curator
                   td
                     div List of first [limit] Documents (by default, limit will be set to 20)
@@ -229,7 +229,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url + 'backoffice/upload/') /backoffice/upload/
+                    a(href=root + 'backoffice/upload/') /backoffice/upload/
                   td [Restricted] standard_user OR curator
                   td Upload a document UI (multiple files allowed for curator)
                 tr
@@ -245,7 +245,7 @@ block content
                 tr
                   td(scope='row') GET
                   td
-                    a(href=deep.url + 'backoffice/accounts/') /backoffice/accounts/
+                    a(href=root + 'backoffice/accounts/') /backoffice/accounts/
                   td [Restricted] curator
                   td Manage accounts UI
                 tr

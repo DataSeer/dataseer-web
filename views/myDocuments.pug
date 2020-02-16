@@ -26,7 +26,7 @@ block content
             each document, index in documents
               div(class='row' style='margin-right:10px; margin-left:10px;' data='true')
                 div(class='col-2')
-                    a(href=deep.url + 'documents/' + document._id) #{document._id}
+                    a(href=root + 'documents/' + document._id) #{document._id}
                 if document.status === 'metadata'
                   div(class='col-2') Metadata validation
                 else if document.status === 'datasets'

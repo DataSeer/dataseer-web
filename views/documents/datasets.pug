@@ -9,36 +9,36 @@ block content
           label(style='font-size:small;') Connected as : <b>#{current_user.username}</b> (#{current_user.role.label})
         else
           label(style='font-size:small;') 
-            a(href=deep.url + 'signup') Sign up 
+            a(href=root + 'signup') Sign up 
             | or 
-            a(href=deep.url + 'signin') Sign in 
+            a(href=root + 'signin') Sign in 
             | to access DataSeer
       div(id='navbar-lg')
         ul
           if current_user
             li
-              a(href=deep.url + 'myDocuments' class='nav') My documents
+              a(href=root + 'myDocuments' class='nav') My documents
 
 
             if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
               li
-                a(href=deep.url + 'documents' class='nav') All documents
+                a(href=root + 'documents' class='nav') All documents
             li
-              a(href=deep.url + 'backoffice/upload' class='nav') Upload
+              a(href=root + 'backoffice/upload' class='nav') Upload
             if current_user.role.label === 'curator'
               li
-                a(href=deep.url + 'backoffice/accounts' class='nav') Accounts
+                a(href=root + 'backoffice/accounts' class='nav') Accounts
             li
-              a(href=deep.url + 'settings' class='nav') Settings
+              a(href=root + 'settings' class='nav') Settings
             li
-              a(href=deep.url + 'signout' class='nav') Sign out
+              a(href=root + 'signout' class='nav') Sign out
           else
             li
-              a(href=deep.url + 'signup' class='nav') Sign up
+              a(href=root + 'signup' class='nav') Sign up
             li
-              a(href=deep.url + 'signin' class='nav') Sign in
+              a(href=root + 'signin' class='nav') Sign in
             li
-              a(href=deep.url + 'forgotPassword' class='nav') Forgot password
+              a(href=root + 'forgotPassword' class='nav') Forgot password
 
   div(class='bordered' style='border-color:#ffffff;border-width:0px;')
     div(class='container-fluid')
