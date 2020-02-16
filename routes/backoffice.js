@@ -30,6 +30,7 @@ router.get('/accounts', function(req, res, next) {
       if (err) return next(err);
       return res.render(path.join('backoffice', 'accounts'), {
         'route': '/backoffice/accounts',
+        'deep': '../../',
         'search': true,
         'current_user': req.user,
         'accounts': post,
@@ -75,6 +76,7 @@ router.get('/upload', function(req, res, next) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   return res.render(path.join('backoffice', 'upload'), {
     'route': '/backoffice/upload',
+    'deep': '../../',
     'title': 'DataSeer',
     'backoffice': true,
     'current_user': req.user
@@ -93,6 +95,7 @@ router.post('/upload', function(req, res, next) {
     results.errors.push({ 'msg': 'You must send at least one file' });
     return res.status(400).render(path.join('backoffice', 'upload'), {
       'route': '/backoffice/upload',
+      'deep': '../../',
       'backoffice': true,
       'results': results,
       'current_user': req.user
@@ -102,6 +105,7 @@ router.post('/upload', function(req, res, next) {
     results.errors.push({ 'msg': 'No file(s) were uploaded' });
     return res.status(400).render(path.join('backoffice', 'upload'), {
       'route': '/backoffice/upload',
+      'deep': '../../',
       'backoffice': true,
       'results': results,
       'current_user': req.user
@@ -129,6 +133,7 @@ router.post('/upload', function(req, res, next) {
         console.log(err);
         return res.render(path.join('backoffice', 'upload'), {
           'route': '/backoffice/upload',
+          'deep': '../../',
           'backoffice': true,
           'results': results,
           'current_user': req.user
@@ -136,6 +141,7 @@ router.post('/upload', function(req, res, next) {
       }
       return res.render(path.join('backoffice', 'upload'), {
         'route': '/backoffice/upload',
+        'deep': '../../',
         'backoffice': true,
         'results': results,
         'current_user': req.user

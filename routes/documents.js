@@ -32,6 +32,7 @@ router.get('/', function(req, res, next) {
       if (err) return next(err);
       return res.render(path.join('documents', 'all'), {
         'route': '/documents',
+        'deep': '../',
         'search': true,
         'documents': post,
         'current_user': req.user
@@ -54,6 +55,7 @@ router.get('/:id', function(req, res, next) {
           : post.status
       ),
       {
+        'deep': '../../',
         'document': post,
         'demo': process.env.DEMO,
         'current_user': req.user

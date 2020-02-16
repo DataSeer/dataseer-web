@@ -4,16 +4,16 @@ html
     title DataSeer
     link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css' integrity='sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ' crossorigin='anonymous')
     link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous')  
-    link(rel='stylesheet' href='../stylesheets/style.css')
+    link(rel='stylesheet' href=deep + 'stylesheets/style.css')
     if document
-      link(rel='stylesheet' href='../stylesheets/tei.css')
+      link(rel='stylesheet' href=deep + 'stylesheets/tei.css')
       if current_user.role.label === 'curator'
-        link(rel='stylesheet' href='../stylesheets/process/datasets.css')
+        link(rel='stylesheet' href=deep + 'stylesheets/process/datasets.css')
       else
-        link(rel='stylesheet' href='../stylesheets/process/'+ document.status + '.css')
+        link(rel='stylesheet' href=deep + 'stylesheets/process/'+ document.status + '.css')
     if backoffice
-      link(rel='stylesheet' href='../../stylesheets/style.css')
-      link(rel='stylesheet' href='../../stylesheets/process/backoffice.css')
+      link(rel='stylesheet' href=deep + 'stylesheets/style.css')
+      link(rel='stylesheet' href=deep + 'stylesheets/process/backoffice.css')
   body
     if current_user
       div#user_id #{current_user.id}
@@ -68,28 +68,28 @@ html
 
   if document
     div(id='document.id' class='data' value=(document._id))
-    script(src='../javascripts/lib/jquery.js')
-    script(src='../javascripts/lib/randomColor.min.js')
-    script(src='../javascripts/lib/htmlBuilder.js')
-    script(src='../javascripts/lib/view.js')
-    script(src='../javascripts/lib/documentView.js')
-    script(src='../javascripts/lib/datasetForm.js')
-    script(src='../javascripts/lib/datasetsList.js')
-    script(src='../javascripts/mongoDB.js')
-    script(src='../javascripts/dataseerML.js')
-    script(src='../javascripts/demo.js')
+    script(src=deep + 'javascripts/lib/jquery.js')
+    script(src=deep + 'javascripts/lib/randomColor.min.js')
+    script(src=deep + 'javascripts/lib/htmlBuilder.js')
+    script(src=deep + 'javascripts/lib/view.js')
+    script(src=deep + 'javascripts/lib/documentView.js')
+    script(src=deep + 'javascripts/lib/datasetForm.js')
+    script(src=deep + 'javascripts/lib/datasetsList.js')
+    script(src=deep + 'javascripts/mongoDB.js')
+    script(src=deep + 'javascripts/dataseerML.js')
+    script(src=deep + 'javascripts/demo.js')
     if current_user.role.label === 'curator'
-      script(src='../javascripts/process/datasets.js')
+      script(src=deep + 'javascripts/process/datasets.js')
     else
-      script(src='../javascripts/process/'+ document.status + '.js')
+      script(src=deep + 'javascripts/process/'+ document.status + '.js')
   else if backoffice
-    script(src='../../javascripts/lib/jquery.js')
-    script(src='../../javascripts/process/backoffice.js')
+    script(src=deep + 'javascripts/lib/jquery.js')
+    script(src=deep + 'javascripts/process/backoffice.js')
   else if search
-    script(src='../../javascripts/lib/jquery.js')
-    script(src='../../javascripts/search.js')
+    script(src=deep + 'javascripts/lib/jquery.js')
+    script(src=deep + 'javascripts/search.js')
   else
-    script(src='../javascripts/lib/jquery.js')
+    script(src=deep + 'javascripts/lib/jquery.js')
 
   script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js' integrity='sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1' crossorigin='anonymous')
   script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js' integrity='sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM' crossorigin='anonymous')
