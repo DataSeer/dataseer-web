@@ -55,6 +55,7 @@ router.get('/:id', function(req, res, next) {
           : post.status
       ),
       {
+        'route': '/documents/:id',
         'deep': { 'resources': '../../', 'url': '../' },
         'document': post,
         'demo': process.env.DEMO,
