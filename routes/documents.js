@@ -10,6 +10,8 @@ const express = require('express'),
   AccountsManager = require('../lib/accountsManager.js'),
   Documents = require('../models/documents.js');
 
+const conf = require('../conf/conf.json');
+
 /* GET ALL Documents */
 router.get('/', function(req, res, next) {
   if (
@@ -32,7 +34,7 @@ router.get('/', function(req, res, next) {
       if (err) return next(err);
       return res.render(path.join('documents', 'all'), {
         'route': '/documents',
-        'root': './',
+        'root': conf.root,
         'search': true,
         'documents': post,
         'current_user': req.user
@@ -56,7 +58,7 @@ router.get('/:id', function(req, res, next) {
       ),
       {
         'route': '/documents/:id',
-        'root': '../../',
+        'root': conf.root,
         'document': post,
         'demo': process.env.DEMO,
         'current_user': req.user

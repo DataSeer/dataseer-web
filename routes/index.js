@@ -16,6 +16,8 @@ const express = require('express'),
 const passwordRegExp = new RegExp('[\\w^\\w]{6,}'),
   emailRegExp = new RegExp("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@[A-Za-z0-9-]+(.[A-Za-z0-9-]+)*");
 
+const conf = require('../conf/conf.json');
+
 let transporter = nodemailer.createTransport({
   'host': smtpConf.host,
   'port': smtpConf.port,
@@ -48,7 +50,7 @@ router.get('/', function(req, res, next) {
     if (AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator))
       return res.render('index', {
         'route': '/',
-        'root': './',
+        'root': conf.root,
         'current_user': req.user
       });
     else return res.redirect('./myDocuments?redirect=true');
@@ -67,13 +69,13 @@ router.post('/signup', function(req, res, next) {
   if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
     return res.render('signup', {
       'route': '/signup',
-      'root': './',
+      'root': conf.root,
       'error': 'Email incorrect !'
     });
   if (typeof req.body.password !== 'string' || !passwordRegExp.test(req.body.password))
     return res.render('signup', {
       'route': '/signup',
-      'root': './',
+      'root': conf.root,
       'error': 'Password incorrect ! (At least 6 chars)'
     });
   return Accounts.register(
@@ -84,20 +86,20 @@ router.post('/signup', function(req, res, next) {
         console.log(err);
         return res.render('signup', {
           'route': '/signup',
-          'root': './',
+          'root': conf.root,
           'error': 'A user with the given email address is already registered'
         });
       } else if (err) {
         console.log(err);
         return res.render('signup', {
           'route': '/signup',
-          'root': './',
+          'root': conf.root,
           'error': 'Sorry, an error has occured. Try to signup later, or send an email to ' + smtpConf.auth.user
         });
       } else
         return res.render('signin', {
           'route': '/signin',
-          'root': './',
+          'root': conf.root,
           'success': 'New account created !',
           'username': req.body.username
         });
@@ -117,7 +119,7 @@ router.post('/forgotPassword', function(req, res) {
   if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
     res.render('forgotPassword', {
       'route': '/forgotPassword',
-      'root': './',
+      'root': conf.root,
       'error': 'Email incorrect !'
     });
   return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
@@ -125,7 +127,7 @@ router.post('/forgotPassword', function(req, res) {
     if (!user)
       return res.render('forgotPassword', {
         'route': '/forgotPassword',
-        'root': './',
+        'root': conf.root,
         'error': 'Current username is incorrect !'
       });
     user.token = getRandomToken();
@@ -133,7 +135,7 @@ router.post('/forgotPassword', function(req, res) {
       if (err)
         return res.render('forgotPassword', {
           'route': '/forgotPassword',
-          'root': './',
+          'root': conf.root,
           'error': err.toString()
         });
       let url = smtpConf.dataseerUrl + '/resetPassword?token=' + user.token + '&username=' + user.username;
@@ -150,7 +152,7 @@ router.post('/forgotPassword', function(req, res) {
             console.log(err);
             return res.render('forgotPassword', {
               'route': '/forgotPassword',
-              'root': './',
+              'root': conf.root,
               'error':
                 'Sorry, an error has occured. Try to reset your password later, or send an email to ' +
                 smtpConf.auth.user
@@ -158,7 +160,7 @@ router.post('/forgotPassword', function(req, res) {
           }
           return res.render('forgotPassword', {
             'route': '/forgotPassword',
-            'root': './',
+            'root': conf.root,
             'success':
               'An email (allowing you to redefine your password) has been sent at the following address : ' +
               user.username
@@ -174,7 +176,7 @@ router.get('/resetPassword', function(req, res) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   res.render('resetPassword', {
     'route': '/resetPassword',
-    'root': './',
+    'root': conf.root,
     'token': req.query.token,
     'username': req.query.username
   });
@@ -186,7 +188,7 @@ router.post('/resetPassword', function(req, res) {
   if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
     return res.render('resetPassword', {
       'route': '/resetPassword',
-      'root': './',
+      'root': conf.root,
       'error': 'Email incorrect !',
       'token': req.body.token,
       'username': req.body.username
@@ -201,7 +203,7 @@ router.post('/resetPassword', function(req, res) {
   if (typeof req.body.password !== 'string' || !passwordRegExp.test(req.body.password))
     return res.render('resetPassword', {
       'route': '/resetPassword',
-      'root': './',
+      'root': conf.root,
       'error': 'New password incorrect ! (At least 6 chars)',
       'token': req.body.token,
       'username': req.body.username
@@ -210,7 +212,7 @@ router.post('/resetPassword', function(req, res) {
     if (err)
       return res.render('resetPassword', {
         'route': '/resetPassword',
-        'root': './',
+        'root': conf.root,
         'error': err.toString(),
         'token': req.body.token,
         'username': req.body.username
@@ -218,7 +220,7 @@ router.post('/resetPassword', function(req, res) {
     if (!user)
       return res.render('resetPassword', {
         'route': '/resetPassword',
-        'root': './',
+        'root': conf.root,
         'error': 'Credentials incorrect !',
         'token': req.body.token,
         'username': req.body.username
@@ -227,7 +229,7 @@ router.post('/resetPassword', function(req, res) {
       if (err)
         return res.render('resetPassword', {
           'route': '/resetPassword',
-          'root': './',
+          'root': conf.root,
           'error': err.toString(),
           'token': req.body.token,
           'username': req.body.username
@@ -237,7 +239,7 @@ router.post('/resetPassword', function(req, res) {
         if (err)
           return res.render('resetPassword', {
             'route': '/resetPassword',
-            'root': './',
+            'root': conf.root,
             'error': err.toString(),
             'token': req.body.token,
             'username': req.body.username
@@ -257,7 +259,7 @@ router.get('/settings', function(req, res) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   return res.render('settings', {
     'route': '/settings',
-    'root': './',
+    'root': conf.root,
     'current_user': req.user
   });
 });
@@ -268,14 +270,14 @@ router.post('/settings', function(req, res) {
   if (typeof req.body.current_password !== 'string' || !passwordRegExp.test(req.body.current_password))
     return res.render('settings', {
       'route': '/settings',
-      'root': './',
+      'root': conf.root,
       'current_user': req.user,
       'error': 'Current password incorrect ! (At least 6 chars)'
     });
   if (typeof req.body.new_password !== 'string' || !passwordRegExp.test(req.body.new_password))
     return res.render('settings', {
       'route': '/settings',
-      'root': './',
+      'root': conf.root,
       'current_user': req.user,
       'error': 'New password incorrect ! (At least 6 chars)'
     });
@@ -283,14 +285,14 @@ router.post('/settings', function(req, res) {
     if (err)
       return res.render('settings', {
         'route': '/settings',
-        'root': './',
+        'root': conf.root,
         'current_user': user,
         'error': err.toString()
       });
     if (!user)
       return res.render('settings', {
         'route': '/settings',
-        'root': './',
+        'root': conf.root,
         'current_user': user,
         'error': 'Current username is incorrect !'
       });
@@ -298,13 +300,13 @@ router.post('/settings', function(req, res) {
       if (err)
         return res.render('settings', {
           'route': '/settings',
-          'root': './',
+          'root': conf.root,
           'current_user': user,
           'error': 'Current password incorrect !'
         });
       return res.render('settings', {
         'route': '/settings',
-        'root': './',
+        'root': conf.root,
         'current_user': req.user,
         'success': 'Password update succeed !'
       });
@@ -317,7 +319,7 @@ router.get('/signin', function(req, res) {
   let error = Array.isArray(errors) && errors.length > 0 ? 'Credentials incorrect !' : undefined;
   return res.render('signin', {
     'route': '/signin',
-    'root': './',
+    'root': conf.root,
     'current_user': req.user,
     'error': error
   });
@@ -359,7 +361,7 @@ router.get('/myDocuments', function(req, res) {
     if (post.length === 0 && redirect) return res.redirect('./backoffice/upload');
     return res.render('myDocuments', {
       'route': '/myDocuments',
-      'root': './',
+      'root': conf.root,
       'search': true,
       'documents': post,
       'current_user': req.user
