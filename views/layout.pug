@@ -30,37 +30,37 @@ html
         else
           div(id='user' style='position:absolute; top:0px; right:25px; text-align:right;')
             label(style='font-size:small;') 
-              a(href=root + 'signup' class=(route === '/signup') ? 'active' : '') Sign up 
+              a(href=root + 'signup' class=(route === 'signup') ? 'active' : '') Sign up 
               | or 
-              a(href=root + 'signin' class=(route === '/signup') ? 'active' : '') Sign in 
+              a(href=root + 'signin' class=(route === 'signup') ? 'active' : '') Sign in 
               | to access DataSeer
         div(id='navbar' style='position:absolute; bottom:0px; right:10px; text-align:right;')
           ul
             if current_user
               if current_user.role.label === 'curator'
                 li
-                  a(href=root class=(route === '/') ? 'nav active' : 'nav') Help
+                  a(href=root class=(route === '') ? 'nav active' : 'nav') Help
               li
-                a(href=root + 'myDocuments' class=(route === '/myDocuments') ? 'nav active' : 'nav') My documents
+                a(href=root + 'myDocuments' class=(route === 'myDocuments') ? 'nav active' : 'nav') My documents
               if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
                 li
-                  a(href=root + 'documents' class=(route === '/documents') ? 'nav active' : 'nav') All documents
+                  a(href=root + 'documents' class=(route === 'documents') ? 'nav active' : 'nav') All documents
               li
-                a(href=root + 'backoffice/upload' class=(route === '/backoffice/upload') ? 'nav active' : 'nav') Upload
+                a(href=root + 'backoffice/upload' class=(route === 'backoffice/upload') ? 'nav active' : 'nav') Upload
               if current_user.role.label === 'curator'
                 li
-                  a(href=root + 'backoffice/accounts' class=(route === '/backoffice/accounts') ? 'nav active' : 'nav') Accounts
+                  a(href=root + 'backoffice/accounts' class=(route === 'backoffice/accounts') ? 'nav active' : 'nav') Accounts
               li
-                a(href=root + 'settings' class=(route === '/settings') ? 'nav active' : 'nav') Settings
+                a(href=root + 'settings' class=(route === 'settings') ? 'nav active' : 'nav') Settings
               li
-                a(href=root + 'signout' class=(route === '/signout') ? 'nav active' : 'nav') Sign out
+                a(href=root + 'signout' class=(route === 'signout') ? 'nav active' : 'nav') Sign out
             else
               li
-                a(href=root + 'signup' class=(route === '/signup') ? 'nav active' : 'nav') Sign up
+                a(href=root + 'signup' class=(route === 'signup') ? 'nav active' : 'nav') Sign up
               li
-                a(href=root + 'signin' class=(route === '/signin') ? 'nav active' : 'nav' style='color:#184D7E;') Sign in
+                a(href=root + 'signin' class=(route === 'signin') ? 'nav active' : 'nav' style='color:#184D7E;') Sign in
               li
-                a(href=root + 'forgotPassword' class=(route === '/forgotPassword') ? 'nav active' : 'nav' style='color:#184D7E;') Forgot password
+                a(href=root + 'forgotPassword' class=(route === 'forgotPassword') ? 'nav active' : 'nav' style='color:#184D7E;') Forgot password
 
     block content
 

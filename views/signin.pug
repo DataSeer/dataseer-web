@@ -10,7 +10,7 @@ block content
             h2 Sign in
         div(class='row')
           div(class='col-12')
-            form(role='form', action=root + 'signin', method='post', style='max-width: 300px; margin: auto; text-align: center; margin-top:20px;')
+            form(role='form', action=root + route, method='post', style='max-width: 300px; margin: auto; text-align: center; margin-top:20px;')
               if error
                 div(class='alert alert-warning' role='alert') #{error}
               if success

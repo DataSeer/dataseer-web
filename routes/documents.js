@@ -33,7 +33,7 @@ router.get('/', function(req, res, next) {
     .exec(function(err, post) {
       if (err) return next(err);
       return res.render(path.join('documents', 'all'), {
-        'route': '/documents',
+        'route': 'documents',
         'root': conf.root,
         'search': true,
         'documents': post,
@@ -57,7 +57,7 @@ router.get('/:id', function(req, res, next) {
           : post.status
       ),
       {
-        'route': '/documents/:id',
+        'route': 'documents/:id',
         'root': conf.root,
         'document': post,
         'demo': process.env.DEMO,

@@ -1,5 +1,5 @@
 div(class='container-fluid')
-  form(ref='uploadForm' id='uploadForm' action='' method='post' encType='multipart/form-data')
+  form(ref='uploadForm' id='uploadForm' action=root+route method='post' encType='multipart/form-data')
     div(class='row')
       div(class='col-12')
         if (current_user.role.label === 'standard_user')
