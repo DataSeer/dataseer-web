@@ -36,6 +36,24 @@ const DatasetForm = function(events) {
       },
       {}
     ),
+    'dataset.customDataType': new View.properties.editable.text(
+      {
+        'id': 'dataset.customDataType',
+        'key': 'Custom Data type: ',
+        'value': ''
+      },
+      {
+        'onEdit': function(element) {},
+        'onSave': function(element) {},
+        'onCancel': function(element) {},
+        'onChange': function(element) {
+          elements['dataset.status'].modified();
+          self.dataset.status = elements['dataset.status'].value();
+          self.dataset.dataType = element.value();
+          events.onChange(element);
+        }
+      }
+    ),
     'dataset.dataType': new View.properties.editable.select(
       {
         'id': 'dataset.dataType',
@@ -45,75 +63,11 @@ const DatasetForm = function(events) {
       },
       {
         'onEdit': function(element) {},
-        'onSave': function(element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.dataType = elements['dataset.dataType'].value();
-          self.setSubTypes(self.dataTypes[self.dataset.dataType]);
-          if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
-            elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(self.metadata[self.dataset.dataType].url)
-            });
-            elements['dataset.description'].value(
-              self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
-            );
-            elements['dataset.bestDataFormatForSharing'].value(
-              self.metadata[self.dataset.dataType].bestDataFormatForSharing
-                ? self.metadata[self.dataset.dataType].bestDataFormatForSharing
-                : ''
-            );
-            elements['dataset.mostSuitableRepositories'].value(
-              self.metadata[self.dataset.dataType].mostSuitableRepositories
-                ? self.metadata[self.dataset.dataType].mostSuitableRepositories
-                : ''
-            );
-          } else {
-            elements['dataset.mostSuitableRepositories'].help({
-              'href': 'http://wiki.dataseer.io/doku.php'
-            });
-            elements['dataset.description'].value('');
-            elements['dataset.bestDataFormatForSharing'].value('');
-            elements['dataset.mostSuitableRepositories'].value('');
-          }
-          self.dataset.description = elements['dataset.description'].value();
-          self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
-          self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
-          events.onSave(element);
-        },
+        'onSave': function(element) {},
         'onCancel': function(element) {},
         'onChange': function(element) {
           elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.dataType = elements['dataset.dataType'].value();
-          self.setSubTypes(self.dataTypes[self.dataset.dataType]);
-          if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
-            elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(self.metadata[self.dataset.dataType].url)
-            });
-            elements['dataset.description'].value(
-              self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
-            );
-            elements['dataset.bestDataFormatForSharing'].value(
-              self.metadata[self.dataset.dataType].bestDataFormatForSharing
-                ? self.metadata[self.dataset.dataType].bestDataFormatForSharing
-                : ''
-            );
-            elements['dataset.mostSuitableRepositories'].value(
-              self.metadata[self.dataset.dataType].mostSuitableRepositories
-                ? self.metadata[self.dataset.dataType].mostSuitableRepositories
-                : ''
-            );
-          } else {
-            elements['dataset.mostSuitableRepositories'].help({
-              'href': 'http://wiki.dataseer.io/doku.php'
-            });
-            elements['dataset.description'].value('');
-            elements['dataset.bestDataFormatForSharing'].value('');
-            elements['dataset.mostSuitableRepositories'].value('');
-          }
-          self.dataset.description = elements['dataset.description'].value();
-          self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
-          self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
+          self.setDataType();
           events.onChange(element);
         }
       }
@@ -127,104 +81,11 @@ const DatasetForm = function(events) {
       },
       {
         'onEdit': function(element) {},
-        'onSave': function(element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.subType = elements['dataset.subType'].value();
-          if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
-            elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(self.metadata[self.dataset.subType].url)
-            });
-            elements['dataset.description'].value(
-              self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
-            );
-            elements['dataset.bestDataFormatForSharing'].value(
-              self.metadata[self.dataset.subType].bestDataFormatForSharing
-                ? self.metadata[self.dataset.subType].bestDataFormatForSharing
-                : ''
-            );
-            elements['dataset.mostSuitableRepositories'].value(
-              self.metadata[self.dataset.subType].mostSuitableRepositories
-                ? self.metadata[self.dataset.subType].mostSuitableRepositories
-                : ''
-            );
-          } else if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
-            elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(self.metadata[self.dataset.dataType].url)
-            });
-            elements['dataset.description'].value(
-              self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
-            );
-            elements['dataset.bestDataFormatForSharing'].value(
-              self.metadata[self.dataset.dataType].bestDataFormatForSharing
-                ? self.metadata[self.dataset.dataType].bestDataFormatForSharing
-                : ''
-            );
-            elements['dataset.mostSuitableRepositories'].value(
-              self.metadata[self.dataset.dataType].mostSuitableRepositories
-                ? self.metadata[self.dataset.dataType].mostSuitableRepositories
-                : ''
-            );
-          } else {
-            elements['dataset.mostSuitableRepositories'].help({
-              'href': 'http://wiki.dataseer.io/doku.php'
-            });
-            elements['dataset.description'].value('');
-            elements['dataset.bestDataFormatForSharing'].value('');
-            elements['dataset.mostSuitableRepositories'].value('');
-          }
-          self.dataset.description = elements['dataset.description'].value();
-          self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
-          self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
-          events.onSave(element);
-        },
+        'onSave': function(element) {},
         'onCancel': function(element) {},
         'onChange': function(element) {
           elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.subType = elements['dataset.subType'].value();
-          if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
-            elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(self.metadata[self.dataset.subType].url)
-            });
-            elements['dataset.description'].value(
-              self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
-            );
-            elements['dataset.bestDataFormatForSharing'].value(
-              self.metadata[self.dataset.subType].bestDataFormatForSharing
-                ? self.metadata[self.dataset.subType].bestDataFormatForSharing
-                : ''
-            );
-            elements['dataset.mostSuitableRepositories'].value(
-              self.metadata[self.dataset.subType].mostSuitableRepositories
-                ? self.metadata[self.dataset.subType].mostSuitableRepositories
-                : ''
-            );
-          } else if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
-            elements['dataset.mostSuitableRepositories'].help({
-              'href': encodeURI(self.metadata[self.dataset.dataType].url)
-            });
-            elements['dataset.description'].value(
-              self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
-            );
-            elements['dataset.bestDataFormatForSharing'].value(
-              self.metadata[self.dataset.dataType].bestDataFormatForSharing
-                ? self.metadata[self.dataset.dataType].bestDataFormatForSharing
-                : ''
-            );
-            elements['dataset.mostSuitableRepositories'].value(
-              self.metadata[self.dataset.dataType].mostSuitableRepositories
-                ? self.metadata[self.dataset.dataType].mostSuitableRepositories
-                : ''
-            );
-          } else {
-            elements['dataset.description'].value('');
-            elements['dataset.bestDataFormatForSharing'].value('');
-            elements['dataset.mostSuitableRepositories'].value('');
-          }
-          self.dataset.description = elements['dataset.description'].value();
-          self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
-          self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
+          self.setSubType();
           events.onChange(element);
         }
       }
@@ -267,11 +128,7 @@ const DatasetForm = function(events) {
       },
       {
         'onEdit': function(element) {},
-        'onSave': function(element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.name = element.value();
-        },
+        'onSave': function(element) {},
         'onCancel': function(element) {},
         'onChange': function(element) {
           elements['dataset.status'].modified();
@@ -290,11 +147,7 @@ const DatasetForm = function(events) {
       },
       {
         'onEdit': function(element) {},
-        'onSave': function(element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.DOI = element.value();
-        },
+        'onSave': function(element) {},
         'onCancel': function(element) {},
         'onChange': function(element) {
           elements['dataset.status'].modified();
@@ -335,6 +188,7 @@ const DatasetForm = function(events) {
     .append(View.forms.row().append(elements['dataset.cert'].elements().container))
     .append(View.forms.row().append(elements['dataset.dataType'].elements().container))
     .append(View.forms.row().append(elements['dataset.subType'].elements().container))
+    .append(View.forms.row().append(elements['dataset.customDataType'].elements().container))
     .append(View.forms.row().append(elements['dataset.description'].elements().container))
     .append(View.forms.row().append(elements['dataset.bestDataFormatForSharing'].elements().container))
     .append(View.forms.row().append(elements['dataset.mostSuitableRepositories'].elements().container))
@@ -387,11 +241,13 @@ const DatasetForm = function(events) {
     }
     if (typeof self.dataset.dataType !== 'undefined' || typeof self.dataset.subType !== 'undefined') {
       let param =
-        typeof self.dataset.subType !== 'undefined' && self.dataset.subType !== ''
-          ? self.dataset.subType
-          : self.dataset.dataType;
+          typeof self.dataset.subType !== 'undefined' && self.dataset.subType !== ''
+            ? self.dataset.subType
+            : self.dataset.dataType,
+        url =
+          typeof self.metadata[param] !== 'undefined' ? self.metadata[param].url : 'http://wiki.dataseer.io/doku.php';
       elements['dataset.mostSuitableRepositories'].help({
-        'href': encodeURI(self.metadata[param].url)
+        'href': encodeURI(url)
       });
     }
     elements['dataset.id'].view();
@@ -409,6 +265,7 @@ const DatasetForm = function(events) {
         .show();
     elements['dataset.dataType'].edit(false);
     elements['dataset.subType'].edit(false);
+    elements['dataset.customDataType'].edit(false);
     elements['dataset.description'].view();
     elements['dataset.bestDataFormatForSharing'].view();
     elements['dataset.mostSuitableRepositories'].view();
@@ -431,7 +288,10 @@ const DatasetForm = function(events) {
         'dataset.status': elements['dataset.status'].value(),
         'dataset.id': elements['dataset.id'].value(),
         'dataset.cert': elements['dataset.cert'].value(),
-        'dataset.dataType': elements['dataset.dataType'].value(),
+        'dataset.dataType':
+          elements['dataset.dataType'].value() !== ''
+            ? elements['dataset.dataType'].value()
+            : elements['dataset.customDataType'].value(),
         'dataset.subType': elements['dataset.subType'].value(),
         'dataset.description': elements['dataset.description'].value(),
         'dataset.bestDataFormatForSharing': elements['dataset.bestDataFormatForSharing'].value(),
@@ -444,6 +304,10 @@ const DatasetForm = function(events) {
     elements['dataset.id'].value(dataset.id);
     elements['dataset.cert'].value(parseFloat(dataset.cert).toFixed(4));
     elements['dataset.dataType'].value(dataset.dataType);
+    if (elements['dataset.dataType'].value() === '') {
+      self.showCustomDataType();
+      elements['dataset.customDataType'].value(dataset.dataType);
+    } else self.hideCustomDataType();
     elements['dataset.subType'].value(dataset.subType);
     elements['dataset.description'].value(dataset.description);
     elements['dataset.bestDataFormatForSharing'].value(dataset.bestDataFormatForSharing);
@@ -457,9 +321,10 @@ const DatasetForm = function(events) {
   self.link = function(dataset, style, element) {
     self.style(style);
     self.dataset = dataset;
-    self.setSubTypes(self.dataTypes[dataset.dataType]);
-    self.values(dataset);
     self.selectedElement = element;
+    self.setDataTypes();
+    self.setSubTypes();
+    self.values(dataset);
     self.refresh({
       'unlink':
         typeof self.selectedElement !== 'undefined' && typeof self.selectedElement.attr('corresp') !== 'undefined'
@@ -469,6 +334,11 @@ const DatasetForm = function(events) {
   self.loadData = function(data) {
     self.dataTypes = data.dataTypes;
     self.metadata = data.metadata;
+    self.setDataTypes();
+    self.setSubTypes();
+  };
+
+  self.setDataTypes = function() {
     let options = [];
     for (let key in self.dataTypes) {
       options.push({
@@ -481,27 +351,120 @@ const DatasetForm = function(events) {
       else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
       else return 0;
     });
+    options.unshift({
+      'value': '',
+      'text': 'None'
+    });
     elements['dataset.dataType'].options(options);
   };
 
-  self.setSubTypes = function(subTypes) {
-    let options = [];
-    for (var i = 0; i < subTypes.length; i++) {
-      options.push({
-        'value': subTypes[i],
-        'text': self.metadata[subTypes[i]].label || subTypes[i]
+  self.setSubTypes = function() {
+    let subTypes = self.dataTypes[self.dataset.dataType],
+      options = [];
+    if (Array.isArray(subTypes)) {
+      for (var i = 0; i < subTypes.length; i++) {
+        options.push({
+          'value': subTypes[i],
+          'text': self.metadata[subTypes[i]].label || subTypes[i]
+        });
+      }
+      options.sort(function(a, b) {
+        if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
+        else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
+        else return 0;
       });
     }
-    options.sort(function(a, b) {
-      if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
-      else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
-      else return 0;
-    });
     options.unshift({
       'value': '',
       'text': 'None'
     });
     elements['dataset.subType'].options(options);
+    return true;
+  };
+
+  self.showCustomDataType = function() {
+    return $('.form-row:has(#dataset\\.customDataType)').show();
+  };
+
+  self.hideCustomDataType = function() {
+    elements['dataset.customDataType'].value('');
+    return $('.form-row:has(#dataset\\.customDataType)').hide();
+  };
+
+  self.setDataType = function() {
+    self.dataset.status = elements['dataset.status'].value();
+    if (elements['dataset.dataType'].value() === '') {
+      self.showCustomDataType();
+      self.dataset.dataType = elements['dataset.customDataType'].value();
+    } else {
+      self.hideCustomDataType();
+      self.dataset.dataType = elements['dataset.dataType'].value();
+    }
+    console.log(self.dataset.dataType);
+    self.dataset.subType = '';
+    self.setSubTypes();
+    self.setDataFromDatatype();
+  };
+
+  self.setDataFromDatatype = function() {
+    if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
+      elements['dataset.mostSuitableRepositories'].help({
+        'href': encodeURI(self.metadata[self.dataset.dataType].url)
+      });
+      elements['dataset.description'].value(
+        self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
+      );
+      elements['dataset.bestDataFormatForSharing'].value(
+        self.metadata[self.dataset.dataType].bestDataFormatForSharing
+          ? self.metadata[self.dataset.dataType].bestDataFormatForSharing
+          : ''
+      );
+      elements['dataset.mostSuitableRepositories'].value(
+        self.metadata[self.dataset.dataType].mostSuitableRepositories
+          ? self.metadata[self.dataset.dataType].mostSuitableRepositories
+          : ''
+      );
+      return true;
+    } else {
+      elements['dataset.mostSuitableRepositories'].help({
+        'href': 'http://wiki.dataseer.io/doku.php'
+      });
+      elements['dataset.description'].value('');
+      elements['dataset.bestDataFormatForSharing'].value('');
+      elements['dataset.mostSuitableRepositories'].value('');
+    }
+    self.dataset.description = elements['dataset.description'].value();
+    self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
+    self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
+    return false;
+  };
+
+  self.setSubType = function() {
+    self.dataset.status = elements['dataset.status'].value();
+    self.dataset.subType = elements['dataset.subType'].value();
+    if (!self.SetDataFromSubtype()) self.setDataFromDatatype();
+  };
+
+  self.SetDataFromSubtype = function() {
+    if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
+      elements['dataset.mostSuitableRepositories'].help({
+        'href': encodeURI(self.metadata[self.dataset.subType].url)
+      });
+      elements['dataset.description'].value(
+        self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
+      );
+      elements['dataset.bestDataFormatForSharing'].value(
+        self.metadata[self.dataset.subType].bestDataFormatForSharing
+          ? self.metadata[self.dataset.subType].bestDataFormatForSharing
+          : ''
+      );
+      elements['dataset.mostSuitableRepositories'].value(
+        self.metadata[self.dataset.subType].mostSuitableRepositories
+          ? self.metadata[self.dataset.subType].mostSuitableRepositories
+          : ''
+      );
+      return true;
+    } else return false;
   };
 
   return self;

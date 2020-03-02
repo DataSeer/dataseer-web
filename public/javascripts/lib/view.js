@@ -443,8 +443,8 @@ const View = {
 
         self.value = function(value) {
           if (typeof value === 'undefined') return elements.data.text();
-          elements.data.text(value);
           elements.input.find('option[value="' + value + '"]').prop('selected', true);
+          elements.data.text(elements.input.find('option:selected').val());
           return self.value();
         };
 

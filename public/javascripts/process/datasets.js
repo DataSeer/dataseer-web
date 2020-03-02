@@ -204,6 +204,10 @@
                 'To validate, please provide a DOI or enter comments explaining why this dataset cannot be shared'
               );
               $('#datasets-error-modal-btn').click();
+            } else if (dataset['dataset.dataType'] === '') {
+              $('#datasets-error-modal-label').html('Final validation');
+              $('#datasets-error-modal-body').html('To validate, please provide a datatype (predefined or custom)');
+              $('#datasets-error-modal-btn').click();
             } else {
               datasetsList.datasets.statusOf(currentId, _status.valid);
               saveDataset(dataset, _status.valid);
