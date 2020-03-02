@@ -82,23 +82,23 @@ block content
               div(class='col-12')
                 div(class='value d-block font-weight-bold') Dataset #{index} :
               div(class='col-12')
-                div(class='value d-inline font-weight-bold') Data Type : 
+                div(class='value d-inline') Data Type : 
                 div(class='value d-inline') #{val.dataType}
               div(class='col-12')
-                div(class='value d-inline font-weight-bold') Data Sentence : 
+                div(class='value d-inline') Data Sentence : 
                 div(class='value d-inline') #{val.text}
-            div(class='row row-margin')
               if val.name
                 div(class='col-12')
-                  div(class='value d-inline font-weight-bold') Dataset name : 
+                  div(class='value d-inline') Dataset name : 
                   div(class='value d-inline') #{val.name}
               if val.DOI
                 div(class='col-12')
-                  div(class='value d-inline font-weight-bold') Stable Identifier : 
-                  div(class='value d-inline') #{val.DOI}
+                  div(class='value d-inline') Stable Identifier : 
+                  div(class='value d-inline')
+                    a(href=val.DOI) #{val.DOI}
               if val.comments
                 div(class='col-12')
-                  div(class='value d-inline font-weight-bold') Comments : 
+                  div(class='value d-inline') Comments : 
                   div(class='value d-inline') #{val.comments}
 
       div(class='row')
