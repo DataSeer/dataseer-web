@@ -16,12 +16,12 @@
   $('#search').keyup(function() {
     // Declare variables
     let input = $(this),
-      filter = input.val();
+      filter = input.val().toLowerCase();
     return $('.list .row[data]').map(function() {
       let row = $(this),
         txt = row.attr('data');
       if (txt.length) {
-        if (txt.indexOf(filter) > -1) {
+        if (txt.toLowerCase().indexOf(filter) > -1) {
           row.removeClass('hidden');
         } else {
           row.addClass('hidden');
