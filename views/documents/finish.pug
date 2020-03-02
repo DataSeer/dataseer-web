@@ -107,15 +107,21 @@ block content
       
       div(class='row row-margin')
         each val, index in document.datasets.current
-          div(class='col-12')
-            if val.DOI && val.name
-              div(class='value d-block') #{val.name} : 
-                a(href=val.DOI) #{val.DOI}
-
+          if val.DOI && val.name
+            div(class='col-12')
+                div(class='value d-block' style="margin-bottom: 4px;") #{val.name} : 
+                  a(href=val.DOI) #{val.DOI}
+          else if val.comments && val.name
+            div(class='col-12')
+                div(class='value d-block' style="margin-bottom: 4px;") #{val.name} : #{val.comments}
 
     div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Datasets deleted:
+        if document.datasets.deleted.length === 0
+          div(class='row row-margin')
+            div(class='col-12')
+              div(class='value d-block') None
     each val in document.datasets.deleted
       div(class='row row-margin')
         div(class='col-12')
