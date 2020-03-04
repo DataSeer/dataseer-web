@@ -233,7 +233,15 @@ body > div > div > div.row > div:nth-child(1) {
   font-weight: bold; !important
 }
 
-#document-view tei back {
+#document-view tei back div[type="references"] {
+  display: none;
+}
+
+#document-view tei back div[type="acknowledgements"] {
+  display: none;
+}
+
+#document-view tei figure[type="table"] table {
   display: none;
 }
 
