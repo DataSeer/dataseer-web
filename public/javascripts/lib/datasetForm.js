@@ -122,7 +122,7 @@ const DatasetForm = function(events) {
     'dataset.name': new View.properties.editable.text(
       {
         'id': 'dataset.name',
-        'key': "Please provide a name for this dataset (e.g. 'heart pressure data'): ",
+        'key': "Please provide a name for this dataset (e.g. 'sampling locations'): ",
         'value': '',
         'placeholder': 'n/a'
       },
