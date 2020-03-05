@@ -148,7 +148,7 @@ router.post('/upload', function(req, res, next) {
           AccountsManager.match.role
         )
       )
-        return res.redirect(path.join('/documents', results.successes[0].document.id));
+        return res.redirect(path.join('../documents', results.successes[0].document.id));
       else
         return res.render(path.join('backoffice', 'upload'), {
           'route': 'backoffice/upload',
