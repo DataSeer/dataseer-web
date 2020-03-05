@@ -3,17 +3,41 @@ extends ../layout
 block content
 
   div(class='container-fluid')
-    div(class='row')
-      div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
-        img(src='../../img/DataSeer-logo-75.png' style='margin-left:10px; ')
+    if results
+      if results.successes.length
+        each result in results.successes
+          div(class='alert alert-success' role='alert')
+            a(href=root + 'documents/' + result.document.id) #{result.filename}
+            div(style='display: inline-block; margin-left: 5px;') successfully uploaded
+      if results.errors.length
+        each error in results.errors
+          if error.filename
+            div(class='alert alert-warning' role='alert') #{error.filename} : #{error.msg}
+          else
+            div(class='alert alert-warning' role='alert') #{error.msg}
     div(class='row')
       div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px;')
-        div(style='margin-top:10px;margin-left:10px;') Upload a new document: supported format are PDF, JATS/NLM, TEI XML, ...
-        div(class='row')
-            include ../forms/documents/upload.pug
-        div(class='row')
+                
+        div(style='margin-top:10px;margin-left:10px;') Supported formats are PDF, JATS/NLM, TEI XML, publisher XML formats for ScholarOne, BMJ, Elsevier (staging format), NPG (Nature), OUP, PNAS, RSC, Sage, Springer and Wiley.
 
-  div(style='text-align:center;')  
-      a(href='https://www.dataseer.io' style='color:#ffffff;' target='_blank') dataseer.io
-      a(href='https://github.com/kermitt2/dataseer-web' target='_blank')
-        i(class='fab fa-github' style='color:#8DCB55;margin-left:5px;')
+        //div(style='margin-top:10px;margin-left:10px;') Upload a new document:
+
+        include ../forms/documents/upload.pug
+
+    div(class='row')
+      div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-top:10px;')
+
+        div(style='margin-top:10px;margin-bottom:10px;margin-left:10px;') DataSeer is powered by AI, which means it’s always learning and improving.
+
+        if current_user.role.label === 'standard_user'
+          div(class='row' style='margin-top:10px;margin-left:10px;margin-bottom: 10px;')
+            div(style='display: inline-block;') By uploading your article and telling it about the things it gets right and gets wrong about your datasets, you’re helping DataSeer improve. Published articles are currently better supported than review-stage/manuscript formats.
+            
+        div(class='row' style='margin-top:10px;margin-left:10px;margin-bottom: 10px;')
+          
+          div(style='display: inline-block;') We define something as its own <i>data type</i> if it needs its own sharing instructions. So, <b>Tabular data</b> is one data type, regardless of whether it’s a table of data from physics or from sociology.
+
+          div(style='display: inline-block;') You may feel an urge to go to the 
+            a(href='http://wiki.dataseer.io' target='_blank') wiki 
+            | and add a new data type for your data. It’s vital we keep DataSeer simple and easy to use, so please only add a data type if it’s impossible to fit it under any existing type.
+

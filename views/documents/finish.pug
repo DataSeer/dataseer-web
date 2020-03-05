@@ -82,23 +82,23 @@ block content
               div(class='col-12')
                 div(class='value d-block font-weight-bold') Dataset #{index} :
               div(class='col-12')
-                div(class='value d-inline font-weight-bold') Data Type : 
+                div(class='value d-inline') Data Type : 
                 div(class='value d-inline') #{val.dataType}
               div(class='col-12')
-                div(class='value d-inline font-weight-bold') Data Sentence : 
+                div(class='value d-inline') Data Sentence : 
                 div(class='value d-inline') #{val.text}
-            div(class='row row-margin')
               if val.name
                 div(class='col-12')
-                  div(class='value d-inline font-weight-bold') Dataset name : 
+                  div(class='value d-inline') Dataset name : 
                   div(class='value d-inline') #{val.name}
               if val.DOI
                 div(class='col-12')
-                  div(class='value d-inline font-weight-bold') Stable Identifier : 
-                  div(class='value d-inline') #{val.DOI}
+                  div(class='value d-inline') Stable Identifier : 
+                  div(class='value d-inline')
+                    a(href=val.DOI) #{val.DOI}
               if val.comments
                 div(class='col-12')
-                  div(class='value d-inline font-weight-bold') Comments : 
+                  div(class='value d-inline') Comments : 
                   div(class='value d-inline') #{val.comments}
 
       div(class='row')
@@ -107,15 +107,21 @@ block content
       
       div(class='row row-margin')
         each val, index in document.datasets.current
-          div(class='col-12')
-            if val.DOI && val.name
-              div(class='value d-block') #{val.name} : 
-                a(href=val.DOI) #{val.DOI}
-
+          if val.DOI && val.name
+            div(class='col-12')
+                div(class='value d-block' style="margin-bottom: 4px;") #{val.name} : 
+                  a(href=val.DOI) #{val.DOI}
+          else if val.comments && val.name
+            div(class='col-12')
+                div(class='value d-block' style="margin-bottom: 4px;") #{val.name} : #{val.comments}
 
     div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Datasets deleted:
+        if document.datasets.deleted.length === 0
+          div(class='row row-margin')
+            div(class='col-12')
+              div(class='value d-block') None
     each val in document.datasets.deleted
       div(class='row row-margin')
         div(class='col-12')

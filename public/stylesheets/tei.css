@@ -71,10 +71,15 @@ figure {font-weight: bold; margin-left: 20px; margin-right: 20px; text-align: ju
 figure label {visibility: hidden;}
 figure label:after {content: " ";}
 figure figdesc {text-align: justify; font-weight: normal;}
-note[place="foot"]:before { content: "Note: "; font-weight: bold; }
+figure table {visibility: hidden;}
+note[place="foot"]:before { content: " \A Note: "; font-weight: bold; display: block;}
 note[place="foot"] { margin-left: 20px; margin-right: 20px; text-align: justify;}
+note[place="foot"]:after { content: " \A "; display: block;}
 formula:before { content: "Formula: ";  font-weight: bold;}
 formula { margin-left: 20px; margin-right: 20px;}
 formula label { font-weight: bold; }
 formula label:after { content: " ";}
 title { font-weight: bold; text-align: center; }
+back div[type="annex"] {text-align: justify;}
+back div { font-weight: bold; }
+back div p { font-weight: normal; }

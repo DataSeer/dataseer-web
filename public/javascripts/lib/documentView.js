@@ -83,27 +83,30 @@ const DocumentView = function(events) {
             // if dataType is set, then it's not a corresp
             target = selection.res.sentence
               .attr('id', options.id)
+              .attr(options.user.role, options.user.id)
               .attr('type', dataType)
               .attr('cert', cert);
             target.removeAttr('class');
             jQuery(target)
               .parents('div[type]')
               .attr('subtype', 'dataseer');
-            target.click(function() {
-              scrollTo(jQuery(this));
-              clickEvent(options.id, this);
+            target.click(function(event) {
+              let el = jQuery(event.target);
+              scrollTo(el);
+              clickEvent(options.id, el);
             });
             return cb(null, target);
           });
         } else {
-          target = selection.res.sentence.attr('corresp', '#' + options.id);
+          target = selection.res.sentence.attr('corresp', '#' + options.id).attr(options.user.role, options.user.id);
           target.removeAttr('class');
           jQuery(target)
             .parents('div[type]')
             .attr('subtype', 'dataseer');
-          target.click(function() {
-            scrollTo(jQuery(this));
-            clickEvent(options.id, this);
+          target.click(function(event) {
+            let el = jQuery(event.target);
+            scrollTo(el);
+            clickEvent(options.id, el);
           });
           return target;
         }
@@ -121,18 +124,18 @@ const DocumentView = function(events) {
       .append(elements.container);
     self.source(source);
 
-    datasets.all().click(function() {
-      let id = jQuery(this).attr('id');
-      scrollTo(jQuery(this));
-      events.datasets.click(id, this);
+    datasets.all().click(function(event) {
+      let el = jQuery(event.target),
+        id = el.attr('id');
+      scrollTo(el);
+      events.datasets.click(id, el);
     });
 
-    corresps.all().click(function() {
-      let id = jQuery(this)
-        .attr('corresp')
-        .replace('#', '');
-      scrollTo(jQuery(this));
-      events.corresps.click(id, this);
+    corresps.all().click(function(event) {
+      let el = jQuery(event.target),
+        id = el.attr('corresp').replace('#', '');
+      scrollTo(el);
+      events.datasets.click(id, el);
     });
 
     datasets.colors();
@@ -141,10 +144,11 @@ const DocumentView = function(events) {
 
   self.source = function(source) {
     if (typeof source === 'undefined') {
-      let copy = elements.container.clone();
+      let copy = $('#document-view > div').clone();
       copy
-        .find('*')
+        .find('*[style]')
         .removeAttr('style')
+        .find('*[class]')
         .removeAttr('class');
       return copy.html();
     }
@@ -170,12 +174,12 @@ const DocumentView = function(events) {
     return styles;
   };
 
-  self.updateDataset = function(id, dataType) {
-    return datasets.update(id, dataType);
+  self.updateDataset = function(user, id, dataType) {
+    return datasets.update(user, id, dataType);
   };
 
-  self.addDataset = function(id, dataType, cb) {
-    return datasets.add(id, dataType, function(err, res) {
+  self.addDataset = function(user, id, dataType, cb) {
+    return datasets.add(user, id, dataType, function(err, res) {
       return cb(err, res);
     });
   };
@@ -188,8 +192,8 @@ const DocumentView = function(events) {
     return datasets.remove(id);
   };
 
-  self.addCorresp = function(id) {
-    return corresps.add(id);
+  self.addCorresp = function(user, id) {
+    return corresps.add(user, id);
   };
 
   self.deleteAllCorresps = function(id) {
@@ -271,11 +275,11 @@ const DocumentView = function(events) {
   let datasets = {
     // get element of given dataset
     'get': function(id) {
-      return elements.container.find('tei text div[subtype="dataseer"] s[id="' + id + '"]');
+      return elements.container.find('tei div[subtype="dataseer"] s[id="' + id + '"]');
     },
     // get elements of all datasets
     'all': function() {
-      return elements.container.find('tei text div[subtype="dataseer"] s[id]');
+      return elements.container.find('tei div[subtype="dataseer"] s[id]');
     },
     // get cert of given dataset
     'certOf': function(id) {
@@ -311,13 +315,13 @@ const DocumentView = function(events) {
         .attr('type', dataType);
     },
     // add dataset
-    'add': function(id, dataType, cb) {
+    'add': function(user, id, dataType, cb) {
       let selection = selectedElements();
       if (selection.err) return cb(true, 'Please select the sentence that contains the new dataset');
       return selectionToSenctence(
         selection,
         datasets.new,
-        { 'id': id, 'dataType': dataType, 'getdataType': true },
+        { 'id': id, 'dataType': dataType, 'getdataType': true, 'user': user },
         events.datasets.click,
         function(err, res) {
           if (err) return cb(err, res);
@@ -331,8 +335,10 @@ const DocumentView = function(events) {
       );
     },
     // add dataset
-    'update': function(id, dataType) {
-      jQuery('#' + id).attr('type', dataType);
+    'update': function(user, id, dataType) {
+      jQuery('#' + id)
+        .attr('type', dataType)
+        .attr(user.role, user.id);
     },
     // remove dataset
     'remove': function(id) {
@@ -349,11 +355,11 @@ const DocumentView = function(events) {
   let corresps = {
     // get element of given correp
     'get': function(id) {
-      return elements.container.find('tei text s[corresp="#' + id + '"]');
+      return elements.container.find('tei s[corresp="#' + id + '"]');
     },
     // get elements of all correps
     'all': function() {
-      return elements.container.find('tei text s[corresp]');
+      return elements.container.find('tei s[corresp]');
     },
     // get/set style of given correp
     'styleOf': function(id, value) {
@@ -376,13 +382,13 @@ const DocumentView = function(events) {
       return jQuery('<s/>').attr('corresp', '#' + id);
     },
     // add correp
-    'add': function(id) {
+    'add': function(user, id) {
       let selection = selectedElements();
       if (selection.err) return selection;
       let target = selectionToSenctence(
           selection,
           corresps.new,
-          { 'id': id, 'getdataType': false },
+          { 'id': id, 'getdataType': false, 'user': user },
           events.corresps.click
         ),
         parent = target.parents('div').first();

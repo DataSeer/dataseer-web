@@ -8,6 +8,98 @@ body {
   background-color: lightgray;
 }
 
+.list .head-list {
+  text-decoration: underline;
+}
+
+.row[data] ul {
+  list-style: none;
+  padding: 0px;
+}
+.row[data] ul li {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.accounts form {
+  max-width: auto;
+}
+
+.accounts .form-group {
+  display: inline-block;
+  width: auto;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.header {
+  font-size: 2em;
+}
+
+#custom-search > div {
+  margin-right: 10px;
+  display: inline-block;
+}
+
+#search {
+  width: 100%; /* Full-width */
+  font-size: 16px; /* Increase font-size */
+  padding: 12px 20px 12px 20px; /* Add some padding */
+  border: 1px solid #ddd; /* Add a grey border */
+  margin-bottom: 12px; /* Add some space below the input */
+}
+
+.accounts .form-group > * {
+  margin-left: 10px;
+  display: inline-block;
+  width: auto;
+  vertical-align: middle;
+}
+
+#user_id,
+#user_username,
+#user_role {
+  display: none;
+}
+
+#user-navbar {
+  background-image: url(../img/DataSeer-logo-75.png);
+  background-repeat: no-repeat;
+  min-height: 195px;
+  min-width: 485px;
+  display: table;
+}
+
+#user-navbar > div {
+  height: 195px;
+  padding: 15px;
+  text-align: center;
+}
+
+#user-navbar > div {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+#user {
+  font-size: 1.5em;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#user > label {
+}
+
+#navbar ul {
+  list-style: none;
+}
+
+#navbar li {
+  display: inline-block;
+  font-size: 1.25em;
+  margin-right: 15px;
+}
+
 .crud-button-action {
   margin-top: 50px !important;
   margin-bottom: 25px !important;
@@ -34,6 +126,11 @@ body {
 .routes {
   margin-top: 20px;
   margin-bottom: 20px;
+}
+
+.routes > table > thead:not(:first-child) > tr > th {
+  background-color: gray;
+  text-decoration: underline;
 }
 
 #document-view {
@@ -70,3 +167,15 @@ body {
   border-color: #1E3945;
 }
 
+.list .row {
+  margin-bottom: 15px;
+}
+
+a.nav {
+  color: #184D7E;
+}
+
+a.nav.active {
+  color: #184D7E;
+  font-weight: bold;
+}

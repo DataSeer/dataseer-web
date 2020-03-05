@@ -51,6 +51,7 @@ const HtmlBuilder = {
     let a = jQuery('<a/>');
     if (options.href) a.attr('href', encodeURI(options.href));
     if (options.text) a.text(options.text);
+    a.attr('target','_blank');
     return a;
   }
 };

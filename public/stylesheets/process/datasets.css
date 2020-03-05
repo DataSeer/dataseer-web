@@ -1,3 +1,45 @@
+#user-navbar {
+  display: none;
+}
+
+#user-navbar-lg {
+  display: table;
+}
+
+#user-navbar-lg > div {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  text-align: center;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+#user-lg,
+#navbar-lg {
+  display: table-cell;
+}
+
+#user-lg {
+  font-size: 1.5em;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#user-lg label {
+  margin: 0px;
+}
+
+#navbar-lg ul {
+  list-style: none;
+  margin: 0px;
+}
+
+#navbar-lg li {
+  display: inline-block;
+  font-size: 1.25em;
+  margin-right: 15px;
+}
+
 .row-margin {
   margin-top: 20px !important;
   margin-bottom: 20px !important;
@@ -65,19 +107,20 @@ body > div > div > div.row > div:nth-child(2) {
 }
 
 
-#dataset-form .form-row:last-child {
+#dataset-form .buttons-container {
   display: table;
   width: 100%;
 }
 
-#dataset-form .form-row:last-child > button {
-  display: table-cell;
-  text-align: left;
-}
-
-#dataset-form .form-row:last-child > button:last-child {
+#dataset-form .form-row > button:last-child {
   display: table-cell;
   text-align: right;
+}
+
+#dataset-form .form-row > button:first-child,
+#dataset-form .form-row > button {
+  display: table-cell;
+  text-align: left;
 }
 
 #dataset-form #dataset\.id {
@@ -117,7 +160,7 @@ body > div > div > div.row > div:nth-child(2) {
   display: inline-block;
 }
 
-#dataset-form .form-row > button {
+#dataset-form .form-row button {
   display: inline-block;
   margin-left: 4px;
   margin-right: 4px; 
@@ -148,41 +191,57 @@ body > div > div > div.row > div:nth-child(1) {
 }
 
 /* TEI CUSTOMIZATION */
-#document-view tei > text > div {
+#document-view tei teiHeader profiledesc abstract {
+  display: inline-block;
+}
+
+#document-view tei > text > div,
+#document-view tei teiHeader profiledesc abstract > div {
   font-weight: bold;
 }
 
-#document-view tei > text > div > p {
+#document-view tei > text > div > p,
+#document-view tei teiHeader profiledesc abstract > div > p {
   margin-top: 10px;
   font-weight: normal;
 }
 
-#document-view tei > text > div > *:not(p) {
+#document-view tei > text > div > *:not(p),
+#document-view tei teiHeader profiledesc abstract > div > *:not(p) {
   margin-top: 5px;
   font-weight: normal;
 }
 
-#document-view tei > text > div > p > * {
+#document-view tei > text > div > p > *,
+#document-view tei teiHeader profiledesc abstract > div > p > * {
   margin-top: 5px;
 }
 
 #document-view tei teiHeader encodingdesc {
   display: none;
 }
-#document-view tei teiHeader profiledesc {
-  display: none;
-}
+
 #document-view tei teiHeader filedesc publicationstmt {
   display: none;
 }
+
 #document-view tei teiHeader filedesc sourcedesc {
   display: none;
 }
+
 #document-view tei teiHeader filedesc titlestmt title {
   font-weight: bold; !important
 }
 
-#document-view tei back {
+#document-view tei back div[type="references"] {
+  display: none;
+}
+
+#document-view tei back div[type="acknowledgements"] {
+  display: none;
+}
+
+#document-view tei figure[type="table"] table {
   display: none;
 }
 

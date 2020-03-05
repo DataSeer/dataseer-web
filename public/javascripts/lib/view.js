@@ -168,15 +168,23 @@ const View = {
         if (typeof data.help === 'object') {
           self.help = function(options) {
             if (typeof options !== 'undefined') {
-              if (options.href) elements.help.attr('href', options.href);
+              if (options.href) {
+                elements.help.attr('href', options.href);
+                if (self.title) elements.container.attr('title', self.title + options.href);
+              }
               if (options.title) elements.container.attr('title', options.title);
               if (options.text) elements.help.text(options.text);
             }
             return elements.help;
           };
+
           if (data.help.href && data.help.text)
             elements.help = HtmlBuilder.a({ 'href': data.help.href, text: data.help.text });
-          if (data.help.title) elements.container.attr('title', data.help.title);
+
+          if (data.help.title) {
+            self.title = data.help.title;
+            elements.container.attr('title', data.help.title);
+          }
         }
 
         self.id = function(value) {
@@ -233,9 +241,11 @@ const View = {
 
         if (typeof data.help === 'object') {
           self.help = function(options) {
-            console.log(options);
             if (typeof options !== 'undefined') {
-              if (options.href) elements.help.attr('href', options.href);
+              if (options.href) {
+                elements.help.attr('href', options.href);
+                if (self.title) elements.container.attr('title', self.title + options.href);
+              }
               if (options.title) elements.container.attr('title', options.title);
               if (options.text) elements.help.text(options.text);
             }
@@ -243,7 +253,10 @@ const View = {
           };
           if (data.help.href && data.help.text)
             elements.help = HtmlBuilder.a({ 'href': data.help.href, text: data.help.text });
-          if (data.help.title) elements.container.attr('title', data.help.title);
+          if (data.help.title) {
+            self.title = data.help.title;
+            elements.container.attr('title', data.help.title);
+          }
         }
 
         elements.input.bind('input propertychange', function() {
@@ -430,8 +443,8 @@ const View = {
 
         self.value = function(value) {
           if (typeof value === 'undefined') return elements.data.text();
-          elements.data.text(value);
           elements.input.find('option[value="' + value + '"]').prop('selected', true);
+          elements.data.text(elements.input.find('option:selected').val());
           return self.value();
         };
 

@@ -4,42 +4,126 @@
 
 const express = require('express'),
   router = express.Router(),
-  extractor = require('../lib/extractor.js'),
-  Documents = require('../models/documents.js'),
   path = require('path'),
-  request = require('request'),
   async = require('async'),
-  md5 = require('md5'),
-  conf = require('../conf/conf.json');
+  AccountsManager = require('../lib/accountsManager.js'),
+  Accounts = require('../models/accounts.js'),
+  extractor = require('../lib/extractor.js'),
+  Upload = require('../lib/upload.js');
+
+const emailRegExp = new RegExp("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@[A-Za-z0-9-]+(.[A-Za-z0-9-]+)*");
+
+const conf = require('../conf/conf.json');
+
+/* GET all accounts */
+router.get('/accounts', function(req, res, next) {
+  if (
+    typeof req.user === 'undefined' ||
+    !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
+  )
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  let limit = parseInt(req.query.limit),
+    error = req.flash('error'),
+    success = req.flash('success');
+  if (isNaN(limit)) limit = 20;
+  Accounts.find({})
+    .limit(limit)
+    .exec(function(err, post) {
+      if (err) return next(err);
+      return res.render(path.join('backoffice', 'accounts'), {
+        'route': 'backoffice/accounts',
+        'root': conf.root,
+        'search': true,
+        'current_user': req.user,
+        'accounts': post,
+        'error': Array.isArray(error) && error.length > 0 ? error : undefined,
+        'success': Array.isArray(success) && success.length > 0 ? success : undefined
+      });
+    });
+});
+
+/* Update an account */
+router.post('/accounts', function(req, res, next) {
+  if (
+    typeof req.user === 'undefined' ||
+    !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
+  )
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username)) {
+    req.flash('error', 'Incorrect Email');
+    return res.redirect('./accounts');
+  }
+
+  return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
+    let role = AccountsManager.roles[req.body.role];
+    if (typeof role === 'undefined') {
+      req.flash('error', 'Incorrect role');
+      return res.redirect('./accounts');
+    }
+    user.role = role;
+    return user.save(function(err) {
+      if (err) {
+        req.flash('error', err);
+        return res.redirect('./accounts');
+      }
+      req.flash('success', 'User role has been successfully updateted');
+      return res.redirect('./accounts');
+    });
+  });
+});
 
 /* UPLOAD Document */
 router.get('/upload', function(req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
   return res.render(path.join('backoffice', 'upload'), {
+    'route': 'backoffice/upload',
+    'root': conf.root,
     'title': 'DataSeer',
-    'backoffice': true
+    'backoffice': true,
+    'current_user': req.user
   });
 });
 
 /* UPLOAD Document */
 router.post('/upload', function(req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
   let results = { 'errors': [], 'successes': [] },
+    isCurator = AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator),
     uploadedFiles = null,
     dataseerML = '';
   if (!req.files) {
     results.errors.push({ 'msg': 'You must send at least one file' });
-    return res.status(400).render(path.join('backoffice', 'results'), { 'backoffice': true, 'results': results });
+    return res.status(400).render(path.join('backoffice', 'upload'), {
+      'route': 'backoffice/upload',
+      'root': conf.root,
+      'backoffice': true,
+      'results': results,
+      'current_user': req.user
+    });
   }
   if (Object.keys(req.files).length == 0) {
     results.errors.push({ 'msg': 'No file(s) were uploaded' });
-    return res.status(400).render(path.join('backoffice', 'results'), { 'backoffice': true, 'results': results });
+    return res.status(400).render(path.join('backoffice', 'upload'), {
+      'route': 'backoffice/upload',
+      'root': conf.root,
+      'backoffice': true,
+      'results': results,
+      'current_user': req.user
+    });
   }
-  uploadedFiles = Array.isArray(req.files['uploadedFiles']) ? req.files['uploadedFiles'] : [req.files['uploadedFiles']];
-  dataseerML = req.body.dataseerML;
+  uploadedFiles = Array.isArray(req.files['uploadedFiles'])
+    ? isCurator
+      ? req.files['uploadedFiles']
+      : [req.files['uploadedFiles'][0]]
+    : [req.files['uploadedFiles']];
+  dataseerML = isCurator ? req.body.dataseerML : 'dataseer-ml';
   async.each(
     uploadedFiles,
     function(file, callback) {
       // Perform operation on file here.
-      return processFile(file, dataseerML, function(error, result) {
+      return Upload.processFile(file, dataseerML, req.app.get('dataTypes.json'), req.user, function(error, result) {
         if (error) results.errors.push(error);
         if (result) results.successes.push(result);
         return callback();
@@ -47,76 +131,25 @@ router.post('/upload', function(req, res, next) {
     },
     function(err) {
       // if any of the file processing produced an error, err would equal that error
-      if (err) return console.log(err);
-      return res.render(path.join('backoffice', 'results'), {
+      if (err) {
+        console.log(err);
+        return res.render(path.join('backoffice', 'upload'), {
+          'route': 'backoffice/upload',
+          'root': conf.root,
+          'backoffice': true,
+          'results': results,
+          'current_user': req.user
+        });
+      }
+      return res.render(path.join('backoffice', 'upload'), {
+        'route': 'backoffice/upload',
+        'root': conf.root,
         'backoffice': true,
-        'results': results
+        'results': results,
+        'current_user': req.user
       });
     }
   );
 });
-
-function processFile(file, calledProcess, cb) {
-  if (!file) return cb({ 'msg': 'No files were uploaded' });
-  if (!file.mimetype) return cb({ 'filename': file.name, 'msg': 'Mimetype unknow' });
-  if (file.mimetype !== 'text/xml' && file.mimetype !== 'application/pdf')
-    return cb({ 'filename': file.name, 'msg': 'Mimetype must be text/xml or application/pdf' });
-  // case send file will be not process
-  if (!calledProcess) {
-    return buildDocument(file.name, file.data, cb);
-  }
-  // case send file will be send to dataseer-ml
-  if (calledProcess === 'dataseer-ml') {
-    return callDataseerML(file, function(err, res) {
-      if (err) return cb(err);
-      return buildDocument(file.name, res, cb);
-    });
-  }
-}
-
-function callDataseerML(file, cb) {
-  let dataseerURL = '';
-  if (file.mimetype === 'text/xml') dataseerURL = '/processDataseerTEI';
-  else if (file.mimetype === 'application/pdf') dataseerURL = '/processDataseerPDF';
-  else return cb({ 'filename': file.name, 'msg': 'Application do not handle this mimetype : ' + file.mimetype });
-  return request.post(
-    {
-      'headers': {
-        'enctype': 'multipart/form-data'
-      },
-      'url': conf.services['dataseer-ml'] + dataseerURL,
-      'formData': {
-        'input': {
-          'value': file.data,
-          'options': {
-            'filename': file.name,
-            'contentType': file.mimetype
-          }
-        }
-      }
-    },
-    function(error, response, body) {
-      if (!error && response.statusCode == 200) {
-        return cb(null, body);
-      } else if (error) {
-        return cb({ 'filename': file.name, 'msg': error.toString() });
-      } else {
-        return cb({ 'filename': file.name, 'msg': 'unspecified error' });
-      }
-    }
-  );
-}
-
-function buildDocument(name, data, cb) {
-  let newFile = {
-      'data': data,
-      'md5': md5(data)
-    },
-    newDocument = extractor.getNewDocumentFromFile(newFile, extractor.types.TEI);
-  Documents.create(newDocument, function(err, post) {
-    if (err) return cb({ 'filename': name, 'msg': err.toString() });
-    return cb(null, { 'filename': name, 'document': post });
-  });
-}
 
 module.exports = router;

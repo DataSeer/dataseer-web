@@ -4,94 +4,257 @@ block content
 
   div(class='container-fluid')
     div(class='row')
-      div(class='col-12')
-        div(class='d-block text-center')
-          h1= title
-        div(class='d-block text-center')
-          p Welcome to #{title}
+      div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px;')
+        div(class='col-10 offset-1')
+          div(class='d-block title')
+            h2 Web Application
+          div(class='d-block routes')
+            table(class='table table-striped')
+              thead
+                tr
+                  th(scope='col') Method
+                  th(scope='col') URL structure
+                  th(scope='col') Authorization
+                  th(scope='col') Description
+              thead
+                tr
+                  th(scope='col' colspan='4') Home Page
+              tbody
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root) /
+                  td [Public]
+                  td Regroup all available routes.
+              thead
+                tr
+                  th(scope='col' colspan='4') Sign up
+              tbody
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root + 'signup') /signup
+                  td [Public]
+                  td Sign up form. Email address & password required to signup
+                tr
+                  td(scope='row') POST
+                  td /signup
+                  td [Public]
+                  td
+                    div Available parameters :
+                    ul
+                      li username : Email address
+                      li password : Paswword
+              thead
+                tr
+                  th(scope='col' colspan='4') Sign in
+              tbody
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root + 'signin') /signin
+                  td [Public]
+                  td Sign in form. Email address & password required to access 'private' part of WebApplication
+                tr
+                  td(scope='row') POST
+                  td /signin
+                  td [Public]
+                  td
+                    div Available parameters :
+                    ul
+                      li username : Registred email address
+                      li password : Paswword
+              thead
+                tr
+                  th(scope='col' colspan='4') Sign out
+              tbody
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root + 'signout') /signout
+                  td [Restricted] Any role
+                  td  Sign you out. Will redirect on Home Page
+              thead
+                tr
+                  th(scope='col' colspan='4') My Documents
+              tbody
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root + 'myDocuments') /myDocuments
+                  td [Restricted] Any role
+                  td List of your documents (modified at least one time by you)
+              thead
+                tr
+                  th(scope='col' colspan='4') Settings
+              tbody
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root + 'settings') /settings
+                  td [Restricted] Any role
+                  td Settings form. Allow you to update your password (when you are connected)
+                tr
+                  td(scope='row') POST
+                  td /settings
+                  td [Restricted] Any role
+                  td
+                    div Available parameters :
+                    ul
+                      li current_password : Current password
+                      li new_password : New password
+              thead
+                tr
+                  th(scope='col' colspan='4') Forgot Password
+              tbody
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root + 'forgotPassword') /forgotPassword
+                  td [Restricted] Any role
+                  td
+                    div Forgot password form.
+                    div Allow you to reset when you forgot password
+                    div Will send you mail with credentials to reset it
+              thead
+                tr
+                  th(scope='col' colspan='4') Reset Password
+              tbody
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root + 'resetPassword') /resetPassword
+                  td [Restricted] Any role
+                  td Reset password form. Allow you to update when you forgot password
+                tr 
+                  td POST
+                  td /resetPassword
+                  td [Restricted] Any role
+                  td
+                    div Available parameters :
+                    ul
+                      li username : Registred email address
+                      li token : Token (send by mail)
+                      li password : New password
+              thead
+                tr
+                  th(scope='col' colspan='4') List of Documents
+              tbody
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root + 'documents/?limit=20') /documents/?limit=[20]
+                  td [Restricted] annotator OR curator
+                  td
+                    div List of first [limit] Documents (by default, limit will be set to 20)
+                    div available parameters :
+                    ul
+                      li limit : maximum number of results
+                      li doi : doi of document
+                      li pmid : pmid of document
+                tr
+                  td GET
+                  td /documents/:id
+                  td [Restricted] Any role
+                  td
+                    div User Interface to process a single Document with Id :id
+                    div 3 UI available : metadata, datasets and finish
+                    div Annotator will only access to datasets UI
     div(class='row')
-      div(class='col-10 offset-1')
-        div(class='d-block title')
-          h2 BackOffice
-        div(class='d-block subtitle')
-          h3 You can request thoses BackOffice routes :
-        div(class='d-block routes')
-          table(class='table table-striped')
-            thead
-              tr
-                th(scope='col') Method
-                th(scope='col') URL structure
-                th(scope='col') Description
-            tbody
-              tr
-                td GET
-                td
-                  a(href='backoffice/upload/') /backoffice/upload/
-                td Get backoffice User Interface
-              tr
-                td POST
-                td /backoffice/upload/
-                td
-                  div Send files to backoffice
-                  div available parameters :
-                  ul
-                    li uploadedFiles : file or list of files
-                    li dataseerML : set "dataseer-ml" to call dataseer-ml on uploadedFiles (or empty to not process file(s))
+      div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-top:10px;')
+        div(class='col-10 offset-1')
+          div(class='d-block title')
+            h2 API
+          div(class='d-block routes')
+            table(class='table table-striped')
+              thead
+                tr
+                  th(scope='col') Method
+                  th(scope='col') URL structure
+                  th(scope='col') Authorization
+                  th(scope='col') Description
+              thead
+                tr
+                  th(scope='col' colspan='4') Documents
+              tbody
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root + 'api/documents/?limit=20') /api/documents/?limit=[20]
+                  td [Restricted] annotator OR curator
+                  td
+                    div List of first [limit] Documents (by default, limit will be set to 20)
+                    div available parameters :
+                    ul
+                      li limit : maximum number of results
+                      li doi : doi of document
+                      li pmid : pmid of document
+                tr
+                  td(scope='row') GET
+                  td /api/documents/:id
+                  td [Restricted] Any role
+                  td Return JSON of Document with Id :id
+                tr
+                  td(scope='row') POST
+                  td /api/documents/
+                  td [Restricted] Any role
+                  td Add Document (structure of data available in GitHub documentation)
+                tr
+                  td(scope='row') PUT
+                  td /api/documents/:id
+                  td [Restricted] Any role
+                  td Modify Document with Id :id
+                tr
+                  td(scope='row') DELETE
+                  td /api/documents/:id
+                  td [Restricted] Any role
+                  td Delete Document with Id :id
     div(class='row')
-      div(class='col-10 offset-1')
-        div(class='d-block title')
-          h2 Web Application
-        div(class='d-block subtitle')
-          h3 You can request thoses WebApllication routes :
-        div(class='d-block routes')
-          table(class='table table-striped')
-            thead
-              tr
-                th(scope='col') Method
-                th(scope='col') URL structure
-                th(scope='col') Description
-            tbody
-              tr
-                td GET
-                td
-                  a(href='documents/?limit=20') /documents/?limit=[20]
-                td Get list of first [limit] Documents (by default, limit will be set to 20)
-              tr
-                td GET
-                td /documents/:id
-                td Get User Interface to process a single Document object with Id :id
-    div(class='row')
-      div(class='col-10 offset-1')
-        div(class='d-block title')
-          h2 API
-        div(class='d-block subtitle')
-          h3 You can request thoses API routes :
-        div(class='d-block routes')
-          table(class='table table-striped')
-            thead
-              tr
-                th(scope='col') Method
-                th(scope='col') URL structure
-                th(scope='col') Description
-            tbody
-              tr
-                td GET
-                td
-                  a(href='api/documents/?limit=20') /api/documents/?limit=[20]
-                td Get [limit] first Documents (by default, limit will be set to 20)
-              tr
-                td GET
-                td /api/documents/:id
-                td Get a single Document object with Id :id
-              tr
-                td POST
-                td /api/documents/
-                td Add a document (structure of data available in GitHub documentation)
-              tr
-                td PUT
-                td /api/documents/:id
-                td Modify the Document object with Id :id
-              tr
-                td DELETE
-                td /api/documents/:id
-                td Delete the Document object with Id :id
+      div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-top:10px;')
+        div(class='col-10 offset-1')
+          div(class='d-block title')
+            h2 BackOffice
+          div(class='d-block routes')
+            table(class='table table-striped')
+              thead
+                tr
+                  th(scope='col') Method
+                  th(scope='col') URL structure
+                  th(scope='col') Authorization
+                  th(scope='col') Description
+              thead
+                tr
+                  th(scope='col' colspan='4') Upload Documents
+              tbody
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root + 'backoffice/upload/') /backoffice/upload/
+                  td [Restricted] standard_user OR curator
+                  td Upload a document UI (multiple files allowed for curator)
+                tr
+                  td(scope='row') POST
+                  td /backoffice/upload/
+                  td [Restricted] standard_user OR curator
+                  td
+                    div Send files to backoffice
+                    div available parameters :
+                    ul
+                      li uploadedFiles : file or list of files
+                      li [only available for curator] dataseerML : "dataseer-ml" to call dataseer-ml on uploaded file(s), or empty
+                tr
+                  td(scope='row') GET
+                  td
+                    a(href=root + 'backoffice/accounts/') /backoffice/accounts/
+                  td [Restricted] curator
+                  td Manage accounts UI
+                tr
+                  td(scope='row') POST
+                  td /backoffice/accounts/
+                  td [Restricted] curator
+                  td
+                    div Update role of given account
+                    div available parameters :
+                    ul
+                      li username : registred username
+                      li role : role
