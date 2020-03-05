@@ -141,13 +141,22 @@ router.post('/upload', function(req, res, next) {
           'current_user': req.user
         });
       }
-      return res.render(path.join('backoffice', 'upload'), {
-        'route': 'backoffice/upload',
-        'root': conf.root,
-        'backoffice': true,
-        'results': results,
-        'current_user': req.user
-      });
+      if (
+        AccountsManager.checkAccountAccessRight(
+          req.user,
+          AccountsManager.roles.standard_user,
+          AccountsManager.match.role
+        )
+      )
+        return res.redirect(path.join('/documents', results.successes[0].document.id));
+      else
+        return res.render(path.join('backoffice', 'upload'), {
+          'route': 'backoffice/upload',
+          'root': conf.root,
+          'backoffice': true,
+          'results': results,
+          'current_user': req.user
+        });
     }
   );
 });
