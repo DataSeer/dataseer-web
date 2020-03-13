@@ -83,7 +83,10 @@ block content
                 div(class='value d-block font-weight-bold') Dataset #{index} :
               div(class='col-12')
                 div(class='value d-inline') Data Type : 
-                div(class='value d-inline') #{val.dataType}
+                if val.subType !== ''
+                  div(class='value d-inline') #{val.dataType} - #{val.subType}
+                else
+                  div(class='value d-inline') #{val.dataType}
               div(class='col-12')
                 div(class='value d-inline') Data Sentence : 
                 div(class='value d-inline') #{val.text}
@@ -127,7 +130,10 @@ block content
         div(class='col-12')
           if val.dataType
             div(class='value d-inline') Data Type : 
-            div(class='value d-inline') #{val.dataType}
+            if val.subType !== ''
+              div(class='value d-inline') #{val.dataType} - #{val.subType}
+            else
+              div(class='value d-inline') #{val.dataType}
         div(class='col-12')
           if val.subType
             div(class='value d-inline') Data Subtype : 
