@@ -359,7 +359,7 @@
 
       // On datasets_validation click
       $('#datasets_validation').click(function() {
-        if (checkStatusOfDatasets()) {
+        if (checkStatusOfDatasets() || user.role === 'curator') {
           currentDocument.status = MongoDB.getNextStatus(currentDocument);
           currentDocument.source = documentView.source();
           return MongoDB.updateDocument(currentDocument, user, function(err, res) {
