@@ -21,12 +21,10 @@ router.get('/', function(req, res, next) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   let limit = parseInt(req.query.limit),
     doi = req.query.doi,
-    username = req.query.username,
     pmid = req.query.pmid,
     query = {};
-  if (typeof doi !== 'undefined' && doi.length > 0) query['doi'] = doi;
-  if (typeof username !== 'undefined' && username.length > 0) query['username'] = username;
-  if (typeof pmid !== 'undefined' && pmid.length > 0) query['pmid'] = pmid;
+  if (typeof doi !== 'undefined' && doi.length > 0) query['metadata.doi'] = doi;
+  if (typeof pmid !== 'undefined' && pmid.length > 0) query['metadata.pmid'] = pmid;
   if (isNaN(limit)) limit = 20;
   return Documents.find(query)
     .limit(limit)
