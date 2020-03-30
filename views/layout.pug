@@ -9,10 +9,7 @@ html
 
     if document
       link(rel='stylesheet' href=root + 'stylesheets/tei.css')
-      if current_user.role.label === 'curator'
-        link(rel='stylesheet' href=root + 'stylesheets/process/datasets.css')
-      else
-        link(rel='stylesheet' href=root + 'stylesheets/process/'+ document.status + '.css')
+      link(rel='stylesheet' href=root + 'stylesheets/process/'+ document.status + '.css')
     if backoffice
       link(rel='stylesheet' href=root + 'stylesheets/style.css')
       link(rel='stylesheet' href=root + 'stylesheets/process/backoffice.css')
@@ -81,10 +78,7 @@ html
     script(src=root + 'javascripts/mongoDB.js')
     script(src=root + 'javascripts/dataseerML.js')
     script(src=root + 'javascripts/demo.js')
-    if current_user.role.label === 'curator'
-      script(src=root + 'javascripts/process/datasets.js')
-    else
-      script(src=root + 'javascripts/process/'+ document.status + '.js')
+    script(src=root + 'javascripts/process/'+ document.status + '.js')
   else if backoffice
     script(src=root + 'javascripts/process/backoffice.js')
   else if search

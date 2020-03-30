@@ -47,21 +47,13 @@ router.get('/:id', function(req, res, next) {
   return Documents.findById(req.params.id, function(err, post) {
     if (err) return next(err);
     if (post === null) return res.status(400).send('error 404');
-    return res.render(
-      path.join(
-        'documents',
-        AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator, AccountsManager.match.role) // If role is curator, force display of step 'datasets'
-          ? 'datasets'
-          : post.status
-      ),
-      {
-        'route': 'documents/:id',
-        'root': conf.root,
-        'document': post,
-        'demo': process.env.DEMO,
-        'current_user': req.user
-      }
-    );
+    return res.render(path.join('documents', post.status), {
+      'route': 'documents/:id',
+      'root': conf.root,
+      'document': post,
+      'demo': process.env.DEMO,
+      'current_user': req.user
+    });
   });
 });
 
