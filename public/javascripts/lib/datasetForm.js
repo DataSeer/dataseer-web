@@ -309,9 +309,6 @@ const DatasetForm = function(events) {
       elements['dataset.customDataType'].value(dataset.dataType);
     } else self.hideCustomDataType();
     elements['dataset.subType'].value(dataset.subType);
-    elements['dataset.description'].value(dataset.description);
-    elements['dataset.bestDataFormatForSharing'].value(dataset.bestDataFormatForSharing);
-    elements['dataset.mostSuitableRepositories'].value(dataset.mostSuitableRepositories);
     elements['dataset.name'].value(dataset.name);
     elements['dataset.DOI'].value(dataset.DOI);
     elements['dataset.comments'].value(dataset.comments);
@@ -325,6 +322,8 @@ const DatasetForm = function(events) {
     self.setDataTypes();
     self.setSubTypes();
     self.values(dataset);
+    self.setDataFromDatatype();
+    self.setDataFromSubtype();
     self.refresh({
       'unlink':
         typeof self.selectedElement !== 'undefined' && typeof self.selectedElement.attr('corresp') !== 'undefined'
@@ -442,10 +441,10 @@ const DatasetForm = function(events) {
   self.setSubType = function() {
     self.dataset.status = elements['dataset.status'].value();
     self.dataset.subType = elements['dataset.subType'].value();
-    if (!self.SetDataFromSubtype()) self.setDataFromDatatype();
+    if (!self.setDataFromSubtype()) self.setDataFromDatatype();
   };
 
-  self.SetDataFromSubtype = function() {
+  self.setDataFromSubtype = function() {
     if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
       elements['dataset.mostSuitableRepositories'].help({
         'href': encodeURI(self.metadata[self.dataset.subType].url)
