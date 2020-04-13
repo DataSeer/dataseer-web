@@ -5,6 +5,12 @@ block content
 
   div(class='container-fluid')
 
+    if current_user
+      if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
+        if document
+          if document.status !== 'metadata'
+            button#previous_step.btn.btn-primary Reopen document
+
     if document.isDataSeer
       
       div(class='row')
