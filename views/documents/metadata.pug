@@ -8,7 +8,10 @@ block content
         div(class='row row-margin')
           div(class='col-12')
             div(class='key d-inline font-weight-bold') Manuscript #: 
-            div(class='value d-inline') #{document.metadata.manuscriptId}
+              if document.metadata.manuscriptId !== ""
+                div(class='value d-inline') #{document.metadata.manuscriptId}
+              else
+                  div(class='value d-inline') Not Found
           div(class='col-12')
             div(class='key d-inline font-weight-bold') Article Title : 
             div(class='value d-inline') #{document.metadata.articleTitle}
@@ -19,26 +22,38 @@ block content
         div(class='row row-margin')
           div(class='col-12')
             div(class='key d-inline font-weight-bold') Authors : 
-            div(class='value d-inline') #{document.metadata.authors}
+            div(class='value d-inline') #{authors}
 
         div(class='row row-margin')
           div(class='col-12')
             div(class='key d-inline font-weight-bold') Submitting Author : 
-            div(class='value d-inline') #{document.metadata.submittingAuthor}
+            if document.metadata.author_persons !== ""
+              div(class='value d-inline') #{document.metadata.author_persons}
+            else
+                div(class='value d-inline') Not Found
           div(class='col-12')
-            div(class='key d-inline font-weight-bold') Submitting Author email : 
-            div(class='value d-inline') #{document.metadata.submittingAuthoremail}
+            div(class='key d-inline font-weight-bold') Submitting Author Institutions : 
+            if author_organizations !== ""
+              div(class='value d-inline') #{author_organizations}
+            else
+                div(class='value d-inline') Not Found
 
         div(class='row row-margin')
           div(class='col-12')
             div(class='key d-inline font-weight-bold') Institutions : 
-            each val, index in document.metadata.institutions
-              div(class='value d-block') #{(index + 1)} #{val}
+            if document.metadata.institutions.length > 0
+              each val, index in document.metadata.institutions
+                div(class='value d-block') #{(index + 1)} #{val}
+            else
+                div(class='value d-inline') Not Found
 
         div(class='row row-margin')
           div(class='col-12')
             div(class='key d-inline font-weight-bold') Funders : 
-            div(class='value d-inline') #{document.metadata.funders}
+            if document.metadata.funders.length > 0
+              div(class='value d-inline') #{document.metadata.funders}
+            else
+              div(class='value d-inline') Not found
 
         div(class='row crud-button-action')
           div(class='col-6 text-center')
