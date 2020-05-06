@@ -11,6 +11,7 @@ block content
         div(class='row')
           div(class='col-12')
             form(role='form', action=root + route, method='post', style='max-width: 300px; margin: auto; text-align: center; margin-top:20px;')
+              input(type="hidden" id="g-recaptcha-response" name="g-recaptcha-response")
               if error
                 div(class='alert alert-warning' role='alert') #{error}
               if success
@@ -29,3 +30,4 @@ block content
             div(style='margin-top:5px;') Forgot your password? 
               a(href=root + 'forgotPassword') Reset it here
 
+  include ./captcha.pug
