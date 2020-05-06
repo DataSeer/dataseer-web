@@ -70,13 +70,15 @@ router.get('/signup', function(req, res) {
 
 router.post('/signup', function(req, res, next) {
   return checkCaptcha(req, function(err, data) {
-    if (err)
+    if (err || data.score < conf._reCAPTCHA_score_.limit) {
+      let error = typeof data === 'string' ? data : conf._reCAPTCHA_score_.error;
       return res.render('signup', {
         'route': 'signup',
         'root': conf.root,
-        'error': data,
+        'error': error,
         '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
       });
+    }
     if (typeof req.user !== 'undefined')
       return res.status(401).send('Your current role do not grant access to this part of website');
     if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
@@ -353,20 +355,11 @@ router.post(
     'failureFlash': true
   }),
   function(req, res) {
-    return checkCaptcha(req, function(err, data) {
-      if (err)
-        return res.render('signin', {
-          'route': 'signin',
-          'root': conf.root,
-          'error': data,
-          '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
-        });
-      return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
-        user.token = undefined;
-        return user.save(function(err) {
-          if (err) console.log('Error : token not deleted');
-          return res.redirect('./');
-        });
+    return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
+      user.token = undefined;
+      return user.save(function(err) {
+        if (err) console.log('Error : token not deleted');
+        return res.redirect('./');
       });
     });
   }
@@ -424,10 +417,6 @@ function checkCaptcha(req, cb) {
   // Hitting GET request to the URL, Google will respond with success or error scenario.
   request(verificationUrl, function(error, response, body) {
     body = JSON.parse(body);
-    // Success will be true or false depending upon captcha validation.
-    if (body.success !== undefined && !body.success) {
-      return cb(true, 'Verification failed');
-    }
     return cb(false, body);
   });
 }

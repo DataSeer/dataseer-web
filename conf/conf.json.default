@@ -8,5 +8,9 @@
   "_reCAPTCHA_site_key_": {
     "public": "publicKey",
     "private": "privateKey"
-  }
+  },
+  "_reCAPTCHA_score_": {
+    "limit": 0.75,
+    "error": "Authentication failed (captcha score too low)"
+    }
 }
