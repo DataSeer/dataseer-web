@@ -58,8 +58,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/signup', function(req, res) {
-  if (typeof req.user !== 'undefined')
-    return res.status(401).send('Your current role do not grant access to this part of website');
+  if (typeof req.user !== 'undefined') return res.redirect('./myDocuments');
   res.render('signup', { 'route': 'signup', 'root': conf.root });
 });
 
