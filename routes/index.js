@@ -78,6 +78,15 @@ router.post('/signup', function(req, res, next) {
       'root': conf.root,
       'error': 'Password incorrect ! (At least 6 chars)'
     });
+  if (
+    typeof req.body.confirm_password !== 'string' ||
+    (!passwordRegExp.test(req.body.confirm_password) || req.body.password !== req.body.confirm_password)
+  )
+    return res.render('signup', {
+      'route': 'signup',
+      'root': conf.root,
+      'error': 'Passwords must be same !'
+    });
   return Accounts.register(
     new Accounts({ 'username': req.body.username, 'role': AccountsManager.roles.standard_user }),
     req.body.password,
