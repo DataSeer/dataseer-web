@@ -63,11 +63,15 @@ body {
 }
 
 #user-navbar {
+  display: table;
+}
+
+#user-navbar > #logo {
   background-image: url(../img/DataSeer-logo-75.png);
   background-repeat: no-repeat;
+  background-position: left center;
   min-height: 195px;
   min-width: 485px;
-  display: table;
 }
 
 #user-navbar > div {
