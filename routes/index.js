@@ -130,8 +130,7 @@ router.post('/signup', function(req, res, next) {
             'route': 'signin',
             'root': conf.root,
             'success': 'New account created !',
-            'username': req.body.username,
-            '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
+            'username': req.body.username
           });
       }
     );
@@ -278,8 +277,7 @@ router.post('/resetPassword', function(req, res) {
         return res.render('signin', {
           'route': 'signin',
           'success': 'your password has been updated successfully',
-          'root': './',
-          '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
+          'root': './'
         });
       });
     });
@@ -352,7 +350,6 @@ router.get('/signin', function(req, res) {
   return res.render('signin', {
     'route': 'signin',
     'root': conf.root,
-    '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public,
     'current_user': req.user,
     'error': error
   });
