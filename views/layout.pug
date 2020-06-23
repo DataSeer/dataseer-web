@@ -19,7 +19,8 @@ html
       div#user_id #{current_user.id}
       div#user_username #{current_user.username}
       div#user_role #{current_user.role.label}
-    div(id='user-navbar' class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
+    div(id='user-navbar' class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;padding-left: 25px;')
+      div(id='logo')
       div
         if current_user
           div(id='user' style='position:absolute; top:0px; right:10px; text-align:right;')
