@@ -147,9 +147,23 @@ router.post('/upload', function(req, res, next) {
           AccountsManager.roles.standard_user,
           AccountsManager.match.role
         )
-      )
-        return res.redirect(path.join('../documents', results.successes[0].document.id));
-      else
+      ) {
+        // case upload has worked
+        if (
+          results.successes.length > 0 &&
+          typeof results.successes[0].document === 'object' &&
+          typeof results.successes[0].document.id !== 'undefined'
+        )
+          return res.redirect(path.join('../documents', results.successes[0].document.id));
+        else
+          return res.render(path.join('backoffice', 'upload'), {
+            'route': 'backoffice/upload',
+            'root': conf.root,
+            'backoffice': true,
+            'results': results,
+            'current_user': req.user
+          });
+      } else
         return res.render(path.join('backoffice', 'upload'), {
           'route': 'backoffice/upload',
           'root': conf.root,
