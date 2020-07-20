@@ -57,6 +57,13 @@ router.get('/', function(req, res, next) {
   } else return res.redirect('./signin');
 });
 
+router.get('/privacy', function(req, res, next) {
+  return res.render('privacy', {
+    'route': 'privacy',
+    'root': conf.root
+  });
+});
+
 router.get('/signup', function(req, res) {
   if (typeof req.user !== 'undefined')
     return res.status(401).send('Your current role do not grant access to this part of website');
