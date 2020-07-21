@@ -22,12 +22,15 @@ block content
                   button.btn.btn-default.waves-effect.waves-light(type='submit') Search for documents
           div(class='row')
             div(class='col-12 text-center')
-              div(class='header count-list') #{documents.length} Result(s)
+              div(class='header')  All documents
           if  documents.length === 0
             div(class='row')
               div(class='col-12 text-center')
                 div(class='header') No data
           else
+            div(class='row')
+              div(class='col-12 text-center')
+                div(class='count-list') #{documents.length} result(s)
             div(class='row')
               div(class='col-12')
                 input#search(type='text' name='username' placeholder='Search for document (doi, pmid, title, email, etc)')

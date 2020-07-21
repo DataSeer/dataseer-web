@@ -23,10 +23,15 @@ router.get('/accounts', function(req, res, next) {
   )
     return res.status(401).send('Your current role do not grant access to this part of website');
   let limit = parseInt(req.query.limit),
+    role = AccountsManager.roles[req.query.role],
     error = req.flash('error'),
-    success = req.flash('success');
+    success = req.flash('success'),
+    query = {};
   if (isNaN(limit)) limit = 20;
-  Accounts.find({})
+  if (typeof role !== 'undefined') {
+    query['role.label'] = role.label;
+  }
+  Accounts.find(query)
     .limit(limit)
     .exec(function(err, post) {
       if (err) return next(err);

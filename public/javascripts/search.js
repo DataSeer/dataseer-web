@@ -29,5 +29,5 @@
     });
     return $('.count-list').text($('.list .row[data]:not(.hidden)').length + ' Result(s)');
   };
-  $('#search').change(filter);
+  document.getElementById('search').addEventListener('input', filter);
 })(jQuery);
