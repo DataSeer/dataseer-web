@@ -12,12 +12,11 @@
     });
     row.attr('data', txt);
   });
-  // On find_user keyup
-  $('#search').keyup(function() {
+  let filter = function() {
     // Declare variables
     let input = $(this),
       filter = input.val().toLowerCase();
-    return $('.list .row[data]').map(function() {
+    $('.list .row[data]').map(function() {
       let row = $(this),
         txt = row.attr('data');
       if (txt.length) {
@@ -28,5 +27,7 @@
         }
       }
     });
-  });
+    return $('.count-list').text($('.list .row[data]:not(.hidden)').length + ' Result(s)');
+  };
+  $('#search').change(filter);
 })(jQuery);

@@ -22,7 +22,7 @@ block content
                   button.btn.btn-default.waves-effect.waves-light(type='submit') Search for documents
           div(class='row')
             div(class='col-12 text-center')
-              div(class='header') Result(s)
+              div(class='header count-list') #{documents.length} Result(s)
           if  documents.length === 0
             div(class='row')
               div(class='col-12 text-center')
@@ -38,7 +38,7 @@ block content
               div(class='col-2') Journal
               div(class='col-4') Title
             each document, index in documents
-              div(class='row' style='margin-right:10px; margin-left:10px;' data='true')
+              div(class='row row-list' style='margin-right:10px; margin-left:10px;' data='true')
                 div(class='col-2')
                   a(href=root + 'documents/' + document._id) #{document._id}
                 if document.status === 'metadata'
