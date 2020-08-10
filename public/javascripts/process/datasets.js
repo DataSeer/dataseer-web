@@ -21,7 +21,11 @@
           'saved': 'saved',
           'valid': 'valid'
         },
-        defaultDataType = Object.keys(dataTypes)[0],
+      defaultDataType = Object.keys(dataTypes).sort(function(a, b) {
+        if (metadata[a].count < metadata[b].count) return 1;
+        else if (metadata[a].count > metadata[b].count) return -1;
+        else return 0;
+      })[0],
         defaultDataset = {
           'status': _status.modified,
           'id': '',
