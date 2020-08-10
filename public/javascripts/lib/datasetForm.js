@@ -450,17 +450,19 @@ const DatasetForm = function(events) {
         'href': encodeURI(self.metadata[self.dataset.subType].url)
       });
       elements['dataset.description'].value(
-        self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
+        self.metadata[self.dataset.subType].description
+          ? self.metadata[self.dataset.subType].description
+          : self.metadata[self.dataset.dataType].description
       );
       elements['dataset.bestDataFormatForSharing'].value(
         self.metadata[self.dataset.subType].bestDataFormatForSharing
           ? self.metadata[self.dataset.subType].bestDataFormatForSharing
-          : ''
+          : self.metadata[self.dataset.dataType].bestDataFormatForSharing
       );
       elements['dataset.mostSuitableRepositories'].value(
         self.metadata[self.dataset.subType].mostSuitableRepositories
           ? self.metadata[self.dataset.subType].mostSuitableRepositories
-          : ''
+          : self.metadata[self.dataset.dataType].mostSuitableRepositories
       );
       return true;
     } else return false;
