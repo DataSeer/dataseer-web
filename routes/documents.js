@@ -43,7 +43,7 @@ router.get('/', function(req, res, next) {
 /* GET SINGLE Document BY ID */
 router.get('/:id', function(req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.redirect('../signin?redirect=documents/'+req.params.id);
   return Documents.findById(req.params.id, function(err, post) {
     if (err) return next(err);
     if (post === null) return res.status(400).send('error 404');
