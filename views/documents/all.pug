@@ -2,6 +2,11 @@ extends ../layout
 
 block content
 
+  if error
+    div(class='alert alert-warning' role='alert') #{error}
+  if success
+    div(class='alert alert-success' role='alert') #{success}
+
   div(class='container-fluid')
     div(class='row')
       div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px;')
@@ -35,28 +40,75 @@ block content
               div(class='col-12')
                 input#search(type='text' name='username' placeholder='Search for document (doi, pmid, title, email, etc)')
             div(class='row head-list' style='margin-right:10px; margin-left:10px;')
-              div(class='col-2') Url
-              div(class='col-2') Status
-              div(class='col-2') Modified by
-              div(class='col-2') Journal
-              div(class='col-4') Title
+              div(class='col-12')
+                div(class='form-row')
+                  if current_user.role.label === 'curator'
+                    div(class='col-1') Url
+                    div(class='col-1') Status
+                    div(class='col-2') Modified by
+                    div(class='col-1') Organisation
+                    div(class='col-2') Journal
+                    div(class='col-3') Title
+                    div(class='col-2') Actions
+                  else
+                    div(class='col-2') Url
+                    div(class='col-2') Status
+                    div(class='col-2') Modified by
+                    div(class='col-2') Journal
+                    div(class='col-4') Title
             each document, index in documents
-              div(class='row row-list' style='margin-right:10px; margin-left:10px;' data='true')
-                div(class='col-2')
-                  a(href=root + 'documents/' + document._id) #{document._id}
-                if document.status === 'metadata'
-                  div(class='col-2') Metadata validation
-                else if document.status === 'datasets'
-                  div(class='col-2') Datasets validation
-                else if document.status === 'finish'
-                  div(class='col-2') Process finished
-                div(class='col-2')
-                  ul
-                    each role, i in document.modifiedBy
-                      each user, j in role
-                        li #{user} (#{i})
-                div(class='col-2') #{document.metadata.journal}
-                div(class='col-4') #{document.metadata.articleTitle}
+              div(class='row' style='margin-right:10px; margin-left:10px;' data='true')
+                div(class='col-12')
+                  form.accounts(role='form', action=root + route, method='post')
+                    div(class='form-row')
+                      if current_user.role.label === 'curator'
+                        div(class='col-1')
+                          a.document-link(href=root + 'documents/' + document._id) #{document._id}
+                          input.form-control(type='text' name='id' class='hidden' value=document._id)
+                        if document.status === 'metadata'
+                          div(class='col-1') Metadata validation
+                        else if document.status === 'datasets'
+                          div(class='col-1') Datasets validation
+                        else if document.status === 'finish'
+                          div(class='col-1') Process finished
+                        div(class='col-2')
+                          ul.modifiers
+                            each role, i in document.modifiedBy
+                              each user, j in role
+                                li.item #{user} (#{i})
+                        div(class='col-1')
+                          select.custom-select(name='organisation')
+                            if document.organisation === ''
+                              option(selected value='') None
+                            else
+                              option(value='') None
+                            each organisation, index in organisations
+                              if document.organisation === organisation.id
+                                option(selected value=organisation.id) #{organisation.name}
+                              else
+                                option(value=organisation.id) #{organisation.name}
+                        div(class='col-2') #{document.metadata.journal}
+                        div(class='col-3') #{document.metadata.articleTitle}
+                        div(class='col-2')
+                          button.btn.btn-default.waves-effect.waves-light(type='submit' name='update') Update
+                      else
+                        div(class='col-2')
+                          a.document-link(href=root + 'documents/' + document._id) #{document._id}
+                          input.form-control(type='text' name='id' class='hidden' value=document._id)
+                        if document.status === 'metadata'
+                          div(class='col-2') Metadata validation
+                        else if document.status === 'datasets'
+                          div(class='col-2') Datasets validation
+                        else if document.status === 'finish'
+                          div(class='col-2') Process finished
+                        div(class='col-2')
+                          ul.modifiers
+                            each role, i in document.modifiedBy
+                              each user, j in role
+                                li.item #{user} (#{i})
+                        div(class='col-2') #{document.metadata.journal}
+                        div(class='col-4') #{document.metadata.articleTitle}
+
 
           div(class='row')
             div(class='col-12' style='margin-top:20px;')

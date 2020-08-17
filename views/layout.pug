@@ -48,6 +48,9 @@ html
               if current_user.role.label === 'curator'
                 li
                   a(href=root + 'backoffice/accounts' class=(route === 'backoffice/accounts') ? 'nav active' : 'nav') Accounts
+              if current_user.role.label === 'curator'
+                li
+                  a(href=root + 'backoffice/organisations' class=(route === 'backoffice/organisations') ? 'nav active' : 'nav') Organisations
               li
                 a(href=root + 'settings' class=(route === 'settings') ? 'nav active' : 'nav') Settings
               li
