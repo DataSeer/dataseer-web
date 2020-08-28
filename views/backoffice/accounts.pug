@@ -74,10 +74,10 @@ block content
                         else
                           option(value='') None
                         each organisation, index in organisations
-                          if account.organisation === organisation.id
-                            option(selected value=organisation.id) #{organisation.name}
+                          if account.organisation === organisation.name
+                            option(selected value=organisation.name) #{organisation.name}
                           else
-                            option(value=organisation.id) #{organisation.name}
+                            option(value=organisation.name) #{organisation.name}
                     div(class='col-3')
                       button.btn.btn-default.waves-effect.waves-light(type='submit' name='update') Update
 

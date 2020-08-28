@@ -83,10 +83,10 @@ block content
                             else
                               option(value='') None
                             each organisation, index in organisations
-                              if document.organisation === organisation.id
-                                option(selected value=organisation.id) #{organisation.name}
+                              if document.organisation === organisation.name
+                                option(selected value=organisation.name) #{organisation.name}
                               else
-                                option(value=organisation.id) #{organisation.name}
+                                option(value=organisation.name) #{organisation.name}
                         div(class='col-2') #{document.metadata.journal}
                         div(class='col-3') #{document.metadata.articleTitle}
                         div(class='col-2')

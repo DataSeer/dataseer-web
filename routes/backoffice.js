@@ -231,14 +231,21 @@ let updateOrganisation = function(req, res, next) {
           req.flash('error', err.message);
           return res.redirect('./organisations');
         }
+        let oldValue = organisation.name;
         organisation.name = req.body.name;
         return organisation.save(function(err) {
           if (err) {
             req.flash('error', err.message);
             return res.redirect('./organisations');
           }
-          req.flash('success', 'Organisation "' + organisation.name + '" have been successfully updated');
-          return res.redirect('./organisations');
+          return updateAccountsAndDocuments(oldValue, organisation.name, function(err) {
+            if (err) {
+              req.flash('error', err.message);
+              return res.redirect('./organisations');
+            }
+            req.flash('success', 'Organisation with name "' + organisation.name + '" has been successfully updated.');
+            return res.redirect('./organisations');
+          });
         });
       }
     );
@@ -279,48 +286,47 @@ let updateOrganisation = function(req, res, next) {
         req.flash('error', err.message);
         return res.redirect('./organisations');
       }
-      return Accounts.find({ 'organisation': req.body._id }).exec(function(err, accounts) {
-        return async.eachSeries(
-          accounts,
-          function(account, callback) {
-            account.organisation = '';
-            account.save(function(err) {
-              if (err) return callback(err);
-              return callback();
-            });
-          },
-          function(err) {
-            if (err) {
-              req.flash('error', err.message);
-              return res.redirect('./organisations');
-            }
-            return Documents.find({ 'organisation': req.body._id }).exec(function(err, documents) {
-              if (err) {
-                req.flash('error', err.message);
-                return res.redirect('./organisations');
-              }
-              return async.eachSeries(
-                documents,
-                function(doc, callback) {
-                  doc.organisation = '';
-                  doc.save(function(err) {
-                    if (err) return callback(err);
-                    return callback();
-                  });
-                },
-                function(err) {
-                  if (err) {
-                    req.flash('error', err.message);
-                    return res.redirect('./organisations');
-                  }
-                  req.flash('success', 'Organisation with name "' + req.body.name + '" has been successfully removed.');
-                  return res.redirect('./organisations');
-                }
-              );
-            });
-          }
-        );
+      return updateAccountsAndDocuments(organisation.name, '', function(err) {
+        if (err) {
+          req.flash('error', err.message);
+          return res.redirect('./organisations');
+        }
+        req.flash('success', 'Organisation with name "' + organisation.name + '" has been successfully removed.');
+        return res.redirect('./organisations');
       });
+    });
+  },
+  updateAccountsAndDocuments = function(oldValue, newValue, cb) {
+    return Accounts.find({ 'organisation': oldValue }).exec(function(err, accounts) {
+      return async.eachSeries(
+        accounts,
+        function(account, callback) {
+          account.organisation = newValue;
+          account.save(function(err) {
+            if (err) return callback(err);
+            return callback();
+          });
+        },
+        function(err) {
+          if (err) return cb(err);
+          return Documents.find({ 'organisation': oldValue }).exec(function(err, documents) {
+            if (err) return cb(err);
+            return async.eachSeries(
+              documents,
+              function(doc, callback) {
+                doc.organisation = newValue;
+                doc.save(function(err) {
+                  if (err) return callback(err);
+                  return callback();
+                });
+              },
+              function(err) {
+                return cb(err);
+              }
+            );
+          });
+        }
+      );
     });
   },
   updateAccount = function(req, res, next) {

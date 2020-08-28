@@ -24,7 +24,7 @@ html
       div
         if current_user
           div(id='user' style='position:absolute; top:0px; right:10px; text-align:right;')
-            label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label})
+            label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label}, #{current_user.organisation})
         else
           div(id='user' style='position:absolute; top:0px; right:25px; text-align:right;')
             label(style='font-size:small;') 
