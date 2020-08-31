@@ -12,6 +12,14 @@ body {
   text-decoration: underline;
 }
 
+.list a {
+  max-width: 100%;
+  width: 100%;
+  display: inline-block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
 .row[data] ul {
   list-style: none;
   padding: 0px;

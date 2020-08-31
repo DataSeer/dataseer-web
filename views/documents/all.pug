@@ -2,6 +2,7 @@ extends ../layout
 
 block content
 
+  include ../functions/format.pug
   if error
     div(class='alert alert-warning' role='alert') #{error}
   if success
@@ -44,14 +45,16 @@ block content
                 div(class='form-row')
                   if current_user.role.label === 'curator'
                     div(class='col-1') Url
+                    div(class='col-1') Date uploaded
                     div(class='col-1') Status
                     div(class='col-2') Modified by
                     div(class='col-1') Organisation
                     div(class='col-2') Journal
                     div(class='col-3') Title
-                    div(class='col-2') Actions
+                    div(class='col-1') Actions
                   else
-                    div(class='col-2') Url
+                    div(class='col-1') Url
+                    div(class='col-1') Date uploaded
                     div(class='col-2') Status
                     div(class='col-2') Modified by
                     div(class='col-2') Journal
@@ -63,8 +66,9 @@ block content
                     div(class='form-row')
                       if current_user.role.label === 'curator'
                         div(class='col-1')
-                          a.document-link(href=root + 'documents/' + document._id) #{document._id}
+                          a.document-link(href=root + 'documents/' + document._id) #{formatUrl(document._id)}
                           input.form-control(type='text' name='id' class='hidden' value=document._id)
+                        div(class='col-1') #{formatDate(document.uploaded_at)}
                         if document.status === 'metadata'
                           div(class='col-1') Metadata validation
                         else if document.status === 'datasets'
@@ -89,12 +93,13 @@ block content
                                 option(value=organisation.name) #{organisation.name}
                         div(class='col-2') #{document.metadata.journal}
                         div(class='col-3') #{document.metadata.articleTitle}
-                        div(class='col-2')
+                        div(class='col-1')
                           button.btn.btn-default.waves-effect.waves-light(type='submit' name='update') Update
                       else
-                        div(class='col-2')
+                        div(class='col-1')
                           a.document-link(href=root + 'documents/' + document._id) #{document._id}
                           input.form-control(type='text' name='id' class='hidden' value=document._id)
+                        div(class='col-1') #{formatDate(document.uploaded_at)}
                         if document.status === 'metadata'
                           div(class='col-2') Metadata validation
                         else if document.status === 'datasets'
@@ -108,7 +113,6 @@ block content
                                 li.item #{user} (#{i})
                         div(class='col-2') #{document.metadata.journal}
                         div(class='col-4') #{document.metadata.articleTitle}
-
 
           div(class='row')
             div(class='col-12' style='margin-top:20px;')
