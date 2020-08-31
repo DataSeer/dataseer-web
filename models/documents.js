@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 let DocumentsSchema = new mongoose.Schema({
   '_id': String,
   'modifiedBy': Object,
+  'organisation': String,
   'metadata': Object,
   'datasets': Object,
   'source': String,

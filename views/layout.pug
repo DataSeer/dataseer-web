@@ -24,7 +24,10 @@ html
       div
         if current_user
           div(id='user' style='position:absolute; top:0px; right:10px; text-align:right;')
-            label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label})
+            if (current_user.organisation !== '')
+              label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label}, #{current_user.organisation})
+            else
+              label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label}, None)
         else
           div(id='user' style='position:absolute; top:0px; right:25px; text-align:right;')
             label(style='font-size:small;') 
@@ -48,6 +51,9 @@ html
               if current_user.role.label === 'curator'
                 li
                   a(href=root + 'backoffice/accounts' class=(route === 'backoffice/accounts') ? 'nav active' : 'nav') Accounts
+              if current_user.role.label === 'curator'
+                li
+                  a(href=root + 'backoffice/organisations' class=(route === 'backoffice/organisations') ? 'nav active' : 'nav') Organisations
               li
                 a(href=root + 'settings' class=(route === 'settings') ? 'nav active' : 'nav') Settings
               li

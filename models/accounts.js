@@ -7,6 +7,7 @@ const mongoose = require('mongoose'),
 
 const Accounts = new Schema({
   'role': Object,
+  'organisation': String,
   'token': String
 });
 
