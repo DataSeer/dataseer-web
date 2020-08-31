@@ -355,7 +355,15 @@ body > div > div > div.row > div:nth-child(1) {
 }
 
 #datasets_validation {
-  width: 100%;
+  display: inline-block;
+  width: 49.5%;
+  margin-top: 15px;
+}
+
+#previous_step {
+  margin-right: 1%;
+  display: inline-block;
+  width: 49.5%;
   margin-top: 15px;
 }
 

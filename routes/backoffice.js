@@ -23,10 +23,15 @@ router.get('/accounts', function(req, res, next) {
   )
     return res.status(401).send('Your current role do not grant access to this part of website');
   let limit = parseInt(req.query.limit),
+    role = AccountsManager.roles[req.query.role],
     error = req.flash('error'),
-    success = req.flash('success');
+    success = req.flash('success'),
+    query = {};
   if (isNaN(limit)) limit = 20;
-  Accounts.find({})
+  if (typeof role !== 'undefined') {
+    query['role.label'] = role.label;
+  }
+  Accounts.find(query)
     .limit(limit)
     .exec(function(err, post) {
       if (err) return next(err);
@@ -141,13 +146,36 @@ router.post('/upload', function(req, res, next) {
           'current_user': req.user
         });
       }
-      return res.render(path.join('backoffice', 'upload'), {
-        'route': 'backoffice/upload',
-        'root': conf.root,
-        'backoffice': true,
-        'results': results,
-        'current_user': req.user
-      });
+      if (
+        AccountsManager.checkAccountAccessRight(
+          req.user,
+          AccountsManager.roles.standard_user,
+          AccountsManager.match.role
+        )
+      ) {
+        // case upload has worked
+        if (
+          results.successes.length > 0 &&
+          typeof results.successes[0].document === 'object' &&
+          typeof results.successes[0].document.id !== 'undefined'
+        )
+          return res.redirect(path.join('../documents', results.successes[0].document.id));
+        else
+          return res.render(path.join('backoffice', 'upload'), {
+            'route': 'backoffice/upload',
+            'root': conf.root,
+            'backoffice': true,
+            'results': results,
+            'current_user': req.user
+          });
+      } else
+        return res.render(path.join('backoffice', 'upload'), {
+          'route': 'backoffice/upload',
+          'root': conf.root,
+          'backoffice': true,
+          'results': results,
+          'current_user': req.user
+        });
     }
   );
 });

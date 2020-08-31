@@ -19,10 +19,15 @@ block content
                 input.form-control(type='email', name='username', placeholder='mail address' value=username)
               .form-group
                 input.form-control(type='password', name='password', placeholder='password')
+              .form-group
+                input.form-control(type='hidden', name='redirect' value=redirect)
               .btn-group
                 button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Sign in to Dataseer
 
         div(class='row')
-          div(class='col-12 my-5' style='margin-top:20px;margin: auto; text-align: center; ') No account yet? 
-            a(href=root + 'signup') Open one here
+          div(class='col-12 my-5' style='margin-top:20px;margin: auto; text-align: center; ')
+            div No account yet? 
+              a(href=root + 'signup') Open one here
+            div(style='margin-top:5px;') Forgot your password? 
+              a(href=root + 'forgotPassword') Reset it here
 

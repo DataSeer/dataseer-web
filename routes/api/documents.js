@@ -16,7 +16,7 @@ router.get('/', function(req, res, next) {
     pmid = req.query.pmid,
     query = {};
   if (typeof doi !== 'undefined') query['doi'] = doi;
-  if (typeof doi !== 'undefined') query['pmid'] = pmid;
+  if (typeof pmid !== 'undefined') query['pmid'] = pmid;
   if (isNaN(limit)) limit = 20;
   Documents.find(query)
     .limit(limit)

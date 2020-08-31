@@ -21,7 +21,11 @@
           'saved': 'saved',
           'valid': 'valid'
         },
-        defaultDataType = Object.keys(dataTypes)[0],
+      defaultDataType = Object.keys(dataTypes).sort(function(a, b) {
+        if (metadata[a].count < metadata[b].count) return 1;
+        else if (metadata[a].count > metadata[b].count) return -1;
+        else return 0;
+      })[0],
         defaultDataset = {
           'status': _status.modified,
           'id': '',
@@ -359,7 +363,7 @@
 
       // On datasets_validation click
       $('#datasets_validation').click(function() {
-        if (checkStatusOfDatasets()) {
+        if (checkStatusOfDatasets() || user.role === 'curator') {
           currentDocument.status = MongoDB.getNextStatus(currentDocument);
           currentDocument.source = documentView.source();
           return MongoDB.updateDocument(currentDocument, user, function(err, res) {

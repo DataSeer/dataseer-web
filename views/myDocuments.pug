@@ -10,17 +10,21 @@ block content
         div(class='list')
           div(class='row')
             div(class='col-12 text-center' style='margin-top:10px;')
-              div(class='header') My documents
+              div(class='header') My documents 
+          if documents.length !== 0
+            div(class='row')
+              div(class='col-12 text-center')
+                div(class='count-list') #{documents.length} Result(s)
           div(class='row')
             div(class='col-12')
               input#search(type='text' name='username' placeholder='Search for document (doi, pmid, title, email, etc)')
           div(class='row head-list' style='margin-right:10px; margin-left:10px;')
             div(class='col-1') Url
             div(class='col-1') Uploaded at
-            div(class='col-1') Status
+            div(class='col-2') Status
             div(class='col-2') Modified by
-            div(class='col-2') Journal
-            div(class='col-5') Title
+            div(class='col-2') 
+            div(class='col-4') Title
           if  documents.length === 0
             div(class='row')
               div(class='col-12 text-center')
@@ -32,18 +36,18 @@ block content
                    a(href=root + 'documents/' + document._id) #{formatUrl(document._id)}
                 div(class='col-1') #{formatDate(document.uploaded_at)}
                 if document.status === 'metadata'
-                  div(class='col-1') Metadata validation
+                  div(class='col-2') Metadata validation
                 else if document.status === 'datasets'
-                  div(class='col-1') Datasets validation
+                  div(class='col-2') Datasets validation
                 else if document.status === 'finish'
-                  div(class='col-1') Process finished
+                  div(class='col-2') Process finished
                 div(class='col-2')
                   ul
                     each role, i in document.modifiedBy
                       each user, j in role
                         li #{user} (#{i})
                 div(class='col-2') #{document.metadata.journal}
-                div(class='col-5') #{document.metadata.articleTitle}
+                div(class='col-4') #{document.metadata.articleTitle}
 
           div(class='row')
             div(class='col-12' style='margin-top:20px;')

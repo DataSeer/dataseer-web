@@ -58,8 +58,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/signup', function(req, res) {
-  if (typeof req.user !== 'undefined')
-    return res.status(401).send('Your current role do not grant access to this part of website');
+  if (typeof req.user !== 'undefined') return res.redirect('./myDocuments');
   res.render('signup', { 'route': 'signup', 'root': conf.root });
 });
 
@@ -77,6 +76,15 @@ router.post('/signup', function(req, res, next) {
       'route': 'signup',
       'root': conf.root,
       'error': 'Password incorrect ! (At least 6 chars)'
+    });
+  if (
+    typeof req.body.confirm_password !== 'string' ||
+    (!passwordRegExp.test(req.body.confirm_password) || req.body.password !== req.body.confirm_password)
+  )
+    return res.render('signup', {
+      'route': 'signup',
+      'root': conf.root,
+      'error': 'Passwords must be same !'
     });
   return Accounts.register(
     new Accounts({ 'username': req.body.username, 'role': AccountsManager.roles.standard_user }),
@@ -315,13 +323,15 @@ router.post('/settings', function(req, res) {
 });
 
 router.get('/signin', function(req, res) {
-  let errors = req.flash('error');
-  let error = Array.isArray(errors) && errors.length > 0 ? 'Credentials incorrect !' : undefined;
+  let errors = req.flash('error'),
+    redirect = typeof req.query.redirect !== 'undefined' ? req.query.redirect : undefined,
+    error = Array.isArray(errors) && errors.length > 0 ? 'Credentials incorrect !' : undefined;
   return res.render('signin', {
     'route': 'signin',
     'root': conf.root,
     'current_user': req.user,
-    'error': error
+    'error': error,
+    'redirect': redirect
   });
 });
 
@@ -332,11 +342,13 @@ router.post(
     'failureFlash': true
   }),
   function(req, res) {
+    let redirect = typeof req.body.redirect !== 'undefined' ? req.body.redirect : undefined;
     return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
       user.token = undefined;
       return user.save(function(err) {
         if (err) console.log('Error : token not deleted');
-        return res.redirect('./');
+        if (!redirect) return res.redirect('./');
+        else return res.redirect('./' + redirect);
       });
     });
   }
