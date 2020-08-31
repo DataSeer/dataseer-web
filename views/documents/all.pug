@@ -43,24 +43,29 @@ block content
               div(class='col-2') Modified by
               div(class='col-2') Journal
               div(class='col-4') Title
-            each document, index in documents
-              div(class='row' style='margin-right:10px; margin-left:10px;' data='true')
-                div(class='col-1')
-                   a(href=root + 'documents/' + document._id) #{document._id}
-                div(class='col-1') #{formatDate(document.uploaded_at)}
-                if document.status === 'metadata'
-                  div(class='col-2') Metadata validation
-                else if document.status === 'datasets'
-                  div(class='col-2') Datasets validation
-                else if document.status === 'finish'
-                  div(class='col-2') Process finished
-                div(class='col-2')
-                  ul
-                    each role, i in document.modifiedBy
-                      each user, j in role
-                        li #{user} (#{i})
-                div(class='col-2') #{document.metadata.journal}
-                div(class='col-4') #{document.metadata.articleTitle}
+            if documents.length === 0
+              div(class='row')
+                div(class='col-12 text-center')
+                  div(class='header') No data
+            else
+              each document, index in documents
+                div(class='row' style='margin-right:10px; margin-left:10px;' data='true')
+                  div(class='col-1')
+                     a(href=root + 'documents/' + document._id) #{document._id}
+                  div(class='col-1') #{formatDate(document.uploaded_at)}
+                  if document.status === 'metadata'
+                    div(class='col-2') Metadata validation
+                  else if document.status === 'datasets'
+                    div(class='col-2') Datasets validation
+                  else if document.status === 'finish'
+                    div(class='col-2') Process finished
+                  div(class='col-2')
+                    ul
+                      each role, i in document.modifiedBy
+                        each user, j in role
+                          li #{user} (#{i})
+                  div(class='col-2') #{document.metadata.journal}
+                  div(class='col-4') #{document.metadata.articleTitle}
 
           div(class='row')
             div(class='col-12' style='margin-top:20px;')
