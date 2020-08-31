@@ -33,7 +33,7 @@ block content
             each document, index in documents
               div(class='row' style='margin-right:10px; margin-left:10px;' data='true')
                 div(class='col-1')
-                   a(href=root + 'documents/' + document._id) #{formatUrl(document._id)}
+                  a.document-link(href=root + 'documents/' + document._id) #{formatUrl(document._id)}
                 div(class='col-1') #{formatDate(document.uploaded_at)}
                 if document.status === 'metadata'
                   div(class='col-2') Metadata validation

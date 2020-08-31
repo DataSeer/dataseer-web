@@ -66,7 +66,7 @@ block content
                     div(class='form-row')
                       if current_user.role.label === 'curator'
                         div(class='col-1')
-                          a.document-link(href=root + 'documents/' + document._id) #{document._id}
+                          a.document-link(href=root + 'documents/' + document._id) #{formatUrl(document._id)}
                           input.form-control(type='text' name='id' class='hidden' value=document._id)
                         div(class='col-1') #{formatDate(document.uploaded_at)}
                         if document.status === 'metadata'
