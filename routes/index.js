@@ -11,6 +11,7 @@ const express = require('express'),
   Upload = require('../lib/upload.js'),
   AccountsManager = require('../lib/accountsManager.js'),
   Documents = require('../models/documents.js'),
+  Organisations = require('../models/organisations.js'),
   Accounts = require('../models/accounts.js');
 
 const passwordRegExp = new RegExp('[\\w^\\w]{6,}'),
@@ -57,60 +58,67 @@ router.get('/', function(req, res, next) {
   } else return res.redirect('./signin');
 });
 
-router.get('/signup', function(req, res) {
+router.get('/signup', function(req, res, next) {
   if (typeof req.user !== 'undefined') return res.redirect('./myDocuments');
-  res.render('signup', { 'route': 'signup', 'root': conf.root });
+  return Organisations.find({}).exec(function(err, organisations) {
+    if (err) return next(err);
+    let error = req.flash('error'),
+      success = req.flash('success');
+    return res.render('signup', {
+      'route': 'signup',
+      'root': conf.root,
+      'organisations': organisations,
+      'error': Array.isArray(error) && error.length > 0 ? error : undefined,
+      'success': Array.isArray(success) && success.length > 0 ? success : undefined
+    });
+  });
 });
 
 router.post('/signup', function(req, res, next) {
   if (typeof req.user !== 'undefined')
     return res.status(401).send('Your current role do not grant access to this part of website');
-  if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
-    return res.render('signup', {
-      'route': 'signup',
-      'root': conf.root,
-      'error': 'Email incorrect !'
-    });
-  if (typeof req.body.password !== 'string' || !passwordRegExp.test(req.body.password))
-    return res.render('signup', {
-      'route': 'signup',
-      'root': conf.root,
-      'error': 'Password incorrect ! (At least 6 chars)'
-    });
+  if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username)) {
+    req.flash('error', 'Email incorrect !');
+    return res.redirect('./signup');
+  }
+  if (typeof req.body.password !== 'string' || !passwordRegExp.test(req.body.password)) {
+    req.flash('error', 'Password incorrect ! (At least 6 chars)');
+    return res.redirect('./signup');
+  }
   if (
     typeof req.body.confirm_password !== 'string' ||
     (!passwordRegExp.test(req.body.confirm_password) || req.body.password !== req.body.confirm_password)
-  )
-    return res.render('signup', {
-      'route': 'signup',
-      'root': conf.root,
-      'error': 'Passwords must be same !'
-    });
+  ) {
+    req.flash('error', 'Passwords must be same !');
+    return res.redirect('./signup');
+  }
+  if (typeof req.body.organisation !== 'string') {
+    req.flash('error', 'Organisation incorrect !');
+    return res.redirect('./signup');
+  }
   return Accounts.register(
-    new Accounts({ 'username': req.body.username, 'role': AccountsManager.roles.standard_user }),
+    new Accounts({
+      'username': req.body.username,
+      'role': AccountsManager.roles.standard_user,
+      organisation: req.body.organisation
+    }),
     req.body.password,
     function(err) {
       if (err && err.name === 'UserExistsError') {
         console.log(err);
-        return res.render('signup', {
-          'route': 'signup',
-          'root': conf.root,
-          'error': 'A user with the given email address is already registered'
-        });
+        req.flash('error', 'A user with the given email address is already registered');
+        return res.redirect('./signup');
       } else if (err) {
         console.log(err);
-        return res.render('signup', {
-          'route': 'signup',
-          'root': conf.root,
-          'error': 'Sorry, an error has occured. Try to signup later, or send an email to ' + smtpConf.auth.user
-        });
-      } else
-        return res.render('signin', {
-          'route': 'signin',
-          'root': conf.root,
-          'success': 'New account created !',
-          'username': req.body.username
-        });
+        req.flash(
+          'error',
+          'Sorry, an error has occured. Try to signup later, or send an email to ' + smtpConf.auth.user
+        );
+        return res.redirect('./signup');
+      } else {
+        req.flash('success', 'New account created !');
+        return res.redirect('./signin');
+      }
     }
   );
 });
@@ -252,11 +260,8 @@ router.post('/resetPassword', function(req, res) {
             'token': req.body.token,
             'username': req.body.username
           });
-        return res.render('signin', {
-          'route': 'signin',
-          'success': 'your password has been updated successfully',
-          'root': './'
-        });
+        req.flash('success', 'your password has been updated successfully');
+        return res.redirect('./signin');
       });
     });
   });
@@ -324,6 +329,7 @@ router.post('/settings', function(req, res) {
 
 router.get('/signin', function(req, res) {
   let errors = req.flash('error'),
+    success = req.flash('success'),
     redirect = typeof req.query.redirect !== 'undefined' ? req.query.redirect : undefined,
     error = Array.isArray(errors) && errors.length > 0 ? 'Credentials incorrect !' : undefined;
   return res.render('signin', {
@@ -331,6 +337,7 @@ router.get('/signin', function(req, res) {
     'root': conf.root,
     'current_user': req.user,
     'error': error,
+    'success': Array.isArray(success) && success.length > 0 ? success : undefined,
     'redirect': redirect
   });
 });
