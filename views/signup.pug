@@ -22,6 +22,13 @@ block content
                 input.form-control(type='password', name='password', placeholder='password')
               .form-group
                 input.form-control(type='password', name='confirm_password', placeholder='confirm password')
+              .form-group
+                label(for='organisation') Select your organisation
+                select.custom-select(name='organisation')
+                  option(selected value='') None
+                  if organisations
+                    each organisation, index in organisations
+                      option(value=organisation.name) #{organisation.name}
               .btn-group
                 button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Sign up to Dataseer
 

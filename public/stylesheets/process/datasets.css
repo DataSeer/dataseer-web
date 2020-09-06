@@ -277,7 +277,7 @@ body > div > div > div.row > div:nth-child(1) {
 }
 
 #document-view tei s.selected {
-  background-color: rgb(0, 123, 255);
+  background-color: rgb(2, 116, 190);
   color: white;
   cursor: pointer;
 }

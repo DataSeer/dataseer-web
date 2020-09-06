@@ -1,15 +1,25 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,300');
+
 body {
   margin-left: 50px;
   margin-right: 50px;
   margin-top: 20px;
   margin-bottom: 20px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
-  color: #063046;
+  font: 14px "Open Sans", "Lucida Grande", Helvetica, sans-serif;
+  color: #3a3a3a;
   background-color: lightgray;
 }
 
 .list .head-list {
   text-decoration: underline;
+}
+
+.list a {
+  max-width: 100%;
+  width: 100%;
+  display: inline-block;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .row[data] ul {
@@ -21,11 +31,40 @@ body {
   margin-bottom: 5px;
 }
 
-.accounts form {
+#new-organisation > input[type="text"] {
+  margin-right: 15px;
+}
+
+.document-link {
+  overflow: hidden;
+  max-width: 100%;
+  display: block;
+  text-overflow: ellipsis;
+}
+
+.modifiers {
+  margin: 0px;
+}
+
+.modifiers > li.item {
+  margin-top: 0px !important;
+  overflow: hidden;
+  max-width: 100%;
+  display: block;
+  text-overflow: ellipsis;
+}
+
+.accounts, .documents {
   max-width: auto;
 }
 
-.accounts .form-group {
+.accounts button[type="submit"],
+.documents button[type="submit"],
+.organisations button[type="submit"] {
+  margin-right: 15px;
+}
+
+.accounts .form-group, .documents .form-group {
   display: inline-block;
   width: auto;
   margin: 0;
@@ -67,15 +106,18 @@ body {
 }
 
 #user-navbar > #logo {
-  background-image: url(../img/DataSeer-logo-75.png);
+  /*background-image: url(../img/DataSeer-logo-75.png);*/
+  background-image: url(../img/DataSeer-logo-up-beta-75.png);
   background-repeat: no-repeat;
   background-position: left center;
-  min-height: 195px;
-  min-width: 485px;
+  /*min-height: 195px;*/
+  min-height: 165px;
+  max-height: 165px;
+  /*min-width: 485px;*/
 }
 
 #user-navbar > div {
-  height: 195px;
+  height: 165px;
   padding: 15px;
   text-align: center;
 }
@@ -151,6 +193,13 @@ body {
   background-color: white;
 }
 
+/*
+Color variants 
+0274BE
+184D7E
+1E3945
+*/
+
 .btn-primary {
   background-color: #184D7E;
   border-color: #184D7E;
@@ -182,4 +231,8 @@ a.nav {
 a.nav.active {
   color: #184D7E;
   font-weight: bold;
+}
+
+a {
+  color: #184D7E;
 }

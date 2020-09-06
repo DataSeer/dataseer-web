@@ -12,6 +12,7 @@ const request = require('request'),
   Upload = require('../lib/upload.js'),
   AccountsManager = require('../lib/accountsManager.js'),
   Documents = require('../models/documents.js'),
+  Organisations = require('../models/organisations.js'),
   Accounts = require('../models/accounts.js');
 
 const passwordRegExp = new RegExp('[\\w^\\w]{6,}'),
@@ -58,17 +59,26 @@ router.get('/', function(req, res, next) {
   } else return res.redirect('./signin');
 });
 
-router.get('/signup', function(req, res) {
-  if (typeof req.user !== 'undefined')
-    return res.status(401).send('Your current role do not grant access to this part of website');
-  res.render('signup', {
-    'route': 'signup',
-    'root': conf.root,
-    '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
+router.get('/signup', function(req, res, next) {
+  if (typeof req.user !== 'undefined') 
+    return res.redirect('./myDocuments');
+  return Organisations.find({}).exec(function(err, organisations) {
+    if (err) return next(err);
+    let error = req.flash('error'),
+      success = req.flash('success');
+    return res.render('signup', {
+      'route': 'signup',
+      'root': conf.root,
+      '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public,
+      'organisations': organisations,
+      'error': Array.isArray(error) && error.length > 0 ? error : undefined,
+      'success': Array.isArray(success) && success.length > 0 ? success : undefined
+    });
   });
 });
 
 router.post('/signup', function(req, res, next) {
+
   return checkCaptcha(req, function(err, data) {
     if (err || data.score < conf._reCAPTCHA_score_.limit) {
       let error = typeof data === 'string' ? data : conf._reCAPTCHA_score_.error;
@@ -79,6 +89,7 @@ router.post('/signup', function(req, res, next) {
         '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
       });
     }
+
     if (typeof req.user !== 'undefined')
       return res.status(401).send('Your current role do not grant access to this part of website');
     if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
@@ -105,8 +116,20 @@ router.post('/signup', function(req, res, next) {
         'error': 'Passwords must be same !',
         '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
       });
+    if (typeof req.body.organisation !== 'string') {
+     return res.render('signup', {
+        'route': 'signup',
+        'root': conf.root,
+        'error': 'Organisation incorrect !',
+        '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
+      });
+    }
     return Accounts.register(
-      new Accounts({ 'username': req.body.username, 'role': AccountsManager.roles.standard_user }),
+      new Accounts({ 
+        'username': req.body.username, 
+        'role': AccountsManager.roles.standard_user,
+        organisation: req.body.organisation 
+      }),
       req.body.password,
       function(err) {
         if (err && err.name === 'UserExistsError') {
@@ -274,11 +297,8 @@ router.post('/resetPassword', function(req, res) {
             'token': req.body.token,
             'username': req.body.username
           });
-        return res.render('signin', {
-          'route': 'signin',
-          'success': 'your password has been updated successfully',
-          'root': './'
-        });
+        req.flash('success', 'your password has been updated successfully');
+        return res.redirect('./signin');
       });
     });
   });
@@ -345,13 +365,17 @@ router.post('/settings', function(req, res) {
 });
 
 router.get('/signin', function(req, res) {
-  let errors = req.flash('error');
-  let error = Array.isArray(errors) && errors.length > 0 ? 'Credentials incorrect !' : undefined;
+  let errors = req.flash('error'),
+    success = req.flash('success'),
+    redirect = typeof req.query.redirect !== 'undefined' ? req.query.redirect : undefined,
+    error = Array.isArray(errors) && errors.length > 0 ? 'Credentials incorrect !' : undefined;
   return res.render('signin', {
     'route': 'signin',
     'root': conf.root,
     'current_user': req.user,
-    'error': error
+    'error': error,
+    'success': Array.isArray(success) && success.length > 0 ? success : undefined,
+    'redirect': redirect
   });
 });
 
@@ -362,11 +386,13 @@ router.post(
     'failureFlash': true
   }),
   function(req, res) {
+    let redirect = typeof req.body.redirect !== 'undefined' ? req.body.redirect : undefined;
     return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
       user.token = undefined;
       return user.save(function(err) {
         if (err) console.log('Error : token not deleted');
-        return res.redirect('./');
+        if (!redirect) return res.redirect('./');
+        else return res.redirect('./' + redirect);
       });
     });
   }
