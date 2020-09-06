@@ -2,7 +2,8 @@
  * @prettier
  */
 
-const express = require('express'),
+const request = require('request'),
+  express = require('express'),
   crypto = require('crypto'),
   nodemailer = require('nodemailer'),
   router = express.Router(),
@@ -59,7 +60,8 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/signup', function(req, res, next) {
-  if (typeof req.user !== 'undefined') return res.redirect('./myDocuments');
+  if (typeof req.user !== 'undefined') 
+    return res.redirect('./myDocuments');
   return Organisations.find({}).exec(function(err, organisations) {
     if (err) return next(err);
     let error = req.flash('error'),
@@ -67,6 +69,7 @@ router.get('/signup', function(req, res, next) {
     return res.render('signup', {
       'route': 'signup',
       'root': conf.root,
+      '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public,
       'organisations': organisations,
       'error': Array.isArray(error) && error.length > 0 ? error : undefined,
       'success': Array.isArray(success) && success.length > 0 ? success : undefined
@@ -75,52 +78,86 @@ router.get('/signup', function(req, res, next) {
 });
 
 router.post('/signup', function(req, res, next) {
-  if (typeof req.user !== 'undefined')
-    return res.status(401).send('Your current role do not grant access to this part of website');
-  if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username)) {
-    req.flash('error', 'Email incorrect !');
-    return res.redirect('./signup');
-  }
-  if (typeof req.body.password !== 'string' || !passwordRegExp.test(req.body.password)) {
-    req.flash('error', 'Password incorrect ! (At least 6 chars)');
-    return res.redirect('./signup');
-  }
-  if (
-    typeof req.body.confirm_password !== 'string' ||
-    (!passwordRegExp.test(req.body.confirm_password) || req.body.password !== req.body.confirm_password)
-  ) {
-    req.flash('error', 'Passwords must be same !');
-    return res.redirect('./signup');
-  }
-  if (typeof req.body.organisation !== 'string') {
-    req.flash('error', 'Organisation incorrect !');
-    return res.redirect('./signup');
-  }
-  return Accounts.register(
-    new Accounts({
-      'username': req.body.username,
-      'role': AccountsManager.roles.standard_user,
-      organisation: req.body.organisation
-    }),
-    req.body.password,
-    function(err) {
-      if (err && err.name === 'UserExistsError') {
-        console.log(err);
-        req.flash('error', 'A user with the given email address is already registered');
-        return res.redirect('./signup');
-      } else if (err) {
-        console.log(err);
-        req.flash(
-          'error',
-          'Sorry, an error has occured. Try to signup later, or send an email to ' + smtpConf.auth.user
-        );
-        return res.redirect('./signup');
-      } else {
-        req.flash('success', 'New account created !');
-        return res.redirect('./signin');
-      }
+
+  return checkCaptcha(req, function(err, data) {
+    if (err || data.score < conf._reCAPTCHA_score_.limit) {
+      let error = typeof data === 'string' ? data : conf._reCAPTCHA_score_.error;
+      return res.render('signup', {
+        'route': 'signup',
+        'root': conf.root,
+        'error': error,
+        '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
+      });
     }
-  );
+
+    if (typeof req.user !== 'undefined')
+      return res.status(401).send('Your current role do not grant access to this part of website');
+    if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username))
+      return res.render('signup', {
+        'route': 'signup',
+        'root': conf.root,
+        'error': 'Email incorrect !',
+        '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
+      });
+    if (typeof req.body.password !== 'string' || !passwordRegExp.test(req.body.password))
+      return res.render('signup', {
+        'route': 'signup',
+        'root': conf.root,
+        'error': 'Password incorrect ! (At least 6 chars)',
+        '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
+      });
+    if (
+      typeof req.body.confirm_password !== 'string' ||
+      (!passwordRegExp.test(req.body.confirm_password) || req.body.password !== req.body.confirm_password)
+    )
+      return res.render('signup', {
+        'route': 'signup',
+        'root': conf.root,
+        'error': 'Passwords must be same !',
+        '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
+      });
+    if (typeof req.body.organisation !== 'string') {
+     return res.render('signup', {
+        'route': 'signup',
+        'root': conf.root,
+        'error': 'Organisation incorrect !',
+        '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
+      });
+    }
+    return Accounts.register(
+      new Accounts({ 
+        'username': req.body.username, 
+        'role': AccountsManager.roles.standard_user,
+        organisation: req.body.organisation 
+      }),
+      req.body.password,
+      function(err) {
+        if (err && err.name === 'UserExistsError') {
+          console.log(err);
+          return res.render('signup', {
+            'route': 'signup',
+            'root': conf.root,
+            'error': 'A user with the given email address is already registered',
+            '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
+          });
+        } else if (err) {
+          console.log(err);
+          return res.render('signup', {
+            'route': 'signup',
+            'root': conf.root,
+            'error': 'Sorry, an error has occured. Try to signup later, or send an email to ' + smtpConf.auth.user,
+            '_reCAPTCHA_site_key_': conf._reCAPTCHA_site_key_.public
+          });
+        } else
+          return res.render('signin', {
+            'route': 'signin',
+            'root': conf.root,
+            'success': 'New account created !',
+            'username': req.body.username
+          });
+      }
+    );
+  });
 });
 
 router.get('/forgotPassword', function(req, res) {
@@ -390,6 +427,31 @@ router.get('/myDocuments', function(req, res) {
 
 function getRandomToken(length = 256) {
   return crypto.randomBytes(length).toString('hex');
+}
+
+function checkCaptcha(req, cb) {
+  // g-recaptcha-response is the key that browser will generate upon form submit.
+  // if its blank or null means user has not selected the captcha, so return the error.
+  if (
+    req.body['g-recaptcha-response'] === undefined ||
+    req.body['g-recaptcha-response'] === '' ||
+    req.body['g-recaptcha-response'] === null
+  ) {
+    return cb(true, 'Missing g-recaptcha-response');
+  }
+  // req.connection.remoteAddress will provide IP address of connected user.
+  var verificationUrl =
+    'https://www.google.com/recaptcha/api/siteverify?secret=' +
+    conf._reCAPTCHA_site_key_.private +
+    '&response=' +
+    req.body['g-recaptcha-response'] +
+    '&remoteip=' +
+    req.connection.remoteAddress;
+  // Hitting GET request to the URL, Google will respond with success or error scenario.
+  request(verificationUrl, function(error, response, body) {
+    body = JSON.parse(body);
+    return cb(false, body);
+  });
 }
 
 module.exports = router;
