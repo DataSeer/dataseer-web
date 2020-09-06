@@ -2,7 +2,15 @@
   "services": {
     "mongodb": "mongodb://localhost:27017/app",
     "dataseer-ml": "http://cloud.science-miner.com/dataseer-ml/service",
-    "curator-email": "tim@dataseer.io"
+    "curator-email": "tim@dataseer.ai"
   },
-  "root": "http://localhost:3000/"
+  "root": "http://localhost:3000/",
+  "_reCAPTCHA_site_key_": {
+    "public": "publicKey",
+    "private": "privateKey"
+  },
+  "_reCAPTCHA_score_": {
+    "limit": 0.75,
+    "error": "Authentication failed (captcha score too low)"
+  }
 }
