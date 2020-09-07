@@ -14,17 +14,17 @@ block content
         div(class='list')
           div(class='row')
             div(class='col-12 text-center' style='margin-top:10px;')
-              div(class='header') Custom search :
+              div(class='header') Custom search:
           div(class='row')
             div(class='col-12 text-center')
               form#custom-search(role='form', action=root + route,method='get')
-                div role : 
+                div role: 
                   select(name='role')
                     option(value='all') All
                     option(value='standard_user') Standard User
                     option(value='annotator') Annotator
                     option(value='curator') Curator
-                div limit : 
+                div limit: 
                   input(type='text' name='limit' placeholder='Maximum number of results')
                 div
                   button.btn.btn-default.waves-effect.waves-light(type='submit') Search for accounts
@@ -47,7 +47,7 @@ block content
                 div(class='form-row')
                   div(class='col-3 offset-1') Email
                   div(class='col-3') Role
-                  div(class='col-2') Organisation
+                  div(class='col-2') Organization
                   div(class='col-3') Actions
             if  accounts.length === 0
               div(class='row')

@@ -30,7 +30,7 @@ let transporter = nodemailer.createTransport({
 const getMailTxt = function(url) {
     return (
       'Hi,\n' +
-      'You can reset your password here : ' +
+      'You can reset your password here: ' +
       url +
       '\n' +
       "Just ignore this email if you don't want to reset your password\n" +
@@ -215,7 +215,7 @@ router.post('/forgotPassword', function(req, res) {
             'route': 'forgotPassword',
             'root': conf.root,
             'success':
-              'An email (allowing you to redefine your password) has been sent at the following address : ' +
+              'An email (allowing you to redefine your password) has been sent at the following address: ' +
               user.username
           });
         }
@@ -390,7 +390,7 @@ router.post(
     return Accounts.findOne({ 'username': req.body.username }, function(err, user) {
       user.token = undefined;
       return user.save(function(err) {
-        if (err) console.log('Error : token not deleted');
+        if (err) console.log('Error: token not deleted');
         if (!redirect) return res.redirect('./');
         else return res.redirect('./' + redirect);
       });

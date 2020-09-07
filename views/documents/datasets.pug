@@ -6,7 +6,7 @@ block content
     div
       div(id='user-lg' style='position:absolute; top:0px; right:10px; text-align:right;')
         if current_user
-          label(style='font-size:small;') Connected as : <b>#{current_user.username}</b> (#{current_user.role.label})
+          label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label})
         else
           label(style='font-size:small;') 
             a(href=root + 'signup') Sign up 

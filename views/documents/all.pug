@@ -14,15 +14,15 @@ block content
         div(class='list')
           div(class='row')
             div(class='col-12 text-center' style='margin-top:10px;')
-              div(class='header') Custom search :
+              div(class='header') Custom search:
           div(class='row')
             div(class='col-12 text-center')
               form#custom-search(role='form', action=root + 'documents',method='get')
-                div pmid : 
+                div pmid: 
                   input(type='text' name='pmid' placeholder='pmid')
-                div doi : 
+                div doi: 
                   input(type='text' name='doi' placeholder='doi')
-                div limit : 
+                div limit: 
                   input(type='text' name='limit' placeholder='Maximum number of results')
                 div
                   button.btn.btn-default.waves-effect.waves-light(type='submit') Search for documents
@@ -48,7 +48,7 @@ block content
                     div(class='col-1') Date uploaded
                     div(class='col-1') Status
                     div(class='col-2') Modified by
-                    div(class='col-1') Organisation
+                    div(class='col-1') Organization
                     div(class='col-2') Journal
                     div(class='col-3') Title
                     div(class='col-1') Actions

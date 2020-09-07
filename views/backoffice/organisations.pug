@@ -14,11 +14,11 @@ block content
         div(class='list')
           div(class='row')
             div(class='col-12 text-center' style='margin-top:10px;')
-              div(class='header') Add new Organisation :
+              div(class='header') Add new Organization:
           div(class='row')
             div(class='col-12 text-center' style='margin-top:10px;')
               form#new-organisation(role='form', action=root + route,method='post')
-                input(type='text' name='name' placeholder='Name of new organisation')
+                input(type='text' name='name' placeholder='Name of new organization')
                 button.btn.btn-default.waves-effect.waves-light(type='submit' name='create') Add
   
   div(class='container-fluid')
@@ -27,17 +27,17 @@ block content
         div(class='list')
           div(class='row')
             div(class='col-12 text-center' style='margin-top:10px;')
-              div(class='header') Custom search :
+              div(class='header') Custom search:
           div(class='row')
             div(class='col-12 text-center')
               form#custom-search(role='form', action=root + route,method='get')
-                div limit : 
+                div limit: 
                   input(type='text' name='limit' placeholder='Maximum number of results')
                 div
-                  button.btn.btn-default.waves-effect.waves-light(type='submit') Search for organisations
+                  button.btn.btn-default.waves-effect.waves-light(type='submit') Search for organizations
           div(class='row')
             div(class='col-12 text-center')
-              div(class='header') Organisations
+              div(class='header') Organizations
           if  organisations.length === 0
             div(class='row')
               div(class='col-12 text-center')
@@ -48,7 +48,7 @@ block content
                 div(class='count-list') #{organisations.length} result(s)
             div(class='row')
               div(class='col-10 offset-1')
-                input#search(type='text' name='name' placeholder='Search for organisation name')
+                input#search(type='text' name='name' placeholder='Search for organization name')
             div(class='row head-list')
               div(class='col-12')
                 div(class='form-row')
