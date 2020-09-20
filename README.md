@@ -96,4 +96,4 @@ Main authors and contact: Nicolas Kieffer, Patrice Lopez (<patrice.lopez@science
 
 The development of dataseer-ml is supported by a [Sloan Foundation](https://sloan.org/) grant, see [here](https://coko.foundation/coko-receives-sloan-foundation-grant-to-build-dataseer-a-missing-piece-in-the-data-sharing-puzzle/)
 
-DataSeer-Web is distributed under [MIT license](https://opensource.org/licenses/MIT), copyright Aspiration. 
+dataseer-Web is distributed under [Apache2 license](https://www.apache.org/licenses/LICENSE-2.0).
