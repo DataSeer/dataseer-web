@@ -10,6 +10,8 @@ html
     if document
       link(rel='stylesheet' href=root + 'stylesheets/tei.css')
       link(rel='stylesheet' href=root + 'stylesheets/process/'+ document.status + '.css')
+      link(rel='stylesheet' href=root + 'javascripts/pdf.js/build/components/pdf_viewer.css')
+      
     if backoffice
       link(rel='stylesheet' href=root + 'stylesheets/style.css')
       link(rel='stylesheet' href=root + 'stylesheets/process/backoffice.css')
@@ -92,6 +94,9 @@ html
     script(src=root + 'javascripts/dataseerML.js')
     script(src=root + 'javascripts/admin.js')
     script(src=root + 'javascripts/process/'+ document.status + '.js')
+    script(src=root + 'javascripts/pdf.js/build/generic/build/pdf.js')
+    script(src=root + 'javascripts/pdf.js/build/generic/build/pdf.worker.js')
+    script(src=root + 'javascripts/lib/display_pdf.js')
   else if backoffice
     script(src=root + 'javascripts/process/backoffice.js')
   else if search

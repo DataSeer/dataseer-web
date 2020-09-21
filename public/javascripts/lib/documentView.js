@@ -1,7 +1,6 @@
 /*
  * @prettier
  */
-
 const Colors = function() {
   let self = this,
     colors = ['#ff0000', '#ffa500', '#ffff00', '#008000', '#0000ff', '#4b0082', '#ee82ee'],
@@ -118,11 +117,42 @@ const DocumentView = function(events) {
       return elements.container.parent().animate({ scrollTop: position });
     };
 
-  self.init = function(id, source) {
-    jQuery(id)
-      .empty()
-      .append(elements.container);
-    self.source(source);
+  self.init = function(id, doc) {
+    let mainContainer = jQuery(id);
+    mainContainer.empty().append($('<div id="xml">').append(elements.container));
+
+    self.hasPdf = typeof doc.pdf !== 'undefined';
+
+    if (self.hasPdf) {
+      $('#view-selection').hide();
+      $('#xml').hide();
+      mainContainer.append($('<div id="pdf">'));
+      PdfManager.init('#pdf', {
+        'click': function(item, element) {
+          let xmlSentenceElement = $('tei s[sentenceid="' + item.sentenceId + '"]'),
+            pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]');
+          $('#pdf s.selected').removeClass('selected');
+          xmlSentenceElement.click();
+          if (xmlSentenceElement.hasClass('selected')) {
+            pdfSentenceElements.addClass('selected');
+          } else {
+            pdfSentenceElements.removeClass('selected');
+          }
+        },
+        'hover': function(item, element) {
+          let pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]');
+          pdfSentenceElements.addClass('hover');
+        },
+        'endHover': function(item, element) {
+          let pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]');
+          pdfSentenceElements.removeClass('hover');
+        }
+      });
+      PdfManager.refreshPdf(doc.pdf.data.data, doc.pdf.metadata.sentences);
+    } else {
+      $('#view-selection').show();
+    }
+    self.source(doc.source);
 
     datasets.all().click(function(event) {
       let el = jQuery(event.target),
@@ -207,6 +237,8 @@ const DocumentView = function(events) {
   self.views = {
     // scroll ot dataset position
     'scrollTo': function(id) {
+      if (self.hasPdf) {
+      }
       let position = datasets.get(id).position().top + elements.container.parent().scrollTop() - 14;
       return elements.container.parent().animate({ scrollTop: position });
     },

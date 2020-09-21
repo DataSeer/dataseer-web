@@ -5,9 +5,9 @@
 // API Interface Object
 const MongoDB = {
   // Get the current object
-  'getCurrentDocument': function(done) {
+  'getCurrentDocument': function(opts = {}, done) {
     let currentId = jQuery(document.getElementById('document.id')).attr('value');
-    jQuery.get('../api/documents/' + currentId, function(data) {
+    jQuery.get('../api/documents/' + currentId + (typeof opts.pdf !== 'undefined' ? '?pdf=true' : ''), function(data) {
       return done(data);
     });
   },

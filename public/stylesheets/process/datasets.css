@@ -1,3 +1,55 @@
+
+#document-view #pdf-viewer {
+    background: lightgray;
+    padding-right: 15px;
+}
+
+#document-view #pdf-viewer .annotationsLayer {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  line-height: 1;
+  overflow: hidden;
+}
+
+#document-view #pdf-viewer .annotationsLayer s {
+  cursor: pointer;
+  z-index: 1050;
+}
+
+#document-view #pdf-viewer .annotationsLayer .hover {
+  background-color: rgba(220, 220, 220, 0.25);
+  cursor: pointer;
+}
+
+#document-view #pdf-viewer .annotationsLayer .selected {
+  background-color: rgba(2, 116, 190, 0.25);
+  cursor: pointer;
+}
+
+#document-view #pdf-viewer .annotationsLayer [datasetId] {
+  cursor: pointer;
+  background-color: rgba(255, 255, 224, 0.3);
+}
+
+#document-view #pdf-viewer .annotationsLayer s[corresp],
+#document-view #pdf-viewer .annotationsLayer s[id] {
+  cursor: pointer;
+  background-color: lightyellow;
+}
+
+#document-view #pdf-viewer #sentencesLayer {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  line-height: 1;
+  overflow: hidden;
+}
+
 #user-navbar {
   display: none;
 }
@@ -276,14 +328,19 @@ body > div > div > div.row > div:nth-child(1) {
   cursor: pointer;
 }
 
-#document-view tei s.selected {
+#document-view .selected {
   background-color: rgb(2, 116, 190);
   color: white;
   cursor: pointer;
 }
 
-#document-view tei s[corresp],
-#document-view tei s[id] {
+#document-view [datasetId] {
+  cursor: pointer;
+  background-color: rgba(255,255,224, 0.3);
+}
+
+#document-view s[corresp],
+#document-view s[id] {
   cursor: pointer;
   background-color: lightyellow;
 }
