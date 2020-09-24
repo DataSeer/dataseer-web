@@ -78,6 +78,17 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
     }
   },
   PdfManager = {
+    'setColor': function(sentenceid, color) {
+      $('#pdf s[sentenceid="' + sentenceid + '"]').css('background-color', color);
+    },
+    'removeColor': function(sentenceid) {
+      $('#pdf s[sentenceid="' + sentenceid + '"]').css('background-color', '');
+    },
+    'scrollToSentence': function(sentenceid) {
+      let element = $('#pdf s[sentenceid="' + sentenceid + '"]').first(),
+        page = element.parent().parent();
+      return parseInt(page.attr('data-page-number')) * page.height() + element.position().top;
+    },
     'showPdfLoadingLoop': function() {
       $('body').css('cursor', 'progress');
       return PdfManager.pdfViewer.find('LoadingLoop').show();
@@ -97,7 +108,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       PdfManager.showPdfLoadingLoop();
     },
     // Refresh pdf display
-    'refreshPdf': function(buffer, annotations) {
+    'refreshPdf': function(buffer, annotations, done) {
       PdfManager.pdfViewer
         .empty()
         .append('<div id="pdf-viewer" class="pdfViewer"></div>')
@@ -126,8 +137,10 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
               pdf_viewer.loadPage(viewer, numPage, pdfPage, function(page, infos) {
                 pages[numPage - 1] = { 'page_height': infos.width, 'page_width': infos.height };
                 pageRendered++;
-                if (pageRendered >= pdfDocument.numPages)
+                if (pageRendered >= pdfDocument.numPages) {
                   PdfManager.setupAnnotations(annotations, pages, PdfManager.events);
+                  return done();
+                }
               });
             });
           }
@@ -195,6 +208,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       // element.setAttribute('style', attributes + 'border:1px solid; border-color: rgba(0, 0, 255, .5);');
       element.setAttribute('style', attributes);
       element.setAttribute('sentenceid', chunk.sentenceId);
+      element.setAttribute('isPdf', true);
       if (chunk.datasetId) {
         element.setAttribute('datasetid', chunk.datasetId);
         annotationsContainer.attr('subtype', 'dataseer');

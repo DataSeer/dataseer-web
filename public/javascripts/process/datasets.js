@@ -153,6 +153,7 @@
           currentDocument.datasets.deleted.push(currentDocument.datasets.current[id]);
           delete currentDocument.datasets.current[id];
           currentDocument.source = documentView.source();
+          console.log(currentDocument);
           return MongoDB.updateDocument(currentDocument, user, function(err, res) {
             console.log(err, res);
             if (err) return err; // Need to define error behavior
@@ -345,15 +346,18 @@
         keys = currentDocument.datasets.current ? Object.keys(currentDocument.datasets.current) : undefined;
       defaultKey = keys ? keys[0] : undefined;
 
-      documentView.init('#document-view', currentDocument);
-      if (defaultKey) documentView.views.scrollTo(defaultKey);
-
-      datasetForm.init('#dataset-form');
-      datasetForm.loadData(data);
-      if (defaultKey) datasetForm.link(currentDocument.datasets.current[defaultKey], documentView.color(defaultKey));
-
-      datasetsList.init('#datasets-list', documentView.colors(), getStatusOfDatasets(currentDocument.datasets.current));
-      if (defaultKey) datasetsList.select(defaultKey);
+      documentView.init('#document-view', currentDocument, function() {
+        if (defaultKey) documentView.views.scrollTo(defaultKey);
+        datasetForm.init('#dataset-form');
+        datasetForm.loadData(data);
+        if (defaultKey) datasetForm.link(currentDocument.datasets.current[defaultKey], documentView.color(defaultKey));
+        datasetsList.init(
+          '#datasets-list',
+          documentView.colors(),
+          getStatusOfDatasets(currentDocument.datasets.current)
+        );
+        if (defaultKey) datasetsList.select(defaultKey);
+      });
 
       $('#new_dataset > button').click();
 

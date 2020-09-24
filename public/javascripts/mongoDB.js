@@ -18,6 +18,8 @@ const MongoDB = {
       if (typeof doc.modifiedBy[user.role] === 'undefined') doc.modifiedBy[user.role] = {};
       doc.modifiedBy[user.role][user.id] = user.username;
     }
+    let copy = Object.assign({}, doc);
+    copy.pdf.data = undefined;
     jQuery.ajax({
       'type': 'PUT',
       'contentType': 'application/json; charset=utf-8',
@@ -25,7 +27,7 @@ const MongoDB = {
         'X-HTTP-Method-Override': 'PUT'
       },
       'url': '../api/documents/' + doc._id,
-      'data': JSON.stringify(doc),
+      'data': JSON.stringify(copy),
       'success': function(data) {
         return done(null, data);
       },
