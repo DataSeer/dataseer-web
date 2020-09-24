@@ -86,25 +86,47 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
     },
     'scrollToSentence': function(sentenceid) {
       let element = $('#pdf s[sentenceid="' + sentenceid + '"]').first(),
-        page = element.parent().parent();
-      return parseInt(page.attr('data-page-number')) * page.height() + element.position().top;
+        numPage = parseInt(
+          element
+            .parent()
+            .parent()
+            .attr('data-page-number')
+        ),
+        pages = $('#pdf div[class="page"]'),
+        i = 1,
+        height = 0;
+      pages.map(function() {
+        if (i < numPage) {
+          height += $(this).height();
+          i += 1;
+        }
+      });
+      return height + element.position().top;
     },
     'showPdfLoadingLoop': function() {
       $('body').css('cursor', 'progress');
-      return PdfManager.pdfViewer.find('LoadingLoop').show();
+      return PdfManager.pdfViewer.find('#LoadingLoop').show();
     },
     'hidePdfLoadingLoop': function() {
       $('body').css('cursor', 'default');
-      return PdfManager.pdfViewer.find('LoadingLoop').hide();
+      return PdfManager.pdfViewer.find('#LoadingLoop').hide();
+    },
+    // Reorder pages
+    'sortPages': function() {
+      let wrapper = $('#pdf-viewer');
+      wrapper
+        .find('div[class="page"]')
+        .sort(function(a, b) {
+          return parseInt($(a).attr('data-page-number')) - parseInt($(b).attr('data-page-number'));
+        })
+        .appendTo(wrapper);
     },
     'init': function(id, events) {
       PdfManager.events = events;
       PdfManager.pdfViewer = $(id);
       PdfManager.pdfViewer
         .append('<div id="pdf-viewer"></div>')
-        .append(
-          '<img id="gluttonPdfLoadingLoop" src="../javascripts/pdf.js/build/components/images/loading-icon.gif" />'
-        );
+        .append('<img id="LoadingLoop" src="../javascripts/pdf.js/build/components/images/loading-icon.gif" />');
       PdfManager.showPdfLoadingLoop();
     },
     // Refresh pdf display
@@ -112,9 +134,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       PdfManager.pdfViewer
         .empty()
         .append('<div id="pdf-viewer" class="pdfViewer"></div>')
-        .append(
-          '<img id="gluttonPdfLoadingLoop" src="../javascripts/pdf.js/build/components/images/loading-icon.gif" />'
-        );
+        .append('<img id="LoadingLoop" src="../javascripts/pdf.js/build/components/images/loading-icon.gif" />');
       PdfManager.showPdfLoadingLoop();
 
       let viewer = document.getElementById('pdf-viewer');
@@ -139,6 +159,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
                 pageRendered++;
                 if (pageRendered >= pdfDocument.numPages) {
                   PdfManager.setupAnnotations(annotations, pages, PdfManager.events);
+                  PdfManager.sortPages();
                   return done();
                 }
               });
