@@ -54,7 +54,7 @@ const DocumentView = function(events) {
     },
     // get selected element (if it is in container)
     selectedElements = function() {
-      let selection = jQuery('s.selected');
+      let selection = jQuery('tei s.selected');
       if (selection.length > 0) {
         return {
           'err': null,
@@ -69,7 +69,7 @@ const DocumentView = function(events) {
         };
       }
     },
-    selectionToSenctence = function(selection, constructor, options, clickEvent, cb) {
+    selectionToSenctence = function(selection, options, clickEvent, cb) {
       let target = null;
       if (typeof selection.res.sentence !== 'undefined') {
         if (options.getdataType) {
@@ -118,10 +118,11 @@ const DocumentView = function(events) {
     };
 
   self.init = function(id, doc, cb) {
+    self.doc = doc;
     self.mainContainer = jQuery(id);
     self.mainContainer.empty().append($('<div id="xml">').append(elements.container));
 
-    self.hasPdf = typeof doc.pdf !== 'undefined';
+    self.hasPdf = typeof self.doc.pdf !== 'undefined';
 
     if (self.hasPdf) {
       $('#view-selection').hide();
@@ -148,8 +149,8 @@ const DocumentView = function(events) {
           pdfSentenceElements.removeClass('hover');
         }
       });
-      return PdfManager.refreshPdf(doc.pdf.data.data, doc.pdf.metadata.sentences, function() {
-        self.finishInit(doc);
+      return PdfManager.refreshPdf(self.doc.pdf.data.data, self.doc.pdf.metadata.sentences, function() {
+        self.finishInit(self.doc);
         PdfManager.scrollToSentence(
           datasets
             .all()
@@ -160,13 +161,13 @@ const DocumentView = function(events) {
       });
     } else {
       $('#view-selection').show();
-      self.finishInit(doc);
+      self.finishInit(self.doc);
       return cb();
     }
   };
 
   self.finishInit = function(doc) {
-    self.source(doc.source);
+    self.source(self.doc.source);
 
     datasets.all().click(function(event) {
       let el = jQuery(event.target),
@@ -283,8 +284,11 @@ const DocumentView = function(events) {
 
   // Sentences features
   let sentences = {
-    'new': function(html) {
-      return jQuery('<s/>').html(html);
+    'new': function(sentenceid, coords, html) {
+      return jQuery('<s/>')
+        .attr('sentenceid', sentenceid)
+        .attr('coords', coords)
+        .html(html);
     },
     'click': function() {
       let previousSelection = elements.container.find('s.selected'),
@@ -361,19 +365,12 @@ const DocumentView = function(events) {
         if (self.hasPdf) PdfManager.setColor(el.attr('sentenceid'), backgroundColor.replace(/0\.[0-9]+/gm, '0.5'));
       });
     },
-    // new dataset
-    'new': function(id, dataType) {
-      return jQuery('<s/>')
-        .attr('id', id)
-        .attr('type', dataType);
-    },
     // add dataset
     'add': function(user, id, dataType, cb) {
       let selection = selectedElements();
       if (selection.err) return cb(true, 'Please select the sentence that contains the new dataset');
       return selectionToSenctence(
         selection,
-        datasets.new,
         { 'id': id, 'dataType': dataType, 'getdataType': true, 'user': user },
         events.datasets.click,
         function(err, res) {
@@ -383,8 +380,11 @@ const DocumentView = function(events) {
             parent = res.parents('div').first();
           parent.attr('subtype', 'dataseer');
           datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
-          if (self.hasPdf)
-            PdfManager.setColor(datasets.get(id).attr('sentenceid'), backgroundColor.replace(/0\.[0-9]+/gm, '0.5'));
+          if (self.hasPdf) {
+            let sentenceid = datasets.get(id).attr('sentenceid');
+            PdfManager.setColor(sentenceid, backgroundColor.replace(/0\.[0-9]+/gm, '0.5'));
+            PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
+          }
           return cb(null, { 'datatype': res.attr('type'), 'cert': res.attr('cert') });
         }
       );
@@ -399,11 +399,15 @@ const DocumentView = function(events) {
     'remove': function(id) {
       let dataset = datasets.get(id),
         parent = dataset.parents('div[subtype]'),
-        newElement = sentences.new(dataset.html()).clone();
+        newElement = sentences.new(dataset.attr('sentenceid'), dataset.attr('coords'), dataset.html()).clone();
       dataset.replaceWith(newElement);
       newElement.click(sentences.click).hover(sentences.hover, sentences.endHover);
       if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
-      if (self.hasPdf) PdfManager.removeColor(dataset.attr('sentenceid'));
+      if (self.hasPdf) {
+        let sentenceid = dataset.attr('sentenceid');
+        PdfManager.removeColor(sentenceid);
+        PdfManager.unlinkDatasetToSentence(self.doc, sentenceid);
+      }
     }
   };
 
@@ -437,17 +441,12 @@ const DocumentView = function(events) {
         if (self.hasPdf) PdfManager.setColor(el.attr('sentenceid'), color);
       });
     },
-    // new correp
-    'new': function(id) {
-      return jQuery('<s/>').attr('corresp', '#' + id);
-    },
     // add correp
     'add': function(user, id) {
       let selection = selectedElements();
       if (selection.err) return selection;
       let target = selectionToSenctence(
           selection,
-          corresps.new,
           { 'id': id, 'getdataType': false, 'user': user },
           events.corresps.click
         ),
@@ -459,7 +458,11 @@ const DocumentView = function(events) {
           .replace(/0\.[0-9]+/gm, '0.5');
       parent.attr('subtype', 'dataseer');
       corresps.styleOf(id, style);
-      if (self.hasPdf) PdfManager.setColor(el.attr('sentenceid'), color);
+      if (self.hasPdf) {
+        let sentenceid = selection.res.sentence.attr('sentenceid');
+        PdfManager.setColor(sentenceid, color);
+        PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
+      }
       return {
         err: false,
         res: target
@@ -468,22 +471,30 @@ const DocumentView = function(events) {
     // remove correp
     'remove': function(el) {
       let parent = el.parents('div[subtype]'),
-        newElement = sentences.new(el.html()).clone();
+        newElement = sentences.new(el.attr('sentenceid'), el.attr('coords'), el.html()).clone();
       el.replaceWith(newElement);
       newElement.click(sentences.click).hover(sentences.hover, sentences.endHover);
       if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
-      if (self.hasPdf) PdfManager.removeColor(el.attr('sentenceid'));
+      if (self.hasPdf) {
+        let sentenceid = el.attr('sentenceid');
+        PdfManager.removeColor(sentenceid);
+        PdfManager.unlinkDatasetToSentence(self.doc, sentenceid);
+      }
     },
     // remove all correp
     'removeAll': function(id) {
       let _corresps = corresps.get(id).each(function() {
         let el = jQuery(this),
           parent = el.parents('div[subtype]'),
-          newElement = sentences.new(el.html()).clone();
+          newElement = sentences.new(el.attr('sentenceid'), el.attr('coords'), el.html()).clone();
         el.replaceWith(newElement);
         newElement.click(sentences.click).hover(sentences.hover, sentences.endHover);
         if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
-        if (self.hasPdf) PdfManager.removeColor(el.attr('sentenceid'));
+        if (self.hasPdf) {
+          let sentenceid = el.attr('sentenceid');
+          PdfManager.removeColor(sentenceid);
+          PdfManager.unlinkDatasetToSentence(self.doc, sentenceid);
+        }
       });
     }
   };

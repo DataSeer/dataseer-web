@@ -12,6 +12,17 @@ if (typeof pdfjsLib === 'undefined' || (!pdfjsLib && !pdfjsLib.getDocument)) {
 //
 else pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrcPath;
 
+function isIn(container, element) {
+  var l = offset.left;
+  var t = offset.top;
+  var h = $this.height();
+  var w = $this.width();
+
+  var maxx = l + w;
+  var maxy = t + h;
+
+  return y <= maxy && y >= t && (x <= maxx && x >= l) ? $this : null;
+}
 // Some PDFs need external cmaps.
 //
 const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
@@ -78,6 +89,22 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
     }
   },
   PdfManager = {
+    'linkDatasetToSentence': function(doc, sentenceid, id) {
+      let ids = doc.pdf.metadata.sentences.mapping[sentenceid];
+      for (let i = 0; i < ids.length; i++) {
+        console.log(ids[i], doc.pdf.metadata.sentences.chunks[ids[i]].datasetid);
+        doc.pdf.metadata.sentences.chunks[ids[i]].datasetid = id;
+        console.log(ids[i], doc.pdf.metadata.sentences.chunks[ids[i]].datasetid);
+      }
+    },
+    'unlinkDatasetToSentence': function(doc, sentenceid) {
+      let ids = doc.pdf.metadata.sentences.mapping[sentenceid];
+      for (let i = 0; i < ids.length; i++) {
+        console.log(ids[i], doc.pdf.metadata.sentences.chunks[ids[i]].datasetid);
+        doc.pdf.metadata.sentences.chunks[ids[i]].datasetid = undefined;
+        console.log(ids[i], doc.pdf.metadata.sentences.chunks[ids[i]].datasetid);
+      }
+    },
     'setColor': function(sentenceid, color) {
       $('#pdf s[sentenceid="' + sentenceid + '"]').css('background-color', color);
     },
@@ -120,6 +147,11 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
           return parseInt($(a).attr('data-page-number')) - parseInt($(b).attr('data-page-number'));
         })
         .appendTo(wrapper);
+    },
+    'getTextOfSentence': function(sentenceid) {
+      let sentences = $('#pdf s[sentenceid="' + sentenceid + '"]'),
+        chunks = [];
+      sentences.map(function() {});
     },
     'init': function(id, events) {
       PdfManager.events = events;
@@ -231,7 +263,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       element.setAttribute('sentenceid', chunk.sentenceId);
       element.setAttribute('isPdf', true);
       if (chunk.datasetId) {
-        element.setAttribute('datasetid', chunk.datasetId);
+        // element.setAttribute('datasetid', chunk.datasetId);
         annotationsContainer.attr('subtype', 'dataseer');
       }
       // the link here goes to the bibliographical reference
