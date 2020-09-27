@@ -27,7 +27,7 @@ function isIn(container, element) {
 //
 const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   CMAP_PACKED = true,
-  VIEWPORT_SCALE = 1.33,
+  VIEWPORT_SCALE = 1.5,
   pdf_viewer = {
     'createEmptyPage': function(num, width, height) {
       let page = document.createElement('div'),
@@ -148,11 +148,6 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
         })
         .appendTo(wrapper);
     },
-    'getTextOfSentence': function(sentenceid) {
-      let sentences = $('#pdf s[sentenceid="' + sentenceid + '"]'),
-        chunks = [];
-      sentences.map(function() {});
-    },
     'init': function(id, events) {
       PdfManager.events = events;
       PdfManager.pdfViewer = $(id);
@@ -233,8 +228,8 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
     'annotate': function(chunk, page_height, page_width, events) {
       let page = chunk.p,
         annotationsContainer = PdfManager.pdfViewer.find('.page[data-page-number="' + page + '"] .annotationsLayer'),
-        scale_x = 1.33,
-        scale_y = 1.33,
+        scale_x = VIEWPORT_SCALE,
+        scale_y = VIEWPORT_SCALE,
         margin = {
           x: 1.5,
           y: 1.5,

@@ -494,7 +494,7 @@ const View = {
     'static': function(data, events) {
       let self = this,
         elements = {
-          'container': HtmlBuilder.div({ 'class': data.class, 'text': '' }),
+          'container': HtmlBuilder.li({ 'class': data.class, 'text': '' }),
           'data': HtmlBuilder.div({ 'value': data.value, 'class': 'value', 'text': data.text }),
           'status': new View.status.edition(),
           'delete': View.buttons.delete(),

@@ -1,7 +1,29 @@
+.head-col {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  background-color: #FFFFFF;
+  border-top: 1px solid #184D7E;
+  border-left: 1px solid #184D7E;
+  border-right: 1px solid #184D7E;
+  border-bottom: 1px solid #184D7E;
+}
+
+.foot-col {
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #184D7E;
+  border-left: 1px solid #184D7E;
+  border-right: 1px solid #184D7E;
+}
 
 #document-view #pdf-viewer {
     background: lightgray;
     padding-right: 15px;
+}
+
+#document-view #pdf-viewer .page {
+  margin-bottom: 10px; 
 }
 
 #document-view #pdf-viewer .annotationsLayer {
@@ -78,6 +100,8 @@
 }
 
 #user-lg label {
+  display: block;
+  height: 100%;
   margin: 0px;
 }
 
@@ -123,16 +147,16 @@ i {
 /*view-selection*/
 
 #view-selection {
-  border-bottom: 3px solid lightgray;
-  border-bottom-left-radius: 0px;
-  border-bottom-right-radius: 0px;
-  padding: 20px;
-  width: 100%;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
-#view-selection label {
-  width: 34%;
+#view-selection > label {
+  flex: 1;
 }
 
 /*dataset-form*/
@@ -143,8 +167,6 @@ body > div > div > div.row > div:nth-child(2) {
 
 #dataset-form {
   width: 100%;
-  height: 87vh;
-  overflow: auto;
   padding: 15px;
 }
 
@@ -238,8 +260,6 @@ body > div > div > div.row > div:nth-child(1) {
   border-top-right-radius: 0px;
   padding: 15px;
   width: 100%;
-  height: 83vh;
-  overflow: auto;
 }
 
 /* TEI CUSTOMIZATION */
@@ -348,24 +368,31 @@ body > div > div > div.row > div:nth-child(1) {
 /*datasets-list*/
 
 #datasets-list {
-  padding: 0;
+  background-color: #FFFFFF;
+  border: 1px solid #184D7E;
+  border-radius: 20px;
+  margin-bottom: 15px;
   width: 100%;
-  height: 80vh;
   overflow: auto;
 }
 
 #datasets-list .selected {
   border: 1px solid lightgray;
+  border-radius: 20px;
   background-color: #EEEEEE;
 }
 
 #datasets-list .form-row {
   text-align: center;
-  display: block;
+  display: inline-block;
+  margin-left: 10px;
+  margin-right: 10px;
   margin-top: 10px;
   margin-bottom: 10px;
   padding-top: 10px;
   padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
   vertical-align: middle;
 }
 
@@ -413,15 +440,19 @@ body > div > div > div.row > div:nth-child(1) {
 
 #datasets_validation {
   display: inline-block;
-  width: 49.5%;
-  margin-top: 15px;
+  flex: 1;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-right: 25px;
 }
 
 #previous_step {
   margin-right: 1%;
   display: inline-block;
-  width: 49.5%;
-  margin-top: 15px;
+  flex: 1;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 25px;
 }
 
 .warning-color-dark {

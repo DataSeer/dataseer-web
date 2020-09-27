@@ -11,6 +11,22 @@ const HtmlBuilder = {
     if (options.value) result.attr('value', options.value);
     return result;
   },
+  'ul': function(options = {}) {
+    let result = jQuery('<ul/>')
+      .addClass(options.class)
+      .text(options.text);
+    if (options.id) result.attr('id', options.id);
+    if (options.value) result.attr('value', options.value);
+    return result;
+  },
+  'li': function(options = {}) {
+    let result = jQuery('<li/>')
+      .addClass(options.class)
+      .text(options.text);
+    if (options.id) result.attr('id', options.id);
+    if (options.value) result.attr('value', options.value);
+    return result;
+  },
   'input': function(options = {}) {
     return jQuery('<input/>')
       .attr('type', options.type)
@@ -51,7 +67,7 @@ const HtmlBuilder = {
     let a = jQuery('<a/>');
     if (options.href) a.attr('href', encodeURI(options.href));
     if (options.text) a.text(options.text);
-    a.attr('target','_blank');
+    a.attr('target', '_blank');
     return a;
   }
 };

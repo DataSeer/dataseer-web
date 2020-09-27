@@ -2,73 +2,83 @@ extends ../layout
 
 block content
 
-  div(id='user-navbar-lg' class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
-    div
-      div(id='user-lg' style='position:absolute; top:0px; right:10px; text-align:right;')
-        if current_user
-          label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label})
-        else
-          label(style='font-size:small;') 
-            a(href=root + 'signup') Sign up 
-            | or 
-            a(href=root + 'signin') Sign in 
-            | to access DataSeer
-      div(id='navbar-lg')
-        ul(style='padding-left: 15px;')
-          li
-            img(src='../img/DataSeer-logo-min.png' width='25')
-          
-          if current_user
-            li
-              a(href=root + 'myDocuments' class='nav') My documents
-
-            if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
-              li
-                a(href=root + 'documents' class='nav') All documents
-            li
-              a(href=root + 'backoffice/upload' class='nav') Upload
-            if current_user.role.label === 'curator'
-              li
-                a(href=root + 'backoffice/accounts' class='nav') Accounts
-            li
-              a(href=root + 'settings' class='nav') Settings
-            li
-              a(href=root + 'signout' class='nav') Sign out
-          else
-            li
-              a(href=root + 'signup' class='nav') Sign up
-            li
-              a(href=root + 'signin' class='nav') Sign in
-            li
-              a(href=root + 'forgotPassword' class='nav') Forgot password
-
-  div(class='bordered' style='border-color:#ffffff;border-width:0px;')
+  div(class='' style='border-color:#ffffff;border-width:0px;')
     div(class='container-fluid')
       div(class='row')
-        div(class='col-6')
-          div(class='row')
-            div(class='col-12 text-center')
-              div(id='view-selection' class='btn-group btn-group-toggle bordered' data-toggle='buttons' style='padding:0;')
+        div(class='col-12')
+          div(id='user-navbar-lg' class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
+            div
+              div(id='user-lg' style='position:absolute; top:0px; right:10px; text-align:right;')
+                if current_user
+                  label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label})
+                else
+                  label(style='font-size:small;') 
+                    a(href=root + 'signup') Sign up 
+                    | or 
+                    a(href=root + 'signin') Sign in 
+                    | to access DataSeer
+              div(id='navbar-lg')
+                ul(style='padding-left: 15px;')
+                  li
+                    img(src='../img/DataSeer-logo-min.png' width='25')
+                  
+                  if current_user
+                    li
+                      a(href=root + 'myDocuments' class='nav') My documents
+
+                    if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
+                      li
+                        a(href=root + 'documents' class='nav') All documents
+                    li
+                      a(href=root + 'backoffice/upload' class='nav') Upload
+                    if current_user.role.label === 'curator'
+                      li
+                        a(href=root + 'backoffice/accounts' class='nav') Accounts
+                    li
+                      a(href=root + 'settings' class='nav') Settings
+                    li
+                      a(href=root + 'signout' class='nav') Sign out
+                  else
+                    li
+                      a(href=root + 'signup' class='nav') Sign up
+                    li
+                      a(href=root + 'signin' class='nav') Sign in
+                    li
+                      a(href=root + 'forgotPassword' class='nav') Forgot password
+      div(class='row')
+        div(class='col-12')
+          div(id='datasets-list' class='form')
+      div(class='row')
+        div(class='col-8')
+          div(class='head-col' style='height: 65px;')
+            div(id='view-selection' class='btn-group btn-group-toggle' data-toggle='buttons' style='padding:0;')
+              if document.pdf
+                label(class='btn btn-secondary btn-sm') full text
+                  input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off')
+              else
                 label(class='btn btn-secondary btn-sm active') full text
                   input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off' checked)
-                label(class='btn btn-secondary btn-sm') section
-                  input(type='radio' name='options' id='tei_only_dataseer' value='onlyDataseer' autocomplete='off')
-                label(class='btn btn-secondary btn-sm') paragraph
-                  input(type='radio' name='options' id='tei_only_datasets' value='onlyDatasets' autocomplete='off')
-          div(class='row')
-            div(class='col-12')
-              div(id='document-view' class='bordered')
+              label(class='btn btn-secondary btn-sm') section
+                input(type='radio' name='options' id='tei_only_dataseer' value='onlyDataseer' autocomplete='off')
+              label(class='btn btn-secondary btn-sm') paragraph
+                input(type='radio' name='options' id='tei_only_datasets' value='onlyDatasets' autocomplete='off')
+              if document.pdf
+                label(class='btn btn-secondary btn-sm active') PDF
+                  input(type='radio' name='options' id='pdf_all_visible' value='pdf' autocomplete='off' checked)
         div(class='col-4')
-          div(class='row')
-            div(id='dataset-form' class='form bordered')
-        div(class='col-2')
-          div(class='row')
-            div(id='datasets-list' class='form bordered')
+          div(class='head-col' style='display: flex; align-items: center; justify-content: center; height: 65px;')
             if current_user
                 if document
                   if document.status !== 'metadata'
                     button#previous_step.btn.btn-primary Metadata
             button(id='datasets_validation' class='btn btn-primary') Finish
+      div(class='row')
+        div(class='col-8')
+          div(class='foot-col' style='height: 700px; overflow: auto')
+            div(id='document-view' class='')
+        div(class='col-4')
+          div(class='foot-col' style='height: 700px; overflow: auto')
+            div(id='dataset-form' class='form')
 
   include ../modals/quit.pug
   include ../modals/documents/datasets.pug

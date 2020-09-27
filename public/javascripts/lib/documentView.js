@@ -113,8 +113,21 @@ const DocumentView = function(events) {
     },
     // scroll ot dataset position
     scrollTo = function(el) {
-      let position = el.position().top + elements.container.parent().scrollTop() - 14;
-      return elements.container.parent().animate({ scrollTop: position });
+      if ($('#xml').is(':visible')) {
+        let position =
+          el.position().top +
+          elements.container
+            .parent()
+            .parent()
+            .parent()
+            .scrollTop() -
+          14;
+        return elements.container
+          .parent()
+          .parent()
+          .parent()
+          .animate({ scrollTop: position });
+      }
     };
 
   self.init = function(id, doc, cb) {
@@ -125,9 +138,8 @@ const DocumentView = function(events) {
     self.hasPdf = typeof self.doc.pdf !== 'undefined';
 
     if (self.hasPdf) {
-      $('#view-selection').hide();
-      $('#xml').hide();
       self.mainContainer.append($('<div id="pdf">'));
+      $('#xml').hide();
       PdfManager.init('#pdf', {
         'click': function(item, element) {
           let xmlSentenceElement = $('tei s[sentenceid="' + item.sentenceId + '"]'),
@@ -160,7 +172,6 @@ const DocumentView = function(events) {
         return cb();
       });
     } else {
-      $('#view-selection').show();
       self.finishInit(self.doc);
       return cb();
     }
@@ -252,12 +263,23 @@ const DocumentView = function(events) {
   self.views = {
     // scroll ot dataset position
     'scrollTo': function(id) {
-      let position = self.hasPdf
-        ? PdfManager.scrollToSentence(datasets.get(id).attr('sentenceid')) +
-          elements.container.parent().scrollTop() -
-          14
-        : datasets.get(id).position().top + elements.container.parent().scrollTop() - 14;
+      let position =
+        self.hasPdf && $('#pdf').is(':visible')
+          ? PdfManager.scrollToSentence(datasets.get(id).attr('sentenceid')) +
+            elements.container
+              .parent()
+              .parent()
+              .scrollTop() -
+            14
+          : datasets.get(id).position().top +
+            elements.container
+              .parent()
+              .parent()
+              .parent()
+              .scrollTop() -
+            14;
       return elements.container
+        .parent()
         .parent()
         .parent()
         .animate({ scrollTop: position });
@@ -266,19 +288,33 @@ const DocumentView = function(events) {
     'allVisible': function() {
       paragraphsWithoutDatasets().removeClass();
       sectionsWithoutDatasets().removeClass();
-      elements.container.parent().removeClass();
-      elements.container.parent().addClass('bordered');
+      elements.container
+        .parent()
+        .parent()
+        .parent()
+        .removeClass();
+      $('#pdf').hide();
+      $('#xml').show();
     },
     // set only dataseer elements visible
     'onlyDataseer': function() {
       self.views.allVisible();
       sectionsWithoutDatasets().addClass('hidden');
+      $('#pdf').hide();
+      $('#xml').show();
     },
     // set only datasets elements visible
     'onlyDatasets': function() {
       self.views.allVisible();
       self.views.onlyDataseer();
       paragraphsWithoutDatasets().addClass('hidden');
+      $('#pdf').hide();
+      $('#xml').show();
+    },
+    // set only PDF elements visible
+    'pdf': function() {
+      $('#xml').hide();
+      $('#pdf').show();
     }
   };
 
