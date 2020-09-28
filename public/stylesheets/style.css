@@ -107,9 +107,10 @@ body {
 
 #user-navbar > #logo {
   /*background-image: url(../img/DataSeer-logo-75.png);*/
-  background-image: url(../img/DataSeer-logo-up-beta-75.png);
+  background-image: url(../img/DataSeer-logo-up-beta-3-75.png);
   background-repeat: no-repeat;
   background-position: left center;
+  background-size: 220px;
   /*min-height: 195px;*/
   min-height: 165px;
   max-height: 165px;
@@ -117,7 +118,7 @@ body {
 }
 
 #user-navbar > div {
-  height: 165px;
+  height: 90px;
   padding: 15px;
   text-align: center;
 }
