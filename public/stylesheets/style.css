@@ -1,6 +1,11 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,300');
 
+html {
+  height: 100%;
+}
+
 body {
+  height: 100%;
   margin-left: 50px;
   margin-right: 50px;
   margin-top: 20px;

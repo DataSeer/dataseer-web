@@ -1,17 +1,28 @@
-.head-col {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  background-color: #FFFFFF;
-  border-top: 1px solid #184D7E;
-  border-left: 1px solid #184D7E;
-  border-right: 1px solid #184D7E;
-  border-bottom: 1px solid #184D7E;
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  margin-left: 50px;
+  margin-right: 50px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font: 14px "Open Sans", "Lucida Grande", Helvetica, sans-serif;
+  color: #3a3a3a;
+  background-color: lightgray;
+}
+
+.footer {
+  flex-shrink: 0;
 }
 
 .foot-col {
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
   background-color: #FFFFFF;
+  border-top: 1px solid #184D7E;
   border-bottom: 1px solid #184D7E;
   border-left: 1px solid #184D7E;
   border-right: 1px solid #184D7E;
@@ -19,7 +30,6 @@
 
 #document-view #pdf-viewer {
     background: lightgray;
-    padding-right: 15px;
 }
 
 #document-view #pdf-viewer .page {
@@ -370,7 +380,6 @@ body > div > div > div.row > div:nth-child(1) {
 #datasets-list {
   background-color: #FFFFFF;
   border: 1px solid #184D7E;
-  border-radius: 20px;
   margin-bottom: 15px;
   width: 100%;
   overflow: auto;
@@ -378,7 +387,6 @@ body > div > div > div.row > div:nth-child(1) {
 
 #datasets-list .selected {
   border: 1px solid lightgray;
-  border-radius: 20px;
   background-color: #EEEEEE;
 }
 
@@ -492,4 +500,8 @@ body > div > div > div.row > div:nth-child(1) {
 
 #quit-modal .modal-body {
   color: #CC0000;
+}
+
+.pdfViewer {
+  overflow: hidden;
 }

@@ -23,11 +23,13 @@ function isIn(container, element) {
 
   return y <= maxy && y >= t && (x <= maxx && x >= l) ? $this : null;
 }
+
+var the_scale = 1.5;
 // Some PDFs need external cmaps.
 //
 const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   CMAP_PACKED = true,
-  VIEWPORT_SCALE = 1.5,
+  //VIEWPORT_SCALE = 1.5,
   pdf_viewer = {
     'createEmptyPage': function(num, width, height) {
       let page = document.createElement('div'),
@@ -46,6 +48,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       canvas.height = height;
       page.style.width = `${width}px`;
       page.style.height = `${height}px`;
+      page.style.border = '0px'
       wrapper.style.width = `${width}px`;
       wrapper.style.height = `${height}px`;
       textLayer.style.width = `${width}px`;
@@ -60,7 +63,11 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       return page;
     },
     'loadPage': function(viewer, numPage, pdfPage, callback) {
-      let viewport = pdfPage.getViewport({ 'scale': VIEWPORT_SCALE }),
+      //let viewport = pdfPage.getViewport({ 'scale': VIEWPORT_SCALE }),
+      var desiredWidth = viewer.offsetWidth;
+      var viewport_tmp = pdfPage.getViewport({ scale: 1, });
+      the_scale = desiredWidth / viewport_tmp.width;
+      let viewport = pdfPage.getViewport({ 'scale': the_scale }),
         page = pdf_viewer.createEmptyPage(numPage, viewport.width, viewport.height),
         canvas = page.querySelector('canvas'),
         wrapper = page.querySelector('.canvasWrapper'),
@@ -204,7 +211,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       let page_height = 0.0,
         page_width = 0.0;
 
-      // Add annotationsLayer fir each page
+      // Add annotationsLayer for each page
       PdfManager.pdfViewer.find('.page[data-page-number]').each(function(index) {
         let pageDiv = $(this),
           container = $('<div>'),
@@ -228,8 +235,8 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
     'annotate': function(chunk, page_height, page_width, events) {
       let page = chunk.p,
         annotationsContainer = PdfManager.pdfViewer.find('.page[data-page-number="' + page + '"] .annotationsLayer'),
-        scale_x = VIEWPORT_SCALE,
-        scale_y = VIEWPORT_SCALE,
+        scale_x = the_scale,
+        scale_y = the_scale,
         margin = {
           x: 1.5,
           y: 1.5,
