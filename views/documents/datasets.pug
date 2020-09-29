@@ -42,9 +42,11 @@ block content
             li
               a(href=root + 'forgotPassword' class='nav') Forgot password
 
-  div(class='row' style='height:10%;overflow:hidden;margin-bottom:5px;min-height:60px; ')
-    div(class='col-12')
-      div(id='datasets-list' class='' style='')
+  div(class='row' style='height:10%;margin-bottom:5px;min-height:60px;')
+    div(class='col-12' style='height:100%;')
+      div(class='' style='border:1px solid #184D7E;height:100%;width:100%;overflow:hidden;width:100%;background-color:#FFF;')
+        div(id='datasets-list' style='width:92%;border:0px;')
+        button(id='newDataset' class='btn btn-primary' style='width:8%;float:right; height:80%;padding:0;margin:0;position:absolute; right:25px; top:10%;white-space:normal;') Add new Dataset
     
   div(class='row' style='height:70%;flex:1 0 auto;')
     div(class='col-8' style='height:100%;padding-right:0px;')

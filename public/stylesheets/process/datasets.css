@@ -408,6 +408,10 @@ body > div > div > div.row > div:nth-child(1) {
   text-align: center;
 }
 
+#datasets-list > div > ul {
+  padding-left: 0px
+}
+
 #datasets-list .form-row > * {
   display: inline-block;
 }

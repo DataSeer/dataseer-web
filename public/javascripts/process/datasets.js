@@ -389,7 +389,7 @@
         }
       });
 
-      // On confirm button click od modal
+      // On confirm button click of modal
       $('#datasets-confirm-modal-valid').click(function() {
         let id = $('#datasets-confirm-modal-data').html();
         datasetsList.datasets.remove(id);

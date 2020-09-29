@@ -6,7 +6,7 @@ const DatasetsList = function(data, events) {
   let datasets = {};
 
   let elements = {
-      'container': HtmlBuilder.div({ 'id': '', 'class': 'container-fluid', 'text': '' }),
+      'container': HtmlBuilder.div({ 'id': '', 'class': '', 'text': '' }),
       'datasetsList': HtmlBuilder.ul({ 'id': '', 'class': '', 'text': '' }),
       'newDataset': new View.buttons.add('Add new Dataset')
     },
@@ -60,8 +60,13 @@ const DatasetsList = function(data, events) {
 
   // Add all elements
   elements.container.append(elements.datasetsList.append(elements.newDataset));
+  //elements.container.append(elements.datasetsList)
 
-  elements.newDataset.click(function() {
+  /*elements.newDataset.click(function() {
+    events.onNewDataset();
+  });*/
+
+  $('#newDataset').click(function() {
     events.onNewDataset();
   });
 
