@@ -380,9 +380,12 @@ body > div > div > div.row > div:nth-child(1) {
 #datasets-list {
   background-color: #FFFFFF;
   border: 1px solid #184D7E;
-  margin-bottom: 15px;
   width: 100%;
-  overflow: auto;
+}
+
+#datasets-list .form-row > .item {
+  display: block;
+  margin: 5px;
 }
 
 #datasets-list .selected {
@@ -408,16 +411,35 @@ body > div > div > div.row > div:nth-child(1) {
   text-align: center;
 }
 
-#datasets-list > div > ul {
-  padding-left: 0px
+#datasets-list > div > * {
+  display: inline-block;
+  vertical-align:top;
+  height: 100px;
+}
+
+#datasets-list #newDataset > button {
+  margin-top: 33.3px;
+}
+
+#datasets-list #newDataset > button i {
+  margin-right: 0!important;
+}
+
+#datasets-list #newDataset {
+  min-width: 20%;
+}
+
+#datasets-list #datasetsListItems {
+  max-width: 80%;
+  overflow-y: scroll;
+  padding-left: 0px;
+  padding-right: 0px;
+  margin: 0px;
 }
 
 #datasets-list .form-row > * {
+  cursor: pointer;
   display: inline-block;
-}
-
-#datasets-list > div > button > i {
-  margin-right: 0 !important;
 }
 
 #datasets-list .form-row > *:first-child {

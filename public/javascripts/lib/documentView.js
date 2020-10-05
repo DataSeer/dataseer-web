@@ -121,7 +121,7 @@ const DocumentView = function(events) {
             .parent()
             .parent()
             .scrollTop() -
-          14;
+          24;
         return elements.container
           .parent()
           .parent()
@@ -288,11 +288,6 @@ const DocumentView = function(events) {
     'allVisible': function() {
       paragraphsWithoutDatasets().removeClass();
       sectionsWithoutDatasets().removeClass();
-      elements.container
-        .parent()
-        .parent()
-        .parent()
-        .removeClass();
       $('#pdf').hide();
       $('#xml').show();
     },

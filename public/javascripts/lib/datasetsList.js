@@ -7,8 +7,8 @@ const DatasetsList = function(data, events) {
 
   let elements = {
       'container': HtmlBuilder.div({ 'id': '', 'class': '', 'text': '' }),
-      'datasetsList': HtmlBuilder.ul({ 'id': '', 'class': '', 'text': '' }),
-      'newDataset': new View.buttons.add('Add new Dataset')
+      'datasetsList': HtmlBuilder.ul({ 'id': 'datasetsListItems', 'class': '', 'text': '' }),
+      'newDataset': HtmlBuilder.div({ 'id': 'newDataset', 'class': '', 'text': '' })
     },
     mapping = {};
 
@@ -37,7 +37,7 @@ const DatasetsList = function(data, events) {
         container = _elements.container;
       mapping[id] = container;
       _elements.link.attr('title', 'Link selected sentence to this dataset');
-      elements.newDataset.before(container);
+      elements.datasetsList.append(container);
     },
     'remove': function(id) {
       datasets[id].delete();
@@ -59,14 +59,11 @@ const DatasetsList = function(data, events) {
   };
 
   // Add all elements
-  elements.container.append(elements.datasetsList.append(elements.newDataset));
-  //elements.container.append(elements.datasetsList)
+  elements.container.append(elements.datasetsList);
+  elements.container.append(elements.newDataset);
+  elements.newDataset.append(new View.buttons.add('Add new Dataset'));
 
-  /*elements.newDataset.click(function() {
-    events.onNewDataset();
-  });*/
-
-  $('#newDataset').click(function() {
+  elements.newDataset.find('button').click(function() {
     events.onNewDataset();
   });
 

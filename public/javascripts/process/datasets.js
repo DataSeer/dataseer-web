@@ -180,13 +180,6 @@
 
       let hasChanged = false; // tell us if there is some change
 
-      // Save of validation process because it will be insert into datasetList
-      let validationBtn = $('<button/>')
-          .attr('id', 'datasets_validation')
-          .addClass('btn btn-primary')
-          .text('This info is correct : Continue'),
-        newDatasetBtn = $('#new_dataset').clone(true);
-
       // All components
       let datasetForm = new DatasetForm({
           // On final validation
@@ -358,8 +351,6 @@
         );
         if (defaultKey) datasetsList.select(defaultKey);
       });
-
-      $('#new_dataset > button').click();
 
       // get selection
       $('#view-selection input[type=radio]').on('change', function() {

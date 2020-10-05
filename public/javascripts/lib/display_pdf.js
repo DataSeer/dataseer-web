@@ -48,7 +48,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       canvas.height = height;
       page.style.width = `${width}px`;
       page.style.height = `${height}px`;
-      page.style.border = '0px'
+      page.style.border = '0px';
       wrapper.style.width = `${width}px`;
       wrapper.style.height = `${height}px`;
       textLayer.style.width = `${width}px`;
@@ -65,7 +65,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
     'loadPage': function(viewer, numPage, pdfPage, callback) {
       //let viewport = pdfPage.getViewport({ 'scale': VIEWPORT_SCALE }),
       var desiredWidth = viewer.offsetWidth;
-      var viewport_tmp = pdfPage.getViewport({ scale: 1, });
+      var viewport_tmp = pdfPage.getViewport({ scale: 1 });
       the_scale = desiredWidth / viewport_tmp.width;
       let viewport = pdfPage.getViewport({ 'scale': the_scale }),
         page = pdf_viewer.createEmptyPage(numPage, viewport.width, viewport.height),
@@ -99,17 +99,13 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
     'linkDatasetToSentence': function(doc, sentenceid, id) {
       let ids = doc.pdf.metadata.sentences.mapping[sentenceid];
       for (let i = 0; i < ids.length; i++) {
-        console.log(ids[i], doc.pdf.metadata.sentences.chunks[ids[i]].datasetid);
         doc.pdf.metadata.sentences.chunks[ids[i]].datasetid = id;
-        console.log(ids[i], doc.pdf.metadata.sentences.chunks[ids[i]].datasetid);
       }
     },
     'unlinkDatasetToSentence': function(doc, sentenceid) {
       let ids = doc.pdf.metadata.sentences.mapping[sentenceid];
       for (let i = 0; i < ids.length; i++) {
-        console.log(ids[i], doc.pdf.metadata.sentences.chunks[ids[i]].datasetid);
         doc.pdf.metadata.sentences.chunks[ids[i]].datasetid = undefined;
-        console.log(ids[i], doc.pdf.metadata.sentences.chunks[ids[i]].datasetid);
       }
     },
     'setColor': function(sentenceid, color) {
@@ -189,7 +185,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
             let numPage = i + 1;
             pdfDocument.getPage(numPage).then(function(pdfPage) {
               pdf_viewer.loadPage(viewer, numPage, pdfPage, function(page, infos) {
-                pages[numPage - 1] = { 'page_height': infos.width, 'page_width': infos.height };
+                pages[numPage - 1] = { 'page_height': infos.height, 'page_width': infos.width };
                 pageRendered++;
                 if (pageRendered >= pdfDocument.numPages) {
                   PdfManager.setupAnnotations(annotations, pages, PdfManager.events);
@@ -206,6 +202,146 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
           pdfContainer.empty().append('<div>An error has occurred while PDF processing</div>');
         });
     },
+    // Return chunks regrouped by lines
+    'getLines': function(chunks) {
+      if (Array.isArray(chunks)) {
+        let lines = [
+          [
+            {
+              'x': parseInt(chunks[0].x) * the_scale,
+              'y': parseInt(chunks[0].y) * the_scale,
+              'w': parseInt(chunks[0].w) * the_scale,
+              'h': parseInt(chunks[0].h) * the_scale,
+              'p': parseInt(chunks[0].p)
+            }
+          ]
+        ];
+        if (chunks.length > 1)
+          for (let i = 0; i < chunks.length - 1; i++) {
+            let previous = {
+                'x': parseInt(chunks[i].x) * the_scale,
+                'y': parseInt(chunks[i].y) * the_scale,
+                'w': parseInt(chunks[i].w) * the_scale,
+                'h': parseInt(chunks[i].h) * the_scale,
+                'p': parseInt(chunks[i].p)
+              },
+              next = {
+                'x': parseInt(chunks[i + 1].x) * the_scale,
+                'y': parseInt(chunks[i + 1].y) * the_scale,
+                'w': parseInt(chunks[i + 1].w) * the_scale,
+                'h': parseInt(chunks[i + 1].h) * the_scale,
+                'p': parseInt(chunks[i].p)
+              };
+            // case this is a new line
+            if (next.x <= previous.x) {
+              lines.push([next]);
+            } else {
+              lines[lines.length - 1].push(next);
+            }
+          }
+        return lines;
+      } else return [];
+    },
+    // Return lines areas
+    'getAreas': function(lines) {
+      if (Array.isArray(lines)) {
+        let result = { 'p': false, 'x': { 'min': null, 'max': null }, 'y': { 'min': null, 'max': null }, 'areas': [] };
+        for (let i = 0; i < lines.length; i++) {
+          let area = PdfManager.getArea(lines[i]);
+          result.p = area.p;
+          if (result.x.min === null || result.x.min > area.x) result.x.min = area.x;
+          if (result.x.max === null || result.x.max < area.x + area.w) result.x.max = area.x + area.w;
+          if (result.y.min === null || result.y.min > area.y) result.y.min = area.y;
+          if (result.y.max === null || result.y.max < area.y + area.h) result.y.max = area.y + area.h;
+          result.areas.push(area);
+        }
+        return result;
+      } else return null;
+    },
+    // Return line area
+    'getArea': function(chunks) {
+      if (Array.isArray(chunks)) {
+        let area = { 'p': chunks[0].p, 'x': chunks[0].x, 'y': chunks[0].y, 'h': chunks[0].h, 'w': chunks[0].w };
+        if (chunks.length === 1) return area;
+        // look chunks
+        else
+          for (let i = 1; i < chunks.length; i++) {
+            // if new line detected, chunk will be ignored
+            if (area.x < chunks[i].x) area.w = chunks[i].x - area.x + chunks[i].w;
+            if (area.y < chunks[i].y) area.y = chunks[i].y;
+          }
+        return area;
+      } else return null;
+    },
+    'buildContour': function(mapping, chunks, color) {
+      for (let key in mapping) {
+        if (mapping[key].length > 0) {
+          let subArray = chunks.slice(mapping[key][0], mapping[key][mapping[key].length - 1] + 1),
+            areas = PdfManager.getAreas(PdfManager.getLines(subArray)),
+            contour = PdfManager.getContour(areas, color),
+            annotationsContainer = PdfManager.pdfViewer.find(
+              '.page[data-page-number="' + areas.p + '"] .svgAnnotationsLayer'
+            );
+          annotationsContainer.append(contour);
+          console.log(areas);
+        }
+      }
+    },
+    // Return contour of lines
+    'getContour': function(data, color) {
+      if (Array.isArray(data.areas)) {
+        // case coutour is rectangle
+        if (data.areas.length === 1)
+          return PdfManager.buildPath(['H ', data.areas[0].w, 'V', data.areas[0].h, 'H 0 V 0'].join(''), color, {
+            'x': data.areas[0].x,
+            'y': data.areas[0].y,
+            'height': data.areas[0].h,
+            'width': data.areas[0].w
+          });
+        else {
+          let d = '';
+          for (let i = 0; i < data.areas.length; i++) {
+            d +=
+              [
+                'M' + (data.areas[i].x - data.x.min).toString(),
+                data.areas[i].y - data.y.min,
+                'H',
+                data.areas[i].w,
+                'V',
+                data.areas[i].h,
+                'H',
+                data.areas[i].x - data.x.min,
+                'V',
+                data.areas[i].y - data.y.min
+              ].join(' ') + ' ';
+          }
+          return PdfManager.buildPath(d.substring(0, d.length - 1), color, {
+            'x': data.x.min,
+            'y': data.y.min,
+            'height': data.y.max - data.y.min,
+            'width': data.x.max - data.x.min
+          });
+        }
+      } else return null;
+    },
+    'buildPath': function(d, color, style) {
+      return $('<path/>')
+        .attr(
+          'style',
+          'z-index: 100000;display: block;width: ' +
+            style.width +
+            'px;height: ' +
+            style.height +
+            'px;position: absolute;top: ' +
+            style.y +
+            'px;left: ' +
+            style.x +
+            'px;'
+        )
+        .attr('d', d)
+        .attr('fill', 'black')
+        .attr('stroke', color);
+    },
     'setupAnnotations': function(sentences, pages, events) {
       // we must check/wait that the corresponding PDF page is rendered at this point
       let page_height = 0.0,
@@ -215,10 +351,25 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       PdfManager.pdfViewer.find('.page[data-page-number]').each(function(index) {
         let pageDiv = $(this),
           container = $('<div>'),
+          // svg = $('<svg>'),
           style = pageDiv.find('.canvasWrapper').attr('style');
         container.addClass('annotationsLayer');
         container.attr('style', style);
+        // svg.addClass('svgAnnotationsLayer');
+        // svg
+        //   .attr('width', Math.round(pages[pageDiv.attr('data-page-number') - 1].page_width))
+        //   .attr('height', Math.round(pages[pageDiv.attr('data-page-number') - 1].page_height))
+        //   .attr('xmlns', 'http://www.w3.org/2000/svg')
+        //   .attr('version', '1.1')
+        //   .attr(
+        //     'viewBox',
+        //     '0 0 ' +
+        //       Math.round(pages[pageDiv.attr('data-page-number') - 1].page_width) +
+        //       ' ' +
+        //       Math.round(pages[pageDiv.attr('data-page-number') - 1].page_height)
+        //   );
         pageDiv.prepend(container);
+        // pageDiv.prepend(svg);
       });
 
       if (sentences.chunks) {
@@ -230,6 +381,9 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
           }
           PdfManager.annotate(chunk, page_height, page_width, events);
         });
+        // if (sentences.mapping) {
+        //   PdfManager.buildContour(sentences.mapping, sentences.chunks, 'black');
+        // }
       }
     },
     'annotate': function(chunk, page_height, page_width, events) {
