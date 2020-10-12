@@ -45,13 +45,12 @@ block content
   div(class='row' style='margin-bottom:5px;')
     div(class='col-12')
       div(class='' style='border:1px solid #184D7E;background-color:#FFF;')
-        div(id='datasets-list' style='border:0px;')
+        div(id='datasets-list' style='border:0px;height: 100px;')
     
   div(class='row' style='height:70%;flex:1 0 auto;')
     div(class='col-8' style='height:100%;padding-right:0px;')
-      div(class='' style='height:100%;')
-        
-        div(id='view-selection' class='btn-group btn-group-toggle' data-toggle='buttons' style='height:4%;overflow:hidden;padding:0;margin:0;height:20px;')
+      div(class='' style='height:100%;')        
+        div(id='view-selection' class='btn-group btn-group-toggle' data-toggle='buttons' style='overflow:hidden;padding:0;margin:0;height:20px;')
           if document.pdf
             label(class='btn btn-secondary btn-sm') full text
               input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off')
@@ -66,7 +65,7 @@ block content
             label(class='btn btn-secondary btn-sm active') PDF
               input(type='radio' name='options' id='pdf_all_visible' value='pdf' autocomplete='off' checked)
 
-        div(class='foot-col' style='height:95%; overflow: auto;flex:1 0 auto;')
+        div(class='foot-col' style='height:calc(100% - 20px); overflow: auto;flex:1 0 auto;')
           div(id='document-view' class='' style='padding:0;')
 
     div(class='col-4' style='height:100%; padding-left:5px;')
