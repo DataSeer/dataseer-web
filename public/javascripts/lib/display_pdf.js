@@ -3,6 +3,16 @@
  */
 'use strict';
 
+let getColor = function() {
+  getColor.bool = !getColor.bool;
+  return getColor.bool ? 'blue' : 'red';
+};
+
+let getColor2 = function() {
+  getColor2.bool = !getColor2.bool;
+  return getColor2.bool ? 'gold' : 'green';
+};
+
 let workerSrcPath = '../javascripts/pdf.js/build/pdf.worker.js';
 
 if (typeof pdfjsLib === 'undefined' || (!pdfjsLib && !pdfjsLib.getDocument)) {
@@ -12,19 +22,36 @@ if (typeof pdfjsLib === 'undefined' || (!pdfjsLib && !pdfjsLib.getDocument)) {
 //
 else pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrcPath;
 
-function isIn(container, element) {
-  var l = offset.left;
-  var t = offset.top;
-  var h = $this.height();
-  var w = $this.width();
+let Area = function(data) {
+    this.addPoints = function(square) {
+      this.points.push([x0, y0]);
+      this.points.push([x1, y0]);
+      this.points.push([x1, y1]);
+      this.points.push([x0, y1]);
+    };
+    this.points = [];
+    this.lines = [];
+    this.p = data.p;
+    this.h = data.h;
+    this.w = data.w;
+    this.min = {
+      x: data.x,
+      y: data.y
+    };
+    this.max = {
+      x: data.x + data.w,
+      y: data.y + data.h
+    };
+    this.addPoints({ 'x': data.x, 'y': data.y, 'w': data.w, 'h': data.h });
+    return this;
+  },
+  Areas = function(sentenceId) {
+    this.sentenceId = sentenceId;
+    this.areas = [];
+    return this;
+  };
 
-  var maxx = l + w;
-  var maxy = t + h;
-
-  return y <= maxy && y >= t && (x <= maxx && x >= l) ? $this : null;
-}
-
-var the_scale = 1.5;
+let the_scale = 1.5;
 // Some PDFs need external cmaps.
 //
 const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
@@ -64,8 +91,8 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
     },
     'loadPage': function(viewer, numPage, pdfPage, callback) {
       //let viewport = pdfPage.getViewport({ 'scale': VIEWPORT_SCALE }),
-      var desiredWidth = viewer.offsetWidth;
-      var viewport_tmp = pdfPage.getViewport({ scale: 1 });
+      let desiredWidth = viewer.offsetWidth;
+      let viewport_tmp = pdfPage.getViewport({ scale: 1 });
       the_scale = desiredWidth / viewport_tmp.width;
       let viewport = pdfPage.getViewport({ 'scale': the_scale }),
         page = pdf_viewer.createEmptyPage(numPage, viewport.width, viewport.height),
@@ -204,14 +231,15 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
     },
     // Return chunks regrouped by lines
     'getLines': function(chunks) {
+      let layeringMargin = { 'x': 5, 'y': 5 }; // A value (px) to handle layering of chunks
       if (Array.isArray(chunks)) {
         let lines = [
           [
             {
-              'x': parseInt(chunks[0].x) * the_scale,
-              'y': parseInt(chunks[0].y) * the_scale,
-              'w': parseInt(chunks[0].w) * the_scale,
-              'h': parseInt(chunks[0].h) * the_scale,
+              'x': parseInt(chunks[0].x * the_scale),
+              'y': parseInt(chunks[0].y * the_scale),
+              'w': parseInt(chunks[0].w * the_scale),
+              'h': parseInt(chunks[0].h * the_scale),
               'p': parseInt(chunks[0].p)
             }
           ]
@@ -219,128 +247,164 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
         if (chunks.length > 1)
           for (let i = 0; i < chunks.length - 1; i++) {
             let previous = {
-                'x': parseInt(chunks[i].x) * the_scale,
-                'y': parseInt(chunks[i].y) * the_scale,
-                'w': parseInt(chunks[i].w) * the_scale,
-                'h': parseInt(chunks[i].h) * the_scale,
+                'x': parseInt(chunks[i].x * the_scale),
+                'y': parseInt(chunks[i].y * the_scale),
+                'w': parseInt(chunks[i].w * the_scale),
+                'h': parseInt(chunks[i].h * the_scale),
                 'p': parseInt(chunks[i].p)
               },
               next = {
-                'x': parseInt(chunks[i + 1].x) * the_scale,
-                'y': parseInt(chunks[i + 1].y) * the_scale,
-                'w': parseInt(chunks[i + 1].w) * the_scale,
-                'h': parseInt(chunks[i + 1].h) * the_scale,
-                'p': parseInt(chunks[i].p)
+                'x': parseInt(chunks[i + 1].x * the_scale),
+                'y': parseInt(chunks[i + 1].y * the_scale),
+                'w': parseInt(chunks[i + 1].w * the_scale),
+                'h': parseInt(chunks[i + 1].h * the_scale),
+                'p': parseInt(chunks[i + 1].p)
               };
             // case this is a new line
-            if (next.x <= previous.x) {
+            if (
+              previous.p !== next.p ||
+              (previous.x + previous.w < next.x && previous.x + previous.w - layeringMargin.x < next.x) ||
+              (previous.y > next.y && previous.y - layeringMargin.y > next.y)
+            )
               lines.push([next]);
-            } else {
-              lines[lines.length - 1].push(next);
-            }
+            else lines[lines.length - 1].push(next);
           }
         return lines;
       } else return [];
     },
     // Return lines areas
-    'getAreas': function(lines) {
+    'getAreas': function(chunks, sentenceId) {
+      let lines = PdfManager.getLines(chunks);
       if (Array.isArray(lines)) {
-        let result = { 'p': false, 'x': { 'min': null, 'max': null }, 'y': { 'min': null, 'max': null }, 'areas': [] };
+        let result = [];
         for (let i = 0; i < lines.length; i++) {
-          let area = PdfManager.getArea(lines[i]);
-          result.p = area.p;
-          if (result.x.min === null || result.x.min > area.x) result.x.min = area.x;
-          if (result.x.max === null || result.x.max < area.x + area.w) result.x.max = area.x + area.w;
-          if (result.y.min === null || result.y.min > area.y) result.y.min = area.y;
-          if (result.y.max === null || result.y.max < area.y + area.h) result.y.max = area.y + area.h;
-          result.areas.push(area);
+          let areas = PdfManager.getArea(lines[i]);
+          for (let j = 0; j < areas.length; j++) {
+            let area = areas[j];
+            if (result.length === 0 || result[result.length - 1].p !== area.p) {
+              result.push(new Areas(sentenceId));
+            }
+            let res = result[result.length - 1];
+            res.areas = res.areas.concat(area);
+          }
         }
         return result;
       } else return null;
     },
     // Return line area
-    'getArea': function(chunks) {
-      if (Array.isArray(chunks)) {
-        let area = { 'p': chunks[0].p, 'x': chunks[0].x, 'y': chunks[0].y, 'h': chunks[0].h, 'w': chunks[0].w };
-        if (chunks.length === 1) return area;
-        // look chunks
-        else
-          for (let i = 1; i < chunks.length; i++) {
-            // if new line detected, chunk will be ignored
-            if (area.x < chunks[i].x) area.w = chunks[i].x - area.x + chunks[i].w;
-            if (area.y < chunks[i].y) area.y = chunks[i].y;
+    'getArea': function(lines) {
+      if (Array.isArray(lines)) {
+        let result = [new Area(lines[0])];
+        if (lines.length === 1) return result;
+        // loop lines
+        else {
+          for (let i = 1; i < lines.length; i++) {
+            if (result[result.length - 1].y > lines[i].y) {
+              result.push(new Area(lines[i]));
+            } else {
+              result[result.length - 1].addPoints({
+                'x': lines[i].x,
+                'y': lines[i].y,
+                'w': lines[i].w,
+                'h': lines[i].h
+              });
+            }
+            let area = result[result.length - 1];
+            if (area.min.x > lines[i].x) area.min.x = lines[i].x;
+            if (area.max.x < lines[i].x + lines[i].w) area.max.x = lines[i].x + lines[i].w;
+            if (area.min.y > lines[i].y) area.min.y = lines[i].y;
+            if (area.max.y < lines[i].y + lines[i].h) area.max.y = lines[i].y + lines[i].h;
+            area.w = area.max.x - area.min.x;
+            area.h = area.max.y - area.min.y;
           }
-        return area;
+          return result;
+        }
       } else return null;
     },
-    'buildContour': function(mapping, chunks, color) {
+    'buildContours': function(mapping, chunks, color) {
       for (let key in mapping) {
         if (mapping[key].length > 0) {
           let subArray = chunks.slice(mapping[key][0], mapping[key][mapping[key].length - 1] + 1),
-            areas = PdfManager.getAreas(PdfManager.getLines(subArray)),
-            contour = PdfManager.getContour(areas, color),
-            annotationsContainer = PdfManager.pdfViewer.find(
-              '.page[data-page-number="' + areas.p + '"] .svgAnnotationsLayer'
-            );
-          annotationsContainer.append(contour);
-          console.log(areas);
+            areas = PdfManager.getAreas(subArray, key),
+            contours = PdfManager.buildContour(areas, { hull: getColor2(), chunks: getColor() });
         }
       }
     },
     // Return contour of lines
-    'getContour': function(data, color) {
-      if (Array.isArray(data.areas)) {
-        // case coutour is rectangle
-        if (data.areas.length === 1)
-          return PdfManager.buildPath(['H ', data.areas[0].w, 'V', data.areas[0].h, 'H 0 V 0'].join(''), color, {
-            'x': data.areas[0].x,
-            'y': data.areas[0].y,
-            'height': data.areas[0].h,
-            'width': data.areas[0].w
-          });
-        else {
-          let d = '';
-          for (let i = 0; i < data.areas.length; i++) {
-            d +=
-              [
-                'M' + (data.areas[i].x - data.x.min).toString(),
-                data.areas[i].y - data.y.min,
-                'H',
-                data.areas[i].w,
-                'V',
-                data.areas[i].h,
-                'H',
-                data.areas[i].x - data.x.min,
-                'V',
-                data.areas[i].y - data.y.min
-              ].join(' ') + ' ';
+    'buildContour': function(parts, color) {
+      if (Array.isArray(parts)) {
+        for (let i = 0; i < parts.length; i++) {
+          if (Array.isArray(parts[i].areas)) {
+            for (let j = 0; j < parts[i].areas.length; j++) {
+              let area = parts[i].areas[j],
+                svgAnnotationsLayer = PdfManager.pdfViewer.find(
+                  '.page[data-page-number="' + area.p + '"] .svgAnnotationsLayer'
+                ),
+                style = {
+                  'x': area.min.x,
+                  'y': area.min.y,
+                  'height': area.h,
+                  'width': area.w
+                },
+                svg = $('<svg>')
+                  .attr(
+                    'style',
+                    'display: block;width: ' +
+                      (style.width + 1.5) +
+                      'px;height: ' +
+                      (style.height + 1.5) +
+                      'px;position: absolute;top: ' +
+                      (style.y - 1.5) +
+                      'px;left: ' +
+                      (style.x - 1.5) +
+                      'px;'
+                  )
+                  .attr('sentenceId', parts[i].sentenceId)
+                  .attr('width', Math.round(style.width + 3))
+                  .attr('height', Math.round(style.height + 3))
+                  .attr('xmlns', 'http://www.w3.org/2000/svg')
+                  .attr('version', '1.1')
+                  .attr('viewBox', '0 0 ' + (style.width + 3) + ' ' + (style.height + 3)),
+                points = area.points.map(function(item) {
+                  return [item[0] - area.min.x, item[1] - area.min.y];
+                }),
+                pts = d3.polygonHull(points),
+                contour = PdfManager.buildPolygon(
+                  pts
+                    .map(function(item) {
+                      return item[0] + ',' + item[1];
+                    })
+                    .join(' '),
+                  color.hull
+                );
+              console.log(area, pts);
+              for (let i = 0; i < area.points.length; i += 4) {
+                svg.append(
+                  PdfManager.buildPolygon(
+                    [
+                      [area.points[i][0] - area.min.x, ',', area.points[i][1] - area.min.y].join(''),
+                      [area.points[i + 1][0] - area.min.x, ',', area.points[i + 1][1] - area.min.y].join(''),
+                      [area.points[i + 2][0] - area.min.x, ',', area.points[i + 2][1] - area.min.y].join(''),
+                      [area.points[i + 3][0] - area.min.x, ',', area.points[i + 3][1] - area.min.y].join('')
+                    ].join(' '),
+                    color.chunks
+                  )
+                );
+              }
+              svg.append(contour);
+              svgAnnotationsLayer.append(svg);
+            }
           }
-          return PdfManager.buildPath(d.substring(0, d.length - 1), color, {
-            'x': data.x.min,
-            'y': data.y.min,
-            'height': data.y.max - data.y.min,
-            'width': data.x.max - data.x.min
-          });
         }
+        return true;
       } else return null;
     },
-    'buildPath': function(d, color, style) {
-      return $('<path/>')
-        .attr(
-          'style',
-          'z-index: 100000;display: block;width: ' +
-            style.width +
-            'px;height: ' +
-            style.height +
-            'px;position: absolute;top: ' +
-            style.y +
-            'px;left: ' +
-            style.x +
-            'px;'
-        )
-        .attr('d', d)
-        .attr('fill', 'black')
+    'buildPolygon': function(points, color) {
+      let polygon = $('<polygon>')
+        .attr('points', points)
+        .attr('fill', 'transparent')
         .attr('stroke', color);
+      return polygon;
     },
     'setupAnnotations': function(sentences, pages, events) {
       // we must check/wait that the corresponding PDF page is rendered at this point
@@ -351,25 +415,14 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       PdfManager.pdfViewer.find('.page[data-page-number]').each(function(index) {
         let pageDiv = $(this),
           container = $('<div>'),
-          // svg = $('<svg>'),
+          svg = $('<div>'),
           style = pageDiv.find('.canvasWrapper').attr('style');
         container.addClass('annotationsLayer');
         container.attr('style', style);
-        // svg.addClass('svgAnnotationsLayer');
-        // svg
-        //   .attr('width', Math.round(pages[pageDiv.attr('data-page-number') - 1].page_width))
-        //   .attr('height', Math.round(pages[pageDiv.attr('data-page-number') - 1].page_height))
-        //   .attr('xmlns', 'http://www.w3.org/2000/svg')
-        //   .attr('version', '1.1')
-        //   .attr(
-        //     'viewBox',
-        //     '0 0 ' +
-        //       Math.round(pages[pageDiv.attr('data-page-number') - 1].page_width) +
-        //       ' ' +
-        //       Math.round(pages[pageDiv.attr('data-page-number') - 1].page_height)
-        //   );
+        svg.addClass('svgAnnotationsLayer');
+        svg.attr('style', style);
         pageDiv.prepend(container);
-        // pageDiv.prepend(svg);
+        pageDiv.prepend(svg);
       });
 
       if (sentences.chunks) {
@@ -381,9 +434,9 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
           }
           PdfManager.annotate(chunk, page_height, page_width, events);
         });
-        // if (sentences.mapping) {
-        //   PdfManager.buildContour(sentences.mapping, sentences.chunks, 'black');
-        // }
+        if (sentences.mapping) {
+          PdfManager.buildContours(sentences.mapping, sentences.chunks, 'black');
+        }
       }
     },
     'annotate': function(chunk, page_height, page_width, events) {
@@ -404,7 +457,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       //make clickable the area
       let element = document.createElement('s'),
         attributes =
-          'display:block; width:' +
+          'background-color: rgba(211,211,211,0.5);display:block; width:' +
           width +
           'px; height:' +
           height +

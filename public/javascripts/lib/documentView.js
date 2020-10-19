@@ -127,6 +127,8 @@ const DocumentView = function(events) {
           .parent()
           .parent()
           .animate({ scrollTop: position });
+      } else {
+        self.views.scrollTo(el.attr('id'));
       }
     };
 
@@ -290,6 +292,7 @@ const DocumentView = function(events) {
       sectionsWithoutDatasets().removeClass();
       $('#pdf').hide();
       $('#xml').show();
+      $('#datasetsListItems .selected .item').click();
     },
     // set only dataseer elements visible
     'onlyDataseer': function() {
@@ -297,6 +300,7 @@ const DocumentView = function(events) {
       sectionsWithoutDatasets().addClass('hidden');
       $('#pdf').hide();
       $('#xml').show();
+      $('#datasetsListItems .selected .item').click();
     },
     // set only datasets elements visible
     'onlyDatasets': function() {
@@ -305,11 +309,13 @@ const DocumentView = function(events) {
       paragraphsWithoutDatasets().addClass('hidden');
       $('#pdf').hide();
       $('#xml').show();
+      $('#datasetsListItems .selected .item').click();
     },
     // set only PDF elements visible
     'pdf': function() {
       $('#xml').hide();
       $('#pdf').show();
+      $('#datasetsListItems .selected .item').click();
     }
   };
 

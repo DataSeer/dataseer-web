@@ -36,6 +36,28 @@ body {
   margin-bottom: 10px; 
 }
 
+#document-view #pdf-viewer .svgAnnotationsLayer {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  line-height: 1;
+  overflow: hidden;
+}
+
+#document-view #pdf-viewer .svgAnnotationsLayer svg {
+  z-index: 1100;
+}
+
+#document-view #pdf-viewer .svgAnnotationsLayer polygon {
+  box-sizing: content-box;
+  display: inline;
+  float: none;
+  line-height: normal;
+  position: static !important;
+}
+
 #document-view #pdf-viewer .annotationsLayer {
   position: absolute;
   left: 0px;
@@ -48,7 +70,7 @@ body {
 
 #document-view #pdf-viewer .annotationsLayer s {
   cursor: pointer;
-  z-index: 1050;
+  z-index: 1200;
 }
 
 #document-view #pdf-viewer .annotationsLayer .hover {
