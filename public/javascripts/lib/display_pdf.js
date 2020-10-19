@@ -24,6 +24,10 @@ else pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrcPath;
 
 let Area = function(data) {
     this.addPoints = function(square) {
+      let x0 = square.x,
+        x1 = square.x + square.w,
+        y0 = square.y,
+        y1 = square.y + square.h;
       this.points.push([x0, y0]);
       this.points.push([x1, y0]);
       this.points.push([x1, y1]);
@@ -377,7 +381,6 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
                     .join(' '),
                   color.hull
                 );
-              console.log(area, pts);
               for (let i = 0; i < area.points.length; i += 4) {
                 svg.append(
                   PdfManager.buildPolygon(
@@ -435,7 +438,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
           PdfManager.annotate(chunk, page_height, page_width, events);
         });
         if (sentences.mapping) {
-          PdfManager.buildContours(sentences.mapping, sentences.chunks, 'black');
+          // PdfManager.buildContours(sentences.mapping, sentences.chunks, 'black');
         }
       }
     },
@@ -457,15 +460,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       //make clickable the area
       let element = document.createElement('s'),
         attributes =
-          'background-color: rgba(211,211,211,0.5);display:block; width:' +
-          width +
-          'px; height:' +
-          height +
-          'px; position:absolute; top:' +
-          y +
-          'px; left:' +
-          x +
-          'px;';
+          'width:' + width + 'px; height:' + height + 'px; position:absolute; top:' + y + 'px; left:' + x + 'px;';
 
       // element.setAttribute('style', attributes + 'border:1px solid; border-color: rgba(0, 0, 255, .5);');
       element.setAttribute('style', attributes);
