@@ -3,17 +3,9 @@
  */
 'use strict';
 
-let getColor = function() {
-  getColor.bool = !getColor.bool;
-  return getColor.bool ? 'blue' : 'red';
-};
-
-let getColor2 = function() {
-  getColor2.bool = !getColor2.bool;
-  return getColor2.bool ? 'gold' : 'green';
-};
-
 let workerSrcPath = '../javascripts/pdf.js/build/pdf.worker.js';
+
+const sentenceColor = 'black';
 
 if (typeof pdfjsLib === 'undefined' || (!pdfjsLib && !pdfjsLib.getDocument)) {
   console.error('Please build the pdfjs-dist library using\n' + '  `gulp dist-install`');
@@ -23,7 +15,7 @@ if (typeof pdfjsLib === 'undefined' || (!pdfjsLib && !pdfjsLib.getDocument)) {
 else pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrcPath;
 
 let Area = function(data) {
-    this.addPoints = function(square) {
+    this.addLine = function(square) {
       let x0 = square.x,
         x1 = square.x + square.w,
         y0 = square.y,
@@ -32,6 +24,7 @@ let Area = function(data) {
       this.points.push([x1, y0]);
       this.points.push([x1, y1]);
       this.points.push([x0, y1]);
+      this.lines.push(square);
     };
     this.points = [];
     this.lines = [];
@@ -46,7 +39,7 @@ let Area = function(data) {
       x: data.x + data.w,
       y: data.y + data.h
     };
-    this.addPoints({ 'x': data.x, 'y': data.y, 'w': data.w, 'h': data.h });
+    this.addLine({ 'x': data.x, 'y': data.y, 'w': data.w, 'h': data.h });
     return this;
   },
   Areas = function(sentenceId) {
@@ -140,10 +133,14 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       }
     },
     'setColor': function(sentenceid, color) {
-      $('#pdf s[sentenceid="' + sentenceid + '"]').css('background-color', color);
+      $('#pdf .contourAnnotationsLayer > div[sentenceid="' + sentenceid + '"] > div')
+        .css('border-color', color)
+        .addClass('coloredContour');
     },
     'removeColor': function(sentenceid) {
-      $('#pdf s[sentenceid="' + sentenceid + '"]').css('background-color', '');
+      $('#pdf .contourAnnotationsLayer > div[sentenceid="' + sentenceid + '"] > div')
+        .css('border-color', sentenceColor)
+        .removeClass('coloredContour');
     },
     'scrollToSentence': function(sentenceid) {
       let element = $('#pdf s[sentenceid="' + sentenceid + '"]').first(),
@@ -240,29 +237,29 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
         let lines = [
           [
             {
-              'x': parseInt(chunks[0].x * the_scale),
-              'y': parseInt(chunks[0].y * the_scale),
-              'w': parseInt(chunks[0].w * the_scale),
-              'h': parseInt(chunks[0].h * the_scale),
-              'p': parseInt(chunks[0].p)
+              'x': chunks[0].x * the_scale,
+              'y': chunks[0].y * the_scale,
+              'w': chunks[0].w * the_scale,
+              'h': chunks[0].h * the_scale,
+              'p': chunks[0].p
             }
           ]
         ];
         if (chunks.length > 1)
           for (let i = 0; i < chunks.length - 1; i++) {
             let previous = {
-                'x': parseInt(chunks[i].x * the_scale),
-                'y': parseInt(chunks[i].y * the_scale),
-                'w': parseInt(chunks[i].w * the_scale),
-                'h': parseInt(chunks[i].h * the_scale),
-                'p': parseInt(chunks[i].p)
+                'x': chunks[i].x * the_scale,
+                'y': chunks[i].y * the_scale,
+                'w': chunks[i].w * the_scale,
+                'h': chunks[i].h * the_scale,
+                'p': chunks[i].p
               },
               next = {
-                'x': parseInt(chunks[i + 1].x * the_scale),
-                'y': parseInt(chunks[i + 1].y * the_scale),
-                'w': parseInt(chunks[i + 1].w * the_scale),
-                'h': parseInt(chunks[i + 1].h * the_scale),
-                'p': parseInt(chunks[i + 1].p)
+                'x': chunks[i + 1].x * the_scale,
+                'y': chunks[i + 1].y * the_scale,
+                'w': chunks[i + 1].w * the_scale,
+                'h': chunks[i + 1].h * the_scale,
+                'p': chunks[i + 1].p
               };
             // case this is a new line
             if (
@@ -306,7 +303,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
             if (result[result.length - 1].y > lines[i].y) {
               result.push(new Area(lines[i]));
             } else {
-              result[result.length - 1].addPoints({
+              result[result.length - 1].addLine({
                 'x': lines[i].x,
                 'y': lines[i].y,
                 'w': lines[i].w,
@@ -330,7 +327,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
         if (mapping[key].length > 0) {
           let subArray = chunks.slice(mapping[key][0], mapping[key][mapping[key].length - 1] + 1),
             areas = PdfManager.getAreas(subArray, key),
-            contours = PdfManager.buildContour(areas, { hull: getColor2(), chunks: getColor() });
+            contours = PdfManager.buildContour(areas, color);
         }
       }
     },
@@ -341,73 +338,132 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
           if (Array.isArray(parts[i].areas)) {
             for (let j = 0; j < parts[i].areas.length; j++) {
               let area = parts[i].areas[j],
-                svgAnnotationsLayer = PdfManager.pdfViewer.find(
-                  '.page[data-page-number="' + area.p + '"] .svgAnnotationsLayer'
+                contourAnnotationsLayer = PdfManager.pdfViewer.find(
+                  '.page[data-page-number="' + area.p + '"] .contourAnnotationsLayer'
                 ),
-                style = {
-                  'x': area.min.x,
-                  'y': area.min.y,
-                  'height': area.h,
-                  'width': area.w
-                },
-                svg = $('<svg>')
-                  .attr(
-                    'style',
-                    'display: block;width: ' +
-                      (style.width + 1.5) +
-                      'px;height: ' +
-                      (style.height + 1.5) +
-                      'px;position: absolute;top: ' +
-                      (style.y - 1.5) +
-                      'px;left: ' +
-                      (style.x - 1.5) +
-                      'px;'
-                  )
-                  .attr('sentenceId', parts[i].sentenceId)
-                  .attr('width', Math.round(style.width + 3))
-                  .attr('height', Math.round(style.height + 3))
-                  .attr('xmlns', 'http://www.w3.org/2000/svg')
-                  .attr('version', '1.1')
-                  .attr('viewBox', '0 0 ' + (style.width + 3) + ' ' + (style.height + 3)),
-                points = area.points.map(function(item) {
-                  return [item[0] - area.min.x, item[1] - area.min.y];
-                }),
-                pts = d3.polygonHull(points),
-                contour = PdfManager.buildPolygon(
-                  pts
-                    .map(function(item) {
-                      return item[0] + ',' + item[1];
-                    })
-                    .join(' '),
-                  color.hull
-                );
-              for (let i = 0; i < area.points.length; i += 4) {
-                svg.append(
-                  PdfManager.buildPolygon(
-                    [
-                      [area.points[i][0] - area.min.x, ',', area.points[i][1] - area.min.y].join(''),
-                      [area.points[i + 1][0] - area.min.x, ',', area.points[i + 1][1] - area.min.y].join(''),
-                      [area.points[i + 2][0] - area.min.x, ',', area.points[i + 2][1] - area.min.y].join(''),
-                      [area.points[i + 3][0] - area.min.x, ',', area.points[i + 3][1] - area.min.y].join('')
-                    ].join(' '),
-                    color.chunks
-                  )
-                );
-              }
-              svg.append(contour);
-              svgAnnotationsLayer.append(svg);
+                borders = PdfManager.buildBorders(area, color, parts[i].sentenceId);
+              contourAnnotationsLayer.append(borders);
             }
           }
         }
         return true;
       } else return null;
     },
-    'buildPolygon': function(points, color) {
-      let polygon = $('<polygon>')
-        .attr('points', points)
-        .attr('fill', 'transparent')
-        .attr('stroke', color);
-      return polygon;
+    'buildBorders': function(area, color, sentenceid) {
+      let margin = {
+          x: 5,
+          y: 5,
+          w: 5,
+          h: 5
+        },
+        container = $('<div>'),
+        borders = PdfManager.getSquares(area, color, margin);
+      container.attr('sentenceid', sentenceid).attr('class', 'contour');
+      borders.map(function(item) {
+        return container.append(item);
+      });
+      return container;
+    },
+    'getSquares': function(area, color, margin) {
+      let result = [];
+      if (area.lines.length === 1) {
+        let borders = $('<div>').attr(
+          'style',
+          'border: 0px solid ' +
+            color +
+            ';width:' +
+            (area.w + margin.w * 2) +
+            'px; height:' +
+            (area.h + margin.h * 2) +
+            'px; position:absolute; top:' +
+            (area.min.y - margin.y) +
+            'px; left:' +
+            (area.min.x - margin.x) +
+            'px;'
+        );
+        result.push(borders);
+      } else if (area.lines.length === 2 && area.lines[0].x > area.lines[1].x + area.lines[1].w) {
+        let top = $('<div>').attr(
+            'style',
+            'border: 0px solid ' +
+              color +
+              ';border-right: none; width:' +
+              (area.lines[0].w + margin.w * 2) +
+              'px; height:' +
+              (area.lines[0].h + margin.h * 2) +
+              'px; position:absolute; top:' +
+              (area.lines[0].y - margin.y) +
+              'px; left:' +
+              (area.lines[0].x - margin.x) +
+              'px;'
+          ),
+          bottom = $('<div>').attr(
+            'style',
+            'border: 0px solid ' +
+              color +
+              ';border-left: none; width:' +
+              (area.lines[1].w + margin.w * 2) +
+              'px; height:' +
+              (area.lines[1].h + margin.h * 2) +
+              'px; position:absolute; top:' +
+              (area.lines[1].y - margin.y) +
+              'px; left:' +
+              (area.lines[1].x - margin.x) +
+              'px;'
+          );
+        result.push(top);
+        result.push(bottom);
+      } else {
+        let topLeft = {
+            'x': area.min.x - margin.x,
+            'y': area.min.y - margin.y,
+            'w': area.lines[0].x - area.min.x + margin.w,
+            'h': area.lines[1].y - area.min.y + margin.h,
+            'borders': ';border-top: none; border-left: none; width:'
+          },
+          topRight = {
+            'x': topLeft.x + topLeft.w,
+            'y': area.min.y - margin.y,
+            'w': area.max.x - (topLeft.x + topLeft.w) + margin.w,
+            'h': area.lines[area.lines.length - 2].y + area.lines[area.lines.length - 2].h - area.min.y + margin.h,
+            'borders': ';border-bottom: none; border-left: none; width:'
+          },
+          bottomLeft = {
+            'x': area.min.x - margin.x,
+            'y': topLeft.y + topLeft.h,
+            'w': area.lines[area.lines.length - 1].w + margin.w,
+            'h': area.max.y - area.lines[1].y + margin.h,
+            'borders': ';border-top: none; border-right: none; width:'
+          },
+          bottomRight = {
+            'x': area.min.x + area.lines[area.lines.length - 1].w,
+            'y': topRight.y + topRight.h,
+            'w': area.max.x - (area.lines[area.lines.length - 1].x + area.lines[area.lines.length - 1].w) + margin.w,
+            'h': area.max.y - (area.lines[area.lines.length - 2].y + area.lines[area.lines.length - 2].h) + margin.h,
+            'borders': ';border-bottom: none; border-right: none; width:'
+          },
+          elements = [topLeft, topRight, bottomLeft, bottomRight];
+        for (let i = 0; i < elements.length; i++) {
+          elements[i];
+          result.push(
+            $('<div>').attr(
+              'style',
+              'border: 0px solid ' +
+                color +
+                elements[i].borders +
+                elements[i].w +
+                'px; height:' +
+                elements[i].h +
+                'px; position:absolute; top:' +
+                elements[i].y +
+                'px; left:' +
+                elements[i].x +
+                'px;'
+            )
+          );
+        }
+      }
+      return result;
     },
     'setupAnnotations': function(sentences, pages, events) {
       // we must check/wait that the corresponding PDF page is rendered at this point
@@ -418,14 +474,14 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       PdfManager.pdfViewer.find('.page[data-page-number]').each(function(index) {
         let pageDiv = $(this),
           container = $('<div>'),
-          svg = $('<div>'),
+          contourAnnotationsLayer = $('<div>'),
           style = pageDiv.find('.canvasWrapper').attr('style');
         container.addClass('annotationsLayer');
         container.attr('style', style);
-        svg.addClass('svgAnnotationsLayer');
-        svg.attr('style', style);
+        contourAnnotationsLayer.addClass('contourAnnotationsLayer');
+        contourAnnotationsLayer.attr('style', style);
         pageDiv.prepend(container);
-        pageDiv.prepend(svg);
+        pageDiv.prepend(contourAnnotationsLayer);
       });
 
       if (sentences.chunks) {
@@ -438,7 +494,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
           PdfManager.annotate(chunk, page_height, page_width, events);
         });
         if (sentences.mapping) {
-          // PdfManager.buildContours(sentences.mapping, sentences.chunks, 'black');
+          PdfManager.buildContours(sentences.mapping, sentences.chunks, sentenceColor);
         }
       }
     },

@@ -36,7 +36,7 @@ body {
   margin-bottom: 10px; 
 }
 
-#document-view #pdf-viewer .svgAnnotationsLayer {
+#document-view #pdf-viewer .contourAnnotationsLayer {
   position: absolute;
   left: 0px;
   top: 0px;
@@ -46,16 +46,11 @@ body {
   overflow: hidden;
 }
 
-#document-view #pdf-viewer .svgAnnotationsLayer svg {
-  z-index: 1100;
-}
-
-#document-view #pdf-viewer .svgAnnotationsLayer polygon {
-  box-sizing: content-box;
-  display: inline;
-  float: none;
-  line-height: normal;
-  position: static !important;
+#document-view #pdf-viewer .contourAnnotationsLayer .activeContour,
+#document-view #pdf-viewer .contourAnnotationsLayer .selected,
+#document-view #pdf-viewer .contourAnnotationsLayer .coloredContour,
+#document-view #pdf-viewer .contourAnnotationsLayer .corresp {
+  border-width: 3px !important;
 }
 
 #document-view #pdf-viewer .annotationsLayer {
@@ -74,12 +69,10 @@ body {
 }
 
 #document-view #pdf-viewer .annotationsLayer .hover {
-  background-color: rgba(220, 220, 220, 0.25);
   cursor: pointer;
 }
 
 #document-view #pdf-viewer .annotationsLayer .selected {
-  background-color: rgba(2, 116, 190, 0.25);
   cursor: pointer;
 }
 
@@ -380,7 +373,7 @@ body > div > div > div.row > div:nth-child(1) {
   cursor: pointer;
 }
 
-#document-view .selected {
+#document-view #xml .selected {
   background-color: rgb(2, 116, 190);
   color: white;
   cursor: pointer;

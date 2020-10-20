@@ -145,22 +145,30 @@ const DocumentView = function(events) {
       PdfManager.init('#pdf', {
         'click': function(item, element) {
           let xmlSentenceElement = $('tei s[sentenceid="' + item.sentenceId + '"]'),
-            pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]');
+            pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]'),
+            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + item.sentenceId + '"] > div');
           $('#pdf s.selected').removeClass('selected');
+          $('#pdf .contourAnnotationsLayer > div.contour[sentenceid] > div.selected').removeClass('selected');
           xmlSentenceElement.click();
           if (xmlSentenceElement.hasClass('selected')) {
             pdfSentenceElements.addClass('selected');
+            pdfContour.addClass('selected');
           } else {
             pdfSentenceElements.removeClass('selected');
+            pdfContour.removeClass('selected');
           }
         },
         'hover': function(item, element) {
-          let pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]');
+          let pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]'),
+            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + item.sentenceId + '"] > div');
           pdfSentenceElements.addClass('hover');
+          pdfContour.addClass('activeContour');
         },
         'endHover': function(item, element) {
-          let pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]');
+          let pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]'),
+            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + item.sentenceId + '"] > div');
           pdfSentenceElements.removeClass('hover');
+          pdfContour.removeClass('activeContour');
         }
       });
       return PdfManager.refreshPdf(self.doc.pdf.data.data, self.doc.pdf.metadata.sentences, function() {
@@ -399,7 +407,7 @@ const DocumentView = function(events) {
           backgroundColor = colors.backgroundColor(datasets.certOf(id)),
           color = colors.color(backgroundColor);
         datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
-        if (self.hasPdf) PdfManager.setColor(el.attr('sentenceid'), backgroundColor.replace(/0\.[0-9]+/gm, '0.5'));
+        if (self.hasPdf) PdfManager.setColor(el.attr('sentenceid'), backgroundColor);
       });
     },
     // add dataset
@@ -419,7 +427,7 @@ const DocumentView = function(events) {
           datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
           if (self.hasPdf) {
             let sentenceid = datasets.get(id).attr('sentenceid');
-            PdfManager.setColor(sentenceid, backgroundColor.replace(/0\.[0-9]+/gm, '0.5'));
+            PdfManager.setColor(sentenceid, backgroundColor);
             PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
           }
           return cb(null, { 'datatype': res.attr('type'), 'cert': res.attr('cert') });
@@ -470,10 +478,7 @@ const DocumentView = function(events) {
         let el = jQuery(this),
           id = el.attr('corresp').replace('#', ''),
           style = datasets.styleOf(id),
-          color = style
-            .split(';')[0]
-            .split(':')[1]
-            .replace(/0\.[0-9]+/gm, '0.5');
+          color = style.split(';')[0].split(':')[1];
         corresps.styleOf(id, style);
         if (self.hasPdf) PdfManager.setColor(el.attr('sentenceid'), color);
       });
@@ -489,10 +494,7 @@ const DocumentView = function(events) {
         ),
         parent = target.parents('div').first(),
         style = datasets.styleOf(id),
-        color = style
-          .split(';')[0]
-          .split(':')[1]
-          .replace(/0\.[0-9]+/gm, '0.5');
+        color = style.split(';')[0].split(':')[1];
       parent.attr('subtype', 'dataseer');
       corresps.styleOf(id, style);
       if (self.hasPdf) {
