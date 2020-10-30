@@ -417,7 +417,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
         let topLeft = {
             'x': area.min.x - margin.x,
             'y': area.min.y - margin.y,
-            'w': area.lines[0].x - area.min.x + margin.w,
+            'w': area.lines[0].x - area.min.x + (area.lines[0].x !== area.lines[1].x ? margin.w : 0),
             'h': area.lines[1].y - area.min.y + margin.h,
             'borders': ';border-top: none; border-left: none; width:'
           },
