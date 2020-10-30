@@ -48,7 +48,6 @@ let Area = function(data) {
     return this;
   };
 
-let the_scale = 1.5;
 // Some PDFs need external cmaps.
 //
 const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
@@ -90,7 +89,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       //let viewport = pdfPage.getViewport({ 'scale': VIEWPORT_SCALE }),
       let desiredWidth = viewer.offsetWidth;
       let viewport_tmp = pdfPage.getViewport({ scale: 1 });
-      the_scale = desiredWidth / viewport_tmp.width;
+      let the_scale = desiredWidth / viewport_tmp.width;
       let viewport = pdfPage.getViewport({ 'scale': the_scale }),
         page = pdf_viewer.createEmptyPage(numPage, viewport.width, viewport.height),
         canvas = page.querySelector('canvas'),
@@ -114,7 +113,12 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
               textDivs: []
             });
             page.setAttribute('data-loaded', 'true');
-            return callback(pdfPage, { 'width': viewport.width, 'height': viewport.height, 'number': numPage });
+            return callback(pdfPage, {
+              'width': viewport.width,
+              'height': viewport.height,
+              'number': numPage,
+              'scale': the_scale
+            });
           });
         });
     }
@@ -213,7 +217,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
             let numPage = i + 1;
             pdfDocument.getPage(numPage).then(function(pdfPage) {
               pdf_viewer.loadPage(viewer, numPage, pdfPage, function(page, infos) {
-                pages[numPage - 1] = { 'page_height': infos.height, 'page_width': infos.width };
+                pages[numPage - 1] = { 'page_height': infos.height, 'page_width': infos.width, 'scale': infos.scale };
                 pageRendered++;
                 if (pageRendered >= pdfDocument.numPages) {
                   PdfManager.setupAnnotations(annotations, pages, PdfManager.events);
@@ -231,16 +235,16 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
         });
     },
     // Return chunks regrouped by lines
-    'getLines': function(chunks) {
+    'getLines': function(chunks, scales) {
       let layeringMargin = { 'x': 5, 'y': 5 }; // A value (px) to handle layering of chunks
       if (Array.isArray(chunks)) {
         let lines = [
           [
             {
-              'x': chunks[0].x * the_scale,
-              'y': chunks[0].y * the_scale,
-              'w': chunks[0].w * the_scale,
-              'h': chunks[0].h * the_scale,
+              'x': chunks[0].x * scales[chunks[0].p],
+              'y': chunks[0].y * scales[chunks[0].p],
+              'w': chunks[0].w * scales[chunks[0].p],
+              'h': chunks[0].h * scales[chunks[0].p],
               'p': chunks[0].p
             }
           ]
@@ -248,17 +252,17 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
         if (chunks.length > 1)
           for (let i = 0; i < chunks.length - 1; i++) {
             let previous = {
-                'x': chunks[i].x * the_scale,
-                'y': chunks[i].y * the_scale,
-                'w': chunks[i].w * the_scale,
-                'h': chunks[i].h * the_scale,
+                'x': chunks[i].x * scales[chunks[i].p],
+                'y': chunks[i].y * scales[chunks[i].p],
+                'w': chunks[i].w * scales[chunks[i].p],
+                'h': chunks[i].h * scales[chunks[i].p],
                 'p': chunks[i].p
               },
               next = {
-                'x': chunks[i + 1].x * the_scale,
-                'y': chunks[i + 1].y * the_scale,
-                'w': chunks[i + 1].w * the_scale,
-                'h': chunks[i + 1].h * the_scale,
+                'x': chunks[i + 1].x * scales[chunks[i + 1].p],
+                'y': chunks[i + 1].y * scales[chunks[i + 1].p],
+                'w': chunks[i + 1].w * scales[chunks[i + 1].p],
+                'h': chunks[i + 1].h * scales[chunks[i + 1].p],
                 'p': chunks[i + 1].p
               };
             // case this is a new line
@@ -274,8 +278,8 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
       } else return [];
     },
     // Return lines areas
-    'getAreas': function(chunks, sentenceId) {
-      let lines = PdfManager.getLines(chunks);
+    'getAreas': function(chunks, sentenceId, scales) {
+      let lines = PdfManager.getLines(chunks, scales);
       if (Array.isArray(lines)) {
         let result = [];
         for (let i = 0; i < lines.length; i++) {
@@ -322,11 +326,11 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
         }
       } else return null;
     },
-    'buildContours': function(mapping, chunks, color) {
+    'buildContours': function(mapping, chunks, color, scales) {
       for (let key in mapping) {
         if (mapping[key].length > 0) {
           let subArray = chunks.slice(mapping[key][0], mapping[key][mapping[key].length - 1] + 1),
-            areas = PdfManager.getAreas(subArray, key),
+            areas = PdfManager.getAreas(subArray, key, scales),
             contours = PdfManager.buildContour(areas, color);
         }
       }
@@ -467,8 +471,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
     },
     'setupAnnotations': function(sentences, pages, events) {
       // we must check/wait that the corresponding PDF page is rendered at this point
-      let page_height = 0.0,
-        page_width = 0.0;
+      let scale = 1;
 
       // Add annotationsLayer for each page
       PdfManager.pdfViewer.find('.page[data-page-number]').each(function(index) {
@@ -483,26 +486,26 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
         pageDiv.prepend(container);
         pageDiv.prepend(contourAnnotationsLayer);
       });
-
+      let scales = {};
       if (sentences.chunks) {
         sentences.chunks.forEach(function(chunk, n) {
           let numPage = chunk.p;
           if (pages[numPage - 1]) {
-            page_height = pages[numPage - 1].page_height;
-            page_width = pages[numPage - 1].page_width;
+            scale = pages[numPage - 1].scale;
           }
-          PdfManager.annotate(chunk, page_height, page_width, events);
+          scales[numPage] = scale;
+          PdfManager.annotate(chunk, scale, events);
         });
         if (sentences.mapping) {
-          PdfManager.buildContours(sentences.mapping, sentences.chunks, sentenceColor);
+          PdfManager.buildContours(sentences.mapping, sentences.chunks, sentenceColor, scales);
         }
       }
     },
-    'annotate': function(chunk, page_height, page_width, events) {
+    'annotate': function(chunk, scale, events) {
       let page = chunk.p,
         annotationsContainer = PdfManager.pdfViewer.find('.page[data-page-number="' + page + '"] .annotationsLayer'),
-        scale_x = the_scale,
-        scale_y = the_scale,
+        scale_x = scale,
+        scale_y = scale,
         margin = {
           x: 1.5,
           y: 1.5,
