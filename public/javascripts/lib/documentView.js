@@ -142,7 +142,7 @@ const DocumentView = function(events) {
     if (self.hasPdf) {
       self.mainContainer.append($('<div id="pdf">'));
       $('#xml').hide();
-      PdfManager.init('#pdf', {
+      self.pdfViewer = new PdfViewer('pdf', {
         'click': function(item, element) {
           let xmlSentenceElement = $('tei s[sentenceid="' + item.sentenceId + '"]'),
             pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]'),
@@ -171,9 +171,9 @@ const DocumentView = function(events) {
           pdfContour.removeClass('activeContour');
         }
       });
-      return PdfManager.refreshPdf(self.doc.pdf.data.data, self.doc.pdf.metadata.sentences, function() {
+      return self.pdfViewer.render(self.doc.pdf.data.data, self.doc.pdf.metadata.sentences, function() {
         self.finishInit(self.doc);
-        PdfManager.scrollToSentence(
+        self.pdfViewer.scrollToSentence(
           datasets
             .all()
             .first()
@@ -275,7 +275,7 @@ const DocumentView = function(events) {
     'scrollTo': function(id) {
       let position =
         self.hasPdf && $('#pdf').is(':visible')
-          ? PdfManager.scrollToSentence(datasets.get(id).attr('sentenceid')) +
+          ? self.pdfViewer.scrollToSentence(datasets.get(id).attr('sentenceid')) +
             elements.container
               .parent()
               .parent()
@@ -407,7 +407,7 @@ const DocumentView = function(events) {
           backgroundColor = colors.backgroundColor(datasets.certOf(id)),
           color = colors.color(backgroundColor);
         datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
-        if (self.hasPdf) PdfManager.setColor(el.attr('sentenceid'), backgroundColor);
+        if (self.hasPdf) self.pdfViewer.setColor(el.attr('sentenceid'), backgroundColor);
       });
     },
     // add dataset
@@ -427,7 +427,7 @@ const DocumentView = function(events) {
           datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
           if (self.hasPdf) {
             let sentenceid = datasets.get(id).attr('sentenceid');
-            PdfManager.setColor(sentenceid, backgroundColor);
+            self.pdfViewer.setColor(sentenceid, backgroundColor);
             PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
           }
           return cb(null, { 'datatype': res.attr('type'), 'cert': res.attr('cert') });
@@ -450,7 +450,7 @@ const DocumentView = function(events) {
       if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
       if (self.hasPdf) {
         let sentenceid = dataset.attr('sentenceid');
-        PdfManager.removeColor(sentenceid);
+        self.pdfViewer.removeColor(sentenceid);
         PdfManager.unlinkDatasetToSentence(self.doc, sentenceid);
       }
     }
@@ -480,7 +480,7 @@ const DocumentView = function(events) {
           style = datasets.styleOf(id),
           color = style.split(';')[0].split(':')[1];
         corresps.styleOf(id, style);
-        if (self.hasPdf) PdfManager.setColor(el.attr('sentenceid'), color);
+        if (self.hasPdf) self.pdfViewer.setColor(el.attr('sentenceid'), color);
       });
     },
     // add correp
@@ -499,7 +499,7 @@ const DocumentView = function(events) {
       corresps.styleOf(id, style);
       if (self.hasPdf) {
         let sentenceid = selection.res.sentence.attr('sentenceid');
-        PdfManager.setColor(sentenceid, color);
+        self.pdfViewer.setColor(sentenceid, color);
         PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
       }
       return {
@@ -516,7 +516,7 @@ const DocumentView = function(events) {
       if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
       if (self.hasPdf) {
         let sentenceid = el.attr('sentenceid');
-        PdfManager.removeColor(sentenceid);
+        self.pdfViewer.removeColor(sentenceid);
         PdfManager.unlinkDatasetToSentence(self.doc, sentenceid);
       }
     },
@@ -531,7 +531,7 @@ const DocumentView = function(events) {
         if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
         if (self.hasPdf) {
           let sentenceid = el.attr('sentenceid');
-          PdfManager.removeColor(sentenceid);
+          self.pdfViewer.removeColor(sentenceid);
           PdfManager.unlinkDatasetToSentence(self.doc, sentenceid);
         }
       });
