@@ -19,7 +19,7 @@ const MongoDB = {
       doc.modifiedBy[user.role][user.id] = user.username;
     }
     let copy = Object.assign({}, doc);
-    copy.pdf.data = undefined;
+    if (typeof copy.pdf !== 'undefined' && typeof copy.pdf.data !== 'undefined') copy.pdf.data = undefined;
     jQuery.ajax({
       'type': 'PUT',
       'contentType': 'application/json; charset=utf-8',

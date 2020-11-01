@@ -73,7 +73,7 @@ router.post('/', function(req, res, next) {
 router.put('/:id', function(req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  if (typeof req.body.pdf.data !== 'undefined') req.body.pdf.data = undefined;
+  if (typeof req.body.pdf !== 'undefined' && typeof req.body.pdf.data !== 'undefined') req.body.pdf.data = undefined;
   Documents.findByIdAndUpdate(req.params.id, req.body, function(err, post) {
     if (err) return next(err);
     return res.json(post);
