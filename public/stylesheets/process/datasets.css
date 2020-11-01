@@ -400,7 +400,8 @@ body > div > div > div.row > div:nth-child(1) {
 
 #datasets-list .form-row > .item {
   display: block;
-  margin: 5px;
+  /*margin: 8px;*/
+  margin-bottom: 8px;
 }
 
 #datasets-list .selected {
@@ -409,17 +410,19 @@ body > div > div > div.row > div:nth-child(1) {
 }
 
 #datasets-list .form-row {
-  text-align: center;
+  /*text-align: center;*/
+  display: flex;
+  justify-content: center;
   display: inline-block;
   margin-left: 10px;
   margin-right: 10px;
   margin-top: 10px;
   margin-bottom: 10px;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 15px;
+  padding-bottom: 15px;
   padding-left: 10px;
   padding-right: 10px;
-  vertical-align: middle;
+  /*vertical-align: middle;*/
 }
 
 #datasets-list > * {
@@ -428,12 +431,15 @@ body > div > div > div.row > div:nth-child(1) {
 
 #datasets-list > div > * {
   display: inline-block;
-  vertical-align:top;
+  /*vertical-align:top;*/
   height: 100px;
 }
 
 #datasets-list #newDataset > button {
-  margin-top: 33.3px;
+  margin-top: 25px;
+  margin-right: 25px;
+  margin-left: 25px;
+  /*width: 100px;*/
 }
 
 #datasets-list #newDataset > button i {
@@ -441,15 +447,20 @@ body > div > div > div.row > div:nth-child(1) {
 }
 
 #datasets-list #newDataset {
-  min-width: 20%;
-}
-
-#datasets-list #datasetsListItems {
-  max-width: 80%;
-  overflow-y: scroll;
+  /*min-width: 10%;*/
   padding-left: 0px;
   padding-right: 0px;
   margin: 0px;
+}
+
+#datasets-list #datasetsListItems {
+  /*max-width: 90%;*/
+  width: 100%;
+  overflow-y: scroll;
+  padding-left: 0px;
+  padding-right: 150px;
+  margin: 0px;
+  /*float: right;*/
 }
 
 #datasets-list .form-row > * {
@@ -512,6 +523,20 @@ body > div > div > div.row > div:nth-child(1) {
   color: #007E33;
 }
 
+.fa-save {
+  font-size: 22px;
+  padding-top: 1px;
+  margin-left: 0px;
+}
+
+.fa-pen {
+  font-size: 16px;
+}
+
+.fa-check {
+  font-size: 16px;
+}
+
 #datasets-error-modal .modal-header {
   color: white;
   background-color: rgb(0, 123, 255);
@@ -545,4 +570,19 @@ body > div > div > div.row > div:nth-child(1) {
 
 .pdfViewer {
   overflow: hidden;
+}
+
+.right{
+  /*float:right;*/
+  width: 150px;
+  padding-left: 0px;
+  padding-right: 0px;
+  margin: 0px;
+  position:absolute;
+  top: 0px;
+  right: 0px;
+}
+
+.datasetListContainer {
+  position: relative;
 }

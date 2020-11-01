@@ -6,9 +6,9 @@ const DatasetsList = function(data, events) {
   let datasets = {};
 
   let elements = {
-      'container': HtmlBuilder.div({ 'id': '', 'class': '', 'text': '' }),
-      'datasetsList': HtmlBuilder.ul({ 'id': 'datasetsListItems', 'class': '', 'text': '' }),
-      'newDataset': HtmlBuilder.div({ 'id': 'newDataset', 'class': '', 'text': '' })
+      'container': HtmlBuilder.div({ 'id': '', 'class': 'datasetListContainer', 'text': '' }),
+      'datasetsList': HtmlBuilder.div({ 'id': 'datasetsListItems', 'class': '', 'text': '' }),
+      'newDataset': HtmlBuilder.div({ 'id': 'newDataset', 'class': 'right', 'text': '' })
     },
     mapping = {};
 
@@ -61,7 +61,9 @@ const DatasetsList = function(data, events) {
   // Add all elements
   elements.container.append(elements.datasetsList);
   elements.container.append(elements.newDataset);
-  elements.newDataset.append(new View.buttons.add('Add new Dataset'));
+  theButton = new View.buttons.add('Add new Dataset');
+  theButton.attr('style', 'white-space: normal;');
+  elements.newDataset.append(theButton);
 
   elements.newDataset.find('button').click(function() {
     events.onNewDataset();
