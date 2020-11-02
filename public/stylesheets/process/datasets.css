@@ -399,7 +399,6 @@ body > div > div > div.row > div:nth-child(1) {
 
 #datasets-list .form-row > .item {
   display: block;
-  /*margin: 8px;*/
   margin-bottom: 8px;
 }
 
@@ -409,9 +408,6 @@ body > div > div > div.row > div:nth-child(1) {
 }
 
 #datasets-list .form-row {
-  /*text-align: center;*/
-  display: flex;
-  justify-content: center;
   display: inline-block;
   margin-left: 10px;
   margin-right: 10px;
@@ -421,24 +417,12 @@ body > div > div > div.row > div:nth-child(1) {
   padding-bottom: 15px;
   padding-left: 10px;
   padding-right: 10px;
-  /*vertical-align: middle;*/
-}
-
-#datasets-list > * {
-  text-align: center;
-}
-
-#datasets-list > div > * {
-  display: inline-block;
-  /*vertical-align:top;*/
-  height: 100px;
 }
 
 #datasets-list #newDataset > button {
   margin-top: 25px;
   margin-right: 25px;
   margin-left: 25px;
-  /*width: 100px;*/
 }
 
 #datasets-list #newDataset > button i {
@@ -446,20 +430,28 @@ body > div > div > div.row > div:nth-child(1) {
 }
 
 #datasets-list #newDataset {
-  /*min-width: 10%;*/
+  width: 150px;
   padding-left: 0px;
   padding-right: 0px;
   margin: 0px;
+  height: 100%;
+}
+
+#datasets-list #datasetsListItemsContainer {
+  display: inline-block;
+  height: 115px;
 }
 
 #datasets-list #datasetsListItems {
-  /*max-width: 90%;*/
-  width: 100%;
-  overflow-y: scroll;
-  padding-left: 0px;
-  padding-right: 150px;
-  margin: 0px;
-  /*float: right;*/
+  text-align: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 100%;
+  width: calc(100% - 150px);
+}
+
+#datasets-list #datasetsListItems > * {
+  text-align: center;
 }
 
 #datasets-list .form-row > * {
@@ -584,4 +576,9 @@ body > div > div > div.row > div:nth-child(1) {
 
 .datasetListContainer {
   position: relative;
+  height: 115px;
+}
+
+.modal {
+  z-index: 10000;
 }
