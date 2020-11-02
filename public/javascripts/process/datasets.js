@@ -349,7 +349,12 @@
           documentView.colors(),
           getStatusOfDatasets(currentDocument.datasets.current)
         );
-        if (defaultKey) datasetsList.select(defaultKey);
+        if (defaultKey) {
+          // Select default Key after Jquery build datasetLists
+          setTimeout(function() {
+            datasetsList.select(defaultKey);
+          }, 1000);
+        }
       });
 
       // get selection

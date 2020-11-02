@@ -25,7 +25,6 @@ const DatasetsList = function(data, events) {
         {
           'onClick': function(id) {
             events.onClick(id);
-            scrollTo(id);
           },
           'onDelete': function(id) {
             events.onDelete(id);
@@ -39,11 +38,11 @@ const DatasetsList = function(data, events) {
         container = _elements.container;
       mapping[id] = container;
       _elements.link.attr('title', 'Link selected sentence to this dataset');
+
       let previous = elements.datasetsListItemsContainer.innerWidth();
       elements.datasetsListItemsContainer.append(container);
       let next = elements.datasetsListItemsContainer.find('.form-row:last').innerWidth() + 40;
       elements.datasetsListItemsContainer.innerWidth(previous + next);
-      scrollTo(id);
     },
     'remove': function(id) {
       let previous = elements.datasetsListItemsContainer.innerWidth();
@@ -63,9 +62,30 @@ const DatasetsList = function(data, events) {
 
   // scroll ot dataset position
   let scrollTo = function(id) {
-    let position = mapping[id].position().left;
+    let position = Math.round(
+      mapping[id].position().left + elements.datasetsList.scrollLeft() - mapping[id].width() / 2
+    );
     elements.datasetsList.animate({ scrollLeft: position });
   };
+
+  let animationFinished = true;
+
+  elements.datasetsListItemsContainer.get(0).addEventListener(
+    'wheel',
+    function(e) {
+      if (animationFinished) {
+        animationFinished = false;
+        let scroll = e.deltaY > 0 ? 75 : -75,
+          position = Math.round(elements.datasetsList.scrollLeft() + scroll);
+        console.log('wheel', e, position);
+        // elements.datasetsList.scrollLeft(position);
+        elements.datasetsList.animate({ scrollLeft: position }, function() {
+          animationFinished = true;
+        });
+      }
+    },
+    { passive: true }
+  );
 
   // Add all elements
   elements.datasetsList.append(elements.datasetsListItemsContainer);
