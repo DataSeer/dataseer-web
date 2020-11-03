@@ -143,10 +143,10 @@ const DocumentView = function(events) {
       self.mainContainer.append($('<div id="pdf">'));
       $('#xml').hide();
       self.pdfViewer = new PdfViewer('pdf', {
-        'click': function(item, element) {
-          let xmlSentenceElement = $('tei s[sentenceid="' + item.sentenceId + '"]'),
-            pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]'),
-            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + item.sentenceId + '"] > div');
+        'click': function(sentenceId, element) {
+          let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]'),
+            pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
+            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + sentenceId + '"] > div');
           $('#pdf s.selected').removeClass('selected');
           $('#pdf .contourAnnotationsLayer > div.contour[sentenceid] > div.selected').removeClass('selected');
           xmlSentenceElement.click();
@@ -158,15 +158,15 @@ const DocumentView = function(events) {
             pdfContour.removeClass('selected');
           }
         },
-        'hover': function(item, element) {
-          let pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]'),
-            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + item.sentenceId + '"] > div');
+        'hover': function(sentenceId, element) {
+          let pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
+            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + sentenceId + '"] > div');
           pdfSentenceElements.addClass('hover');
           pdfContour.addClass('activeContour');
         },
-        'endHover': function(item, element) {
-          let pdfSentenceElements = $('#pdf s[sentenceid="' + item.sentenceId + '"]'),
-            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + item.sentenceId + '"] > div');
+        'endHover': function(sentenceId, element) {
+          let pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
+            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + sentenceId + '"] > div');
           pdfSentenceElements.removeClass('hover');
           pdfContour.removeClass('activeContour');
         }

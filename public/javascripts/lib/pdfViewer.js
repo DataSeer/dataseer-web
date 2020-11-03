@@ -328,13 +328,13 @@ const PdfViewer = function(id, events) {
       }
       // the link here goes to the bibliographical reference
       element.onclick = function() {
-        events.click(chunk, this);
+        events.click(chunk.sentenceId, this);
       };
       element.onmouseover = function() {
-        events.hover(chunk, this);
+        events.hover(chunk.sentenceId, this);
       };
       element.onmouseout = function() {
-        events.endHover(chunk, this);
+        events.endHover(chunk.sentenceId, this);
       };
       annotationsContainer.append(element);
     };
@@ -390,7 +390,7 @@ const PdfViewer = function(id, events) {
         h: 5
       },
       container = $('<div>'),
-      borders = this.getSquares(area, color, margin);
+      borders = this.getSquares(area, color, margin, sentenceid);
     container.attr('sentenceid', sentenceid).attr('class', 'contour');
     borders.map(function(item) {
       return container.append(item);
@@ -398,56 +398,84 @@ const PdfViewer = function(id, events) {
     return container;
   };
   // Get squares of given area (usefull to display borders)
-  this.getSquares = function(area, color, margin) {
+  this.getSquares = function(area, color, margin, sentenceid) {
     let result = [],
       lines = area.getLines();
     if (lines.length === 1) {
-      let borders = $('<div>').attr(
-        'style',
-        'border: 0px solid ' +
-          color +
-          ';width:' +
-          (area.w + margin.w * 2) +
-          'px; height:' +
-          (area.h + margin.h * 2) +
-          'px; position:absolute; top:' +
-          (area.min.y - margin.y) +
-          'px; left:' +
-          (area.min.x - margin.x) +
-          'px;'
-      );
+      let borders = $('<div>')
+        .attr(
+          'style',
+          'border: 0px solid ' +
+            color +
+            ';width:' +
+            (area.w + margin.w * 2) +
+            'px; height:' +
+            (area.h + margin.h * 2) +
+            'px; position:absolute; top:' +
+            (area.min.y - margin.y) +
+            'px; left:' +
+            (area.min.x - margin.x) +
+            'px;'
+        )
+        .attr('sentenceid', sentenceid);
       result.push(borders);
+      this.setEvents(borders);
     } else if (lines.length === 2 && lines[1].max.x < lines[0].min.x) {
-      let top = $('<div>').attr(
-          'style',
-          'border: 0px solid ' +
-            color +
-            ';border-right: none; width:' +
-            (lines[0].w + margin.w * 2) +
-            'px; height:' +
-            (lines[0].h + margin.h * 2) +
-            'px; position:absolute; top:' +
-            (lines[0].min.y - margin.y) +
-            'px; left:' +
-            (lines[0].min.x - margin.x) +
-            'px;'
-        ),
-        bottom = $('<div>').attr(
-          'style',
-          'border: 0px solid ' +
-            color +
-            ';border-left: none; width:' +
-            (lines[1].w + margin.w * 2) +
-            'px; height:' +
-            (lines[1].h + margin.h * 2) +
-            'px; position:absolute; top:' +
-            (lines[1].min.y - margin.y) +
-            'px; left:' +
-            (lines[1].min.x - margin.x) +
-            'px;'
-        );
+      let top = $('<div>')
+          .attr(
+            'style',
+            'border: 0px solid ' +
+              color +
+              ';border-right: none; width:' +
+              (lines[0].w + margin.w * 2) +
+              'px; height:' +
+              (lines[0].h + margin.h * 2) +
+              'px; position:absolute; top:' +
+              (lines[0].min.y - margin.y) +
+              'px; left:' +
+              (lines[0].min.x - margin.x) +
+              'px;'
+          )
+          .attr('sentenceid', sentenceid),
+        bottom = $('<div>')
+          .attr(
+            'style',
+            'border: 0px solid ' +
+              color +
+              ';border-left: none; width:' +
+              (lines[1].w + margin.w * 2) +
+              'px; height:' +
+              (lines[1].h + margin.h * 2) +
+              'px; position:absolute; top:' +
+              (lines[1].min.y - margin.y) +
+              'px; left:' +
+              (lines[1].min.x - margin.x) +
+              'px;'
+          )
+          .attr('sentenceid', sentenceid);
       result.push(top);
       result.push(bottom);
+      this.setEvents(top);
+      this.setEvents(bottom);
+    } else if (lines.length === 2 && lines[1].min.x === lines[0].min.x && lines[1].max.x > lines[0].max.x) {
+      let borders = $('<div>')
+        .attr(
+          'style',
+          'border: 0px solid ' +
+            color +
+            ';width:' +
+            (area.w + margin.w * 2) +
+            'px; height:' +
+            (area.h + margin.h * 2) +
+            'px; position:absolute; top:' +
+            (area.min.y - margin.y) +
+            'px; left:' +
+            (area.min.x - margin.x) +
+            'px;'
+        )
+        .attr('sentenceid', sentenceid);
+      result.push(borders);
+      this.setEvents(borders);
     } else {
       let topLeft = {
           'x': area.min.x - margin.x,
@@ -481,24 +509,43 @@ const PdfViewer = function(id, events) {
       for (let i = 0; i < elements.length; i++) {
         elements[i];
         result.push(
-          $('<div>').attr(
-            'style',
-            'border: 0px solid ' +
-              color +
-              elements[i].borders +
-              elements[i].w +
-              'px; height:' +
-              elements[i].h +
-              'px; position:absolute; top:' +
-              elements[i].y +
-              'px; left:' +
-              elements[i].x +
-              'px;'
-          )
+          $('<div>')
+            .attr(
+              'style',
+              'border: 0px solid ' +
+                color +
+                elements[i].borders +
+                elements[i].w +
+                'px; height:' +
+                elements[i].h +
+                'px; position:absolute; top:' +
+                elements[i].y +
+                'px; left:' +
+                elements[i].x +
+                'px;'
+            )
+            .attr('sentenceid', sentenceid)
         );
       }
+      this.setEvents(result[1]);
+      this.setEvents(result[2]);
     }
     return result;
+  };
+
+  this.setEvents = function(item) {
+    let element = item.get(0),
+      sentenceid = item.attr('sentenceid');
+    // the link here goes to the bibliographical reference
+    element.onclick = function() {
+      events.click(sentenceid, this);
+    };
+    element.onmouseover = function() {
+      events.hover(sentenceid, this);
+    };
+    element.onmouseout = function() {
+      events.endHover(sentenceid, this);
+    };
   };
 
   this.setColor = function(sentenceid, color) {

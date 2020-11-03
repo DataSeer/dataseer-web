@@ -28,7 +28,7 @@ body {
 }
 
 #document-view #pdf-viewer {
-    background: lightgray;
+  background: lightgray;
 }
 
 #document-view #pdf-viewer .page {
@@ -60,6 +60,11 @@ body {
   bottom: 0px;
   line-height: 1;
   overflow: hidden;
+}
+
+#document-view #pdf-viewer .contourAnnotationsLayer .contour div {
+  cursor: pointer;
+  z-index: 1100;
 }
 
 #document-view #pdf-viewer .annotationsLayer s {
