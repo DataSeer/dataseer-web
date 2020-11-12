@@ -146,29 +146,45 @@ const DocumentView = function(events) {
         'click': function(sentenceId, element) {
           let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]'),
             pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
-            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + sentenceId + '"] > div');
-          $('#pdf s.selected').removeClass('selected');
-          $('#pdf .contourAnnotationsLayer > div.contour[sentenceid] > div.selected').removeClass('selected');
+            pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
+            isDataset = typeof xmlSentenceElement.attr('id') !== 'undefined',
+            lastSelectedSentence = $('s.selected'),
+            lastSelectedContour = $('#pdf .contourLayer > div.contour[sentenceid].selected');
           xmlSentenceElement.click();
+          lastSelectedSentence.removeClass('selected');
+          lastSelectedContour.removeClass('selected');
+          self.pdfViewer.unselectCanvas(lastSelectedContour.attr('sentenceid'));
+          self.pdfViewer.hoverCanvas(sentenceId, isDataset, pdfContour.hasClass('selected'));
           if (xmlSentenceElement.hasClass('selected')) {
             pdfSentenceElements.addClass('selected');
             pdfContour.addClass('selected');
-          } else {
-            pdfSentenceElements.removeClass('selected');
-            pdfContour.removeClass('selected');
+            self.pdfViewer.selectCanvas(sentenceId);
           }
         },
         'hover': function(sentenceId, element) {
+          let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]');
           let pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
-            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + sentenceId + '"] > div');
+            pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
+            isDataset = typeof xmlSentenceElement.attr('id') !== 'undefined';
           pdfSentenceElements.addClass('hover');
-          pdfContour.addClass('activeContour');
+          self.pdfViewer.hoverCanvas(sentenceId, isDataset, pdfContour.hasClass('selected'));
+          if (isDataset) {
+            pdfContour.addClass('activeContourDataset');
+          } else {
+            pdfContour.addClass('activeContourSentence');
+          }
         },
         'endHover': function(sentenceId, element) {
+          let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]');
           let pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
-            pdfContour = $('#pdf .contourAnnotationsLayer > div.contour[sentenceid="' + sentenceId + '"] > div');
-          pdfSentenceElements.removeClass('hover');
-          pdfContour.removeClass('activeContour');
+            pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
+            isDataset = typeof xmlSentenceElement.attr('id') !== 'undefined';
+          self.pdfViewer.endHoverCanvas(sentenceId, isDataset, pdfContour.hasClass('selected'));
+          if (isDataset) {
+            pdfContour.removeClass('activeContourDataset');
+          } else {
+            pdfContour.removeClass('activeContourSentence');
+          }
         }
       });
       return self.pdfViewer.render(self.doc.pdf.data.data, self.doc.pdf.metadata.sentences, function() {
@@ -407,7 +423,7 @@ const DocumentView = function(events) {
           backgroundColor = colors.backgroundColor(datasets.certOf(id)),
           color = colors.color(backgroundColor);
         datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
-        if (self.hasPdf) self.pdfViewer.setColor(el.attr('sentenceid'), backgroundColor);
+        if (self.hasPdf) self.pdfViewer.setColor(el.attr('sentenceid'), backgroundColor, id);
       });
     },
     // add dataset
@@ -427,7 +443,7 @@ const DocumentView = function(events) {
           datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
           if (self.hasPdf) {
             let sentenceid = datasets.get(id).attr('sentenceid');
-            self.pdfViewer.setColor(sentenceid, backgroundColor);
+            self.pdfViewer.setColor(sentenceid, backgroundColor, id);
             PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
           }
           return cb(null, { 'datatype': res.attr('type'), 'cert': res.attr('cert') });
@@ -480,7 +496,7 @@ const DocumentView = function(events) {
           style = datasets.styleOf(id),
           color = style.split(';')[0].split(':')[1];
         corresps.styleOf(id, style);
-        if (self.hasPdf) self.pdfViewer.setColor(el.attr('sentenceid'), color);
+        if (self.hasPdf) self.pdfViewer.setColor(el.attr('sentenceid'), color, id);
       });
     },
     // add correp
@@ -499,7 +515,7 @@ const DocumentView = function(events) {
       corresps.styleOf(id, style);
       if (self.hasPdf) {
         let sentenceid = selection.res.sentence.attr('sentenceid');
-        self.pdfViewer.setColor(sentenceid, color);
+        self.pdfViewer.setColor(sentenceid, color, id);
         PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
       }
       return {

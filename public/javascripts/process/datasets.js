@@ -3,6 +3,23 @@
  */
 (function($) {
   let currentDocument;
+
+  const showLoop = function() {
+      let loop = $('#pdf-loading-loop'),
+        container = loop.find('.loader-container'),
+        loader = container.find('.loader'),
+        width = $('html').width();
+      loop.css('width', width);
+      loop.css('height', window.document.body.clientHeight);
+      container.css('padding-top', `${window.document.body.clientHeight * 0.5 - loader.height() * 0.5}px`);
+      container.css('padding-left', `${width * 0.5 - loader.width() * 0.5}px`);
+      loop.show();
+    },
+    hideLoop = function() {
+      $('#pdf-loading-loop').hide();
+    };
+
+  showLoop();
   // Get the current Object
   return MongoDB.getCurrentDocument({ 'pdf': true }, function(doc) {
     console.log(doc);
@@ -340,6 +357,7 @@
       defaultKey = keys ? keys[0] : undefined;
 
       documentView.init('#document-view', currentDocument, function() {
+        hideLoop();
         if (defaultKey) documentView.views.scrollTo(defaultKey);
         datasetForm.init('#dataset-form');
         datasetForm.loadData(data);
