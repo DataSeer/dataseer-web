@@ -38,15 +38,9 @@ const DatasetsList = function(data, events) {
         container = _elements.container;
       mapping[id] = container;
       _elements.link.attr('title', 'Link selected sentence to this dataset');
-
-      let previous = elements.datasetsListItemsContainer.innerWidth();
       elements.datasetsListItemsContainer.append(container);
-      let next = elements.datasetsListItemsContainer.find('.form-row:last').innerWidth() + 40;
-      elements.datasetsListItemsContainer.innerWidth(previous + next);
     },
     'remove': function(id) {
-      let previous = elements.datasetsListItemsContainer.innerWidth();
-      elements.datasetsListItemsContainer.innerWidth(previous - (datasets[id].elements().container.innerWidth() + 40));
       scrollTo(id);
       datasets[id].delete();
       datasets[id] = undefined;

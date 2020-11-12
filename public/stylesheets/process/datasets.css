@@ -503,19 +503,25 @@ body > div > div > div.row > div:nth-child(1) {
   margin: 0px;
   height: 100%;
 }
-
-#datasets-list #datasetsListItemsContainer {
-  display: inline-block;
+.datasetListContainer {
+  position: relative;
   height: 115px;
-  min-width: 100%;
 }
 
-#datasets-list #datasetsListItems {
-  text-align: center;
+#datasetsListItems {
+  position: absolute;
+  left: 0;
+  top: 0;
   overflow-x: auto;
   overflow-y: hidden;
   height: 100%;
   width: calc(100% - 150px);
+}
+
+#datasetsListItemsContainer {
+  width: auto;
+  height: 100%;
+  white-space: nowrap;
 }
 
 #datasets-list #datasetsListItems > * {
@@ -640,11 +646,6 @@ body > div > div > div.row > div:nth-child(1) {
   position:absolute;
   top: 0px;
   right: 0px;
-}
-
-.datasetListContainer {
-  position: relative;
-  height: 115px;
 }
 
 .modal {
