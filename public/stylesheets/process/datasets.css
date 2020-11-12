@@ -257,8 +257,14 @@ i {
 
 /*dataset-form*/
 
-body > div > div > div.row > div:nth-child(2) {
-  padding-left: 0;
+#dataset-form-container {
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+#dataset-form-container .wrapper {
+  overflow: auto;
+  height: 100%;
 }
 
 #dataset-form {
@@ -302,6 +308,8 @@ body > div > div > div.row > div:nth-child(2) {
 #dataset-form #dataset\.status {
   display: inline-block;
   width: auto;
+  padding-top: 2px;
+  padding-left: 5px;
 }
 
 #dataset-form #dataset\.id .key,
@@ -346,8 +354,10 @@ body > div > div > div.row > div:nth-child(2) {
 
 /*document-view*/
 
-body > div > div > div.row > div:nth-child(1) {
-  padding-left: 0;
+#document-view-container {
+  overflow: auto;
+  height: 100%;
+  border-radius: 20px;
 }
 
 #document-view {
@@ -506,6 +516,7 @@ body > div > div > div.row > div:nth-child(1) {
 .datasetListContainer {
   position: relative;
   height: 115px;
+  margin-left: 20px;
 }
 
 #datasetsListItems {

@@ -407,8 +407,9 @@ const PdfViewer = function(id, events) {
     return container;
   };
 
-  this.unselectCanvas = function(sentenceid, isHover) {
-    this.setCanvasColor(sentenceid, BORDER_WIDTH, REMOVED_BORDER_COLOR);
+  this.unselectCanvas = function(sentenceid) {
+    let color = this.viewer.find('.contourLayer > div[sentenceid="' + sentenceid + '"]').attr('color');
+    this.setCanvasColor(sentenceid, BORDER_WIDTH, color ? color : REMOVED_BORDER_COLOR);
   };
 
   this.selectCanvas = function(sentenceid) {

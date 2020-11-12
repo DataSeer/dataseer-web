@@ -44,13 +44,13 @@ block content
 
   div(class='row' style='margin-bottom:5px;')
     div(class='col-12')
-      div(class='' style='border:1px solid #184D7E;background-color:#FFF;')
-        div(id='datasets-list' style='border:0px;height: 115px;')
+      div(class='' style='border:1px solid #184D7E;background-color:#FFF; border-radius: 20px;')
+        div(id='datasets-list' style='border:0px;height: 115px; border-radius: 20px;')
     
   div(class='row' style='height:70%;flex:1 0 auto;')
     div(class='col-8' style='height:100%;padding-right:0px;')
       div(class='' style='height:100%;')        
-        div(id='view-selection' class='btn-group btn-group-toggle' data-toggle='buttons' style='overflow:hidden;padding:0;margin:0;height:20px;')
+        div(id='view-selection' class='btn-group btn-group-toggle' data-toggle='buttons' style='overflow:hidden;padding:0;margin:0;height:20px;border-top-left-radius: 20px;border-top-right-radius: 20px;')
           if document.pdf
             label(class='btn btn-secondary btn-sm') full text
               input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off')
@@ -65,12 +65,14 @@ block content
             label(class='btn btn-secondary btn-sm active') PDF
               input(type='radio' name='options' id='pdf_all_visible' value='pdf' autocomplete='off' checked)
 
-        div(class='foot-col' style='height:calc(100% - 20px); overflow: auto;flex:1 0 auto;')
-          div(id='document-view' class='' style='padding:0;')
+        div(class='foot-col' style='height:calc(100% - 20px); overflow: hidden; border-bottom-left-radius: 20px;border-bottom-right-radius: 20px;')
+          div(id='document-view-container')
+            div(id='document-view' class='' style='padding:0;')
 
     div(class='col-4' style='height:100%; padding-left:5px;')
-      div(class='foot-col' style='height:93%; overflow: auto')
-        div(id='dataset-form' class='form')
+      div(id='dataset-form-container' class='foot-col' style='height:93%;')
+        div(class='wrapper')
+          div(id='dataset-form' class='form')
       div(class='' style='display: flex; align-items: center; justify-content: center; height:7%; width:100%')
         if current_user
             if document
