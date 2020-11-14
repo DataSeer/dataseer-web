@@ -14,16 +14,16 @@ else pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrcPath;
 
 const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   MARGIN_CHUNK = {
-    'x': 2,
-    'y': 2,
-    'w': 2,
-    'h': 2
+    x: 2,
+    y: 2,
+    w: 2,
+    h: 2
   },
   MARGIN_CONTOUR = {
-    'x': 3,
-    'y': 3,
-    'w': 3,
-    'h': 3
+    x: 3,
+    y: 3,
+    w: 3,
+    h: 3
   },
   CMAP_PACKED = true,
   BORDER_RADIUS = 0, // Not handled yet
@@ -32,7 +32,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   HOVER_BORDER_COLOR = 'rgba(0, 0, 0, 1)',
   SELECTED_BORDER_COLOR = 'rgba(2, 116, 190, 1)';
 
-const Chunk = function(data, scale) {
+const Chunk = function (data, scale) {
     // Representation of a chunk in PDF
     this.x = Math.floor((parseFloat(data.x) - MARGIN_CHUNK.x) * scale);
     this.y = Math.floor((parseFloat(data.y) - MARGIN_CHUNK.y) * scale);
@@ -41,7 +41,7 @@ const Chunk = function(data, scale) {
     this.p = parseInt(data.p);
     return this;
   },
-  Line = function(first) {
+  Line = function (first) {
     // Representation of a line in PDF
     let chunks = [];
     this.h = 0;
@@ -51,10 +51,10 @@ const Chunk = function(data, scale) {
     this.max = { x: -Infinity, y: -Infinity };
     this.p = undefined;
     // getter of chunks
-    this.chunks = function() {
+    this.chunks = function () {
       return chunks;
     };
-    this.addChunk = function(input) {
+    this.addChunk = function (input) {
       let chunk = input instanceof Chunk ? input : new Chunk(input),
         xMin = chunk.x,
         xMax = chunk.x + chunk.w,
@@ -72,7 +72,7 @@ const Chunk = function(data, scale) {
       if (typeof this.p === 'undefined') this.p = chunk.p;
       chunks.push(chunk);
     };
-    this.isIn = function(chunk) {
+    this.isIn = function (chunk) {
       if (chunks.length <= 0) return true; // If there is no chunk, it will be "in" by default
       let xMin = chunk.x,
         xMax = chunk.x + chunk.w,
@@ -87,20 +87,20 @@ const Chunk = function(data, scale) {
     if (typeof first !== 'undefined') this.addChunk(first);
     return this;
   },
-  Lines = function(chunks, scales) {
+  Lines = function (chunks, scales) {
     // Representation of multipes lines in PDF (atteched to a given sentence)
     let collection = [new Line()];
     // getter of all lines
-    this.all = function() {
+    this.all = function () {
       return collection;
     };
-    this.getLast = function() {
+    this.getLast = function () {
       return collection[collection.length - 1];
     };
-    this.newLine = function(chunk) {
+    this.newLine = function (chunk) {
       return collection.push(new Line(chunk));
     };
-    this.addChunks = function(chunks = [], scales = {}) {
+    this.addChunks = function (chunks = [], scales = {}) {
       for (let i = 0; i < chunks.length; i++) {
         let line = this.getLast(),
           item = chunks[i],
@@ -113,12 +113,12 @@ const Chunk = function(data, scale) {
     if (Array.isArray(chunks)) this.addChunks(chunks, scales);
     return this;
   },
-  Area = function(first) {
+  Area = function (first) {
     let lines = [];
-    this.getLines = function() {
+    this.getLines = function () {
       return lines;
     };
-    this.addLine = function(line) {
+    this.addLine = function (line) {
       let xMin = line.min.x,
         xMax = line.min.x + line.w,
         yMin = line.min.y,
@@ -132,7 +132,7 @@ const Chunk = function(data, scale) {
       if (typeof this.p === 'undefined') this.p = line.p;
       lines.push(line);
     };
-    this.isNext = function(line, limits) {
+    this.isNext = function (line, limits) {
       if (lines.length === 0) return true; // If there is no lines, it will be "next" by default
       let xMin = line.min.x,
         xMax = line.min.x + line.w,
@@ -152,18 +152,18 @@ const Chunk = function(data, scale) {
     if (typeof first !== 'undefined') this.addLine(first);
     return this;
   },
-  Areas = function(lines, limites) {
+  Areas = function (lines, limites) {
     let collection = [new Area()];
-    this.newArea = function(line) {
+    this.newArea = function (line) {
       return collection.push(new Area(line));
     };
-    this.getLast = function() {
+    this.getLast = function () {
       return collection[collection.length - 1];
     };
-    this.all = function() {
+    this.all = function () {
       return collection;
     };
-    this.addLines = function(lines = [], limites) {
+    this.addLines = function (lines = [], limites) {
       for (let i = 0; i < lines.length; i++) {
         let area = this.getLast(),
           line = lines[i];
@@ -175,7 +175,7 @@ const Chunk = function(data, scale) {
     return this;
   };
 
-const PdfViewer = function(id, events) {
+const PdfViewer = function (id, events) {
   let self = this;
   this.containerId = id;
   this.viewerId = id + '-viewer';
@@ -187,11 +187,11 @@ const PdfViewer = function(id, events) {
   this.events = events;
 
   // Load a given page
-  this.loadPage = function(numPage, pdfPage, callback) {
+  this.loadPage = function (numPage, pdfPage, callback) {
     let desiredWidth = this.viewerElement.offsetWidth,
       viewport_tmp = pdfPage.getViewport({ scale: 1 }),
       the_scale = desiredWidth / viewport_tmp.width,
-      viewport = pdfPage.getViewport({ 'scale': the_scale }),
+      viewport = pdfPage.getViewport({ scale: the_scale }),
       page = this.buildEmptyPage(numPage, viewport.width, viewport.height),
       canvas = page.querySelector('canvas'),
       wrapper = page.querySelector('.canvasWrapper'),
@@ -202,11 +202,11 @@ const PdfViewer = function(id, events) {
 
     return pdfPage
       .render({
-        'canvasContext': canvasContext,
-        'viewport': viewport
+        canvasContext: canvasContext,
+        viewport: viewport
       })
-      .promise.then(function() {
-        return pdfPage.getTextContent().then(function(textContent) {
+      .promise.then(function () {
+        return pdfPage.getTextContent().then(function (textContent) {
           pdfjsLib.renderTextLayer({
             textContent,
             container,
@@ -215,43 +215,47 @@ const PdfViewer = function(id, events) {
           });
           page.setAttribute('data-loaded', 'true');
           return callback(pdfPage, {
-            'width': viewport.width,
-            'height': viewport.height,
-            'number': numPage,
-            'scale': the_scale
+            width: viewport.width,
+            height: viewport.height,
+            number: numPage,
+            scale: the_scale
           });
         });
       });
   };
 
   // Reorder pages
-  this.sortPages = function() {
+  this.sortPages = function () {
     this.container
       .find('div[class="page"]')
-      .sort(function(a, b) {
+      .sort(function (a, b) {
         return parseInt($(a).attr('data-page-number')) - parseInt($(b).attr('data-page-number'), 10);
       })
       .appendTo(this.viewer);
   };
 
   // Refresh pdf display
-  this.refresh = function(buffer, annotations, done) {
+  this.refresh = function (buffer, annotations, done) {
     // Loading document
     let loadingTask = pdfjsLib.getDocument({
-      'data': buffer,
-      'cMapUrl': CMAP_URL,
-      'cMapPacked': CMAP_PACKED
+      data: buffer,
+      cMapUrl: CMAP_URL,
+      cMapPacked: CMAP_PACKED
     });
 
     loadingTask.promise
-      .then(function(pdfDocument) {
+      .then(function (pdfDocument) {
         let pageRendered = 0;
         let pages = new Array(pdfDocument.numPages);
         for (let i = 0; i < pdfDocument.numPages; i++) {
           let numPage = i + 1;
-          pdfDocument.getPage(numPage).then(function(pdfPage) {
-            self.loadPage(numPage, pdfPage, function(page, infos) {
-              pages[numPage - 1] = { 'page_height': infos.height, 'page_width': infos.width, 'scale': infos.scale };
+          pdfDocument.getPage(numPage).then(function (pdfPage) {
+            self.loadPage(numPage, pdfPage, function (page, infos) {
+              pages[numPage - 1] = {
+                page_height: infos.height,
+                page_width: infos.width,
+                scale: infos.scale
+              };
               pageRendered++;
               if (pageRendered >= pdfDocument.numPages) {
                 self.setup(annotations, pages);
@@ -267,7 +271,7 @@ const PdfViewer = function(id, events) {
         this.container.empty().append('<div>An error has occurred while processing the document</div>');
       });
     // Build all contours
-    this.buildContours = function(mapping, chunks, scales, limites) {
+    this.buildContours = function (mapping, chunks, scales, limites) {
       for (let key in mapping) {
         if (mapping[key].length > 0) {
           let sentenceChunks = chunks.slice(mapping[key][0], mapping[key][mapping[key].length - 1] + 1),
@@ -277,7 +281,7 @@ const PdfViewer = function(id, events) {
       }
     };
     // Return contour of lines
-    this.buildContour = function(lines, sentenceid, limites) {
+    this.buildContour = function (lines, sentenceid, limites) {
       if (Array.isArray(lines)) {
         let areas = new Areas(lines).all();
         for (let i = 0; i < areas.length; i++) {
@@ -289,11 +293,11 @@ const PdfViewer = function(id, events) {
         return true;
       } else return null;
     };
-    this.setup = function(sentences, pages) {
+    this.setup = function (sentences, pages) {
       // we must check/wait that the corresponding PDF page is rendered at this point
       let scale = 1;
       // Add annotationsLayer for each page
-      this.container.find('.page[data-page-number]').each(function(index) {
+      this.container.find('.page[data-page-number]').each(function (index) {
         let pageDiv = $(this),
           container = $('<div>'),
           contourLayer = $('<div>'),
@@ -308,13 +312,13 @@ const PdfViewer = function(id, events) {
       let scales = {},
         limites = {};
       if (sentences.chunks) {
-        sentences.chunks.forEach(function(chunk, n) {
+        sentences.chunks.forEach(function (chunk, n) {
           let numPage = chunk.p;
           if (pages[numPage - 1]) {
             scale = pages[numPage - 1].scale;
             limites[numPage - 1] = {
-              'w': pages[numPage - 1].page_width,
-              'h': pages[numPage - 1].page_height
+              w: pages[numPage - 1].page_width,
+              h: pages[numPage - 1].page_height
             };
           }
           scales[numPage] = scale;
@@ -325,7 +329,7 @@ const PdfViewer = function(id, events) {
         }
       }
     };
-    this.annotate = function(chunk, scale) {
+    this.annotate = function (chunk, scale) {
       let page = chunk.p,
         annotationsContainer = this.container.find('.page[data-page-number="' + page + '"] .annotationsLayer'),
         ch = new Chunk(chunk, scale);
@@ -342,20 +346,20 @@ const PdfViewer = function(id, events) {
         annotationsContainer.attr('subtype', 'dataseer');
       }
       // the link here goes to the bibliographical reference
-      element.onclick = function() {
+      element.onclick = function () {
         events.click(chunk.sentenceId, this);
       };
-      element.onmouseover = function() {
+      element.onmouseover = function () {
         events.hover(chunk.sentenceId, this);
       };
-      element.onmouseout = function() {
+      element.onmouseout = function () {
         events.endHover(chunk.sentenceId, this);
       };
       annotationsContainer.append(element);
     };
   };
 
-  this.buildEmptyPage = function(num, width, height) {
+  this.buildEmptyPage = function (num, width, height) {
     let page = document.createElement('div'),
       canvas = document.createElement('canvas'),
       wrapper = document.createElement('div'),
@@ -387,36 +391,36 @@ const PdfViewer = function(id, events) {
     return page;
   };
 
-  this.render = function(buffer, annotations, cb) {
+  this.render = function (buffer, annotations, cb) {
     console.log('rendering PDF...');
     this.viewer.empty();
-    return this.refresh(buffer, annotations, function() {
+    return this.refresh(buffer, annotations, function () {
       console.log('render of PDF done.');
       return cb();
     });
   };
 
   // Build borders
-  this.buildBorders = function(area, sentenceid) {
+  this.buildBorders = function (area, sentenceid) {
     let container = $('<div>'),
       borders = this.getSquares(area, sentenceid);
     container.attr('sentenceid', sentenceid).attr('class', 'contour');
-    borders.map(function(item) {
+    borders.map(function (item) {
       return container.append(item);
     });
     return container;
   };
 
-  this.unselectCanvas = function(sentenceid) {
+  this.unselectCanvas = function (sentenceid) {
     let color = this.viewer.find('.contourLayer > div[sentenceid="' + sentenceid + '"]').attr('color');
     this.setCanvasColor(sentenceid, BORDER_WIDTH, color ? color : REMOVED_BORDER_COLOR);
   };
 
-  this.selectCanvas = function(sentenceid) {
+  this.selectCanvas = function (sentenceid) {
     this.setCanvasColor(sentenceid, BORDER_WIDTH, SELECTED_BORDER_COLOR);
   };
 
-  this.hoverCanvas = function(sentenceid, isDataset, isSelected) {
+  this.hoverCanvas = function (sentenceid, isDataset, isSelected) {
     if (isDataset)
       this.setCanvasColor(
         sentenceid,
@@ -426,7 +430,7 @@ const PdfViewer = function(id, events) {
     else this.setCanvasColor(sentenceid, BORDER_WIDTH, isSelected ? SELECTED_BORDER_COLOR : HOVER_BORDER_COLOR);
   };
 
-  this.endHoverCanvas = function(sentenceid, isDataset, isSelected) {
+  this.endHoverCanvas = function (sentenceid, isDataset, isSelected) {
     if (isDataset)
       this.setCanvasColor(
         sentenceid,
@@ -437,12 +441,12 @@ const PdfViewer = function(id, events) {
   };
 
   // draw multiple lines
-  this.drawLines = function(canvas, lines, width, color) {
+  this.drawLines = function (canvas, lines, width, color) {
     let canvasElement = canvas.get(0),
       ctx = canvasElement.getContext('2d'),
       img = new Image();
     img.src = canvas.attr('data-url');
-    img.onload = function() {
+    img.onload = function () {
       ctx.drawImage(img, 0, 0);
       ctx.lineWidth = width;
       ctx.strokeStyle = color;
@@ -456,17 +460,17 @@ const PdfViewer = function(id, events) {
     };
   };
 
-  this.setCanvasColor = function(sentenceid, width, color) {
+  this.setCanvasColor = function (sentenceid, width, color) {
     let canvas = this.container
       .find(`.contour[sentenceid="${sentenceid}"] canvas[sentenceid="${sentenceid}"]`)
-      .map(function() {
+      .map(function () {
         let element = $(this);
         self.drawLines(element, JSON.parse(element.attr('borders')), width, color);
       });
   };
 
   // Build canvas
-  this.buildCanvas = function(_x, _y, _w, _h, p, sentenceid, borders = []) {
+  this.buildCanvas = function (_x, _y, _w, _h, p, sentenceid, borders = []) {
     let x = Math.floor(_x),
       y = Math.floor(_y),
       w = Math.floor(_w),
@@ -486,7 +490,7 @@ const PdfViewer = function(id, events) {
   };
 
   // build div
-  this.buildDiv = function(x, y, w, h, sentenceid, events = true) {
+  this.buildDiv = function (x, y, w, h, sentenceid, events = true) {
     let newDiv = $('<div>')
       .attr('style', `width: ${w}px;` + `height: ${h}px;` + `position:absolute;` + `top: ${y}px;` + `left: ${x}px;`)
       .attr('sentenceid', sentenceid)
@@ -495,7 +499,7 @@ const PdfViewer = function(id, events) {
   };
 
   // Get squares of given area (usefull to display borders)
-  this.getSquares = function(area, sentenceid) {
+  this.getSquares = function (area, sentenceid) {
     let lines = area.getLines();
     // case area is a rectangle
     /*
@@ -522,10 +526,10 @@ const PdfViewer = function(id, events) {
         yMin = BORDER_WIDTH,
         yMax = h - BORDER_WIDTH,
         borders = [
-          { 'x0': xMin, 'y0': yMin, 'x1': xMax, 'y1': yMin },
-          { 'x0': xMax, 'y0': yMin, 'x1': xMax, 'y1': yMax },
-          { 'x0': xMax, 'y0': yMax, 'x1': xMin, 'y1': yMax },
-          { 'x0': xMin, 'y0': yMax, 'x1': xMin, 'y1': yMin }
+          { x0: xMin, y0: yMin, x1: xMax, y1: yMin },
+          { x0: xMax, y0: yMin, x1: xMax, y1: yMax },
+          { x0: xMax, y0: yMax, x1: xMin, y1: yMax },
+          { x0: xMin, y0: yMax, x1: xMin, y1: yMin }
         ],
         divs = [this.buildDiv(x, y, w, h, sentenceid)],
         canvas = [this.buildCanvas(x, y, w, h, area.p, sentenceid, borders)];
@@ -548,14 +552,14 @@ const PdfViewer = function(id, events) {
           borders =
             i === 0
               ? [
-                  { 'x0': xMin, 'y0': yMin, 'x1': xMax, 'y1': yMin },
-                  { 'x0': xMax, 'y0': yMax, 'x1': xMin, 'y1': yMax },
-                  { 'x0': xMin, 'y0': yMax, 'x1': xMin, 'y1': yMin }
+                  { x0: xMin, y0: yMin, x1: xMax, y1: yMin },
+                  { x0: xMax, y0: yMax, x1: xMin, y1: yMax },
+                  { x0: xMin, y0: yMax, x1: xMin, y1: yMin }
                 ]
               : [
-                  { 'x0': xMin, 'y0': yMin, 'x1': xMax, 'y1': yMin },
-                  { 'x0': xMax, 'y0': yMin, 'x1': xMax, 'y1': yMax },
-                  { 'x0': xMax, 'y0': yMax, 'x1': xMin, 'y1': yMax }
+                  { x0: xMin, y0: yMin, x1: xMax, y1: yMin },
+                  { x0: xMax, y0: yMin, x1: xMax, y1: yMax },
+                  { x0: xMax, y0: yMax, x1: xMin, y1: yMax }
                 ];
         divs.push(this.buildDiv(x, y, w, h, sentenceid));
         canvas.push(this.buildCanvas(x, y, w, h, area.p, sentenceid, borders));
@@ -569,18 +573,18 @@ const PdfViewer = function(id, events) {
       bottomLeftEmpty = lines[lines.length - 2].min.x > lines[lines.length - 1].min.x,
       xCenter = fistLineMinX_gt_lastLineMaxX
         ? {
-            'min': lines[lines.length - 1].max.x,
-            'max': lines[0].min.x
+            min: lines[lines.length - 1].max.x,
+            max: lines[0].min.x
           }
         : {
-            'min': lines[0].min.x,
-            'max': lines[lines.length - 1].max.x
+            min: lines[0].min.x,
+            max: lines[lines.length - 1].max.x
           },
       topLeft = {
-        'x': area.min.x - MARGIN_CONTOUR.x,
-        'y': area.min.y - MARGIN_CONTOUR.y,
-        'w': xCenter.min - area.min.x + MARGIN_CONTOUR.w / 3,
-        'h':
+        x: area.min.x - MARGIN_CONTOUR.x,
+        y: area.min.y - MARGIN_CONTOUR.y,
+        w: xCenter.min - area.min.x + MARGIN_CONTOUR.w / 3,
+        h:
           (lines[1].min.y === lines[0].max.y
             ? lines[1].min.y
             : lines[1].min.y < lines[0].max.y
@@ -590,22 +594,22 @@ const PdfViewer = function(id, events) {
           MARGIN_CONTOUR.h / 3
       },
       topMiddle = {
-        'x': topLeft.x + topLeft.w,
-        'y': topLeft.y,
-        'w': xCenter.max - xCenter.min + MARGIN_CONTOUR.w / 3,
-        'h': topLeft.h
+        x: topLeft.x + topLeft.w,
+        y: topLeft.y,
+        w: xCenter.max - xCenter.min + MARGIN_CONTOUR.w / 3,
+        h: topLeft.h
       },
       topRight = {
-        'x': topMiddle.x + topMiddle.w,
-        'y': topLeft.y,
-        'w': area.max.x - xCenter.max + MARGIN_CONTOUR.w / 3,
-        'h': topLeft.h
+        x: topMiddle.x + topMiddle.w,
+        y: topLeft.y,
+        w: area.max.x - xCenter.max + MARGIN_CONTOUR.w / 3,
+        h: topLeft.h
       },
       middleLeft = {
-        'x': topLeft.x,
-        'y': topLeft.y + topLeft.h,
-        'w': topLeft.w,
-        'h':
+        x: topLeft.x,
+        y: topLeft.y + topLeft.h,
+        w: topLeft.w,
+        h:
           (lines[lines.length - 1].min.y === lines[lines.length - 2].max.y
             ? lines[lines.length - 1].min.y
             : lines[lines.length - 1].min.y < lines[lines.length - 2].max.y
@@ -615,34 +619,34 @@ const PdfViewer = function(id, events) {
           MARGIN_CONTOUR.h / 3
       },
       center = {
-        'x': topMiddle.x,
-        'y': middleLeft.y,
-        'w': topMiddle.w,
-        'h': middleLeft.h
+        x: topMiddle.x,
+        y: middleLeft.y,
+        w: topMiddle.w,
+        h: middleLeft.h
       },
       middleRight = {
-        'x': topRight.x,
-        'y': middleLeft.y,
-        'w': topRight.w,
-        'h': middleLeft.h
+        x: topRight.x,
+        y: middleLeft.y,
+        w: topRight.w,
+        h: middleLeft.h
       },
       bottomLeft = {
-        'x': middleLeft.x,
-        'y': middleLeft.y + middleLeft.h,
-        'w': middleLeft.w,
-        'h': area.max.y - (middleLeft.y + middleLeft.h) + MARGIN_CONTOUR.h / 3
+        x: middleLeft.x,
+        y: middleLeft.y + middleLeft.h,
+        w: middleLeft.w,
+        h: area.max.y - (middleLeft.y + middleLeft.h) + MARGIN_CONTOUR.h / 3
       },
       bottomMiddle = {
-        'x': center.x,
-        'y': bottomLeft.y,
-        'w': center.w,
-        'h': bottomLeft.h
+        x: center.x,
+        y: bottomLeft.y,
+        w: center.w,
+        h: bottomLeft.h
       },
       bottomRight = {
-        'x': topRight.x,
-        'y': bottomLeft.y,
-        'w': topRight.w,
-        'h': bottomLeft.h
+        x: topRight.x,
+        y: bottomLeft.y,
+        w: topRight.w,
+        h: bottomLeft.h
       },
       events,
       divsInfos = [
@@ -678,32 +682,32 @@ const PdfViewer = function(id, events) {
           bordersTopCanvas = [
             {
               // Top
-              'x0': xMinTopCanvasBorder,
-              'y0': yMinTopCanvasBorder,
-              'x1': xMaxTopCanvasBorder,
-              'y1': yMinTopCanvasBorder
+              x0: xMinTopCanvasBorder,
+              y0: yMinTopCanvasBorder,
+              x1: xMaxTopCanvasBorder,
+              y1: yMinTopCanvasBorder
             },
             {
               // Right
-              'x0': xMaxTopCanvasBorder,
-              'y0': yMinTopCanvasBorder,
-              'x1': xMaxTopCanvasBorder,
-              'y1': hTopCanvas // JOIN BORDERS
+              x0: xMaxTopCanvasBorder,
+              y0: yMinTopCanvasBorder,
+              x1: xMaxTopCanvasBorder,
+              y1: hTopCanvas // JOIN BORDERS
             },
             {
               // Left
-              'x0': xMinTopCanvasBorder,
-              'y0': hTopCanvas, // JOIN BORDERS
-              'x1': xMinTopCanvasBorder,
-              'y1': yMinTopCanvasBorder
+              x0: xMinTopCanvasBorder,
+              y0: hTopCanvas, // JOIN BORDERS
+              x1: xMinTopCanvasBorder,
+              y1: yMinTopCanvasBorder
             }
           ],
           topCanvas = {
-            'x': xTopCanvas,
-            'y': yTopCanvas,
-            'w': wTopCanvas,
-            'h': hTopCanvas,
-            'borders': bordersTopCanvas
+            x: xTopCanvas,
+            y: yTopCanvas,
+            w: wTopCanvas,
+            h: hTopCanvas,
+            borders: bordersTopCanvas
           };
         let xMiddleCanvas = middleLeft.x - BORDER_WIDTH / 2,
           yMiddleCanvas = middleLeft.y - BORDER_WIDTH / 2,
@@ -718,39 +722,39 @@ const PdfViewer = function(id, events) {
           bordersMiddleCanvas = [
             {
               // Top
-              'x0': xMinMiddleCanvasBorder,
-              'y0': yMinMiddleCanvasBorder,
-              'x1': xTopMaxMiddleCanvasBorder,
-              'y1': yMinMiddleCanvasBorder
+              x0: xMinMiddleCanvasBorder,
+              y0: yMinMiddleCanvasBorder,
+              x1: xTopMaxMiddleCanvasBorder,
+              y1: yMinMiddleCanvasBorder
             },
             {
               // Right
-              'x0': xMaxMiddleCanvasBorder,
-              'y0': 0, // JOIN BORDERS
-              'x1': xMaxMiddleCanvasBorder,
-              'y1': yMaxMiddleCanvasBorder
+              x0: xMaxMiddleCanvasBorder,
+              y0: 0, // JOIN BORDERS
+              x1: xMaxMiddleCanvasBorder,
+              y1: yMaxMiddleCanvasBorder
             },
             {
               // Bottom
-              'x0': xMaxMiddleCanvasBorder,
-              'y0': yMaxMiddleCanvasBorder,
-              'x1': xBottomMinMiddleCanvasBorder,
-              'y1': yMaxMiddleCanvasBorder
+              x0: xMaxMiddleCanvasBorder,
+              y0: yMaxMiddleCanvasBorder,
+              x1: xBottomMinMiddleCanvasBorder,
+              y1: yMaxMiddleCanvasBorder
             },
             {
               // Left
-              'x0': xMinMiddleCanvasBorder,
-              'y0': hMiddleCanvas, // JOIN BORDERS
-              'x1': xMinMiddleCanvasBorder,
-              'y1': yMinMiddleCanvasBorder
+              x0: xMinMiddleCanvasBorder,
+              y0: hMiddleCanvas, // JOIN BORDERS
+              x1: xMinMiddleCanvasBorder,
+              y1: yMinMiddleCanvasBorder
             }
           ],
           middleCanvas = {
-            'x': xMiddleCanvas,
-            'y': yMiddleCanvas,
-            'w': wMiddleCanvas,
-            'h': hMiddleCanvas,
-            'borders': bordersMiddleCanvas
+            x: xMiddleCanvas,
+            y: yMiddleCanvas,
+            w: wMiddleCanvas,
+            h: hMiddleCanvas,
+            borders: bordersMiddleCanvas
           };
         let xBottomCanvas = bottomLeft.x - BORDER_WIDTH / 2,
           yBottomCanvas = bottomLeft.y - BORDER_WIDTH,
@@ -763,32 +767,32 @@ const PdfViewer = function(id, events) {
           bordersBottomCanvas = [
             {
               // Right
-              'x0': xMaxBottomCanvasBorder,
-              'y0': yMinBottomCanvasBorder,
-              'x1': xMaxBottomCanvasBorder,
-              'y1': yMaxBottomCanvasBorder
+              x0: xMaxBottomCanvasBorder,
+              y0: yMinBottomCanvasBorder,
+              x1: xMaxBottomCanvasBorder,
+              y1: yMaxBottomCanvasBorder
             },
             {
               // Bottom
-              'x0': xMaxBottomCanvasBorder,
-              'y0': yMaxBottomCanvasBorder,
-              'x1': xMinBottomCanvasBorder,
-              'y1': yMaxBottomCanvasBorder
+              x0: xMaxBottomCanvasBorder,
+              y0: yMaxBottomCanvasBorder,
+              x1: xMinBottomCanvasBorder,
+              y1: yMaxBottomCanvasBorder
             },
             {
               // Left
-              'x0': xMinBottomCanvasBorder,
-              'y0': yMaxBottomCanvasBorder,
-              'x1': xMinBottomCanvasBorder,
-              'y1': 0 // JOIN BORDERS
+              x0: xMinBottomCanvasBorder,
+              y0: yMaxBottomCanvasBorder,
+              x1: xMinBottomCanvasBorder,
+              y1: 0 // JOIN BORDERS
             }
           ],
           bottomCanvas = {
-            'x': xBottomCanvas,
-            'y': yBottomCanvas,
-            'w': wBottomCanvas,
-            'h': hBottomCanvas,
-            'borders': bordersBottomCanvas
+            x: xBottomCanvas,
+            y: yBottomCanvas,
+            w: wBottomCanvas,
+            h: hBottomCanvas,
+            borders: bordersBottomCanvas
           };
         canvasInfos.push(topCanvas);
         canvasInfos.push(middleCanvas);
@@ -811,32 +815,32 @@ const PdfViewer = function(id, events) {
           bordersTopCanvas = [
             {
               // Top
-              'x0': xMinTopCanvasBorder,
-              'y0': yMinTopCanvasBorder,
-              'x1': xMaxTopCanvasBorder,
-              'y1': yMinTopCanvasBorder
+              x0: xMinTopCanvasBorder,
+              y0: yMinTopCanvasBorder,
+              x1: xMaxTopCanvasBorder,
+              y1: yMinTopCanvasBorder
             },
             {
               // Right
-              'x0': xMaxTopCanvasBorder,
-              'y0': yMinTopCanvasBorder,
-              'x1': xMaxTopCanvasBorder,
-              'y1': hTopCanvas // JOIN BORDERS
+              x0: xMaxTopCanvasBorder,
+              y0: yMinTopCanvasBorder,
+              x1: xMaxTopCanvasBorder,
+              y1: hTopCanvas // JOIN BORDERS
             },
             {
               // Left
-              'x0': xMinTopCanvasBorder,
-              'y0': hTopCanvas, // JOIN BORDERS
-              'x1': xMinTopCanvasBorder,
-              'y1': yMinTopCanvasBorder
+              x0: xMinTopCanvasBorder,
+              y0: hTopCanvas, // JOIN BORDERS
+              x1: xMinTopCanvasBorder,
+              y1: yMinTopCanvasBorder
             }
           ],
           topCanvas = {
-            'x': xTopCanvas,
-            'y': yTopCanvas,
-            'w': wTopCanvas,
-            'h': hTopCanvas,
-            'borders': bordersTopCanvas
+            x: xTopCanvas,
+            y: yTopCanvas,
+            w: wTopCanvas,
+            h: hTopCanvas,
+            borders: bordersTopCanvas
           };
         let xMiddleCanvas = middleLeft.x - BORDER_WIDTH / 2,
           yMiddleCanvas = middleLeft.y - BORDER_WIDTH / 2,
@@ -851,39 +855,39 @@ const PdfViewer = function(id, events) {
           bordersMiddleCanvas = [
             {
               // Top
-              'x0': xMinMiddleCanvasBorder,
-              'y0': yMinMiddleCanvasBorder,
-              'x1': xTopMaxMiddleCanvasBorder,
-              'y1': yMinMiddleCanvasBorder
+              x0: xMinMiddleCanvasBorder,
+              y0: yMinMiddleCanvasBorder,
+              x1: xTopMaxMiddleCanvasBorder,
+              y1: yMinMiddleCanvasBorder
             },
             {
               // Right
-              'x0': xMaxMiddleCanvasBorder,
-              'y0': 0, // JOIN BORDERS
-              'x1': xMaxMiddleCanvasBorder,
-              'y1': yMaxMiddleCanvasBorder
+              x0: xMaxMiddleCanvasBorder,
+              y0: 0, // JOIN BORDERS
+              x1: xMaxMiddleCanvasBorder,
+              y1: yMaxMiddleCanvasBorder
             },
             {
               // Bottom
-              'x0': xMaxMiddleCanvasBorder,
-              'y0': yMaxMiddleCanvasBorder,
-              'x1': xBottomMinMiddleCanvasBorder,
-              'y1': yMaxMiddleCanvasBorder
+              x0: xMaxMiddleCanvasBorder,
+              y0: yMaxMiddleCanvasBorder,
+              x1: xBottomMinMiddleCanvasBorder,
+              y1: yMaxMiddleCanvasBorder
             },
             {
               // Left
-              'x0': xMinMiddleCanvasBorder,
-              'y0': hMiddleCanvas, // JOIN BORDERS
-              'x1': xMinMiddleCanvasBorder,
-              'y1': yMinMiddleCanvasBorder
+              x0: xMinMiddleCanvasBorder,
+              y0: hMiddleCanvas, // JOIN BORDERS
+              x1: xMinMiddleCanvasBorder,
+              y1: yMinMiddleCanvasBorder
             }
           ],
           middleCanvas = {
-            'x': xMiddleCanvas,
-            'y': yMiddleCanvas,
-            'w': wMiddleCanvas,
-            'h': hMiddleCanvas,
-            'borders': bordersMiddleCanvas
+            x: xMiddleCanvas,
+            y: yMiddleCanvas,
+            w: wMiddleCanvas,
+            h: hMiddleCanvas,
+            borders: bordersMiddleCanvas
           };
         let xBottomCanvas = bottomLeft.x - BORDER_WIDTH / 2,
           yBottomCanvas = bottomLeft.y - BORDER_WIDTH / 2,
@@ -896,32 +900,32 @@ const PdfViewer = function(id, events) {
           bordersBottomCanvas = [
             {
               // Right
-              'x0': xMaxBottomCanvasBorder,
-              'y0': yMinBottomCanvasBorder, // NO NEED TO JOIN BORDERS
-              'x1': xMaxBottomCanvasBorder,
-              'y1': yMaxBottomCanvasBorder
+              x0: xMaxBottomCanvasBorder,
+              y0: yMinBottomCanvasBorder, // NO NEED TO JOIN BORDERS
+              x1: xMaxBottomCanvasBorder,
+              y1: yMaxBottomCanvasBorder
             },
             {
               // Bottom
-              'x0': xMaxBottomCanvasBorder,
-              'y0': yMaxBottomCanvasBorder,
-              'x1': xMinBottomCanvasBorder,
-              'y1': yMaxBottomCanvasBorder
+              x0: xMaxBottomCanvasBorder,
+              y0: yMaxBottomCanvasBorder,
+              x1: xMinBottomCanvasBorder,
+              y1: yMaxBottomCanvasBorder
             },
             {
               // Left
-              'x0': xMinBottomCanvasBorder,
-              'y0': yMaxBottomCanvasBorder,
-              'x1': xMinBottomCanvasBorder,
-              'y1': 0 // JOIN BORDERS
+              x0: xMinBottomCanvasBorder,
+              y0: yMaxBottomCanvasBorder,
+              x1: xMinBottomCanvasBorder,
+              y1: 0 // JOIN BORDERS
             }
           ],
           bottomCanvas = {
-            'x': xBottomCanvas,
-            'y': yBottomCanvas,
-            'w': wBottomCanvas,
-            'h': hBottomCanvas,
-            'borders': bordersBottomCanvas
+            x: xBottomCanvas,
+            y: yBottomCanvas,
+            w: wBottomCanvas,
+            h: hBottomCanvas,
+            borders: bordersBottomCanvas
           };
         canvasInfos.push(middleCanvas);
         canvasInfos.push(topCanvas);
@@ -946,39 +950,39 @@ const PdfViewer = function(id, events) {
         bordersTopCanvas = [
           {
             // Top
-            'x0': xMinTopCanvasBorder,
-            'y0': yMinTopCanvasBorder,
-            'x1': xMaxTopCanvasBorder,
-            'y1': yMinTopCanvasBorder
+            x0: xMinTopCanvasBorder,
+            y0: yMinTopCanvasBorder,
+            x1: xMaxTopCanvasBorder,
+            y1: yMinTopCanvasBorder
           },
           {
             // Right
-            'x0': xMaxTopCanvasBorder,
-            'y0': yMinTopCanvasBorder,
-            'x1': xMaxTopCanvasBorder,
-            'y1': hTopCanvas // JOIN BORDERS
+            x0: xMaxTopCanvasBorder,
+            y0: yMinTopCanvasBorder,
+            x1: xMaxTopCanvasBorder,
+            y1: hTopCanvas // JOIN BORDERS
           },
           {
             // Bottom
-            'x0': xMaxTopCanvasBorder,
-            'y0': yMaxTopCanvasBorder,
-            'x1': xBottomMinTopCanvasBorder,
-            'y1': yMaxTopCanvasBorder
+            x0: xMaxTopCanvasBorder,
+            y0: yMaxTopCanvasBorder,
+            x1: xBottomMinTopCanvasBorder,
+            y1: yMaxTopCanvasBorder
           },
           {
             // Left
-            'x0': xMinTopCanvasBorder,
-            'y0': hTopCanvas, // JOIN BORDERS
-            'x1': xMinTopCanvasBorder,
-            'y1': yMinTopCanvasBorder
+            x0: xMinTopCanvasBorder,
+            y0: hTopCanvas, // JOIN BORDERS
+            x1: xMinTopCanvasBorder,
+            y1: yMinTopCanvasBorder
           }
         ],
         topCanvas = {
-          'x': xTopCanvas,
-          'y': yTopCanvas,
-          'w': wTopCanvas,
-          'h': hTopCanvas,
-          'borders': bordersTopCanvas
+          x: xTopCanvas,
+          y: yTopCanvas,
+          w: wTopCanvas,
+          h: hTopCanvas,
+          borders: bordersTopCanvas
         };
       let xBottomCanvas = bottomMiddle.x - BORDER_WIDTH / 2,
         yBottomCanvas = bottomMiddle.y - BORDER_WIDTH / 2,
@@ -991,32 +995,32 @@ const PdfViewer = function(id, events) {
         bordersBottomCanvas = [
           {
             // Right
-            'x0': xMaxBottomCanvasBorder,
-            'y0': 0, // JOIN TOP/BOTTOM CANVAS
-            'x1': xMaxBottomCanvasBorder,
-            'y1': yMaxBottomCanvasBorder
+            x0: xMaxBottomCanvasBorder,
+            y0: 0, // JOIN TOP/BOTTOM CANVAS
+            x1: xMaxBottomCanvasBorder,
+            y1: yMaxBottomCanvasBorder
           },
           {
             // Bottom
-            'x0': xMaxBottomCanvasBorder,
-            'y0': yMaxBottomCanvasBorder,
-            'x1': xMinBottomCanvasBorder,
-            'y1': yMaxBottomCanvasBorder
+            x0: xMaxBottomCanvasBorder,
+            y0: yMaxBottomCanvasBorder,
+            x1: xMinBottomCanvasBorder,
+            y1: yMaxBottomCanvasBorder
           },
           {
             // Left
-            'x0': xMinBottomCanvasBorder,
-            'y0': yMaxBottomCanvasBorder,
-            'x1': xMinBottomCanvasBorder,
-            'y1': 0 // JOIN TOP/BOTTOM CANVAS
+            x0: xMinBottomCanvasBorder,
+            y0: yMaxBottomCanvasBorder,
+            x1: xMinBottomCanvasBorder,
+            y1: 0 // JOIN TOP/BOTTOM CANVAS
           }
         ],
         bottomCanvas = {
-          'x': xBottomCanvas,
-          'y': yBottomCanvas,
-          'w': wBottomCanvas,
-          'h': hBottomCanvas,
-          'borders': bordersBottomCanvas
+          x: xBottomCanvas,
+          y: yBottomCanvas,
+          w: wBottomCanvas,
+          h: hBottomCanvas,
+          borders: bordersBottomCanvas
         };
       canvasInfos.push(bottomCanvas);
       canvasInfos.push(topCanvas);
@@ -1043,21 +1047,21 @@ const PdfViewer = function(id, events) {
     return divs.concat(canvas);
   };
 
-  this.setEvents = function(items) {
+  this.setEvents = function (items) {
     for (let i = 0; i < items.length; i++) {
       let item = items[i];
       if (item.attr('events') === 'true') {
         let element = item.get(0),
           sentenceid = item.attr('sentenceid');
         // the link here goes to the bibliographical reference
-        element.onclick = function() {
+        element.onclick = function () {
           events.click(sentenceid, this);
         };
-        element.onmouseover = function() {
+        element.onmouseover = function () {
           item.parent().addClass('hover');
           events.hover(sentenceid, this);
         };
-        element.onmouseout = function() {
+        element.onmouseout = function () {
           item.parent().removeClass('hover');
           events.endHover(sentenceid, this);
         };
@@ -1065,32 +1069,27 @@ const PdfViewer = function(id, events) {
     }
   };
 
-  this.setColor = function(sentenceid, color, datasetid) {
+  this.setColor = function (sentenceid, color, datasetid) {
     this.setCanvasColor(sentenceid, BORDER_WIDTH, color);
     this.viewer
       .find('.contourLayer > div[sentenceid="' + sentenceid + '"]')
       .attr('color', color)
       .attr('datasetid', datasetid);
   };
-  this.removeColor = function(sentenceid) {
+  this.removeColor = function (sentenceid) {
     this.setCanvasColor(sentenceid, BORDER_WIDTH, REMOVED_BORDER_COLOR);
     this.viewer
       .find('.contourLayer > div[sentenceid="' + sentenceid + '"]')
       .attr('color', REMOVED_BORDER_COLOR)
       .removeAttr('datasetid');
   };
-  this.scrollToSentence = function(sentenceid) {
+  this.scrollToSentence = function (sentenceid) {
     let element = this.viewer.find('s[sentenceid="' + sentenceid + '"]').first(),
-      numPage = parseInt(
-        element
-          .parent()
-          .parent()
-          .attr('data-page-number')
-      ),
+      numPage = parseInt(element.parent().parent().attr('data-page-number')),
       pages = this.viewer.find('div[class="page"]'),
       i = 1,
       height = 0;
-    pages.map(function() {
+    pages.map(function () {
       if (i < numPage) {
         height += $(this).height();
         i += 1;

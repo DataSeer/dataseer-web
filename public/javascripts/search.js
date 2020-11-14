@@ -2,21 +2,21 @@
  * @prettier
  */
 
-(function($) {
+(function ($) {
   // init attr data of each 'searchable' row
-  $('.list .row[data]').map(function() {
+  $('.list .row[data]').map(function () {
     let row = $(this),
       txt = '';
-    row.children().map(function() {
+    row.children().map(function () {
       txt += $(this).text() + ';';
     });
     row.attr('data', txt);
   });
-  let filter = function() {
+  let filter = function () {
     // Declare variables
     let input = $(this),
       searchedValue = input.val().toLowerCase();
-    $('.list .row[data]').map(function() {
+    $('.list .row[data]').map(function () {
       let row = $(this),
         txt = row.attr('data');
       if (txt.length) {

@@ -38,18 +38,18 @@ app.use(logger('dev'));
 app.use(methodOverride());
 app.use(
   fileUpload({
-    'limits': { 'fileSize': 50 * 1024 * 1024 }
+    limits: { fileSize: 50 * 1024 * 1024 }
   })
 );
-app.use(bodyParser.json({ 'limit': '50mb', 'extended': true }));
-app.use(bodyParser.urlencoded({ 'limit': '10mb', 'extended': true }));
+app.use(bodyParser.json({ limit: '50mb', extended: true }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 // app.use(multer());
 app.use(
   session({
-    'cookieName': 'session',
-    'secret': 'uwotm8',
-    'resave': false,
-    'saveUninitialized': false
+    cookieName: 'session',
+    secret: 'uwotm8',
+    resave: false,
+    saveUninitialized: false
   })
 );
 app.use(flash());
@@ -82,15 +82,19 @@ mongoose.set('useCreateIndex', true);
 const urlmongo = conf.services.mongodb;
 
 // API connection
-mongoose.connect(urlmongo, { 'useNewUrlParser': true, 'useFindAndModify': false, 'useUnifiedTopology': true });
+mongoose.connect(urlmongo, {
+  useNewUrlParser: true,
+  useFindAndModify: false,
+  useUnifiedTopology: true
+});
 
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Failed to connect to MongoDB'));
-db.once('open', function() {
+db.once('open', function () {
   console.log('Connection to MongoDB succeeded');
 });
 
-request.get(conf.services['dataseer-ml'] + '/jsonDataTypes', function(error, response, body) {
+request.get(conf.services['dataseer-ml'] + '/jsonDataTypes', function (error, response, body) {
   if (!error && response.statusCode == 200) {
     app.set('dataTypes.json', extractor.buildDataTypes(JSON.parse(body)));
   } else {

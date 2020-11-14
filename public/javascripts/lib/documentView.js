@@ -1,22 +1,22 @@
 /*
  * @prettier
  */
-const Colors = function() {
+const Colors = function () {
   let self = this,
     colors = ['#ff0000', '#ffa500', '#ffff00', '#008000', '#0000ff', '#4b0082', '#ee82ee'],
     // colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'],
     index = 0;
-  self.backgroundColor = function(alpha) {
+  self.backgroundColor = function (alpha) {
     let result = randomColor({
       // 'luminosity': 'light',
-      'hue': colors[index],
-      'format': 'rgba',
-      'alpha': alpha
+      hue: colors[index],
+      format: 'rgba',
+      alpha: alpha
     });
     index = index < colors.length - 1 ? index + 1 : 0;
     return result;
   };
-  self.color = function(backgroundColor) {
+  self.color = function (backgroundColor) {
     let regex = /^rgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d*(?:\.\d+)?)\)$/,
       matches = backgroundColor.match(regex),
       R = matches[1],
@@ -31,49 +31,49 @@ const Colors = function() {
   return self;
 };
 
-const DocumentView = function(events) {
+const DocumentView = function (events) {
   let self = this,
     colors = new Colors();
 
   let elements = {
-    container: HtmlBuilder.div({ 'id': '', 'class': 'container-fluid', 'text': '' })
+    container: HtmlBuilder.div({ id: '', class: 'container-fluid', text: '' })
   };
 
   // get paragraphs without Datasets
-  let paragraphsWithoutDatasets = function() {
+  let paragraphsWithoutDatasets = function () {
       let paragraphs = elements.container.find('text > div > div, text > div > *:not(div)');
-      return paragraphs.map(function(i, el) {
+      return paragraphs.map(function (i, el) {
         if (jQuery(el).find('s[id], s[corresp]').length === 0) return el;
       });
     },
-    sectionsWithoutDatasets = function() {
+    sectionsWithoutDatasets = function () {
       let paragraphs = elements.container.find('text > div, text > *:not(div)');
-      return paragraphs.map(function(i, el) {
+      return paragraphs.map(function (i, el) {
         if (jQuery(el).find('s[id], s[corresp]').length === 0) return el;
       });
     },
     // get selected element (if it is in container)
-    selectedElements = function() {
+    selectedElements = function () {
       let selection = jQuery('tei s.selected');
       if (selection.length > 0) {
         return {
-          'err': null,
-          'res': {
-            'sentence': selection
+          err: null,
+          res: {
+            sentence: selection
           }
         };
       } else {
         return {
-          'err': true,
-          'res': null
+          err: true,
+          res: null
         };
       }
     },
-    selectionToSenctence = function(selection, options, clickEvent, cb) {
+    selectionToSenctence = function (selection, options, clickEvent, cb) {
       let target = null;
       if (typeof selection.res.sentence !== 'undefined') {
         if (options.getdataType) {
-          return dataseerML.getdataType(selection.res.sentence, function(err, res) {
+          return dataseerML.getdataType(selection.res.sentence, function (err, res) {
             if (err) {
               return cb(err, res);
             }
@@ -86,10 +86,8 @@ const DocumentView = function(events) {
               .attr('type', dataType)
               .attr('cert', cert);
             target.removeAttr('class');
-            jQuery(target)
-              .parents('div[type]')
-              .attr('subtype', 'dataseer');
-            target.click(function(event) {
+            jQuery(target).parents('div[type]').attr('subtype', 'dataseer');
+            target.click(function (event) {
               let el = jQuery(event.target);
               scrollTo(el);
               clickEvent(options.id, el);
@@ -99,10 +97,8 @@ const DocumentView = function(events) {
         } else {
           target = selection.res.sentence.attr('corresp', '#' + options.id).attr(options.user.role, options.user.id);
           target.removeAttr('class');
-          jQuery(target)
-            .parents('div[type]')
-            .attr('subtype', 'dataseer');
-          target.click(function(event) {
+          jQuery(target).parents('div[type]').attr('subtype', 'dataseer');
+          target.click(function (event) {
             let el = jQuery(event.target);
             scrollTo(el);
             clickEvent(options.id, el);
@@ -112,27 +108,16 @@ const DocumentView = function(events) {
       }
     },
     // scroll ot dataset position
-    scrollTo = function(el) {
+    scrollTo = function (el) {
       if ($('#xml').is(':visible')) {
-        let position =
-          el.position().top +
-          elements.container
-            .parent()
-            .parent()
-            .parent()
-            .scrollTop() -
-          24;
-        return elements.container
-          .parent()
-          .parent()
-          .parent()
-          .animate({ scrollTop: position });
+        let position = el.position().top + elements.container.parent().parent().parent().scrollTop() - 24;
+        return elements.container.parent().parent().parent().animate({ scrollTop: position });
       } else {
         self.views.scrollTo(el.attr('id'));
       }
     };
 
-  self.init = function(id, doc, cb) {
+  self.init = function (id, doc, cb) {
     self.doc = doc;
     self.mainContainer = jQuery(id);
     self.mainContainer.empty().append($('<div id="xml">').append(elements.container));
@@ -143,7 +128,7 @@ const DocumentView = function(events) {
       self.mainContainer.append($('<div id="pdf">'));
       $('#xml').hide();
       self.pdfViewer = new PdfViewer('pdf', {
-        'click': function(sentenceId, element) {
+        click: function (sentenceId, element) {
           let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]'),
             pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
             pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
@@ -161,7 +146,7 @@ const DocumentView = function(events) {
             self.pdfViewer.selectCanvas(sentenceId);
           }
         },
-        'hover': function(sentenceId, element) {
+        hover: function (sentenceId, element) {
           let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]');
           let pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
             pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
@@ -174,7 +159,7 @@ const DocumentView = function(events) {
             pdfContour.addClass('activeContourSentence');
           }
         },
-        'endHover': function(sentenceId, element) {
+        endHover: function (sentenceId, element) {
           let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]');
           let pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
             pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
@@ -187,14 +172,9 @@ const DocumentView = function(events) {
           }
         }
       });
-      return self.pdfViewer.render(self.doc.pdf.data.data, self.doc.pdf.metadata.sentences, function() {
+      return self.pdfViewer.render(self.doc.pdf.data.data, self.doc.pdf.metadata.sentences, function () {
         self.finishInit(self.doc);
-        self.pdfViewer.scrollToSentence(
-          datasets
-            .all()
-            .first()
-            .attr('sentenceid')
-        );
+        self.pdfViewer.scrollToSentence(datasets.all().first().attr('sentenceid'));
         return cb();
       });
     } else {
@@ -203,17 +183,17 @@ const DocumentView = function(events) {
     }
   };
 
-  self.finishInit = function(doc) {
+  self.finishInit = function (doc) {
     self.source(self.doc.source);
 
-    datasets.all().click(function(event) {
+    datasets.all().click(function (event) {
       let el = jQuery(event.target),
         id = el.attr('id');
       scrollTo(el);
       events.datasets.click(id, el);
     });
 
-    corresps.all().click(function(event) {
+    corresps.all().click(function (event) {
       let el = jQuery(event.target),
         id = el.attr('corresp').replace('#', '');
       scrollTo(el);
@@ -224,14 +204,10 @@ const DocumentView = function(events) {
     corresps.colors();
   };
 
-  self.source = function(source) {
+  self.source = function (source) {
     if (typeof source === 'undefined') {
       let copy = $('#xml > div').clone();
-      copy
-        .find('*[style]')
-        .removeAttr('style')
-        .find('*[class]')
-        .removeAttr('class');
+      copy.find('*[style]').removeAttr('style').find('*[class]').removeAttr('class');
       return copy.html();
     }
     elements.container.html(source.replace(/\s/gm, ' '));
@@ -242,13 +218,13 @@ const DocumentView = function(events) {
     return self.source();
   };
 
-  self.color = function(id) {
+  self.color = function (id) {
     return datasets.styleOf(id);
   };
 
-  self.colors = function() {
+  self.colors = function () {
     let styles = {};
-    datasets.all().each(function() {
+    datasets.all().each(function () {
       let id = jQuery(this).attr('id'),
         style = datasets.styleOf(id);
       styles[id] = style;
@@ -256,62 +232,49 @@ const DocumentView = function(events) {
     return styles;
   };
 
-  self.updateDataset = function(user, id, dataType) {
+  self.updateDataset = function (user, id, dataType) {
     return datasets.update(user, id, dataType);
   };
 
-  self.addDataset = function(user, id, dataType, cb) {
-    return datasets.add(user, id, dataType, function(err, res) {
+  self.addDataset = function (user, id, dataType, cb) {
+    return datasets.add(user, id, dataType, function (err, res) {
       return cb(err, res);
     });
   };
 
-  self.getTextOfDataset = function(id) {
+  self.getTextOfDataset = function (id) {
     return datasets.get(id).text();
   };
 
-  self.deleteDataset = function(id) {
+  self.deleteDataset = function (id) {
     return datasets.remove(id);
   };
 
-  self.addCorresp = function(user, id) {
+  self.addCorresp = function (user, id) {
     return corresps.add(user, id);
   };
 
-  self.deleteAllCorresps = function(id) {
+  self.deleteAllCorresps = function (id) {
     return corresps.removeAll(id);
   };
 
-  self.deleteCorresp = function(el) {
+  self.deleteCorresp = function (el) {
     return corresps.remove(el);
   };
 
   self.views = {
     // scroll ot dataset position
-    'scrollTo': function(id) {
+    scrollTo: function (id) {
       let position =
         self.hasPdf && $('#pdf').is(':visible')
           ? self.pdfViewer.scrollToSentence(datasets.get(id).attr('sentenceid')) +
-            elements.container
-              .parent()
-              .parent()
-              .scrollTop() -
+            elements.container.parent().parent().scrollTop() -
             14
-          : datasets.get(id).position().top +
-            elements.container
-              .parent()
-              .parent()
-              .parent()
-              .scrollTop() -
-            14;
-      return elements.container
-        .parent()
-        .parent()
-        .parent()
-        .animate({ scrollTop: position });
+          : datasets.get(id).position().top + elements.container.parent().parent().parent().scrollTop() - 14;
+      return elements.container.parent().parent().parent().animate({ scrollTop: position });
     },
     // set All elements visible
-    'allVisible': function() {
+    allVisible: function () {
       paragraphsWithoutDatasets().removeClass();
       sectionsWithoutDatasets().removeClass();
       $('#pdf').hide();
@@ -319,7 +282,7 @@ const DocumentView = function(events) {
       $('#datasetsListItems .selected .item').click();
     },
     // set only dataseer elements visible
-    'onlyDataseer': function() {
+    onlyDataseer: function () {
       self.views.allVisible();
       sectionsWithoutDatasets().addClass('hidden');
       $('#pdf').hide();
@@ -327,7 +290,7 @@ const DocumentView = function(events) {
       $('#datasetsListItems .selected .item').click();
     },
     // set only datasets elements visible
-    'onlyDatasets': function() {
+    onlyDatasets: function () {
       self.views.allVisible();
       self.views.onlyDataseer();
       paragraphsWithoutDatasets().addClass('hidden');
@@ -336,7 +299,7 @@ const DocumentView = function(events) {
       $('#datasetsListItems .selected .item').click();
     },
     // set only PDF elements visible
-    'pdf': function() {
+    pdf: function () {
       $('#xml').hide();
       $('#pdf').show();
       $('#datasetsListItems .selected .item').click();
@@ -345,13 +308,10 @@ const DocumentView = function(events) {
 
   // Sentences features
   let sentences = {
-    'new': function(sentenceid, coords, html) {
-      return jQuery('<s/>')
-        .attr('sentenceid', sentenceid)
-        .attr('coords', coords)
-        .html(html);
+    new: function (sentenceid, coords, html) {
+      return jQuery('<s/>').attr('sentenceid', sentenceid).attr('coords', coords).html(html);
     },
-    'click': function() {
+    click: function () {
       let previousSelection = elements.container.find('s.selected'),
         selected = jQuery(this);
       if (
@@ -365,7 +325,7 @@ const DocumentView = function(events) {
         }
       }
     },
-    'hover': function() {
+    hover: function () {
       let selected = jQuery(this);
       if (
         !selected.attr('corresp') &&
@@ -375,7 +335,7 @@ const DocumentView = function(events) {
         selected.addClass('hover');
       }
     },
-    'endHover': function() {
+    endHover: function () {
       let selected = jQuery(this);
       if (
         !selected.attr('corresp') &&
@@ -390,34 +350,34 @@ const DocumentView = function(events) {
   // Datasets features
   let datasets = {
     // get element of given dataset
-    'get': function(id) {
+    get: function (id) {
       return elements.container.find('tei div[subtype="dataseer"] s[id="' + id + '"]');
     },
     // get elements of all datasets
-    'all': function() {
+    all: function () {
       return elements.container.find('tei div[subtype="dataseer"] s[id]');
     },
     // get cert of given dataset
-    'certOf': function(id) {
+    certOf: function (id) {
       let cert = parseFloat(datasets.get(id).attr('cert'));
       if (!cert || cert <= 0.5) cert = 0.5;
       return cert;
     },
     // get/set dataType of given dataset
-    'dataTypeOf': function(id, value) {
+    dataTypeOf: function (id, value) {
       if (typeof value === 'undefined') return datasets.get(id).attr('type');
       datasets.get(id).attr('type', value);
       return datasets.dataTypeOf(id);
     },
     // get/set style of given dataset
-    'styleOf': function(id, value) {
+    styleOf: function (id, value) {
       if (typeof value === 'undefined') return datasets.get(id).attr('style');
       datasets.get(id).attr('style', value);
       return datasets.styleOf(id);
     },
     // set colors of datasets
-    'colors': function() {
-      datasets.all().each(function() {
+    colors: function () {
+      datasets.all().each(function () {
         let el = jQuery(this),
           id = el.attr('id'),
           backgroundColor = colors.backgroundColor(datasets.certOf(id)),
@@ -427,14 +387,14 @@ const DocumentView = function(events) {
       });
     },
     // add dataset
-    'add': function(user, id, dataType, cb) {
+    add: function (user, id, dataType, cb) {
       let selection = selectedElements();
       if (selection.err) return cb(true, 'Please select the sentence that contains the new dataset');
       return selectionToSenctence(
         selection,
-        { 'id': id, 'dataType': dataType, 'getdataType': true, 'user': user },
+        { id: id, dataType: dataType, getdataType: true, user: user },
         events.datasets.click,
-        function(err, res) {
+        function (err, res) {
           if (err) return cb(err, res);
           let backgroundColor = colors.backgroundColor(datasets.certOf(id)),
             color = colors.color(backgroundColor),
@@ -446,18 +406,21 @@ const DocumentView = function(events) {
             self.pdfViewer.setColor(sentenceid, backgroundColor, id);
             PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
           }
-          return cb(null, { 'datatype': res.attr('type'), 'cert': res.attr('cert') });
+          return cb(null, {
+            datatype: res.attr('type'),
+            cert: res.attr('cert')
+          });
         }
       );
     },
     // add dataset
-    'update': function(user, id, dataType) {
+    update: function (user, id, dataType) {
       jQuery('#' + id)
         .attr('type', dataType)
         .attr(user.role, user.id);
     },
     // remove dataset
-    'remove': function(id) {
+    remove: function (id) {
       let dataset = datasets.get(id),
         parent = dataset.parents('div[subtype]'),
         newElement = sentences.new(dataset.attr('sentenceid'), dataset.attr('coords'), dataset.html()).clone();
@@ -475,22 +438,22 @@ const DocumentView = function(events) {
   // Corresps features
   let corresps = {
     // get element of given correp
-    'get': function(id) {
+    get: function (id) {
       return elements.container.find('tei s[corresp="#' + id + '"]');
     },
     // get elements of all correps
-    'all': function() {
+    all: function () {
       return elements.container.find('tei s[corresp]');
     },
     // get/set style of given correp
-    'styleOf': function(id, value) {
+    styleOf: function (id, value) {
       if (typeof value === 'undefined') return corresps.get(id).attr('style');
       corresps.get(id).attr('style', value);
       return corresps.styleOf(id);
     },
     // set colors of correps
-    'colors': function() {
-      corresps.all().each(function() {
+    colors: function () {
+      corresps.all().each(function () {
         let el = jQuery(this),
           id = el.attr('corresp').replace('#', ''),
           style = datasets.styleOf(id),
@@ -500,14 +463,10 @@ const DocumentView = function(events) {
       });
     },
     // add correp
-    'add': function(user, id) {
+    add: function (user, id) {
       let selection = selectedElements();
       if (selection.err) return selection;
-      let target = selectionToSenctence(
-          selection,
-          { 'id': id, 'getdataType': false, 'user': user },
-          events.corresps.click
-        ),
+      let target = selectionToSenctence(selection, { id: id, getdataType: false, user: user }, events.corresps.click),
         parent = target.parents('div').first(),
         style = datasets.styleOf(id),
         color = style.split(';')[0].split(':')[1];
@@ -524,7 +483,7 @@ const DocumentView = function(events) {
       };
     },
     // remove correp
-    'remove': function(el) {
+    remove: function (el) {
       let parent = el.parents('div[subtype]'),
         newElement = sentences.new(el.attr('sentenceid'), el.attr('coords'), el.html()).clone();
       el.replaceWith(newElement);
@@ -537,8 +496,8 @@ const DocumentView = function(events) {
       }
     },
     // remove all correp
-    'removeAll': function(id) {
-      let _corresps = corresps.get(id).each(function() {
+    removeAll: function (id) {
+      let _corresps = corresps.get(id).each(function () {
         let el = jQuery(this),
           parent = el.parents('div[subtype]'),
           newElement = sentences.new(el.attr('sentenceid'), el.attr('coords'), el.html()).clone();

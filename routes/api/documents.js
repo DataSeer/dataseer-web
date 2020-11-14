@@ -11,7 +11,7 @@ const express = require('express'),
 const gridfs = require('mongoose-gridfs');
 
 /* GET ALL Documents */
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   let limit = parseInt(req.query.limit),
@@ -23,17 +23,17 @@ router.get('/', function(req, res, next) {
   if (isNaN(limit)) limit = 20;
   Documents.find(query)
     .limit(limit)
-    .exec(function(err, post) {
+    .exec(function (err, post) {
       if (err) return next(err);
       return res.json(post);
     });
 });
 
 /* GET SINGLE Document BY ID */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  Documents.findById(req.params.id, function(err, post) {
+  Documents.findById(req.params.id, function (err, post) {
     if (err) return next(err);
     if (req.query.pdf && typeof post.pdf !== 'undefined') {
       const Pdf = gridfs.createModel({
@@ -44,13 +44,13 @@ router.get('/:id', function(req, res, next) {
         if (err) return next(err);
         let arr = [];
         const readstream = pdf.read();
-        readstream.on('error', function(err) {
+        readstream.on('error', function (err) {
           return next(err);
         });
-        readstream.on('data', function(data) {
+        readstream.on('data', function (data) {
           arr.push(data);
         });
-        readstream.on('close', function(data) {
+        readstream.on('close', function (data) {
           post.pdf.data = Buffer.concat(arr);
           return res.json(post);
         });
@@ -60,31 +60,31 @@ router.get('/:id', function(req, res, next) {
 });
 
 /* SAVE Document */
-router.post('/', function(req, res, next) {
+router.post('/', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  Documents.create(req.body, function(err, post) {
+  Documents.create(req.body, function (err, post) {
     if (err) return next(err);
     return res.json(post);
   });
 });
 
 /* UPDATE Document */
-router.put('/:id', function(req, res, next) {
+router.put('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   if (typeof req.body.pdf !== 'undefined' && typeof req.body.pdf.data !== 'undefined') req.body.pdf.data = undefined;
-  Documents.findByIdAndUpdate(req.params.id, req.body, function(err, post) {
+  Documents.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     return res.json(post);
   });
 });
 
 /* DELETE Document */
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  Documents.findByIdAndRemove(req.params.id, req.body, function(err, post) {
+  Documents.findByIdAndRemove(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     return res.json(post);
   });

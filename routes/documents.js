@@ -14,7 +14,7 @@ const express = require('express'),
 const conf = require('../conf/conf.json');
 
 /* GET ALL Documents */
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
   if (
     typeof req.user === 'undefined' ||
     !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.annotator, AccountsManager.match.weight)
@@ -33,26 +33,26 @@ router.get('/', function(req, res, next) {
     query['organisation'] = req.user.organisation; // if this is an annotator, then restrict access to his organisation only
   return Documents.find(query)
     .limit(limit)
-    .exec(function(err, post) {
+    .exec(function (err, post) {
       if (err) return next(err);
-      Organisations.find({}).exec(function(err, organisations) {
+      Organisations.find({}).exec(function (err, organisations) {
         if (err) return next(err);
         return res.render(path.join('documents', 'all'), {
-          'route': 'documents',
-          'root': conf.root,
-          'organisations': organisations,
-          'search': true,
-          'documents': post,
-          'current_user': req.user,
-          'error': Array.isArray(error) && error.length > 0 ? error : undefined,
-          'success': Array.isArray(success) && success.length > 0 ? success : undefined
+          route: 'documents',
+          root: conf.root,
+          organisations: organisations,
+          search: true,
+          documents: post,
+          current_user: req.user,
+          error: Array.isArray(error) && error.length > 0 ? error : undefined,
+          success: Array.isArray(success) && success.length > 0 ? success : undefined
         });
       });
     });
 });
 
 /* Update a document */
-router.post('/', function(req, res, next) {
+router.post('/', function (req, res, next) {
   if (
     typeof req.user === 'undefined' ||
     !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
@@ -62,23 +62,23 @@ router.post('/', function(req, res, next) {
 });
 
 /* GET SINGLE Document BY ID */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  return Documents.findById(req.params.id, function(err, post) {
+  return Documents.findById(req.params.id, function (err, post) {
     if (err) return next(err);
     if (post === null) return res.status(400).send('error 404');
     return res.render(path.join('documents', post.status), {
-      'route': 'documents/:id',
-      'root': conf.root,
-      'document': post,
-      'demo': process.env.DEMO,
-      'current_user': req.user
+      route: 'documents/:id',
+      root: conf.root,
+      document: post,
+      demo: process.env.DEMO,
+      current_user: req.user
     });
   });
 });
 
-let updateDocument = function(req, res, next) {
+let updateDocument = function (req, res, next) {
   if (typeof req.body.organisation !== 'string' || req.body.organisation.length <= 0) {
     req.flash('error', 'Incorrect organisation');
     return res.redirect('./documents');
@@ -89,15 +89,15 @@ let updateDocument = function(req, res, next) {
   }
   return Documents.findOne(
     {
-      '_id': req.body.id
+      _id: req.body.id
     },
-    function(err, doc) {
+    function (err, doc) {
       if (err) {
         req.flash('error', err.message);
         return res.redirect('./documents');
       }
       doc.organisation = req.body.organisation;
-      return doc.save(function(err) {
+      return doc.save(function (err) {
         if (err) {
           req.flash('error', err.message);
           return res.redirect('./documents');
