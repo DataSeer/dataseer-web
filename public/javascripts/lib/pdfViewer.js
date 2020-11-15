@@ -30,7 +30,35 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   BORDER_WIDTH = 2, // Need to be an even number
   REMOVED_BORDER_COLOR = 'rgba(255, 255, 255, 1)',
   HOVER_BORDER_COLOR = 'rgba(0, 0, 0, 1)',
-  SELECTED_BORDER_COLOR = 'rgba(2, 116, 190, 1)';
+  SELECTED_BORDER_COLOR = 'rgba(105, 105, 105, 1)';
+
+const median = function (values) {
+    if (values.length === 0) return 0;
+    values.sort(function (a, b) {
+      return a - b;
+    });
+    let half = Math.floor(values.length / 2);
+    if (values.length % 2) return values[half];
+    return (values[half - 1] + values[half]) / 2.0;
+  },
+  getInterlinesLength = function (paragraphs, limits) {
+    let stats = {};
+    for (let i = 0; i < paragraphs.length; i++) {
+      if (paragraphs[i].lines.length > 1)
+        for (let j = 0; j < paragraphs[i].lines.length - 1; j++) {
+          let previous = paragraphs[i].lines[j],
+            next = paragraphs[i].lines[j + 1],
+            interline = Math.abs(previous.min.y + previous.h / 2 - (next.min.y + next.h / 2));
+          if (typeof stats[previous.p] === 'undefined') stats[previous.p] = [interline];
+          else stats[previous.p].push(interline);
+        }
+    }
+    let result = {};
+    for (let key in stats) {
+      result[key] = median(stats[key]);
+    }
+    return result;
+  };
 
 const Chunk = function (data, scale) {
     // Representation of a chunk in PDF
@@ -132,16 +160,12 @@ const Chunk = function (data, scale) {
       if (typeof this.p === 'undefined') this.p = line.p;
       lines.push(line);
     };
-    this.isNext = function (line, limits) {
+    this.isNext = function (line, margin = 5) {
       if (lines.length === 0) return true; // If there is no lines, it will be "next" by default
-      let xMin = line.min.x,
-        xMax = line.min.x + line.w,
-        yMin = line.min.y,
-        yMax = line.min.y + line.h,
-        margin = 5,
+      let middle = line.min.y + line.h / 2,
         samePage = this.p === line.p,
-        isTooUnder = yMin > this.max.y + margin,
-        isTooUpper = yMax < this.min.y - margin;
+        isTooUnder = middle - margin > this.max.y,
+        isTooUpper = middle + margin < this.min.y;
       return samePage && !isTooUpper && !isTooUnder;
     };
     this.h = 0;
@@ -152,7 +176,7 @@ const Chunk = function (data, scale) {
     if (typeof first !== 'undefined') this.addLine(first);
     return this;
   },
-  Areas = function (lines, limites) {
+  Areas = function (lines, interlines) {
     let collection = [new Area()];
     this.newArea = function (line) {
       return collection.push(new Area(line));
@@ -163,15 +187,15 @@ const Chunk = function (data, scale) {
     this.all = function () {
       return collection;
     };
-    this.addLines = function (lines = [], limites) {
+    this.addLines = function (lines = [], interlines) {
       for (let i = 0; i < lines.length; i++) {
         let area = this.getLast(),
           line = lines[i];
-        if (area.isNext(line, limites)) area.addLine(line);
+        if (area.isNext(line, interlines[lines[i].p])) area.addLine(line);
         else this.newArea(line);
       }
     };
-    if (Array.isArray(lines)) this.addLines(lines);
+    if (Array.isArray(lines)) this.addLines(lines, interlines);
     return this;
   };
 
@@ -272,18 +296,26 @@ const PdfViewer = function (id, events) {
       });
     // Build all contours
     this.buildContours = function (mapping, chunks, scales, limites) {
+      let paragraphs = [];
       for (let key in mapping) {
         if (mapping[key].length > 0) {
           let sentenceChunks = chunks.slice(mapping[key][0], mapping[key][mapping[key].length - 1] + 1),
-            lines = new Lines(sentenceChunks, scales).all();
-          this.buildContour(lines, key, limites);
+            lines = {
+              'lines': new Lines(sentenceChunks, scales).all(),
+              'sentenceid': key
+            };
+          paragraphs.push(lines);
         }
+      }
+      let interlines = getInterlinesLength(paragraphs, limites);
+      for (let i = 0; i < paragraphs.length; i++) {
+        this.buildContour(paragraphs[i].lines, paragraphs[i].sentenceid, interlines);
       }
     };
     // Return contour of lines
-    this.buildContour = function (lines, sentenceid, limites) {
+    this.buildContour = function (lines, sentenceid, interlines) {
       if (Array.isArray(lines)) {
-        let areas = new Areas(lines).all();
+        let areas = new Areas(lines, interlines).all();
         for (let i = 0; i < areas.length; i++) {
           let area = areas[i],
             contourLayer = this.container.find('.page[data-page-number="' + area.p + '"] .contourLayer'),
@@ -417,7 +449,7 @@ const PdfViewer = function (id, events) {
   };
 
   this.selectCanvas = function (sentenceid) {
-    this.setCanvasColor(sentenceid, BORDER_WIDTH, SELECTED_BORDER_COLOR);
+    this.setCanvasColor(sentenceid, BORDER_WIDTH, SELECTED_BORDER_COLOR, true);
   };
 
   this.hoverCanvas = function (sentenceid, isDataset, isSelected) {
@@ -427,7 +459,13 @@ const PdfViewer = function (id, events) {
         BORDER_WIDTH,
         this.viewer.find('.contourLayer > div[sentenceid="' + sentenceid + '"]').attr('color')
       );
-    else this.setCanvasColor(sentenceid, BORDER_WIDTH, isSelected ? SELECTED_BORDER_COLOR : HOVER_BORDER_COLOR);
+    else
+      this.setCanvasColor(
+        sentenceid,
+        BORDER_WIDTH,
+        isSelected ? SELECTED_BORDER_COLOR : HOVER_BORDER_COLOR,
+        isSelected
+      );
   };
 
   this.endHoverCanvas = function (sentenceid, isDataset, isSelected) {
@@ -437,17 +475,25 @@ const PdfViewer = function (id, events) {
         BORDER_WIDTH,
         this.viewer.find('.contourLayer > div[sentenceid="' + sentenceid + '"]').attr('color')
       );
-    else this.setCanvasColor(sentenceid, BORDER_WIDTH, isSelected ? SELECTED_BORDER_COLOR : REMOVED_BORDER_COLOR);
+    else
+      this.setCanvasColor(
+        sentenceid,
+        BORDER_WIDTH,
+        isSelected ? SELECTED_BORDER_COLOR : REMOVED_BORDER_COLOR,
+        isSelected
+      );
   };
 
   // draw multiple lines
-  this.drawLines = function (canvas, lines, width, color) {
+  this.drawLines = function (canvas, lines, width, color, linedash = false) {
     let canvasElement = canvas.get(0),
       ctx = canvasElement.getContext('2d'),
       img = new Image();
     img.src = canvas.attr('data-url');
     img.onload = function () {
       ctx.drawImage(img, 0, 0);
+      if (linedash) ctx.setLineDash([15, 5]);
+      else ctx.setLineDash([]);
       ctx.lineWidth = width;
       ctx.strokeStyle = color;
       for (let i = 0; i < lines.length; i++) {
@@ -460,12 +506,12 @@ const PdfViewer = function (id, events) {
     };
   };
 
-  this.setCanvasColor = function (sentenceid, width, color) {
+  this.setCanvasColor = function (sentenceid, width, color, linedash = false) {
     let canvas = this.container
       .find(`.contour[sentenceid="${sentenceid}"] canvas[sentenceid="${sentenceid}"]`)
       .map(function () {
         let element = $(this);
-        self.drawLines(element, JSON.parse(element.attr('borders')), width, color);
+        self.drawLines(element, JSON.parse(element.attr('borders')), width, color, linedash);
       });
   };
 
