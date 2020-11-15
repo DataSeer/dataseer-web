@@ -33,7 +33,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   SELECTED_BORDER_COLOR = 'rgba(105, 105, 105, 1)';
 
 const median = function (values) {
-    if (values.length === 0) return 0;
+    if (values.length === 0) return undefined;
     values.sort(function (a, b) {
       return a - b;
     });
@@ -160,12 +160,13 @@ const Chunk = function (data, scale) {
       if (typeof this.p === 'undefined') this.p = line.p;
       lines.push(line);
     };
-    this.isNext = function (line, margin = 5) {
+    this.isNext = function (line, margin) {
       if (lines.length === 0) return true; // If there is no lines, it will be "next" by default
       let middle = line.min.y + line.h / 2,
+        delta = typeof margin !== 'undefined' ? margin : line.h,
         samePage = this.p === line.p,
-        isTooUnder = middle - margin > this.max.y,
-        isTooUpper = middle + margin < this.min.y;
+        isTooUnder = middle - delta > this.max.y,
+        isTooUpper = middle + delta < this.min.y;
       return samePage && !isTooUpper && !isTooUnder;
     };
     this.h = 0;
