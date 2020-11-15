@@ -22,7 +22,6 @@
   showLoop();
   // Get the current Object
   return MongoDB.getCurrentDocument({ pdf: true }, function (doc) {
-    console.log(doc);
     dataseerML.jsonDataTypes(function (err, data) {
       if (err) return alert('Error : Datatypes unavailable, dataseer-ml service does not respond');
       currentDocument = doc;
@@ -170,7 +169,6 @@
           currentDocument.datasets.deleted.push(currentDocument.datasets.current[id]);
           delete currentDocument.datasets.current[id];
           currentDocument.source = documentView.source();
-          console.log(currentDocument);
           return MongoDB.updateDocument(currentDocument, user, function (err, res) {
             console.log(err, res);
             if (err) return err; // Need to define error behavior

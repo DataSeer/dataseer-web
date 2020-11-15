@@ -8,6 +8,7 @@ const MongoDB = {
   getCurrentDocument: function (opts = {}, done) {
     let currentId = jQuery(document.getElementById('document.id')).attr('value');
     jQuery.get('../api/documents/' + currentId + (typeof opts.pdf !== 'undefined' ? '?pdf=true' : ''), function (data) {
+      console.log(data);
       return done(data);
     });
   },
@@ -29,9 +30,11 @@ const MongoDB = {
       url: '../api/documents/' + doc._id,
       data: JSON.stringify(copy),
       success: function (data) {
+        console.log(data);
         return done(null, data);
       },
       error: function (data) {
+        console.log(data);
         return done(true, data);
       },
       dataType: 'json'
