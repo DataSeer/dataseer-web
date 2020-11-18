@@ -6,39 +6,60 @@ block content
     div(class='row')
       div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px;')
         div(class='row row-margin')
-          div(class='col-12')
-            div(class='key d-inline font-weight-bold') Manuscript #: 
-            div(class='value d-inline') #{document.metadata.manuscriptId}
-          div(class='col-12')
-            div(class='key d-inline font-weight-bold') Article Title: 
-            div(class='value d-inline') #{document.metadata.articleTitle}
-          div(class='col-12')
-            div(class='key d-inline font-weight-bold') Journal: 
-            div(class='value d-inline') #{document.metadata.journal}
+          if document.metadata.journal
+            div(class='col-12')
+              div(class='key d-inline font-weight-bold') Journal: 
+              div(class='value d-inline') #{document.metadata.journal}
+          if document.metadata.publisher
+            div(class='col-12')
+              div(class='key d-inline font-weight-bold') Publisher: 
+              div(class='value d-inline') #{document.metadata.publisher}
+          if document.metadata.date_published
+            div(class='col-12')
+              div(class='key d-inline font-weight-bold') Publication date: 
+              div(class='value d-inline') #{document.metadata.date_published}
+          if document.metadata.doi
+            div(class='col-12')
+              div(class='key d-inline font-weight-bold') DOI: 
+              div(class='value d-inline') #{document.metadata.doi}
+          if document.metadata.pmid
+            div(class='col-12')
+              div(class='key d-inline font-weight-bold') PMID: 
+              div(class='value d-inline') #{document.metadata.pmid}
 
         div(class='row row-margin')
-          div(class='col-12')
-            div(class='key d-inline font-weight-bold') Authors: 
-            div(class='value d-inline') #{document.metadata.authors}
+          if document.metadata.submittingAuthor
+            div(class='col-12')
+              div(class='key d-inline font-weight-bold') Submiting Author: 
+              div(class='value d-inline') #{document.metadata.submittingAuthor}
+          if document.metadata.submittingAuthorEmail
+            div(class='col-12')
+              div(class='key d-inline font-weight-bold') Submiting Author Email: 
+              div(class='value d-inline') #{document.metadata.submittingAuthorEmail}
 
         div(class='row row-margin')
-          div(class='col-12')
-            div(class='key d-inline font-weight-bold') Submitting Author: 
-            div(class='value d-inline') #{document.metadata.submittingAuthor}
-          div(class='col-12')
-            div(class='key d-inline font-weight-bold') Submitting Author email: 
-            div(class='value d-inline') #{document.metadata.submittingAuthoremail}
+          if document.metadata.articleTitle
+            div(class='col-12')
+              div(class='key d-inline font-weight-bold') Article Title: 
+              div(class='value d-inline') #{document.metadata.articleTitle}
+          if document.metadata.authors.length > 0
+            div(class='col-12')
+              div(class='key d-inline font-weight-bold') Authors: 
+                div(class='value d-block authors-container')
+                  ul
+                    each val, index in document.metadata.authors
+                      if val.name
+                        li #{val.name}
+                          ul
+                            if val.name && val.affiliations
+                              each aff, index in val.affiliations
+                                li #{aff}
 
-        div(class='row row-margin')
-          div(class='col-12')
-            div(class='key d-inline font-weight-bold') Institutions: 
-            each val, index in document.metadata.institutions
-              div(class='value d-block') #{(index + 1)} #{val}
-
-        div(class='row row-margin')
-          div(class='col-12')
-            div(class='key d-inline font-weight-bold') Funders: 
-            div(class='value d-inline') #{document.metadata.funders}
+        if current_user.role.label === 'curator'
+          div(class='row row-margin')
+            div(class='col-12')
+              a(href="?reloadMetadata=true")
+                button(id='reload_metada' class='btn btn-primary') Reload metadata
 
         div(class='row crud-button-action')
           div(class='col-6 text-center')

@@ -8,6 +8,7 @@ const express = require('express'),
   mongoose = require('mongoose'),
   passport = require('passport'),
   AccountsManager = require('../lib/accountsManager.js'),
+  extractor = require('../lib/extractor.js'),
   Organisations = require('../models/organisations.js'),
   Documents = require('../models/documents.js');
 
@@ -65,16 +66,27 @@ router.post('/', function (req, res, next) {
 router.get('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
+  let reloadMetadata = false,
+    render = function (doc) {
+      res.render(path.join('documents', doc.status), {
+        route: 'documents/:id',
+        root: conf.root,
+        document: doc,
+        demo: process.env.DEMO,
+        current_user: req.user
+      });
+    };
+  if (typeof req.query.reloadMetadata !== 'undefined') reloadMetadata = true;
   return Documents.findById(req.params.id, function (err, post) {
     if (err) return next(err);
     if (post === null) return res.status(400).send('error 404');
-    return res.render(path.join('documents', post.status), {
-      route: 'documents/:id',
-      root: conf.root,
-      document: post,
-      demo: process.env.DEMO,
-      current_user: req.user
-    });
+    if (reloadMetadata) {
+      post.metadata = extractor.getMetadataFromStr(post.source);
+      post.save(function (err) {
+        if (err) return next(err);
+        return render(post);
+      });
+    } else return render(post);
   });
 });
 
