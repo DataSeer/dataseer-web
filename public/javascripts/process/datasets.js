@@ -19,6 +19,11 @@
       $('#pdf-loading-loop').hide();
     };
 
+  window.addEventListener('unhandledrejection', function (event) {
+    alert('An error has occured while processing this document... (' + currentDocument._id + ')');
+    hideLoop();
+  });
+
   showLoop();
   // Get the current Object
   return MongoDB.getCurrentDocument({ pdf: true }, function (doc) {
