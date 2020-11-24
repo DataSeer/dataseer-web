@@ -294,6 +294,7 @@ const PdfViewer = function (id, events) {
       .catch((e) => {
         console.log(e);
         this.container.empty().append('<div>An error has occurred while processing the document</div>');
+        return done();
       });
     // Build all contours
     this.buildContours = function (mapping, chunks, scales, limites) {
