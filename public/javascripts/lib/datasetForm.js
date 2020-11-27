@@ -11,9 +11,14 @@ const DatasetForm = function (events) {
 
   let elements = {
     container: HtmlBuilder.div({
-      id: '',
+      id: 'dataset-form-form',
       class: 'container-fluid',
       text: ''
+    }),
+    lock: HtmlBuilder.div({
+      id: 'dataset-form-lock',
+      class: 'container-fluid lock',
+      text: 'At least one dataset must be added to be able to use this form'
     }),
     save: new View.buttons.save('Save for later '),
     validation: new View.buttons.default('Validate'),
@@ -202,7 +207,8 @@ const DatasetForm = function (events) {
         .append(elements['save'])
         .append(elements['validation'])
         .append(elements['help'])
-    );
+    )
+    .append(elements['lock']);
 
   elements.unlink.click(function () {
     events.onUnlink(self.selectedElement);
@@ -229,8 +235,21 @@ const DatasetForm = function (events) {
   };
 
   self.init = function (id) {
-    jQuery(id).empty().append(elements.container);
+    jQuery(id).empty().append(elements.container).append(elements.lock);
     self.refresh();
+    self.lock();
+  };
+
+  self.lock = function () {
+    self.refresh();
+    $('#dataset-form-form').hide();
+    $('#dataset-form-lock').show();
+  };
+
+  self.unlock = function () {
+    self.refresh();
+    $('#dataset-form-form').show();
+    $('#dataset-form-lock').hide();
   };
 
   self.refresh = function (options) {
@@ -306,6 +325,7 @@ const DatasetForm = function (events) {
   };
 
   self.link = function (dataset, style, element) {
+    self.unlock();
     self.style(style);
     self.dataset = dataset;
     self.selectedElement = element;
@@ -388,7 +408,6 @@ const DatasetForm = function (events) {
       self.hideCustomDataType();
       self.dataset.dataType = elements['dataset.dataType'].value();
     }
-    console.log(self.dataset.dataType);
     self.dataset.subType = '';
     self.setSubTypes();
     self.setDataFromDatatype();

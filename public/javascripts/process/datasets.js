@@ -186,6 +186,8 @@
               documentView.views.scrollTo(key);
             } else {
               datasetForm.link(defaultDataset);
+              documentView.views.unselectCanvas();
+              datasetForm.lock();
             }
           });
         },
@@ -263,6 +265,7 @@
           },
           onUnlink: function (element) {
             documentView.deleteCorresp(element);
+            documentView.views.unselectCanvas();
             let id = element.attr('corresp').substring(1);
             datasetForm.link(currentDocument.datasets.current[id], documentView.color(id));
             documentView.views.scrollTo(id);
@@ -306,6 +309,7 @@
                   datasetsList.add(newId, documentView.color(newId), currentDocument.datasets.current[newId].status);
                   datasetsList.select(newId);
                   datasetForm.link(currentDocument.datasets.current[newId], documentView.color(newId));
+                  documentView.views.unselectCanvas();
                   documentView.views.scrollTo(newId);
                 });
               }
@@ -336,6 +340,7 @@
                 console.log(err, res);
                 if (err) return err; // Need to define error behavior
                 hasChanged = false;
+                documentView.views.unselectCanvas();
                 // return location.reload();
               });
             }

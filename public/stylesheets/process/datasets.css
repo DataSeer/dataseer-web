@@ -257,6 +257,13 @@ i {
 
 /*dataset-form*/
 
+#dataset-form #dataset-form-lock {
+  display: table-cell;
+  vertical-align: middle;
+  font-size: 20px;
+  text-align: center;
+}
+
 #dataset-form-container {
   overflow: hidden;
   border-radius: 20px;
@@ -269,6 +276,8 @@ i {
 
 #dataset-form {
   width: 100%;
+  height: 100%;
+  display: table;
   padding: 15px;
 }
 
@@ -472,6 +481,12 @@ i {
   background-color: #FFFFFF;
   border: 1px solid #184D7E;
   width: 100%;
+}
+
+#datasets-list .no-data {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 20px;
 }
 
 #datasets-list .form-row > .item {

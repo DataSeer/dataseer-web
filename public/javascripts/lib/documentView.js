@@ -113,7 +113,9 @@ const DocumentView = function (events) {
         let position = el.position().top + elements.container.parent().parent().parent().scrollTop() - 24;
         return elements.container.parent().parent().parent().animate({ scrollTop: position });
       } else {
-        self.views.scrollTo(el.attr('id'));
+        let isCorrep = typeof el.attr('corresp') !== 'undefined',
+          id = isCorrep ? el.attr('corresp').replace('#', '') : el.attr('id');
+        self.views.scrollTo(id, isCorrep);
       }
     };
 
@@ -132,7 +134,9 @@ const DocumentView = function (events) {
           let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]'),
             pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
             pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
-            isDataset = typeof xmlSentenceElement.attr('id') !== 'undefined',
+            isDataset =
+              typeof xmlSentenceElement.attr('id') !== 'undefined' ||
+              typeof xmlSentenceElement.attr('corresp') !== 'undefined',
             lastSelectedSentence = $('s.selected'),
             lastSelectedContour = $('#pdf .contourLayer > div.contour[sentenceid].selected');
           xmlSentenceElement.click();
@@ -150,7 +154,9 @@ const DocumentView = function (events) {
           let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]');
           let pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
             pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
-            isDataset = typeof xmlSentenceElement.attr('id') !== 'undefined';
+            isDataset =
+              typeof xmlSentenceElement.attr('id') !== 'undefined' ||
+              typeof xmlSentenceElement.attr('corresp') !== 'undefined';
           pdfSentenceElements.addClass('hover');
           self.pdfViewer.hoverCanvas(sentenceId, isDataset, pdfContour.hasClass('selected'));
           if (isDataset) {
@@ -163,7 +169,9 @@ const DocumentView = function (events) {
           let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]');
           let pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
             pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
-            isDataset = typeof xmlSentenceElement.attr('id') !== 'undefined';
+            isDataset =
+              typeof xmlSentenceElement.attr('id') !== 'undefined' ||
+              typeof xmlSentenceElement.attr('corresp') !== 'undefined';
           self.pdfViewer.endHoverCanvas(sentenceId, isDataset, pdfContour.hasClass('selected'));
           if (isDataset) {
             pdfContour.removeClass('activeContourDataset');
@@ -174,7 +182,8 @@ const DocumentView = function (events) {
       });
       return self.pdfViewer.render(self.doc.pdf.data.data, self.doc.pdf.metadata.sentences, function () {
         self.finishInit(self.doc);
-        self.pdfViewer.scrollToSentence(datasets.all().first().attr('sentenceid'));
+        let sentenceid = datasets.all().first().attr('sentenceid') || '0';
+        self.pdfViewer.scrollToSentence(sentenceid);
         return cb();
       });
     } else {
@@ -263,14 +272,18 @@ const DocumentView = function (events) {
   };
 
   self.views = {
+    unselectCanvas: function () {
+      $('#pdf .contourLayer > div.contour[sentenceid].selected').removeClass('selected');
+    },
     // scroll ot dataset position
-    scrollTo: function (id) {
-      let position =
-        self.hasPdf && $('#pdf').is(':visible')
-          ? self.pdfViewer.scrollToSentence(datasets.get(id).attr('sentenceid')) +
-            elements.container.parent().parent().scrollTop() -
-            14
-          : datasets.get(id).position().top + elements.container.parent().parent().parent().scrollTop() - 14;
+    scrollTo: function (id, isCorresp = false) {
+      let element = isCorresp ? corresps.get(id) : datasets.get(id),
+        position =
+          self.hasPdf && $('#pdf').is(':visible')
+            ? self.pdfViewer.scrollToSentence(element.attr('sentenceid')) +
+              elements.container.parent().parent().scrollTop() -
+              14
+            : element.position().top + elements.container.parent().parent().parent().scrollTop() - 14;
       return elements.container.parent().parent().parent().animate({ scrollTop: position });
     },
     // set All elements visible

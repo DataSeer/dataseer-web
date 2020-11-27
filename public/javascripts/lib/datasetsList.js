@@ -11,6 +11,9 @@ const DatasetsList = function (data, events) {
         class: 'datasetListContainer',
         text: ''
       }),
+      empty: $(
+        `<li class="form-row"><div class="item no-data" value="no-data">There is no datasets in this document</div></li>`
+      ),
       datasetsList: HtmlBuilder.div({
         id: 'datasetsListItems',
         class: '',
@@ -55,12 +58,13 @@ const DatasetsList = function (data, events) {
       mapping[id] = container;
       _elements.link.attr('title', 'Link selected sentence to this dataset');
       elements.datasetsListItemsContainer.append(container);
+      elements.empty.hide();
     },
     remove: function (id) {
-      scrollTo(id);
       datasets[id].delete();
-      datasets[id] = undefined;
-      mapping[id] = undefined;
+      delete datasets[id];
+      delete mapping[id];
+      if (Object.keys(datasets).length === 0) elements.empty.show();
     },
     statusOf: function (id, value) {
       if (typeof value !== 'undefined') datasets[id].elements().status.value(value);
@@ -87,7 +91,6 @@ const DatasetsList = function (data, events) {
         animationFinished = false;
         let scroll = e.deltaY > 0 ? 75 : -75,
           position = Math.round(elements.datasetsList.scrollLeft() + scroll);
-        console.log('wheel', e, position);
         // elements.datasetsList.scrollLeft(position);
         elements.datasetsList.animate({ scrollLeft: position }, function () {
           animationFinished = true;
@@ -98,7 +101,7 @@ const DatasetsList = function (data, events) {
   );
 
   // Add all elements
-  elements.datasetsList.append(elements.datasetsListItemsContainer);
+  elements.datasetsList.append(elements.datasetsListItemsContainer.append(elements.empty));
   elements.container.append(elements.datasetsList);
   elements.container.append(elements.newDataset);
   theButton = new View.buttons.add('Add new Dataset');
