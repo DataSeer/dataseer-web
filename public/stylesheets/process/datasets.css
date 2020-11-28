@@ -1,3 +1,173 @@
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  min-height: 100vh;
+  flex-direction: column;
+  margin-left: 50px;
+  margin-right: 50px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  font: 14px "Open Sans", "Lucida Grande", Helvetica, sans-serif;
+  color: #3a3a3a;
+  background-color: lightgray;
+}
+
+#pdf-loading-loop {
+  z-index: 100000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.75;
+  background-color: white;
+}
+
+#pdf-loading-loop .loader-container {
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+}
+
+#pdf-loading-loop .loader-container .loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 250px;
+  height: 250px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.footer {
+  flex-shrink: 0;
+}
+
+.foot-col {
+  background-color: #FFFFFF;
+  border-top: 1px solid #184D7E;
+  border-bottom: 1px solid #184D7E;
+  border-left: 1px solid #184D7E;
+  border-right: 1px solid #184D7E;
+}
+
+#document-view #pdf-viewer {
+  background: lightgray;
+}
+
+#document-view #pdf-viewer .page {
+  margin-bottom: 10px; 
+}
+
+#document-view #pdf-viewer .textLayer {
+  z-index: 1000;
+}
+
+#document-view #pdf-viewer .contourLayer {
+  background-color: transparent;
+  z-index: 3000;
+}
+
+#document-view #pdf-viewer .annotationsLayer {
+  background-color: transparent;
+  z-index: 2000;
+}
+
+#document-view #pdf-viewer .contourLayer .contour {
+  background-color: transparent;
+  z-index: 3100;
+  cursor: pointer;
+}
+
+#document-view #pdf-viewer .contourLayer .contour div {
+  background-color: transparent; 
+}
+
+#document-view #pdf-viewer .contourLayer .contour div[events="true"] {
+  z-index: 3120;
+  background-color: transparent; 
+}
+
+#document-view #pdf-viewer .contourLayer .contour canvas {
+  z-index: 3110;
+}
+
+#document-view #pdf-viewer .contourLayer .contour[datasetid] canvas {
+  z-index: 3115;
+}
+
+#document-view #pdf-viewer .contourLayer .contour.activeContourDataset,
+#document-view #pdf-viewer .contourLayer .contour.activeContourSentence,
+#document-view #pdf-viewer .contourLayer .contour.selected {
+  z-index: 3200;
+}
+
+#document-view #pdf-viewer .contourLayer .contour.activeContourDataset canvas,
+#document-view #pdf-viewer .contourLayer .contour.activeContourSentence canvas,
+#document-view #pdf-viewer .contourLayer .contour.selected canvas {
+  z-index: 3210;
+}
+
+#document-view #pdf-viewer .contourLayer .contour.activeContourDataset div[events="true"] ,
+#document-view #pdf-viewer .contourLayer .contour.activeContourSentence div[events="true"] ,
+#document-view #pdf-viewer .contourLayer .contour.selected div[events="true"]  {
+  z-index: 3220;
+}
+
+#document-view #pdf-viewer .annotationsLayer s {
+  z-index: 2100;
+  cursor: pointer;
+}
+
+#document-view #pdf-viewer .contourLayer {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    line-height: 1;
+    overflow: hidden;
+}
+
+#document-view #pdf-viewer .annotationsLayer {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  line-height: 1;
+  overflow: hidden;
+}
+
+#document-view #pdf-viewer .annotationsLayer .hover {
+  cursor: pointer;
+}
+
+#document-view #pdf-viewer .annotationsLayer .selected {
+  cursor: pointer;
+}
+
+#document-view #pdf-viewer .annotationsLayer s[corresp],
+#document-view #pdf-viewer .annotationsLayer s[id] {
+  cursor: pointer;
+  background-color: lightyellow;
+}
+
+#document-view #pdf-viewer #sentencesLayer {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  line-height: 1;
+  overflow: hidden;
+}
+
 #user-navbar {
   display: none;
 }
@@ -26,6 +196,8 @@
 }
 
 #user-lg label {
+  display: block;
+  height: 100%;
   margin: 0px;
 }
 
@@ -71,28 +243,41 @@ i {
 /*view-selection*/
 
 #view-selection {
-  border-bottom: 3px solid lightgray;
-  border-bottom-left-radius: 0px;
-  border-bottom-right-radius: 0px;
-  padding: 20px;
-  width: 100%;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
-#view-selection label {
-  width: 34%;
+#view-selection > label {
+  flex: 1;
 }
 
 /*dataset-form*/
 
-body > div > div > div.row > div:nth-child(2) {
-  padding-left: 0;
+#dataset-form #dataset-form-lock {
+  display: table-cell;
+  vertical-align: middle;
+  font-size: 20px;
+  text-align: center;
+}
+
+#dataset-form-container {
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+#dataset-form-container .wrapper {
+  overflow: auto;
+  height: 100%;
 }
 
 #dataset-form {
   width: 100%;
-  height: 87vh;
-  overflow: auto;
+  height: 100%;
+  display: table;
   padding: 15px;
 }
 
@@ -132,6 +317,8 @@ body > div > div > div.row > div:nth-child(2) {
 #dataset-form #dataset\.status {
   display: inline-block;
   width: auto;
+  padding-top: 2px;
+  padding-left: 5px;
 }
 
 #dataset-form #dataset\.id .key,
@@ -176,8 +363,10 @@ body > div > div > div.row > div:nth-child(2) {
 
 /*document-view*/
 
-body > div > div > div.row > div:nth-child(1) {
-  padding-left: 0;
+#document-view-container {
+  overflow: auto;
+  height: 100%;
+  border-radius: 20px;
 }
 
 #document-view {
@@ -186,8 +375,6 @@ body > div > div > div.row > div:nth-child(1) {
   border-top-right-radius: 0px;
   padding: 15px;
   width: 100%;
-  height: 83vh;
-  overflow: auto;
 }
 
 /* TEI CUSTOMIZATION */
@@ -276,14 +463,14 @@ body > div > div > div.row > div:nth-child(1) {
   cursor: pointer;
 }
 
-#document-view tei s.selected {
+#document-view #xml .selected {
   background-color: rgb(2, 116, 190);
   color: white;
   cursor: pointer;
 }
 
-#document-view tei s[corresp],
-#document-view tei s[id] {
+#document-view s[corresp],
+#document-view s[id] {
   cursor: pointer;
   background-color: lightyellow;
 }
@@ -291,10 +478,20 @@ body > div > div > div.row > div:nth-child(1) {
 /*datasets-list*/
 
 #datasets-list {
-  padding: 0;
+  background-color: #FFFFFF;
+  border: 1px solid #184D7E;
   width: 100%;
-  height: 80vh;
-  overflow: auto;
+}
+
+#datasets-list .no-data {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 20px;
+}
+
+#datasets-list .form-row > .item {
+  display: block;
+  margin-bottom: 8px;
 }
 
 #datasets-list .selected {
@@ -303,25 +500,63 @@ body > div > div > div.row > div:nth-child(1) {
 }
 
 #datasets-list .form-row {
-  text-align: center;
-  display: block;
+  display: inline-block;
+  margin-left: 10px;
+  margin-right: 10px;
   margin-top: 10px;
   margin-bottom: 10px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  vertical-align: middle;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-#datasets-list > * {
+#datasets-list #newDataset > button {
+  margin-top: 25px;
+  margin-right: 25px;
+  margin-left: 25px;
+}
+
+#datasets-list #newDataset > button i {
+  margin-right: 0!important;
+}
+
+#datasets-list #newDataset {
+  width: 150px;
+  padding-left: 0px;
+  padding-right: 0px;
+  margin: 0px;
+  height: 100%;
+}
+.datasetListContainer {
+  position: relative;
+  height: 115px;
+  margin-left: 20px;
+}
+
+#datasetsListItems {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 100%;
+  width: calc(100% - 150px);
+}
+
+#datasetsListItemsContainer {
+  width: auto;
+  height: 100%;
+  white-space: nowrap;
+}
+
+#datasets-list #datasetsListItems > * {
   text-align: center;
 }
 
 #datasets-list .form-row > * {
+  cursor: pointer;
   display: inline-block;
-}
-
-#datasets-list > div > button > i {
-  margin-right: 0 !important;
 }
 
 #datasets-list .form-row > *:first-child {
@@ -356,15 +591,19 @@ body > div > div > div.row > div:nth-child(1) {
 
 #datasets_validation {
   display: inline-block;
-  width: 49.5%;
-  margin-top: 15px;
+  flex: 1;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-right: 25px;
 }
 
 #previous_step {
   margin-right: 1%;
   display: inline-block;
-  width: 49.5%;
-  margin-top: 15px;
+  flex: 1;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 25px;
 }
 
 .warning-color-dark {
@@ -373,6 +612,20 @@ body > div > div > div.row > div:nth-child(1) {
 
 .success-color-dark {
   color: #007E33;
+}
+
+.fa-save {
+  font-size: 22px;
+  padding-top: 1px;
+  margin-left: 0px;
+}
+
+.fa-pen {
+  font-size: 16px;
+}
+
+.fa-check {
+  font-size: 16px;
 }
 
 #datasets-error-modal .modal-header {
@@ -404,4 +657,23 @@ body > div > div > div.row > div:nth-child(1) {
 
 #quit-modal .modal-body {
   color: #CC0000;
+}
+
+.pdfViewer {
+  overflow: hidden;
+}
+
+.right{
+  /*float:right;*/
+  width: 150px;
+  padding-left: 0px;
+  padding-right: 0px;
+  margin: 0px;
+  position:absolute;
+  top: 0px;
+  right: 0px;
+}
+
+.modal {
+  z-index: 10000;
 }

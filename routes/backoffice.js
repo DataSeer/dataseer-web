@@ -19,7 +19,7 @@ const emailRegExp = new RegExp("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@[A-Za-z0-9-]+(.[
 const conf = require('../conf/conf.json');
 
 /* GET all accounts */
-router.get('/accounts', function(req, res, next) {
+router.get('/accounts', function (req, res, next) {
   if (
     typeof req.user === 'undefined' ||
     !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
@@ -31,30 +31,30 @@ router.get('/accounts', function(req, res, next) {
   if (isNaN(limit)) limit = 20;
   Accounts.find({})
     .limit(limit)
-    .exec(function(err, accounts) {
+    .exec(function (err, accounts) {
       if (err) {
         req.flash('error', err.message);
         return res.redirect('./accounts');
       }
-      Organisations.find({}).exec(function(err, organisations) {
+      Organisations.find({}).exec(function (err, organisations) {
         if (err) return next(err);
         return res.render(path.join('backoffice', 'accounts'), {
-          'route': 'backoffice/accounts',
-          'root': conf.root,
-          'search': true,
-          'current_user': req.user,
-          'accounts': accounts,
-          'roles': AccountsManager.roles,
-          'organisations': organisations,
-          'error': Array.isArray(error) && error.length > 0 ? error : undefined,
-          'success': Array.isArray(success) && success.length > 0 ? success : undefined
+          route: 'backoffice/accounts',
+          root: conf.root,
+          search: true,
+          current_user: req.user,
+          accounts: accounts,
+          roles: AccountsManager.roles,
+          organisations: organisations,
+          error: Array.isArray(error) && error.length > 0 ? error : undefined,
+          success: Array.isArray(success) && success.length > 0 ? success : undefined
         });
       });
     });
 });
 
 /* Update an account */
-router.post('/accounts', function(req, res, next) {
+router.post('/accounts', function (req, res, next) {
   if (
     typeof req.user === 'undefined' ||
     !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
@@ -64,7 +64,7 @@ router.post('/accounts', function(req, res, next) {
 });
 
 /* GET all organisations */
-router.get('/organisations', function(req, res, next) {
+router.get('/organisations', function (req, res, next) {
   if (
     typeof req.user === 'undefined' ||
     !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
@@ -74,25 +74,25 @@ router.get('/organisations', function(req, res, next) {
     error = req.flash('error'),
     success = req.flash('success');
   if (isNaN(limit)) limit = 20;
-  Organisations.find({}).exec(function(err, organisations) {
+  Organisations.find({}).exec(function (err, organisations) {
     if (err) {
       req.flash('error', err.message);
       return res.redirect('./organisations');
     }
     return res.render(path.join('backoffice', 'organisations'), {
-      'route': 'backoffice/organisations',
-      'root': conf.root,
-      'search': true,
-      'current_user': req.user,
-      'organisations': organisations,
-      'error': Array.isArray(error) && error.length > 0 ? error : undefined,
-      'success': Array.isArray(success) && success.length > 0 ? success : undefined
+      route: 'backoffice/organisations',
+      root: conf.root,
+      search: true,
+      current_user: req.user,
+      organisations: organisations,
+      error: Array.isArray(error) && error.length > 0 ? error : undefined,
+      success: Array.isArray(success) && success.length > 0 ? success : undefined
     });
   });
 });
 
 /* Update an account */
-router.post('/organisations', function(req, res, next) {
+router.post('/organisations', function (req, res, next) {
   if (
     typeof req.user === 'undefined' ||
     !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
@@ -105,51 +105,51 @@ router.post('/organisations', function(req, res, next) {
 });
 
 /* UPLOAD Document */
-router.get('/upload', function(req, res, next) {
+router.get('/upload', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   return res.render(path.join('backoffice', 'upload'), {
-    'route': 'backoffice/upload',
-    'root': conf.root,
-    'title': 'DataSeer',
-    'backoffice': true,
-    'current_user': req.user
+    route: 'backoffice/upload',
+    root: conf.root,
+    title: 'DataSeer',
+    backoffice: true,
+    current_user: req.user
   });
 });
 
 /* UPLOAD Document */
-router.post('/upload', function(req, res, next) {
+router.post('/upload', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   let results = {
-      'errors': [],
-      'successes': []
+      errors: [],
+      successes: []
     },
     isCurator = AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator),
     uploadedFiles = null,
     dataseerML = '';
   if (!req.files) {
     results.errors.push({
-      'msg': 'You must send at least one file'
+      msg: 'You must send at least one file'
     });
     return res.status(400).render(path.join('backoffice', 'upload'), {
-      'route': 'backoffice/upload',
-      'root': conf.root,
-      'backoffice': true,
-      'results': results,
-      'current_user': req.user
+      route: 'backoffice/upload',
+      root: conf.root,
+      backoffice: true,
+      results: results,
+      current_user: req.user
     });
   }
   if (Object.keys(req.files).length == 0) {
     results.errors.push({
-      'msg': 'No file(s) were uploaded'
+      msg: 'No file(s) were uploaded'
     });
     return res.status(400).render(path.join('backoffice', 'upload'), {
-      'route': 'backoffice/upload',
-      'root': conf.root,
-      'backoffice': true,
-      'results': results,
-      'current_user': req.user
+      route: 'backoffice/upload',
+      root: conf.root,
+      backoffice: true,
+      results: results,
+      current_user: req.user
     });
   }
   uploadedFiles = Array.isArray(req.files['uploadedFiles'])
@@ -160,23 +160,23 @@ router.post('/upload', function(req, res, next) {
   dataseerML = isCurator ? req.body.dataseerML : 'dataseer-ml';
   async.each(
     uploadedFiles,
-    function(file, callback) {
+    function (file, callback) {
       // Perform operation on file here.
-      return Upload.processFile(file, dataseerML, req.app.get('dataTypes.json'), req.user, function(error, result) {
+      return Upload.processFile(file, dataseerML, req.app.get('dataTypes.json'), req.user, function (error, result) {
         if (error) results.errors.push(error);
         if (result) results.successes.push(result);
         return callback();
       });
     },
-    function(err) {
+    function (err) {
       // if any of the file processing produced an error, err would equal that error
       if (err) {
         return res.render(path.join('backoffice', 'upload'), {
-          'route': 'backoffice/upload',
-          'root': conf.root,
-          'backoffice': true,
-          'results': results,
-          'current_user': req.user
+          route: 'backoffice/upload',
+          root: conf.root,
+          backoffice: true,
+          results: results,
+          current_user: req.user
         });
       }
       if (
@@ -195,25 +195,25 @@ router.post('/upload', function(req, res, next) {
           return res.redirect(path.join('../documents', results.successes[0].document.id));
         else
           return res.render(path.join('backoffice', 'upload'), {
-            'route': 'backoffice/upload',
-            'root': conf.root,
-            'backoffice': true,
-            'results': results,
-            'current_user': req.user
+            route: 'backoffice/upload',
+            root: conf.root,
+            backoffice: true,
+            results: results,
+            current_user: req.user
           });
       } else
         return res.render(path.join('backoffice', 'upload'), {
-          'route': 'backoffice/upload',
-          'root': conf.root,
-          'backoffice': true,
-          'results': results,
-          'current_user': req.user
+          route: 'backoffice/upload',
+          root: conf.root,
+          backoffice: true,
+          results: results,
+          current_user: req.user
         });
     }
   );
 });
 
-let updateOrganisation = function(req, res, next) {
+let updateOrganisation = function (req, res, next) {
     if (typeof req.body._id !== 'string' || req.body._id.length <= 0) {
       req.flash('error', 'Incorrect _id');
       return res.redirect('./organisations');
@@ -224,21 +224,21 @@ let updateOrganisation = function(req, res, next) {
     }
     return Organisations.findOne(
       {
-        '_id': req.body._id
+        _id: req.body._id
       },
-      function(err, organisation) {
+      function (err, organisation) {
         if (err) {
           req.flash('error', err.message);
           return res.redirect('./organisations');
         }
         let oldValue = organisation.name;
         organisation.name = req.body.name;
-        return organisation.save(function(err) {
+        return organisation.save(function (err) {
           if (err) {
             req.flash('error', err.message);
             return res.redirect('./organisations');
           }
-          return updateAccountsAndDocuments(oldValue, organisation.name, function(err) {
+          return updateAccountsAndDocuments(oldValue, organisation.name, function (err) {
             if (err) {
               req.flash('error', err.message);
               return res.redirect('./organisations');
@@ -250,14 +250,14 @@ let updateOrganisation = function(req, res, next) {
       }
     );
   },
-  createOrganisation = function(req, res, next) {
+  createOrganisation = function (req, res, next) {
     if (typeof req.body.name !== 'string' || req.body.name.length <= 0) {
       req.flash('error', 'Incorrect name');
       return res.redirect('./organisations');
     }
     return Organisations.find({
-      'name': req.body.name
-    }).exec(function(err, organisations) {
+      name: req.body.name
+    }).exec(function (err, organisations) {
       if (err) {
         req.flash('error', err.message);
         return res.redirect('./organisations');
@@ -266,7 +266,7 @@ let updateOrganisation = function(req, res, next) {
         req.flash('error', 'Organisation with name "' + req.body.name + '" already exist.');
         return res.redirect('./organisations');
       }
-      return Organisations.create({ 'name': req.body.name }, function(err, organisations) {
+      return Organisations.create({ name: req.body.name }, function (err, organisations) {
         if (err) {
           req.flash('error', err.message);
           return res.redirect('./organisations');
@@ -276,17 +276,17 @@ let updateOrganisation = function(req, res, next) {
       });
     });
   },
-  deleteOrganisation = function(req, res, next) {
+  deleteOrganisation = function (req, res, next) {
     if (typeof req.body._id !== 'string' || req.body._id.length <= 0) {
       req.flash('error', 'Incorrect _id');
       return res.redirect('./organisations');
     }
-    return Organisations.findByIdAndRemove(req.body._id, function(err, organisation) {
+    return Organisations.findByIdAndRemove(req.body._id, function (err, organisation) {
       if (err) {
         req.flash('error', err.message);
         return res.redirect('./organisations');
       }
-      return updateAccountsAndDocuments(organisation.name, '', function(err) {
+      return updateAccountsAndDocuments(organisation.name, '', function (err) {
         if (err) {
           req.flash('error', err.message);
           return res.redirect('./organisations');
@@ -296,31 +296,31 @@ let updateOrganisation = function(req, res, next) {
       });
     });
   },
-  updateAccountsAndDocuments = function(oldValue, newValue, cb) {
-    return Accounts.find({ 'organisation': oldValue }).exec(function(err, accounts) {
+  updateAccountsAndDocuments = function (oldValue, newValue, cb) {
+    return Accounts.find({ organisation: oldValue }).exec(function (err, accounts) {
       return async.eachSeries(
         accounts,
-        function(account, callback) {
+        function (account, callback) {
           account.organisation = newValue;
-          account.save(function(err) {
+          account.save(function (err) {
             if (err) return callback(err);
             return callback();
           });
         },
-        function(err) {
+        function (err) {
           if (err) return cb(err);
-          return Documents.find({ 'organisation': oldValue }).exec(function(err, documents) {
+          return Documents.find({ organisation: oldValue }).exec(function (err, documents) {
             if (err) return cb(err);
             return async.eachSeries(
               documents,
-              function(doc, callback) {
+              function (doc, callback) {
                 doc.organisation = newValue;
-                doc.save(function(err) {
+                doc.save(function (err) {
                   if (err) return callback(err);
                   return callback();
                 });
               },
-              function(err) {
+              function (err) {
                 return cb(err);
               }
             );
@@ -329,16 +329,16 @@ let updateOrganisation = function(req, res, next) {
       );
     });
   },
-  updateAccount = function(req, res, next) {
+  updateAccount = function (req, res, next) {
     if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username)) {
       req.flash('error', 'Incorrect Email');
       return res.redirect('./accounts');
     }
     return Accounts.findOne(
       {
-        'username': req.body.username
+        username: req.body.username
       },
-      function(err, user) {
+      function (err, user) {
         let role = AccountsManager.roles[req.body.role],
           organisation = req.body.organisation;
         if (typeof role === 'undefined') {
@@ -349,8 +349,8 @@ let updateOrganisation = function(req, res, next) {
           req.flash('error', 'Incorrect organisation');
           return res.redirect('./accounts');
         }
-        let saveUser = function() {
-            return user.save(function(err) {
+        let saveUser = function () {
+            return user.save(function (err) {
               if (err) {
                 req.flash('error', err.message);
                 return res.redirect('./accounts');
@@ -364,21 +364,21 @@ let updateOrganisation = function(req, res, next) {
         user.role = role;
         user.organisation = organisation;
         if (updateDocuments) {
-          return Documents.find(updateQuery).exec(function(err, documents) {
+          return Documents.find(updateQuery).exec(function (err, documents) {
             if (err) {
               req.flash('error', err.message);
               return res.redirect('./accounts');
             }
             return async.eachSeries(
               documents,
-              function(doc, callback) {
+              function (doc, callback) {
                 doc.organisation = user.organisation;
-                doc.save(function(err) {
+                doc.save(function (err) {
                   if (err) return callback(err);
                   return callback();
                 });
               },
-              function(err) {
+              function (err) {
                 if (err) {
                   req.flash('error', err.message);
                   return res.redirect('./accounts');
