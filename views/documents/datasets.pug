@@ -30,6 +30,9 @@ block content
             if current_user.role.label === 'curator'
               li
                 a(href=root + 'backoffice/accounts' class='nav') Accounts
+            if current_user.role.label === 'curator'
+              li
+                a(href=root + 'backoffice/organisations' class='nav') Organizations
             li
               a(href=root + 'settings' class='nav') Settings
             li
