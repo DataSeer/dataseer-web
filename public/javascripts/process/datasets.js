@@ -379,6 +379,26 @@
           // Select default Key after Jquery build datasetLists
           setTimeout(function () {
             datasetsList.select(defaultKey);
+            // If user is annotator
+            if (user.role !== 'standard_user') {
+              let refreshDiv = $('<div/>').addClass('form-row'),
+                refreshBtn = $('<button/>')
+                  .addClass('btn btn-primary btn-sm')
+                  .text('Refresh Datatypes ')
+                  .click(function () {
+                    refreshIcon.addClass('fa-spin');
+                    dataseerML.resyncJsonDataTypes(function (err, data) {
+                      refreshIcon.removeClass('fa-spin');
+                      if (err) return console.log(err);
+                      subTypes = data.subTypes;
+                      dataTypes = data.dataTypes;
+                      metadata = data.metadata;
+                      datasetForm.loadData(data);
+                    });
+                  }),
+                refreshIcon = $('<i/>').addClass('fas fa-sync-alt');
+              $('#dataset-form-form').append(refreshDiv.append(refreshBtn.append(refreshIcon)));
+            }
           }, 1000);
         }
       });
@@ -417,28 +437,6 @@
         datasetsList.datasets.remove(id);
         deleteDataset(id);
       });
-
-      // If user is annotator
-      if (user.role === 'annotator') {
-        console.log('annotator');
-        let refreshDiv = $('<div/>').addClass('form-row'),
-          refreshBtn = $('<button/>')
-            .addClass('btn btn-primary btn-sm')
-            .text('Refresh Datatypes ')
-            .click(function () {
-              refreshIcon.addClass('fa-spin');
-              dataseerML.resyncJsonDataTypes(function (err, data) {
-                refreshIcon.removeClass('fa-spin');
-                if (err) return console.log(err);
-                subTypes = data.subTypes;
-                dataTypes = data.dataTypes;
-                metadata = data.metadata;
-                datasetForm.loadData(data);
-              });
-            }),
-          refreshIcon = $('<i/>').addClass('fas fa-sync-alt');
-        $('#dataset-form .container-fluid').append(refreshDiv.append(refreshBtn.append(refreshIcon)));
-      }
 
       window.onbeforeunload = function () {
         if (hasChanged)
