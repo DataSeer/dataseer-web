@@ -12,7 +12,7 @@ const DatasetsList = function (data, events) {
         text: ''
       }),
       empty: $(
-        `<li class="form-row"><div class="item no-data" value="no-data">There is no datasets in this document</div></li>`
+        `<li class="form-row"><div class="item no-data" value="no-data">DataSeer has not detected any datasets in this document</div></li>`
       ),
       datasetsList: HtmlBuilder.div({
         id: 'datasetsListItems',
