@@ -28,7 +28,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   CMAP_PACKED = true,
   BORDER_RADIUS = 0, // Not handled yet
   BORDER_WIDTH = 2, // Need to be an even number
-  REMOVED_BORDER_COLOR = 'rgba(255, 255, 255, 1)',
+  REMOVED_BORDER_COLOR = false,
   HOVER_BORDER_COLOR = 'rgba(0, 0, 0, 1)',
   SELECTED_BORDER_COLOR = 'rgba(105, 105, 105, 1)';
 
@@ -487,23 +487,25 @@ const PdfViewer = function (id, events) {
   };
 
   // draw multiple lines
-  this.drawLines = function (canvas, lines, width, color, linedash = false) {
+  this.drawLines = function (canvas, lines, width, color = false, linedash = false) {
     let canvasElement = canvas.get(0),
       ctx = canvasElement.getContext('2d'),
       img = new Image();
     img.src = canvas.attr('data-url');
     img.onload = function () {
       ctx.drawImage(img, 0, 0);
-      if (linedash) ctx.setLineDash([15, 5]);
-      else ctx.setLineDash([]);
-      ctx.lineWidth = width;
-      ctx.strokeStyle = color;
-      for (let i = 0; i < lines.length; i++) {
-        ctx.beginPath();
-        ctx.moveTo(lines[i].x0, lines[i].y0);
-        ctx.lineTo(lines[i].x1, lines[i].y1);
-        ctx.stroke();
-        ctx.closePath();
+      if (color) {
+        if (linedash) ctx.setLineDash([15, 5]);
+        else ctx.setLineDash([]);
+        ctx.lineWidth = width;
+        ctx.strokeStyle = color;
+        for (let i = 0; i < lines.length; i++) {
+          ctx.beginPath();
+          ctx.moveTo(Math.floor(lines[i].x0), Math.floor(lines[i].y0));
+          ctx.lineTo(Math.floor(lines[i].x1), Math.floor(lines[i].y1));
+          ctx.stroke();
+          ctx.closePath();
+        }
       }
     };
   };
@@ -549,7 +551,6 @@ const PdfViewer = function (id, events) {
   // Get squares of given area (usefull to display borders)
   this.getSquares = function (area, sentenceid) {
     let lines = area.getLines();
-    // case area is a rectangle
     /*
      * Borders :
      * // Top
@@ -561,6 +562,7 @@ const PdfViewer = function (id, events) {
      * // Left
      * { 'x0': xMin, 'y0': yMax, 'x1': xMin, 'y1': yMin },
      */
+    // case area is a rectangle
     if (
       lines.length === 1 ||
       (lines[0].min.x === lines[lines.length - 1].min.x && lines[0].max.x < lines[lines.length - 1].max.x)
@@ -615,9 +617,87 @@ const PdfViewer = function (id, events) {
       this.setEvents(divs);
       return divs.concat(canvas);
     }
+    /* case there is shapes like this :
+     * xo  oo
+     * oo  ox
+     */
+    if (lines[lines.length - 1].min.x === lines[0].min.x || lines[lines.length - 1].max.x === lines[0].max.x) {
+      let divs = [],
+        canvas = [],
+        height = Math.round((area.h + MARGIN_CONTOUR.h + BORDER_WIDTH) / lines.length),
+        topLeftCornerEmpty = lines[0].min.x > lines[lines.length - 1].min.x,
+        topHeight = height * (topLeftCornerEmpty ? 1 : lines.length - 1),
+        bottomHeight = height * (topLeftCornerEmpty ? lines.length - 1 : 1),
+        top = {
+          x: lines[0].min.x - MARGIN_CONTOUR.x - BORDER_WIDTH / 2,
+          y: lines[0].min.y - MARGIN_CONTOUR.y - BORDER_WIDTH / 2,
+          w: lines[0].w + MARGIN_CONTOUR.w + BORDER_WIDTH,
+          h: topHeight
+        },
+        bottom = {
+          x: lines[lines.length - 1].min.x - MARGIN_CONTOUR.x - BORDER_WIDTH / 2,
+          y: top.y + topHeight,
+          w: lines[lines.length - 1].w + MARGIN_CONTOUR.w + BORDER_WIDTH,
+          h: bottomHeight
+        },
+        xMin = { top: BORDER_WIDTH / 2, bottom: BORDER_WIDTH / 2 },
+        xMax = { top: top.w - BORDER_WIDTH / 2, bottom: bottom.w - BORDER_WIDTH / 2 },
+        yMin = { top: BORDER_WIDTH / 2, bottom: BORDER_WIDTH / 2 },
+        yMax = { top: top.h - BORDER_WIDTH / 2, bottom: bottom.h - BORDER_WIDTH / 2 };
+      top.borders = topLeftCornerEmpty
+        ? [
+            { x0: xMin.top, y0: yMin.top, x1: xMax.top, y1: yMin.top }, // Top
+            { x0: xMax.top, y0: yMin.top, x1: xMax.top, y1: BORDER_WIDTH + yMax.top }, // Right
+            { x0: xMin.top, y0: BORDER_WIDTH + yMax.top, x1: xMin.top, y1: yMin.top } // left
+          ]
+        : [
+            { x0: xMin.top, y0: yMin.top, x1: xMax.top, y1: yMin.top }, // Top
+            { x0: xMax.top, y0: yMin.top, x1: xMax.top, y1: yMax.top }, // Right
+            { x0: xMax.top, y0: yMax.top, x1: xMax.bottom - BORDER_WIDTH / 2, y1: yMax.top }, // Bottom
+            { x0: xMin.top, y0: BORDER_WIDTH + yMax.top, x1: xMin.top, y1: yMin.top } // Left
+          ];
+      bottom.borders = topLeftCornerEmpty
+        ? [
+            { x0: xMin.bottom, y0: yMin.bottom, x1: BORDER_WIDTH + (top.x - bottom.x), y1: yMin.bottom }, // Top
+            { x0: xMax.bottom, y0: 0, x1: xMax.bottom, y1: yMax.bottom }, // Right
+            { x0: xMax.bottom, y0: yMax.bottom, x1: xMin.bottom, y1: yMax.bottom }, // Bottom
+            { x0: xMin.bottom, y0: yMax.bottom, x1: xMin.bottom, y1: yMin.bottom } // Left
+          ]
+        : [
+            { x0: xMax.bottom, y0: 0, x1: xMax.bottom, y1: yMax.bottom }, // Right
+            { x0: xMax.bottom, y0: yMax.bottom, x1: xMin.bottom, y1: yMax.bottom }, // Bottom
+            { x0: xMin.bottom, y0: yMax.bottom, x1: xMin.bottom, y1: 0 } // left
+          ];
+      if (topLeftCornerEmpty) {
+        divs.push(this.buildDiv(top.x, top.y, top.w, top.h, sentenceid));
+        divs.push(this.buildDiv(bottom.x, bottom.y, bottom.w, bottom.h, sentenceid));
+        canvas.push(this.buildCanvas(top.x, top.y, top.w, top.h, area.p, sentenceid, top.borders));
+        canvas.push(this.buildCanvas(bottom.x, bottom.y, bottom.w, bottom.h, area.p, sentenceid, bottom.borders));
+      } else {
+        divs.push(this.buildDiv(bottom.x, bottom.y, bottom.w, bottom.h, sentenceid));
+        divs.push(this.buildDiv(top.x, top.y, top.w, top.h, sentenceid));
+        canvas.push(this.buildCanvas(bottom.x, bottom.y, bottom.w, bottom.h, area.p, sentenceid, bottom.borders));
+        canvas.push(this.buildCanvas(top.x, top.y, top.w, top.h, area.p, sentenceid, top.borders));
+      }
+      this.setEvents(divs);
+      return divs.concat(canvas);
+    }
     // case area is some complex rectangles
+    /* There is 4 possible cases ([3*3]) :
+     * xoo  xoo  xxo  xxo
+     * ooo  ooo  ooo  ooo
+     * oox  oxx  oox  oxx
+     *
+     * wich can be summarized by (by modifying the value of xCenter) :
+     * xxo xoo
+     * ooo ooo
+     * oxx oox
+     *
+     * Notes :
+     * o = there is content
+     * x = there is no content
+     */
     let fistLineMinX_gt_lastLineMaxX = lines[0].min.x > lines[lines.length - 1].max.x,
-      fistLineMinX_gt_secondLineMinX = lines[0].min.x > lines[1].min.x,
       bottomLeftEmpty = lines[lines.length - 2].min.x > lines[lines.length - 1].min.x,
       xCenter = fistLineMinX_gt_lastLineMaxX
         ? {
@@ -711,287 +791,18 @@ const PdfViewer = function (id, events) {
       divs = [],
       canvasInfos = [],
       canvas = [];
-    if (fistLineMinX_gt_secondLineMinX) {
-      if (fistLineMinX_gt_lastLineMaxX) {
-        /* case : 1 && 1
-         * x x o
-         * o o o
-         * o x x
-         */
-        events = [false, false, true, true, true, true, true, false, false];
-        let xTopCanvas = topRight.x - BORDER_WIDTH / 2,
-          yTopCanvas = topRight.y - BORDER_WIDTH / 2,
-          wTopCanvas = topRight.w + BORDER_WIDTH,
-          hTopCanvas = topRight.h + BORDER_WIDTH,
-          xMinTopCanvasBorder = BORDER_WIDTH / 2,
-          xMaxTopCanvasBorder = wTopCanvas - BORDER_WIDTH / 2,
-          yMinTopCanvasBorder = BORDER_WIDTH / 2,
-          yMaxTopCanvasBorder = hTopCanvas - BORDER_WIDTH / 2,
-          bordersTopCanvas = [
-            {
-              // Top
-              x0: xMinTopCanvasBorder,
-              y0: yMinTopCanvasBorder,
-              x1: xMaxTopCanvasBorder,
-              y1: yMinTopCanvasBorder
-            },
-            {
-              // Right
-              x0: xMaxTopCanvasBorder,
-              y0: yMinTopCanvasBorder,
-              x1: xMaxTopCanvasBorder,
-              y1: hTopCanvas // JOIN BORDERS
-            },
-            {
-              // Left
-              x0: xMinTopCanvasBorder,
-              y0: hTopCanvas, // JOIN BORDERS
-              x1: xMinTopCanvasBorder,
-              y1: yMinTopCanvasBorder
-            }
-          ],
-          topCanvas = {
-            x: xTopCanvas,
-            y: yTopCanvas,
-            w: wTopCanvas,
-            h: hTopCanvas,
-            borders: bordersTopCanvas
-          };
-        let xMiddleCanvas = middleLeft.x - BORDER_WIDTH / 2,
-          yMiddleCanvas = middleLeft.y - BORDER_WIDTH / 2,
-          wMiddleCanvas = middleRight.x + middleRight.w - middleLeft.x + BORDER_WIDTH,
-          hMiddleCanvas = middleLeft.h + BORDER_WIDTH,
-          xMinMiddleCanvasBorder = BORDER_WIDTH / 2,
-          xTopMaxMiddleCanvasBorder = center.x + center.w - middleLeft.x + BORDER_WIDTH,
-          xBottomMinMiddleCanvasBorder = center.x - middleLeft.x - BORDER_WIDTH,
-          xMaxMiddleCanvasBorder = wMiddleCanvas - BORDER_WIDTH / 2,
-          yMinMiddleCanvasBorder = BORDER_WIDTH / 2,
-          yMaxMiddleCanvasBorder = hMiddleCanvas - BORDER_WIDTH / 2,
-          bordersMiddleCanvas = [
-            {
-              // Top
-              x0: xMinMiddleCanvasBorder,
-              y0: yMinMiddleCanvasBorder,
-              x1: xTopMaxMiddleCanvasBorder,
-              y1: yMinMiddleCanvasBorder
-            },
-            {
-              // Right
-              x0: xMaxMiddleCanvasBorder,
-              y0: 0, // JOIN BORDERS
-              x1: xMaxMiddleCanvasBorder,
-              y1: yMaxMiddleCanvasBorder
-            },
-            {
-              // Bottom
-              x0: xMaxMiddleCanvasBorder,
-              y0: yMaxMiddleCanvasBorder,
-              x1: xBottomMinMiddleCanvasBorder,
-              y1: yMaxMiddleCanvasBorder
-            },
-            {
-              // Left
-              x0: xMinMiddleCanvasBorder,
-              y0: hMiddleCanvas, // JOIN BORDERS
-              x1: xMinMiddleCanvasBorder,
-              y1: yMinMiddleCanvasBorder
-            }
-          ],
-          middleCanvas = {
-            x: xMiddleCanvas,
-            y: yMiddleCanvas,
-            w: wMiddleCanvas,
-            h: hMiddleCanvas,
-            borders: bordersMiddleCanvas
-          };
-        let xBottomCanvas = bottomLeft.x - BORDER_WIDTH / 2,
-          yBottomCanvas = bottomLeft.y - BORDER_WIDTH,
-          wBottomCanvas = bottomLeft.w + BORDER_WIDTH,
-          hBottomCanvas = bottomLeft.h + BORDER_WIDTH,
-          xMinBottomCanvasBorder = BORDER_WIDTH / 2,
-          xMaxBottomCanvasBorder = wBottomCanvas - BORDER_WIDTH / 2,
-          yMinBottomCanvasBorder = BORDER_WIDTH / 2,
-          yMaxBottomCanvasBorder = hBottomCanvas - BORDER_WIDTH / 2,
-          bordersBottomCanvas = [
-            {
-              // Right
-              x0: xMaxBottomCanvasBorder,
-              y0: yMinBottomCanvasBorder,
-              x1: xMaxBottomCanvasBorder,
-              y1: yMaxBottomCanvasBorder
-            },
-            {
-              // Bottom
-              x0: xMaxBottomCanvasBorder,
-              y0: yMaxBottomCanvasBorder,
-              x1: xMinBottomCanvasBorder,
-              y1: yMaxBottomCanvasBorder
-            },
-            {
-              // Left
-              x0: xMinBottomCanvasBorder,
-              y0: yMaxBottomCanvasBorder,
-              x1: xMinBottomCanvasBorder,
-              y1: 0 // JOIN BORDERS
-            }
-          ],
-          bottomCanvas = {
-            x: xBottomCanvas,
-            y: yBottomCanvas,
-            w: wBottomCanvas,
-            h: hBottomCanvas,
-            borders: bordersBottomCanvas
-          };
-        canvasInfos.push(topCanvas);
-        canvasInfos.push(middleCanvas);
-        canvasInfos.push(bottomCanvas);
-      } else {
-        /* case : 1 && 0
-         * x o o
-         * o o o
-         * o o x
-         */
-        events = [false, true, true, true, true, true, true, true, false];
-        let xTopCanvas = topMiddle.x - BORDER_WIDTH / 2,
-          yTopCanvas = topMiddle.y - BORDER_WIDTH / 2,
-          wTopCanvas = topRight.x + topRight.w - topMiddle.x + BORDER_WIDTH,
-          hTopCanvas = topMiddle.h + BORDER_WIDTH,
-          xMinTopCanvasBorder = BORDER_WIDTH / 2,
-          xMaxTopCanvasBorder = wTopCanvas - BORDER_WIDTH / 2,
-          yMinTopCanvasBorder = BORDER_WIDTH / 2,
-          yMaxTopCanvasBorder = hTopCanvas - BORDER_WIDTH / 2,
-          bordersTopCanvas = [
-            {
-              // Top
-              x0: xMinTopCanvasBorder,
-              y0: yMinTopCanvasBorder,
-              x1: xMaxTopCanvasBorder,
-              y1: yMinTopCanvasBorder
-            },
-            {
-              // Right
-              x0: xMaxTopCanvasBorder,
-              y0: yMinTopCanvasBorder,
-              x1: xMaxTopCanvasBorder,
-              y1: hTopCanvas // JOIN BORDERS
-            },
-            {
-              // Left
-              x0: xMinTopCanvasBorder,
-              y0: hTopCanvas, // JOIN BORDERS
-              x1: xMinTopCanvasBorder,
-              y1: yMinTopCanvasBorder
-            }
-          ],
-          topCanvas = {
-            x: xTopCanvas,
-            y: yTopCanvas,
-            w: wTopCanvas,
-            h: hTopCanvas,
-            borders: bordersTopCanvas
-          };
-        let xMiddleCanvas = middleLeft.x - BORDER_WIDTH / 2,
-          yMiddleCanvas = middleLeft.y - BORDER_WIDTH / 2,
-          wMiddleCanvas = middleRight.x + middleRight.w - middleLeft.x + BORDER_WIDTH,
-          hMiddleCanvas = middleLeft.h + BORDER_WIDTH,
-          xMinMiddleCanvasBorder = BORDER_WIDTH / 2,
-          xTopMaxMiddleCanvasBorder = center.x - middleLeft.x + BORDER_WIDTH / 2,
-          xBottomMinMiddleCanvasBorder = middleRight.x - middleLeft.x - BORDER_WIDTH / 2,
-          xMaxMiddleCanvasBorder = wMiddleCanvas - BORDER_WIDTH / 2,
-          yMinMiddleCanvasBorder = BORDER_WIDTH / 2,
-          yMaxMiddleCanvasBorder = hMiddleCanvas - BORDER_WIDTH / 2,
-          bordersMiddleCanvas = [
-            {
-              // Top
-              x0: xMinMiddleCanvasBorder,
-              y0: yMinMiddleCanvasBorder,
-              x1: xTopMaxMiddleCanvasBorder,
-              y1: yMinMiddleCanvasBorder
-            },
-            {
-              // Right
-              x0: xMaxMiddleCanvasBorder,
-              y0: 0, // JOIN BORDERS
-              x1: xMaxMiddleCanvasBorder,
-              y1: yMaxMiddleCanvasBorder
-            },
-            {
-              // Bottom
-              x0: xMaxMiddleCanvasBorder,
-              y0: yMaxMiddleCanvasBorder,
-              x1: xBottomMinMiddleCanvasBorder,
-              y1: yMaxMiddleCanvasBorder
-            },
-            {
-              // Left
-              x0: xMinMiddleCanvasBorder,
-              y0: hMiddleCanvas, // JOIN BORDERS
-              x1: xMinMiddleCanvasBorder,
-              y1: yMinMiddleCanvasBorder
-            }
-          ],
-          middleCanvas = {
-            x: xMiddleCanvas,
-            y: yMiddleCanvas,
-            w: wMiddleCanvas,
-            h: hMiddleCanvas,
-            borders: bordersMiddleCanvas
-          };
-        let xBottomCanvas = bottomLeft.x - BORDER_WIDTH / 2,
-          yBottomCanvas = bottomLeft.y - BORDER_WIDTH / 2,
-          wBottomCanvas = bottomMiddle.x + bottomMiddle.w - bottomLeft.x + BORDER_WIDTH,
-          hBottomCanvas = bottomMiddle.y + bottomMiddle.h - bottomLeft.y + BORDER_WIDTH,
-          xMinBottomCanvasBorder = BORDER_WIDTH / 2,
-          xMaxBottomCanvasBorder = wBottomCanvas - BORDER_WIDTH / 2,
-          yMinBottomCanvasBorder = BORDER_WIDTH / 2,
-          yMaxBottomCanvasBorder = hBottomCanvas - BORDER_WIDTH / 2,
-          bordersBottomCanvas = [
-            {
-              // Right
-              x0: xMaxBottomCanvasBorder,
-              y0: yMinBottomCanvasBorder, // NO NEED TO JOIN BORDERS
-              x1: xMaxBottomCanvasBorder,
-              y1: yMaxBottomCanvasBorder
-            },
-            {
-              // Bottom
-              x0: xMaxBottomCanvasBorder,
-              y0: yMaxBottomCanvasBorder,
-              x1: xMinBottomCanvasBorder,
-              y1: yMaxBottomCanvasBorder
-            },
-            {
-              // Left
-              x0: xMinBottomCanvasBorder,
-              y0: yMaxBottomCanvasBorder,
-              x1: xMinBottomCanvasBorder,
-              y1: 0 // JOIN BORDERS
-            }
-          ],
-          bottomCanvas = {
-            x: xBottomCanvas,
-            y: yBottomCanvas,
-            w: wBottomCanvas,
-            h: hBottomCanvas,
-            borders: bordersBottomCanvas
-          };
-        canvasInfos.push(middleCanvas);
-        canvasInfos.push(topCanvas);
-        canvasInfos.push(bottomCanvas);
-      }
-    } else {
-      /* case : 0 && 1 || 0 && 0
-       * x o o
-       * x o o
-       * x o x
+    if (fistLineMinX_gt_lastLineMaxX) {
+      /* case :
+       * xxo
+       * ooo
+       * oxx
        */
-      events = [false, true, true, false, true, true, false, true, false];
-      let xTopCanvas = topMiddle.x - BORDER_WIDTH / 2,
-        yTopCanvas = topMiddle.y - BORDER_WIDTH / 2,
-        wTopCanvas = topMiddle.w + middleRight.w + BORDER_WIDTH,
-        hTopCanvas = topMiddle.h + center.h + BORDER_WIDTH,
+      events = [false, false, true, true, true, true, true, false, false];
+      let xTopCanvas = topRight.x - BORDER_WIDTH / 2,
+        yTopCanvas = topRight.y - BORDER_WIDTH / 2,
+        wTopCanvas = topRight.w + BORDER_WIDTH,
+        hTopCanvas = topRight.h + BORDER_WIDTH,
         xMinTopCanvasBorder = BORDER_WIDTH / 2,
-        xBottomMinTopCanvasBorder = middleRight.x - middleLeft.x - BORDER_WIDTH / 2,
         xMaxTopCanvasBorder = wTopCanvas - BORDER_WIDTH / 2,
         yMinTopCanvasBorder = BORDER_WIDTH / 2,
         yMaxTopCanvasBorder = hTopCanvas - BORDER_WIDTH / 2,
@@ -1011,11 +822,137 @@ const PdfViewer = function (id, events) {
             y1: hTopCanvas // JOIN BORDERS
           },
           {
+            // Left
+            x0: xMinTopCanvasBorder,
+            y0: hTopCanvas, // JOIN BORDERS
+            x1: xMinTopCanvasBorder,
+            y1: yMinTopCanvasBorder
+          }
+        ],
+        topCanvas = {
+          x: xTopCanvas,
+          y: yTopCanvas,
+          w: wTopCanvas,
+          h: hTopCanvas,
+          borders: bordersTopCanvas
+        };
+      let xMiddleCanvas = middleLeft.x - BORDER_WIDTH / 2,
+        yMiddleCanvas = middleLeft.y - BORDER_WIDTH / 2,
+        wMiddleCanvas = middleRight.x + middleRight.w - middleLeft.x + BORDER_WIDTH,
+        hMiddleCanvas = middleLeft.h + BORDER_WIDTH,
+        xMinMiddleCanvasBorder = BORDER_WIDTH / 2,
+        xTopMaxMiddleCanvasBorder = center.x + center.w - middleLeft.x + BORDER_WIDTH,
+        xBottomMinMiddleCanvasBorder = center.x - middleLeft.x - BORDER_WIDTH,
+        xMaxMiddleCanvasBorder = wMiddleCanvas - BORDER_WIDTH / 2,
+        yMinMiddleCanvasBorder = BORDER_WIDTH / 2,
+        yMaxMiddleCanvasBorder = hMiddleCanvas - BORDER_WIDTH / 2,
+        bordersMiddleCanvas = [
+          {
+            // Top
+            x0: xMinMiddleCanvasBorder,
+            y0: yMinMiddleCanvasBorder,
+            x1: xTopMaxMiddleCanvasBorder,
+            y1: yMinMiddleCanvasBorder
+          },
+          {
+            // Right
+            x0: xMaxMiddleCanvasBorder,
+            y0: 0, // JOIN BORDERS
+            x1: xMaxMiddleCanvasBorder,
+            y1: yMaxMiddleCanvasBorder
+          },
+          {
             // Bottom
+            x0: xMaxMiddleCanvasBorder,
+            y0: yMaxMiddleCanvasBorder,
+            x1: xBottomMinMiddleCanvasBorder,
+            y1: yMaxMiddleCanvasBorder
+          },
+          {
+            // Left
+            x0: xMinMiddleCanvasBorder,
+            y0: hMiddleCanvas, // JOIN BORDERS
+            x1: xMinMiddleCanvasBorder,
+            y1: yMinMiddleCanvasBorder
+          }
+        ],
+        middleCanvas = {
+          x: xMiddleCanvas,
+          y: yMiddleCanvas,
+          w: wMiddleCanvas,
+          h: hMiddleCanvas,
+          borders: bordersMiddleCanvas
+        };
+      let xBottomCanvas = bottomLeft.x - BORDER_WIDTH / 2,
+        yBottomCanvas = bottomLeft.y - BORDER_WIDTH,
+        wBottomCanvas = bottomLeft.w + BORDER_WIDTH,
+        hBottomCanvas = bottomLeft.h + BORDER_WIDTH,
+        xMinBottomCanvasBorder = BORDER_WIDTH / 2,
+        xMaxBottomCanvasBorder = wBottomCanvas - BORDER_WIDTH / 2,
+        yMinBottomCanvasBorder = BORDER_WIDTH / 2,
+        yMaxBottomCanvasBorder = hBottomCanvas - BORDER_WIDTH / 2,
+        bordersBottomCanvas = [
+          {
+            // Right
+            x0: xMaxBottomCanvasBorder,
+            y0: yMinBottomCanvasBorder,
+            x1: xMaxBottomCanvasBorder,
+            y1: yMaxBottomCanvasBorder
+          },
+          {
+            // Bottom
+            x0: xMaxBottomCanvasBorder,
+            y0: yMaxBottomCanvasBorder,
+            x1: xMinBottomCanvasBorder,
+            y1: yMaxBottomCanvasBorder
+          },
+          {
+            // Left
+            x0: xMinBottomCanvasBorder,
+            y0: yMaxBottomCanvasBorder,
+            x1: xMinBottomCanvasBorder,
+            y1: 0 // JOIN BORDERS
+          }
+        ],
+        bottomCanvas = {
+          x: xBottomCanvas,
+          y: yBottomCanvas,
+          w: wBottomCanvas,
+          h: hBottomCanvas,
+          borders: bordersBottomCanvas
+        };
+      canvasInfos.push(topCanvas);
+      canvasInfos.push(middleCanvas);
+      canvasInfos.push(bottomCanvas);
+    } else {
+      /* case :
+       * xoo
+       * ooo
+       * oox
+       */
+      events = [false, true, true, true, true, true, true, true, false];
+      let xTopCanvas = topMiddle.x - BORDER_WIDTH / 2,
+        yTopCanvas = topMiddle.y - BORDER_WIDTH / 2,
+        wTopCanvas = topRight.x + topRight.w - topMiddle.x + BORDER_WIDTH,
+        hTopCanvas = topMiddle.h + BORDER_WIDTH,
+        xMinTopCanvasBorder = BORDER_WIDTH / 2,
+        xMaxTopCanvasBorder = wTopCanvas - BORDER_WIDTH / 2,
+        yMinTopCanvasBorder = BORDER_WIDTH / 2,
+        yMaxTopCanvasBorder = hTopCanvas - BORDER_WIDTH / 2,
+        bordersTopCanvas = [
+          {
+            // Top
+            x0: xMinTopCanvasBorder,
+            y0: yMinTopCanvasBorder,
+            x1: xMaxTopCanvasBorder,
+            y1: yMinTopCanvasBorder
+          },
+          {
+            // Right
             x0: xMaxTopCanvasBorder,
-            y0: yMaxTopCanvasBorder,
-            x1: xBottomMinTopCanvasBorder,
-            y1: yMaxTopCanvasBorder
+            y0: yMinTopCanvasBorder,
+            x1: xMaxTopCanvasBorder,
+            y1: hTopCanvas // JOIN BORDERS
           },
           {
             // Left
@@ -1032,19 +969,66 @@ const PdfViewer = function (id, events) {
           h: hTopCanvas,
           borders: bordersTopCanvas
         };
-      let xBottomCanvas = bottomMiddle.x - BORDER_WIDTH / 2,
-        yBottomCanvas = bottomMiddle.y - BORDER_WIDTH / 2,
-        wBottomCanvas = bottomMiddle.w + BORDER_WIDTH,
-        hBottomCanvas = bottomMiddle.h + BORDER_WIDTH,
+      let xMiddleCanvas = middleLeft.x - BORDER_WIDTH / 2,
+        yMiddleCanvas = middleLeft.y - BORDER_WIDTH / 2,
+        wMiddleCanvas = middleRight.x + middleRight.w - middleLeft.x + BORDER_WIDTH,
+        hMiddleCanvas = middleLeft.h + BORDER_WIDTH,
+        xMinMiddleCanvasBorder = BORDER_WIDTH / 2,
+        xTopMaxMiddleCanvasBorder = center.x - middleLeft.x + BORDER_WIDTH / 2,
+        xBottomMinMiddleCanvasBorder = middleRight.x - middleLeft.x - BORDER_WIDTH / 2,
+        xMaxMiddleCanvasBorder = wMiddleCanvas - BORDER_WIDTH / 2,
+        yMinMiddleCanvasBorder = BORDER_WIDTH / 2,
+        yMaxMiddleCanvasBorder = hMiddleCanvas - BORDER_WIDTH / 2,
+        bordersMiddleCanvas = [
+          {
+            // Top
+            x0: xMinMiddleCanvasBorder,
+            y0: yMinMiddleCanvasBorder,
+            x1: xTopMaxMiddleCanvasBorder,
+            y1: yMinMiddleCanvasBorder
+          },
+          {
+            // Right
+            x0: xMaxMiddleCanvasBorder,
+            y0: 0, // JOIN BORDERS
+            x1: xMaxMiddleCanvasBorder,
+            y1: yMaxMiddleCanvasBorder
+          },
+          {
+            // Bottom
+            x0: xMaxMiddleCanvasBorder,
+            y0: yMaxMiddleCanvasBorder,
+            x1: xBottomMinMiddleCanvasBorder,
+            y1: yMaxMiddleCanvasBorder
+          },
+          {
+            // Left
+            x0: xMinMiddleCanvasBorder,
+            y0: hMiddleCanvas, // JOIN BORDERS
+            x1: xMinMiddleCanvasBorder,
+            y1: yMinMiddleCanvasBorder
+          }
+        ],
+        middleCanvas = {
+          x: xMiddleCanvas,
+          y: yMiddleCanvas,
+          w: wMiddleCanvas,
+          h: hMiddleCanvas,
+          borders: bordersMiddleCanvas
+        };
+      let xBottomCanvas = bottomLeft.x - BORDER_WIDTH / 2,
+        yBottomCanvas = bottomLeft.y - BORDER_WIDTH / 2,
+        wBottomCanvas = bottomMiddle.x + bottomMiddle.w - bottomLeft.x + BORDER_WIDTH,
+        hBottomCanvas = bottomMiddle.y + bottomMiddle.h - bottomLeft.y + BORDER_WIDTH,
         xMinBottomCanvasBorder = BORDER_WIDTH / 2,
         xMaxBottomCanvasBorder = wBottomCanvas - BORDER_WIDTH / 2,
         yMinBottomCanvasBorder = BORDER_WIDTH / 2,
-        yMaxBottomCanvasBorder = hBottomCanvas - BORDER_WIDTH,
+        yMaxBottomCanvasBorder = hBottomCanvas - BORDER_WIDTH / 2,
         bordersBottomCanvas = [
           {
             // Right
             x0: xMaxBottomCanvasBorder,
-            y0: 0, // JOIN TOP/BOTTOM CANVAS
+            y0: yMinBottomCanvasBorder, // NO NEED TO JOIN BORDERS
             x1: xMaxBottomCanvasBorder,
             y1: yMaxBottomCanvasBorder
           },
@@ -1060,7 +1044,7 @@ const PdfViewer = function (id, events) {
             x0: xMinBottomCanvasBorder,
             y0: yMaxBottomCanvasBorder,
             x1: xMinBottomCanvasBorder,
-            y1: 0 // JOIN TOP/BOTTOM CANVAS
+            y1: 0 // JOIN BORDERS
           }
         ],
         bottomCanvas = {
@@ -1070,8 +1054,9 @@ const PdfViewer = function (id, events) {
           h: hBottomCanvas,
           borders: bordersBottomCanvas
         };
-      canvasInfos.push(bottomCanvas);
+      canvasInfos.push(middleCanvas);
       canvasInfos.push(topCanvas);
+      canvasInfos.push(bottomCanvas);
     }
     // Build canvas
     for (let i = 0; i < canvasInfos.length; i++) {
