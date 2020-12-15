@@ -58,9 +58,18 @@ block content
     else
 
       div(class='row row-margin')
-        div(class='col-12')
-          div(class='key d-inline font-weight-bold') Authors: 
-          div(class='value d-inline') #{document.metadata.authors}
+        if document.metadata.authors.length > 0
+          div(class='col-12')
+            div(class='key d-inline font-weight-bold') Authors: 
+              div(class='value d-block authors-container')
+                ul
+                  each val, index in document.metadata.authors
+                    if val.name
+                      li #{val.name}
+                        ul
+                          if val.name && val.affiliations
+                            each aff, index in val.affiliations
+                              li #{aff}
         div(class='col-12')
           div(class='key d-inline font-weight-bold') Title: 
           div(class='value d-inline') #{document.metadata.articleTitle}
