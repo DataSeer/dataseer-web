@@ -184,8 +184,8 @@
               datasetsList.select(key);
               datasetForm.link(currentDocument.datasets.current[key], documentView.color(key));
               documentView.views.scrollTo(key);
-            } else {
-              datasetForm.link(defaultDataset);
+            }
+            if (keys.length < 0) {
               documentView.views.unselectCanvas();
               datasetForm.lock();
             }
