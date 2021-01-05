@@ -179,15 +179,14 @@
             if (err) return err; // Need to define error behavior
             hasChanged = false;
             let keys = Object.keys(currentDocument.datasets.current);
-            if (id === datasetForm.id() && keys.length > 0) {
+            if (keys.length <= 0) {
+              documentView.views.unselectCanvas();
+              datasetForm.lock();
+            } else if (id === datasetForm.id()) {
               let key = keys.length > 1 ? keys[1] : keys[0];
               datasetsList.select(key);
               datasetForm.link(currentDocument.datasets.current[key], documentView.color(key));
               documentView.views.scrollTo(key);
-            }
-            if (keys.length < 0) {
-              documentView.views.unselectCanvas();
-              datasetForm.lock();
             }
           });
         },
