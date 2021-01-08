@@ -30,8 +30,6 @@ router.post('/processDataseerSentence', function (req, res, next) {
 });
 
 router.get('/jsonDataTypes', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
   return res.json(req.app.get('dataTypes.json'));
 });
 
