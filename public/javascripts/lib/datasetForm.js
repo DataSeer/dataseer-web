@@ -118,7 +118,7 @@ const DatasetForm = function (events) {
         value: '',
         help: {
           title: 'If you disagree with this information, please edit the Dataseer Wiki available at: ',
-          href: 'http://wiki.dataseer.io/doku.php',
+          href: 'http://wiki.dataseer.ai/doku.php',
           text: '?'
         }
       },
