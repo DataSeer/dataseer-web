@@ -1113,7 +1113,7 @@ const PdfViewer = function (id, events) {
     this.setCanvasColor(sentenceid, BORDER_WIDTH, REMOVED_BORDER_COLOR);
     this.viewer
       .find('.contourLayer > div[sentenceid="' + sentenceid + '"]')
-      .attr('color', REMOVED_BORDER_COLOR)
+      .removeAttr('color')
       .removeAttr('datasetid');
   };
   this.scrollToSentence = function (sentenceid) {
