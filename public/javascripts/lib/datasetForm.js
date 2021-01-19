@@ -190,7 +190,7 @@ const DatasetForm = function (events) {
         .append(elements['dataset.status'].elements().container)
         .append(elements['unlink'])
     )
-    .append(View.forms.row().append(elements['dataset.cert'].elements().container))
+    // .append(View.forms.row().append(elements['dataset.cert'].elements().container)) // fix-161 : hide cert
     .append(View.forms.row().append(elements['dataset.dataType'].elements().container))
     .append(View.forms.row().append(elements['dataset.subType'].elements().container))
     .append(View.forms.row().append(elements['dataset.customDataType'].elements().container))
