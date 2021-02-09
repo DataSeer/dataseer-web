@@ -2,7 +2,7 @@
  * @prettier
  */
 
-(function($) {
+(function ($) {
   window.cookieconsent.initialise({
     'palette': {
       'popup': {
@@ -16,9 +16,9 @@
     'theme': 'classic',
     'content': {
       'message': 'By using this app, you consent to our cookie policy',
-      'dismiss': 'Dismiss',
-      'allow': 'Accept',
-      'deny': 'Deny',
+      'dismiss': 'Got it!',
+      'allow': 'Allow cookies',
+      'deny': 'Decline',
       'link': 'Learn more',
       'href': 'privacy'
     }
