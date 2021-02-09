@@ -4,37 +4,37 @@
 
 // API Interface Object
 const dataseerML = {
-  'jsonDataTypes': function(done) {
+  jsonDataTypes: function (done) {
     return $.ajax({
-      'cache': false,
-      'type': 'GET',
-      'contentType': 'application/json',
-      'url': '../api/dataseer-ml/jsonDataTypes',
-      'success': function(data) {
+      cache: false,
+      type: 'GET',
+      contentType: 'application/json',
+      url: '../api/dataseer-ml/jsonDataTypes',
+      success: function (data) {
         if (typeof data === 'string') data = JSON.parse(data);
         return done(null, data);
       },
-      'error': function(data) {
+      error: function (data) {
         return done(true, data);
       }
     });
   },
-  'resyncJsonDataTypes': function(done) {
+  resyncJsonDataTypes: function (done) {
     return $.ajax({
-      'cache': false,
-      'type': 'GET',
-      'contentType': 'application/json',
-      'url': '../api/dataseer-ml/resyncJsonDataTypes',
-      'success': function(data) {
+      cache: false,
+      type: 'GET',
+      contentType: 'application/json',
+      url: '../api/dataseer-ml/resyncJsonDataTypes',
+      success: function (data) {
         if (typeof data === 'string') data = JSON.parse(data);
         return done(null, data);
       },
-      'error': function(data) {
+      error: function (data) {
         return done(true, data);
       }
     });
   },
-  'extractDatatypeFrom': function(data) {
+  extractDatatypeFrom: function (data) {
     let classifications =
         data['classifications'].length > 0 &&
         typeof data['classifications'][0] === 'object' &&
@@ -62,17 +62,17 @@ const dataseerML = {
     return result;
   },
   // Get the dataType of a given sentence
-  'getdataType': function(sentence, done) {
+  getdataType: function (sentence, done) {
     return $.ajax({
-      'cache': false,
-      'type': 'POST',
-      'url': '../api/dataseer-ml/processDataseerSentence',
-      'data': 'text=' + encodeURIComponent(sentence.text()),
-      'success': function(data) {
+      cache: false,
+      type: 'POST',
+      url: '../api/dataseer-ml/processDataseerSentence',
+      data: 'text=' + encodeURIComponent(sentence.text()),
+      success: function (data) {
         let result = dataseerML.extractDatatypeFrom(JSON.parse(data));
         return done(null, result);
       },
-      'error': function(data) {
+      error: function (data) {
         return done(true, data);
       }
     });

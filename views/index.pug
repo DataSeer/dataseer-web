@@ -41,10 +41,10 @@ block content
                   td /signup
                   td [Public]
                   td
-                    div Available parameters :
+                    div Available parameters:
                     ul
-                      li username : Email address
-                      li password : Paswword
+                      li username: Email address
+                      li password: Paswword
               thead
                 tr
                   th(scope='col' colspan='4') Sign in
@@ -60,10 +60,10 @@ block content
                   td /signin
                   td [Public]
                   td
-                    div Available parameters :
+                    div Available parameters:
                     ul
-                      li username : Registred email address
-                      li password : Paswword
+                      li username: Registered email address
+                      li password: Paswword
               thead
                 tr
                   th(scope='col' colspan='4') Sign out
@@ -99,10 +99,10 @@ block content
                   td /settings
                   td [Restricted] Any role
                   td
-                    div Available parameters :
+                    div Available parameters:
                     ul
-                      li current_password : Current password
-                      li new_password : New password
+                      li current_password: Current password
+                      li new_password: New password
               thead
                 tr
                   th(scope='col' colspan='4') Forgot Password
@@ -131,11 +131,11 @@ block content
                   td /resetPassword
                   td [Restricted] Any role
                   td
-                    div Available parameters :
+                    div Available parameters:
                     ul
-                      li username : Registred email address
-                      li token : Token (send by mail)
-                      li password : New password
+                      li username: Registred email address
+                      li token: Token (send by mail)
+                      li password: New password
               thead
                 tr
                   th(scope='col' colspan='4') List of Documents
@@ -147,18 +147,18 @@ block content
                   td [Restricted] annotator OR curator
                   td
                     div List of first [limit] Documents (by default, limit will be set to 20)
-                    div available parameters :
+                    div available parameters:
                     ul
-                      li limit : maximum number of results
-                      li doi : doi of document
-                      li pmid : pmid of document
+                      li limit: maximum number of results
+                      li doi: doi of document
+                      li pmid: pmid of document
                 tr
                   td GET
                   td /documents/:id
                   td [Restricted] Any role
                   td
                     div User Interface to process a single Document with Id :id
-                    div 3 UI available : metadata, datasets and finish
+                    div 3 UI available: metadata, datasets and finish
                     div Annotator will only access to datasets UI
     div(class='row')
       div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-top:10px;')
@@ -184,11 +184,11 @@ block content
                   td [Restricted] annotator OR curator
                   td
                     div List of first [limit] Documents (by default, limit will be set to 20)
-                    div available parameters :
+                    div available parameters:
                     ul
-                      li limit : maximum number of results
-                      li doi : doi of document
-                      li pmid : pmid of document
+                      li limit: maximum number of results
+                      li doi: doi of document
+                      li pmid: pmid of document
                 tr
                   td(scope='row') GET
                   td /api/documents/:id
@@ -238,10 +238,10 @@ block content
                   td [Restricted] standard_user OR curator
                   td
                     div Send files to backoffice
-                    div available parameters :
+                    div available parameters:
                     ul
-                      li uploadedFiles : file or list of files
-                      li [only available for curator] dataseerML : "dataseer-ml" to call dataseer-ml on uploaded file(s), or empty
+                      li uploadedFiles: file or list of files
+                      li [only available for curator] dataseerML: "dataseer-ml" to call dataseer-ml on uploaded file(s), or empty
                 tr
                   td(scope='row') GET
                   td
@@ -254,7 +254,7 @@ block content
                   td [Restricted] curator
                   td
                     div Update role of given account
-                    div available parameters :
+                    div available parameters:
                     ul
-                      li username : registred username
-                      li role : role
+                      li username: registred username
+                      li role: role

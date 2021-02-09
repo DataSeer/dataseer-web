@@ -1,7 +1,7 @@
 /*
  * @prettier
  */
-const DatasetForm = function(events) {
+const DatasetForm = function (events) {
   let self = this;
 
   self.selectedElement = undefined;
@@ -10,43 +10,48 @@ const DatasetForm = function(events) {
   self.metadata = {};
 
   let elements = {
-    'container': HtmlBuilder.div({
-      'id': '',
-      'class': 'container-fluid',
-      'text': ''
+    container: HtmlBuilder.div({
+      id: 'dataset-form-form',
+      class: 'container-fluid',
+      text: ''
     }),
-    'save': new View.buttons.save('Save for later '),
-    'validation': new View.buttons.default('Validate'),
-    'help': new View.buttons.help('Help'),
-    'unlink': new View.buttons.unlink(),
+    lock: HtmlBuilder.div({
+      id: 'dataset-form-lock',
+      class: 'container-fluid lock',
+      text: 'At least one dataset must be added to be able to use this form'
+    }),
+    save: new View.buttons.save('Save for later '),
+    validation: new View.buttons.default('Validate'),
+    help: new View.buttons.help('Help'),
+    unlink: new View.buttons.unlink(),
     'dataset.status': new View.status.edition('dataset.status'),
     'dataset.id': new View.properties.uneditable.text(
       {
-        'id': 'dataset.id',
-        'key': 'DataSet',
-        'value': ''
+        id: 'dataset.id',
+        key: 'DataSet',
+        value: ''
       },
       {}
     ),
     'dataset.cert': new View.properties.uneditable.text(
       {
-        'id': 'dataset.cert',
-        'key': 'cert: ',
-        'value': ''
+        id: 'dataset.cert',
+        key: 'cert: ',
+        value: ''
       },
       {}
     ),
     'dataset.customDataType': new View.properties.editable.text(
       {
-        'id': 'dataset.customDataType',
-        'key': 'Custom Data type: ',
-        'value': ''
+        id: 'dataset.customDataType',
+        key: 'Custom Data type: ',
+        value: ''
       },
       {
-        'onEdit': function(element) {},
-        'onSave': function(element) {},
-        'onCancel': function(element) {},
-        'onChange': function(element) {
+        onEdit: function (element) {},
+        onSave: function (element) {},
+        onCancel: function (element) {},
+        onChange: function (element) {
           elements['dataset.status'].modified();
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.dataType = element.value();
@@ -56,16 +61,16 @@ const DatasetForm = function(events) {
     ),
     'dataset.dataType': new View.properties.editable.select(
       {
-        'id': 'dataset.dataType',
-        'key': 'Data type: ',
-        'value': '',
-        'options': []
+        id: 'dataset.dataType',
+        key: 'Data type: ',
+        value: '',
+        options: []
       },
       {
-        'onEdit': function(element) {},
-        'onSave': function(element) {},
-        'onCancel': function(element) {},
-        'onChange': function(element) {
+        onEdit: function (element) {},
+        onSave: function (element) {},
+        onCancel: function (element) {},
+        onChange: function (element) {
           elements['dataset.status'].modified();
           self.setDataType();
           events.onChange(element);
@@ -74,16 +79,16 @@ const DatasetForm = function(events) {
     ),
     'dataset.subType': new View.properties.editable.select(
       {
-        'id': 'dataset.subType',
-        'key': 'Sub type: ',
-        'value': '',
-        'options': []
+        id: 'dataset.subType',
+        key: 'Sub type: ',
+        value: '',
+        options: []
       },
       {
-        'onEdit': function(element) {},
-        'onSave': function(element) {},
-        'onCancel': function(element) {},
-        'onChange': function(element) {
+        onEdit: function (element) {},
+        onSave: function (element) {},
+        onCancel: function (element) {},
+        onChange: function (element) {
           elements['dataset.status'].modified();
           self.setSubType();
           events.onChange(element);
@@ -92,45 +97,45 @@ const DatasetForm = function(events) {
     ),
     'dataset.description': new View.properties.uneditable.text(
       {
-        'id': 'dataset.description',
-        'key': 'Description: ',
-        'value': ''
+        id: 'dataset.description',
+        key: 'Description: ',
+        value: ''
       },
       {}
     ),
     'dataset.bestDataFormatForSharing': new View.properties.uneditable.text(
       {
-        'id': 'dataset.bestDataFormatForSharing',
-        'key': 'Best data format for sharing: ',
-        'value': ''
+        id: 'dataset.bestDataFormatForSharing',
+        key: 'Best data format for sharing: ',
+        value: ''
       },
       {}
     ),
     'dataset.mostSuitableRepositories': new View.properties.uneditable.text(
       {
-        'id': 'dataset.mostSuitableRepositories',
-        'key': 'Most suitable Repositories: ',
-        'value': '',
-        'help': {
-          'title': 'If you disagree with this information, please edit the Dataseer Wiki available at: ',
-          'href': 'http://wiki.dataseer.io/doku.php',
-          'text': '?'
+        id: 'dataset.mostSuitableRepositories',
+        key: 'Most suitable Repositories: ',
+        value: '',
+        help: {
+          title: 'If you disagree with this information, please edit the Dataseer Wiki available at: ',
+          href: 'http://wiki.dataseer.ai/doku.php',
+          text: '?'
         }
       },
       {}
     ),
     'dataset.name': new View.properties.editable.text(
       {
-        'id': 'dataset.name',
-        'key': "Please provide a name for this dataset (e.g. 'sampling locations'): ",
-        'value': '',
-        'placeholder': 'n/a'
+        id: 'dataset.name',
+        key: "Please provide a name for this dataset (e.g. 'sampling locations'): ",
+        value: '',
+        placeholder: 'n/a'
       },
       {
-        'onEdit': function(element) {},
-        'onSave': function(element) {},
-        'onCancel': function(element) {},
-        'onChange': function(element) {
+        onEdit: function (element) {},
+        onSave: function (element) {},
+        onCancel: function (element) {},
+        onChange: function (element) {
           elements['dataset.status'].modified();
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.name = element.value();
@@ -140,16 +145,16 @@ const DatasetForm = function(events) {
     ),
     'dataset.DOI': new View.properties.editable.text(
       {
-        'id': 'dataset.DOI',
-        'key': 'Please provide the DOI (or other stable link) to this dataset: ',
-        'value': '',
-        'placeholder': 'n/a'
+        id: 'dataset.DOI',
+        key: 'Please provide the DOI (or other stable link) to this dataset: ',
+        value: '',
+        placeholder: 'n/a'
       },
       {
-        'onEdit': function(element) {},
-        'onSave': function(element) {},
-        'onCancel': function(element) {},
-        'onChange': function(element) {
+        onEdit: function (element) {},
+        onSave: function (element) {},
+        onCancel: function (element) {},
+        onChange: function (element) {
           elements['dataset.status'].modified();
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.DOI = element.value();
@@ -159,14 +164,14 @@ const DatasetForm = function(events) {
     ),
     'dataset.comments': new View.properties.editable.textarea(
       {
-        'id': 'dataset.comments',
-        'key': 'Please enter any comments here (such as a reason why this dataset cannot be shared): ',
-        'value': '',
-        'rows': 3,
-        'placeholder': 'n/a'
+        id: 'dataset.comments',
+        key: 'Please enter any comments here (such as a reason why this dataset cannot be shared): ',
+        value: '',
+        rows: 3,
+        placeholder: 'n/a'
       },
       {
-        'onChange': function(element) {
+        onChange: function (element) {
           elements['dataset.status'].modified();
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.comments = element.value();
@@ -185,7 +190,7 @@ const DatasetForm = function(events) {
         .append(elements['dataset.status'].elements().container)
         .append(elements['unlink'])
     )
-    .append(View.forms.row().append(elements['dataset.cert'].elements().container))
+    // .append(View.forms.row().append(elements['dataset.cert'].elements().container)) // fix-161 : hide cert
     .append(View.forms.row().append(elements['dataset.dataType'].elements().container))
     .append(View.forms.row().append(elements['dataset.subType'].elements().container))
     .append(View.forms.row().append(elements['dataset.customDataType'].elements().container))
@@ -202,40 +207,52 @@ const DatasetForm = function(events) {
         .append(elements['save'])
         .append(elements['validation'])
         .append(elements['help'])
-    );
+    )
+    .append(elements['lock']);
 
-  elements.unlink.click(function() {
+  elements.unlink.click(function () {
     events.onUnlink(self.selectedElement);
   });
 
   elements.unlink.attr('title', 'Unlink selected sentence to this dataset');
 
-  elements.save.click(function() {
+  elements.save.click(function () {
     self.dataset = self.values();
     events.onSave(self.dataset);
   });
 
-  elements.validation.click(function() {
+  elements.validation.click(function () {
     self.dataset = self.values();
     events.onValidation(self.dataset);
   });
 
-  elements['dataset.id'].elements().data.click(function() {
+  elements['dataset.id'].elements().data.click(function () {
     events.onIdClick(elements['dataset.id'].value());
   });
 
-  self.id = function() {
+  self.id = function () {
     if (typeof value === 'undefined') return elements['dataset.id'].value();
   };
 
-  self.init = function(id) {
-    jQuery(id)
-      .empty()
-      .append(elements.container);
+  self.init = function (id) {
+    jQuery(id).empty().append(elements.container).append(elements.lock);
     self.refresh();
+    self.lock();
   };
 
-  self.refresh = function(options) {
+  self.lock = function () {
+    self.refresh();
+    $('#dataset-form-form').hide();
+    $('#dataset-form-lock').show();
+  };
+
+  self.unlock = function () {
+    self.refresh();
+    $('#dataset-form-form').show();
+    $('#dataset-form-lock').hide();
+  };
+
+  self.refresh = function (options) {
     if (typeof options !== 'undefined') {
       if (typeof options.unlink !== 'undefined') options.unlink ? elements['unlink'].show() : elements['unlink'].hide();
     }
@@ -247,22 +264,14 @@ const DatasetForm = function(events) {
         url =
           typeof self.metadata[param] !== 'undefined' ? self.metadata[param].url : 'http://wiki.dataseer.io/doku.php';
       elements['dataset.mostSuitableRepositories'].help({
-        'href': encodeURI(url)
+        href: encodeURI(url)
       });
     }
     elements['dataset.id'].view();
     elements['dataset.cert'].view();
     let certValue = parseFloat(elements['dataset.cert'].value());
-    if (certValue === 0.0)
-      elements['dataset.cert']
-        .elements()
-        .container.parent()
-        .hide();
-    else
-      elements['dataset.cert']
-        .elements()
-        .container.parent()
-        .show();
+    if (certValue === 0.0) elements['dataset.cert'].elements().container.parent().hide();
+    else elements['dataset.cert'].elements().container.parent().show();
     elements['dataset.dataType'].edit(false);
     elements['dataset.subType'].edit(false);
     elements['dataset.customDataType'].edit(false);
@@ -274,15 +283,15 @@ const DatasetForm = function(events) {
     elements['dataset.comments'].view();
   };
 
-  self.style = function(style) {
+  self.style = function (style) {
     elements['dataset.id'].elements().data.attr('style', style);
   };
 
-  self.elements = function() {
+  self.elements = function () {
     return elements;
   };
 
-  self.values = function(dataset) {
+  self.values = function (dataset) {
     if (typeof dataset === 'undefined')
       return {
         'dataset.status': elements['dataset.status'].value(),
@@ -315,7 +324,8 @@ const DatasetForm = function(events) {
     return self.values();
   };
 
-  self.link = function(dataset, style, element) {
+  self.link = function (dataset, style, element) {
+    self.unlock();
     self.style(style);
     self.dataset = dataset;
     self.selectedElement = element;
@@ -325,72 +335,71 @@ const DatasetForm = function(events) {
     self.setDataFromDatatype();
     self.setDataFromSubtype();
     self.refresh({
-      'unlink':
-        typeof self.selectedElement !== 'undefined' && typeof self.selectedElement.attr('corresp') !== 'undefined'
+      unlink: typeof self.selectedElement !== 'undefined' && typeof self.selectedElement.attr('corresp') !== 'undefined'
     });
   };
 
-  self.loadData = function(data) {
+  self.loadData = function (data) {
     self.dataTypes = data.dataTypes;
     self.metadata = data.metadata;
     self.setDataTypes();
     self.setSubTypes();
   };
 
-  self.setDataTypes = function() {
+  self.setDataTypes = function () {
     let options = [];
     for (let key in self.dataTypes) {
       options.push({
-        'value': key,
-        'text': self.metadata[key].label || key
+        value: key,
+        text: self.metadata[key].label || key
       });
     }
-    options.sort(function(a, b) {
+    options.sort(function (a, b) {
       if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
       else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
       else return 0;
     });
     options.unshift({
-      'value': '',
-      'text': 'None'
+      value: '',
+      text: 'None'
     });
     elements['dataset.dataType'].options(options);
   };
 
-  self.setSubTypes = function() {
+  self.setSubTypes = function () {
     let subTypes = self.dataTypes[self.dataset.dataType],
       options = [];
     if (Array.isArray(subTypes)) {
       for (var i = 0; i < subTypes.length; i++) {
         options.push({
-          'value': subTypes[i],
-          'text': self.metadata[subTypes[i]].label || subTypes[i]
+          value: subTypes[i],
+          text: self.metadata[subTypes[i]].label || subTypes[i]
         });
       }
-      options.sort(function(a, b) {
+      options.sort(function (a, b) {
         if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
         else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
         else return 0;
       });
     }
     options.unshift({
-      'value': '',
-      'text': 'None'
+      value: '',
+      text: 'None'
     });
     elements['dataset.subType'].options(options);
     return true;
   };
 
-  self.showCustomDataType = function() {
+  self.showCustomDataType = function () {
     return $('.form-row:has(#dataset\\.customDataType)').show();
   };
 
-  self.hideCustomDataType = function() {
+  self.hideCustomDataType = function () {
     elements['dataset.customDataType'].value('');
     return $('.form-row:has(#dataset\\.customDataType)').hide();
   };
 
-  self.setDataType = function() {
+  self.setDataType = function () {
     self.dataset.status = elements['dataset.status'].value();
     if (elements['dataset.dataType'].value() === '') {
       self.showCustomDataType();
@@ -399,16 +408,15 @@ const DatasetForm = function(events) {
       self.hideCustomDataType();
       self.dataset.dataType = elements['dataset.dataType'].value();
     }
-    console.log(self.dataset.dataType);
     self.dataset.subType = '';
     self.setSubTypes();
     self.setDataFromDatatype();
   };
 
-  self.setDataFromDatatype = function() {
+  self.setDataFromDatatype = function () {
     if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
       elements['dataset.mostSuitableRepositories'].help({
-        'href': encodeURI(self.metadata[self.dataset.dataType].url)
+        href: encodeURI(self.metadata[self.dataset.dataType].url)
       });
       elements['dataset.description'].value(
         self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
@@ -426,7 +434,7 @@ const DatasetForm = function(events) {
       return true;
     } else {
       elements['dataset.mostSuitableRepositories'].help({
-        'href': 'http://wiki.dataseer.io/doku.php'
+        href: 'http://wiki.dataseer.io/doku.php'
       });
       elements['dataset.description'].value('');
       elements['dataset.bestDataFormatForSharing'].value('');
@@ -438,29 +446,31 @@ const DatasetForm = function(events) {
     return false;
   };
 
-  self.setSubType = function() {
+  self.setSubType = function () {
     self.dataset.status = elements['dataset.status'].value();
     self.dataset.subType = elements['dataset.subType'].value();
     if (!self.setDataFromSubtype()) self.setDataFromDatatype();
   };
 
-  self.setDataFromSubtype = function() {
+  self.setDataFromSubtype = function () {
     if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
       elements['dataset.mostSuitableRepositories'].help({
-        'href': encodeURI(self.metadata[self.dataset.subType].url)
+        href: encodeURI(self.metadata[self.dataset.subType].url)
       });
       elements['dataset.description'].value(
-        self.metadata[self.dataset.subType].description ? self.metadata[self.dataset.subType].description : ''
+        self.metadata[self.dataset.subType].description
+          ? self.metadata[self.dataset.subType].description
+          : self.metadata[self.dataset.dataType].description
       );
       elements['dataset.bestDataFormatForSharing'].value(
         self.metadata[self.dataset.subType].bestDataFormatForSharing
           ? self.metadata[self.dataset.subType].bestDataFormatForSharing
-          : ''
+          : self.metadata[self.dataset.dataType].bestDataFormatForSharing
       );
       elements['dataset.mostSuitableRepositories'].value(
         self.metadata[self.dataset.subType].mostSuitableRepositories
           ? self.metadata[self.dataset.subType].mostSuitableRepositories
-          : ''
+          : self.metadata[self.dataset.dataType].mostSuitableRepositories
       );
       return true;
     } else return false;

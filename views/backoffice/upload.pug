@@ -12,7 +12,7 @@ block content
       if results.errors.length
         each error in results.errors
           if error.filename
-            div(class='alert alert-warning' role='alert') #{error.filename} : #{error.msg}
+            div(class='alert alert-warning' role='alert') #{error.filename}: #{error.msg}
           else
             div(class='alert alert-warning' role='alert') #{error.msg}
     div(class='row')

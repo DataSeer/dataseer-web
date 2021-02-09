@@ -19,17 +19,17 @@ block content
 
             div(class='row row-margin')
               div(class='col-12')
-                div(class='key d-inline') Data Availability Statement : 
+                div(class='key d-inline') Data Availability Statement: 
                 each val, index in document.datasets.current
 
                   div(class='row')
                     div(class='col-12')
                       if val.DOI && val.name
-                        div(class='value d-block') #{val.name} : 
+                        div(class='value d-block') #{val.name}: 
                           a(href=val.DOI) #{val.DOI}
 
       div(class='row')
-        div(class='col-12') The report below has been sent to the journal Editorial Office :
+        div(class='col-12') The report below has been sent to the journal Editorial Office:
           div(class='container-fluid')
 
             div(class='row')
@@ -37,30 +37,39 @@ block content
 
             div(class='row row-margin')
               div(class='col-12')
-                div(class='key d-inline') Data Availability Statement : 
+                div(class='key d-inline') Data Availability Statement: 
                 each val, index in document.datasets.current
 
                   div(class='row')
                     div(class='col-12')
                       if val.DOI && val.name
-                        div(class='value d-block') #{val.name} : 
+                        div(class='value d-block') #{val.name}: 
                           a(href=val.DOI) #{val.DOI}
 
             div(class='row row-margin')
-              div(class='col-12') Author Comments : 
+              div(class='col-12') Author Comments: 
                 each val, index in document.datasets.current
 
                   div(class='row')
                     div(class='col-12')
                       if val.comments
-                        div(class='value d-block') #{val.name} : #{val.comments}
+                        div(class='value d-block') #{val.name}: #{val.comments}
 
     else
 
       div(class='row row-margin')
-        div(class='col-12')
-          div(class='key d-inline font-weight-bold') Authors: 
-          div(class='value d-inline') #{document.metadata.authors}
+        if document.metadata.authors.length > 0
+          div(class='col-12')
+            div(class='key d-inline font-weight-bold') Authors: 
+              div(class='value d-block authors-container')
+                ul
+                  each val, index in document.metadata.authors
+                    if val.name
+                      li #{val.name}
+                        ul
+                          if val.name && val.affiliations
+                            each aff, index in val.affiliations
+                              li #{aff}
         div(class='col-12')
           div(class='key d-inline font-weight-bold') Title: 
           div(class='value d-inline') #{document.metadata.articleTitle}
@@ -68,15 +77,15 @@ block content
           div(class='key d-inline font-weight-bold') Manuscript #: 
           div(class='value d-inline') #{document.metadata.manuscriptId}
         div(class='col-12')
-          div(class='key d-inline font-weight-bold') Submitting Author : 
+          div(class='key d-inline font-weight-bold') Submitting Author: 
           div(class='value d-inline') #{document.metadata.submittingAuthor}
         div(class='col-12')
-          div(class='key d-inline font-weight-bold') Submitting Author email : 
+          div(class='key d-inline font-weight-bold') Submitting Author email: 
           div(class='value d-inline') #{document.metadata.submittingAuthoremail}
 
       div(class='row')
         div(class='col-12')
-          div(class='key d-inline font-weight-bold') Datasets :
+          div(class='key d-inline font-weight-bold') Datasets:
 
       div(class='row')
         div(class='col-12')
@@ -85,43 +94,43 @@ block content
 
             div(class='row row-margin')
               div(class='col-12')
-                div(class='value d-block font-weight-bold') Dataset #{index} :
+                div(class='value d-block font-weight-bold') Dataset #{index}:
               div(class='col-12')
-                div(class='value d-inline') Data Type : 
+                div(class='value d-inline') Data Type: 
                 if val.subType !== ''
                   div(class='value d-inline') #{val.dataType} - #{val.subType}
                 else
                   div(class='value d-inline') #{val.dataType}
               div(class='col-12')
-                div(class='value d-inline') Data Sentence : 
+                div(class='value d-inline') Data Sentence: 
                 div(class='value d-inline') #{val.text}
               if val.name
                 div(class='col-12')
-                  div(class='value d-inline') Dataset name : 
+                  div(class='value d-inline') Dataset name: 
                   div(class='value d-inline') #{val.name}
               if val.DOI
                 div(class='col-12')
-                  div(class='value d-inline') Stable Identifier : 
+                  div(class='value d-inline') Stable Identifier: 
                   div(class='value d-inline')
                     a(href=val.DOI) #{val.DOI}
               if val.comments
                 div(class='col-12')
-                  div(class='value d-inline') Comments : 
+                  div(class='value d-inline') Comments: 
                   div(class='value d-inline') #{val.comments}
 
       div(class='row')
         div(class='col-12')
-          div(class='key d-inline font-weight-bold') Suggested Data Availability Statement : 
+          div(class='key d-inline font-weight-bold') Suggested Data Availability Statement: 
       
       div(class='row row-margin')
         each val, index in document.datasets.current
           if val.DOI && val.name
             div(class='col-12')
-                div(class='value d-block' style="margin-bottom: 4px;") #{val.name} : 
+                div(class='value d-block' style="margin-bottom: 4px;") #{val.name}: 
                   a(href=val.DOI) #{val.DOI}
           else if val.comments && val.name
             div(class='col-12')
-                div(class='value d-block' style="margin-bottom: 4px;") #{val.name} : #{val.comments}
+                div(class='value d-block' style="margin-bottom: 4px;") #{val.name}: #{val.comments}
 
     div(class='row row-margin')
       div(class='col-12')
@@ -134,18 +143,18 @@ block content
       div(class='row row-margin')
         div(class='col-12')
           if val.dataType
-            div(class='value d-inline') Data Type : 
+            div(class='value d-inline') Data Type: 
             if val.subType !== ''
               div(class='value d-inline') #{val.dataType} - #{val.subType}
             else
               div(class='value d-inline') #{val.dataType}
         div(class='col-12')
           if val.subType
-            div(class='value d-inline') Data Subtype : 
+            div(class='value d-inline') Data Subtype: 
             div(class='value d-inline') #{val.subType}
         div(class='col-12')
           if val.text
-            div(class='value d-inline') Data Sentence : 
+            div(class='value d-inline') Data Sentence: 
             div(class='value d-inline') #{val.text}
 
   if demo

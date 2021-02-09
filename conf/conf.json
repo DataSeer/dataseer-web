@@ -1,8 +1,0 @@
-{
-  "services": {
-    "mongodb": "mongodb://localhost:27017/app",
-    "dataseer-ml": "http://cloud.science-miner.com/dataseer-ml/service",
-    "curator-email": "tim@dataseer.io"
-  },
-  "root": "http://localhost:3000/"
-}

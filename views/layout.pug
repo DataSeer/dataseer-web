@@ -10,6 +10,8 @@ html
     if document
       link(rel='stylesheet' href=root + 'stylesheets/tei.css')
       link(rel='stylesheet' href=root + 'stylesheets/process/'+ document.status + '.css')
+      link(rel='stylesheet' href=root + 'javascripts/pdf.js/build/components/pdf_viewer.css')
+      
     if backoffice
       link(rel='stylesheet' href=root + 'stylesheets/style.css')
       link(rel='stylesheet' href=root + 'stylesheets/process/backoffice.css')
@@ -22,11 +24,20 @@ html
       div#user_username #{current_user.username}
       div#user_role #{current_user.role.label}
     div(id='user-navbar' class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;padding-left: 25px;')
-      div(id='logo')
+      div(id='logo' style='padding-top: 0px; padding-bottom: 0px;')
       div
         if current_user
-          div(id='user' style='position:absolute; top:0px; right:10px; text-align:right;')
-            label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label})
+          div(id='user' style='position:absolute; top:0px; right:10px; text-align:right;margin-right: 15px;')
+            if (current_user.organisation !== '')
+              label(style='font-size:small;') Connected as: 
+                a(href=href=root + 'settings')
+                  <b>#{current_user.username}</b> 
+              label(style='font-size:small;') (#{current_user.role.label}, #{current_user.organisation})
+            else
+              label(style='font-size:small;') Connected as: 
+                a(href=href=root + 'settings')
+                  <b>#{current_user.username}</b> 
+              label(style='font-size:small;') (#{current_user.role.label}, None)
         else
           div(id='user' style='position:absolute; top:0px; right:25px; text-align:right;')
             label(style='font-size:small;') 
@@ -50,6 +61,9 @@ html
               if current_user.role.label === 'curator'
                 li
                   a(href=root + 'backoffice/accounts' class=(route === 'backoffice/accounts') ? 'nav active' : 'nav') Accounts
+              if current_user.role.label === 'curator'
+                li
+                  a(href=root + 'backoffice/organisations' class=(route === 'backoffice/organisations') ? 'nav active' : 'nav') Organizations
               li
                 a(href=root + 'settings' class=(route === 'settings') ? 'nav active' : 'nav') Settings
               li
@@ -64,10 +78,10 @@ html
 
     block content
 
-    div(style='text-align:center;margin-top: 20px;')  
-      a(href='https://www.dataseer.io' style='color:#ffffff;' target='_blank') dataseer.io
+    div(class='footer' style='text-align:center;margin-top: 20px; ')  
+      a(href='https://www.dataseer.io' style='color:#ffffff;' target='_blank') dataseer.ai
       a(href='https://github.com/kermitt2/dataseer-web' target='_blank')
-        i(class='fab fa-github' style='color:#8DCB55;margin-left:5px;')
+        i(class='fab fa-github' style='color:#1E3945;margin-left:5px;')
 
   script(src=root + 'javascripts/lib/jquery.js')
   if document
@@ -82,6 +96,10 @@ html
     script(src=root + 'javascripts/dataseerML.js')
     script(src=root + 'javascripts/admin.js')
     script(src=root + 'javascripts/process/'+ document.status + '.js')
+    script(src=root + 'javascripts/pdf.js/build/generic/build/pdf.js')
+    script(src=root + 'javascripts/pdf.js/build/generic/build/pdf.worker.js')
+    script(src=root + 'javascripts/lib/pdfManager.js')
+    script(src=root + 'javascripts/lib/pdfViewer.js')
   else if backoffice
     script(src=root + 'javascripts/process/backoffice.js')
   else if search

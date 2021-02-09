@@ -2,11 +2,11 @@ extends ../layout
 
 block content
 
-  div(id='user-navbar-lg' class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
+  div(id='user-navbar-lg' class='col-12' style='min-height:45px; background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
     div
-      div(id='user-lg' style='position:absolute; top:0px; right:10px; text-align:right;')
+      div(id='user-lg' style='position:absolute; top:4px; right:10px; text-align:right;')
         if current_user
-          label(style='font-size:small;') Connected as : <b>#{current_user.username}</b> (#{current_user.role.label})
+          label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label})
         else
           label(style='font-size:small;') 
             a(href=root + 'signup') Sign up 
@@ -14,11 +14,13 @@ block content
             a(href=root + 'signin') Sign in 
             | to access DataSeer
       div(id='navbar-lg')
-        ul
+        ul(style='padding-left: 15px;')
+          li
+            img(src='../img/DataSeer-logo-min.png' width='25')
+          
           if current_user
             li
               a(href=root + 'myDocuments' class='nav') My documents
-
 
             if current_user.role.label === 'curator' || current_user.role.label === 'annotator'
               li
@@ -28,6 +30,9 @@ block content
             if current_user.role.label === 'curator'
               li
                 a(href=root + 'backoffice/accounts' class='nav') Accounts
+            if current_user.role.label === 'curator'
+              li
+                a(href=root + 'backoffice/organisations' class='nav') Organizations
             li
               a(href=root + 'settings' class='nav') Settings
             li
@@ -40,37 +45,55 @@ block content
             li
               a(href=root + 'forgotPassword' class='nav') Forgot password
 
-  div(class='bordered' style='border-color:#ffffff;border-width:0px;')
-    div(class='container-fluid')
-      div(class='row')
-        div(class='col-6')
-          div(class='row')
-            div(class='col-12 text-center')
-              div(id='view-selection' class='btn-group btn-group-toggle bordered' data-toggle='buttons' style='padding:0;')
-                label(class='btn btn-secondary btn-sm active') full text
-                  input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off' checked)
-                label(class='btn btn-secondary btn-sm') section
-                  input(type='radio' name='options' id='tei_only_dataseer' value='onlyDataseer' autocomplete='off')
-                label(class='btn btn-secondary btn-sm') paragraph
-                  input(type='radio' name='options' id='tei_only_datasets' value='onlyDatasets' autocomplete='off')
-          div(class='row')
-            div(class='col-12')
-              div(id='document-view' class='bordered')
-        div(class='col-4')
-          div(class='row')
-            div(id='dataset-form' class='form bordered')
-        div(class='col-2')
-          div(class='row')
-            div(id='datasets-list' class='form bordered')
-            if current_user
-                if document
-                  if document.status !== 'metadata'
-                    button#previous_step.btn.btn-primary Metadata
-            button(id='datasets_validation' class='btn btn-primary') Finish
+  div(class='row' style='margin-bottom:5px;')
+    div(class='col-12')
+      div(class='' style='border:1px solid #184D7E;background-color:#FFF; border-radius: 20px;')
+        div(id='datasets-list' style='border:0px;height: 115px; border-radius: 20px;')
+    
+  div(class='row' style='height:70%;flex:1 0 auto;')
+    div(class='col-8' style='height:100%;padding-right:0px;')
+      div(class='' style='height:100%;')        
+        div(id='view-selection' class='btn-group btn-group-toggle' data-toggle='buttons' style='overflow:hidden;padding:0;margin:0;height:20px;border-top-left-radius: 20px;border-top-right-radius: 20px;')
+          if document.pdf
+            label(class='btn btn-secondary btn-sm') full text
+              input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off')
+          else
+            label(class='btn btn-secondary btn-sm active') full text
+              input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off' checked)
+          label(class='btn btn-secondary btn-sm') section
+            input(type='radio' name='options' id='tei_only_dataseer' value='onlyDataseer' autocomplete='off')
+          label(class='btn btn-secondary btn-sm') paragraph
+            input(type='radio' name='options' id='tei_only_datasets' value='onlyDatasets' autocomplete='off')
+          if document.pdf
+            label(class='btn btn-secondary btn-sm active') PDF
+              input(type='radio' name='options' id='pdf_all_visible' value='pdf' autocomplete='off' checked)
+
+        div(class='foot-col' style='height:calc(100% - 20px); overflow: hidden; border-bottom-left-radius: 20px;border-bottom-right-radius: 20px;')
+          div(id='document-view-container')
+            div(id='document-view' class='' style='padding:0;')
+
+    div(class='col-4' style='height:100%; padding-left:5px;')
+      div(id='dataset-form-container' class='foot-col' style='height:93%;')
+        div(class='wrapper')
+          div(id='dataset-form' class='form')
+      div(class='' style='display: flex; align-items: center; justify-content: center; height:7%; width:100%')
+        if current_user
+            if document
+              if document.status !== 'metadata'
+                button(id='previous_step' class='btn btn-primary' style='height:80%;line-height: 0;') Metadata
+        button(id='datasets_validation' class='btn btn-primary' style='height:80%;line-height: 0;') Finish
+
+            
 
   include ../modals/quit.pug
   include ../modals/documents/datasets.pug
   include ../modals/help.pug
+
+  <div id="pdf-loading-loop">
+    <div class="loader-container">
+      <div class="loader"></div> 
+    </div>
+  </div>
 
   if demo
     include ../forms/demo/datasets.pug

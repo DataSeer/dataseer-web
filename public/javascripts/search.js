@@ -2,31 +2,32 @@
  * @prettier
  */
 
-(function($) {
+(function ($) {
   // init attr data of each 'searchable' row
-  $('.list .row[data]').map(function() {
+  $('.list .row[data]').map(function () {
     let row = $(this),
       txt = '';
-    row.children().map(function() {
+    row.children().map(function () {
       txt += $(this).text() + ';';
     });
     row.attr('data', txt);
   });
-  // On find_user keyup
-  $('#search').keyup(function() {
+  let filter = function () {
     // Declare variables
     let input = $(this),
-      filter = input.val().toLowerCase();
-    return $('.list .row[data]').map(function() {
+      searchedValue = input.val().toLowerCase();
+    $('.list .row[data]').map(function () {
       let row = $(this),
         txt = row.attr('data');
       if (txt.length) {
-        if (txt.toLowerCase().indexOf(filter) > -1) {
+        if (txt.toLowerCase().indexOf(searchedValue) > -1) {
           row.removeClass('hidden');
         } else {
           row.addClass('hidden');
         }
       }
     });
-  });
+    return $('.count-list').text($('.list .row[data]:not(.hidden)').length + ' Result(s)');
+  };
+  document.getElementById('search').addEventListener('input', filter);
 })(jQuery);
