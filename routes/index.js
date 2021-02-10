@@ -59,6 +59,13 @@ router.get('/', function (req, res, next) {
   } else return res.redirect('./signin');
 });
 
+router.get('/privacy', function(req, res, next) {
+  return res.render('privacy', {
+    'route': 'privacy',
+    'root': conf.root
+  });
+});
+
 router.get('/signup', function (req, res, next) {
   if (typeof req.user !== 'undefined') return res.redirect('./myDocuments');
   return Organisations.find({}).exec(function (err, organisations) {
