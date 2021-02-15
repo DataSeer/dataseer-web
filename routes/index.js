@@ -59,7 +59,7 @@ router.get('/', function (req, res, next) {
   } else return res.redirect('./signin');
 });
 
-router.get('/privacy', function(req, res, next) {
+router.get('/privacy', function (req, res, next) {
   return res.render('privacy', {
     'route': 'privacy',
     'root': conf.root

@@ -3,6 +3,7 @@
  */
 
 const express = require('express'),
+  crypto = require('crypto'),
   router = express.Router(),
   path = require('path'),
   async = require('async'),
@@ -15,6 +16,10 @@ const express = require('express'),
   Upload = require('../lib/upload.js');
 
 const emailRegExp = new RegExp("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@[A-Za-z0-9-]+(.[A-Za-z0-9-]+)*");
+
+function getRandomToken(length = 256) {
+  return crypto.randomBytes(length).toString('hex');
+}
 
 const conf = require('../conf/conf.json');
 
@@ -61,6 +66,9 @@ router.post('/accounts', function (req, res, next) {
   )
     return res.status(401).send('Your current role do not grant access to this part of website');
   if (typeof req.body.update !== 'undefined' && req.body.update === '') return updateAccount(req, res, next);
+  else if (typeof req.body.generate_token !== 'undefined' && req.body.generate_token === '')
+    return generateToken(req, res, next);
+  return res.redirect('./accounts');
 });
 
 /* GET all organisations */
@@ -388,6 +396,28 @@ let updateOrganisation = function (req, res, next) {
             );
           });
         } else return saveUser();
+      }
+    );
+  },
+  generateToken = function (req, res, next) {
+    if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username)) {
+      req.flash('error', 'Incorrect Email');
+      return res.redirect('./accounts');
+    }
+    return Accounts.findOne(
+      {
+        username: req.body.username
+      },
+      function (err, user) {
+        user.apiToken = getRandomToken();
+        return user.save(function (err) {
+          if (err) {
+            req.flash('error', err.message);
+            return res.redirect('./accounts');
+          }
+          req.flash('success', 'Token of User ' + user.username + ' have been successfully updated');
+          return res.redirect('./accounts');
+        });
       }
     );
   };

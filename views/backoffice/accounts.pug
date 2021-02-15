@@ -45,10 +45,11 @@ block content
             div(class='row head-list')
               div(class='col-12')
                 div(class='form-row')
-                  div(class='col-3 offset-1') Email
+                  div(class='col-3') Email
                   div(class='col-3') Role
                   div(class='col-2') Organization
-                  div(class='col-3') Actions
+                  div(class='col-1') Token
+                  div(class='col-2') Actions
             if  accounts.length === 0
               div(class='row')
                 div(class='col-12 text-center')
@@ -58,7 +59,7 @@ block content
               div(class='col-12')
                 form.accounts(role='form', action=root + route, method='post')
                   div(class='form-row')
-                    div(class='col-3 offset-1') #{account.username}
+                    div(class='col-3') #{account.username}
                       input.form-control(type='text' name='username' class='hidden' value=account.username)
                     div(class='col-3')
                       select.custom-select(name='role')
@@ -78,8 +79,11 @@ block content
                             option(selected value=organisation.name) #{organisation.name}
                           else
                             option(value=organisation.name) #{organisation.name}
-                    div(class='col-3')
+                    div(class='col-1')
+                      input.form-control(type='text' name='apiToken' value=account.apiToken)
+                    div(class='col-2')
                       button.btn.btn-default.waves-effect.waves-light(type='submit' name='update') Update
+                      button.btn.btn-default.waves-effect.waves-light(type='submit' name='generate_token') New Token
 
           div(class='row')
             div(class='col-12' style='margin-top:20px;')

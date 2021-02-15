@@ -9,7 +9,8 @@ const Accounts = new Schema(
   {
     role: Object,
     organisation: String,
-    token: String
+    token: String,
+    apiToken: String
   },
   { minimize: false }
 );
