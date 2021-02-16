@@ -33,4 +33,5 @@ block content
               .btn-group
                 button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') update password
 
-  if (current_user.apiToken) script(src=root + 'javascripts/settings.js')
+  if (current_user.apiToken)
+    script(src=root + 'javascripts/settings.js')

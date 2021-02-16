@@ -7,7 +7,7 @@
   return MongoDB.getCurrentDocument(undefined, function (currentDocument) {
     // On previous click
     $('#previous_step').click(function () {
-      return MongoDB.getCurrentDocument(undefined, function (currentDocument) {
+      return MongoDB.getCurrentDocument(undefined, function (err, currentDocument) {
         currentDocument.status = MongoDB.getPreviousStatus(currentDocument);
         MongoDB.updateDocument(currentDocument, null, function (err, res) {
           console.log(err, res);
@@ -19,7 +19,7 @@
 
     // On next click
     $('#next_step').click(function () {
-      return MongoDB.getCurrentDocument(undefined, function (currentDocument) {
+      return MongoDB.getCurrentDocument(undefined, function (err, currentDocument) {
         currentDocument.status = MongoDB.getNextStatus(currentDocument);
         MongoDB.updateDocument(currentDocument, null, function (err, res) {
           console.log(err, res);
