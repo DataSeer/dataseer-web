@@ -12,7 +12,8 @@ block content
                 <td style='padding-right: 40px;'><b>Username</b>: #{current_user.username} </td>
                 <td style='padding-right: 20px;'><b>Role</b>:  #{current_user.role.label} </td>
                 <td style='padding-left: 20px;'><b>Organization</b>: #{current_user.organisation}</td>
-                <td style='padding-left: 20px;'><b>token</b>: <button id="copyApiToken" class="button blue btn btn-sm btn-primary waves-effect waves-light" title=#{current_user.apiToken}>Copy to clipboard</button></td>
+                if (current_user.apiToken) 
+                  <td style='padding-left: 20px;'><b>token</b>: <button id="copyApiToken" class="button blue btn btn-sm btn-primary waves-effect waves-light" title=#{current_user.apiToken}>Copy to clipboard</button></td>
               </tr>
             </table>
             input.form-control.hidden(type='text' id='apiToken' name='apiToken' value=current_user.apiToken)
