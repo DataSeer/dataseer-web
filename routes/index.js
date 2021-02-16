@@ -3,13 +3,14 @@
  */
 
 const request = require('request'),
+  path = require('path'),
   express = require('express'),
   crypto = require('crypto'),
-  nodemailer = require('nodemailer'),
   router = express.Router(),
   passport = require('passport'),
   smtpConf = require('../conf/smtp.conf.json'),
   Upload = require('../lib/upload.js'),
+  mailer = require('../lib/mailer.js'),
   AccountsManager = require('../lib/accountsManager.js'),
   Documents = require('../models/documents.js'),
   Organisations = require('../models/organisations.js'),
@@ -20,14 +21,7 @@ const passwordRegExp = new RegExp('[\\w^\\w]{6,}'),
 
 const conf = require('../conf/conf.json');
 
-let transporter = nodemailer.createTransport({
-  host: smtpConf.host,
-  port: smtpConf.port,
-  secure: false, // upgrade later with STARTTLS
-  auth: smtpConf.auth
-});
-
-const getMailTxt = function (url) {
+const getResetPasswordMailTxt = function (url) {
     return (
       'Hi,\n' +
       'You can reset your password here: ' +
@@ -37,7 +31,7 @@ const getMailTxt = function (url) {
       'This email has been automatically generated'
     );
   },
-  getMailHtml = function (url) {
+  getResetPasswordMailHtml = function (url) {
     return (
       'Hi,<br/>' +
       `You can reset your password <a href="${url}">here</a><br/>` +
@@ -201,14 +195,13 @@ router.post('/forgotPassword', function (req, res) {
           root: conf.root,
           error: err.toString()
         });
-      let url = smtpConf.dataseerUrl + '/resetPassword?token=' + user.token + '&username=' + user.username;
-      return transporter.sendMail(
+      let url = path.join(conf.root, 'resetPassword?token=' + user.token + '&username=' + user.username);
+      return mailer.sendMail(
         {
-          from: smtpConf.from, // sender address
-          to: user.username, // list of receivers
-          subject: smtpConf.subject, // Subject line
-          text: getMailTxt(url), // plain text body
-          html: getMailHtml(url) // html body
+          'username': user.username,
+          'subject': 'Reset Dataseer Password',
+          'text': getResetPasswordMailTxt(url),
+          'html': getResetPasswordMailHtml(url)
         },
         function (err, info) {
           if (err) {

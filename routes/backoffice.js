@@ -8,6 +8,8 @@ const express = require('express'),
   path = require('path'),
   async = require('async'),
   mongoose = require('mongoose'),
+  jwt = require('jsonwebtoken'),
+  mailer = require('../lib/mailer.js'),
   AccountsManager = require('../lib/accountsManager.js'),
   Accounts = require('../models/accounts.js'),
   Organisations = require('../models/organisations.js'),
@@ -17,9 +19,43 @@ const express = require('express'),
 
 const emailRegExp = new RegExp("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@[A-Za-z0-9-]+(.[A-Za-z0-9-]+)*");
 
-function getRandomToken(length = 256) {
-  return crypto.randomBytes(length).toString('hex');
-}
+const getGenerateTokenMailTxt = function (token) {
+    return (
+      'Hi,\n' +
+      'Your personal token has been generated: ' +
+      token +
+      '\n' +
+      "(It's linked to your account, so don't share it)\n" +
+      'More informations about how to use dataseer-web API with this token here: https://github.com/DataSeer/dataseer-web/blob/master/README.md\n' +
+      "Just ignore this email if you don't want to use dataseer-web API\n" +
+      'This email has been automatically generated'
+    );
+  },
+  getGenerateTokenMailHtml = function (token) {
+    return (
+      'Hi,<br/>' +
+      'Your personal token has been generated: ' +
+      token +
+      '<br/>' +
+      "(It's linked to your account, so don't share it)<br/>" +
+      'More informations about how to use dataseer-web API with this token <a href="https://github.com/DataSeer/dataseer-web/blob/master/README.md">here</a><br/>' +
+      "Just ignore this email if you don't want to use dataseer-web API<br/>" +
+      'This email has been automatically generated'
+    );
+  },
+  getJWT = function (username, privateKey, callback) {
+    let date = new Date(Date.now());
+    return jwt.sign(
+      {
+        'username': username
+      },
+      privateKey,
+      { 'expiresIn': 5259492 }, // expire in 2 mounth
+      function (err, token) {
+        return callback(err, token);
+      }
+    );
+  };
 
 const conf = require('../conf/conf.json');
 
@@ -409,15 +445,42 @@ let updateOrganisation = function (req, res, next) {
         username: req.body.username
       },
       function (err, user) {
-        user.apiToken = getRandomToken();
-        return user.save(function (err) {
-          if (err) {
-            req.flash('error', err.message);
-            return res.redirect('./accounts');
-          }
-          req.flash('success', 'Token of User ' + user.username + ' have been successfully updated');
+        let privateKey = req.app.get('private.key');
+        if (privateKey)
+          return getJWT(user.username, privateKey, function (err, token) {
+            if (err) {
+              req.flash('error', err.message);
+              return res.redirect('./accounts');
+            }
+            user.apiToken = token;
+            return user.save(function (err) {
+              if (err) {
+                req.flash('error', err.message);
+                return res.redirect('./accounts');
+              }
+              return mailer.sendMail(
+                {
+                  'username': user.username,
+                  'subject': 'Dataseer Token',
+                  'text': getMailTxt(url),
+                  'html': getMailHtml(url)
+                },
+                function (err, info) {
+                  if (err) {
+                    console.log(err);
+                    req.flash('error', 'Error while creating token, email not sent');
+                    return res.redirect('./accounts');
+                  }
+                  req.flash('success', 'Token of User ' + user.username + ' have been successfully updated');
+                  return res.redirect('./accounts');
+                }
+              );
+            });
+          });
+        else {
+          req.flash('error', 'Error while creating token (server not ready)');
           return res.redirect('./accounts');
-        });
+        }
       }
     );
   };

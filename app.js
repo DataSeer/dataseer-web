@@ -7,6 +7,7 @@ const express = require('express'),
   http = require('http').Server(app),
   path = require('path'),
   url = require('url'),
+  fs = require('fs'),
   fileUpload = require('express-fileupload'),
   logger = require('morgan'),
   methodOverride = require('method-override'),
@@ -27,6 +28,15 @@ const indexRouter = require('./routes/index'),
 
 const conf = require('./conf/conf.json'),
   extractor = require('./lib/extractor.js');
+
+fs.readFile('./conf/private.key', 'utf-8', function (err, res) {
+  if (err) {
+    console.log('file conf/private.key not found');
+    process.exit(0);
+  }
+  console.log('file conf/private.key loaded');
+  app.set('private.key', res);
+});
 
 app.disable('x-powered-by');
 
@@ -89,16 +99,22 @@ mongoose.connect(urlmongo, {
 });
 
 let db = mongoose.connection;
-db.on('error', console.error.bind(console, 'Failed to connect to MongoDB'));
+db.on('error', function () {
+  console.log('Connection to MongoDB failed');
+  process.exit(0);
+});
 db.once('open', function () {
   console.log('Connection to MongoDB succeeded');
 });
 
 request.get(conf.services['dataseer-ml'] + '/jsonDataTypes', function (error, response, body) {
   if (!error && response.statusCode == 200) {
+    console.log('GET on /jsonDataTypes route of dataseer-ml service succeeded');
     app.set('dataTypes.json', extractor.buildDataTypes(JSON.parse(body)));
   } else {
     console.log(error);
+    console.log('GET on /jsonDataTypes route of dataseer-ml service failed');
+    process.exit(0);
   }
 });
 

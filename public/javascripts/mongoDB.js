@@ -9,7 +9,7 @@ const MongoDB = {
     let currentId = jQuery(document.getElementById('document.id')).attr('value');
     jQuery.get('../api/documents/' + currentId + (typeof opts.pdf !== 'undefined' ? '?pdf=true' : ''), function (data) {
       console.log(data);
-      return done(data);
+      return done(data.err, data.res);
     });
   },
   // Update a gicen document
@@ -31,11 +31,11 @@ const MongoDB = {
       data: JSON.stringify(copy),
       success: function (data) {
         console.log(data);
-        return done(null, data);
+        return done(data.err, data.res);
       },
       error: function (data) {
         console.log(data);
-        return done(true, data);
+        return done(data.err, data.res);
       },
       dataType: 'json'
     });

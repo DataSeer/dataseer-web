@@ -1,4 +1,5 @@
 conf/smtp.conf.json
 conf/conf.json
+conf/private.key
 node_modules/
 *.log

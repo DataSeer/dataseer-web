@@ -26,7 +26,7 @@
 
   showLoop();
   // Get the current Object
-  return MongoDB.getCurrentDocument({ pdf: true }, function (doc) {
+  return MongoDB.getCurrentDocument({ pdf: true }, function (err, doc) {
     dataseerML.jsonDataTypes(function (err, data) {
       if (err) return alert('Error : Datatypes unavailable, dataseer-ml service does not respond');
       currentDocument = doc;

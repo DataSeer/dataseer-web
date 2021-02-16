@@ -7,6 +7,7 @@ block content
   if success
     div(class='alert alert-success' role='alert') #{success}
 
+  include ../functions/format.pug
   
   div(class='container-fluid')
     div(class='row')
@@ -48,7 +49,7 @@ block content
                   div(class='col-3') Email
                   div(class='col-3') Role
                   div(class='col-2') Organization
-                  div(class='col-1') Token
+                  div(class='col-2') Token
                   div(class='col-2') Actions
             if  accounts.length === 0
               div(class='row')
@@ -79,8 +80,12 @@ block content
                             option(selected value=organisation.name) #{organisation.name}
                           else
                             option(value=organisation.name) #{organisation.name}
-                    div(class='col-1')
-                      input.form-control(type='text' name='apiToken' value=account.apiToken)
+                    if account.apiToken
+                      div(class='col-2')
+                        input.form-control(type='text' id='apiToken' name='apiToken' value=account.apiToken)
+                    else
+                      div(class='col-2')
+                        div This user does not have a token
                     div(class='col-2')
                       button.btn.btn-default.waves-effect.waves-light(type='submit' name='update') Update
                       button.btn.btn-default.waves-effect.waves-light(type='submit' name='generate_token') New Token
