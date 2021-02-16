@@ -16,7 +16,7 @@ const gridfs = require('mongoose-gridfs');
 // if a apiToken is provided, try to identify user
 const checkApiToken = function (req, res, cb) {
   // Authorization: Bearer <token>
-  if (!req.header('Authorization')) return cb();
+  if (!req.header('Authorization')) return cb(req, res);
   let token = req.header('Authorization').replace(/^Bearer /, ''),
     privateKey = req.app.get('private.key');
   if (privateKey)
@@ -29,7 +29,7 @@ const checkApiToken = function (req, res, cb) {
         .exec(function (err, posts) {
           if (err || posts.length !== 1) return res.json({ 'err': true, 'msg': 'Account not found', 'res': null });
           req.user = posts[0];
-          return cb();
+          return cb(req, res);
         });
     });
   else return res.json({ 'err': true, 'msg': 'API unable to validate token', 'res': null });
@@ -37,26 +37,28 @@ const checkApiToken = function (req, res, cb) {
 
 /* GET ALL Documents */
 router.get('/', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
-  let limit = parseInt(req.query.limit),
-    doi = req.query.doi,
-    pmid = req.query.pmid,
-    query = {};
-  if (typeof doi !== 'undefined') query['doi'] = doi;
-  if (typeof pmid !== 'undefined') query['pmid'] = pmid;
-  if (isNaN(limit)) limit = 20;
-  Documents.find(query)
-    .limit(limit)
-    .exec(function (err, post) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
-      return res.json({ 'err': false, 'res': post });
-    });
+  return checkApiToken(req, res, function (req, res) {
+    if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
+      return res.status(401).send('Your current role do not grant access to this part of website');
+    let limit = parseInt(req.query.limit),
+      doi = req.query.doi,
+      pmid = req.query.pmid,
+      query = {};
+    if (typeof doi !== 'undefined') query['doi'] = doi;
+    if (typeof pmid !== 'undefined') query['pmid'] = pmid;
+    if (isNaN(limit)) limit = 20;
+    Documents.find(query)
+      .limit(limit)
+      .exec(function (err, post) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+        return res.json({ 'err': false, 'res': post });
+      });
+  });
 });
 
 /* GET SINGLE Document BY ID */
 router.get('/:id', function (req, res, next) {
-  return checkApiToken(req, res, function () {
+  return checkApiToken(req, res, function (req, res) {
     if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
       return res.status(401).send('Your current role do not grant access to this part of website');
     Documents.findById(req.params.id, function (err, post) {
@@ -87,14 +89,19 @@ router.get('/:id', function (req, res, next) {
 });
 
 /* SAVE Document */
-router.post('/', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
-  Documents.create(req.body, function (err, post) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
-    return res.json({ 'err': false, 'res': post });
-  });
-});
+// router.post('/', function (req, res, next) {
+//  return checkApiToken(req, res, function (req, res) {
+//     if (
+//       typeof req.user === 'undefined' ||
+//       !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
+//     )
+//       return res.status(401).send('Your current role do not grant access to this part of website');
+//     Documents.create(req.body, function (err, post) {
+//       if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+//       return res.json({ 'err': false, 'res': post });
+//     });
+//   });
+// });
 
 /* UPDATE Document */
 router.put('/:id', function (req, res, next) {
@@ -111,16 +118,18 @@ router.put('/:id', function (req, res, next) {
 });
 
 /* DELETE Document */
-router.delete('/:id', function (req, res, next) {
-  if (
-    typeof req.user === 'undefined' ||
-    !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
-  )
-    return res.status(401).send('Your current role do not grant access to this part of website');
-  Documents.findByIdAndRemove(req.params.id, req.body, function (err, post) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
-    return res.json({ 'err': false, 'res': post });
-  });
-});
+// router.delete('/:id', function (req, res, next) {
+//  return checkApiToken(req, res, function (req, res) {
+//     if (
+//       typeof req.user === 'undefined' ||
+//       !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
+//     )
+//       return res.status(401).send('Your current role do not grant access to this part of website');
+//     Documents.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+//       if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+//       return res.json({ 'err': false, 'res': post });
+//     });
+//   });
+// });
 
 module.exports = router;
