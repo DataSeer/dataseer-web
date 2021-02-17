@@ -22,11 +22,11 @@ const emailRegExp = new RegExp("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@[A-Za-z0-9-]+(.[
 const getGenerateTokenMailTxt = function (token) {
     return (
       'Hi,\n' +
-      'Your personal token has been generated: ' +
+      'Your personal token has been generated:\n' +
       token +
       '\n' +
-      "(It's linked to your account, so don't share it)\n" +
-      'More informations about how to use dataseer-web API with this token here: https://github.com/DataSeer/dataseer-web/blob/master/README.md\n' +
+      "(It's linked to your account, so don't share it)\n\n" +
+      'More informations about how to use dataseer-web API with this token here: https://github.com/DataSeer/dataseer-web/blob/master/README.md\n\n' +
       "Just ignore this email if you don't want to use dataseer-web API\n" +
       'This email has been automatically generated'
     );
@@ -34,11 +34,11 @@ const getGenerateTokenMailTxt = function (token) {
   getGenerateTokenMailHtml = function (token) {
     return (
       'Hi,<br/>' +
-      'Your personal token has been generated: ' +
+      'Your personal token has been generated:<br/>' +
       token +
       '<br/>' +
-      "(It's linked to your account, so don't share it)<br/>" +
-      'More informations about how to use dataseer-web API with this token <a href="https://github.com/DataSeer/dataseer-web/blob/master/README.md">here</a><br/>' +
+      "(It's linked to your account, so don't share it)<br/><br/>" +
+      'More informations about how to use dataseer-web API with this token <a href="https://github.com/DataSeer/dataseer-web/blob/master/README.md">here</a><br/><br/>' +
       "Just ignore this email if you don't want to use dataseer-web API<br/>" +
       'This email has been automatically generated'
     );
@@ -462,8 +462,8 @@ let updateOrganisation = function (req, res, next) {
                 {
                   'username': user.username,
                   'subject': 'Dataseer Token',
-                  'text': getMailTxt(url),
-                  'html': getMailHtml(url)
+                  'text': getGenerateTokenMailTxt(token),
+                  'html': getGenerateTokenMailHtml(token)
                 },
                 function (err, info) {
                   if (err) {
