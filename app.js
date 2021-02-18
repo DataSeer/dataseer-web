@@ -29,61 +29,6 @@ const indexRouter = require('./routes/index'),
 const conf = require('./conf/conf.json'),
   extractor = require('./lib/extractor.js');
 
-fs.readFile('./conf/private.key', 'utf-8', function (err, res) {
-  if (err) {
-    console.log('file conf/private.key not found');
-    process.exit(0);
-  }
-  console.log('file conf/private.key loaded');
-  app.set('private.key', res);
-});
-
-app.disable('x-powered-by');
-
-// all environments
-app.set('port', process.env.PORT || 3000);
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
-app.use(logger('dev'));
-app.use(methodOverride());
-app.use(
-  fileUpload({
-    limits: { fileSize: 50 * 1024 * 1024 }
-  })
-);
-app.use(bodyParser.json({ limit: '50mb', extended: true }));
-app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
-// app.use(multer());
-app.use(
-  session({
-    cookieName: 'session',
-    secret: 'uwotm8',
-    resave: false,
-    saveUninitialized: false
-  })
-);
-app.use(flash());
-
-// Configure passport middleware
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Configure passport-local to use account model for authentication
-const Accounts = require('./models/accounts.js');
-passport.use(new LocalStrategy(Accounts.authenticate()));
-
-// use static serialize and deserialize of model for passport session support
-passport.serializeUser(Accounts.serializeUser());
-passport.deserializeUser(Accounts.deserializeUser());
-
-app.use(express.static('public'));
-
-app.use('/', indexRouter);
-app.use('/api/documents', documentsRouter);
-app.use('/api/dataseer-ml', dataseerMLRouter);
-app.use('/documents', viewsRouter);
-app.use('/backoffice', backOfficeRouter);
-
 // mongoose object
 const mongoose = require('mongoose');
 mongoose.set('useCreateIndex', true);
@@ -105,22 +50,70 @@ db.on('error', function () {
 });
 db.once('open', function () {
   console.log('Connection to MongoDB succeeded');
-});
+  request.get(conf.services['dataseer-ml'] + '/jsonDataTypes', function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      console.log('GET on /jsonDataTypes route of dataseer-ml service succeeded');
+      app.set('dataTypes.json', extractor.buildDataTypes(JSON.parse(body)));
+      fs.readFile('./conf/private.key', 'utf-8', function (err, privateKey) {
+        if (err) {
+          console.log('file conf/private.key not found');
+          process.exit(0);
+        }
+        console.log('file conf/private.key loaded');
+        app.set('private.key', privateKey);
 
-request.get(conf.services['dataseer-ml'] + '/jsonDataTypes', function (error, response, body) {
-  if (!error && response.statusCode == 200) {
-    console.log('GET on /jsonDataTypes route of dataseer-ml service succeeded');
-    app.set('dataTypes.json', extractor.buildDataTypes(JSON.parse(body)));
-  } else {
-    console.log(error);
-    console.log('GET on /jsonDataTypes route of dataseer-ml service failed');
-    process.exit(0);
-  }
-});
+        app.disable('x-powered-by');
 
-// error handling middleware should be loaded after the loading the routes
-if ('development' == app.get('env')) {
-  app.use(errorHandler());
-}
+        // all environments
+        app.set('port', process.env.PORT || 3000);
+        app.set('views', path.join(__dirname, 'views'));
+        app.set('view engine', 'pug');
+        app.use(logger('dev'));
+        app.use(methodOverride());
+        app.use(
+          fileUpload({
+            limits: { fileSize: 50 * 1024 * 1024 }
+          })
+        );
+        app.use(bodyParser.json({ limit: '50mb', extended: true }));
+        app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+        // app.use(multer());
+        app.use(
+          session({
+            cookieName: 'session',
+            secret: privateKey,
+            resave: false,
+            saveUninitialized: false
+          })
+        );
+        app.use(flash());
+
+        // Configure passport middleware
+        app.use(passport.initialize());
+        app.use(passport.session());
+
+        // Configure passport-local to use account model for authentication
+        const Accounts = require('./models/accounts.js');
+        passport.use(new LocalStrategy(Accounts.authenticate()));
+
+        // use static serialize and deserialize of model for passport session support
+        passport.serializeUser(Accounts.serializeUser());
+        passport.deserializeUser(Accounts.deserializeUser());
+
+        app.use(express.static('public'));
+
+        app.use('/', indexRouter);
+        app.use('/api/documents', documentsRouter);
+        app.use('/api/dataseer-ml', dataseerMLRouter);
+        app.use('/documents', viewsRouter);
+        app.use('/backoffice', backOfficeRouter);
+      });
+    } else {
+      console.log(error);
+      console.log('GET on /jsonDataTypes route of dataseer-ml service failed');
+      process.exit(0);
+    }
+  });
+});
 
 module.exports = app;
