@@ -3,126 +3,174 @@
  */
 
 const express = require('express'),
-  crypto = require('crypto'),
   router = express.Router(),
-  path = require('path'),
-  async = require('async'),
-  mongoose = require('mongoose'),
-  jwt = require('jsonwebtoken'),
-  mailer = require('../lib/mailer.js'),
-  AccountsManager = require('../lib/accountsManager.js'),
+  path = require('path');
+
+const Mailer = require('../lib/mailer.js'),
+  JWT = require('../lib/jwt.js'),
+  AccountsManager = require('../lib/accounts.js'),
   Accounts = require('../models/accounts.js'),
+  AccountsController = require('../controllers/accounts.js'),
   Organisations = require('../models/organisations.js'),
+  Roles = require('../models/roles.js'),
   Documents = require('../models/documents.js'),
-  extractor = require('../lib/extractor.js'),
-  Upload = require('../lib/upload.js');
+  DocumentsController = require('../controllers/documents.js');
 
-const emailRegExp = new RegExp("[A-Za-z0-9!#$%&'*+-/=?^_`{|}~]+@[A-Za-z0-9-]+(.[A-Za-z0-9-]+)*");
+const conf = require('../conf/conf.json'),
+  smtpConf = require('../conf/smtp.conf.json');
 
-const getGenerateTokenMailTxt = function (token) {
-    return (
-      'Hi,\n' +
-      'Your personal token has been generated:\n' +
-      token +
-      '\n' +
-      "(It's linked to your account, so don't share it)\n\n" +
-      'More informations about how to use dataseer-web API with this token here: https://github.com/DataSeer/dataseer-web/blob/master/README.md\n\n' +
-      "Just ignore this email if you don't want to use dataseer-web API\n" +
-      'This email has been automatically generated'
-    );
-  },
-  getGenerateTokenMailHtml = function (token) {
-    return (
-      'Hi,<br/>' +
-      'Your personal token has been generated:<br/>' +
-      token +
-      '<br/>' +
-      "(It's linked to your account, so don't share it)<br/><br/>" +
-      'More informations about how to use dataseer-web API with this token <a href="https://github.com/DataSeer/dataseer-web/blob/master/README.md">here</a><br/><br/>' +
-      "Just ignore this email if you don't want to use dataseer-web API<br/>" +
-      'This email has been automatically generated'
-    );
-  },
-  getJWT = function (username, privateKey, callback) {
-    let date = new Date(Date.now());
-    return jwt.sign(
-      {
-        'username': username
-      },
-      privateKey,
-      { 'expiresIn': 5259492 }, // expire in 2 mounth
-      function (err, token) {
-        return callback(err, token);
-      }
-    );
-  };
-
-const conf = require('../conf/conf.json');
-
-/* GET all accounts */
+/* GET on accounts page */
 router.get('/accounts', function (req, res, next) {
-  if (
-    typeof req.user === 'undefined' ||
-    !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
-  )
+  // If user is not logged in OR is not at least a curator
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  let limit = parseInt(req.query.limit),
-    error = req.flash('error'),
-    success = req.flash('success');
+  let limit = parseInt(req.query.limit);
   if (isNaN(limit)) limit = 20;
-  Accounts.find({})
+  return Accounts.find({})
     .limit(limit)
     .exec(function (err, accounts) {
-      if (err) {
-        req.flash('error', err.message);
-        return res.redirect('./accounts');
-      }
-      Organisations.find({}).exec(function (err, organisations) {
+      // If MongoDB error has occured
+      if (err) return next(err);
+      return Organisations.find({}).exec(function (err, organisations) {
+        // If MongoDB error has occured
         if (err) return next(err);
-        return res.render(path.join('backoffice', 'accounts'), {
-          route: 'backoffice/accounts',
-          root: conf.root,
-          search: true,
-          current_user: req.user,
-          accounts: accounts,
-          roles: AccountsManager.roles,
-          organisations: organisations,
-          error: Array.isArray(error) && error.length > 0 ? error : undefined,
-          success: Array.isArray(success) && success.length > 0 ? success : undefined
+        return Roles.find({}).exec(function (err, roles) {
+          // If MongoDB error has occured
+          if (err) return next(err);
+          let error = req.flash('error'),
+            success = req.flash('success');
+          return res.render(path.join('backoffice', 'accounts'), {
+            route: 'backoffice/accounts',
+            root: conf.root,
+            search: true,
+            current_user: req.user,
+            accounts: accounts,
+            roles: roles,
+            organisations: organisations,
+            error: Array.isArray(error) && error.length > 0 ? error : undefined,
+            success: Array.isArray(success) && success.length > 0 ? success : undefined
+          });
         });
       });
     });
 });
 
-/* Update an account */
+/* POST on accounts page */
 router.post('/accounts', function (req, res, next) {
-  if (
-    typeof req.user === 'undefined' ||
-    !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
-  )
+  // If user is not logged in OR is not at least a curator
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  if (typeof req.body.update !== 'undefined' && req.body.update === '') return updateAccount(req, res, next);
-  else if (typeof req.body.generate_token !== 'undefined' && req.body.generate_token === '')
-    return generateToken(req, res, next);
+  if (typeof req.body.update !== 'undefined' && req.body.update === '') {
+    // If username is not set
+    if (typeof req.body.username !== 'string') {
+      req.flash('error', 'Invalid username !');
+      return res.redirect('./accounts');
+    }
+    // If fullname is not set OR not well formed
+    if (typeof req.body.fullname !== 'string') {
+      req.flash('error', 'Invalid fullname !');
+      return res.redirect('./accounts');
+    }
+    // If organisation is not set
+    if (typeof req.body.organisation !== 'string') {
+      req.flash('error', 'Invalid organisation !');
+      return res.redirect('./accounts');
+    }
+    return Accounts.findOne({ username: req.body.username }).exec(function (err, user) {
+      // If MongoDB error has occured
+      if (err) return next(err);
+      return Organisations.findById(req.body.organisation).exec(function (err, organisation) {
+        // If MongoDB error has occured
+        if (err) return next(err);
+        // If organisation does not exist
+        if (!organisation) {
+          req.flash('error', 'Invalid organisation !');
+          return res.redirect('./accounts');
+        }
+        // If role is not set OR role does not exist
+        if (typeof req.body.role !== 'string' || !req.app.get('roles')[req.body.role]) {
+          req.flash('error', 'Invalid role !');
+          return res.redirect('./accounts');
+        }
+        user.depopulate('organisation');
+        user.depopulate('role');
+        user.fullname = req.body.fullname;
+        user.organisation = req.body.organisation;
+        user.role = req.body.role;
+        return user.save(function (err) {
+          // If MongoDB error has occured
+          if (err) return next(err);
+          req.flash('success', 'User ' + user.username + ' have been successfully updated');
+          return res.redirect('./accounts');
+        });
+      });
+    });
+  } else if (typeof req.body.generate_token !== 'undefined' && req.body.generate_token === '') {
+    // If username is not set
+    if (typeof req.body.username !== 'string') {
+      req.flash('error', 'Invalid username !');
+      return res.redirect('./accounts');
+    }
+    // If privateKey not found
+    let privateKey = req.app.get('private.key');
+    if (!privateKey) {
+      req.flash('error', 'Server unable to create new JWT (private key not found)');
+      return res.redirect('./accounts');
+    }
+    return Accounts.findOne({ username: req.body.username }).exec(function (err, user) {
+      // If MongoDB error has occured
+      if (err) return next(err);
+      // If username is not set
+      if (!user) {
+        req.flash('error', 'User ' + user.username + ' does not exist !');
+        return res.redirect('./accounts');
+      }
+      return JWT.create({ username: user.username }, privateKey, conf.tokens.api.expiresIn, function (err, token) {
+        // If JWT error has occured
+        if (err) {
+          req.flash('error', `Server unable to create new JWT (${err.message})`);
+          return res.redirect('./accounts');
+        }
+        user.tokens.api = token;
+        return user.save(function (err) {
+          if (err) return next(err);
+          return Mailer.sendMail(
+            {
+              'username': user.username,
+              'subject': 'New DataSeer API token',
+              'text': Mailer.getNewAPITokenTxt({ token: token }),
+              'html': Mailer.getNewAPITokenHtml({ token: token })
+            },
+            function (err, info) {
+              // If Mailer error has occured
+              if (err) {
+                console.log(err);
+                next(err);
+              }
+              // If process succeed
+              req.flash('success', 'Token of User ' + user.username + ' have been successfully updated');
+              return res.redirect('./accounts');
+            }
+          );
+        });
+      });
+    });
+  }
   return res.redirect('./accounts');
 });
 
-/* GET all organisations */
+/* GET on organisations page */
 router.get('/organisations', function (req, res, next) {
-  if (
-    typeof req.user === 'undefined' ||
-    !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
-  )
+  // If user is not logged in OR is not at least a curator
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  let limit = parseInt(req.query.limit),
-    error = req.flash('error'),
-    success = req.flash('success');
+  let limit = parseInt(req.query.limit);
   if (isNaN(limit)) limit = 20;
-  Organisations.find({}).exec(function (err, organisations) {
-    if (err) {
-      req.flash('error', err.message);
-      return res.redirect('./organisations');
-    }
+  return Organisations.find({}).exec(function (err, organisations) {
+    // If MongoDB error has occured
+    if (err) return next(err);
+    let error = req.flash('error'),
+      success = req.flash('success');
     return res.render(path.join('backoffice', 'organisations'), {
       route: 'backoffice/organisations',
       root: conf.root,
@@ -135,354 +183,272 @@ router.get('/organisations', function (req, res, next) {
   });
 });
 
-/* Update an account */
+/* POST on organisations page */
 router.post('/organisations', function (req, res, next) {
-  if (
-    typeof req.user === 'undefined' ||
-    !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
-  )
+  // If user is not logged in OR is not at least a curator
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  if (typeof req.body.update !== 'undefined' && req.body.update === '') return updateOrganisation(req, res, next);
-  else if (typeof req.body.create !== 'undefined' && req.body.create === '') return createOrganisation(req, res, next);
-  else if (typeof req.body.delete !== 'undefined' && req.body.delete === '') return deleteOrganisation(req, res, next);
-  else return res.redirect('./organisations');
+  if (typeof req.body.update !== 'undefined' && req.body.update === '') {
+    // If organisation id is not set
+    if (typeof req.body._id !== 'string') {
+      req.flash('error', 'Invalid organisation id !');
+      return res.redirect('./organisations');
+    }
+    // If organisation name is not set
+    if (typeof req.body.name !== 'string') {
+      req.flash('error', 'Invalid organisation name !');
+      return res.redirect('./organisations');
+    }
+    return Organisations.findById(req.body._id).exec(function (err, organisation) {
+      // If MongoDB error has occured
+      if (err) return next(err);
+      // If organisation does not exist
+      if (!organisation) {
+        req.flash('error', 'Invalid organisation !');
+        return res.redirect('./organisations');
+      }
+      organisation.name = req.body.name;
+      return organisation.save(function (err) {
+        // If MongoDB error has occured
+        if (err) return next(err);
+        req.flash('success', 'Organisation ' + organisation.name + ' have been successfully updated');
+        return res.redirect('./organisations');
+      });
+    });
+  } else if (typeof req.body.create !== 'undefined' && req.body.create === '') {
+    // If organisation name is not set
+    if (typeof req.body.name !== 'string') {
+      req.flash('error', 'Invalid organisation name !');
+      return res.redirect('./organisations');
+    }
+    return Organisations.create({ 'name': req.body.name }, function (err, organisation) {
+      // If organisation already exist
+      if (err) {
+        req.flash('error', 'Organisation already exist !');
+        return res.redirect('./organisations');
+      }
+      req.flash('success', 'Organisation ' + organisation.name + ' have been successfully created');
+      return res.redirect('./organisations');
+    });
+  } else if (typeof req.body.delete !== 'undefined' && req.body.delete === '') {
+    // If organisation id is not set
+    if (typeof req.body._id !== 'string') {
+      req.flash('error', 'Invalid organisation id !');
+      return res.redirect('./organisations');
+    }
+    // If organisation name is not set
+    if (typeof req.body.name !== 'string') {
+      req.flash('error', 'Invalid organisation name !');
+      return res.redirect('./organisations');
+    }
+    return Organisations.findOneAndDelete({ '_id': req.body._id, 'name': req.body.name }).exec(function (err) {
+      // If MongoDB error has occured
+      if (err) return next(err);
+      req.flash('success', 'Organisation ' + req.body.name + ' have been successfully created');
+      return res.redirect('./organisations');
+    });
+  } else return res.redirect('./organisations');
 });
 
-/* UPLOAD Document */
+/* GET on upload page */
 router.get('/upload', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
+  // If user is not logged in OR is not at least a standard_user
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  return res.render(path.join('backoffice', 'upload'), {
-    route: 'backoffice/upload',
-    root: conf.root,
-    title: 'DataSeer',
-    backoffice: true,
-    current_user: req.user
-  });
+  // If user is a curator
+  if (AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
+    return Organisations.find({}).exec(function (err, organisations) {
+      // If MongoDB error has occured
+      if (err) return next(err);
+      return Accounts.find({}).exec(function (err, accounts) {
+        // If MongoDB error has occured
+        if (err) return next(err);
+        let error = req.flash('error'),
+          success = req.flash('success');
+        return res.render(path.join('backoffice', 'upload'), {
+          route: 'backoffice/upload',
+          accounts: accounts.sort(function (a, b) {
+            return a.username.localeCompare(b.username);
+          }),
+          organisations: organisations.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
+          }),
+          root: conf.root,
+          title: 'DataSeer',
+          backoffice: true,
+          current_user: req.user,
+          error: Array.isArray(error) && error.length > 0 ? error : undefined,
+          success: Array.isArray(success) && success.length > 0 ? success : undefined
+        });
+      });
+    });
+  else {
+    let error = req.flash('error'),
+      success = req.flash('success');
+    return res.render(path.join('backoffice', 'upload'), {
+      route: 'backoffice/upload',
+      root: conf.root,
+      title: 'DataSeer',
+      backoffice: true,
+      current_user: req.user,
+      error: Array.isArray(error) && error.length > 0 ? error : undefined,
+      success: Array.isArray(success) && success.length > 0 ? success : undefined
+    });
+  }
 });
 
-/* UPLOAD Document */
+/* POST on upload page */
 router.post('/upload', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  let results = {
-      errors: [],
-      successes: []
-    },
-    isCurator = AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator),
-    uploadedFiles = null,
-    dataseerML = '';
-  if (!req.files) {
-    results.errors.push({
-      msg: 'You must send at least one file'
-    });
-    return res.status(400).render(path.join('backoffice', 'upload'), {
-      route: 'backoffice/upload',
-      root: conf.root,
-      backoffice: true,
-      results: results,
-      current_user: req.user
-    });
+  // If file is not set
+  if (!req.files || !req.files['file']) {
+    req.flash('error', 'You must select a file !');
+    return res.redirect('./upload');
   }
-  if (Object.keys(req.files).length == 0) {
-    results.errors.push({
-      msg: 'No file(s) were uploaded'
-    });
-    return res.status(400).render(path.join('backoffice', 'upload'), {
-      route: 'backoffice/upload',
-      root: conf.root,
-      backoffice: true,
-      results: results,
-      current_user: req.user
-    });
+  let alreadyAssessed = !!req.body.already_assessed,
+    file = req.files['file'],
+    attachedFiles = Array.isArray(req.files['attached_files']) ? req.files['attached_files'] : [],
+    uploaded_by = req.user._id,
+    opts = {
+      alreadyAssessed,
+      file,
+      attachedFiles,
+      uploaded_by,
+      dataTypes: req.app.get('dataTypes'),
+      privateKey: req.app.get('private.key')
+    };
+  if (AccountsManager.checkAccessRight(req.user, AccountsManager.roles.standard_user, AccountsManager.match.role)) {
+    // Case of standard_user
+    opts.journal = req.user.organisation.name;
+    opts.email = req.user.username;
+    opts.fullname = req.user.fullname;
+    opts.dataseerML = true; // always proceed dataseer-ml
+  } else {
+    // Case of annotator OR curator
+    // If journal AND existing_journal are not set
+    if (!req.body.journal && !req.body.existing_journal) {
+      req.flash('error', 'You must select an existing "Journal" (or fill in "Journal" field) !');
+      return res.redirect('./upload');
+    }
+    opts.journal = !req.body.journal ? req.body.existing_journal : req.body.journal;
+    // If there is no account AND email is invalid
+    if (
+      !req.body.account &&
+      (typeof req.body.email !== 'string' || !AccountsController.RegExp.email.test(req.body.email))
+    ) {
+      req.flash('error', 'Invalid Email !');
+      return res.redirect('./upload');
+    }
+    // If user data are not set
+    if (!(req.body.account || (req.body.email && req.body.fullname))) {
+      req.flash('error', 'You must select an existing "Email" (or fill in "Full Name" and "Email" fields) !');
+      return res.redirect('./upload');
+    }
+    if (req.body.account) {
+      // If there is an existing account, data will be: email;fullname
+      let tmp = req.body.account.split(';');
+      opts.email = tmp[0];
+      opts.fullname = tmp[1];
+    } else {
+      // If there is an new account
+      opts.email = req.body.email;
+      opts.fullname = req.body.fullname;
+    }
+    // dataseer-ml processing
+    opts.dataseerML = !!req.body.dataseerML;
   }
-  uploadedFiles = Array.isArray(req.files['uploadedFiles'])
-    ? isCurator
-      ? req.files['uploadedFiles']
-      : [req.files['uploadedFiles'][0]]
-    : [req.files['uploadedFiles']];
-  dataseerML = isCurator ? req.body.dataseerML : 'dataseer-ml';
-  async.each(
-    uploadedFiles,
-    function (file, callback) {
-      // Perform operation on file here.
-      return Upload.processFile(file, dataseerML, req.app.get('dataTypes.json'), req.user, function (error, result) {
-        if (error) results.errors.push(error);
-        if (result) results.successes.push(result);
-        return callback();
-      });
-    },
-    function (err) {
-      // if any of the file processing produced an error, err would equal that error
-      if (err) {
-        return res.render(path.join('backoffice', 'upload'), {
-          route: 'backoffice/upload',
-          root: conf.root,
-          backoffice: true,
-          results: results,
-          current_user: req.user
-        });
-      }
-      if (
-        AccountsManager.checkAccountAccessRight(
-          req.user,
-          AccountsManager.roles.standard_user,
-          AccountsManager.match.role
-        )
-      ) {
-        // case upload has worked
-        if (
-          results.successes.length > 0 &&
-          typeof results.successes[0].document === 'object' &&
-          typeof results.successes[0].document.id !== 'undefined'
-        )
-          return res.redirect(path.join('../documents', results.successes[0].document.id));
-        else
-          return res.render(path.join('backoffice', 'upload'), {
-            route: 'backoffice/upload',
-            root: conf.root,
-            backoffice: true,
-            results: results,
-            current_user: req.user
-          });
-      } else
-        return res.render(path.join('backoffice', 'upload'), {
-          route: 'backoffice/upload',
-          root: conf.root,
-          backoffice: true,
-          results: results,
-          current_user: req.user
-        });
-    }
-  );
-});
-
-let updateOrganisation = function (req, res, next) {
-    if (typeof req.body._id !== 'string' || req.body._id.length <= 0) {
-      req.flash('error', 'Incorrect _id');
-      return res.redirect('./organisations');
-    }
-    if (typeof req.body.name !== 'string' || req.body.name.length <= 0) {
-      req.flash('error', 'Incorrect name');
-      return res.redirect('./organisations');
-    }
-    return Organisations.findOne(
-      {
-        _id: req.body._id
-      },
-      function (err, organisation) {
-        if (err) {
-          req.flash('error', err.message);
-          return res.redirect('./organisations');
-        }
-        let oldValue = organisation.name;
-        organisation.name = req.body.name;
-        return organisation.save(function (err) {
-          if (err) {
-            req.flash('error', err.message);
-            return res.redirect('./organisations');
-          }
-          return updateAccountsAndDocuments(oldValue, organisation.name, function (err) {
-            if (err) {
-              req.flash('error', err.message);
-              return res.redirect('./organisations');
-            }
-            req.flash('success', 'Organisation with name "' + organisation.name + '" has been successfully updated.');
-            return res.redirect('./organisations');
-          });
-        });
-      }
-    );
-  },
-  createOrganisation = function (req, res, next) {
-    if (typeof req.body.name !== 'string' || req.body.name.length <= 0) {
-      req.flash('error', 'Incorrect name');
-      return res.redirect('./organisations');
-    }
-    return Organisations.find({
-      name: req.body.name
-    }).exec(function (err, organisations) {
-      if (err) {
-        req.flash('error', err.message);
-        return res.redirect('./organisations');
-      }
-      if (organisations.length > 0) {
-        req.flash('error', 'Organisation with name "' + req.body.name + '" already exist.');
-        return res.redirect('./organisations');
-      }
-      return Organisations.create({ name: req.body.name }, function (err, organisations) {
-        if (err) {
-          req.flash('error', err.message);
-          return res.redirect('./organisations');
-        }
-        req.flash('success', 'Organisation "' + organisations.name + '" have been successfully created');
-        return res.redirect('./organisations');
-      });
-    });
-  },
-  deleteOrganisation = function (req, res, next) {
-    if (typeof req.body._id !== 'string' || req.body._id.length <= 0) {
-      req.flash('error', 'Incorrect _id');
-      return res.redirect('./organisations');
-    }
-    return Organisations.findByIdAndRemove(req.body._id, function (err, organisation) {
-      if (err) {
-        req.flash('error', err.message);
-        return res.redirect('./organisations');
-      }
-      return updateAccountsAndDocuments(organisation.name, '', function (err) {
-        if (err) {
-          req.flash('error', err.message);
-          return res.redirect('./organisations');
-        }
-        req.flash('success', 'Organisation with name "' + organisation.name + '" has been successfully removed.');
-        return res.redirect('./organisations');
-      });
-    });
-  },
-  updateAccountsAndDocuments = function (oldValue, newValue, cb) {
-    return Accounts.find({ organisation: oldValue }).exec(function (err, accounts) {
-      return async.eachSeries(
-        accounts,
-        function (account, callback) {
-          account.organisation = newValue;
-          account.save(function (err) {
-            if (err) return callback(err);
-            return callback();
-          });
-        },
-        function (err) {
-          if (err) return cb(err);
-          return Documents.find({ organisation: oldValue }).exec(function (err, documents) {
-            if (err) return cb(err);
-            return async.eachSeries(
-              documents,
-              function (doc, callback) {
-                doc.organisation = newValue;
-                doc.save(function (err) {
-                  if (err) return callback(err);
-                  return callback();
-                });
-              },
-              function (err) {
-                return cb(err);
-              }
-            );
-          });
-        }
-      );
-    });
-  },
-  updateAccount = function (req, res, next) {
-    if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username)) {
-      req.flash('error', 'Incorrect Email');
-      return res.redirect('./accounts');
-    }
-    return Accounts.findOne(
-      {
-        username: req.body.username
-      },
-      function (err, user) {
-        let role = AccountsManager.roles[req.body.role],
-          organisation = req.body.organisation;
-        if (typeof role === 'undefined') {
-          req.flash('error', 'Incorrect role');
-          return res.redirect('./accounts');
-        }
-        if (typeof organisation === 'undefined') {
-          req.flash('error', 'Incorrect organisation');
-          return res.redirect('./accounts');
-        }
-        let saveUser = function () {
-            return user.save(function (err) {
-              if (err) {
-                req.flash('error', err.message);
-                return res.redirect('./accounts');
-              }
-              req.flash('success', 'Informations of User ' + user.username + ' have been successfully updated');
-              return res.redirect('./accounts');
-            });
-          },
-          updateDocuments = user.organisation !== organisation,
-          updateQuery = updateDocuments ? AccountsManager.getModifiedByQuery(user) : undefined;
-        user.role = role;
-        user.organisation = organisation;
-        if (updateDocuments) {
-          return Documents.find(updateQuery).exec(function (err, documents) {
-            if (err) {
-              req.flash('error', err.message);
-              return res.redirect('./accounts');
-            }
-            return async.eachSeries(
-              documents,
-              function (doc, callback) {
-                doc.organisation = user.organisation;
-                doc.save(function (err) {
-                  if (err) return callback(err);
-                  return callback();
-                });
-              },
-              function (err) {
-                if (err) {
-                  req.flash('error', err.message);
-                  return res.redirect('./accounts');
-                }
-                return saveUser();
-              }
-            );
-          });
-        } else return saveUser();
-      }
-    );
-  },
-  generateToken = function (req, res, next) {
-    if (typeof req.body.username !== 'string' || !emailRegExp.test(req.body.username)) {
-      req.flash('error', 'Incorrect Email');
-      return res.redirect('./accounts');
-    }
-    return Accounts.findOne(
-      {
-        username: req.body.username
-      },
-      function (err, user) {
+  return DocumentsController.upload(
+    opts,
+    {
+      onCreatedAccount: function (account) {
+        // If privateKey not found
         let privateKey = req.app.get('private.key');
-        if (privateKey)
-          return getJWT(user.username, privateKey, function (err, token) {
+        if (!privateKey) {
+          console.log('Server unable to send mail to ' + account.username + '(no private key)');
+        }
+        return JWT.create(
+          { username: account.username },
+          privateKey,
+          conf.tokens.automaticAccountCreation.expiresIn,
+          function (err, token) {
+            // If JWT error has occured
             if (err) {
-              req.flash('error', err.message);
-              return res.redirect('./accounts');
+              console.log(account.username);
+              console.log(err);
             }
-            user.apiToken = token;
-            return user.save(function (err) {
+            account.tokens.resetPassword = token;
+            return account.save(function (err) {
+              // If MongoDB error has occured
               if (err) {
-                req.flash('error', err.message);
-                return res.redirect('./accounts');
+                console.log(account.username);
+                console.log(err);
               }
-              return mailer.sendMail(
+              let url = path.join(
+                conf.root,
+                'resetPassword?resetPasswordToken=' + account.tokens.resetPassword + '&username=' + account.username
+              );
+              return Mailer.sendMail(
                 {
-                  'username': user.username,
-                  'subject': 'Dataseer Token',
-                  'text': getGenerateTokenMailTxt(token),
-                  'html': getGenerateTokenMailHtml(token)
+                  'username': account.username,
+                  'subject': 'Set your DataSeer Password',
+                  'text': Mailer.getAutomaticAccountCreationMailTxt({ url: url }),
+                  'html': Mailer.getAutomaticAccountCreationMailHtml({ url: url })
                 },
                 function (err, info) {
+                  // If Mailer error has occured
                   if (err) {
+                    console.log(account.username);
                     console.log(err);
-                    req.flash('error', 'Error while creating token, email not sent');
-                    return res.redirect('./accounts');
                   }
-                  req.flash('success', 'Token of User ' + user.username + ' have been successfully updated');
-                  return res.redirect('./accounts');
                 }
               );
             });
-          });
-        else {
-          req.flash('error', 'Error while creating token (server not ready)');
-          return res.redirect('./accounts');
-        }
+          }
+        );
+      },
+      onCreatedJournal: function (journal) {}
+    },
+    function (err, doc) {
+      // If any of the file processing produced an error, err would equal that error
+      if (err) {
+        req.flash('error', 'Error while uploading document !');
+        return res.redirect('./upload');
       }
-    );
-  };
+      // send email to curator address
+      Mailer.sendMail(
+        {
+          'username': conf.emails.upload,
+          'subject': 'New document uploaded on DataSeer Web',
+          'text': Mailer.getUploadDocumentMailTxt({
+            url: DocumentsController.getUrl(doc._id),
+            opts: opts,
+            uploader: req.user.username
+          }),
+          'html': Mailer.getUploadDocumentMailHtml({
+            url: DocumentsController.getUrl(doc._id),
+            opts: opts,
+            uploader: req.user.username
+          })
+        },
+        function (err, info) {
+          // If Mailer error has occured
+          if (err) {
+            console.log(conf.emails.upload);
+            console.log(err);
+          }
+        }
+      );
+      // Case of standard_user
+      if (AccountsManager.checkAccessRight(req.user, AccountsManager.roles.standard_user, AccountsManager.match.role))
+        return res.redirect(path.join('../documents', doc.id));
+      // Case of annotator OR curator
+      else {
+        req.flash('success', 'Document upload complete !');
+        return res.redirect('./upload');
+      }
+    }
+  );
+});
 
 module.exports = router;

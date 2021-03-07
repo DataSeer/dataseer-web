@@ -3,133 +3,329 @@
  */
 
 const express = require('express'),
-  mongoose = require('mongoose'),
-  jwt = require('jsonwebtoken'),
-  fs = require('fs'),
   router = express.Router(),
-  Accounts = require('../../models/accounts.js'),
-  AccountsManager = require('../../lib/accountsManager.js'),
+  fs = require('fs');
+
+const DocumentsDatasets = require('../../models/documents.datasets.js'),
+  DocumentsMetadata = require('../../models/documents.metadata.js'),
+  DocumentsFiles = require('../../models/documents.files.js'),
+  DocumentsLogs = require('../../models/documents.logs.js'),
   Documents = require('../../models/documents.js');
 
-const gridfs = require('mongoose-gridfs');
+const AccountsManager = require('../../lib/accounts.js');
 
-// if a apiToken is provided, try to identify user
-const checkApiToken = function (req, res, cb) {
-  // Authorization: Bearer <token>
-  if (!req.header('Authorization')) return cb(req, res);
-  let token = req.header('Authorization').replace(/^Bearer /, ''),
-    privateKey = req.app.get('private.key');
-  if (privateKey)
-    return jwt.verify(token, privateKey, { 'maxAge': 5259492 }, function (err, decoded) {
-      // maxAge of 2 mounth
-      // err
-      if (err) return res.json({ 'err': true, 'msg': err.name + ': ' + err.message, 'res': null });
-      Accounts.find({ 'username': decoded.username })
-        .limit(1)
-        .exec(function (err, posts) {
-          if (err || posts.length !== 1) return res.json({ 'err': true, 'msg': 'Account not found', 'res': null });
-          req.user = posts[0];
-          return cb(req, res);
-        });
-    });
-  else return res.json({ 'err': true, 'msg': 'API unable to validate token', 'res': null });
-};
+const DocumentsFilesController = require('../../controllers/documents.files.js'),
+  DocumentsDatasetsController = require('../../controllers/documents.datasets.js');
 
 /* GET ALL Documents */
 router.get('/', function (req, res, next) {
-  return checkApiToken(req, res, function (req, res) {
-    if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
-      return res.status(401).send('Your current role do not grant access to this part of website');
-    let limit = parseInt(req.query.limit),
-      doi = req.query.doi,
-      pmid = req.query.pmid,
-      query = {};
-    if (typeof doi !== 'undefined') query['doi'] = doi;
-    if (typeof pmid !== 'undefined') query['pmid'] = pmid;
-    if (isNaN(limit)) limit = 20;
-    Documents.find(query)
-      .limit(limit)
-      .exec(function (err, post) {
-        if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
-        return res.json({ 'err': false, 'res': post });
-      });
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  let limit = parseInt(req.query.limit),
+    doi = req.query.doi,
+    pmid = req.query.pmid,
+    query = {};
+  if (typeof doi !== 'undefined') query['doi'] = doi;
+  if (typeof pmid !== 'undefined') query['pmid'] = pmid;
+  if (isNaN(limit)) limit = 20;
+  // Init transaction
+  let transaction = Documents.find(query).limit(limit);
+  // Populate dependings on the parameters
+  if (req.query.pdf) transaction.populate('pdf');
+  if (req.query.tei) transaction.populate('tei');
+  if (req.query.files) transaction.populate('files');
+  if (req.query.metadata) transaction.populate('metadata');
+  if (req.query.datasets) transaction.populate('datasets');
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    return res.json({ 'err': false, 'res': doc });
   });
 });
 
 /* GET SINGLE Document BY ID */
 router.get('/:id', function (req, res, next) {
-  return checkApiToken(req, res, function (req, res) {
-    if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
-      return res.status(401).send('Your current role do not grant access to this part of website');
-    Documents.findById(req.params.id, function (err, post) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
-      if (req.query.pdf && typeof post.pdf !== 'undefined') {
-        const Pdf = gridfs.createModel({
-          modelName: 'Pdf',
-          connection: mongoose.connection
-        });
-        Pdf.findById(post.pdf.id, (err, pdf) => {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id });
+  // Populate dependings on the parameters
+  if (req.query.pdf) transaction.populate('pdf');
+  if (req.query.tei) transaction.populate('tei');
+  if (req.query.files) transaction.populate('files');
+  if (req.query.metadata) transaction.populate('metadata');
+  if (req.query.datasets) transaction.populate('datasets');
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    else return res.json({ 'err': false, 'res': doc });
+  });
+});
+
+/* GET PDF of document */
+router.get('/:id/pdf', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id });
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    else
+      return DocumentsFiles.findById(doc.pdf).exec(function (err, file) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+        else if (!file) return res.json({ 'err': true, 'res': null, 'msg': 'file not found' });
+        else return res.json({ 'err': false, 'res': file });
+      });
+  });
+});
+
+/* GET PDF of document */
+router.get('/:id/pdf/content', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id });
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    else
+      return DocumentsFiles.findById(doc.pdf)
+        .select('+path') // path is not returned by default
+        .exec(function (err, file) {
           if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
-          let arr = [];
-          const readstream = pdf.read();
-          readstream.on('error', function (err) {
-            return res.json({ 'err': true, 'res': null, 'msg': err });
-          });
-          readstream.on('data', function (data) {
-            arr.push(data);
-          });
-          readstream.on('close', function (data) {
-            post.pdf.data = Buffer.concat(arr);
-            return res.json({ 'err': false, 'res': post });
-          });
+          else if (!file) return res.json({ 'err': true, 'res': null, 'msg': 'file not found' });
+          let stream = fs.createReadStream(file.path),
+            stat = fs.statSync(file.path);
+          res.setHeader('Content-Length', stat.size);
+          res.setHeader('Content-Type', 'application/pdf');
+          return stream.pipe(res);
         });
-      } else return res.json({ 'err': false, 'res': post });
+  });
+});
+
+/* GET TEI of document */
+router.get('/:id/tei/', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id });
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    else
+      return DocumentsFiles.findById(doc.tei).exec(function (err, file) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+        else if (!file) return res.json({ 'err': true, 'res': null, 'msg': 'file not found' });
+        else return res.json({ 'err': false, 'res': file });
+      });
+  });
+});
+
+/* GET TEI of document */
+router.get('/:id/tei/content', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id });
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    else
+      return DocumentsFilesController.readFile(doc.tei, function (err, data) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+        return res.end(data);
+      });
+  });
+});
+
+/* GET metadata of document */
+router.get('/:id/metadata', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = DocumentsMetadata.findOne({ document: req.params.id });
+  // Execute transaction
+  return transaction.exec(function (err, metadata) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!metadata) return res.json({ 'err': true, 'res': null, 'msg': 'metadata not found' });
+    else return res.json({ 'err': false, 'res': metadata });
+  });
+});
+
+/* POST validate metadata of document */
+router.post('/:id/metadata/validate', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id });
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    doc.status = 'datasets';
+    doc.save(function (err) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      // Create logs
+      else
+        return DocumentsLogs.create(
+          {
+            document: doc._id,
+            user: req.user._id,
+            action: 'VALIDATE METADATA'
+          },
+          function (err, log) {
+            if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+            doc.logs.push(log._id);
+            return doc.save(function (err) {
+              if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+              else return res.json({ 'err': false, 'res': true });
+            });
+          }
+        );
     });
   });
 });
 
-/* SAVE Document */
-// router.post('/', function (req, res, next) {
-//  return checkApiToken(req, res, function (req, res) {
-//     if (
-//       typeof req.user === 'undefined' ||
-//       !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
-//     )
-//       return res.status(401).send('Your current role do not grant access to this part of website');
-//     Documents.create(req.body, function (err, post) {
-//       if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
-//       return res.json({ 'err': false, 'res': post });
-//     });
-//   });
-// });
-
-/* UPDATE Document */
-router.put('/:id', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccountAccessRight(req.user))
+/* GET datasets of document */
+router.get('/:id/datasets', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  if (typeof req.body.pdf !== 'undefined' && typeof req.body.pdf.data !== 'undefined') req.body.pdf.data = undefined;
-  if (typeof req.body.modifiedBy === 'undefined') req.body.modifiedBy = {};
-  if (typeof req.body.modifiedBy[req.user.role.label] === 'undefined') req.body.modifiedBy[req.user.role.label] = {};
-  req.body.modifiedBy[req.user.role.label][req.user.id] = req.user.username;
-  Documents.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
+  // Init transaction
+  let transaction = DocumentsDatasets.find({ document: req.params.id });
+  // Execute transaction
+  return transaction.exec(function (err, datasets) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
-    return res.json({ 'err': false, 'res': post });
+    else if (!datasets) return res.json({ 'err': true, 'res': null, 'msg': 'datasets not found' });
+    else return res.json({ 'err': false, 'res': datasets });
   });
 });
 
-/* DELETE Document */
-// router.delete('/:id', function (req, res, next) {
-//  return checkApiToken(req, res, function (req, res) {
-//     if (
-//       typeof req.user === 'undefined' ||
-//       !AccountsManager.checkAccountAccessRight(req.user, AccountsManager.roles.curator)
-//     )
-//       return res.status(401).send('Your current role do not grant access to this part of website');
-//     Documents.findByIdAndRemove(req.params.id, req.body, function (err, post) {
-//       if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
-//       return res.json({ 'err': false, 'res': post });
-//     });
-//   });
-// });
+/* POST validate datasets of document */
+router.post('/:id/datasets/validate', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id });
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    else
+      return DocumentsDatasetsController.checkValidation(doc.datasets, function (err, check) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+        else if (!AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator) && !check)
+          return res.json({ 'err': true, 'res': null, 'msg': 'datasets not valid (at least one of them)' });
+        doc.status = 'finish';
+        doc.save(function (err) {
+          if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+          // Create logs
+          else
+            return DocumentsLogs.create(
+              {
+                document: doc._id,
+                user: req.user._id,
+                action: 'VALIDATE DATASETS'
+              },
+              function (err, log) {
+                if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+                doc.logs.push(log._id);
+                return doc.save(function (err) {
+                  if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+                  else return res.json({ 'err': false, 'res': true });
+                });
+              }
+            );
+        });
+      });
+  });
+});
+
+/* POST backToMetadata document */
+router.post('/:id/datasets/backToMetadata', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id });
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    doc.status = 'metadata';
+    doc.save(function (err) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      // Create logs
+      else
+        return DocumentsLogs.create(
+          {
+            document: doc._id,
+            user: req.user._id,
+            action: 'BACK TO METADATA VALIDATION'
+          },
+          function (err, log) {
+            if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+            doc.logs.push(log._id);
+            return doc.save(function (err) {
+              if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+              else return res.json({ 'err': false, 'res': true });
+            });
+          }
+        );
+    });
+  });
+});
+
+/* POST reopen document */
+router.post('/:id/finish/reopen', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id });
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    doc.status = 'metadata';
+    doc.save(function (err) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      // Create logs
+      else
+        return DocumentsLogs.create(
+          {
+            document: doc._id,
+            user: req.user._id,
+            action: 'REOPEN DOCUMENT'
+          },
+          function (err, log) {
+            if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+            doc.logs.push(log._id);
+            return doc.save(function (err) {
+              if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+              else return res.json({ 'err': false, 'res': true });
+            });
+          }
+        );
+    });
+  });
+});
+
+/* GET files of document */
+router.get('/:id/files', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = DocumentsFiles.find({ document: req.params.id });
+  // Execute transaction
+  return transaction.exec(function (err, file) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!file) return res.json({ 'err': true, 'res': null, 'msg': 'file not found' });
+    else return res.json({ 'err': false, 'res': file });
+  });
+});
 
 module.exports = router;
