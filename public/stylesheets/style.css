@@ -49,6 +49,8 @@ body {
 
 .modifiers {
   margin: 0px;
+  max-height: 100px;
+  overflow-y: auto;
 }
 
 .modifiers > li.item {

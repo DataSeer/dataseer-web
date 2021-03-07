@@ -8,6 +8,20 @@
   text-decoration: underline;
 }
 
+#uploadForm {
+  
+}
+
+#uploadForm input[type="file"] {
+  width: auto !important;
+}
+
+#uploadForm input[type="text"],
+#uploadForm select {
+  display: block;
+  width: 300px !important;
+}
+
 #uploadForm label {
   display: inline;
 }
@@ -25,6 +39,7 @@
 
 #uploadForm .row {
   margin-top: 10px; 
+  margin-bottom: 10px; 
 }
 
 .success div {

@@ -73,7 +73,7 @@ const DocumentView = function (events) {
       let target = null;
       if (typeof selection.res.sentence !== 'undefined') {
         if (options.getdataType) {
-          return dataseerML.getdataType(selection.res.sentence, function (err, res) {
+          return DataSeerAPI.getdataType(selection.res.sentence, function (err, res) {
             if (err) {
               return cb(err, res);
             }
@@ -414,14 +414,15 @@ const DocumentView = function (events) {
             parent = res.parents('div').first();
           parent.attr('subtype', 'dataseer');
           datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
+          let sentenceid = datasets.get(id).attr('sentenceid');
           if (self.hasPdf) {
-            let sentenceid = datasets.get(id).attr('sentenceid');
             self.pdfViewer.setColor(sentenceid, backgroundColor, id);
             PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
           }
           return cb(null, {
             datatype: res.attr('type'),
-            cert: res.attr('cert')
+            cert: res.attr('cert'),
+            sentenceId: sentenceid
           });
         }
       );
@@ -485,14 +486,15 @@ const DocumentView = function (events) {
         color = style.split(';')[0].split(':')[1];
       parent.attr('subtype', 'dataseer');
       corresps.styleOf(id, style);
+      let sentenceid = selection.res.sentence.attr('sentenceid');
       if (self.hasPdf) {
-        let sentenceid = selection.res.sentence.attr('sentenceid');
         self.pdfViewer.setColor(sentenceid, color, id);
         PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
       }
       return {
         err: false,
-        res: target
+        res: target,
+        sentenceId: sentenceid
       };
     },
     // remove correp
