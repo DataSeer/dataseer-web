@@ -3,7 +3,7 @@ conf/smtp.conf.json
 conf/conf.json
 conf/private.key
 # data repositories
-data/[0-9a-zA-Z]{1}/*
+data/*
 #logs
 *.log
 # node modules
