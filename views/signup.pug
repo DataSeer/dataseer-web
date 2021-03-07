@@ -17,18 +17,19 @@ block content
               if success
                 div(class='alert alert-success' role='alert') #{success}
               .form-group
-                input.form-control(type='email', name='username', placeholder='mail address')
+                input.form-control(type='text', name='fullname', placeholder='Full Name')
               .form-group
-                input.form-control(type='password', name='password', placeholder='password')
+                input.form-control(type='email', name='username', placeholder='Email address')
               .form-group
-                input.form-control(type='password', name='confirm_password', placeholder='confirm password')
+                input.form-control(type='password', name='password', placeholder='Password')
+              .form-group
+                input.form-control(type='password', name='confirm_password', placeholder='Confirm password')
               .form-group
                 label(for='organisation') Select your organization
                 select.custom-select(name='organisation')
-                  option(selected value='') None
                   if organisations
                     each organisation, index in organisations
-                      option(value=organisation.name) #{organisation.name}
+                      option(value=organisation.id) #{organisation.name}
               .btn-group
                 button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Sign up to Dataseer
 

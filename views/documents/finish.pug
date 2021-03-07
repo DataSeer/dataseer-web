@@ -1,14 +1,13 @@
 extends ../layout
 
 block content
-  div(class='finish')
 
   div(class='container-fluid')
 
     if current_user
         if document
           if document.status !== 'metadata'
-            button#previous_step.btn.btn-primary Reopen document
+            button#reopen_document.btn.btn-primary Reopen document
 
     if document.isDataSeer
       
@@ -20,13 +19,13 @@ block content
             div(class='row row-margin')
               div(class='col-12')
                 div(class='key d-inline') Data Availability Statement: 
-                each val, index in document.datasets.current
+                each dataset in document.datasets.current
 
                   div(class='row')
                     div(class='col-12')
-                      if val.DOI && val.name
-                        div(class='value d-block') #{val.name}: 
-                          a(href=val.DOI) #{val.DOI}
+                      if dataset.DOI && dataset.name
+                        div(class='value d-block') #{dataset.name}: 
+                          a(href=dataset.DOI) #{dataset.DOI}
 
       div(class='row')
         div(class='col-12') The report below has been sent to the journal Editorial Office:
@@ -38,22 +37,22 @@ block content
             div(class='row row-margin')
               div(class='col-12')
                 div(class='key d-inline') Data Availability Statement: 
-                each val, index in document.datasets.current
+                each dataset in document.datasets.current
 
                   div(class='row')
                     div(class='col-12')
-                      if val.DOI && val.name
-                        div(class='value d-block') #{val.name}: 
-                          a(href=val.DOI) #{val.DOI}
+                      if dataset.DOI && dataset.name
+                        div(class='value d-block') #{dataset.name}: 
+                          a(href=dataset.DOI) #{dataset.DOI}
 
             div(class='row row-margin')
               div(class='col-12') Author Comments: 
-                each val, index in document.datasets.current
+                each dataset in document.datasets.current
 
                   div(class='row')
                     div(class='col-12')
-                      if val.comments
-                        div(class='value d-block') #{val.name}: #{val.comments}
+                      if dataset.comments
+                        div(class='value d-block') #{dataset.name}: #{dataset.comments}
 
     else
 
@@ -90,47 +89,47 @@ block content
       div(class='row')
         div(class='col-12')
           div(class='key d-inline')
-          each val, index in document.datasets.current
+          each dataset in document.datasets.current
 
             div(class='row row-margin')
               div(class='col-12')
                 div(class='value d-block font-weight-bold') Dataset #{index}:
               div(class='col-12')
                 div(class='value d-inline') Data Type: 
-                if val.subType !== ''
-                  div(class='value d-inline') #{val.dataType} - #{val.subType}
+                if dataset.subType !== ''
+                  div(class='value d-inline') #{dataset.dataType} - #{dataset.subType}
                 else
-                  div(class='value d-inline') #{val.dataType}
+                  div(class='value d-inline') #{dataset.dataType}
               div(class='col-12')
                 div(class='value d-inline') Data Sentence: 
-                div(class='value d-inline') #{val.text}
-              if val.name
+                div(class='value d-inline') #{dataset.text}
+              if dataset.name
                 div(class='col-12')
                   div(class='value d-inline') Dataset name: 
-                  div(class='value d-inline') #{val.name}
-              if val.DOI
+                  div(class='value d-inline') #{dataset.name}
+              if dataset.DOI
                 div(class='col-12')
                   div(class='value d-inline') Stable Identifier: 
                   div(class='value d-inline')
-                    a(href=val.DOI) #{val.DOI}
-              if val.comments
+                    a(href=dataset.DOI) #{dataset.DOI}
+              if dataset.comments
                 div(class='col-12')
                   div(class='value d-inline') Comments: 
-                  div(class='value d-inline') #{val.comments}
+                  div(class='value d-inline') #{dataset.comments}
 
       div(class='row')
         div(class='col-12')
           div(class='key d-inline font-weight-bold') Suggested Data Availability Statement: 
       
       div(class='row row-margin')
-        each val, index in document.datasets.current
-          if val.DOI && val.name
+        each dataset in document.datasets.current
+          if dataset.DOI && dataset.name
             div(class='col-12')
-                div(class='value d-block' style="margin-bottom: 4px;") #{val.name}: 
-                  a(href=val.DOI) #{val.DOI}
-          else if val.comments && val.name
+                div(class='value d-block' style="margin-bottom: 4px;") #{dataset.name}: 
+                  a(href=dataset.DOI) #{dataset.DOI}
+          else if dataset.comments && dataset.name
             div(class='col-12')
-                div(class='value d-block' style="margin-bottom: 4px;") #{val.name}: #{val.comments}
+                div(class='value d-block' style="margin-bottom: 4px;") #{dataset.name}: #{dataset.comments}
 
     div(class='row row-margin')
       div(class='col-12')
@@ -139,23 +138,20 @@ block content
           div(class='row row-margin')
             div(class='col-12')
               div(class='value d-block') None
-    each val in document.datasets.deleted
+    each dataset in document.datasets.deleted
       div(class='row row-margin')
         div(class='col-12')
-          if val.dataType
+          if dataset.dataType
             div(class='value d-inline') Data Type: 
-            if val.subType !== ''
-              div(class='value d-inline') #{val.dataType} - #{val.subType}
+            if dataset.subType !== ''
+              div(class='value d-inline') #{dataset.dataType} - #{dataset.subType}
             else
-              div(class='value d-inline') #{val.dataType}
+              div(class='value d-inline') #{dataset.dataType}
         div(class='col-12')
-          if val.subType
+          if dataset.subType
             div(class='value d-inline') Data Subtype: 
-            div(class='value d-inline') #{val.subType}
+            div(class='value d-inline') #{dataset.subType}
         div(class='col-12')
-          if val.text
+          if dataset.text
             div(class='value d-inline') Data Sentence: 
-            div(class='value d-inline') #{val.text}
-
-  if demo
-    include ../forms/demo/finish.pug
+            div(class='value d-inline') #{dataset.text}

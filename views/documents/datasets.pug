@@ -5,7 +5,7 @@ block content
   div(id='user-navbar-lg' class='col-12' style='min-height:45px; background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
     div
       div(id='user-lg' style='position:absolute; top:4px; right:10px; text-align:right;')
-        if current_user
+        if current_user && !useDocumentToken
           label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label})
         else
           label(style='font-size:small;') 
@@ -18,7 +18,7 @@ block content
           li
             img(src='../img/DataSeer-logo-min.png' width='25')
           
-          if current_user
+          if current_user && !useDocumentToken
             li
               a(href=root + 'myDocuments' class='nav') My documents
 
@@ -80,7 +80,7 @@ block content
         if current_user
             if document
               if document.status !== 'metadata'
-                button(id='previous_step' class='btn btn-primary' style='height:80%;line-height: 0;') Metadata
+                button(id='back_to_metadata' class='btn btn-primary' style='height:80%;line-height: 0;') Metadata
         button(id='datasets_validation' class='btn btn-primary' style='height:80%;line-height: 0;') Finish
 
             
@@ -94,6 +94,3 @@ block content
       <div class="loader"></div> 
     </div>
   </div>
-
-  if demo
-    include ../forms/demo/datasets.pug
