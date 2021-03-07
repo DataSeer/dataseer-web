@@ -1,20 +1,27 @@
 /*
  * @prettier
  */
+
 const mongoose = require('mongoose'),
-  Schema = mongoose.Schema,
   passportLocalMongoose = require('passport-local-mongoose');
 
-const Accounts = new Schema(
+const Schema = new mongoose.Schema(
   {
-    role: Object,
-    organisation: String,
-    token: String,
-    apiToken: String
+    fullname: { type: String, default: '', required: true },
+    role: { type: mongoose.Schema.Types.ObjectId, ref: 'Roles', required: true }, // refers to roles collection item
+    organisation: { type: mongoose.Schema.Types.ObjectId, ref: 'Organisations', required: true }, // refers to organisations collection item
+    tokens: { api: { type: String, default: '' }, resetPassword: { type: String, default: '' } } // tokens of user
   },
   { minimize: false }
 );
 
-Accounts.plugin(passportLocalMongoose);
+Schema.plugin(passportLocalMongoose);
 
-module.exports = mongoose.model('Accounts', Accounts);
+// Populate Accounts data to ensure AccountsManager process
+Schema.pre(/^find/, function (next) {
+  this.populate('role');
+  this.populate('organisation');
+  return next();
+});
+
+module.exports = mongoose.model('Accounts', Schema, 'accounts');
