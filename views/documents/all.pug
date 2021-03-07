@@ -29,6 +29,9 @@ block content
           div(class='row')
             div(class='col-12 text-center')
               div(class='header')  All documents
+          div(class='row')
+            div(class='col-12')
+              input#search(type='text' name='username' placeholder='Search for document (doi, pmid, title, email, etc)')
           if  documents.length === 0
             div(class='row')
               div(class='col-12 text-center')
@@ -37,9 +40,6 @@ block content
             div(class='row')
               div(class='col-12 text-center')
                 div(class='count-list') #{documents.length} result(s)
-            div(class='row')
-              div(class='col-12')
-                input#search(type='text' name='username' placeholder='Search for document (doi, pmid, title, email, etc)')
             div(class='row head-list' style='margin-right:10px; margin-left:10px;')
               div(class='col-12')
                 div(class='form-row')

@@ -32,7 +32,7 @@ block content
           div(class='container-fluid')
 
             div(class='row')
-              div(class='col-12') Manuscript #: #{document.metadata.manuscriptId}
+              div(class='col-12') Manuscript #: #{document.metadata.manuscript_id}
 
             div(class='row row-margin')
               div(class='col-12')
@@ -71,16 +71,16 @@ block content
                               li #{aff}
         div(class='col-12')
           div(class='key d-inline font-weight-bold') Title: 
-          div(class='value d-inline') #{document.metadata.articleTitle}
+          div(class='value d-inline') #{document.metadata.article_title}
         div(class='col-12')
           div(class='key d-inline font-weight-bold') Manuscript #: 
-          div(class='value d-inline') #{document.metadata.manuscriptId}
+          div(class='value d-inline') #{document.metadata.manuscript_id}
         div(class='col-12')
           div(class='key d-inline font-weight-bold') Submitting Author: 
-          div(class='value d-inline') #{document.metadata.submittingAuthor}
+          div(class='value d-inline') #{document.metadata.submitting_author}
         div(class='col-12')
           div(class='key d-inline font-weight-bold') Submitting Author email: 
-          div(class='value d-inline') #{document.metadata.submittingAuthoremail}
+          div(class='value d-inline') #{document.metadata.submitting_author_email}
 
       div(class='row')
         div(class='col-12')
@@ -89,7 +89,7 @@ block content
       div(class='row')
         div(class='col-12')
           div(class='key d-inline')
-          each dataset in document.datasets.current
+          each dataset, index in document.datasets.current
 
             div(class='row row-margin')
               div(class='col-12')

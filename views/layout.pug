@@ -84,6 +84,7 @@ html
       a(href='https://github.com/kermitt2/dataseer-web' target='_blank')
         i(class='fab fa-github' style='color:#1E3945;margin-left:5px;')
 
+  script(src=root + 'javascripts/lib/jquery.js')
   if document
     div(id='document.id' class='data' value=(document._id))
     script(src=root + 'javascripts/lib/randomColor.min.js')
@@ -102,7 +103,6 @@ html
   else if search
     script(src=root + 'javascripts/search.js')
 
-  script(src=root + 'javascripts/lib/jquery.js')
   if route === 'documents/:id/metadata'
     script(src=root + 'javascripts/process/metadata.js')
   else if route === 'documents/:id/datasets'
