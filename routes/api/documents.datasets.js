@@ -11,6 +11,23 @@ const DocumentsDatasets = require('../../models/documents.datasets.js');
 
 const DocumentsDatasetsController = require('../../controllers/documents.datasets.js');
 
+/* PUT on datasets */
+router.put('/:id', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  return DocumentsDatasets.findOne({ _id: req.params.id }, function (err, datasets) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else if (!datasets) res.json({ 'err': true, 'res': null, 'msg': 'datasets not found' });
+    datasets.current = req.body.current;
+    datasets.deleted = req.body.deleted;
+    datasets.extracted = req.body.extracted;
+    return datasets.save(function (err) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      else return res.json({ 'err': false, 'res': true });
+    });
+  });
+});
+
 /* POST check validation of datasets */
 router.post('/:id/checkValidation', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
