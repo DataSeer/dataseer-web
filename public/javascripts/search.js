@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 (function ($) {
   // init attr data of each 'searchable' row
   $('.list .row[data]').map(function () {

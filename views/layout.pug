@@ -1,6 +1,6 @@
 doctype html
 html
-  head      
+  head
     title DataSeer
     link(rel='shortcut icon' type='image/ico' href=root + 'favicon.ico')
     link(rel='stylesheet' href='https://use.fontawesome.com/releases/v5.7.0/css/all.css' integrity='sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ' crossorigin='anonymous')
@@ -20,19 +20,20 @@ html
 
   body
     if current_user
-      div#user_id #{current_user.id}
-      div#user_username #{current_user.username}
-      div#user_role #{current_user.role.label}
+      div(id='user.id' class='data' value=(current_user._id))
+    if root
+      div(id='rootURL' class='data' value=(root))
+    
     div(id='user-navbar' class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;padding-left: 25px;')
       div(id='logo' style='padding-top: 0px; padding-bottom: 0px;')
       div
-        if current_user
+        if current_user && !useDocumentToken
           div(id='user' style='position:absolute; top:0px; right:10px; text-align:right;margin-right: 15px;')
             if (current_user.organisation !== '')
               label(style='font-size:small;') Connected as: 
                 a(href=href=root + 'settings')
                   <b>#{current_user.username}</b> 
-              label(style='font-size:small;') (#{current_user.role.label}, #{current_user.organisation})
+                label(style='font-size:small;') (#{current_user.role.label}, #{current_user.organisation.name})
             else
               label(style='font-size:small;') Connected as: 
                 a(href=href=root + 'settings')
@@ -47,7 +48,7 @@ html
               | to access DataSeer
         div(id='navbar' style='position:absolute; bottom:0px; right:10px; text-align:right;')
           ul
-            if current_user
+            if current_user && !useDocumentToken
               if current_user.role.label === 'curator'
                 li
                   a(href=root class=(route === '') ? 'nav active' : 'nav') Help
@@ -92,10 +93,7 @@ html
     script(src=root + 'javascripts/lib/documentView.js')
     script(src=root + 'javascripts/lib/datasetForm.js')
     script(src=root + 'javascripts/lib/datasetsList.js')
-    script(src=root + 'javascripts/mongoDB.js')
-    script(src=root + 'javascripts/dataseerML.js')
-    script(src=root + 'javascripts/admin.js')
-    script(src=root + 'javascripts/process/'+ document.status + '.js')
+    script(src=root + 'javascripts/dataseerAPI.js')
     script(src=root + 'javascripts/pdf.js/build/generic/build/pdf.js')
     script(src=root + 'javascripts/pdf.js/build/generic/build/pdf.worker.js')
     script(src=root + 'javascripts/lib/pdfManager.js')
@@ -104,6 +102,17 @@ html
     script(src=root + 'javascripts/process/backoffice.js')
   else if search
     script(src=root + 'javascripts/search.js')
+
+  if route === 'documents/:id/metadata'
+    script(src=root + 'javascripts/process/metadata.js')
+  else if route === 'documents/:id/datasets'
+    script(src=root + 'javascripts/process/datasets.js')
+    if current_user
+      div(id='user_id' class='data' value=(current_user._id))
+      div(id='user_username' class='data' value=(current_user.username))
+      div(id='user_role' class='data' value=(current_user.role.label))
+  else if route === 'documents/:id/finish'
+    script(src=root + 'javascripts/process/finish.js')
 
   script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js' integrity='sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1' crossorigin='anonymous')
   script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js' integrity='sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM' crossorigin='anonymous')

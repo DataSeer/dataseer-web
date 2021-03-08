@@ -19,12 +19,11 @@ block content
             div(class='col-12')
               input#search(type='text' name='username' placeholder='Search for document (doi, pmid, title, email, etc)')
           div(class='row head-list' style='margin-right:10px; margin-left:10px;')
-            div(class='col-1') Url
-            div(class='col-1') Uploaded at
-            div(class='col-2') Status
-            div(class='col-2') Modified by
+            div(class='col-2') Url
+            div(class='col-2') Date uploaded
+            div(class='col-3') Status
             div(class='col-2') Journal
-            div(class='col-4') Title
+            div(class='col-3') Title
           if documents.length === 0
             div(class='row')
               div(class='col-12 text-center')
@@ -32,28 +31,25 @@ block content
           else
             each document, index in documents
               div(class='row' style='margin-right:10px; margin-left:10px;' data='true')
-                div(class='col-1')
-                  div(class="hidden") #{document.metadata.manuscriptId} #{document.metadata.doi} #{document.metadata.pmid}
-                  if (typeof document.metadata.manuscriptId !== "undefined" && document.metadata.manuscriptId !== "")
-                    a.document-link(href=root + 'documents/' + document._id) #{document.metadata.manuscriptId}
-                  else if (typeof document.pdf !== "undefined" && typeof document.pdf.filename !== "undefined" && document.pdf.filename !== "")
+                div(class='col-2')
+                  div(class="hidden") #{JSON.stringify(document.metadata)}
+                  if (document.metadata.manuscript_id !== "")
+                    a.document-link(href=root + 'documents/' + document._id) #{document.metadata.manuscript_id}
+                  else if (document.pdf !== "")
                     a.document-link(href=root + 'documents/' + document._id) #{document.pdf.filename}
+                  else if (document.tei !== "")
+                    a.document-link(href=root + 'documents/' + document._id) #{document.tei.filename}
                   else
                     a.document-link(href=root + 'documents/' + document._id) #{formatUrl(document._id)}
-                div(class='col-1') #{formatDate(document.uploaded_at)}
+                div(class='col-2') #{formatDate(document.uploaded_at)}
                 if document.status === 'metadata'
-                  div(class='col-2') Metadata validation
+                  div(class='col-3') Metadata validation
                 else if document.status === 'datasets'
-                  div(class='col-2') Datasets validation
+                  div(class='col-3') Datasets validation
                 else if document.status === 'finish'
-                  div(class='col-2') Process finished
-                div(class='col-2')
-                  ul
-                    each role, i in document.modifiedBy
-                      each user, j in role
-                        li #{user} (#{i})
+                  div(class='col-3') Process finished
                 div(class='col-2') #{document.metadata.journal}
-                div(class='col-4') #{document.metadata.articleTitle}
+                div(class='col-3') #{document.metadata.article_title}
 
           div(class='row')
             div(class='col-12' style='margin-top:20px;')

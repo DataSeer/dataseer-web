@@ -1,6 +1,7 @@
 /*
  * @prettier
  */
+
 'use strict';
 
 const workerSrcPath = '../javascripts/pdf.js/build/pdf.worker.js';

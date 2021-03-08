@@ -3,26 +3,65 @@ extends ../layout
 block content
 
   div(class='container-fluid')
-    if results
-      if results.successes.length
-        each result in results.successes
-          div(class='alert alert-success' role='alert')
-            a(href=root + 'documents/' + result.document.id) #{result.filename}
-            div(style='display: inline-block; margin-left: 5px;') successfully uploaded
-      if results.errors.length
-        each error in results.errors
-          if error.filename
-            div(class='alert alert-warning' role='alert') #{error.filename}: #{error.msg}
-          else
-            div(class='alert alert-warning' role='alert') #{error.msg}
+    if success
+      div(class='alert alert-success' role='alert') #{success}
+    if error
+      div(class='alert alert-warning' role='alert') #{error}
     div(class='row')
       div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px;')
                 
         div(style='margin-top:10px;margin-left:10px;') Supported formats are PDF, JATS/NLM, TEI XML, publisher XML formats for ScholarOne, BMJ, Elsevier (staging format), NPG (Nature), OUP, PNAS, RSC, Sage, Springer and Wiley.
 
-        //div(style='margin-top:10px;margin-left:10px;') Upload a new document:
-
-        include ../forms/documents/upload.pug
+        div(class='container-fluid')
+          form(ref='uploadForm' id='uploadForm' action=root+route method='post' encType='multipart/form-data')
+            div(class='row')
+              div(class='col-12')
+                label(for='file') Upload you file here
+                input(type='file' class='form-control' name='file' id='file' style='margin-left:10px;')
+            div(class='row')
+              div(class='col-12')
+                label(for='attached_files') Upload any additional files here (you can select more than one)
+                div(class='col-12')
+                label(for='attached_files' style='font-style: italic;') All formats are supported
+                input(type='file' class='form-control' name='attached_files' id='attached_files' multiple style='margin-left:10px;')
+            if (current_user.role.label === 'curator')
+              div(class='row')
+                div(class='col-12')
+                  label(for='existing_journal') Which journal will be sent to
+                div(class='col-12')
+                  label(for='existing_journal' style='font-style: italic;') If the journal already exsit, select it:
+                  select.custom-select(style='margin-left:10px;' name='existing_journal' id='existing_journal')
+                    option(selected value='') ----------
+                    each organisation, index in organisations
+                      option(value=organisation.name) #{organisation.name}
+                div(class='col-12')
+                  label(for='journal' style='font-style: italic;') If the journal is not present in the list above, set informations here:
+                  input(type='text' placeholder='Journal' class='form-control' name='journal' id='journal' value='' style='margin-left:10px;')
+            if (current_user.role.label === 'curator')
+              div(class='row')
+                div(class='col-12')
+                  label(for='account') Email
+                div(class='col-12')
+                  label(for='account' style='font-style: italic;') If the user already exsit, select it:
+                  select.custom-select(style='margin-left:10px;' name='account' id='account')
+                    option(selected value='') ----------
+                    each account, index in accounts
+                      option(value=account.username + ";" + account.fullname) #{account.username}
+                div(class='col-12')
+                  label(for='fullname' style='font-style: italic;') If the user is not present in the list above, set informations here:
+                  input(type='text' placeholder='Full Name' class='form-control' name='fullname' id='fullname' value='' style='margin-left:10px;')
+                  input(type='text' placeholder='Email' class='form-control' name='email' id='email' value='' style='margin-left:10px;')
+              div(class='row')
+                div(class='col-12')
+                  input(type='checkbox' class='form-control checked' name='dataseerML' id='dataseerML' value='true' style='margin-left:10px;')
+                  label(for='dataseerML') Identify datasets automatically
+            div(class='row')
+              div(class='col-12')
+                input(type='checkbox' class='form-control checked' name='already_assessed' id='already_assessed' value='true' style='margin-left:10px;')
+                label(for='already_assessed') This is a new version of an article DataSeer has already assessed
+            div(class='row')
+              div(class='col-12')
+                  button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' id='addDocuments' style='margin-left:10px;') Upload document
 
     div(class='row')
       div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-top:10px;')

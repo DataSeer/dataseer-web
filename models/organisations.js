@@ -1,14 +1,16 @@
 /*
  * @prettier
  */
-const mongoose = require('mongoose'),
-  Schema = mongoose.Schema;
 
-const OrganisationsSchema = new Schema(
+'use strict';
+
+const mongoose = require('mongoose');
+
+const Schema = new mongoose.Schema(
   {
-    name: String
+    name: { type: String, default: 'None', index: true } // name of organisation
   },
   { minimize: false }
 );
 
-module.exports = mongoose.model('Organisations', OrganisationsSchema);
+module.exports = mongoose.model('Organisations', Schema, 'organisations');

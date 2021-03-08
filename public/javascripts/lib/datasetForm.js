@@ -1,6 +1,9 @@
 /*
  * @prettier
  */
+
+'use strict';
+
 const DatasetForm = function (events) {
   let self = this;
 

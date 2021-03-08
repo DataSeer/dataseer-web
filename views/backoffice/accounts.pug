@@ -7,6 +7,7 @@ block content
   if success
     div(class='alert alert-success' role='alert') #{success}
 
+  include ../functions/format.pug
   
   div(class='container-fluid')
     div(class='row')
@@ -27,7 +28,7 @@ block content
                 div limit: 
                   input(type='text' name='limit' placeholder='Maximum number of results')
                 div
-                  button.btn.btn-default.waves-effect.waves-light(type='submit') Search for accounts
+                  button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Search for accounts
           div(class='row')
             div(class='col-12 text-center')
               div(class='header') Accounts
@@ -45,10 +46,12 @@ block content
             div(class='row head-list')
               div(class='col-12')
                 div(class='form-row')
-                  div(class='col-3 offset-1') Email
-                  div(class='col-3') Role
+                  div(class='col-2') Email
+                  div(class='col-2') Full Name
+                  div(class='col-2') Role
                   div(class='col-2') Organization
-                  div(class='col-3') Actions
+                  div(class='col-2') Token
+                  div(class='col-2') Actions
             if  accounts.length === 0
               div(class='row')
                 div(class='col-12 text-center')
@@ -58,28 +61,33 @@ block content
               div(class='col-12')
                 form.accounts(role='form', action=root + route, method='post')
                   div(class='form-row')
-                    div(class='col-3 offset-1') #{account.username}
+                    div(class='col-2') #{account.username}
                       input.form-control(type='text' name='username' class='hidden' value=account.username)
-                    div(class='col-3')
+                    div(class='col-2')
+                      input.form-control(type='text' name='fullname' value=account.fullname)
+                    div(class='col-2')
                       select.custom-select(name='role')
                         each role, index in roles
                           if account.role.label === role.label
-                            option(selected value=role.label) #{role.label}
+                            option(selected value=role._id) #{role.label}
                           else
-                            option(value=role.label) #{role.label}
+                            option(value=role._id) #{role.label}
                     div(class='col-2')
                       select.custom-select(name='organisation')
-                        if account.organisation === ''
-                          option(selected value='') None
-                        else
-                          option(value='') None
                         each organisation, index in organisations
-                          if account.organisation === organisation.name
-                            option(selected value=organisation.name) #{organisation.name}
+                          if account.organisation.name === organisation.name
+                            option(selected value=organisation._id) #{organisation.name}
                           else
-                            option(value=organisation.name) #{organisation.name}
-                    div(class='col-3')
-                      button.btn.btn-default.waves-effect.waves-light(type='submit' name='update') Update
+                            option(value=organisation._id) #{organisation.name}
+                    if account.tokens.api
+                      div(class='col-2')
+                        input.form-control(type='text' id='apiToken' name='apiToken' value=account.tokens.api)
+                    else
+                      div(class='col-2')
+                        div This user does not have a token
+                    div(class='col-2')
+                      button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' name='update') Update
+                      button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' name='generate_token') New Token
 
           div(class='row')
             div(class='col-12' style='margin-top:20px;')
