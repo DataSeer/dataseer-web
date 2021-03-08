@@ -14,6 +14,7 @@ const AccountsController = require('../controllers/accounts.js'),
   DocumentsFilesController = require('../controllers/documents.files.js');
 
 const DataSeerML = require('../lib/dataseer-ml.js'),
+  AccountsManager = require('../lib/accounts.js'),
   JWT = require('../lib/jwt.js'),
   XML = require('../lib/xml.js');
 
@@ -81,12 +82,73 @@ Self.authenticate = function (req, res, next) {
 };
 
 /**
- * Create URL for a given document id
- * @param {String} documentId Id of document
- * @returns {String} URL of document
+ * Check params & build params for Self.upload() function
+ * @param {Object} params Options available
+ * @param {Object} params.files JSON Object of files in req.files (available keys: "file" OR "attached_files")
+ * @param {String} params.files[key].name
+ * @param {Buffer} params.files[key].data
+ * @param {Number} params.files[key].size
+ * @param {String} params.files[key].encoding
+ * @param {String} params.files[key].tempFilePath
+ * @param {String} params.files[key].mimetype
+ * @param {String} params.files[key].md5
+ * @param {Boolean} params.already_assessed Already assessed
+ * @param {Boolean} params.isDataseer Is DataSeer
+ * @param {String} params.journal Journal of document owner
+ * @param {String} params.email Email of owner
+ * @param {String} params.fullname fullname of owner
+ * @param {String} params.uploaded_by Id of uploader
+ * @param {String} params.dataseerML process dataseer-ml
+ * @param {Object} events Events
+ * @param {Function} events.onCreatedAccount Function called if new Account is created
+ * @param {Function} events.onCreatedJournal Function called if new Journal is created
+ * @returns {Object} Options for Self.upload() function or new Error(msg)
  */
-Self.getUrl = function (documentId) {
-  return `${conf.root}documents/${documentId}`;
+Self.getUploadParams = function (params = {}, user) {
+  // If file is not set
+  if (!params.files || !params.files['file']) return new Error('You must select a file !');
+  let alreadyAssessed = !!params.already_assessed,
+    file = params.files['file'],
+    attachedFiles = Array.isArray(params.files['attached_files']) ? params.files['attached_files'] : [],
+    uploaded_by = user._id,
+    opts = {
+      alreadyAssessed,
+      file,
+      attachedFiles,
+      uploaded_by
+    };
+  if (AccountsManager.checkAccessRight(user, AccountsManager.roles.standard_user, AccountsManager.match.role)) {
+    // Case of standard_user
+    opts.journal = user.organisation.name;
+    opts.email = user.username;
+    opts.fullname = user.fullname;
+    opts.dataseerML = true; // always proceed dataseer-ml
+  } else {
+    // Case of annotator OR curator
+    // If journal AND existing_journal are not set
+    if (!params.journal && !params.existing_journal)
+      return new Error('You must select an existing "Journal" (or fill in "Journal" field) !');
+    opts.journal = !params.journal ? params.existing_journal : params.journal;
+    // If there is no account AND email is invalid
+    if (!params.account && (typeof params.email !== 'string' || !AccountsController.RegExp.email.test(params.email)))
+      return new Error('Invalid Email !');
+    // If user data are not set
+    if (!(params.account || (params.email && params.fullname)))
+      return new Error('You must select an existing "Email" (or fill in "Full Name" and "Email" fields) !');
+    if (params.account) {
+      // If there is an existing account, data will be: email;fullname
+      let tmp = params.account.split(';');
+      opts.email = tmp[0];
+      opts.fullname = tmp[1];
+    } else {
+      // If there is an new account
+      opts.email = params.email;
+      opts.fullname = params.fullname;
+    }
+    // dataseer-ml processing
+    opts.dataseerML = !!params.dataseerML;
+  }
+  return opts;
 };
 
 /**
@@ -99,15 +161,17 @@ Self.getUrl = function (documentId) {
  * @param {Number} opts.file.size
  * @param {String} opts.file.encoding
  * @param {String} opts.file.tempFilePath
- * @param {Boolean} opts.file.truncated
  * @param {String} opts.file.mimetype
  * @param {String} opts.file.md5
+ * @param {Array} opts.attachedFiles Array of attached files (same structure as opts.file)
+ * @param {Boolean} opts.already_assessed Already assessed
+ * @param {Boolean} opts.isDataseer Is DataSeer
  * @param {String} opts.journal Journal of document owner
  * @param {String} opts.email Email of owner
  * @param {String} opts.fullname fullname of owner
  * @param {String} opts.uploaded_by Id of uploader
  * @param {String} opts.dataseerML process dataseer-ml
- * @param {String} opts.privateKey PrivateKey to create JWT token
+ * @param {String} opts.privateKey PrivateKey to create JWT token (stored in app.get('private.key'))
  * @param {Object} events Events
  * @param {Function} events.onCreatedAccount Function called if new Account is created
  * @param {Function} events.onCreatedJournal Function called if new Journal is created
@@ -116,7 +180,12 @@ Self.getUrl = function (documentId) {
  */
 Self.upload = function (opts = {}, events, cb) {
   return Documents.create(
-    { uploaded_by: opts.uploaded_by, already_assessed: opts.already_assessed, watchers: [opts.uploaded_by] },
+    {
+      uploaded_by: opts.uploaded_by,
+      isDataseer: opts.isDataseer,
+      already_assessed: opts.already_assessed,
+      watchers: [opts.uploaded_by]
+    },
     function (err, doc) {
       if (err) return cb(err);
       return Organisations.findOne({ name: opts.journal }).exec(function (err, organisation) {

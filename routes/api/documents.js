@@ -12,10 +12,14 @@ const DocumentsDatasets = require('../../models/documents.datasets.js'),
   DocumentsLogs = require('../../models/documents.logs.js'),
   Documents = require('../../models/documents.js');
 
-const AccountsManager = require('../../lib/accounts.js');
+const AccountsManager = require('../../lib/accounts.js'),
+  Mailer = require('../../lib/mailer.js');
 
 const DocumentsFilesController = require('../../controllers/documents.files.js'),
+  DocumentsController = require('../../controllers/documents.js'),
   DocumentsDatasetsController = require('../../controllers/documents.datasets.js');
+
+const conf = require('../../conf/conf.json');
 
 /* GET ALL Documents */
 router.get('/', function (req, res, next) {
@@ -41,6 +45,32 @@ router.get('/', function (req, res, next) {
     else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
     return res.json({ 'err': false, 'res': doc });
   });
+});
+
+/* POST new Document */
+router.post('/', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  let opts = DocumentsController.getUploadParams(Object.assign({ files: req.files }, req.body), req.user),
+    mute = req.body && req.body.mute; // Send mails by default. If mute is set then do not send its
+  if (opts instanceof Error) return res.json({ 'err': true, 'res': null, 'msg': opts.toString() });
+  opts.privateKey = req.app.get('private.key');
+  opts.dataTypes = req.app.get('dataTypes');
+  return DocumentsController.upload(
+    opts,
+    {
+      onCreatedAccount: function (account) {
+        if (!mute) return Mailer.sendAccountCreationMail(account, req.app.get('private.key'));
+      }
+    },
+    function (err, doc) {
+      // Send upload email to curators
+      if (!mute) Mailer.sendDocumentUploadMail(doc, opts, req.user.username);
+      // If any of the file processing produced an error, err would equal that error
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': 'Error while uploading document !' });
+      else res.json({ 'err': false, 'res': doc });
+    }
+  );
 });
 
 /* GET SINGLE Document BY ID */

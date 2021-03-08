@@ -301,113 +301,19 @@ router.get('/upload', function (req, res, next) {
 router.post('/upload', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  // If file is not set
-  if (!req.files || !req.files['file']) {
-    req.flash('error', 'You must select a file !');
+  let opts = DocumentsController.getUploadParams(Object.assign({ files: req.files }, req.body), req.user);
+  if (opts instanceof Error) {
+    req.flash('error', opts.toString());
     return res.redirect('./upload');
   }
-  let alreadyAssessed = !!req.body.already_assessed,
-    file = req.files['file'],
-    attachedFiles = Array.isArray(req.files['attached_files']) ? req.files['attached_files'] : [],
-    uploaded_by = req.user._id,
-    opts = {
-      alreadyAssessed,
-      file,
-      attachedFiles,
-      uploaded_by,
-      dataTypes: req.app.get('dataTypes'),
-      privateKey: req.app.get('private.key')
-    };
-  if (AccountsManager.checkAccessRight(req.user, AccountsManager.roles.standard_user, AccountsManager.match.role)) {
-    // Case of standard_user
-    opts.journal = req.user.organisation.name;
-    opts.email = req.user.username;
-    opts.fullname = req.user.fullname;
-    opts.dataseerML = true; // always proceed dataseer-ml
-  } else {
-    // Case of annotator OR curator
-    // If journal AND existing_journal are not set
-    if (!req.body.journal && !req.body.existing_journal) {
-      req.flash('error', 'You must select an existing "Journal" (or fill in "Journal" field) !');
-      return res.redirect('./upload');
-    }
-    opts.journal = !req.body.journal ? req.body.existing_journal : req.body.journal;
-    // If there is no account AND email is invalid
-    if (
-      !req.body.account &&
-      (typeof req.body.email !== 'string' || !AccountsController.RegExp.email.test(req.body.email))
-    ) {
-      req.flash('error', 'Invalid Email !');
-      return res.redirect('./upload');
-    }
-    // If user data are not set
-    if (!(req.body.account || (req.body.email && req.body.fullname))) {
-      req.flash('error', 'You must select an existing "Email" (or fill in "Full Name" and "Email" fields) !');
-      return res.redirect('./upload');
-    }
-    if (req.body.account) {
-      // If there is an existing account, data will be: email;fullname
-      let tmp = req.body.account.split(';');
-      opts.email = tmp[0];
-      opts.fullname = tmp[1];
-    } else {
-      // If there is an new account
-      opts.email = req.body.email;
-      opts.fullname = req.body.fullname;
-    }
-    // dataseer-ml processing
-    opts.dataseerML = !!req.body.dataseerML;
-  }
+  opts.privateKey = req.app.get('private.key');
+  opts.dataTypes = req.app.get('dataTypes');
   return DocumentsController.upload(
     opts,
     {
       onCreatedAccount: function (account) {
-        // If privateKey not found
-        let privateKey = req.app.get('private.key');
-        if (!privateKey) {
-          console.log('Server unable to send mail to ' + account.username + '(no private key)');
-        }
-        return JWT.create(
-          { username: account.username },
-          privateKey,
-          conf.tokens.automaticAccountCreation.expiresIn,
-          function (err, token) {
-            // If JWT error has occured
-            if (err) {
-              console.log(account.username);
-              console.log(err);
-            }
-            account.tokens.resetPassword = token;
-            return account.save(function (err) {
-              // If MongoDB error has occured
-              if (err) {
-                console.log(account.username);
-                console.log(err);
-              }
-              let url = path.join(
-                conf.root,
-                'resetPassword?resetPasswordToken=' + account.tokens.resetPassword + '&username=' + account.username
-              );
-              return Mailer.sendMail(
-                {
-                  'username': account.username,
-                  'subject': 'Set your DataSeer Password',
-                  'text': Mailer.getAutomaticAccountCreationMailTxt({ url: url }),
-                  'html': Mailer.getAutomaticAccountCreationMailHtml({ url: url })
-                },
-                function (err, info) {
-                  // If Mailer error has occured
-                  if (err) {
-                    console.log(account.username);
-                    console.log(err);
-                  }
-                }
-              );
-            });
-          }
-        );
-      },
-      onCreatedJournal: function (journal) {}
+        return Mailer.sendAccountCreationMail(account, req.app.get('private.key'));
+      }
     },
     function (err, doc) {
       // If any of the file processing produced an error, err would equal that error
@@ -415,30 +321,9 @@ router.post('/upload', function (req, res, next) {
         req.flash('error', 'Error while uploading document !');
         return res.redirect('./upload');
       }
-      // send email to curator address
-      Mailer.sendMail(
-        {
-          'username': conf.emails.upload,
-          'subject': 'New document uploaded on DataSeer Web',
-          'text': Mailer.getUploadDocumentMailTxt({
-            url: DocumentsController.getUrl(doc._id),
-            opts: opts,
-            uploader: req.user.username
-          }),
-          'html': Mailer.getUploadDocumentMailHtml({
-            url: DocumentsController.getUrl(doc._id),
-            opts: opts,
-            uploader: req.user.username
-          })
-        },
-        function (err, info) {
-          // If Mailer error has occured
-          if (err) {
-            console.log(conf.emails.upload);
-            console.log(err);
-          }
-        }
-      );
+      // Send upload email to curators
+      Mailer.sendDocumentUploadMail(doc, opts, req.user.username);
+
       // Case of standard_user
       if (AccountsManager.checkAccessRight(req.user, AccountsManager.roles.standard_user, AccountsManager.match.role))
         return res.redirect(path.join('../documents', doc.id));
