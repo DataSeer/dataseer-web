@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 const md5 = require('md5'),
   path = require('path'),
   fs = require('fs');
@@ -17,9 +19,9 @@ let Self = {};
 
 /**
  * Authenticate account with JWT (documentToken)
- * @param {Object} req req
- * @param {Object} res res
- * @param {Function} next
+ * @param {object} req - req express variable
+ * @param {object} res - res express variable
+ * @param {function} next - next express variable
  * @returns {undefined} undefined
  */
 Self.authenticate = function (req, res, next) {
@@ -48,8 +50,8 @@ Self.authenticate = function (req, res, next) {
 
 /**
  * Check if mimetype is PDF
- * @param {String} mimetype Given mimtype
- * @returns {Boolean} True if mimetype matched, else false
+ * @param {string} mimetype - Given mimtype
+ * @returns {boolean} True if mimetype matched, else false
  */
 Self.isPDF = function (mimetype) {
   return mimetype === 'application/pdf';
@@ -57,8 +59,8 @@ Self.isPDF = function (mimetype) {
 
 /**
  * Check if mimetype is XML
- * @param {String} mimetype Given mimtype
- * @returns {Boolean} True if mimetype matched, else false
+ * @param {string} mimetype - Given mimtype
+ * @returns {boolean} True if mimetype matched, else false
  */
 Self.isXML = function (mimetype) {
   return mimetype === 'text/xml' || mimetype === 'application/xml';
@@ -66,9 +68,9 @@ Self.isXML = function (mimetype) {
 
 /**
  * Get path (on FileSystem) of given documentId
- * @param {String} documentId Document id
- * @param {String} filename Filename
- * @returns {String} Full path of filename
+ * @param {string} documentId - Document id
+ * @param {string} filename - Filename
+ * @returns {string} Full path of filename
  */
 Self.getPath = function (documentId, filename) {
   return path.join(Self.getDirectory(documentId), filename);
@@ -76,8 +78,8 @@ Self.getPath = function (documentId, filename) {
 
 /**
  * Get directory (on FileSystem) of given documentId
- * @param {String} documentId Document id
- * @returns {String} Full path of directory or undefined
+ * @param {string} - documentId Document id
+ * @returns {string} Full path of directory or undefined
  */
 Self.getDirectory = function (documentId) {
   if (documentId.length === 24)
@@ -97,8 +99,8 @@ Self.getDirectory = function (documentId) {
 
 /**
  * Read file
- * @param {mongoose.Schema.Types.ObjectId} id File id
- * @param {Function} cb Callback function(err, res) (err: error process OR null, res: file content (string) OR undefined)
+ * @param {mongoose.Schema.Types.ObjectId} id - File id
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: file content (string) OR undefined)
  * @returns {undefined} undefined
  */
 Self.readFile = function (id, cb) {
@@ -115,9 +117,9 @@ Self.readFile = function (id, cb) {
 
 /**
  * Re-Write file
- * @param {mongoose.Schema.Types.ObjectId} id File id
- * @param {String} data File data
- * @param {Function} cb Callback function(err, res) (err: error process OR undefined)
+ * @param {mongoose.Schema.Types.ObjectId} id - File id
+ * @param {string} data - File data
+ * @param {function} cb - Callback function(err, res) (err: error process OR undefined)
  * @returns {undefined} undefined
  */
 Self.rewriteFile = function (id, data, cb) {
@@ -144,14 +146,14 @@ Self.rewriteFile = function (id, data, cb) {
 
 /**
  * Write file on FileSystem and store attached data in MongoDB
- * @param {Object} opts Options available
- * @param {Object} opts.file File representation
- * @param {String} opts.file.name
- * @param {Buffer} opts.file.data
- * @param {String} opts.file.mimetype
- * @param {String} opts.accountId Account id
- * @param {String} opts.documentId Document id
- * @param {Function} cb Callback function(err, res) (err: error process OR null, res: DocumentsFiles instance OR undefined)
+ * @param {object} opts - Options available
+ * @param {object} opts.file - File representation
+ * @param {string} opts.file.name - File name
+ * @param {buffer} opts.file.data - File content
+ * @param {string} opts.file.mimetype - File mimetype
+ * @param {string} opts.accountId - Account id
+ * @param {string} opts.documentId - Document id
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: DocumentsFiles instance OR undefined)
  * @returns {undefined} undefined
  */
 Self.upload = function (opts, cb) {

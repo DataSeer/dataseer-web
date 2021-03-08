@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 const DocumentsDatasets = require('../models/documents.datasets.js'),
   Accounts = require('../models/accounts.js'),
   Documents = require('../models/documents.js');
@@ -14,9 +16,9 @@ let Self = {};
 
 /**
  * Authenticate account with JWT (documentToken)
- * @param {Object} req req
- * @param {Object} res res
- * @param {Function} next
+ * @param {object} req - req express variable
+ * @param {object} res - res express variable
+ * @param {function} next - next express variable
  * @returns {undefined} undefined
  */
 Self.authenticate = function (req, res, next) {
@@ -45,8 +47,8 @@ Self.authenticate = function (req, res, next) {
 
 /**
  * Check validation of datasets
- * @param {mongoose.Schema.Types.ObjectId} id Datasets id
- * @param {Function} cb Callback function(err, res) (err: error process OR null, res: true if it can be validated OR false)
+ * @param {mongoose.Schema.Types.ObjectId} id - Datasets id
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: true if it can be validated OR false)
  * @returns {undefined} undefined
  */
 Self.checkValidation = function (id, cb) {
@@ -69,21 +71,21 @@ Self.checkValidation = function (id, cb) {
 
 /**
  * Create new dataset
- * @param {Object} opts JSON containing all data
- * @param {String} opts.datasetsId Datasets id
- * @param {String} opts.dataset.id Datset id
- * @param {String} opts.dataset.sentenceId Datset sentence id
- * @param {String} opts.dataset.cert Datset cert value (between 0 and 1)
- * @param {String} opts.dataset.dataType Datset dataType
- * @param {String} opts.dataset.subType Datset subType
- * @param {String} opts.dataset.description Datset description
- * @param {String} opts.dataset.bestDataFormatForSharing Datset best data format for sharing
- * @param {String} opts.dataset.mostSuitableRepositories Datset most suitable repositories
- * @param {String} opts.dataset.DOI Datset DOI
- * @param {String} opts.dataset.name Datset name
- * @param {String} opts.dataset.comments Datset comments
- * @param {String} opts.dataset.text Datset text of sentence
- * @param {Function} cb Callback function(err, res) (err: error process OR null)
+ * @param {object} opts - JSON containing all data
+ * @param {string} opts.datasetsId - Datasets id
+ * @param {string} opts.dataset.id - Dataset id
+ * @param {string} opts.dataset.sentenceId - Dataset sentence id
+ * @param {string} opts.dataset.cert - Dataset cert value (between 0 and 1)
+ * @param {string} opts.dataset.dataType - Dataset dataType
+ * @param {string} opts.dataset.subType - Dataset subType
+ * @param {string} opts.dataset.description - Dataset description
+ * @param {string} opts.dataset.bestDataFormatForSharing - Dataset best data format for sharing
+ * @param {string} opts.dataset.mostSuitableRepositories - Dataset most suitable repositories
+ * @param {string} opts.dataset.DOI - Dataset DOI
+ * @param {string} opts.dataset.name - Dataset name
+ * @param {string} opts.dataset.comments - Dataset comments
+ * @param {string} opts.dataset.text - Dataset text of sentence
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.newDataset = function (opts = {}, cb) {
@@ -126,21 +128,21 @@ Self.newDataset = function (opts = {}, cb) {
 
 /**
  * Update dataset
- * @param {Object} opts JSON containing all data
- * @param {String} opts.datasetsId Datasets id
- * @param {String} opts.dataset.id Datset id
- * @param {String} opts.dataset.sentenceId Datset sentence id
- * @param {String} opts.dataset.cert Datset cert value (between 0 and 1)
- * @param {String} opts.dataset.dataType Datset dataType
- * @param {String} opts.dataset.subType Datset subType
- * @param {String} opts.dataset.description Datset description
- * @param {String} opts.dataset.bestDataFormatForSharing Datset best data format for sharing
- * @param {String} opts.dataset.mostSuitableRepositories Datset most suitable repositories
- * @param {String} opts.dataset.DOI Datset DOI
- * @param {String} opts.dataset.name Datset name
- * @param {String} opts.dataset.comments Datset comments
- * @param {String} opts.dataset.text Datset text of sentence
- * @param {Function} cb Callback function(err, res) (err: error process OR null)
+ * @param {object} opts - JSON containing all data
+ * @param {string} opts.datasetsId - Datasets id
+ * @param {string} opts.dataset.id - Dataset id
+ * @param {string} opts.dataset.sentenceId - Dataset sentence id
+ * @param {string} opts.dataset.cert - Dataset cert value (between 0 and 1)
+ * @param {string} opts.dataset.dataType - Dataset dataType
+ * @param {string} opts.dataset.subType - Dataset subType
+ * @param {string} opts.dataset.description - Dataset description
+ * @param {string} opts.dataset.bestDataFormatForSharing - Dataset best data format for sharing
+ * @param {string} opts.dataset.mostSuitableRepositories - Dataset most suitable repositories
+ * @param {string} opts.dataset.DOI - Dataset DOI
+ * @param {string} opts.dataset.name - Dataset name
+ * @param {string} opts.dataset.comments - Dataset comments
+ * @param {string} opts.dataset.text - Dataset text of sentence
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.updateDataset = function (opts = {}, cb) {
@@ -172,9 +174,9 @@ Self.updateDataset = function (opts = {}, cb) {
 
 /**
  * Delete dataset
- * @param {Object} opts JSON containing all data
- * @param {String} opts.datasetsId Datasets id
- * @param {String} opts.dataset.id Datset id
+ * @param {object} opts - JSON containing all data
+ * @param {string} opts.datasetsId - Datasets id
+ * @param {string} opts.dataset.id - Dataset id
  * @returns {undefined} undefined
  */
 Self.deleteDataset = function (opts = {}, cb) {
@@ -217,11 +219,11 @@ Self.deleteDataset = function (opts = {}, cb) {
 
 /**
  * Create new corresp
- * @param {Object} opts JSON containing all data
- * @param {String} opts.datasetsId Datasets id
- * @param {String} opts.dataset.id Datset id
- * @param {String} opts.dataset.sentenceId Datset sentence id
- * @param {Function} cb Callback function(err, res) (err: error process OR null)
+ * @param {object} opts - JSON containing all data
+ * @param {string} opts.datasetsId - Datasets id
+ * @param {string} opts.dataset.id - Dataset id
+ * @param {string} opts.dataset.sentenceId - Dataset sentence id
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.newCorresp = function (opts = {}, cb) {
@@ -251,11 +253,11 @@ Self.newCorresp = function (opts = {}, cb) {
 
 /**
  * Delete corresp
- * @param {Object} opts JSON containing all data
- * @param {String} opts.datasetsId Datasets id
- * @param {String} opts.dataset.id Datset id
- * @param {String} opts.dataset.sentenceId Datset sentence id
- * @param {Function} cb Callback function(err, res) (err: error process OR null)
+ * @param {object} opts - JSON containing all data
+ * @param {string} opts.datasetsId - Datasets id
+ * @param {string} opts.dataset.id - Dataset id
+ * @param {string} opts.dataset.sentenceId - Dataset sentence id
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.deleteCorresp = function (opts = {}, cb) {
@@ -285,20 +287,20 @@ Self.deleteCorresp = function (opts = {}, cb) {
 
 /**
  * Create new dataset JSON object
- * @param {Object} opts JSON containing all data
- * @param {String} opts.dataset.id Datset id
- * @param {String} opts.dataset.sentenceId Datset sentence id
- * @param {String} opts.dataset.cert Datset cert value (between 0 and 1)
- * @param {String} opts.dataset.dataType Datset dataType
- * @param {String} opts.dataset.subType Datset subType
- * @param {String} opts.dataset.description Datset description
- * @param {String} opts.dataset.bestDataFormatForSharing Datset best data format for sharing
- * @param {String} opts.dataset.mostSuitableRepositories Datset most suitable repositories
- * @param {String} opts.dataset.DOI Datset DOI
- * @param {String} opts.dataset.name Datset name
- * @param {String} opts.dataset.comments Datset comments
- * @param {String} opts.dataset.text Datset text of sentence
- * @returns {Object} opts JSON containing all data
+ * @param {object} opts - JSON containing all data
+ * @param {string} opts.dataset.id - Dataset id
+ * @param {string} opts.dataset.sentenceId - Dataset sentence id
+ * @param {string} opts.dataset.cert - Dataset cert value (between 0 and 1)
+ * @param {string} opts.dataset.dataType - Dataset dataType
+ * @param {string} opts.dataset.subType - Dataset subType
+ * @param {string} opts.dataset.description - Dataset description
+ * @param {string} opts.dataset.bestDataFormatForSharing - Dataset best data format for sharing
+ * @param {string} opts.dataset.mostSuitableRepositories - Dataset most suitable repositories
+ * @param {string} opts.dataset.DOI - Dataset DOI
+ * @param {string} opts.dataset.name - Dataset name
+ * @param {string} opts.dataset.comments - Dataset comments
+ * @param {string} opts.dataset.text - Dataset text of sentence
+ * @returns {object} opts - JSON containing all data
  */
 Self.createDataset = function (opts = {}) {
   return {

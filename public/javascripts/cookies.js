@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 (function ($) {
   window.cookieconsent.initialise({
     'palette': {

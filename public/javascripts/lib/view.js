@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 const View = {
   icons: {
     delete: function () {

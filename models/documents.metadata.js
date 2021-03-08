@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 const mongoose = require('mongoose');
 
 let Author = new mongoose.Schema({ name: String, affiliations: [String] }, { _id: false });

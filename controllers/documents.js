@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 const Documents = require('../models/documents.js'),
   Accounts = require('../models/accounts.js'),
   Organisations = require('../models/organisations.js'),
@@ -26,10 +28,10 @@ let Self = {};
 
 /**
  * Add watcher if necessary
- * @param {String} token Given JWT
- * @param {String} privateKey Private key of JWT
- * @param {Object} opts JWT opts (see https://www.npmjs.com/package/jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback)
- * @param {Function} cb Callback function(err, res) (err: error process OR null, res: decoded JWT OR undefined)
+ * @param {string} token - Given JWT
+ * @param {string} privateKey - Private key of JWT
+ * @param {object} opts - JWT opts (see https://www.npmjs.com/package/jsonwebtoken#jwtverifytoken-secretorpublickey-options-callback)
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: decoded JWT OR undefined)
  * @returns {undefined} undefined
  */
 Self.watch = function (req, res, next) {
@@ -52,9 +54,9 @@ Self.watch = function (req, res, next) {
 
 /**
  * Authenticate account with JWT (documentToken)
- * @param {Object} req req
- * @param {Object} res res
- * @param {Function} next
+ * @param {object} req - req express variable
+ * @param {object} res - res express variable
+ * @param {function} next - next express variable
  * @returns {undefined} undefined
  */
 Self.authenticate = function (req, res, next) {
@@ -83,26 +85,25 @@ Self.authenticate = function (req, res, next) {
 
 /**
  * Check params & build params for Self.upload() function
- * @param {Object} params Options available
- * @param {Object} params.files JSON Object of files in req.files (available keys: "file" OR "attached_files")
- * @param {String} params.files[key].name
- * @param {Buffer} params.files[key].data
- * @param {Number} params.files[key].size
- * @param {String} params.files[key].encoding
- * @param {String} params.files[key].tempFilePath
- * @param {String} params.files[key].mimetype
- * @param {String} params.files[key].md5
- * @param {Boolean} params.already_assessed Already assessed
- * @param {Boolean} params.isDataseer Is DataSeer
- * @param {String} params.journal Journal of document owner
- * @param {String} params.email Email of owner
- * @param {String} params.fullname fullname of owner
- * @param {String} params.uploaded_by Id of uploader
- * @param {String} params.dataseerML process dataseer-ml
- * @param {Object} events Events
- * @param {Function} events.onCreatedAccount Function called if new Account is created
- * @param {Function} events.onCreatedJournal Function called if new Journal is created
- * @returns {Object} Options for Self.upload() function or new Error(msg)
+ * @param {object} params - Options available
+ * @param {object} params.files - JSON Object of files in req.files (available keys: "file" OR "attached_files")
+ * @param {string} params.files[key].name - File name
+ * @param {buffer} params.files[key].data - File data
+ * @param {number} params.files[key].size - File size
+ * @param {string} params.files[key].encoding - File encoding
+ * @param {string} params.files[key].mimetype - File mimetype
+ * @param {string} params.files[key].md5 - File md5
+ * @param {boolean} params.already_assessed - Already assessed
+ * @param {boolean} params.isDataseer - Is DataSeer
+ * @param {string} params.journal - Journal of document owner
+ * @param {string} params.email - Email of owner
+ * @param {string} params.fullname - Fullname of owner
+ * @param {string} params.uploaded_by - Id of uploader
+ * @param {string} params.dataseerML - Process dataseer-ml
+ * @param {object} events - Events
+ * @param {function} events.onCreatedAccount - Function called if new Account is created
+ * @param {function} events.onCreatedJournal - Function called if new Journal is created
+ * @returns {object} Options for Self.upload() function or new Error(msg)
  */
 Self.getUploadParams = function (params = {}, user) {
   // If file is not set
@@ -153,29 +154,28 @@ Self.getUploadParams = function (params = {}, user) {
 
 /**
  * Write file on FileSystem and store attached data in MongoDB
- * @param {Object} opts Options available
- * @param {Object} opts.dataTypes DataTypes JSON (stored in app.get('dataTypes'))
- * @param {Object} opts.file File representation
- * @param {String} opts.file.name
- * @param {Buffer} opts.file.data
- * @param {Number} opts.file.size
- * @param {String} opts.file.encoding
- * @param {String} opts.file.tempFilePath
- * @param {String} opts.file.mimetype
- * @param {String} opts.file.md5
- * @param {Array} opts.attachedFiles Array of attached files (same structure as opts.file)
- * @param {Boolean} opts.already_assessed Already assessed
- * @param {Boolean} opts.isDataseer Is DataSeer
- * @param {String} opts.journal Journal of document owner
- * @param {String} opts.email Email of owner
- * @param {String} opts.fullname fullname of owner
- * @param {String} opts.uploaded_by Id of uploader
- * @param {String} opts.dataseerML process dataseer-ml
- * @param {String} opts.privateKey PrivateKey to create JWT token (stored in app.get('private.key'))
- * @param {Object} events Events
- * @param {Function} events.onCreatedAccount Function called if new Account is created
- * @param {Function} events.onCreatedJournal Function called if new Journal is created
- * @param {Function} cb Callback function(err, res) (err: error process OR null, res: Document instance OR undefined)
+ * @param {object} opts - Options available
+ * @param {object} opts.dataTypes - DataTypes JSON (stored in app.get('dataTypes'))
+ * @param {object} opts.file - File representation
+ * @param {string} opts.file.name - File name
+ * @param {buffer} opts.file.data - File data
+ * @param {number} opts.file.size - File size
+ * @param {string} opts.file.encoding - File encoding
+ * @param {string} opts.file.mimetype - File mimetype
+ * @param {string} opts.file.md5 - File md5
+ * @param {Array} opts.attachedFiles - Array of attached files (same structure as opts.file)
+ * @param {boolean} opts.already_assessed - Already assessed
+ * @param {boolean} opts.isDataseer - Is DataSeer
+ * @param {string} opts.journal - Journal of document owner
+ * @param {string} opts.email - Email of owner
+ * @param {string} opts.fullname - Fullname of owner
+ * @param {string} opts.uploaded_by - Id of uploader
+ * @param {string} opts.dataseerML - Process dataseer-ml
+ * @param {string} opts.privateKey - PrivateKey to create JWT token (stored in app.get('private.key'))
+ * @param {object} events - Events
+ * @param {function} events.onCreatedAccount - Function called if new Account is created
+ * @param {function} events.onCreatedJournal - Function called if new Journal is created
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: Document instance OR undefined)
  * @returns {undefined} undefined
  */
 Self.upload = function (opts = {}, events, cb) {
@@ -396,10 +396,10 @@ Self.upload = function (opts = {}, events, cb) {
 
 /**
  * Extract metadata of PDF file (stored in TEI file) of given document and update it
- * @param {Object} doc Options available
- * @param {mongoose.Schema.Types.ObjectId} doc.pdf pdf file id
- * @param {mongoose.Schema.Types.ObjectId} doc.tei tei file id
- * @param {Function} cb Callback function(err) (err: error process OR null)
+ * @param {object} doc - Options available
+ * @param {mongoose.Schema.Types.ObjectId} doc.pdf - PDF file id
+ * @param {mongoose.Schema.Types.ObjectId} doc.tei - TEI file id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.extractPDFMetadata = function (doc, cb) {
@@ -423,9 +423,9 @@ Self.extractPDFMetadata = function (doc, cb) {
 
 /**
  * Extract metadata stored TEI file of given document and create MongoDB item
- * @param {Object} doc Options available
- * @param {mongoose.Schema.Types.ObjectId} doc.tei tei file id
- * @param {Function} cb Callback function(err) (err: error process OR null)
+ * @param {object} doc - Options available
+ * @param {mongoose.Schema.Types.ObjectId} doc.tei - TEI file id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.extractMetadata = function (doc, cb) {
@@ -451,11 +451,11 @@ Self.extractMetadata = function (doc, cb) {
 
 /**
  * Update metadata stored TEI file of given document and create MongoDB item
- * @param {Object} doc Options available
- * @param {mongoose.Schema.Types.ObjectId} doc.tei tei file id
- * @param {Object} user Options available
- * @param {mongoose.Schema.Types.ObjectId} user._id User
- * @param {Function} cb Callback function(err) (err: error process OR null)
+ * @param {object} doc - Options available
+ * @param {mongoose.Schema.Types.ObjectId} doc.tei - TEI file id
+ * @param {object} user - Options available
+ * @param {mongoose.Schema.Types.ObjectId} user._id - User id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.updateMetadata = function (doc, user, cb) {
@@ -492,10 +492,10 @@ Self.updateMetadata = function (doc, user, cb) {
 
 /**
  * Extract datasets stored TEI file of given document and create MongoDB item
- * @param {Object} doc Options available
- * @param {mongoose.Schema.Types.ObjectId} doc.tei tei file id
- * @param {Object} dataTypes DataTypes JSON (stored in app.get('dataTypes'))
- * @param {Function} cb Callback function(err) (err: error process OR null)
+ * @param {object} doc - Options available
+ * @param {mongoose.Schema.Types.ObjectId} doc.tei - TEI file id
+ * @param {object} dataTypes - DataTypes JSON (stored in app.get('dataTypes'))
+ * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.extractDatasets = function (doc, dataTypes, cb) {
@@ -528,14 +528,14 @@ Self.extractDatasets = function (doc, dataTypes, cb) {
 
 /**
  * Add dataset in TEI file
- * @param {Object} opts JSON object containing all data
- * @param {String} opts.documentId
- * @param {Object} opts.dataset
- * @param {String} opts.dataset.sentenceId
- * @param {String} opts.dataset.id
- * @param {String} opts.dataset.type
- * @param {String} opts.dataset.cert
- * @param {Function} cb Callback function(err) (err: error process OR null)
+ * @param {object} opts - JSON object containing all data
+ * @param {string} opts.documentId - Document id
+ * @param {object} opts.dataset - JSON object containing all dataset infos
+ * @param {string} opts.dataset.sentenceId - Dataset sentenceId
+ * @param {string} opts.dataset.id - Dataset id
+ * @param {string} opts.dataset.type - Dataset type
+ * @param {string} opts.dataset.cert - Dataset cert
+ * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.addDatasetInTEI = function (opts = {}, cb) {
@@ -557,11 +557,11 @@ Self.addDatasetInTEI = function (opts = {}, cb) {
 
 /**
  * Delete dataset in TEI file
- * @param {Object} opts JSON object containing all data
- * @param {String} opts.documentId
- * @param {Object} opts.dataset
- * @param {String} opts.dataset.sentenceId
- * @param {Function} cb Callback function(err) (err: error process OR null)
+ * @param {object} opts JSON object containing all data
+ * @param {string} opts.documentId - Document id
+ * @param {object} opts.dataset - JSON object containing all dataset infos
+ * @param {string} opts.dataset.sentenceId - Dataset sentenceId
+ * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.deleteDatasetInTEI = function (opts = {}, cb) {
@@ -583,12 +583,12 @@ Self.deleteDatasetInTEI = function (opts = {}, cb) {
 
 /**
  * Add corresp in TEI file
- * @param {Object} opts JSON object containing all data
- * @param {String} opts.documentId
- * @param {Object} opts.dataset
- * @param {String} opts.dataset.sentenceId
- * @param {String} opts.dataset.id
- * @param {Function} cb Callback function(err) (err: error process OR null)
+ * @param {object} opts JSON object containing all data
+ * @param {string} opts.documentId - Document id
+ * @param {object} opts.dataset - JSON object containing all dataset infos
+ * @param {string} opts.dataset.sentenceId - Dataset sentenceId
+ * @param {string} opts.dataset.id - Dataset id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.addCorrespInTEI = function (opts = {}, cb) {
@@ -610,12 +610,12 @@ Self.addCorrespInTEI = function (opts = {}, cb) {
 
 /**
  * Delete corresp in TEI file
- * @param {Object} opts JSON object containing all data
- * @param {String} opts.documentId
- * @param {Object} opts.dataset
- * @param {String} opts.dataset.sentenceId
- * @param {String} opts.dataset.id
- * @param {Function} cb Callback function(err) (err: error process OR null)
+ * @param {object} opts JSON object containing all data
+ * @param {string} opts.documentId - Document id
+ * @param {object} opts.dataset - JSON object containing all dataset infos
+ * @param {string} opts.dataset.sentenceId - Dataset sentenceId
+ * @param {string} opts.dataset.id - Dataset id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.deleteCorrespInTEI = function (opts = {}, cb) {

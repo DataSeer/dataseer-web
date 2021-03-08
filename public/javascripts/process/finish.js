@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 (function ($) {
   // On reopen_document click
   $('#reopen_document').click(function () {

@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 const path = require('path'),
   express = require('express'),
   router = express.Router(),

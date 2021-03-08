@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 const Accounts = require('../models/accounts.js'),
   Roles = require('../models/roles.js'),
   Organisations = require('../models/organisations.js');
@@ -17,9 +19,9 @@ Self.RegExp = {
 
 /**
  * Authenticate account with JWT (token)
- * @param {Object} req req
- * @param {Object} res res
- * @param {Function} next
+ * @param {object} req - req express variable
+ * @param {object} res - res express variable
+ * @param {function} next - next express variable
  * @returns {undefined} undefined
  */
 Self.authenticate = function (req, res, next) {
@@ -41,12 +43,12 @@ Self.authenticate = function (req, res, next) {
 
 /**
  * Sign up an account
- * @param {Object} opts Options available
- * @param {String} opts.organisation Organisation name
- * @param {String} opts.username Email account
- * @param {Buffer} opts.password Password account
- * @param {String} opts.fullname Fullname account
- * @param {Function} cb Callback function(err, res) (err: error process OR null, res: Account instance OR undefined)
+ * @param {object} opts - Options available
+ * @param {string} opts.organisation - Organisation name
+ * @param {string} opts.username - Email account
+ * @param {buffer} opts.password - Password account
+ * @param {string} opts.fullname - Fullname account
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: Account instance OR undefined)
  * @returns {undefined} undefined
  */
 Self.signup = function (opts = {}, cb) {
@@ -70,11 +72,11 @@ Self.signup = function (opts = {}, cb) {
 
 /**
  * Reset password of an account
- * @param {Object} opts Options available
- * @param {String} opts.username Email account
- * @param {String} opts.token Token account
- * @param {Buffer} opts.password Password account
- * @param {Function} cb Callback function(err, res) (err: error process OR null, res: Account instance OR undefined)
+ * @param {object} opts - Options available
+ * @param {string} opts.username - Email account
+ * @param {string} opts.token - Token account
+ * @param {buffer} opts.password - Password account
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: Account instance OR undefined)
  * @returns {undefined} undefined
  */
 Self.resetPassword = function (opts = {}, cb) {

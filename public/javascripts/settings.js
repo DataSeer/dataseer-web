@@ -1,6 +1,9 @@
 /*
  * @prettier
  */
+
+'use strict';
+
 (function () {
   document.getElementById('copyApiToken').addEventListener('click', function () {
     /* Get the text field */

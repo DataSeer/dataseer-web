@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 (function ($) {
   // Get current document Id
   const documentId = $(document.getElementById('document.id')).attr('value');

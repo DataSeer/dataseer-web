@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 const express = require('express'),
   router = express.Router(),
   AccountsManager = require('../../lib/accounts.js'),

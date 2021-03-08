@@ -2,13 +2,15 @@
  * @prettier
  */
 
+'use strict';
+
 // API Interface Object
 const DataSeerAPI = {};
 
 /**
  * Build params URL
- * @param {Object} params JSON object containing all data
- * @returns {String} Params URL
+ * @param {object} params - JSON object containing all data
+ * @returns {string} Params URL
  */
 DataSeerAPI.buildParams = function (params) {
   let keys = Object.keys(params);
@@ -24,7 +26,7 @@ DataSeerAPI.buildParams = function (params) {
 
 /**
  * Build URL (add token if necessary)
- * @returns {String} Retrun token or empty string
+ * @returns {string} Retrun token or empty string
  */
 DataSeerAPI.buildURL = function (url, params = {}) {
   let currentURL = new URL(window.location.href),
@@ -37,8 +39,8 @@ DataSeerAPI.buildURL = function (url, params = {}) {
 
 /**
  * Get root URL of DataSeer Web app
- * @param {String} documentId Id of document
- * @returns {String} Retrun root URL of DataSeer Web app
+ * @param {string} documentId Id of document
+ * @returns {string} Retrun root URL of DataSeer Web app
  */
 DataSeerAPI.rootURL = function () {
   return jQuery(document.getElementById('rootURL')).attr('value');
@@ -46,10 +48,10 @@ DataSeerAPI.rootURL = function () {
 
 /**
  * Delete a given dataset
- * @param {Object} opts JSON object containing all data
- * @param {String} opts.datasetsId Id of dataset
- * @param {String} opts.sentenceId Id of sentence
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {object} opts JSON object containing all data
+ * @param {string} opts.datasetsId Id of dataset
+ * @param {string} opts.sentenceId Id of sentence
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.deleteDataset = function (opts = {}, done) {
@@ -73,22 +75,22 @@ DataSeerAPI.deleteDataset = function (opts = {}, done) {
 
 /**
  * Create new dataset to datasets
- * @param {Object} opts JSON object containing all data
- * @param {String} opts.datasetsId Id of document datasets
- * @param {Object} opts.dataset Dataset options
- * @param {String} opts.dataset.status Dataset status
- * @param {String} opts.dataset.id Dataset id
- * @param {String} opts.dataset.cert Dataset cert
- * @param {String} opts.dataset.dataType Dataset dataType
- * @param {String} opts.dataset.subType Dataset subType
- * @param {String} opts.dataset.description Dataset description
- * @param {String} opts.dataset.bestDataFormatForSharing Dataset bestDataFormatForSharing
- * @param {String} opts.dataset.mostSuitableRepositories Dataset mostSuitableRepositories
- * @param {String} opts.dataset.name Dataset name
- * @param {String} opts.dataset.DOI Dataset DOI
- * @param {String} opts.dataset.comments Dataset comments
- * @param {String} opts.dataset.status Dataset comments
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {object} opts JSON object containing all data
+ * @param {string} opts.datasetsId Id of document datasets
+ * @param {object} opts.dataset Dataset options
+ * @param {string} opts.dataset.status Dataset status
+ * @param {string} opts.dataset.id Dataset id
+ * @param {string} opts.dataset.cert Dataset cert
+ * @param {string} opts.dataset.dataType Dataset dataType
+ * @param {string} opts.dataset.subType Dataset subType
+ * @param {string} opts.dataset.description Dataset description
+ * @param {string} opts.dataset.bestDataFormatForSharing Dataset bestDataFormatForSharing
+ * @param {string} opts.dataset.mostSuitableRepositories Dataset mostSuitableRepositories
+ * @param {string} opts.dataset.name Dataset name
+ * @param {string} opts.dataset.DOI Dataset DOI
+ * @param {string} opts.dataset.comments Dataset comments
+ * @param {string} opts.dataset.status Dataset comments
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.createDataset = function (opts = {}, done) {
@@ -112,11 +114,11 @@ DataSeerAPI.createDataset = function (opts = {}, done) {
 
 /**
  * Delete a given corresp
- * @param {Object} opts JSON object containing all data
- * @param {String} opts.datasetsId Id of datasets
- * @param {String} opts.datasetId Id of dataset
- * @param {String} opts.sentenceId Id of sentence
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {object} opts JSON object containing all data
+ * @param {string} opts.datasetsId Id of datasets
+ * @param {string} opts.datasetId Id of dataset
+ * @param {string} opts.sentenceId Id of sentence
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.deleteCorresp = function (opts = {}, done) {
@@ -140,11 +142,11 @@ DataSeerAPI.deleteCorresp = function (opts = {}, done) {
 
 /**
  * Create new corresp to datasets
- * @param {Object} opts JSON object containing all data
- * @param {String} opts.datasetsId Id of datasets
- * @param {String} opts.datasetId Id of dataset
- * @param {String} opts.sentenceId Id of sentence
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {object} opts JSON object containing all data
+ * @param {string} opts.datasetsId Id of datasets
+ * @param {string} opts.datasetId Id of dataset
+ * @param {string} opts.sentenceId Id of sentence
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.createCorresp = function (opts = {}, done) {
@@ -168,22 +170,22 @@ DataSeerAPI.createCorresp = function (opts = {}, done) {
 
 /**
  * Save a given dataset
- * @param {Object} opts JSON object containing all data
- * @param {String} opts.datasetsId Id of document datasets
- * @param {Object} opts.dataset Dataset options
- * @param {String} opts.dataset.status Dataset status
- * @param {String} opts.dataset.id Dataset id
- * @param {String} opts.dataset.cert Dataset cert
- * @param {String} opts.dataset.dataType Dataset dataType
- * @param {String} opts.dataset.subType Dataset subType
- * @param {String} opts.dataset.description Dataset description
- * @param {String} opts.dataset.bestDataFormatForSharing Dataset bestDataFormatForSharing
- * @param {String} opts.dataset.mostSuitableRepositories Dataset mostSuitableRepositories
- * @param {String} opts.dataset.name Dataset name
- * @param {String} opts.dataset.DOI Dataset DOI
- * @param {String} opts.dataset.comments Dataset comments
- * @param {String} opts.dataset.status Dataset comments
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {object} opts JSON object containing all data
+ * @param {string} opts.datasetsId Id of document datasets
+ * @param {object} opts.dataset Dataset options
+ * @param {string} opts.dataset.status Dataset status
+ * @param {string} opts.dataset.id Dataset id
+ * @param {string} opts.dataset.cert Dataset cert
+ * @param {string} opts.dataset.dataType Dataset dataType
+ * @param {string} opts.dataset.subType Dataset subType
+ * @param {string} opts.dataset.description Dataset description
+ * @param {string} opts.dataset.bestDataFormatForSharing Dataset bestDataFormatForSharing
+ * @param {string} opts.dataset.mostSuitableRepositories Dataset mostSuitableRepositories
+ * @param {string} opts.dataset.name Dataset name
+ * @param {string} opts.dataset.DOI Dataset DOI
+ * @param {string} opts.dataset.comments Dataset comments
+ * @param {string} opts.dataset.status Dataset comments
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.updateDataset = function (opts = {}, done) {
@@ -207,8 +209,8 @@ DataSeerAPI.updateDataset = function (opts = {}, done) {
 
 /**
  * Reopen document (back to "Metadata" process)
- * @param {String} documentId Id of document
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {string} documentId Id of document
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.reopenDocument = function (documentId, done) {
@@ -232,8 +234,8 @@ DataSeerAPI.reopenDocument = function (documentId, done) {
 
 /**
  * Back to "Metadata" process from "datasets" step
- * @param {String} documentId Id of document
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {string} documentId Id of document
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.backToMetadata = function (documentId, done) {
@@ -257,8 +259,8 @@ DataSeerAPI.backToMetadata = function (documentId, done) {
 
 /**
  * Validate "Metadata" process
- * @param {String} documentId Id of document
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {string} documentId Id of document
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.validateMetadata = function (documentId, done) {
@@ -282,8 +284,8 @@ DataSeerAPI.validateMetadata = function (documentId, done) {
 
 /**
  * Check if "Datasets" process can be validated
- * @param {String} datasetsId Id of datasets
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {string} datasetsId Id of datasets
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.checkDatasetsValidation = function (datasetsId, done) {
@@ -307,8 +309,8 @@ DataSeerAPI.checkDatasetsValidation = function (datasetsId, done) {
 
 /**
  * Validate "Datasets" process
- * @param {String} documentId Id of document
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {string} documentId Id of document
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.validateDatasets = function (documentId, done) {
@@ -332,11 +334,11 @@ DataSeerAPI.validateDatasets = function (documentId, done) {
 
 /**
  * Get document by id
- * @param {String} documentId Id of document
- * @param {Object} opts JSON object containing all data
- * @param {Boolean} options.datasets Populate datasets if true, else not
- * @param {Boolean} options.metadata Populate metadata if true, else not
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {string} documentId Id of document
+ * @param {object} opts JSON object containing all data
+ * @param {boolean} options.datasets Populate datasets if true, else not
+ * @param {boolean} options.metadata Populate metadata if true, else not
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.getDocument = function (documentId, opts = {}, done) {
@@ -347,8 +349,8 @@ DataSeerAPI.getDocument = function (documentId, opts = {}, done) {
 
 /**
  * Get file by id
- * @param {String} fileId Id of file
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {string} fileId Id of file
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.getPDF = function (fileId, done) {
@@ -359,8 +361,8 @@ DataSeerAPI.getPDF = function (fileId, done) {
 
 /**
  * Get file by id
- * @param {String} fileId Id of file
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {string} fileId Id of file
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.getTEI = function (fileId, done) {
@@ -371,11 +373,11 @@ DataSeerAPI.getTEI = function (fileId, done) {
 
 /**
  * Get document by id
- * @param {String} documentId Id of document
- * @param {Object} opts JSON object containing all data
- * @param {Boolean} options.datasets Populate datasets if true, else not
- * @param {Boolean} options.metadata Populate metadata if true, else not
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {string} documentId Id of document
+ * @param {object} opts JSON object containing all data
+ * @param {boolean} options.datasets Populate datasets if true, else not
+ * @param {boolean} options.metadata Populate metadata if true, else not
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.resyncJsonDataTypes = function (done) {
@@ -396,8 +398,8 @@ DataSeerAPI.resyncJsonDataTypes = function (done) {
 
 /**
  * Extract DataTypes from data (result of DataSeerAPI.jsonDataTypes())
- * @param {Object} data JSON object containing all data
- * @returns {Object} JSON object containing all DataTypes
+ * @param {object} data JSON object containing all data
+ * @returns {object} JSON object containing all DataTypes
  */
 DataSeerAPI.extractDatatypeFrom = function (data) {
   let classifications =
@@ -429,8 +431,8 @@ DataSeerAPI.extractDatatypeFrom = function (data) {
 
 /**
  * Get datatype of given sentence
- * @param {Object} sentence Sentence HTML element
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {object} sentence Sentence HTML element
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.getdataType = function (sentence, done) {
@@ -451,7 +453,7 @@ DataSeerAPI.getdataType = function (sentence, done) {
 
 /**
  * Get jsonDataTypes
- * @param {Function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
 DataSeerAPI.jsonDataTypes = function (done) {

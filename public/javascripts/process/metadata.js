@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 (function ($) {
   // On metadata_validation click
   $('#metadata_validation').click(function () {

@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 const DatasetsList = function (data, events) {
   let datasets = {};
 
