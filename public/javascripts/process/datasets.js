@@ -447,8 +447,8 @@
                 }
               }
             }),
-            keys = currentDocument.datasets.current ? Object.keys(currentDocument.datasets.current) : undefined;
-          defaultKey = keys ? keys[0] : undefined;
+            keys = currentDocument.datasets.current ? Object.keys(currentDocument.datasets.current) : undefined,
+            defaultKey = keys ? keys[0] : undefined;
 
           documentView.init('#document-view', currentDocument, function () {
             hideLoop();
