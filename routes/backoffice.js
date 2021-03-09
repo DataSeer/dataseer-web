@@ -26,9 +26,12 @@ router.get('/accounts', function (req, res, next) {
   // If user is not logged in OR is not at least a curator
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  let limit = parseInt(req.query.limit);
+  let limit = parseInt(req.query.limit),
+    role = req.query.role,
+    query = {};
   if (isNaN(limit)) limit = 20;
-  return Accounts.find({})
+  if (role) query.role = role;
+  return Accounts.find(query)
     .limit(limit)
     .exec(function (err, accounts) {
       // If MongoDB error has occured
