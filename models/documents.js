@@ -19,11 +19,11 @@ let Schema = new mongoose.Schema(
     isDataSeer: { type: Boolean, default: false }, // specify if it's a dataseer document
     updated_at: { type: Date, default: Date.now }, // date of last update
     uploaded_at: { type: Date, default: Date.now }, // date of upload
-    uploaded_by: { type: mongoose.Schema.Types.ObjectId, ref: 'Account' }, // refers to documents.datasets collection item
+    uploaded_by: { type: mongoose.Schema.Types.ObjectId, ref: 'Accounts' }, // refers to documents.datasets collection item
     upload_journal: { type: mongoose.Schema.Types.ObjectId, ref: 'Organisations' }, // Which journal will be sent to
     already_assessed: { type: Boolean, default: false }, // This is a new version of an article DataSeer has already assessed
-    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'Account' }, // refers to documents.datasets collection item
-    watchers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Account' }], // refers to documents.accounts collection item
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'Accounts' }, // refers to documents.datasets collection item
+    watchers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Accounts' }], // refers to documents.accounts collection item
     token: { type: String, default: '' } // refers to documents.datasets collection item
   },
   { minimize: false }
