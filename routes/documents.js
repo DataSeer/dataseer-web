@@ -29,8 +29,8 @@ router.get('/', function (req, res, next) {
     doi = req.query.doi,
     pmid = req.query.pmid,
     query = {};
-  if (typeof doi !== 'undefined') query['doi'] = doi;
-  if (typeof pmid !== 'undefined') query['pmid'] = pmid;
+  if (typeof doi !== 'undefined') query['metadata.doi'] = doi;
+  if (typeof pmid !== 'undefined') query['metadata.pmid'] = pmid;
   if (isNaN(limit)) limit = 20;
   if (AccountsManager.checkAccessRight(req.user, AccountsManager.roles.annotator, AccountsManager.match.role))
     query['organisation'] = req.user.organisation; // if this is an annotator, then restrict access to his organisation only
@@ -39,6 +39,7 @@ router.get('/', function (req, res, next) {
     .select('+logs')
     .populate('organisation')
     .populate('metadata')
+    .populate('owner')
     .populate('tei')
     .populate('pdf')
     .populate('logs')

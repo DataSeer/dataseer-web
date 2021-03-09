@@ -19,11 +19,11 @@ block content
             div(class='col-12 text-center')
               form#custom-search(role='form', action=root + 'documents',method='get')
                 div pmid: 
-                  input(type='text' name='pmid' placeholder='pmid')
+                  input.form-control(style='display: inline-block; width: auto;' type='text' name='pmid' placeholder='pmid')
                 div doi: 
-                  input(type='text' name='doi' placeholder='doi')
+                  input.form-control(style='display: inline-block; width: auto;' type='text' name='doi' placeholder='doi')
                 div limit: 
-                  input(type='text' name='limit' placeholder='Maximum number of results')
+                  input.form-control(style='display: inline-block; width: auto;' type='text' name='limit' placeholder='Maximum number of results')
                 div
                   button.btn.btn-primary.waves-effect.waves-light(type='submit') Search for documents
           div(class='row')
@@ -48,9 +48,10 @@ block content
                     div(class='col-1') Date uploaded
                     div(class='col-1') Status
                     div(class='col-2') Modified By
+                    div(class='col-2') Owner
                     div(class='col-1') Organisation
-                    div(class='col-2') Journal
-                    div(class='col-3') Title
+                    div(class='col-1') Journal
+                    div(class='col-2') Title
                     div(class='col-1') Actions
                   else
                     div(class='col-1') Url
@@ -88,6 +89,7 @@ block content
                             ul.modifiers
                               each log, i in document.logs
                                 li.item #{log.action} (#{log.user.username})
+                          div(class='col-2' style='text-overflow: ellipsis; overflow: hidden;') #{document.owner.username}
                           div(class='col-1')
                             select.custom-select(name='organisation')
                               each organisation, index in organisations
@@ -95,8 +97,8 @@ block content
                                   option(selected value=organisation._id) #{organisation.name}
                                 else
                                   option(value=organisation._id) #{organisation.name}
-                          div(class='col-2') #{document.metadata.journal}
-                          div(class='col-3') #{document.metadata.article_title}
+                          div(class='col-1') #{document.metadata.journal}
+                          div(class='col-2') #{document.metadata.article_title}
                           div(class='col-1')
                             button.btn.btn-primary.waves-effect.waves-light(type='submit' name='update') Update
                         else
