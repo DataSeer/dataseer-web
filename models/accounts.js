@@ -9,7 +9,7 @@ const mongoose = require('mongoose'),
 
 const Schema = new mongoose.Schema(
   {
-    fullname: { type: String, default: '', required: true },
+    fullname: { type: String, default: '' },
     role: { type: mongoose.Schema.Types.ObjectId, ref: 'Roles', required: true }, // refers to roles collection item
     organisation: { type: mongoose.Schema.Types.ObjectId, ref: 'Organisations', required: true }, // refers to organisations collection item
     tokens: { api: { type: String, default: '' }, resetPassword: { type: String, default: '' } } // tokens of user

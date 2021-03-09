@@ -147,7 +147,7 @@ router.post('/accounts', function (req, res, next) {
               // If Mailer error has occured
               if (err) {
                 console.log(err);
-                next(err);
+                return next(err);
               }
               // If process succeed
               req.flash('success', 'Token of User ' + user.username + ' have been successfully updated');

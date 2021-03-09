@@ -171,11 +171,11 @@ Self.upload = function (opts, cb) {
       metadata: !opts.metadata ? {} : opts.metadata
     },
     function (err, file) {
-      if (err) cb(err);
+      if (err) return cb(err);
       return fs.mkdir(Self.getDirectory(opts.documentId.toString()), { recursive: true }, (err) => {
-        if (err) cb(err);
+        if (err) return cb(err);
         return fs.writeFile(file.path, data, 'binary', function (err, res) {
-          if (err) cb(err);
+          if (err) return cb(err);
           return cb(null, file);
         });
       });
