@@ -20,13 +20,12 @@ block content
             div(class='col-12 text-center')
               form#custom-search(role='form', action=root + route,method='get')
                 div role: 
-                  select(name='role')
-                    option(value='all') All
-                    option(value='standard_user') Standard User
-                    option(value='annotator') Annotator
-                    option(value='curator') Curator
+                  select.custom-select(style='width: auto' name='role')
+                    option(value='') All
+                    each role in roles
+                      option(value=role._id) #{role.label}
                 div limit: 
-                  input(type='text' name='limit' placeholder='Maximum number of results')
+                  input.form-control(style='display: inline-block; width: auto;' type='text' name='limit' placeholder='Maximum number of results')
                 div
                   button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Search for accounts
           div(class='row')
