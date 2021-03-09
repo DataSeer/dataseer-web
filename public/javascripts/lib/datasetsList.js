@@ -106,7 +106,7 @@ const DatasetsList = function (data, events) {
   elements.datasetsList.append(elements.datasetsListItemsContainer.append(elements.empty));
   elements.container.append(elements.datasetsList);
   elements.container.append(elements.newDataset);
-  theButton = new View.buttons.add('Add new Dataset');
+  let theButton = new View.buttons.add('Add new Dataset');
   theButton.attr('style', 'white-space: normal;');
   elements.newDataset.append(theButton);
 
