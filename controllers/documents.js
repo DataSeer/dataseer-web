@@ -413,7 +413,7 @@ Self.extractPDFMetadata = function (doc, cb) {
           // Add metadata in file
           file.metadata = { sentences: XML.extractPDFSentencesMetadata(XML.load(data.toString())) };
           return file.save(function (err) {
-            if (err) cb(err);
+            if (err) return cb(err);
             else return cb(null);
           });
         });
@@ -432,7 +432,7 @@ Self.extractMetadata = function (doc, cb) {
   if (doc.tei)
     // Read TEI file (containing PDF metadata)
     return DocumentsFilesController.readFile(doc.tei, function (err, data) {
-      if (err) cb(err);
+      if (err) return cb(err);
       else {
         // Add metadata in MongoDB
         let metadata = XML.extractMetadata(XML.load(data.toString()));
@@ -440,7 +440,7 @@ Self.extractMetadata = function (doc, cb) {
         return DocumentsMetadata.create(metadata, function (err, metadata) {
           doc.metadata = metadata._id; // Link it to the metadata
           return doc.save(function (err) {
-            if (err) cb(err);
+            if (err) return cb(err);
             else return cb(null);
           });
         });
@@ -462,13 +462,13 @@ Self.updateMetadata = function (doc, user, cb) {
   if (doc.tei)
     // Read TEI file (containing PDF metadata)
     return DocumentsFilesController.readFile(doc.tei, function (err, data) {
-      if (err) cb(err);
+      if (err) return cb(err);
       else {
         // Get metadata
         let metadata = XML.extractMetadata(XML.load(data.toString()));
         // Update them
         return DocumentsMetadata.findOneAndUpdate({ _id: doc.metadata }, metadata).exec(function (err, metadata) {
-          if (err) cb(err);
+          if (err) return cb(err);
           // Create logs
           return DocumentsLogs.create(
             {
@@ -502,10 +502,10 @@ Self.extractDatasets = function (doc, dataTypes, cb) {
   if (doc.tei)
     // Read TEI file (containing PDF metadata)
     return DocumentsFilesController.readFile(doc.tei, function (err, data) {
-      if (err) cb(err);
+      if (err) return cb(err);
       else
         return DocumentsFiles.findById(doc.pdf).exec(function (err, file) {
-          if (err) cb(err);
+          if (err) return cb(err);
           // Add metadata in MongoDB
           let datasets = XML.extractDatasets(XML.load(data.toString()), dataTypes),
             item = {
@@ -517,7 +517,7 @@ Self.extractDatasets = function (doc, dataTypes, cb) {
           return DocumentsDatasets.create(item, function (err, datasets) {
             doc.datasets = datasets._id; // Link it to the datasets
             return doc.save(function (err) {
-              if (err) cb(err);
+              if (err) return cb(err);
               else return cb(null);
             });
           });
@@ -543,12 +543,12 @@ Self.addDatasetInTEI = function (opts = {}, cb) {
     if (err) return cb(err);
     else
       return DocumentsFilesController.readFile(doc.tei, function (err, data) {
-        if (err) cb(err);
+        if (err) return cb(err);
         let newXml = XML.addDataset(XML.load(data.toString()), opts.dataset);
         if (!newXml) return cb(new Error('Add dataset failed'));
         else
           return DocumentsFilesController.rewriteFile(doc.tei, newXml, function (err) {
-            if (err) cb(err);
+            if (err) return cb(err);
             else return cb(null);
           });
       });
@@ -569,12 +569,12 @@ Self.deleteDatasetInTEI = function (opts = {}, cb) {
     if (err) return cb(err);
     else
       return DocumentsFilesController.readFile(doc.tei, function (err, data) {
-        if (err) cb(err);
+        if (err) return cb(err);
         let newXml = XML.deleteDataset(XML.load(data.toString()), opts.dataset);
         if (!newXml) return cb(new Error('Delete dataset failed'));
         else
           return DocumentsFilesController.rewriteFile(doc.tei, newXml, function (err) {
-            if (err) cb(err);
+            if (err) return cb(err);
             else return cb(null);
           });
       });
@@ -596,12 +596,12 @@ Self.addCorrespInTEI = function (opts = {}, cb) {
     if (err) return cb(err);
     else
       return DocumentsFilesController.readFile(doc.tei, function (err, data) {
-        if (err) cb(err);
+        if (err) return cb(err);
         let newXml = XML.addCorresp(XML.load(data.toString()), opts.dataset);
         if (!newXml) return cb(new Error('Add corresp failed'));
         else
           return DocumentsFilesController.rewriteFile(doc.tei, newXml, function (err) {
-            if (err) cb(err);
+            if (err) return cb(err);
             else return cb(null);
           });
       });
@@ -623,12 +623,12 @@ Self.deleteCorrespInTEI = function (opts = {}, cb) {
     if (err) return cb(err);
     else
       return DocumentsFilesController.readFile(doc.tei, function (err, data) {
-        if (err) cb(err);
+        if (err) return cb(err);
         let newXml = XML.deleteCorresp(XML.load(data.toString()), opts.dataset);
         if (!newXml) return cb(new Error('Delete corresp failed'));
         else
           return DocumentsFilesController.rewriteFile(doc.tei, newXml, function (err) {
-            if (err) cb(err);
+            if (err) return cb(err);
             else return cb(null);
           });
       });
