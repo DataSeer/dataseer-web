@@ -21,9 +21,9 @@ block content
           div(class='row head-list' style='margin-right:10px; margin-left:10px;')
             div(class='col-2') Url
             div(class='col-2') Date uploaded
-            div(class='col-3') Status
+            div(class='col-2') Status
             div(class='col-2') Journal
-            div(class='col-3') Title
+            div(class='col-4') Title
           if documents.length === 0
             div(class='row')
               div(class='col-12 text-center')
@@ -44,13 +44,13 @@ block content
                       a.document-link(href=root + 'documents/' + document._id) #{formatUrl(document._id)}
                   div(class='col-2') #{formatDate(document.uploaded_at)}
                   if document.status === 'metadata'
-                    div(class='col-3') Metadata validation
+                    div(class='col-2') Metadata validation
                   else if document.status === 'datasets'
-                    div(class='col-3') Datasets validation
+                    div(class='col-2') Datasets validation
                   else if document.status === 'finish'
-                    div(class='col-3') Process finished
+                    div(class='col-2') Process finished
                   div(class='col-2') #{document.metadata.journal}
-                  div(class='col-3') #{document.metadata.article_title}
+                  div(class='col-4') #{document.metadata.article_title}
 
           div(class='row')
             div(class='col-12' style='margin-top:20px;')
