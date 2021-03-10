@@ -44,9 +44,9 @@ The project provides:
   - [Run](#run)
   - [Dependencies](#dependencies)
   - [Configuration](#configuration)
-    - [Web Application configuration](#web-application)
-    - [SMTP configuration](#smtp)
-    - [JWT Configuration](#json-web-token)
+    - [Web Application configuration](#web-application-configuration)
+    - [SMTP configuration](#smtp-configuration)
+    - [JWT Configuration](#jwt-configuration)
   - [Models documentation](doc/MODELS.md#models-documentation)
     - [Accounts](doc/MODELS.md#accounts)
     - [Organisations](doc/MODELS.md#organisations)
@@ -91,7 +91,7 @@ Application requires an instance of mongoDB running on port `27017`, with an `ap
 
 ## Configuration
 
-### Web Application
+### Web Application Configuration
 
 *[Table of contents](#documentations)*
 
@@ -135,7 +135,7 @@ Web app [default configuration file](/conf/conf.default.json). You must create f
 }
 ```
 
-### SMTP
+### SMTP Configuration
 
 *[Table of contents](#documentations)*
 
@@ -155,10 +155,10 @@ SMTP [default configuration file](/conf/smtp.conf.default.json). You must create
 }
 ```
 
-### Json Web Token
+### JWT Configuration
 
 *[Table of contents](#documentations)*
 
 Application requires a private key to create JSON Web Token.
 
-You must create file conf/private.key and fill it with a string.
+You must create file `conf/private.key` and fill it with a random string.
