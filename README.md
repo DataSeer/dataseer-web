@@ -60,12 +60,12 @@ The project provides:
     - [Responses Status Codes](doc/WEBAPP.md#response-status-codes)
     - [Credentials](doc/WEBAPP.md#credentials)
     - [Results](doc/WEBAPP.md#results)
-    - [Routes](doc/WEBAPP.md#routes)
+    - [Available Routes](doc/WEBAPP.md#available-routes)
   - [API documentation](doc/API.md#api-documentation)
     - [Responses Status Codes](doc/API.md#response-status-codes)
     - [Credentials](doc/API.md#credentials)
     - [Results](doc/API.md#results)
-    - [Routes](doc/API.md#routes)
+    - [Available Routes](doc/API.md#available-routes)
 
 ## Install
 

@@ -2,11 +2,10 @@
 
 *[Main Documentation](../README.md#documentations)*
 
-  - [API documentation](doc/API.md)
-  - [Responses Status Codes](doc/API.md#response-status-codes)
-  - [Credentials](doc/API.md#credentials)
-  - [Results](doc/API.md#results)
-  - [Routes](doc/API.md#routes)
+  - [Responses Status Codes](#response-status-codes)
+  - [Credentials](#credentials)
+  - [Results](#results)
+  - [Available Routes](#available-routes)
     - [Documents](#documents)
     - [Documents Files](#documents-files)
     - [Documents Datasets](#documents-datasets)
@@ -102,7 +101,7 @@ In case of success, API will return this kind of object:
 }
 ```
  
- ## Routes
+## Available Routes
 
 *[Table of contents](#api-documentation)*
 
@@ -152,7 +151,7 @@ All these routes return a JSON object:
 ### (GET) /api/documents
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -263,7 +262,7 @@ curl "http://localhost:3000/api/documents/?pdf=true&tei=true&files=true&metadata
 ### (POST) /api/documents
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -392,7 +391,7 @@ curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.
 ### (GET) /api/documents/:id
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -594,7 +593,7 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1?pdf=true&tei=
 ### (GET) /api/documents/:id/pdf
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -630,7 +629,7 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/pdf?token=MY_
 ### (GET) /api/documents/:id/pdf/content
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -664,7 +663,7 @@ Binary file
 ### (GET) /api/documents/:id/tei
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -700,7 +699,7 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/tei?token=MY_
 ### (GET) /api/documents/:id/tei/content
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -734,7 +733,7 @@ Binary file
 ### (GET) /api/documents/:id/metadata
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -770,7 +769,7 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/metadata?toke
 ### (POST) /api/documents/:id/metadata/validate
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -806,7 +805,7 @@ curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/met
 ### (GET) /api/documents/:id/datasets
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -842,7 +841,7 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets?toke
 ### (POST) /api/documents/:id/datasets/validate
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -878,7 +877,7 @@ curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/dat
 ### (POST) /api/documents/:id/datasets/backToMetadata
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -914,7 +913,7 @@ curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/dat
 ### (POST) /api/documents/:id/finish/reopen
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -950,7 +949,7 @@ curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/fin
 ### (GET) /api/documents/:id/files
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -986,7 +985,7 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/files?token=M
 ### (GET) /api/files/:id
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1022,7 +1021,7 @@ curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files?token=MY_TO
 ### (GET) /api/files/:id/buffer
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1055,7 +1054,7 @@ Buffer
 ### (GET) /api/files/:id/string
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1088,7 +1087,7 @@ UTF-8 String
 ### (PUT) /api/datasets/:id
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1161,7 +1160,7 @@ curl -X "PUT" -F "extracted=[{...}]" "http://localhost:3000/api/datasets/60479f9
 ### (POST) /api/datasets/:id/checkValidation
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1197,7 +1196,7 @@ curl -X "POST" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/chec
 ### (POST) /api/datasets/:id/dataset
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1254,7 +1253,7 @@ curl -X "POST" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e
 ### (PUT) /api/datasets/:id/dataset
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1311,7 +1310,7 @@ curl -X "PUT" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e9
 ### (DELETE) /api/datasets/:id/dataset
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1368,7 +1367,7 @@ curl -X "DELETE" -F "dataset={"id":"deleted-dataset-id"}" "http://localhost:3000
 ### (POST) /api/datasets/:id/corresp
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1425,7 +1424,7 @@ curl -X "POST" -F "corresp={"id":"deleted-dataset-id","sentenceId":"1"}" "http:/
 ### (DELETE) /api/datasets/:id/corresp
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1482,7 +1481,7 @@ curl -X "DELETE" -F "corresp={"id":"deleted-dataset-id","sentenceId":"1"}" "http
 ### (POST) /api/dataseer-ml/processDataseerSentence
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1538,7 +1537,7 @@ curl -X "POST" -F "text=my sentence" "http://localhost:3000/api/dataseer-ml/proc
 
 ### (GET) /api/dataseer-ml/jsonDataTypes
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 
@@ -1574,7 +1573,7 @@ curl "http://localhost:3000/api/dataseer-ml/jsonDataTypes?token=MY_TOKEN"
 ### (GET) /api/dataseer-ml/resyncJsonDataTypes
 
 
-*[Documentation](#routes-1)*
+*[Available Routes](#available-routes)*
 
 #### Description
 

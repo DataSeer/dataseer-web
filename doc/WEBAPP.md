@@ -5,7 +5,7 @@
   - [Responses Status Codes](#response-status-codes)
   - [Credentials](#credentials)
   - [Results](#results)
-  - [Routes](#routes)
+  - [Available Routes](#available-routes)
     - [/signup](#signup)
     - [/signin](#signin)
     - [/signout](#signout)
@@ -94,7 +94,7 @@ All these routes return a graphical interface (HTML format):
 
 ### /signup
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
@@ -110,7 +110,7 @@ Use it to sign up to dataseer-web service.
 
 ### /signin
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
@@ -126,7 +126,7 @@ Use it to sign in to dataseer-web service.
 
 ### /signout
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
@@ -140,7 +140,7 @@ Use it to sign out to dataseer-web service.
 
 ### /settings
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
@@ -156,7 +156,7 @@ Use it to reset your password (when you are logged in) or get your account infos
 
 ### /forgotPassword
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
@@ -174,7 +174,7 @@ Use it to get your password reset email when you are logged out.
 
 ### /resetPassword
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
@@ -192,7 +192,7 @@ Use it to reset your password when you are logged out.
 
 ### /myDocuments
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
@@ -208,7 +208,7 @@ Use it to get your documents.
 
 ### /documents/:id
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
@@ -226,7 +226,7 @@ There is 3 steps while processing document:
 
 ##### metadata: metadata validation.
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 **santard_user**
 
@@ -248,7 +248,7 @@ As curator or annotator, you can also reload metadata (useful after dataseer-ml 
 
 ##### datasets: data entry of datasets.
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 On "datasets" step, PDF (or XML) is displayed in the GUI to enter the data relating to each datasets.
 
@@ -286,7 +286,7 @@ Same as **santard_user** (but you will be not considered as logged in).
 
 ##### finish: report of data entered.
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
 
@@ -298,7 +298,7 @@ On "finish" step, summary of current state of document is shown. You can "Reopen
 
 ### /upload
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
@@ -322,7 +322,7 @@ Note: **santard_user** or **annotator** will be redirected to uploaded document 
 
 ### /documents
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
@@ -340,7 +340,7 @@ Note: **annotator** can only see documents of his organization, **curator** see 
 
 ### /accounts
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
@@ -358,7 +358,7 @@ Use "New Token" button to send email (containing the token) to the user.
 
 ### /organizations
 
-*[Documentation](#routes)*
+*[Available Routes](#available-routes)*
 
 #### Role required
 
