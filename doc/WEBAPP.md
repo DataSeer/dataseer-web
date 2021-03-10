@@ -71,7 +71,7 @@ Your current role do not grant access to this part of website
 
 Web Application will return HTML Format response with HTTP 200.
 
-## Routes
+## Available Routes
 
 *[Table of contents](#web-application-documentation)*
 
