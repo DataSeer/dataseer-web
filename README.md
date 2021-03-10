@@ -14,9 +14,11 @@ Supported article formats are PDF, docx, TEI, JATS/NLM, ScholarOne, and a large 
 
 ## Implementation
 
-MongoDB stores every documents.
+MongoDB is used to store every data of documents.
 
-Express is used as web framework.
+FileSystem is used to store every files.
+
+Express is used to create the http server.
 
 ## Contact and License
 
@@ -26,178 +28,63 @@ The development of dataseer-ml is supported by a [Sloan Foundation](https://sloa
 
 dataseer-Web is distributed under [Apache2 license](https://www.apache.org/licenses/LICENSE-2.0).
 
+---
+
+## Description
+
+The project provides: 
+
+  - a web application to process documents stored in MongoDB database: `localhost:3000/`
+  - a back office for uploading manually documents to be processed: `localhost:3000/backoffice/`
+  - a REST api to load and modify documents data (CRUD): `localhost:3000/api`
+
+## Documentations
+
+  - [Install](#install)
+  - [Run](#run)
+  - [Dependencies](#dependencies)
+  - [Configuration](#configuration)
+    - [Web Application configuration](#web-application)
+    - [SMTP configuration](#smtp)
+    - [JWT Configuration](#json-web-token)
+  - [Web Application documentation](#web-application_1)
+    - [Responses Status Codes](#response-status-codes)
+    - [Credentials](#credentials)
+    - [Results](#results)
+    - [Routes](#routes)
+  - [API documentation](#api)
+    - [Responses Status Codes](#response-status-codes_1)
+    - [Credentials](#credentials_1)
+    - [Results](#results_1)
+    - [Routes](#routes_1)
+
 ## Install
+
+*[Table of contents](#documentations)*
+
+Run this command to install dataseer-web app.
 
 ``npm i``
 
 ## Run
 
+*[Table of contents](#documentations)*
+
+Run this command to start dataseer-web app.
+
 ``npm start``
 
 ## Dependencies
 
+*[Table of contents](#documentations)*
+
 Application requires an instance of mongoDB running on port `27017`, with an `app` database (`conf/conf.json` to set complete URL).
-
-## Structure of data (Models)
-
-Data in this app are structured like below:
-
-Note: all models have additionnal parmaters: `_id` and `__v`.
-
-### Accounts
-
-Structure of data:
-
-```js
-{
-  // "username": { "type": String, "default": "" }  <- this property is handled by passport package
-  // "hash": { "type": String, "default": "" }  <- this property is handled by passport package
-  // "salt": { "type": String, "default": "" }  <- this property is handled by passport package
-  "fullname": { "type": String, "default": "" },
-  "role": { "type": mongoose.Schema.Types.ObjectId, "ref": "Roles", "required": true }, // refers to roles collection item
-  "organisation": { "type": mongoose.Schema.Types.ObjectId, "ref": "Organisations", "required": true }, // refers to organisations collection item
-  "tokens": { "api": { "type": String, "default": "" }, "resetPassword": { "type": String, "default": "" } } // tokens of user
-}
-```
-
-### Organisations
-
-Structure of data:
-
-```js
-{
-  "name": { "type": String, "default": "None", "index": true } // name of organisation
-}
-```
-
-### Roles
-
-Structure of data:
-
-```js
-{
-  "label": { "type": String, "default": "", "index": true }, // label of role
-  "weight": { "type": Number, "default": 0 } // weight of role
-}
-```
-
-### Documents
-
-Structure of data:
-
-```js
-{
-  "logs": [{ "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsLogs", "select": false }], // refers to documents.logs collection items
-  "pdf": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsFiles" }, // refers to documents.files collection item (pdf)
-  "tei": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsFiles" }, // refers to documents.files collection item (tei)
-  "files": [{ "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsFiles" }], // refers to documents.files collection items (all kind of files)
-  "metadata": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsMetadata" }, // refers to documents.metadata collection item
-  "organisation": { "type": mongoose.Schema.Types.ObjectId, "ref": "Organisations" }, // refers to organisations collection item
-  "datasets": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsDatasets" }, // refers to documents.datasets collection item
-  "status": { "type": String, "default": "" }, // status of given document
-  "isDataSeer": { "type": Boolean, "default": false }, // specify if it"s a dataseer document
-  "updated_at": { "type": Date, "default": Date.now }, // date of last update
-  "uploaded_at": { "type": Date, "default": Date.now }, // date of upload
-  "uploaded_by": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }, // refers to documents.datasets collection item
-  "upload_journal": { "type": mongoose.Schema.Types.ObjectId, "ref": "Organisations" }, // Which journal will be sent to
-  "already_assessed": { "type": Boolean, "default": false }, // This is a new version of an article DataSeer has already assessed
-  "owner": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }, // refers to documents.datasets collection item
-  "watchers": [{ "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }], // refers to documents.accounts collection item
-  "token": { "type": String, "default": "" } // refers to documents.datasets collection item
-}
-```
-
-#### Documents Metadata
-
-Structure of data:
-
-```js
-// Authors
-{ name: String, affiliations: [String] }, { _id: false }
-
-// Metadata
-{
-  "document": { "type": mongoose.Schema.Types.ObjectId, ref: "Documents" }, // refers to documents collection (id of a given document)
-  "article_title": { "type": String, "default": "" }, // articleTitle
-  "journal": { "type": String, "default": "" }, // journal
-  "publisher": { "type": String, "default": "" }, // publisher
-  "date_published": { "type": String, "default": "" }, // date_published
-  "manuscript_id": { "type": String, "default": "" }, // manuscriptId
-  "submitting_author": { "type": String, "default": "" }, // submittingAuthor
-  "submitting_author_email": { "type": String, "default": "" }, // submittingAuthorEmail
-  "authors": [Author], // authors. Array(Object) => {"name": String, "affiliations": Array(String) }
-  "doi": { "type": String, "default": "" }, // doi
-  "pmid": { "type": String, "default": "" } // pmid
-}
-```
-
-#### Documents Datasets
-
-Structure of data:
-
-```js
-// Dataset
-{
-  "id": { "type": String, "default": "" }, // id
-  "sentenceId": { "type": String, "default": "" }, // sentence id
-  "cert": { "type": String, "default": "" }, // cert value (between 0 and 1)
-  "dataType": { "type": String, "default": "" }, // dataType
-  "subType": { "type": String, "default": "" }, //  subType
-  "description": { "type": String, "default": "" }, // description
-  "bestDataFormatForSharing": { "type": String, "default": "" }, // best data format for sharing
-  "mostSuitableRepositories": { "type": String, "default": "" }, // most suitable repositories
-  "DOI": { "type": String, "default": "" }, // DOI
-  "name": { "type": String, "default": "" }, // name
-  "comments": { "type": String, "default": "" }, // comments
-  "text": { "type": String, "default": "" }, // text of sentence
-  "status": { "type": String, "default": "saved" } // text of sentence
-}
-
-// Datasets
-{
-  "document": { "type": mongoose.Schema.Types.ObjectId, "ref": "Documents" }, // refers to documents collection (id of a given document)
-  "deleted": [Dataset], // deleted datasets (Array of datasets)
-  "extracted": [Dataset], // extracted datasets (Array of datasets)
-  "current": [Dataset] // current datasets (Array of datasets)
-}
-```
-
-#### Documents Files
-
-Structure of data:
-
-```js
-{
-  "document": { "type": mongoose.Schema.Types.ObjectId, "ref": "Documents" }, // refers to documents collection (id of a given document)
-  "updated_at": { "type": Date, "default": Date.now }, // date of last update
-  "uploaded_at": { "type": Date, "default": Date.now }, // date of upload
-  "uploaded_by": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }, // refers to documents.datasets collection item
-  "metadata": { "type": Object, "default": {} }, // metadata of file (could be whatever you want, you have to handle it by yourself). Usefull for PDF processed by dataseer-ml
-  "filename": { "type": String, "default": "" }, // filename of file
-  "path": { "type": String, "default": "", select: false }, // path of file
-  "encoding": { "type": String, "default": "" }, // encoding of file
-  "md5": { "type": String, "default": "" }, // md5 of file
-  "mimetype": { "type": String, "default": "" }, // mimetype of file
-  "size": { "type": Number, "default": 0 } // size of file
-}
-```
-
-#### Documents Logs
-
-Structure of data:
-
-```js
-{
-  "document": { "type": mongoose.Schema.Types.ObjectId, "ref": "Documents", "required": true }, // refers to documents collection (id of a given document)
-  "user": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts", "required": true }, // refers to accounts collection
-  "action": { "type": String, "required": true }, // description of modification that has been made to the document
-  "date": { "type": Date, "default": Date.now } // date of creation
-}
-```
 
 ## Configuration
 
-### Web App
+### Web Application
+
+*[Table of contents](#documentations)*
 
 Web app [default configuration file](/conf/conf.default.json). You must create file conf/conf.json and fill it with data like below:
 
@@ -241,6 +128,8 @@ Web app [default configuration file](/conf/conf.default.json). You must create f
 
 ### SMTP
 
+*[Table of contents](#documentations)*
+
 Application requires a SMTP server to send some emails (resest password, API token, automatique account creation)
 
 SMTP [default configuration file](/conf/smtp.conf.default.json). You must create file conf/smtp.conf.json and fill it with data like below:
@@ -257,36 +146,194 @@ SMTP [default configuration file](/conf/smtp.conf.default.json). You must create
 }
 ```
 
-### JWT & private key
+### Json Web Token
+
+*[Table of contents](#documentations)*
 
 Application requires a private key to create JSON Web Token.
 
 You must create file conf/private.key and fill it with a string.
 
-## Description
+## Structure of data (Models)
 
-The project provides: 
+*[Table of contents](#documentations)*
 
-  - a web application to process documents stored in MongoDB database: `localhost:3000/`
-  - a back office for uploading manually documents to be processed: `localhost:3000/backoffice/`
-  - a REST api to load and modify documents data (CRUD): `localhost:3000/api`
+Data in this app are structured like below:
 
-##Documentations
+Note: all models have additionnal parmaters: `_id` and `__v`.
 
-  - [Web Application documentation](#web-application)
-    - [Responses Status Codes](#response-status-codes)
-    - [Credentials](#credentials)
-    - [Results](#results)
-    - [Routes](#routes)
-  - [API documentation](#api)
-    - [Responses Status Codes](#response-status-codes_1)
-    - [Credentials](#credentials_1)
-    - [Results](#results_1)
-    - [Routes](#routes_1)
+### Accounts
+
+*[Table of contents](#documentations)*
+
+Structure of data:
+
+```js
+{
+  // "username": { "type": String, "default": "" }  <- this property is handled by passport package
+  // "hash": { "type": String, "default": "" }  <- this property is handled by passport package
+  // "salt": { "type": String, "default": "" }  <- this property is handled by passport package
+  "fullname": { "type": String, "default": "" },
+  "role": { "type": mongoose.Schema.Types.ObjectId, "ref": "Roles", "required": true }, // refers to roles collection item
+  "organisation": { "type": mongoose.Schema.Types.ObjectId, "ref": "Organisations", "required": true }, // refers to organisations collection item
+  "tokens": { "api": { "type": String, "default": "" }, "resetPassword": { "type": String, "default": "" } } // tokens of user
+}
+```
+
+### Organisations
+
+*[Table of contents](#documentations)*
+
+Structure of data:
+
+```js
+{
+  "name": { "type": String, "default": "None", "index": true } // name of organisation
+}
+```
+
+### Roles
+
+*[Table of contents](#documentations)*
+
+Structure of data:
+
+```js
+{
+  "label": { "type": String, "default": "", "index": true }, // label of role
+  "weight": { "type": Number, "default": 0 } // weight of role
+}
+```
+
+### Documents
+
+*[Table of contents](#documentations)*
+
+Structure of data:
+
+```js
+{
+  "logs": [{ "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsLogs", "select": false }], // refers to documents.logs collection items
+  "pdf": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsFiles" }, // refers to documents.files collection item (pdf)
+  "tei": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsFiles" }, // refers to documents.files collection item (tei)
+  "files": [{ "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsFiles" }], // refers to documents.files collection items (all kind of files)
+  "metadata": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsMetadata" }, // refers to documents.metadata collection item
+  "organisation": { "type": mongoose.Schema.Types.ObjectId, "ref": "Organisations" }, // refers to organisations collection item
+  "datasets": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsDatasets" }, // refers to documents.datasets collection item
+  "status": { "type": String, "default": "" }, // status of given document
+  "isDataSeer": { "type": Boolean, "default": false }, // specify if it"s a dataseer document
+  "updated_at": { "type": Date, "default": Date.now }, // date of last update
+  "uploaded_at": { "type": Date, "default": Date.now }, // date of upload
+  "uploaded_by": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }, // refers to documents.datasets collection item
+  "upload_journal": { "type": mongoose.Schema.Types.ObjectId, "ref": "Organisations" }, // Which journal will be sent to
+  "already_assessed": { "type": Boolean, "default": false }, // This is a new version of an article DataSeer has already assessed
+  "owner": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }, // refers to documents.datasets collection item
+  "watchers": [{ "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }], // refers to documents.accounts collection item
+  "token": { "type": String, "default": "" } // refers to documents.datasets collection item
+}
+```
+
+#### Documents Metadata
+
+*[Table of contents](#documentations)*
+
+Structure of data:
+
+```js
+// Authors
+{ name: String, affiliations: [String] }, { _id: false }
+
+// Metadata
+{
+  "document": { "type": mongoose.Schema.Types.ObjectId, ref: "Documents" }, // refers to documents collection (id of a given document)
+  "article_title": { "type": String, "default": "" }, // articleTitle
+  "journal": { "type": String, "default": "" }, // journal
+  "publisher": { "type": String, "default": "" }, // publisher
+  "date_published": { "type": String, "default": "" }, // date_published
+  "manuscript_id": { "type": String, "default": "" }, // manuscriptId
+  "submitting_author": { "type": String, "default": "" }, // submittingAuthor
+  "submitting_author_email": { "type": String, "default": "" }, // submittingAuthorEmail
+  "authors": [Author], // authors. Array(Object) => {"name": String, "affiliations": Array(String) }
+  "doi": { "type": String, "default": "" }, // doi
+  "pmid": { "type": String, "default": "" } // pmid
+}
+```
+
+#### Documents Datasets
+
+*[Table of contents](#documentations)*
+
+Structure of data:
+
+```js
+// Dataset
+{
+  "id": { "type": String, "default": "" }, // id
+  "sentenceId": { "type": String, "default": "" }, // sentence id
+  "cert": { "type": String, "default": "" }, // cert value (between 0 and 1)
+  "dataType": { "type": String, "default": "" }, // dataType
+  "subType": { "type": String, "default": "" }, //  subType
+  "description": { "type": String, "default": "" }, // description
+  "bestDataFormatForSharing": { "type": String, "default": "" }, // best data format for sharing
+  "mostSuitableRepositories": { "type": String, "default": "" }, // most suitable repositories
+  "DOI": { "type": String, "default": "" }, // DOI
+  "name": { "type": String, "default": "" }, // name
+  "comments": { "type": String, "default": "" }, // comments
+  "text": { "type": String, "default": "" }, // text of sentence
+  "status": { "type": String, "default": "saved" } // text of sentence
+}
+
+// Datasets
+{
+  "document": { "type": mongoose.Schema.Types.ObjectId, "ref": "Documents" }, // refers to documents collection (id of a given document)
+  "deleted": [Dataset], // deleted datasets (Array of datasets)
+  "extracted": [Dataset], // extracted datasets (Array of datasets)
+  "current": [Dataset] // current datasets (Array of datasets)
+}
+```
+
+#### Documents Files
+
+*[Table of contents](#documentations)*
+
+Structure of data:
+
+```js
+{
+  "document": { "type": mongoose.Schema.Types.ObjectId, "ref": "Documents" }, // refers to documents collection (id of a given document)
+  "updated_at": { "type": Date, "default": Date.now }, // date of last update
+  "uploaded_at": { "type": Date, "default": Date.now }, // date of upload
+  "uploaded_by": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }, // refers to documents.datasets collection item
+  "metadata": { "type": Object, "default": {} }, // metadata of file (could be whatever you want, you have to handle it by yourself). Usefull for PDF processed by dataseer-ml
+  "filename": { "type": String, "default": "" }, // filename of file
+  "path": { "type": String, "default": "", select: false }, // path of file
+  "encoding": { "type": String, "default": "" }, // encoding of file
+  "md5": { "type": String, "default": "" }, // md5 of file
+  "mimetype": { "type": String, "default": "" }, // mimetype of file
+  "size": { "type": Number, "default": 0 } // size of file
+}
+```
+
+#### Documents Logs
+
+*[Table of contents](#documentations)*
+
+Structure of data:
+
+```js
+{
+  "document": { "type": mongoose.Schema.Types.ObjectId, "ref": "Documents", "required": true }, // refers to documents collection (id of a given document)
+  "user": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts", "required": true }, // refers to accounts collection
+  "action": { "type": String, "required": true }, // description of modification that has been made to the document
+  "date": { "type": Date, "default": Date.now } // date of creation
+}
+```
   
 ## Web Application
 
 ### Response status codes:
+
+*[Table of contents](#documentations)*
 
 <table>
   <thead>
@@ -317,6 +364,8 @@ The project provides:
 
 ### Credentials
 
+*[Table of contents](#documentations)*
+
 You must be logged (email & password) in to access most of the following routes.
 
 Sign in (/signin) or Sign up (/signup) before using dataseer-web app.
@@ -330,9 +379,13 @@ Your current role do not grant access to this part of website
 
 ### Results
 
+*[Table of contents](#documentations)*
+
 Web Application will return HTML Format response with HTTP 200.
 
 ### Routes
+
+*[Table of contents](#documentations)*
 
 All these routes return a graphical interface (HTML format):
 
@@ -353,6 +406,8 @@ All these routes return a graphical interface (HTML format):
 
 #### /signup
 
+*[Documentation](#routes)*
+
 ##### Role required
 
 This route is public.
@@ -366,6 +421,8 @@ Use it to sign up to dataseer-web service.
 ---
 
 #### /signin
+
+*[Documentation](#routes)*
 
 ##### Role required
 
@@ -381,6 +438,8 @@ Use it to sign in to dataseer-web service.
 
 #### /signout
 
+*[Documentation](#routes)*
+
 ##### Role required
 
 Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
@@ -392,6 +451,8 @@ Use it to sign out to dataseer-web service.
 ---
 
 #### /settings
+
+*[Documentation](#routes)*
 
 ##### Role required
 
@@ -406,6 +467,8 @@ Use it to reset your password (when you are logged in) or get your account infos
 ---
 
 #### /forgotPassword
+
+*[Documentation](#routes)*
 
 ##### Role required
 
@@ -423,6 +486,8 @@ Use it to get your password reset email when you are logged out.
 
 #### /resetPassword
 
+*[Documentation](#routes)*
+
 ##### Role required
 
 Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
@@ -439,6 +504,8 @@ Use it to reset your password when you are logged out.
 
 #### /myDocuments
 
+*[Documentation](#routes)*
+
 ##### Role required
 
 Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
@@ -452,6 +519,8 @@ Use it to get your documents.
 ---
 
 #### /documents/:id
+
+*[Documentation](#routes)*
 
 ##### Role required
 
@@ -468,6 +537,8 @@ There is 3 steps while processing document:
 ---
 
 ###### metadata: metadata validation.
+
+*[Documentation](#routes)*
 
 **santard_user**
 
@@ -488,6 +559,8 @@ As curator or annotator, you can also reload metadata (useful after dataseer-ml 
 ---
 
 ###### datasets: data entry of datasets.
+
+*[Documentation](#routes)*
 
 On "datasets" step, PDF (or XML) is displayed in the GUI to enter the data relating to each datasets.
 
@@ -525,6 +598,8 @@ Same as **santard_user** (but you will be not considered as logged in).
 
 ###### finish: report of data entered.
 
+*[Documentation](#routes)*
+
 Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
 
 On "finish" step, summary of current state of document is shown. You can "Reopen document" to go back to "metadata" step and restart the process.
@@ -534,6 +609,8 @@ On "finish" step, summary of current state of document is shown. You can "Reopen
 ---
 
 #### /upload
+
+*[Documentation](#routes)*
 
 ##### Role required
 
@@ -557,6 +634,8 @@ Note: **santard_user** or **annotator** will be redirected to uploaded document 
 
 #### /documents
 
+*[Documentation](#routes)*
+
 ##### Role required
 
 Accessible to users with the following role : **annotator**, **curator**.
@@ -572,6 +651,8 @@ Note: **annotator** can only see documents of his organization, **curator** see 
 ---
 
 #### /accounts
+
+*[Documentation](#routes)*
 
 ##### Role required
 
@@ -589,6 +670,8 @@ Use "New Token" button to send email (containing the token) to the user.
 
 #### /organizations
 
+*[Documentation](#routes)*
+
 ##### Role required
 
 Accessible to users with the following role : **curator**.
@@ -604,6 +687,8 @@ Use it to manage all organizations.
 ## API
 
 ### Response status codes:
+
+*[Table of contents](#documentations)*
 
 <table>
   <thead>
@@ -634,6 +719,8 @@ Use it to manage all organizations.
 
 ### Credentials
 
+*[Table of contents](#documentations)*
+
 You must use your API token to access all of the following routes.
 
 Set your token into HTTP headers (Authorization: Bearer my).
@@ -657,9 +744,13 @@ $ curl "http://localhost:3000/documents/5ffa06e61c157616a5c6bae7" -H "Authorizat
 
 ### Results
 
+*[Table of contents](#documentations)*
+
 API will return JSON object response with HTTP 200.
 
 #### Success
+
+*[Table of contents](#documentations)*
 
 In case of success, API will return this kind of object:
 
@@ -686,6 +777,8 @@ In case of success, API will return this kind of object:
 ```
  
 ### Routes
+
+*[Table of contents](#documentations)*
 
 All these routes return a JSON object:
 
@@ -731,6 +824,9 @@ All these routes return a JSON object:
 ---
 
 #### (GET) /api/documents
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -839,6 +935,9 @@ curl "http://localhost:3000/api/documents/?pdf=true&tei=true&files=true&metadata
 ---
 
 #### (POST) /api/documents
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -965,6 +1064,9 @@ curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.
 ---
 
 #### (GET) /api/documents/:id
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -1165,6 +1267,9 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1?pdf=true&tei=
 
 #### (GET) /api/documents/:id/pdf
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 This route return the pdf (JSON format) of given documents.
@@ -1198,6 +1303,9 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/pdf?token=MY_
 
 #### (GET) /api/documents/:id/pdf/content
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 This route return the pdf (binary file) of given documents.
@@ -1228,6 +1336,9 @@ Binary file
 ---
 
 #### (GET) /api/documents/:id/tei
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -1262,6 +1373,9 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/tei?token=MY_
 
 #### (GET) /api/documents/:id/tei/content
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 This route return the tei (binary file) of given documents.
@@ -1292,6 +1406,9 @@ Binary file
 ---
 
 #### (GET) /api/documents/:id/metadata
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -1326,6 +1443,9 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/metadata?toke
 
 #### (POST) /api/documents/:id/metadata/validate
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 This route validate the "metadata" step of the given documents.
@@ -1358,6 +1478,9 @@ curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/met
 ---
 
 #### (GET) /api/documents/:id/datasets
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -1392,6 +1515,9 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets?toke
 
 #### (POST) /api/documents/:id/datasets/validate
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 This route validate the "datasets" step of the given documents.
@@ -1424,6 +1550,9 @@ curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/dat
 ---
 
 #### (POST) /api/documents/:id/datasets/backToMetadata
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -1458,6 +1587,9 @@ curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/dat
 
 #### (POST) /api/documents/:id/finish/reopen
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 This route return the given document to the "metadata" step.
@@ -1490,6 +1622,9 @@ curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/fin
 ---
 
 #### (GET) /api/documents/:id/files
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -1524,6 +1659,9 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/files?token=M
 
 #### (GET) /api/files/:id
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 This route return a given file (JSON formated).
@@ -1557,6 +1695,9 @@ curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files?token=MY_TO
 
 #### (GET) /api/files/:id/buffer
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 This route return a given file (Buffer formated).
@@ -1587,6 +1728,9 @@ Buffer
 
 #### (GET) /api/files/:id/string
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 This route return a given file (String formated).
@@ -1616,6 +1760,9 @@ UTF-8 String
 ---
 
 #### (PUT) /api/datasets/:id
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -1687,6 +1834,9 @@ curl -X "PUT" -F "extracted=[{...}]" "http://localhost:3000/api/datasets/60479f9
 
 #### (POST) /api/datasets/:id/checkValidation
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 Check validation of all current datasets.
@@ -1719,6 +1869,9 @@ curl -X "POST" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/chec
 ---
 
 #### (POST) /api/datasets/:id/dataset
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -1774,6 +1927,9 @@ curl -X "POST" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e
 
 #### (PUT) /api/datasets/:id/dataset
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 Update given dataset of datasets with given id.
@@ -1827,6 +1983,9 @@ curl -X "PUT" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e9
 ---
 
 #### (DELETE) /api/datasets/:id/dataset
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -1882,6 +2041,9 @@ curl -X "DELETE" -F "dataset={"id":"deleted-dataset-id"}" "http://localhost:3000
 
 #### (POST) /api/datasets/:id/corresp
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 Add new corresp to datasets with given id.
@@ -1935,6 +2097,9 @@ curl -X "POST" -F "corresp={"id":"deleted-dataset-id","sentenceId":"1"}" "http:/
 ---
 
 #### (DELETE) /api/datasets/:id/corresp
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
@@ -1990,6 +2155,9 @@ curl -X "DELETE" -F "corresp={"id":"deleted-dataset-id","sentenceId":"1"}" "http
 
 #### (POST) /api/dataseer-ml/processDataseerSentence
 
+
+*[Documentation](#routes_1)*
+
 ##### Description
 
 Process sentence (send data to dataseer-ml service).
@@ -2044,6 +2212,8 @@ curl -X "POST" -F "text=my sentence" "http://localhost:3000/api/dataseer-ml/proc
 
 #### (GET) /api/dataseer-ml/jsonDataTypes
 
+*[Documentation](#routes_1)*
+
 ##### Description
 
 This route return dataTypes used by the app (JSON formatted).
@@ -2076,6 +2246,9 @@ curl "http://localhost:3000/api/dataseer-ml/jsonDataTypes?token=MY_TOKEN"
 ---
 
 #### (GET) /api/dataseer-ml/resyncJsonDataTypes
+
+
+*[Documentation](#routes_1)*
 
 ##### Description
 
