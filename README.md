@@ -155,7 +155,7 @@ SMTP [default configuration file](/conf/smtp.conf.default.json). You must create
 }
 ```
 
-### JWT Configuration
+### JWT Configuration
 
 *[Table of contents](#documentations)*
 
