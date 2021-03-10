@@ -280,13 +280,14 @@ const DocumentView = function (events) {
     },
     // scroll ot dataset position
     scrollTo: function (id, isCorresp = false) {
-      let element = isCorresp ? corresps.get(id) : datasets.get(id),
-        position =
-          self.hasPdf && $('#pdf').is(':visible')
-            ? self.pdfViewer.scrollToSentence(element.attr('sentenceid')) +
-              elements.container.parent().parent().scrollTop() -
-              14
-            : element.position().top + elements.container.parent().parent().parent().scrollTop() - 14;
+      let element = isCorresp ? corresps.get(id) : datasets.get(id);
+      console.log(id, element.attr('sentenceid'));
+      let position =
+        self.hasPdf && $('#pdf').is(':visible')
+          ? self.pdfViewer.scrollToSentence(element.attr('sentenceid')) +
+            elements.container.parent().parent().scrollTop() -
+            14
+          : element.position().top + elements.container.parent().parent().parent().scrollTop() - 14;
       return elements.container.parent().parent().parent().animate({ scrollTop: position });
     },
     // set All elements visible
@@ -367,11 +368,11 @@ const DocumentView = function (events) {
   let datasets = {
     // get element of given dataset
     get: function (id) {
-      return elements.container.find('tei div[subtype="dataseer"] s[id="' + id + '"]');
+      return elements.container.find('tei s[id="' + id + '"]');
     },
     // get elements of all datasets
     all: function () {
-      return elements.container.find('tei div[subtype="dataseer"] s[id]');
+      return elements.container.find('tei s[id]');
     },
     // get cert of given dataset
     certOf: function (id) {
