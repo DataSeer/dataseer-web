@@ -51,20 +51,20 @@ You must use your API token to access all of the following routes.
 Set your token into HTTP headers (Authorization: Bearer my).
 
 ```bash
- Replace MY_TOKEN by your dataseer-web API token
-  use -H "Authorization: Bearer MY_TOKEN" to set headers with curl
+# Replace MY_TOKEN by your dataseer-web API token
+#  use -H "Authorization: Bearer MY_TOKEN" to set headers with curl
 $ curl "http://localhost:3000/api/documents/5ffa06e61c157616a5c6bae7" -H "Authorization: Bearer MY_TOKEN"
- Or use token parameter
+# Or use token parameter
 $ curl "http://localhost:3000/api/documents/5ffa06e61c157616a5c6bae7?token=MY_TOKEN"
 ```
 
 __If you try to access an unauthorized route, the app will return an HTTP 401 error__
 
 ```bash
- HTTP 401 will be returned
+# HTTP 401 will be returned
 $ curl "http://localhost:3000/documents/5ffa06e61c157616a5c6bae7" -H "Authorization: Bearer WRONG_TOKEN"
- > Your current role do not grant access to this part of website
-  This error is caused by: a wrong token, an expired token, a blacklisted token 
+# > Your current role do not grant access to this part of website
+#  This error is caused by: a wrong token, an expired token, a blacklisted token 
 ```
 
 ## Results
@@ -237,13 +237,13 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
 #### How to request
 
 ```bash
- Will return the 30 first documents
+# Will return the 30 first documents
 curl "http://localhost:3000/api/documents?limit=30" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents?limit=30&token=MY_TOKEN"
- Will return from the 10th to the 40th first documents
+# Will return from the 10th to the 40th first documents
 curl "http://localhost:3000/api/documents?limit=30&skip=10" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents?limit=30&skip=10&token=MY_TOKEN"
- Will return the 20 first documents with data filled for properties: pdf, tei, files, metadata, datasets
+# Will return the 20 first documents with data filled for properties: pdf, tei, files, metadata, datasets
 curl "http://localhost:3000/api/documents/?pdf=true&tei=true&files=true&metadata=true&datasets=true" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents/?pdf=true&tei=true&files=true&metadata=true&datasets=true&token=MY_TOKEN"
 ```
@@ -364,15 +364,15 @@ Accessible to users with the following role : **curator**.
 #### How to request
 
 ```bash
- Upload a document with attached files
+# Upload a document with attached files
 curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" -H "Authorization: Bearer MY_TOKEN" "http://localhost:3000/api/documents"
 curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" "http://localhost:3000/api/documents?token=MY_TOKEN"
 
- Upload a document without attached files
+# Upload a document without attached files
 curl -X "POST" -F "file=@/path/to/file.pdf" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" -H "Authorization: Bearer MY_TOKEN" "http://localhost:3000/api/documents"
 curl -X "POST" -F "file=@/path/to/file.pdf" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" "http://localhost:3000/api/documents?token=MY_TOKEN"
 
- Upload a document with attached files but do not send email notification
+# Upload a document with attached files but do not send email notification
 curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" -F "mute=true" -H "Authorization: Bearer MY_TOKEN" "http://localhost:3000/api/documents"
 curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" -F "mute=true" "http://localhost:3000/api/documents?token=MY_TOKEN"
 ```
@@ -479,7 +479,7 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
 ##### Get "light version" of a given document
 
 ```bash
- Will return document (with id 60479f995e905b3e479e02e1) without data for: pdf, tei, files, metadata, datasets
+# Will return document (with id 60479f995e905b3e479e02e1) without data for: pdf, tei, files, metadata, datasets
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1?token=MY_TOKEN"
 ```
@@ -529,7 +529,7 @@ curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1?token=MY_TOKE
 ##### Get "full version" of a given document
 
 ```bash
- Will return document (with id 60479f995e905b3e479e02e1) with data filled for properties: pdf, tei, files, metadata, datasets
+# Will return document (with id 60479f995e905b3e479e02e1) with data filled for properties: pdf, tei, files, metadata, datasets
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1?pdf=true&tei=true&files=true&metadata=true&datasets=true" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1?pdf=true&tei=true&files=true&metadata=true&datasets=true&token=MY_TOKEN"
 ```
@@ -610,7 +610,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return the pdf (JSON format) of the document (with id 60479f995e905b3e479e02e1)
+# Will return the pdf (JSON format) of the document (with id 60479f995e905b3e479e02e1)
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/pdf" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/pdf?token=MY_TOKEN"
 ```
@@ -646,7 +646,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return the pdf (binary file) of the document (with id 60479f995e905b3e479e02e1)
+# Will return the pdf (binary file) of the document (with id 60479f995e905b3e479e02e1)
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/pdf/content" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/pdf/content?token=MY_TOKEN"
 ```
@@ -680,7 +680,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return the tei (JSON format) of the document (with id 60479f995e905b3e479e02e1)
+# Will return the tei (JSON format) of the document (with id 60479f995e905b3e479e02e1)
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/tei" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/tei?token=MY_TOKEN"
 ```
@@ -716,7 +716,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return the tei (binary file) of the document (with id 60479f995e905b3e479e02e1)
+# Will return the tei (binary file) of the document (with id 60479f995e905b3e479e02e1)
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/tei/content" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/tei/content?token=MY_TOKEN"
 ```
@@ -750,7 +750,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return the metadata (JSON formated) of the document (with id 60479f995e905b3e479e02e1)
+# Will return the metadata (JSON formated) of the document (with id 60479f995e905b3e479e02e1)
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/metadata" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/metadata?token=MY_TOKEN"
 ```
@@ -786,7 +786,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will validate the "metadata" step of the document (with id 60479f995e905b3e479e02e1)
+# Will validate the "metadata" step of the document (with id 60479f995e905b3e479e02e1)
 curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/metadata/validate" -H "Authorization: Bearer MY_TOKEN"
 curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/metadata/validate?token=MY_TOKEN"
 ```
@@ -822,7 +822,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return the datasets (JSON formated) of the document (with id 60479f995e905b3e479e02e1)
+# Will return the datasets (JSON formated) of the document (with id 60479f995e905b3e479e02e1)
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets?token=MY_TOKEN"
 ```
@@ -858,7 +858,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will validate the "datasets" step of the document (with id 60479f995e905b3e479e02e1)
+# Will validate the "datasets" step of the document (with id 60479f995e905b3e479e02e1)
 curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets/validate" -H "Authorization: Bearer MY_TOKEN"
 curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets/validate?token=MY_TOKEN"
 ```
@@ -894,7 +894,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return the given document (with id 60479f995e905b3e479e02e1) to the "metadata" step
+# Will return the given document (with id 60479f995e905b3e479e02e1) to the "metadata" step
 curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets/validate" -H "Authorization: Bearer MY_TOKEN"
 curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets/validate?token=MY_TOKEN"
 ```
@@ -930,7 +930,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return the given document (with id 60479f995e905b3e479e02e1) to the "metadata" step
+# Will return the given document (with id 60479f995e905b3e479e02e1) to the "metadata" step
 curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/finish/reopen" -H "Authorization: Bearer MY_TOKEN"
 curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/finish/reopen?token=MY_TOKEN"
 ```
@@ -966,7 +966,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return all files (JSON formated) of the document (with id 60479f995e905b3e479e02e1)
+# Will return all files (JSON formated) of the document (with id 60479f995e905b3e479e02e1)
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/files" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/files?token=MY_TOKEN"
 ```
@@ -1002,7 +1002,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return the files (JSON formated) with id 60479f995e905b3e479e02e1
+# Will return the files (JSON formated) with id 60479f995e905b3e479e02e1
 curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files?token=MY_TOKEN"
 ```
@@ -1038,7 +1038,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return the files (Buffer formated) with id 60479f995e905b3e479e02e1
+# Will return the files (Buffer formated) with id 60479f995e905b3e479e02e1
 curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files/buffer" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files/buffer?token=MY_TOKEN"
 ```
@@ -1071,7 +1071,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return the files (String formated) with id 60479f995e905b3e479e02e1
+# Will return the files (String formated) with id 60479f995e905b3e479e02e1
 curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files/string" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files/string?token=MY_TOKEN"
 ```
@@ -1141,7 +1141,7 @@ Accessible to users with the following role : **curator**.
 #### How to request
 
 ```bash
- Will update extracted property of datasets with id 60479f995e905b3e479e02e1
+# Will update extracted property of datasets with id 60479f995e905b3e479e02e1
 curl -X "PUT" -F "extracted=[{...}]" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1" -H "Authorization: Bearer MY_TOKEN"
 curl -X "PUT" -F "extracted=[{...}]" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1?token=MY_TOKEN"
 ```
@@ -1177,7 +1177,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will check validation of all current datasets with id 60479f995e905b3e479e02e1
+# Will check validation of all current datasets with id 60479f995e905b3e479e02e1
 curl -X "POST" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/checkValidation" -H "Authorization: Bearer MY_TOKEN"
 curl -X "POST" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/checkValidation?token=MY_TOKEN"
 ```
@@ -1234,7 +1234,7 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
 #### How to request
 
 ```bash
- Will add new dataset to datasets with id 60479f995e905b3e479e02e1
+# Will add new dataset to datasets with id 60479f995e905b3e479e02e1
 curl -X "POST" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset" -H "Authorization: Bearer MY_TOKEN"
 curl -X "POST" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset?token=MY_TOKEN"
 ```
@@ -1291,7 +1291,7 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
 #### How to request
 
 ```bash
- Will add update given dataset of datasets with id 60479f995e905b3e479e02e1
+# Will add update given dataset of datasets with id 60479f995e905b3e479e02e1
 curl -X "PUT" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset" -H "Authorization: Bearer MY_TOKEN"
 curl -X "PUT" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset?token=MY_TOKEN"
 ```
@@ -1348,7 +1348,7 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
 #### How to request
 
 ```bash
- Will update given dataset of datasets with id 60479f995e905b3e479e02e1
+# Will update given dataset of datasets with id 60479f995e905b3e479e02e1
 curl -X "DELETE" -F "dataset={"id":"deleted-dataset-id"}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset" -H "Authorization: Bearer MY_TOKEN"
 curl -X "DELETE" -F "dataset={"id":"deleted-dataset-id"}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset?token=MY_TOKEN"
 ```
@@ -1405,7 +1405,7 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
 #### How to request
 
 ```bash
- Will add new corresp to datasets with id 60479f995e905b3e479e02e1
+# Will add new corresp to datasets with id 60479f995e905b3e479e02e1
 curl -X "POST" -F "corresp={"id":"deleted-dataset-id","sentenceId":"1"}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/corresp" -H "Authorization: Bearer MY_TOKEN"
 curl -X "POST" -F "corresp={"id":"deleted-dataset-id","sentenceId":"1"}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/corresp?token=MY_TOKEN"
 ```
@@ -1462,7 +1462,7 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
 #### How to request
 
 ```bash
- Will update given corresp of datasets with id 60479f995e905b3e479e02e1
+# Will update given corresp of datasets with id 60479f995e905b3e479e02e1
 curl -X "DELETE" -F "corresp={"id":"deleted-dataset-id","sentenceId":"1"}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/corresp" -H "Authorization: Bearer MY_TOKEN"
 curl -X "DELETE" -F "corresp={"id":"deleted-dataset-id","sentenceId":"1"}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/corresp?token=MY_TOKEN"
 ```
@@ -1519,7 +1519,7 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
 #### How to request
 
 ```bash
- Will process sentence (send data to dataseer-ml service)
+# Will process sentence (send data to dataseer-ml service)
 curl -X "POST" -F "text=my sentence" "http://localhost:3000/api/dataseer-ml/processDataseerSentence" -H "Authorization: Bearer MY_TOKEN"
 curl -X "POST" -F "text=my sentence" "http://localhost:3000/api/dataseer-ml/processDataseerSentence?token=MY_TOKEN"
 ```
@@ -1554,7 +1554,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will return dataTypes used by the app (JSON formatted)
+# Will return dataTypes used by the app (JSON formatted)
 curl "http://localhost:3000/api/dataseer-ml/jsonDataTypes" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/dataseer-ml/jsonDataTypes?token=MY_TOKEN"
 ```
@@ -1590,7 +1590,7 @@ No parameters available
 #### How to request
 
 ```bash
- Will resync dataTypes used by the app (JSON formatted)
+# Will resync dataTypes used by the app (JSON formatted)
 curl "http://localhost:3000/api/dataseer-ml/jsonDataTypes" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/dataseer-ml/jsonDataTypes?token=MY_TOKEN"
 ```
