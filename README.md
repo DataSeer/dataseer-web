@@ -12,14 +12,6 @@ See the [dataseer-ml](https://github.com/dataseer/dataseer-ml) repository for th
 
 Supported article formats are PDF, docx, TEI, JATS/NLM, ScholarOne, and a large variety of additional publisher native XML formats: BMJ, Elsevier staging format, OUP, PNAS, RSC, Sage, Wiley, etc (see [Pub2TEI](https://github.com/kermitt2/Pub2TEI) for the list of native publisher XML format covered).
 
-## Implementation
-
-MongoDB is used to store every data of documents.
-
-FileSystem is used to store every files.
-
-Express is used to create the http server.
-
 ## Contact and License
 
 Main authors and contact: [Nicolas Kieffer](https://github.com/NicolasKieffer), Patrice Lopez (<patrice.lopez@science-miner.com>).
@@ -28,15 +20,15 @@ The development of dataseer-ml is supported by a [Sloan Foundation](https://sloa
 
 dataseer-Web is distributed under [Apache2 license](https://www.apache.org/licenses/LICENSE-2.0).
 
----
-
 ## Description
 
-The project provides: 
+This application is composed of: 
 
-  - a web application to process documents stored in MongoDB database: `localhost:3000/`
-  - a back office for uploading manually documents to be processed: `localhost:3000/backoffice/`
-  - a REST api to load and modify documents data (CRUD): `localhost:3000/api`
+  - a GUI to manage your account & documents (`localhost:3000/`)
+  - a Back Office to manage all documents, users and organisations (`localhost:3000/backoffice/`)
+  - a REST API to interact with data stored in MongoDB (`localhost:3000/api`)
+
+Documents, Organisations & Users data are stored in MongoDB. Files (PDF, XML, etc) uploaded on dataseer-web are stored on the server FileSystem.
 
 ## Documentations
 
@@ -67,6 +59,7 @@ The project provides:
     - [Results](doc/API.md#results)
     - [Available Routes](doc/API.md#available-routes)
 
+
 ## Install
 
 *[Table of contents](#documentations)*
@@ -87,7 +80,12 @@ Run this command to start dataseer-web app.
 
 *[Table of contents](#documentations)*
 
-Application requires an instance of mongoDB running on port `27017`, with an `app` database (`conf/conf.json` to set complete URL).
+Application requires:
+
+  - an instance of mongoDB (by default: running on port `27017`, with an `app` database).
+  - an instance of dataseer-ml application (by default: running on `http://localhost/dataseer-ml/service`).
+
+Use `conf/conf.json` to custom configuration.
 
 ## Configuration
 
@@ -95,7 +93,7 @@ Application requires an instance of mongoDB running on port `27017`, with an `ap
 
 *[Table of contents](#documentations)*
 
-Web app [default configuration file](/conf/conf.default.json). You must create file conf/conf.json and fill it with data like below:
+You must create file `conf/conf.json` (based on *[default configuration file](/conf/conf.default.json)*) and fill it with with your data:
 
 ```js
 {
@@ -141,7 +139,7 @@ Web app [default configuration file](/conf/conf.default.json). You must create f
 
 Application requires a SMTP server to send some emails (resest password, API token, automatique account creation)
 
-SMTP [default configuration file](/conf/smtp.conf.default.json). You must create file conf/smtp.conf.json and fill it with data like below:
+You must create file `conf/smtp.conf.json` (based on *[default configuration file](/conf/smtp.conf.default.json)*) and fill it with your data:
 
 ```js
 {
@@ -161,4 +159,4 @@ SMTP [default configuration file](/conf/smtp.conf.default.json). You must create
 
 Application requires a private key to create JSON Web Token.
 
-You must create file `conf/private.key` and fill it with a random string.
+You must create file `conf/private.key` (based on *[default private key file](/conf/private.key.default)*) and fill it with a random string.
