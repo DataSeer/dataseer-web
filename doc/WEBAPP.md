@@ -236,13 +236,13 @@ You can also share this document with button "Get public URL of this document". 
 
 __Note:__ Public URL is like `http://localhost:3000/documents/60479f995e905b3e479e02e1?documentToken=...`
 
-![documents:id metadata GUI](documents:id-metadata.png "documents:id metadata GUI")
+![documents:id metadata GUI](documents_id-metadata.png "documents:id metadata GUI")
 
 **annotator**, **curator**.
 
 As curator or annotator, you can also reload metadata (useful after dataseer-ml service update/upgrade).
 
-![documents:id metadata GUI](documents:id-metadata-curator.png "documents:id metadata GUI")
+![documents:id metadata GUI](documents_id-metadata-curator.png "documents:id metadata GUI")
 
 ---
 
@@ -264,7 +264,7 @@ Available actions:
   - "Metadata" Go back to "metadata" step
   - "Finish" Go to "finish" step (all Datasets must be validated)
 
-![documents:id datasets GUI](documents:id-datasets.png "documents:id datasets GUI")
+![documents:id datasets GUI](documents_id-datasets.png "documents:id datasets GUI")
 
 **annotator**, **curator**.
 
@@ -274,13 +274,13 @@ Available actions:
   - "Refresh Datatypes" (useful after dataseer-ml service update/upgrade)
   - "Finish" Go to "finish" step without validate all Datasets
 
-![documents:id datasets GUI](documents:id-datasets-curator.png "documents:id datasets GUI")
+![documents:id datasets GUI](documents_id-datasets-curator.png "documents:id datasets GUI")
 
 **Using public URL**
 
 Same as **santard_user** (but you will be not considered as logged in).
 
-![documents:id datasets GUI](documents:id-datasets-token.png "documents:id datasets GUI")
+![documents:id datasets GUI](documents_id-datasets-token.png "documents:id datasets GUI")
 
 ---
 
@@ -292,7 +292,7 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
 
 On "finish" step, summary of current state of document is shown. You can "Reopen document" to go back to "metadata" step and restart the process.
 
-![documents:id finish GUI](documents:id-finish.png "documents:id finish GUI")
+![documents:id finish GUI](documents_id-finish.png "documents:id finish GUI")
 
 ---
 
