@@ -26,24 +26,21 @@ router.get('/', function (req, res, next) {
   )
     return res.status(401).send('Your current role do not grant access to this part of website');
   let limit = parseInt(req.query.limit),
-    doi = req.query.doi,
-    pmid = req.query.pmid,
+    skip = parseInt(req.query.skip),
     query = {};
-  if (typeof doi !== 'undefined') query['metadata.doi'] = doi;
-  if (typeof pmid !== 'undefined') query['metadata.pmid'] = pmid;
+  if (isNaN(skip)) skip = 0;
   if (isNaN(limit)) limit = 20;
-  if (AccountsManager.checkAccessRight(req.user, AccountsManager.roles.annotator, AccountsManager.match.role))
-    query['organisation'] = req.user.organisation; // if this is an annotator, then restrict access to his organisation only
   // Init transaction
   let transaction = Documents.find(query)
+    .skip(skip)
+    .limit(limit)
     .select('+logs')
     .populate('organisation')
     .populate('metadata')
     .populate('owner')
     .populate('tei')
     .populate('pdf')
-    .populate('logs')
-    .limit(limit);
+    .populate('logs');
   // Execute transaction
   return transaction.exec(function (err, documents) {
     if (err) return next(err);

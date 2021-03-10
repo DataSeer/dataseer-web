@@ -20,9 +20,9 @@ router.put('/:id', function (req, res, next) {
   return DocumentsDatasets.findOne({ _id: req.params.id }, function (err, datasets) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
     else if (!datasets) res.json({ 'err': true, 'res': null, 'msg': 'datasets not found' });
-    datasets.current = req.body.current;
-    datasets.deleted = req.body.deleted;
-    datasets.extracted = req.body.extracted;
+    if (req.body.current) datasets.current = req.body.current;
+    if (req.body.deleted) datasets.deleted = req.body.deleted;
+    if (req.body.extracted) datasets.extracted = req.body.extracted;
     return datasets.save(function (err) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
       else return res.json({ 'err': false, 'res': true });
