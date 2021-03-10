@@ -28,14 +28,12 @@ router.get('/', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   let limit = parseInt(req.query.limit),
-    doi = req.query.doi,
-    pmid = req.query.pmid,
+    skip = parseInt(req.query.skip),
     query = {};
-  if (typeof doi !== 'undefined') query['doi'] = doi;
-  if (typeof pmid !== 'undefined') query['pmid'] = pmid;
   if (isNaN(limit)) limit = 20;
+  if (isNaN(skip)) skip = 0;
   // Init transaction
-  let transaction = Documents.find(query).limit(limit);
+  let transaction = Documents.find(query).skip(skip).limit(limit);
   // Populate dependings on the parameters
   if (req.query.pdf) transaction.populate('pdf');
   if (req.query.tei) transaction.populate('tei');
