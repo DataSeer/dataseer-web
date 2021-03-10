@@ -34,7 +34,7 @@ Self.authenticate = function (req, res, next) {
   else
     return JWT.check(token, req.app.get('private.key'), {}, function (err, decoded) {
       if (err) return next();
-      return Accounts.findOne({ username: decoded.username }, function (err, user) {
+      return Accounts.findOne({ username: decoded.username, 'tokens.api': token }, function (err, user) {
         if (!err && user) req.user = user; // Set user
         return next();
       });
