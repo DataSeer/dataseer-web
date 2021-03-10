@@ -367,11 +367,11 @@ const DocumentView = function (events) {
   let datasets = {
     // get element of given dataset
     get: function (id) {
-      return elements.container.find('tei div[subtype="dataseer"] s[id="' + id + '"]');
+      return elements.container.find('tei s[id="' + id + '"]');
     },
     // get elements of all datasets
     all: function () {
-      return elements.container.find('tei div[subtype="dataseer"] s[id]');
+      return elements.container.find('tei s[id]');
     },
     // get cert of given dataset
     certOf: function (id) {
