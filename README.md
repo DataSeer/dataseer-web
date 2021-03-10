@@ -88,7 +88,7 @@ Application requires an instance of mongoDB running on port `27017`, with an `ap
 
 Web app [default configuration file](/conf/conf.default.json). You must create file conf/conf.json and fill it with data like below:
 
-```json
+```js
 {
   "services": {
     "mongodb": "mongodb://localhost:27017/app",
@@ -134,7 +134,7 @@ Application requires a SMTP server to send some emails (resest password, API tok
 
 SMTP [default configuration file](/conf/smtp.conf.default.json). You must create file conf/smtp.conf.json and fill it with data like below:
 
-```json
+```js
 {
   "host": "smtp.default.com",
   "port": 587,
