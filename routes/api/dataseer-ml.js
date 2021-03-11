@@ -5,8 +5,10 @@
 'use strict';
 
 const express = require('express'),
-  router = express.Router(),
-  AccountsManager = require('../../lib/accounts.js'),
+  router = express.Router();
+
+const AccountsManager = require('../../lib/accounts.js'),
+  Wiki = require('../../lib/wiki.js'),
   DataSeerML = require('../../lib/dataseer-ml.js');
 
 /* SAVE Document */
@@ -26,10 +28,10 @@ router.get('/jsonDataTypes', function (req, res, next) {
 router.get('/resyncJsonDataTypes', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.annotator))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  return DataSeerML.resyncJsonDataTypes(function (err, body) {
+  return Wiki.getDataTypes(function (err, dataTypes) {
     if (err) return next(err);
     else {
-      req.app.set('dataTypes', DataSeerML.buildDataTypes(JSON.parse(body)));
+      req.app.set('dataTypes', dataTypes);
       return res.json(req.app.get('dataTypes'));
     }
   });
