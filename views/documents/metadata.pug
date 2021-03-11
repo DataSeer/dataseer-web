@@ -65,6 +65,9 @@ block content
           div(class='col-12')
             button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;') Get public URL of this document
             input.form-control.hidden(type='text' id='public_url' name='public_url' value=publicURL)
+            a(href='mailto:?subject='+ encodeURIComponent("DataSeer Document Public URL") + '&body=' + encodeURIComponent(`Hi,\n\nUse the following link to process the DataSeer document:\n${publicURL}\n\nThis email has been automatically generated`))
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Send it by email')
+                <i class="far fa-paper-plane"></i>
 
         div(class='row crud-button-action')
           div(class='col-6 text-center')
