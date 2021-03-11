@@ -232,7 +232,7 @@ There is 3 steps while processing document:
 
 On "metadata" step, you can validate metadata with button "Continue" to go to the next step (or contact a curator if nedded).
 
-You can also share this document with button "Get public URL of this document". By using this URL, You will be considered as a "visitor" (a standard_user not logged in).
+You can also share this document with button "Get public URL of this document" or send it in an email. By using this URL, You will be considered as a "visitor" (a standard_user not logged in).
 
 __Note:__ Public URL is like `http://localhost:3000/documents/60479f995e905b3e479e02e1?documentToken=...`
 
