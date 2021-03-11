@@ -98,6 +98,11 @@ You must create file `conf/conf.json` (based on *[default configuration file](/c
 ```js
 {
   "services": {
+    "dataseer-wiki": {
+      "limit": 5, // number of URLs processed in parallel 
+      "root": "https://wiki.dataseer.ai",
+      "dataTypes": "/doku.php?id=data_type"
+    },
     "mongodb": "mongodb://localhost:27017/app",
     "dataseer-ml": "http://localhost/dataseer-ml/service",
     "curator-email": "curator@mydomain.ai"

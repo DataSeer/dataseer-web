@@ -218,7 +218,7 @@ Note: **santard_user**, **annotator**, **curator** do not have same restrictions
 
 #### Purpose
 
-Use it to get process a given document.
+Use it to process a given document.
 
 There is 3 steps while processing document:
 
@@ -258,8 +258,8 @@ Available actions:
 
   - "Add new Dataset" (you need to select sentence before)
   - "Delete" a given Dataset (click on trash icon)
-  - "Link" sentence to an existing Dataset (click on trash icon of a Dataset)
-  - "Save for later" a Dataset (click on chain icon of a Datset)
+  - "Link" sentence to an existing Dataset (click on chain icon of a Datset)
+  - "Save" a Dataset (click on "Save for later")
   - "Validate" a Dataset ("Name" & "DOI" are required)
   - "Metadata" Go back to "metadata" step
   - "Finish" Go to "finish" step (all Datasets must be validated)

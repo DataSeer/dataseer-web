@@ -33,6 +33,7 @@ const indexRouter = require('./routes/index.js'),
 const conf = require('./conf/conf.json');
 
 const DataSeerML = require('./lib/dataseer-ml.js'),
+  Wiki = require('./lib/wiki.js'),
   JWT = require('./lib/jwt.js');
 
 const Accounts = require('./models/accounts.js'),
@@ -64,10 +65,11 @@ db.on('error', function () {
 });
 db.once('open', function () {
   console.log('Connection to MongoDB succeeded');
-  return request.get(conf.services['dataseer-ml'] + '/jsonDataTypes', function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      console.log('GET on /jsonDataTypes route of dataseer-ml service succeeded');
-      app.set('dataTypes', DataSeerML.buildDataTypes(JSON.parse(body)));
+  console.log('Load dataTypes from wiki...');
+  return Wiki.getDataTypes(function (err, dataTypes) {
+    if (!err) {
+      console.log('Load dataTypes from wiki... finished');
+      app.set('dataTypes', dataTypes);
       return fs.readFile('./conf/private.key', 'utf-8', function (err, privateKey) {
         if (err) {
           console.log('file conf/private.key not found');
@@ -147,7 +149,7 @@ db.once('open', function () {
         });
       });
     } else {
-      console.log(error);
+      console.log(err);
       console.log('GET on /jsonDataTypes route of dataseer-ml service failed');
       process.exit(0);
     }
