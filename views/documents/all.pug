@@ -71,9 +71,9 @@ block content
                             div(class="hidden") #{JSON.stringify(document.metadata)}
                             if (document.metadata.manuscript_id !== "")
                               a.document-link(href=root + 'documents/' + document._id) #{document.metadata.manuscript_id}
-                            else if (document.pdf !== "")
+                            else if (document.pdf)
                               a.document-link(href=root + 'documents/' + document._id) #{document.pdf.filename}
-                            else if (document.tei !== "")
+                            else if (document.tei)
                               a.document-link(href=root + 'documents/' + document._id) #{document.tei.filename}
                             else
                               a.document-link(href=root + 'documents/' + document._id) #{formatUrl(document._id)}
@@ -106,9 +106,9 @@ block content
                             div(class="hidden") #{JSON.stringify(document.metadata)}
                             if (document.metadata.manuscript_id !== "")
                               a.document-link(href=root + 'documents/' + document._id) #{document.metadata.manuscript_id}
-                            else if (document.pdf !== "")
+                            else if (document.pdf)
                               a.document-link(href=root + 'documents/' + document._id) #{document.pdf.filename}
-                            else if (document.tei !== "")
+                            else if (document.tei)
                               a.document-link(href=root + 'documents/' + document._id) #{document.tei.filename}
                             else
                               a.document-link(href=root + 'documents/' + document._id) #{formatUrl(document._id)}
