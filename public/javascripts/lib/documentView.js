@@ -127,7 +127,7 @@ const DocumentView = function (events) {
     self.mainContainer = jQuery(id);
     self.mainContainer.empty().append($('<div id="xml">').append(elements.container));
 
-    self.hasPdf = typeof self.doc.pdf !== 'undefined';
+    self.hasPdf = !!self.doc.pdf;
 
     if (self.hasPdf) {
       self.mainContainer.append($('<div id="pdf">'));
