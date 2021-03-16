@@ -118,14 +118,14 @@ Self.getUploadParams = function (params = {}, user) {
       attachedFiles,
       uploaded_by
     };
-  if (AccountsManager.checkAccessRight(user, AccountsManager.roles.standard_user, AccountsManager.match.role)) {
-    // Case of standard_user
+  if (!AccountsManager.checkAccessRight(user, AccountsManager.roles.curator, AccountsManager.match.role)) {
+    // Case of standard_user OR annotator
     opts.journal = user.organisation.name;
     opts.email = user.username;
     opts.fullname = user.fullname;
     opts.dataseerML = true; // always proceed dataseer-ml
   } else {
-    // Case of annotator OR curator
+    // Case of curator
     // If journal AND existing_journal are not set
     if (!params.journal && !params.existing_journal)
       return new Error('You must select an existing "Journal" (or fill in "Journal" field) !');
