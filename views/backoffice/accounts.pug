@@ -18,7 +18,7 @@ block content
               div(class='header') Custom search:
           div(class='row')
             div(class='col-12 text-center')
-              form#custom-search(role='form', action=root + route,method='get')
+              form#custom-search(role='form', action=conf.root + route,method='get')
                 div role: 
                   select.custom-select(style='width: auto' name='role')
                     option(value='') All
@@ -58,7 +58,7 @@ block content
           each account, index in accounts
             div(class='row' data='true')
               div(class='col-12')
-                form.accounts(role='form', action=root + route, method='post')
+                form.accounts(role='form', action=conf.root + route, method='post')
                   div(class='form-row')
                     div(class='col-2') #{account.username}
                       input.form-control(type='text' name='username' class='hidden' value=account.username)
