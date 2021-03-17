@@ -17,7 +17,7 @@ block content
               div(class='header') Add new Organization:
           div(class='row')
             div(class='col-12 text-center' style='margin-top:10px;')
-              form#new-organisation(role='form', action=root + route,method='post')
+              form#new-organisation(role='form', action=conf.root + route,method='post')
                 input(type='text' name='name' placeholder='Name of new organization')
                 button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' name='create') Add
   
@@ -30,7 +30,7 @@ block content
               div(class='header') Custom search:
           div(class='row')
             div(class='col-12 text-center')
-              form#custom-search(role='form', action=root + route,method='get')
+              form#custom-search(role='form', action=conf.root + route,method='get')
                 div limit: 
                   input(type='text' name='limit' placeholder='Maximum number of results')
                 div
@@ -61,7 +61,7 @@ block content
           each organisation, index in organisations
             div(class='row' data='true')
               div(class='col-12')
-                form.organisations(role='form', action=root + route, method='post')
+                form.organisations(role='form', action=conf.root + route, method='post')
                   div(class='form-row')
                     div(class='col-3 offset-3')
                       input.form-control(type='text' class='hidden' name='_id' value=organisation._id)
