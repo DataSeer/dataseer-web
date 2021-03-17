@@ -60,12 +60,12 @@ router.post('/', function (req, res, next) {
     opts,
     {
       onCreatedAccount: function (account) {
-        if (!mute) return Mailer.sendAccountCreationMail(account, req.app.get('private.key'));
+        // if (!mute) return Mailer.sendAccountCreationMail(account, req.app.get('private.key'));
       }
     },
     function (err, doc) {
       // Send upload email to curators
-      if (!mute) Mailer.sendDocumentUploadMail(doc, opts, req.user.username);
+      // if (!mute) Mailer.sendDocumentUploadMail(doc, opts, req.user.username);
       // If any of the file processing produced an error, err would equal that error
       if (err) return res.json({ 'err': true, 'res': null, 'msg': 'Error while uploading document !' });
       else res.json({ 'err': false, 'res': doc });

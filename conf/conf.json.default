@@ -1,10 +1,15 @@
-
 {
   "services": {
     "dataseer-wiki": {
       "limit": 5,
-      "root": "https://wiki.dataseer.ai/",
-      "dataTypes": "doku.php?id=data_type"
+      "root": "https://wiki.dataseer.ai",
+      "dataTypes": "/doku.php?id=data_type"
+    },
+    "crisp": {
+      "id": "YOUR_CRISP_ID"
+    },
+    "userflow": {
+      "token": "YOUR_USERFLOW_TOKEN"
     },
     "mongodb": "mongodb://localhost:27017/app",
     "dataseer-ml": "http://localhost/dataseer-ml/service",

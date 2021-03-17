@@ -17,7 +17,7 @@ block content
               div(class='header') Custom search:
           div(class='row')
             div(class='col-12 text-center')
-              form#custom-search(role='form', action=root + 'documents',method='get')
+              form#custom-search(role='form', action=conf.root + 'documents',method='get')
                 div pmid: 
                   input.form-control(style='display: inline-block; width: auto;' type='text' name='pmid' placeholder='pmid')
                 div doi: 
@@ -64,19 +64,19 @@ block content
               if (document.metadata)
                 div(class='row' style='margin-right:10px; margin-left:10px;' data='true')
                   div(class='col-12')
-                    form.accounts(role='form', action=root + route, method='post')
+                    form.accounts(role='form', action=conf.root + route, method='post')
                       div(class='form-row')
                         if current_user.role.label === 'curator'
                           div(class='col-1')
                             div(class="hidden") #{JSON.stringify(document.metadata)}
                             if (document.metadata.manuscript_id !== "")
-                              a.document-link(href=root + 'documents/' + document._id) #{document.metadata.manuscript_id}
+                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.metadata.manuscript_id}
                             else if (document.pdf)
-                              a.document-link(href=root + 'documents/' + document._id) #{document.pdf.filename}
+                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.pdf.filename}
                             else if (document.tei)
-                              a.document-link(href=root + 'documents/' + document._id) #{document.tei.filename}
+                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.tei.filename}
                             else
-                              a.document-link(href=root + 'documents/' + document._id) #{formatUrl(document._id)}
+                              a.document-link(href=conf.root + 'documents/' + document._id) #{formatUrl(document._id)}
                             input.form-control(type='text' name='id' class='hidden' value=document._id)
                           div(class='col-1') #{formatDate(document.uploaded_at)}
                           if document.status === 'metadata'
@@ -105,13 +105,13 @@ block content
                           div(class='col-1')
                             div(class="hidden") #{JSON.stringify(document.metadata)}
                             if (document.metadata.manuscript_id !== "")
-                              a.document-link(href=root + 'documents/' + document._id) #{document.metadata.manuscript_id}
+                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.metadata.manuscript_id}
                             else if (document.pdf)
-                              a.document-link(href=root + 'documents/' + document._id) #{document.pdf.filename}
+                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.pdf.filename}
                             else if (document.tei)
-                              a.document-link(href=root + 'documents/' + document._id) #{document.tei.filename}
+                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.tei.filename}
                             else
-                              a.document-link(href=root + 'documents/' + document._id) #{formatUrl(document._id)}
+                              a.document-link(href=conf.root + 'documents/' + document._id) #{formatUrl(document._id)}
                             input.form-control(type='text' name='id' class='hidden' value=document._id)
                           div(class='col-1') #{formatDate(document.uploaded_at)}
                           if document.status === 'metadata'

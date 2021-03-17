@@ -50,7 +50,7 @@ router.get('/', function (req, res, next) {
         success = req.flash('success');
       return res.render(path.join('documents', 'all'), {
         route: 'documents',
-        root: conf.root,
+        conf: conf,
         organisations: organisations,
         search: true,
         documents: documents,
@@ -107,7 +107,7 @@ router.get('/:id/metadata', function (req, res, next) {
       return res.render(path.join('documents', 'metadata'), {
         route: 'documents/:id/metadata',
         publicURL: conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token,
-        root: conf.root,
+        conf: conf,
         document: doc,
         current_user: req.user
       });
@@ -142,7 +142,7 @@ router.get('/:id/datasets', function (req, res, next) {
     else
       return res.render(path.join('documents', 'datasets'), {
         route: 'documents/:id/datasets',
-        root: conf.root,
+        conf: conf,
         document: doc,
         current_user: req.user
       });
@@ -162,7 +162,7 @@ router.get('/:id/finish', function (req, res, next) {
     else
       return res.render(path.join('documents', 'finish'), {
         route: 'documents/:id/finish',
-        root: conf.root,
+        conf: conf,
         document: doc,
         current_user: req.user
       });
