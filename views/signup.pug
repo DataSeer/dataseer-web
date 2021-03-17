@@ -10,7 +10,7 @@ block content
             h2 Sign up
         div(class='row')
           div(class='col-12')
-            form(role='form', action=root + route, method='post', style='max-width: 300px; margin: auto; text-align: center; margin-top:20px;')
+            form(role='form', action=conf.root + route, method='post', style='max-width: 300px; margin: auto; text-align: center; margin-top:20px;')
               input(type="hidden" id="g-recaptcha-response" name="g-recaptcha-response")
               if error
                 div(class='alert alert-warning' role='alert') #{error}
@@ -36,8 +36,8 @@ block content
         div(class='row')
           div(class='col-12 my-5' style='margin-top:20px;margin: auto; text-align: center; ')
             div Already have an account? 
-              a(href=root + 'signin') Sign in here
+              a(href=conf.root + 'signin') Sign in here
             div(style='margin-top:5px;') Forgot your password? 
-              a(href=root + 'forgotPassword') Reset it here
+              a(href=conf.root + 'forgotPassword') Reset it here
 
   include ./captcha.pug

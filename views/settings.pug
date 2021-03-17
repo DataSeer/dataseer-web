@@ -21,7 +21,7 @@ block content
             h2 Update password
         div(class='row')
           div(class='col-12')
-            form(role='form', action=root + route, method='post', style='max-width: 300px; margin: auto; text-align: center; margin-top:20px; margin-bottom:20px;')
+            form(role='form', action=conf.root + route, method='post', style='max-width: 300px; margin: auto; text-align: center; margin-top:20px; margin-bottom:20px;')
               if error
                 div(class='alert alert-warning' role='alert') #{error}
               if success
@@ -34,4 +34,4 @@ block content
                 button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Update password
 
   if (current_user.tokens && current_user.tokens.api) 
-    script(src=root + 'javascripts/settings.js')
+    script(src=conf.root + 'javascripts/settings.js')

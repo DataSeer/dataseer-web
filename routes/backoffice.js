@@ -46,7 +46,7 @@ router.get('/accounts', function (req, res, next) {
             success = req.flash('success');
           return res.render(path.join('backoffice', 'accounts'), {
             route: 'backoffice/accounts',
-            root: conf.root,
+            conf: conf,
             search: true,
             current_user: req.user,
             accounts: accounts,
@@ -178,7 +178,7 @@ router.get('/organisations', function (req, res, next) {
       success = req.flash('success');
     return res.render(path.join('backoffice', 'organisations'), {
       route: 'backoffice/organisations',
-      root: conf.root,
+      conf: conf,
       search: true,
       current_user: req.user,
       organisations: organisations,
@@ -278,7 +278,7 @@ router.get('/upload', function (req, res, next) {
           organisations: organisations.sort(function (a, b) {
             return a.name.localeCompare(b.name);
           }),
-          root: conf.root,
+          conf: conf,
           title: 'DataSeer',
           backoffice: true,
           current_user: req.user,
@@ -292,7 +292,7 @@ router.get('/upload', function (req, res, next) {
       success = req.flash('success');
     return res.render(path.join('backoffice', 'upload'), {
       route: 'backoffice/upload',
-      root: conf.root,
+      conf: conf,
       title: 'DataSeer',
       backoffice: true,
       current_user: req.user,

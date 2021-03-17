@@ -103,6 +103,12 @@ You must create file `conf/conf.json` (based on *[default configuration file](/c
       "root": "https://wiki.dataseer.ai",
       "dataTypes": "/doku.php?id=data_type"
     },
+    "crisp": {
+      "id": "YOUR_CRISP_ID"
+    },
+    "userflow": {
+      "token": "YOUR_USERFLOW_TOKEN"
+    },
     "mongodb": "mongodb://localhost:27017/app",
     "dataseer-ml": "http://localhost/dataseer-ml/service",
     "curator-email": "curator@mydomain.ai"
@@ -129,7 +135,7 @@ You must create file `conf/conf.json` (based on *[default configuration file](/c
       "accountId": "Account ID that will be used for logs"
     },
     "resetPassword": {
-      "expiresIn": 3600// 1 hour
+      "expiresIn": 3600 // 1 hour
     },
     "automaticAccountCreation": {
       "expiresIn": 604800 // 7 days
