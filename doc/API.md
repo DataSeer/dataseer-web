@@ -272,6 +272,8 @@ This route add new a document (should be used to upload document).
 
 Public access
 
+__Note: If your are not authenticated as curator, you can not set "mute" or "dataseerML" parameters value.__
+
 #### Parameters
 
 <table>
@@ -348,7 +350,7 @@ Public access
       <td>application/json</td>
       <td>isDataseer</td>
       <td>optional</td>
-      <td>Specify if this document is from DataSeer (default: false)</td>
+      <td>Specify if this document is from DataSeer.<br/>Only available if you are authenticated as curator (otherwise the value will be forced to true)</td>
     </tr>
     <tr>
       <td>POST</td>
@@ -356,7 +358,7 @@ Public access
       <td>application/json</td>
       <td>mute</td>
       <td>optional</td>
-      <td>Specify if notifications will be muted (default: false)</td>
+      <td>Specify if notifications will be muted.<br/>Only available if you are authenticated as curator (otherwise the value will be forced to false)</td>
     </tr>
   </tbody>
 </table>
