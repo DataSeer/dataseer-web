@@ -44,6 +44,9 @@ block content
               a(href=conf.root + 'signin' class='nav') Sign in
             li
               a(href=conf.root + 'forgotPassword' class='nav') Forgot password
+          li
+            button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;') Get public URL of this document
+            input.form-control.hidden(type='text' id='public_url' name='public_url' value=publicURL)
 
   div(class='row' style='margin-bottom:5px;')
     div(class='col-12')
