@@ -24,13 +24,25 @@ block content
                     option(value='') All
                     each role in roles
                       option(value=role._id) #{role.label}
+                div organisation: 
+                  select.custom-select(style='width: auto' name='organisation')
+                    option(value='') All
+                    each organisation in organisations
+                      option(value=organisation._id) #{organisation.name}
                 div limit: 
                   input.form-control(style='display: inline-block; width: auto;' type='text' name='limit' placeholder='Maximum number of results')
                 div
                   button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Search for accounts
           div(class='row')
             div(class='col-12 text-center')
-              div(class='header') Accounts
+              div(class='header') Accounts              
+          div(class='row')
+            div(class='col-1')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='buttom' id='previous_skip') <
+            div(class='col-10')
+              input#search(type='text' name='username' placeholder='Search for email adress')
+            div(class='col-1')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='buttom' id='next_skip') >
           if  accounts.length === 0
             div(class='row')
               div(class='col-12 text-center')
@@ -39,9 +51,6 @@ block content
             div(class='row')
               div(class='col-12 text-center')
                 div(class='count-list') #{accounts.length} result(s)
-            div(class='row')
-              div(class='col-10 offset-1')
-                input#search(type='text' name='username' placeholder='Search for email adress')
             div(class='row head-list')
               div(class='col-12')
                 div(class='form-row')

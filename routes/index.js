@@ -488,8 +488,14 @@ router.get('/myDocuments', function (req, res) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   let query = { 'owner': req.user.id },
+    limit = parseInt(req.query.limit),
+    skip = parseInt(req.query.skip),
     redirect = typeof req.query.redirect !== 'undefined' && req.query.redirect === 'true';
+  if (isNaN(limit) || limit < 0) limit = 20;
+  if (isNaN(skip) || skip < 0) skip = 0;
   return Documents.find(query)
+    .limit(limit)
+    .skip(skip)
     .populate('metadata')
     .populate('pdf')
     .populate('tei')

@@ -16,8 +16,12 @@ block content
               div(class='col-12 text-center')
                 div(class='count-list') #{documents.length} Result(s)
           div(class='row')
-            div(class='col-12')
+            div(class='col-1')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='buttom' id='previous_skip') <
+            div(class='col-10')
               input#search(type='text' name='username' placeholder='Search for document (doi, pmid, title, email, etc)')
+            div(class='col-1')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='buttom' id='next_skip') >
           div(class='row head-list' style='margin-right:10px; margin-left:10px;')
             div(class='col-2') Url
             div(class='col-2') Date uploaded

@@ -27,12 +27,17 @@ router.get('/accounts', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
     return res.status(401).send('Your current role do not grant access to this part of website');
   let limit = parseInt(req.query.limit),
+    skip = parseInt(req.query.skip),
     role = req.query.role,
+    organisation = req.query.organisation,
     query = {};
-  if (isNaN(limit)) limit = 20;
+  if (isNaN(limit) || limit < 0) limit = 20;
+  if (isNaN(skip) || skip < 0) skip = 0;
   if (role) query.role = role;
+  if (organisation) query.organisation = organisation;
   return Accounts.find(query)
     .limit(limit)
+    .skip(skip)
     .exec(function (err, accounts) {
       // If MongoDB error has occured
       if (err) return next(err);
@@ -169,23 +174,28 @@ router.get('/organisations', function (req, res, next) {
   // If user is not logged in OR is not at least a curator
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
     return res.status(401).send('Your current role do not grant access to this part of website');
-  let limit = parseInt(req.query.limit);
-  if (isNaN(limit)) limit = 20;
-  return Organisations.find({}).exec(function (err, organisations) {
-    // If MongoDB error has occured
-    if (err) return next(err);
-    let error = req.flash('error'),
-      success = req.flash('success');
-    return res.render(path.join('backoffice', 'organisations'), {
-      route: 'backoffice/organisations',
-      conf: conf,
-      search: true,
-      current_user: req.user,
-      organisations: organisations,
-      error: Array.isArray(error) && error.length > 0 ? error : undefined,
-      success: Array.isArray(success) && success.length > 0 ? success : undefined
+  let limit = parseInt(req.query.limit),
+    skip = parseInt(req.query.skip);
+  if (isNaN(limit) || limit < 0) limit = 20;
+  if (isNaN(skip) || skip < 0) skip = 0;
+  return Organisations.find({})
+    .limit(limit)
+    .skip(skip)
+    .exec(function (err, organisations) {
+      // If MongoDB error has occured
+      if (err) return next(err);
+      let error = req.flash('error'),
+        success = req.flash('success');
+      return res.render(path.join('backoffice', 'organisations'), {
+        route: 'backoffice/organisations',
+        conf: conf,
+        search: true,
+        current_user: req.user,
+        organisations: organisations,
+        error: Array.isArray(error) && error.length > 0 ? error : undefined,
+        success: Array.isArray(success) && success.length > 0 ? success : undefined
+      });
     });
-  });
 });
 
 /* POST on organisations page */

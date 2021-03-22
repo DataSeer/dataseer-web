@@ -8,7 +8,8 @@ const express = require('express'),
   router = express.Router(),
   fs = require('fs');
 
-const DocumentsDatasets = require('../../models/documents.datasets.js'),
+const Accounts = require('../../models/accounts.js'),
+  DocumentsDatasets = require('../../models/documents.datasets.js'),
   DocumentsMetadata = require('../../models/documents.metadata.js'),
   DocumentsFiles = require('../../models/documents.files.js'),
   DocumentsLogs = require('../../models/documents.logs.js'),
@@ -31,7 +32,7 @@ router.get('/', function (req, res, next) {
     skip = parseInt(req.query.skip),
     query = {};
   if (isNaN(limit)) limit = 20;
-  if (isNaN(skip)) skip = 0;
+  if (isNaN(skip) || skip < 0) skip = 0;
   // Init transaction
   let transaction = Documents.find(query).skip(skip).limit(limit);
   // Populate dependings on the parameters
@@ -49,10 +50,11 @@ router.get('/', function (req, res, next) {
 
 /* POST new Document */
 router.post('/', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
-    return res.status(401).send('Your current role do not grant access to this part of website');
   let opts = DocumentsController.getUploadParams(Object.assign({ files: req.files }, req.body), req.user),
-    mute = req.body && req.body.mute; // Send mails by default. If mute is set then do not send its
+    mute =
+      req.user && AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator)
+        ? req.body && req.body.mute
+        : false; // Send mails by default. If mute is set by curator then do not send its
   if (opts instanceof Error) return res.json({ 'err': true, 'res': null, 'msg': opts.toString() });
   opts.privateKey = req.app.get('private.key');
   opts.dataTypes = req.app.get('dataTypes');
@@ -60,15 +62,21 @@ router.post('/', function (req, res, next) {
     opts,
     {
       onCreatedAccount: function (account) {
-        // if (!mute) return Mailer.sendAccountCreationMail(account, req.app.get('private.key'));
+        if (!mute) return Mailer.sendAccountCreationMail(account, req.app.get('private.key'));
       }
     },
     function (err, doc) {
-      // Send upload email to curators
-      // if (!mute) Mailer.sendDocumentUploadMail(doc, opts, req.user.username);
-      // If any of the file processing produced an error, err would equal that error
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': 'Error while uploading document !' });
-      else res.json({ 'err': false, 'res': doc });
+      if (err || !doc) return res.json({ 'err': true, 'res': null, 'msg': 'Error while uploading document !' });
+      // Get the uploader account
+      return Accounts.findOne({ _id: doc.uploaded_by }).exec(function (err, account) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+        else if (!account) return res.json({ 'err': true, 'res': null, 'msg': 'account not found' });
+        // Send upload email to curators
+        if (!mute) Mailer.sendDocumentUploadMail(doc, opts, account.username);
+        // If any of the file processing produced an error, err would equal that error
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': 'Error while uploading document !' });
+        else res.json({ 'err': false, 'res': doc });
+      });
     }
   );
 });
@@ -90,6 +98,16 @@ router.get('/:id', function (req, res, next) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
     else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
     else return res.json({ 'err': false, 'res': doc });
+  });
+});
+
+/* DELETE SINGLE Document BY ID */
+router.delete('/:id', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  return DocumentsController.delete(req.params.id, function (err) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    else return res.json({ 'err': false, 'res': true });
   });
 });
 
