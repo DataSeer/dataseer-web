@@ -116,6 +116,27 @@ Self.readFile = function (id, cb) {
 };
 
 /**
+ * Delete file
+ * @param {mongoose.Schema.Types.ObjectId} id - File id
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.deleteFile = function (id, cb) {
+  return DocumentsFiles.findById(id)
+    .select('+path') // path is not returned by default
+    .exec(function (err, file) {
+      if (err) return cb(err);
+      else
+        return fs.unlink(file.path, function (err) {
+          if (err) return cb(err);
+          return DocumentsFiles.deleteOne({ _id: file._id }, function (err) {
+            return cb(err);
+          });
+        });
+    });
+};
+
+/**
  * Re-Write file
  * @param {mongoose.Schema.Types.ObjectId} id - File id
  * @param {string} data - File data
