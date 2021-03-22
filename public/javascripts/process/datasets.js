@@ -23,6 +23,23 @@
     return result;
   };
 
+  const showLoop = function () {
+      let loop = $('#pdf-loading-loop'),
+        container = loop.find('.loader-container'),
+        loader = container.find('.loader'),
+        width = $('html').width();
+      loop.css('width', width);
+      loop.css('height', window.document.body.clientHeight);
+      container.css('padding-top', `${window.document.body.clientHeight * 0.5 - loader.height() * 0.5}px`);
+      container.css('padding-left', `${width * 0.5 - loader.width() * 0.5}px`);
+      loop.show();
+    },
+    hideLoop = function () {
+      $('#pdf-loading-loop').hide();
+    };
+
+  showLoop();
+
   // Get data of current document with datasets informations
   return DataSeerAPI.getDocument(documentId, { datasets: true }, function (err, doc) {
     return DataSeerAPI.getPDF(doc.pdf, function (err, pdf) {
@@ -39,27 +56,10 @@
         };
         console.log(currentDocument);
 
-        const showLoop = function () {
-            let loop = $('#pdf-loading-loop'),
-              container = loop.find('.loader-container'),
-              loader = container.find('.loader'),
-              width = $('html').width();
-            loop.css('width', width);
-            loop.css('height', window.document.body.clientHeight);
-            container.css('padding-top', `${window.document.body.clientHeight * 0.5 - loader.height() * 0.5}px`);
-            container.css('padding-left', `${width * 0.5 - loader.width() * 0.5}px`);
-            loop.show();
-          },
-          hideLoop = function () {
-            $('#pdf-loading-loop').hide();
-          };
-
         window.addEventListener('unhandledrejection', function (event) {
           alert('An error has occured while processing this document... (' + currentDocument._id + ')');
           hideLoop();
         });
-
-        showLoop();
 
         // Get the current Object
         DataSeerAPI.jsonDataTypes(function (err, data) {
