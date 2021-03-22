@@ -11,6 +11,7 @@ const express = require('express'),
 const AccountsManager = require('../lib/accounts.js');
 
 const Organisations = require('../models/organisations.js'),
+  Accounts = require('../models/accounts.js'),
   DocumentsLogs = require('../models/documents.logs.js'),
   Documents = require('../models/documents.js');
 
@@ -27,11 +28,15 @@ router.get('/', function (req, res, next) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   let limit = parseInt(req.query.limit),
     skip = parseInt(req.query.skip),
+    organisation = req.query.organisation,
+    user = req.query.user,
     documentId = req.query.documentId,
     query = {};
   if (isNaN(skip) || skip < 0) skip = 0;
   if (isNaN(limit) || limit < 0) limit = 20;
   if (documentId) query['_id'] = documentId;
+  if (organisation) query['organisation'] = organisation;
+  if (user) query['watchers'] = { '$in': [user] };
   // Init transaction
   let transaction = Documents.find(query)
     .limit(limit)
@@ -46,19 +51,26 @@ router.get('/', function (req, res, next) {
   // Execute transaction
   return transaction.exec(function (err, documents) {
     if (err) return next(err);
-    Organisations.find({}).exec(function (err, organisations) {
-      if (err) return next(err);
-      let error = req.flash('error'),
-        success = req.flash('success');
-      return res.render(path.join('documents', 'all'), {
-        route: 'documents',
-        conf: conf,
-        organisations: organisations,
-        search: true,
-        documents: documents,
-        current_user: req.user,
-        error: Array.isArray(error) && error.length > 0 ? error : undefined,
-        success: Array.isArray(success) && success.length > 0 ? success : undefined
+    return Accounts.find({}).exec(function (err, accounts) {
+      return Organisations.find({}).exec(function (err, organisations) {
+        if (err) return next(err);
+        let error = req.flash('error'),
+          success = req.flash('success');
+        return res.render(path.join('documents', 'all'), {
+          route: 'documents',
+          conf: conf,
+          accounts: accounts.sort(function (a, b) {
+            return a.username.localeCompare(b.username);
+          }),
+          organisations: organisations.sort(function (a, b) {
+            return a.name.localeCompare(b.name);
+          }),
+          search: true,
+          documents: documents,
+          current_user: req.user,
+          error: Array.isArray(error) && error.length > 0 ? error : undefined,
+          success: Array.isArray(success) && success.length > 0 ? success : undefined
+        });
       });
     });
   });
@@ -158,6 +170,7 @@ router.get('/:id/datasets', function (req, res, next) {
     else
       return res.render(path.join('documents', 'datasets'), {
         route: 'documents/:id/datasets',
+        publicURL: conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token,
         conf: conf,
         document: doc,
         current_user: req.user
@@ -178,6 +191,7 @@ router.get('/:id/finish', function (req, res, next) {
     else
       return res.render(path.join('documents', 'finish'), {
         route: 'documents/:id/finish',
+        publicURL: conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token,
         conf: conf,
         document: doc,
         current_user: req.user
