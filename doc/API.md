@@ -270,7 +270,7 @@ This route add new a document (should be used to upload document).
 
 #### Role required
 
-Accessible to users with the following role : **curator**.
+Public access
 
 #### Parameters
 
@@ -356,7 +356,7 @@ Accessible to users with the following role : **curator**.
       <td>application/json</td>
       <td>mute</td>
       <td>optional</td>
-      <td>Specify if notifications will be sent (default: true)</td>
+      <td>Specify if notifications will be muted (default: false)</td>
     </tr>
   </tbody>
 </table>
@@ -365,16 +365,14 @@ Accessible to users with the following role : **curator**.
 
 ```bash
 # Upload a document with attached files
-curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" -H "Authorization: Bearer MY_TOKEN" "http://localhost:3000/api/documents"
-curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" "http://localhost:3000/api/documents?token=MY_TOKEN"
+curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" "http://localhost:3000/api/documents"
 
 # Upload a document without attached files
-curl -X "POST" -F "file=@/path/to/file.pdf" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" -H "Authorization: Bearer MY_TOKEN" "http://localhost:3000/api/documents"
-curl -X "POST" -F "file=@/path/to/file.pdf" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" "http://localhost:3000/api/documents?token=MY_TOKEN"
+curl -X "POST" -F "file=@/path/to/file.pdf" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" "http://localhost:3000/api/documents"
 
 # Upload a document with attached files but do not send email notification
-curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" -F "mute=true" -H "Authorization: Bearer MY_TOKEN" "http://localhost:3000/api/documents"
-curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" -F "mute=true" "http://localhost:3000/api/documents?token=MY_TOKEN"
+
+curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" -F "mute=true" "http://localhost:3000/api/documents"
 ```
 
 #### Result

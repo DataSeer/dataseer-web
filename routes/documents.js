@@ -27,13 +27,15 @@ router.get('/', function (req, res, next) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   let limit = parseInt(req.query.limit),
     skip = parseInt(req.query.skip),
+    documentId = req.query.documentId,
     query = {};
-  if (isNaN(skip)) skip = 0;
-  if (isNaN(limit)) limit = 20;
+  if (isNaN(skip) || skip < 0) skip = 0;
+  if (isNaN(limit) || limit < 0) limit = 20;
+  if (documentId) query['_id'] = documentId;
   // Init transaction
   let transaction = Documents.find(query)
-    .skip(skip)
     .limit(limit)
+    .skip(skip)
     .select('+logs')
     .populate('organisation')
     .populate('metadata')
@@ -89,6 +91,20 @@ router.post('/', function (req, res, next) {
         req.flash('success', 'Organisation of document ' + doc._id + ' has been successfully updated');
         return res.redirect('./documents');
       });
+    });
+  }
+  if (typeof req.body.delete !== 'undefined' && req.body.delete === '') {
+    if (typeof req.body.id !== 'string' || req.body.id.length <= 0) {
+      req.flash('error', 'Incorrect document');
+      return res.redirect('./documents');
+    }
+    return DocumentsController.delete(req.body.id, function (err) {
+      if (err) {
+        req.flash('error', err.message);
+        return res.redirect('./documents');
+      }
+      req.flash('success', 'Document ' + req.body.id + ' has been successfully deleted');
+      return res.redirect('./documents');
     });
   }
 });

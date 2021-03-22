@@ -15,6 +15,11 @@
     "dataseer-ml": "http://localhost/dataseer-ml/service",
     "curator-email": "curator@mydomain.ai"
   },
+  "upload": {
+    "default": {
+      "journal": "Organisation ID that will be used for upload from visitor"
+    }
+  },
   "emails": {
     "upload": "info@dataseer.ai"
   },
