@@ -18,27 +18,38 @@ block content
           div(class='row')
             div(class='col-12 text-center')
               form#custom-search(role='form', action=conf.root + 'documents',method='get')
-                div Uploaded before: 
-                  input.form-control(style='display: inline-block; width: auto;' type='date' name='uploaded_before' placeholder='Uploaded before' value=(params.uploaded_before))
-                div Uploaded after: 
-                  input.form-control(style='display: inline-block; width: auto;' type='date' name='uploaded_after' placeholder='Uploaded after' value=(params.uploaded_after))
+                div(style="width:100%;")
+                  div(style="display:block; margin-bottom: 15px;") Uploaded 
+                  div(style="display:inline-block; margin-right:10px;") before: 
+                    input.form-control(style='display: inline-block; width: auto;' type='date' name='uploaded_before' placeholder='Uploaded before' value=(params.uploaded_before))
+                  div(style="display:inline-block; margin-right:10px;") after: 
+                    input.form-control(style='display: inline-block; width: auto;' type='date' name='uploaded_after' placeholder='Uploaded after' value=(params.uploaded_after))
                 div(style='display:block; margin-top:10px;')
-                div Updated before: 
-                  input.form-control(style='display: inline-block; width: auto;' type='date' name='updated_before' placeholder='Updated before' value=(params.updated_before))
-                div Updated after: 
-                  input.form-control(style='display: inline-block; width: auto;' type='date' name='updated_after' placeholder='Updated after' value=(params.updated_after))
-                div(style='display:block; margin-top:10px;')
-                div Organisation: 
-                  select.custom-select(style='width: auto' name='organisation')
-                    if (params.organisation)
+                div(style="width:100%;")
+                  div(style="display:block; margin-bottom: 15px;") Updated 
+                  div(style="display:inline-block; margin-right:10px;") before: 
+                    input.form-control(style='display: inline-block; width: auto;' type='date' name='updated_before' placeholder='Uploaded before' value=(params.updated_before))
+                  div(style="display:inline-block; margin-right:10px;") after: 
+                    input.form-control(style='display: inline-block; width: auto;' type='date' name='updated_after' placeholder='Uploaded after' value=(params.updated_after))
+                div(style='display:block; margin-top:25px;')
+                div Status: 
+                  select.custom-select(style='width: auto' name='status')
+                    if (params.status)
                       option(value='') All
                     else
                       option(value='' selected) All
-                    each organisation in organisations
-                      if (params.organisation && params.organisation === organisation._id.toString())
-                        option(value=organisation._id selected) #{organisation.name}
-                      else
-                        option(value=organisation._id) #{organisation.name}
+                    if params.status === 'metadata'
+                      option(value='metadata' selected) Metadata validation
+                    else
+                      option(value='metadata') Metadata validation
+                    if params.status === 'datasets'
+                      option(value='datasets' selected) Datasets validation
+                    else
+                      option(value='datasets') Datasets validation
+                    if params.status === 'finish'
+                      option(value='finish' selected) Process finished
+                    else
+                      option(value='finish') Process finished
                 div Modified By: 
                   select.custom-select(style='width: auto' name='user')
                     if (params.organisation)
@@ -50,14 +61,25 @@ block content
                         option(value=account._id selected) #{account.username}
                       else
                         option(value=account._id) #{account.username}
-                div(style='display:block; margin-top:10px;')
+                div Organisation: 
+                  select.custom-select(style='width: auto' name='organisation')
+                    if (params.organisation)
+                      option(value='') All
+                    else
+                      option(value='' selected) All
+                    each organisation in organisations
+                      if (params.organisation && params.organisation === organisation._id.toString())
+                        option(value=organisation._id selected) #{organisation.name}
+                      else
+                        option(value=organisation._id) #{organisation.name}
+                div(style='display:block; margin-top:25px;')
                 div pmid: 
                   input.form-control(style='display: inline-block; width: auto;' type='text' name='pmid' placeholder='pmid' value=(params.pmid))
                 div doi: 
                   input.form-control(style='display: inline-block; width: auto;' type='text' name='doi' placeholder='doi' value=(params.doi))
                 div limit: 
                   input.form-control(style='display: inline-block; width: auto;' type='text' name='limit' placeholder='Maximum number of results' value=(params.limit))
-                div(style='display:block; margin-top:10px;')
+                div(style='display:block; margin-top:25px;')
                   button.btn.btn-primary.waves-effect.waves-light(type='submit') Search for documents
           div(class='row')
             div(class='col-12 text-center')
