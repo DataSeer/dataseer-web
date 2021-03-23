@@ -51,6 +51,7 @@ router.get('/accounts', function (req, res, next) {
             success = req.flash('success');
           return res.render(path.join('backoffice', 'accounts'), {
             route: 'backoffice/accounts',
+            params: req.query,
             conf: conf,
             search: true,
             current_user: req.user,
@@ -189,6 +190,7 @@ router.get('/organisations', function (req, res, next) {
       return res.render(path.join('backoffice', 'organisations'), {
         route: 'backoffice/organisations',
         conf: conf,
+        params: req.query,
         search: true,
         current_user: req.user,
         organisations: organisations,

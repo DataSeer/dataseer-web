@@ -32,7 +32,7 @@ block content
             div(class='col-12 text-center')
               form#custom-search(role='form', action=conf.root + route,method='get')
                 div limit: 
-                  input.form-control(style='display: inline-block; width: auto;' type='text' name='limit' placeholder='Maximum number of results')
+                  input.form-control(style='display: inline-block; width: auto;' type='text' name='limit' placeholder='Maximum number of results' value=(params.limit))
                 div
                   button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Search for organizations
           div(class='row')

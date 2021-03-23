@@ -29,11 +29,35 @@ router.get('/', function (req, res, next) {
   let limit = parseInt(req.query.limit),
     skip = parseInt(req.query.skip),
     organisation = req.query.organisation,
+    pmid = req.query.pmid ? req.query.pmid : null,
+    doi = req.query.doi ? req.query.doi : null,
+    uploaded_before = req.query.uploaded_before ? new Date(req.query.uploaded_before) : null,
+    uploaded_after = req.query.uploaded_after ? new Date(req.query.uploaded_after) : null,
+    updated_before = req.query.updated_before ? new Date(req.query.updated_before) : null,
+    updated_after = req.query.updated_after ? new Date(req.query.updated_after) : null,
     user = req.query.user,
     documentId = req.query.documentId,
     query = {};
   if (isNaN(skip) || skip < 0) skip = 0;
   if (isNaN(limit) || limit < 0) limit = 20;
+  // Check uploaded dates
+  if (uploaded_before instanceof Date && !isNaN(uploaded_before)) {
+    if (query['uploaded_at'] === undefined) query['uploaded_at'] = {};
+    query['uploaded_at']['$lte'] = uploaded_before.toISOString();
+  }
+  if (uploaded_after instanceof Date && !isNaN(uploaded_after)) {
+    if (query['uploaded_at'] === undefined) query['uploaded_at'] = {};
+    query['uploaded_at']['$gte'] = uploaded_after.toISOString();
+  }
+  // Check updated dates
+  if (updated_before instanceof Date && !isNaN(updated_before)) {
+    if (query['updated_at'] === undefined) query['updated_at'] = {};
+    query['updated_at']['$lte'] = updated_before.toISOString();
+  }
+  if (updated_after instanceof Date && !isNaN(updated_after)) {
+    if (query['updated_at'] === undefined) query['updated_at'] = {};
+    query['updated_at']['$gte'] = updated_after.toISOString();
+  }
   if (documentId) query['_id'] = documentId;
   if (organisation) query['organisation'] = organisation;
   if (user) query['watchers'] = { '$in': [user] };
@@ -55,10 +79,20 @@ router.get('/', function (req, res, next) {
       return Organisations.find({}).exec(function (err, organisations) {
         if (err) return next(err);
         let error = req.flash('error'),
-          success = req.flash('success');
+          success = req.flash('success'),
+          docs = documents;
+        if (pmid || doi) {
+          docs = documents.filter(function (item) {
+            let res = true;
+            if (pmid) res &= pmid === item.metadata.pmid;
+            if (doi) res &= doi === item.metadata.doi;
+            return res;
+          });
+        }
         return res.render(path.join('documents', 'all'), {
           route: 'documents',
           conf: conf,
+          params: req.query,
           accounts: accounts.sort(function (a, b) {
             return a.username.localeCompare(b.username);
           }),
@@ -66,7 +100,7 @@ router.get('/', function (req, res, next) {
             return a.name.localeCompare(b.name);
           }),
           search: true,
-          documents: documents,
+          documents: docs,
           current_user: req.user,
           error: Array.isArray(error) && error.length > 0 ? error : undefined,
           success: Array.isArray(success) && success.length > 0 ? success : undefined
