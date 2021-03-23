@@ -28,9 +28,10 @@ router.get('/', function (req, res, next) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   let limit = parseInt(req.query.limit),
     skip = parseInt(req.query.skip),
+    status = req.query.status,
     organisation = req.query.organisation,
-    pmid = req.query.pmid ? req.query.pmid : null,
-    doi = req.query.doi ? req.query.doi : null,
+    pmid = req.query.pmid,
+    doi = req.query.doi,
     uploaded_before = req.query.uploaded_before ? new Date(req.query.uploaded_before) : null,
     uploaded_after = req.query.uploaded_after ? new Date(req.query.uploaded_after) : null,
     updated_before = req.query.updated_before ? new Date(req.query.updated_before) : null,
@@ -59,6 +60,7 @@ router.get('/', function (req, res, next) {
     query['updated_at']['$gte'] = updated_after.toISOString();
   }
   if (documentId) query['_id'] = documentId;
+  if (status) query['status'] = status;
   if (organisation) query['organisation'] = organisation;
   if (user) query['watchers'] = { '$in': [user] };
   // Init transaction
