@@ -19,18 +19,30 @@ block content
           div(class='row')
             div(class='col-12 text-center')
               form#custom-search(role='form', action=conf.root + route,method='get')
-                div role: 
+                div Role: 
                   select.custom-select(style='width: auto' name='role')
-                    option(value='') All
+                    if (params.role)
+                      option(value='') All
+                    else
+                      option(value='' selected) All
                     each role in roles
-                      option(value=role._id) #{role.label}
-                div organisation: 
+                      if (params.role && params.role === role._id.toString())
+                        option(value=role._id selected) #{role.label}
+                      else
+                        option(value=role._id) #{role.label}
+                div Organisation: 
                   select.custom-select(style='width: auto' name='organisation')
-                    option(value='') All
+                    if (params.organisation)
+                      option(value='') All
+                    else
+                      option(value='' selected) All
                     each organisation in organisations
-                      option(value=organisation._id) #{organisation.name}
+                      if (params.organisation && params.organisation === organisation._id.toString())
+                        option(value=organisation._id selected) #{organisation.name}
+                      else
+                        option(value=organisation._id) #{organisation.name}
                 div limit: 
-                  input.form-control(style='display: inline-block; width: auto;' type='text' name='limit' placeholder='Maximum number of results')
+                  input.form-control(style='display: inline-block; width: auto;' type='text' name='limit' placeholder='Maximum number of results' value=(params.limit))
                 div
                   button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Search for accounts
           div(class='row')

@@ -29,4 +29,9 @@ let Schema = new mongoose.Schema(
   { minimize: false }
 );
 
+Schema.pre('save', function (next) {
+  this.set({ updated_at: new Date().toISOString() });
+  return next();
+});
+
 module.exports = mongoose.model('Documents', Schema, 'documents');
