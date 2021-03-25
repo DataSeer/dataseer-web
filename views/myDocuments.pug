@@ -39,13 +39,13 @@ block content
                   div(class='col-2')
                     div(class="hidden") #{JSON.stringify(document.metadata)}
                     if (document.metadata.manuscript_id !== "")
-                      a.document-link(href=conf.root + 'documents/' + document._id) #{document.metadata.manuscript_id}
+                      a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{document.metadata.manuscript_id}
                     else if (document.pdf)
-                      a.document-link(href=conf.root + 'documents/' + document._id) #{document.pdf.filename}
+                      a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{document.pdf.filename}
                     else if (document.tei)
-                      a.document-link(href=conf.root + 'documents/' + document._id) #{document.tei.filename}
+                      a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{document.tei.filename}
                     else
-                      a.document-link(href=conf.root + 'documents/' + document._id) #{formatUrl(document._id)}
+                      a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{formatUrl(document._id)}
                   div(class='col-2') #{formatDate(document.uploaded_at)}
                   if document.status === 'metadata'
                     div(class='col-2') Metadata validation

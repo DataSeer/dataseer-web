@@ -59,15 +59,17 @@ block content
           div(class='row row-margin')
             div(class='col-12')
               form(ref='reload_metada' id='reload_metada' method='post')
-                button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' id='addDocuments' style='margin-left:10px;') Reload metadata
+                button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' id='addDocuments' style='margin-left:10px;')
+                  <i class="fas fa-sync-alt"></i> Reload metadata
 
         div(class='row row-margin')
           div(class='col-12')
-            button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;') Get public URL of this document
+            button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;')
+              <i class="fas fa-link"></i> Get public URL of this document
             input.form-control.hidden(type='text' id='public_url' name='public_url' value=publicURL)
-            a(href='mailto:?subject='+ encodeURIComponent("DataSeer Document Public URL") + '&body=' + encodeURIComponent(`Hi,\n\nUse the following link to process the DataSeer document:\n${publicURL}\n\nThis email has been automatically generated`))
+            a(href='mailto:?subject='+ encodeURIComponent(mail.subject) + '&body=' + encodeURIComponent(mail.body) target='_blank')
               button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Send it by email')
-                <i class="far fa-paper-plane"></i>
+                <i class="far fa-envelope"></i> Share with colleague
 
         div(class='row crud-button-action')
           div(class='col-6 text-center')

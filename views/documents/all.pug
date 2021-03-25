@@ -61,17 +61,18 @@ block content
                         option(value=account._id selected) #{account.username}
                       else
                         option(value=account._id) #{account.username}
-                div Organisation: 
-                  select.custom-select(style='width: auto' name='organisation')
-                    if (params.organisation)
-                      option(value='') All
-                    else
-                      option(value='' selected) All
-                    each organisation in organisations
-                      if (params.organisation && params.organisation === organisation._id.toString())
-                        option(value=organisation._id selected) #{organisation.name}
+                if (current_user.role.label === 'curator')        
+                  div Organisation: 
+                    select.custom-select(style='width: auto' name='organisation')
+                      if (params.organisation)
+                        option(value='') All
                       else
-                        option(value=organisation._id) #{organisation.name}
+                        option(value='' selected) All
+                      each organisation in organisations
+                        if (params.organisation && params.organisation === organisation._id.toString())
+                          option(value=organisation._id selected) #{organisation.name}
+                        else
+                          option(value=organisation._id) #{organisation.name}
                 div(style='display:block; margin-top:25px;')
                 div pmid: 
                   input.form-control(style='display: inline-block; width: auto;' type='text' name='pmid' placeholder='pmid' value=(params.pmid))
@@ -129,13 +130,13 @@ block content
                           div(class='col-1')
                             div(class="hidden") #{JSON.stringify(document.metadata)}
                             if (document.metadata.manuscript_id !== "")
-                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.metadata.manuscript_id}
+                              a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{document.metadata.manuscript_id}
                             else if (document.pdf)
-                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.pdf.filename}
+                              a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{document.pdf.filename}
                             else if (document.tei)
-                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.tei.filename}
+                              a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{document.tei.filename}
                             else
-                              a.document-link(href=conf.root + 'documents/' + document._id) #{formatUrl(document._id)}
+                              a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{formatUrl(document._id)}
                             input.form-control(type='text' name='id' class='hidden' value=document._id)
                           div(class='col-1') #{formatDate(document.uploaded_at)}
                           if document.status === 'metadata'
@@ -159,19 +160,21 @@ block content
                           div(class='col-1') #{document.metadata.journal}
                           div(class='col-2') #{document.metadata.article_title}
                           div(class='col-1')
-                            button.btn.btn-primary.waves-effect.waves-light(type='submit' name='update') Update
-                            button.btn.btn-danger.waves-effect.waves-light(type='submit' name='delete') Delete
+                            button.btn.btn-primary.waves-effect.waves-light(type='submit' name='update')
+                              <i class="far fa-save"></i>
+                            button.btn.btn-danger.waves-effect.waves-light(type='submit' name='delete')
+                              <i class="far fa-trash-alt"></i>
                         else
                           div(class='col-1')
                             div(class="hidden") #{JSON.stringify(document.metadata)}
                             if (document.metadata.manuscript_id !== "")
-                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.metadata.manuscript_id}
+                              a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{document.metadata.manuscript_id}
                             else if (document.pdf)
-                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.pdf.filename}
+                              a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{document.pdf.filename}
                             else if (document.tei)
-                              a.document-link(href=conf.root + 'documents/' + document._id) #{document.tei.filename}
+                              a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{document.tei.filename}
                             else
-                              a.document-link(href=conf.root + 'documents/' + document._id) #{formatUrl(document._id)}
+                              a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{formatUrl(document._id)}
                             input.form-control(type='text' name='id' class='hidden' value=document._id)
                           div(class='col-1') #{formatDate(document.uploaded_at)}
                           if document.status === 'metadata'
