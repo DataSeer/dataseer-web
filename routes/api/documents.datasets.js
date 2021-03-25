@@ -18,13 +18,13 @@ router.put('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
     return res.status(401).send('Your current role do not grant access to this part of website');
   return DocumentsDatasets.findOne({ _id: req.params.id }, function (err, datasets) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else if (!datasets) return res.json({ 'err': true, 'res': null, 'msg': 'datasets not found' });
     if (req.body.current) datasets.current = req.body.current;
     if (req.body.deleted) datasets.deleted = req.body.deleted;
     if (req.body.extracted) datasets.extracted = req.body.extracted;
     return datasets.save(function (err) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       else return res.json({ 'err': false, 'res': true });
     });
   });
@@ -35,7 +35,7 @@ router.post('/:id/checkValidation', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   return DocumentsDatasetsController.checkValidation(req.params.id, function (err, check) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else return res.json({ 'err': false, 'res': check });
   });
 });
@@ -49,7 +49,7 @@ router.post('/:id/dataset', function (req, res, next) {
   return DocumentsDatasetsController.newDataset(
     { datasetsId: req.params.id, dataset: req.body.dataset },
     function (err) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       else return res.json({ 'err': false, 'res': true });
     }
   );
@@ -62,7 +62,7 @@ router.put('/:id/dataset', function (req, res, next) {
   return DocumentsDatasetsController.updateDataset(
     { datasetsId: req.params.id, dataset: req.body.dataset },
     function (err) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       else return res.json({ 'err': false, 'res': true });
     }
   );
@@ -75,7 +75,7 @@ router.delete('/:id/dataset', function (req, res, next) {
   return DocumentsDatasetsController.deleteDataset(
     { datasetsId: req.params.id, dataset: req.body.dataset },
     function (err) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       else return res.json({ 'err': false, 'res': true });
     }
   );
@@ -88,7 +88,7 @@ router.post('/:id/corresp', function (req, res, next) {
   return DocumentsDatasetsController.newCorresp(
     { datasetsId: req.params.id, dataset: req.body.dataset },
     function (err) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       else return res.json({ 'err': false, 'res': true });
     }
   );
@@ -101,7 +101,7 @@ router.delete('/:id/corresp', function (req, res, next) {
   return DocumentsDatasetsController.deleteCorresp(
     { datasetsId: req.params.id, dataset: req.body.dataset },
     function (err) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       else return res.json({ 'err': false, 'res': true });
     }
   );
