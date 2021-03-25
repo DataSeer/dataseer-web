@@ -119,6 +119,16 @@ body {
   z-index: 3220;
 }
 
+#document-view #pdf-viewer .contourLayer .contour.hover canvas,
+#document-view #pdf-viewer .contourLayer .contour.hover canvas {
+  z-index: 3215;
+}
+
+#document-view #pdf-viewer .contourLayer .contour.hover div[events="true"] ,
+#document-view #pdf-viewer .contourLayer .contour.hover div[events="true"]   {
+  z-index: 3225;
+}
+
 #document-view #pdf-viewer .annotationsLayer s {
   z-index: 2100;
   cursor: pointer;
@@ -597,7 +607,7 @@ i {
   margin-right: 25px;
 }
 
-#previous_step {
+#back_to_metadata {
   margin-right: 1%;
   display: inline-block;
   flex: 1;

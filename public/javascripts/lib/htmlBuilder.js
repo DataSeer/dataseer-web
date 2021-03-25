@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 const HtmlBuilder = {
   div: function (options = {}) {
     let result = jQuery('<div/>').addClass(options.class).text(options.text);

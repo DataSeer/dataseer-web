@@ -7,6 +7,7 @@ block content
   if success
     div(class='alert alert-success' role='alert') #{success}
 
+  include ../functions/format.pug
   
   div(class='container-fluid')
     div(class='row')
@@ -17,20 +18,43 @@ block content
               div(class='header') Custom search:
           div(class='row')
             div(class='col-12 text-center')
-              form#custom-search(role='form', action=root + route,method='get')
-                div role: 
-                  select(name='role')
-                    option(value='all') All
-                    option(value='standard_user') Standard User
-                    option(value='annotator') Annotator
-                    option(value='curator') Curator
+              form#custom-search(role='form', action=conf.root + route,method='get')
+                div Role: 
+                  select.custom-select(style='width: auto' name='role')
+                    if (params.role)
+                      option(value='') All
+                    else
+                      option(value='' selected) All
+                    each role in roles
+                      if (params.role && params.role === role._id.toString())
+                        option(value=role._id selected) #{role.label}
+                      else
+                        option(value=role._id) #{role.label}
+                div Organisation: 
+                  select.custom-select(style='width: auto' name='organisation')
+                    if (params.organisation)
+                      option(value='') All
+                    else
+                      option(value='' selected) All
+                    each organisation in organisations
+                      if (params.organisation && params.organisation === organisation._id.toString())
+                        option(value=organisation._id selected) #{organisation.name}
+                      else
+                        option(value=organisation._id) #{organisation.name}
                 div limit: 
-                  input(type='text' name='limit' placeholder='Maximum number of results')
+                  input.form-control(style='display: inline-block; width: auto;' type='text' name='limit' placeholder='Maximum number of results' value=(params.limit))
                 div
-                  button.btn.btn-default.waves-effect.waves-light(type='submit') Search for accounts
+                  button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Search for accounts
           div(class='row')
             div(class='col-12 text-center')
-              div(class='header') Accounts
+              div(class='header') Accounts              
+          div(class='row')
+            div(class='col-1')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='buttom' id='previous_skip') <
+            div(class='col-10')
+              input#search(type='text' name='username' placeholder='Search for email adress')
+            div(class='col-1')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='buttom' id='next_skip') >
           if  accounts.length === 0
             div(class='row')
               div(class='col-12 text-center')
@@ -39,16 +63,15 @@ block content
             div(class='row')
               div(class='col-12 text-center')
                 div(class='count-list') #{accounts.length} result(s)
-            div(class='row')
-              div(class='col-10 offset-1')
-                input#search(type='text' name='username' placeholder='Search for email adress')
             div(class='row head-list')
               div(class='col-12')
                 div(class='form-row')
-                  div(class='col-3 offset-1') Email
-                  div(class='col-3') Role
+                  div(class='col-2') Email
+                  div(class='col-2') Full Name
+                  div(class='col-2') Role
                   div(class='col-2') Organization
-                  div(class='col-3') Actions
+                  div(class='col-2') Token
+                  div(class='col-2') Actions
             if  accounts.length === 0
               div(class='row')
                 div(class='col-12 text-center')
@@ -56,30 +79,35 @@ block content
           each account, index in accounts
             div(class='row' data='true')
               div(class='col-12')
-                form.accounts(role='form', action=root + route, method='post')
+                form.accounts(role='form', action=conf.root + route, method='post')
                   div(class='form-row')
-                    div(class='col-3 offset-1') #{account.username}
+                    div(class='col-2') #{account.username}
                       input.form-control(type='text' name='username' class='hidden' value=account.username)
-                    div(class='col-3')
+                    div(class='col-2')
+                      input.form-control(type='text' name='fullname' value=account.fullname)
+                    div(class='col-2')
                       select.custom-select(name='role')
                         each role, index in roles
                           if account.role.label === role.label
-                            option(selected value=role.label) #{role.label}
+                            option(selected value=role._id) #{role.label}
                           else
-                            option(value=role.label) #{role.label}
+                            option(value=role._id) #{role.label}
                     div(class='col-2')
                       select.custom-select(name='organisation')
-                        if account.organisation === ''
-                          option(selected value='') None
-                        else
-                          option(value='') None
                         each organisation, index in organisations
-                          if account.organisation === organisation.name
-                            option(selected value=organisation.name) #{organisation.name}
+                          if account.organisation.name === organisation.name
+                            option(selected value=organisation._id) #{organisation.name}
                           else
-                            option(value=organisation.name) #{organisation.name}
-                    div(class='col-3')
-                      button.btn.btn-default.waves-effect.waves-light(type='submit' name='update') Update
+                            option(value=organisation._id) #{organisation.name}
+                    if account.tokens.api
+                      div(class='col-2')
+                        input.form-control(type='text' id='apiToken' name='apiToken' value=account.tokens.api)
+                    else
+                      div(class='col-2')
+                        div This user does not have a token
+                    div(class='col-2')
+                      button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' name='update') Update
+                      button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' name='generate_token') New Token
 
           div(class='row')
             div(class='col-12' style='margin-top:20px;')

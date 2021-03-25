@@ -1,6 +1,9 @@
 /*
  * @prettier
  */
+
+'use strict';
+
 const DatasetForm = function (events) {
   let self = this;
 
@@ -118,7 +121,7 @@ const DatasetForm = function (events) {
         value: '',
         help: {
           title: 'If you disagree with this information, please edit the Dataseer Wiki available at: ',
-          href: 'http://wiki.dataseer.io/doku.php',
+          href: 'http://wiki.dataseer.ai/doku.php',
           text: '?'
         }
       },
@@ -190,7 +193,7 @@ const DatasetForm = function (events) {
         .append(elements['dataset.status'].elements().container)
         .append(elements['unlink'])
     )
-    .append(View.forms.row().append(elements['dataset.cert'].elements().container))
+    // .append(View.forms.row().append(elements['dataset.cert'].elements().container)) // fix-161 : hide cert
     .append(View.forms.row().append(elements['dataset.dataType'].elements().container))
     .append(View.forms.row().append(elements['dataset.subType'].elements().container))
     .append(View.forms.row().append(elements['dataset.customDataType'].elements().container))

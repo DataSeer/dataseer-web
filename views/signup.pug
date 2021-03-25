@@ -10,33 +10,34 @@ block content
             h2 Sign up
         div(class='row')
           div(class='col-12')
-            form(role='form', action=root + route, method='post', style='max-width: 300px; margin: auto; text-align: center; margin-top:20px;')
+            form(role='form', action=conf.root + route, method='post', style='max-width: 300px; margin: auto; text-align: center; margin-top:20px;')
               input(type="hidden" id="g-recaptcha-response" name="g-recaptcha-response")
               if error
                 div(class='alert alert-warning' role='alert') #{error}
               if success
                 div(class='alert alert-success' role='alert') #{success}
               .form-group
-                input.form-control(type='email', name='username', placeholder='mail address')
+                input.form-control(type='text', name='fullname', placeholder='Full Name')
               .form-group
-                input.form-control(type='password', name='password', placeholder='password')
+                input.form-control(type='email', name='username', placeholder='Email address')
               .form-group
-                input.form-control(type='password', name='confirm_password', placeholder='confirm password')
+                input.form-control(type='password', name='password', placeholder='Password')
+              .form-group
+                input.form-control(type='password', name='confirm_password', placeholder='Confirm password')
               .form-group
                 label(for='organisation') Select your organization
                 select.custom-select(name='organisation')
-                  option(selected value='') None
                   if organisations
                     each organisation, index in organisations
-                      option(value=organisation.name) #{organisation.name}
+                      option(value=organisation.id) #{organisation.name}
               .btn-group
                 button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Sign up to Dataseer
 
         div(class='row')
           div(class='col-12 my-5' style='margin-top:20px;margin: auto; text-align: center; ')
             div Already have an account? 
-              a(href=root + 'signin') Sign in here
+              a(href=conf.root + 'signin') Sign in here
             div(style='margin-top:5px;') Forgot your password? 
-              a(href=root + 'forgotPassword') Reset it here
+              a(href=conf.root + 'forgotPassword') Reset it here
 
   include ./captcha.pug

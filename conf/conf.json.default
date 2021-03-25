@@ -1,9 +1,29 @@
 {
   "services": {
+    "dataseer-wiki": {
+      "limit": 5,
+      "root": "https://wiki.dataseer.ai",
+      "dataTypes": "/doku.php?id=data_type"
+    },
+    "crisp": {
+      "id": "YOUR_CRISP_ID"
+    },
+    "userflow": {
+      "token": "YOUR_USERFLOW_TOKEN"
+    },
     "mongodb": "mongodb://localhost:27017/app",
-    "dataseer-ml": "http://cloud.science-miner.com/dataseer-ml/service",
-    "curator-email": "tim@dataseer.ai"
+    "dataseer-ml": "http://localhost/dataseer-ml/service",
+    "curator-email": "curator@mydomain.ai"
   },
+  "upload": {
+    "default": {
+      "journal": "Organisation ID that will be used for upload from visitor"
+    }
+  },
+  "emails": {
+    "upload": "info@dataseer.ai"
+  },
+  "FileSystemRoot": "./data",
   "root": "http://localhost:3000/",
   "_reCAPTCHA_site_key_": {
     "public": "publicKey",
@@ -12,5 +32,20 @@
   "_reCAPTCHA_score_": {
     "limit": 0.75,
     "error": "Authentication failed (captcha score too low)"
+  },
+  "tokens": {
+    "api": {
+      "expiresIn": 2592000
+    },
+    "documents": {
+      "expiresIn": 2592000,
+      "accountId": "Account ID that will be used for logs"
+    },
+    "resetPassword": {
+      "expiresIn": 3600
+    },
+    "automaticAccountCreation": {
+      "expiresIn": 604800
+    }
   }
 }

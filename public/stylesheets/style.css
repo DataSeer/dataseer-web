@@ -49,6 +49,8 @@ body {
 
 .modifiers {
   margin: 0px;
+  max-height: 100px;
+  overflow-y: auto;
 }
 
 .modifiers > li.item {
@@ -91,6 +93,16 @@ body {
   padding: 12px 20px 12px 20px; /* Add some padding */
   border: 1px solid #ddd; /* Add a grey border */
   margin-bottom: 12px; /* Add some space below the input */
+}
+
+#previous_skip {
+  float: right;
+  margin-top: 5px;
+}
+
+#next_skip {
+  float: left;
+  margin-top: 5px;
 }
 
 .accounts .form-group > * {

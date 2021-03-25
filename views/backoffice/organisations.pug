@@ -17,9 +17,9 @@ block content
               div(class='header') Add new Organization:
           div(class='row')
             div(class='col-12 text-center' style='margin-top:10px;')
-              form#new-organisation(role='form', action=root + route,method='post')
-                input(type='text' name='name' placeholder='Name of new organization')
-                button.btn.btn-default.waves-effect.waves-light(type='submit' name='create') Add
+              form#new-organisation(role='form', action=conf.root + route,method='post')
+                input.form-control(style='display: inline-block; width: auto;' type='text' name='name' placeholder='Name of new organization')
+                button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' name='create') Add
   
   div(class='container-fluid')
     div(class='row')
@@ -30,14 +30,21 @@ block content
               div(class='header') Custom search:
           div(class='row')
             div(class='col-12 text-center')
-              form#custom-search(role='form', action=root + route,method='get')
+              form#custom-search(role='form', action=conf.root + route,method='get')
                 div limit: 
-                  input(type='text' name='limit' placeholder='Maximum number of results')
+                  input.form-control(style='display: inline-block; width: auto;' type='text' name='limit' placeholder='Maximum number of results' value=(params.limit))
                 div
-                  button.btn.btn-default.waves-effect.waves-light(type='submit') Search for organizations
+                  button.blue.btn.btn-primary.waves-effect.waves-light(type='submit') Search for organizations
           div(class='row')
             div(class='col-12 text-center')
               div(class='header') Organizations
+          div(class='row')
+            div(class='col-1')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='buttom' id='previous_skip') <
+            div(class='col-10')
+              input#search(type='text' name='name' placeholder='Search for organization name')
+            div(class='col-1')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='buttom' id='next_skip') >
           if  organisations.length === 0
             div(class='row')
               div(class='col-12 text-center')
@@ -46,9 +53,6 @@ block content
             div(class='row')
               div(class='col-12 text-center')
                 div(class='count-list') #{organisations.length} result(s)
-            div(class='row')
-              div(class='col-10 offset-1')
-                input#search(type='text' name='name' placeholder='Search for organization name')
             div(class='row head-list')
               div(class='col-12')
                 div(class='form-row')
@@ -61,13 +65,13 @@ block content
           each organisation, index in organisations
             div(class='row' data='true')
               div(class='col-12')
-                form.organisations(role='form', action=root + route, method='post')
+                form.organisations(role='form', action=conf.root + route, method='post')
                   div(class='form-row')
                     div(class='col-3 offset-3')
                       input.form-control(type='text' class='hidden' name='_id' value=organisation._id)
                       input.form-control(type='text' name='name' value=organisation.name)
                     div(class='col-3')
-                      button.btn.btn-default.waves-effect.waves-light(type='submit' name='update') Update
+                      button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' name='update') Update
                       button.btn.btn-danger.waves-effect.waves-light(type='submit' name='delete') Delete
 
           div(class='row')

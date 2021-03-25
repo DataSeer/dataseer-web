@@ -1,4 +1,10 @@
+# custom conf files
 conf/smtp.conf.json
 conf/conf.json
-node_modules/
+conf/private.key
+# data repositories
+data/*
+#logs
 *.log
+# node modules
+node_modules/

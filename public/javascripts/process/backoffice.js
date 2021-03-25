@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 (function ($) {
   // On addDocument click
   $('#addDocuments').click(function () {

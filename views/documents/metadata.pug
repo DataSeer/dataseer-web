@@ -58,15 +58,22 @@ block content
         if current_user.role.label === 'curator'
           div(class='row row-margin')
             div(class='col-12')
-              a(href="?reloadMetadata=true")
-                button(id='reload_metada' class='btn btn-primary') Reload metadata
+              form(ref='reload_metada' id='reload_metada' method='post')
+                button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' id='addDocuments' style='margin-left:10px;')
+                  <i class="fas fa-sync-alt"></i> Reload metadata
+
+        div(class='row row-margin')
+          div(class='col-12')
+            button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;')
+              <i class="fas fa-link"></i> Get public URL of this document
+            input.form-control.hidden(type='text' id='public_url' name='public_url' value=publicURL)
+            a(href='mailto:?subject='+ encodeURIComponent(mail.subject) + '&body=' + encodeURIComponent(mail.body) target='_blank')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Send it by email')
+                <i class="far fa-envelope"></i> Share with colleague
 
         div(class='row crud-button-action')
           div(class='col-6 text-center')
-            button(id='metadata_validation' class='btn btn-primary') This info is correct: Continue
+            button(id='metadata_validation' class='blue btn btn-primary waves-effect waves-light') This info is correct: Continue
           div(class='col-6 text-center')
             a(href="mailto:tim@dataseer.ai")
-              button(id='metadata_contest' class='btn btn-primary') Something is wrong: Contact the DataSeer curator
-
-  if demo
-    include ../forms/demo/metadata.pug
+              button(id='metadata_contest' class='blue btn btn-primary waves-effect waves-light') Something is wrong: Contact the DataSeer curator

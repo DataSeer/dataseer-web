@@ -2,6 +2,8 @@
  * @prettier
  */
 
+'use strict';
+
 const View = {
   icons: {
     delete: function () {
@@ -155,7 +157,7 @@ const View = {
           self.help = function (options) {
             if (typeof options !== 'undefined') {
               if (options.href) {
-                elements.help.attr('href', options.href);
+                elements.help.attr('href', options.href.replace('.io/', '.ai/'));
                 if (self.title) elements.container.attr('title', self.title + options.href);
               }
               if (options.title) elements.container.attr('title', options.title);
@@ -236,7 +238,7 @@ const View = {
           self.help = function (options) {
             if (typeof options !== 'undefined') {
               if (options.href) {
-                elements.help.attr('href', options.href);
+                elements.help.attr('href', options.href.replace('.io/', '.ai/'));
                 if (self.title) elements.container.attr('title', self.title + options.href);
               }
               if (options.title) elements.container.attr('title', options.title);

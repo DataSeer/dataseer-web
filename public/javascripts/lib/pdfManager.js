@@ -1,6 +1,7 @@
 /*
  * @prettier
  */
+
 'use strict';
 
 const PdfManager = {
