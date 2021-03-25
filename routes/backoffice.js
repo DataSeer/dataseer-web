@@ -334,7 +334,8 @@ router.post('/upload', function (req, res, next) {
     },
     function (err, doc) {
       // If any of the file processing produced an error, err would equal that error
-      if (err) {
+      if (err || !doc) {
+        console.log(err);
         req.flash('error', 'Error while uploading document !');
         return res.redirect('./upload');
       }
