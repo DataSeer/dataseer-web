@@ -26,6 +26,7 @@ const indexRouter = require('./routes/index.js'),
   documentsRouter = require('./routes/api/documents.js'),
   documentsFilesRouter = require('./routes/api/documents.files.js'),
   documentsDatasetsRouter = require('./routes/api/documents.datasets.js'),
+  documentsMetadataRouter = require('./routes/api/documents.metadata.js'),
   dataseerMLRouter = require('./routes/api/dataseer-ml.js'),
   backOfficeRouter = require('./routes/backoffice.js'),
   viewsRouter = require('./routes/documents.js');
@@ -143,6 +144,7 @@ db.once('open', function () {
           app.use('/api/documents', documentsRouter);
           app.use('/api/files', documentsFilesRouter);
           app.use('/api/datasets', documentsDatasetsRouter);
+          app.use('/api/metadata', documentsMetadataRouter);
           app.use('/api/dataseer-ml', dataseerMLRouter);
           app.use('/documents', viewsRouter);
           app.use('/backoffice', backOfficeRouter);

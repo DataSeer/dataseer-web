@@ -8,7 +8,8 @@ const express = require('express'),
   router = express.Router(),
   path = require('path');
 
-const AccountsManager = require('../lib/accounts.js');
+const AccountsManager = require('../lib/accounts.js'),
+  Mailer = require('../lib/mailer.js');
 
 const Organisations = require('../models/organisations.js'),
   Accounts = require('../models/accounts.js'),
@@ -38,7 +39,8 @@ router.get('/', function (req, res, next) {
     updated_after = req.query.updated_after ? new Date(req.query.updated_after) : null,
     user = req.query.user,
     documentId = req.query.documentId,
-    query = {};
+    query = {},
+    isCuractor = AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator);
   if (isNaN(skip) || skip < 0) skip = 0;
   if (isNaN(limit) || limit < 0) limit = 20;
   // Check uploaded dates
@@ -63,6 +65,8 @@ router.get('/', function (req, res, next) {
   if (status) query['status'] = status;
   if (organisation) query['organisation'] = organisation;
   if (user) query['watchers'] = { '$in': [user] };
+  // Annotators access is restricted
+  if (!isCuractor) query['organisation'] = req.user.organisation._id;
   // Init transaction
   let transaction = Documents.find(query)
     .limit(limit)
@@ -77,8 +81,10 @@ router.get('/', function (req, res, next) {
   // Execute transaction
   return transaction.exec(function (err, documents) {
     if (err) return next(err);
-    return Accounts.find({}).exec(function (err, accounts) {
-      return Organisations.find({}).exec(function (err, organisations) {
+    let accountsQuery = isCuractor ? {} : { organisation: query['organisation'] };
+    return Accounts.find(accountsQuery).exec(function (err, accounts) {
+      let organisationsQuery = isCuractor ? {} : { _id: query['organisation'] };
+      return Organisations.find(organisationsQuery).exec(function (err, organisations) {
         if (err) return next(err);
         let error = req.flash('error'),
           success = req.flash('success'),
@@ -170,7 +176,13 @@ router.get('/:id/metadata', function (req, res, next) {
     else
       return res.render(path.join('documents', 'metadata'), {
         route: 'documents/:id/metadata',
-        publicURL: conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token,
+        mail: {
+          subject: Mailer.getShareWithColleagueSubject(),
+          body: Mailer.getShareWithColleagueBodyTxt({
+            metadata: doc.metadata,
+            url: conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token
+          })
+        },
         conf: conf,
         document: doc,
         current_user: req.user

@@ -19,7 +19,7 @@ router.put('/:id', function (req, res, next) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   return DocumentsDatasets.findOne({ _id: req.params.id }, function (err, datasets) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
-    else if (!datasets) res.json({ 'err': true, 'res': null, 'msg': 'datasets not found' });
+    else if (!datasets) return res.json({ 'err': true, 'res': null, 'msg': 'datasets not found' });
     if (req.body.current) datasets.current = req.body.current;
     if (req.body.deleted) datasets.deleted = req.body.deleted;
     if (req.body.extracted) datasets.extracted = req.body.extracted;
