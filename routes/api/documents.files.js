@@ -25,7 +25,7 @@ router.get('/:id', function (req, res, next) {
   let transaction = DocumentsFiles.findOne({ _id: req.params.id }).select('+path'); // path is not returned by default;
   // Execute transaction
   return transaction.exec(function (err, file) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else if (!file) return res.json({ 'err': true, 'res': null, 'msg': 'file not found' });
     let stream = fs.createReadStream(file.path),
       stat = fs.statSync(file.path);
@@ -43,10 +43,10 @@ router.get('/:id/buffer', function (req, res, next) {
   let transaction = DocumentsFiles.findOne({ _id: req.params.id }).lean(); // path is not returned by default;
   // Execute transaction
   return transaction.exec(function (err, file) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else if (!file) return res.json({ 'err': true, 'res': null, 'msg': 'file not found' });
     return DocumentsFilesController.readFile(req.params.id, function (err, data) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       let result = Object.assign({}, file, { data: Buffer.from(data, file.encoding) });
       return res.json({ 'err': false, 'res': result });
     });
@@ -61,10 +61,10 @@ router.get('/:id/string', function (req, res, next) {
   let transaction = DocumentsFiles.findOne({ _id: req.params.id }).lean(); // path is not returned by default;
   // Execute transaction
   return transaction.exec(function (err, file) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else if (!file) return res.json({ 'err': true, 'res': null, 'msg': 'file not found' });
     return DocumentsFilesController.readFile(req.params.id, function (err, data) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       let result = Object.assign({}, file, { data: data.toString('utf8') });
       return res.json({ 'err': false, 'res': result });
     });

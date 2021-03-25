@@ -16,7 +16,7 @@ router.put('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
     return res.status(401).send('Your current role do not grant access to this part of website');
   return DocumentsMetadata.findOne({ _id: req.params.id }, function (err, metadata) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else if (!metadata) return res.json({ 'err': true, 'res': null, 'msg': 'metadata not found' });
     if (req.body.article_title) metadata.article_title = req.body.article_title;
     if (req.body.journal) metadata.journal = req.body.journal;
@@ -29,7 +29,7 @@ router.put('/:id', function (req, res, next) {
     if (req.body.doi) metadata.doi = req.body.doi;
     if (req.body.pmid) metadata.pmid = req.body.pmid;
     return metadata.save(function (err) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       else return res.json({ 'err': false, 'res': true });
     });
   });
