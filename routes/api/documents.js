@@ -66,16 +66,15 @@ router.post('/', function (req, res, next) {
       }
     },
     function (err, doc) {
-      if (err || !doc) return res.json({ 'err': true, 'res': null, 'msg': 'Error while uploading document !' });
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
+      if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'Error while uploading document !' });
       // Get the uploader account
       return Accounts.findOne({ _id: doc.uploaded_by }).exec(function (err, account) {
         if (err) return res.json({ 'err': true, 'res': null, 'msg': err });
         else if (!account) return res.json({ 'err': true, 'res': null, 'msg': 'account not found' });
         // Send upload email to curators
         if (!mute) Mailer.sendDocumentUploadMail(doc, opts, account.username);
-        // If any of the file processing produced an error, err would equal that error
-        if (err) return res.json({ 'err': true, 'res': null, 'msg': 'Error while uploading document !' });
-        else res.json({ 'err': false, 'res': doc });
+        return res.json({ 'err': false, 'res': doc });
       });
     }
   );
