@@ -148,9 +148,9 @@ router.post('/accounts', function (req, res, next) {
           return Mailer.sendMail(
             {
               'username': user.username,
-              'subject': 'New DataSeer API token',
-              'text': Mailer.getNewAPITokenTxt({ token: token }),
-              'html': Mailer.getNewAPITokenHtml({ token: token })
+              'subject': Mailer.getNewAPITokenSubject(),
+              'text': Mailer.getNewAPITokenBodyTxt({ token: token }),
+              'html': Mailer.getNewAPITokenBodyHtml({ token: token })
             },
             function (err, info) {
               // If Mailer error has occured

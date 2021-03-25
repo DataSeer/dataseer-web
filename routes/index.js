@@ -241,9 +241,9 @@ router.post('/forgotPassword', function (req, res) {
           return Mailer.sendMail(
             {
               'username': user.username,
-              'subject': 'Reset your DataSeer Password',
-              'text': Mailer.getResetPasswordMailTxt({ url: url }),
-              'html': Mailer.getResetPasswordMailHtml({ url: url })
+              'subject': Mailer.getResetPasswordSubject(),
+              'text': Mailer.getResetPasswordBodyTxt({ url: url }),
+              'html': Mailer.getResetPasswordBodyHtml({ url: url })
             },
             function (err, info) {
               // If Mailer error has occured
