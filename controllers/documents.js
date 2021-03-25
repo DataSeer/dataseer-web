@@ -386,7 +386,10 @@ Self.upload = function (opts = {}, events, cb) {
           });
         },
         function (err, result) {
-          if (err) return cb(err);
+          if (err)
+            return Self.delete(result._id.toString(), function (_err) {
+              return cb(err);
+            });
           // Create logs
           return DocumentsLogs.create(
             {
@@ -433,55 +436,52 @@ Self.delete = function (documentId, cb) {
   return Documents.findById(documentId).exec(function (err, doc) {
     if (err) return cb(err);
     if (!doc) return cb(new Error('Document not found'));
-    // Delete files on FileSystem
-    return async.each(
-      doc.files,
-      function (item, callback) {
-        return DocumentsFilesController.deleteFile(item.toString(), function (err) {
+    if (err) return cb(err);
+    let actions = [
+      // Delete DocumentsLogs
+      function (callback) {
+        return DocumentsLogs.deleteOne({ document: doc._id.toString() }, function (err) {
           return callback(err);
         });
       },
+      // Delete DocumentsFiles
+      function (callback) {
+        return DocumentsFiles.find({ document: doc._id.toString() }, function (err, files) {
+          if (err) return callback(err);
+          if (Array.isArray(files) && files.length)
+            return files.map(function (file) {
+              // Delete files on FileSystem & in mongoDB
+              return DocumentsFilesController.deleteFile(file._id.toString(), function (err) {
+                return callback(err);
+              });
+            });
+          else return callback();
+        });
+      },
+      // Delete DocumentsMetadata
+      function (callback) {
+        return DocumentsMetadata.deleteOne({ document: doc._id.toString() }, function (err) {
+          return callback(err);
+        });
+      },
+      // Delete DocumentsDatasets
+      function (callback) {
+        return DocumentsDatasets.deleteOne({ document: doc._id.toString() }, function (err) {
+          return callback(err);
+        });
+      }
+    ];
+    // Execute all delete actions
+    return async.each(
+      actions,
+      function (action, callback) {
+        return action(callback);
+      },
       function (err) {
         if (err) return cb(err);
-        let actions = [
-          // Delete DocumentsLogs
-          function (callback) {
-            return DocumentsLogs.deleteOne({ document: doc._id.toString() }, function (err) {
-              return callback(err);
-            });
-          },
-          // Delete DocumentsFiles
-          function (callback) {
-            return DocumentsFiles.deleteOne({ document: doc._id.toString() }, function (err) {
-              return callback(err);
-            });
-          },
-          // Delete DocumentsMetadata
-          function (callback) {
-            return DocumentsMetadata.deleteOne({ document: doc._id.toString() }, function (err) {
-              return callback(err);
-            });
-          },
-          // Delete DocumentsDatasets
-          function (callback) {
-            return DocumentsDatasets.deleteOne({ document: doc._id.toString() }, function (err) {
-              return callback(err);
-            });
-          }
-        ];
-        // Execute all delete actions
-        return async.each(
-          actions,
-          function (action, callback) {
-            return action(callback);
-          },
-          function (err) {
-            if (err) return cb(err);
-            return Documents.deleteOne({ _id: doc._id.toString() }, function (err) {
-              return cb(err);
-            });
-          }
-        );
+        return Documents.deleteOne({ _id: doc._id.toString() }, function (err) {
+          return cb(err);
+        });
       }
     );
   });
