@@ -258,12 +258,29 @@ router.post('/organisations', function (req, res, next) {
       req.flash('error', 'Invalid organisation name !');
       return res.redirect('./organisations');
     }
-    return Organisations.findOneAndDelete({ '_id': req.body._id, 'name': req.body.name }).exec(function (err) {
-      // If MongoDB error has occured
-      if (err) return next(err);
-      req.flash('success', 'Organisation ' + req.body.name + ' have been successfully created');
-      return res.redirect('./organisations');
-    });
+    return Documents.updateMany({ 'organisation': req.body._id }, { 'organisation': conf.upload.default.journal }).exec(
+      function (err, results) {
+        if (err) {
+          req.flash('error', 'Error while updating documents organisation !');
+          return res.redirect('./organisations');
+        }
+        return Documents.updateMany(
+          { 'upload_journal': req.body._id },
+          { 'upload_journal': conf.upload.default.journal }
+        ).exec(function (err, results) {
+          if (err) {
+            req.flash('error', 'Error while updating documents upload_journal !');
+            return res.redirect('./organisations');
+          }
+          return Organisations.findOneAndDelete({ '_id': req.body._id, 'name': req.body.name }).exec(function (err) {
+            // If MongoDB error has occured
+            if (err) return next(err);
+            req.flash('success', 'Organisation ' + req.body.name + ' have been successfully created');
+            return res.redirect('./organisations');
+          });
+        });
+      }
+    );
   } else return res.redirect('./organisations');
 });
 
