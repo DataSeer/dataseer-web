@@ -449,12 +449,18 @@ Self.delete = function (documentId, cb) {
         return DocumentsFiles.find({ document: doc._id.toString() }, function (err, files) {
           if (err) return callback(err);
           if (Array.isArray(files) && files.length)
-            return files.map(function (file) {
-              // Delete files on FileSystem & in mongoDB
-              return DocumentsFilesController.deleteFile(file._id.toString(), function (err) {
+            return async.each(
+              files,
+              function (file, next) {
+                // Delete files on FileSystem & in mongoDB
+                return DocumentsFilesController.deleteFile(file._id.toString(), function (err) {
+                  return next(err);
+                });
+              },
+              function (err) {
                 return callback(err);
-              });
-            });
+              }
+            );
           else return callback();
         });
       },
