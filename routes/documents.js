@@ -173,20 +173,23 @@ router.get('/:id/metadata', function (req, res, next) {
   return transaction.exec(function (err, doc) {
     if (err || !doc) return res.status(404).send('Document not found');
     if (doc.status !== 'metadata') return res.redirect(`./${doc.status}` + AccountsManager.addTokenInURL(req.query));
-    else
+    else {
+      let publicURL = conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token;
       return res.render(path.join('documents', 'metadata'), {
         route: 'documents/:id/metadata',
+        publicURL: publicURL,
         mail: {
           subject: Mailer.getShareWithColleagueSubject(),
           body: Mailer.getShareWithColleagueBodyTxt({
             metadata: doc.metadata,
-            url: conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token
+            url: publicURL
           })
         },
         conf: conf,
         document: doc,
         current_user: req.user
       });
+    }
   });
 });
 
