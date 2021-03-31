@@ -73,6 +73,8 @@ Run this command to install dataseer-web app.
 
 *[Table of contents](#documentations)*
 
+**Important: NodeJS version 10 (or greater) needed**
+
 Run this command to start dataseer-web app instance (that will be restarted in case of crash).
 
 ``npm start``
