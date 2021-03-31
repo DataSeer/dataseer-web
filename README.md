@@ -81,7 +81,11 @@ Run this command to stop dataseer-web app instance.
 
 ``npm stop``
 
-Note: [pm2](https://www.npmjs.com/package/pm2) is used to handle restart of the app.
+Run this command to list forever app.
+
+``npm run list``
+
+Note: [forever](https://www.npmjs.com/package/forever) is used to handle restart of the app.
 
 ## Dependencies
 
