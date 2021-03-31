@@ -45,8 +45,12 @@ block content
             li
               a(href=conf.root + 'forgotPassword' class='nav') Forgot password
           li
-            button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;') Get public URL of this document
+            button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Copy URL to clipboard')
+              <i class="fas fa-link"></i>
             input.form-control.hidden(type='text' id='public_url' name='public_url' value=publicURL)
+            a(href='mailto:?subject='+ encodeURIComponent(mail.subject) + '&body=' + encodeURIComponent(mail.body) target='_blank')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email')
+                <i class="far fa-envelope"></i>
 
   div(class='row' style='margin-bottom:5px;')
     div(class='col-12')

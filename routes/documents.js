@@ -218,14 +218,23 @@ router.get('/:id/datasets', function (req, res, next) {
   return transaction.exec(function (err, doc) {
     if (err || !doc) return res.status(404).send('Document not found');
     if (doc.status !== 'datasets') return res.redirect(`./${doc.status}` + AccountsManager.addTokenInURL(req.query));
-    else
+    else {
+      let publicURL = conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token;
       return res.render(path.join('documents', 'datasets'), {
         route: 'documents/:id/datasets',
-        publicURL: conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token,
+        publicURL: publicURL,
+        mail: {
+          subject: Mailer.getShareWithColleagueSubject(),
+          body: Mailer.getShareWithColleagueBodyTxt({
+            metadata: doc.metadata,
+            url: publicURL
+          })
+        },
         conf: conf,
         document: doc,
         current_user: req.user
       });
+    }
   });
 });
 
@@ -239,14 +248,23 @@ router.get('/:id/finish', function (req, res, next) {
   return transaction.exec(function (err, doc) {
     if (err || !doc) return res.status(404).send('Document not found');
     if (doc.status !== 'finish') return res.redirect(`./${doc.status}` + AccountsManager.addTokenInURL(req.query));
-    else
+    else {
+      let publicURL = conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token;
       return res.render(path.join('documents', 'finish'), {
         route: 'documents/:id/finish',
-        publicURL: conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token,
+        publicURL: publicURL,
+        mail: {
+          subject: Mailer.getShareWithColleagueSubject(),
+          body: Mailer.getShareWithColleagueBodyTxt({
+            metadata: doc.metadata,
+            url: publicURL
+          })
+        },
         conf: conf,
         document: doc,
         current_user: req.user
       });
+    }
   });
 });
 
