@@ -6,7 +6,7 @@
 
 const mongoose = require('mongoose');
 
-let Author = new mongoose.Schema({ name: String, affiliations: [String] }, { _id: false });
+let Author = new mongoose.Schema({ name: String, email: String, affiliations: [String] }, { _id: false });
 
 let Schema = new mongoose.Schema(
   {

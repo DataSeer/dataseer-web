@@ -94,7 +94,7 @@ Structure of data:
 
 ```js
 // Authors
-{ name: String, affiliations: [String] }, { _id: false }
+{ name: String, email: String, affiliations: [String] }, { _id: false }
 
 // Metadata
 {
