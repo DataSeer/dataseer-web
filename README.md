@@ -34,6 +34,7 @@ Documents, Organisations & Users data are stored in MongoDB. Files (PDF, XML, et
 
   - [Install](#install)
   - [Run](#run)
+  - [Save & Restore MongoDB](#save--restore-mongodb)
   - [Dependencies](#dependencies)
   - [Configuration](#configuration)
     - [Web Application configuration](#web-application-configuration)
@@ -72,9 +73,15 @@ Run this command to install dataseer-web app.
 
 *[Table of contents](#documentations)*
 
-Run this command to start dataseer-web app.
+Run this command to start dataseer-web app instance (that will be restarted in case of crash).
 
 ``npm start``
+
+Run this command to stop dataseer-web app instance.
+
+``npm stop``
+
+Note: [pm2](https://www.npmjs.com/package/pm2) is used to handle restart of the app.
 
 ## Dependencies
 
@@ -85,7 +92,20 @@ Application requires:
   - an instance of mongoDB (by default: running on port `27017`, with an `app` database).
   - an instance of dataseer-ml application (by default: running on `http://localhost/dataseer-ml/service`).
 
-Use `conf/conf.json` to custom configuration.
+## Save & Restore MongoDB
+
+MongoDB database can be save with script ./db-save/save.sh (using cron):
+
+```bash
+crontab -e
+0 0 * * * /path/to/dataseer-web/db-save/save.sh
+```
+
+It will run ``mongodump`` every day (at 00:00). To restore data, go to the desired save directory & run ``mongorestore``.
+
+Note: There is one directory per day (0/ is used for monday, 1/ is used for thusday, etc). If you want to restore data from the last Friday, you must use the directory **./db-save/4/dump/**.
+
+**Important: it only backup/restore mongodb data. Files stored on FileSystem are not managed by this script.**
 
 ## Configuration
 
