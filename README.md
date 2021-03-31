@@ -104,7 +104,10 @@ MongoDB database can be save with script ./db-save/save.sh (using cron):
 
 ```bash
 crontab -e
+# this one will enable email notification
 0 0 * * * /path/to/dataseer-web/db-save/save.sh
+# this one will disable email notification
+0 0 * * * /path/to/dataseer-web/db-save/save.sh > /dev/null 2>&1
 ```
 
 It will run ``mongodump`` every day (at 00:00). To restore data, go to the desired save directory & run ``mongorestore``.
