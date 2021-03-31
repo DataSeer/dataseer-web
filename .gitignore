@@ -8,3 +8,5 @@ data/*
 *.log
 # node modules
 node_modules/
+# mongodb save
+db-save/[0-6]/dump
