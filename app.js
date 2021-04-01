@@ -133,8 +133,8 @@ db.once('open', function () {
           app.use('/documents/', DocumentsController.authenticate);
           app.use('/api/documents/', DocumentsController.authenticate);
           app.use('/api/dataseer-ml/', DocumentsController.authenticate);
-          app.use('/api/datasets/', DocumentsDatasetsController.authenticate);
-          app.use('/api/files/', DocumentsFilesController.authenticate);
+          app.use('/api/datasets/', DocumentsController.authenticate);
+          app.use('/api/files/', DocumentsController.authenticate);
 
           app.use('/documents/:id', DocumentsController.watch); // Add watcher if necessary
 

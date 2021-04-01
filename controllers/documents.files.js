@@ -8,45 +8,11 @@ const md5 = require('md5'),
   path = require('path'),
   fs = require('fs');
 
-const DocumentsFiles = require('../models/documents.files.js'),
-  Accounts = require('../models/accounts.js');
-
-const JWT = require('../lib/jwt.js');
+const DocumentsFiles = require('../models/documents.files.js');
 
 const conf = require('../conf/conf.json');
 
 let Self = {};
-
-/**
- * Authenticate account with JWT (documentToken)
- * @param {object} req - req express variable
- * @param {object} res - res express variable
- * @param {function} next - next express variable
- * @returns {undefined} undefined
- */
-Self.authenticate = function (req, res, next) {
-  // If user is already authenticated with session, just go next
-  if (req.user) return next();
-  // Get token
-  let token = req.query.documentToken;
-  if (!token) return next();
-  // Just try to authenticate. If it fail, just go next
-  else
-    return JWT.check(token, req.app.get('private.key'), {}, function (err, decoded) {
-      if (err || !decoded) return next();
-      return Accounts.findOne({ _id: decoded.accountId }, function (err, user) {
-        if (err || !user) return next();
-        return DocumentsFiles.findOne({ document: decoded.documentId }, function (err, file) {
-          if (err || !file) return next();
-          if (file.document.toString() === decoded.documentId) {
-            req.user = user; // Set user
-            res.locals = { useDocumentToken: true };
-          }
-          return next();
-        });
-      });
-    });
-};
 
 /**
  * Check if mimetype is PDF
