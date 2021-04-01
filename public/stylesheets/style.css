@@ -65,9 +65,10 @@ body {
   max-width: auto;
 }
 
-.accounts button[type="submit"],
-.documents button[type="submit"],
-.organisations button[type="submit"] {
+.accounts button,
+.documents button,
+.organisations button {
+  margin-bottom: 5px;
   margin-right: 15px;
 }
 
