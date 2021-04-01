@@ -112,7 +112,7 @@ crontab -e
 
 It will run ``mongodump`` every day (at 00:00). To restore data, go to the desired save directory & run ``mongorestore``.
 
-Note: There is one directory per day (0/ is used for monday, 1/ is used for thusday, etc). If you want to restore data from the last Friday, you must use the directory **./db-save/4/dump/**.
+Note: There is one directory per day (0/ is used for monday, 1/ is used for tuesday, etc). If you want to restore data from the last friday, you must use the directory **./db-save/4/dump/**.
 
 **Important: it only backup/restore mongodb data. Files stored on FileSystem are not managed by this script.**
 
