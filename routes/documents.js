@@ -9,6 +9,7 @@ const express = require('express'),
   path = require('path');
 
 const AccountsManager = require('../lib/accounts.js'),
+  JWT = require('../lib/jwt.js'),
   Mailer = require('../lib/mailer.js');
 
 const Organisations = require('../models/organisations.js'),
@@ -145,8 +146,7 @@ router.post('/', function (req, res, next) {
         return res.redirect('./documents');
       });
     });
-  }
-  if (typeof req.body.delete !== 'undefined' && req.body.delete === '') {
+  } else if (typeof req.body.delete !== 'undefined' && req.body.delete === '') {
     if (typeof req.body.id !== 'string' || req.body.id.length <= 0) {
       req.flash('error', 'Incorrect document');
       return res.redirect('./documents');
@@ -159,7 +159,46 @@ router.post('/', function (req, res, next) {
       req.flash('success', 'Document ' + req.body.id + ' has been successfully deleted');
       return res.redirect('./documents');
     });
+  } else if (typeof req.body.generate_token !== 'undefined' && req.body.generate_token === '') {
+    if (typeof req.body.id !== 'string' || req.body.id.length <= 0) {
+      req.flash('error', 'Incorrect document');
+      return res.redirect('./documents');
+    }
+    // If privateKey not found
+    let privateKey = req.app.get('private.key');
+    if (!privateKey) {
+      req.flash('error', 'Server unable to create new JWT (private key not found)');
+      return res.redirect('./documents');
+    }
+    return Documents.findOne({ _id: req.body.id }, function (err, doc) {
+      if (err) {
+        req.flash('error', err.message);
+        return res.redirect('./documents');
+      }
+      return JWT.create(
+        { documentId: doc._id, accountId: conf.tokens.documents.accountId },
+        privateKey,
+        conf.tokens.documents.expiresIn,
+        function (err, token) {
+          // If JWT error has occured
+          if (err) {
+            req.flash('error', `Server unable to create new JWT (${err.message})`);
+            return res.redirect('./documents');
+          }
+          doc.token = token;
+          return doc.save(function (err) {
+            if (err) {
+              req.flash('error', err.message);
+              return res.redirect('./documents');
+            }
+            req.flash('success', 'Token of document ' + doc._id + ' has been successfully updated');
+            return res.redirect('./documents');
+          });
+        }
+      );
+    });
   }
+  return res.redirect('./documents');
 });
 
 /* GET on given document metadata page */
