@@ -307,17 +307,6 @@ i {
   width: 100%;
 }
 
-#dataset-form .form-row > button:last-child {
-  display: table-cell;
-  text-align: right;
-}
-
-#dataset-form .form-row > button:first-child,
-#dataset-form .form-row > button {
-  display: table-cell;
-  text-align: left;
-}
-
 #dataset-form #dataset\.id {
   display: inline-block;
   width: auto;
@@ -358,9 +347,21 @@ i {
 }
 
 #dataset-form .form-row button {
+  float: left;
   display: inline-block;
   margin-left: 4px;
   margin-right: 4px; 
+}
+
+#dataset-form .form-row button i {
+  font-size: 1rem;
+}
+
+#dataset-form .form-row button div {
+  font-weight: normal;
+  margin-left: 5px;
+  display: inline;
+  font-size: 1rem;
 }
 
 #dataset-form .form-row input {
