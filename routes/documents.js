@@ -69,6 +69,7 @@ router.get('/', function (req, res, next) {
   if (!isCuractor) query['organisation'] = req.user.organisation._id;
   // Init transaction
   let transaction = Documents.find(query)
+    .sort({ _id: -1 })
     .limit(limit)
     .skip(skip)
     .select('+logs')

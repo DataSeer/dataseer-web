@@ -494,6 +494,7 @@ router.get('/myDocuments', function (req, res) {
   if (isNaN(limit) || limit < 0) limit = 20;
   if (isNaN(skip) || skip < 0) skip = 0;
   return Documents.find(query)
+    .sort({ _id: -1 })
     .limit(limit)
     .skip(skip)
     .populate('metadata')
