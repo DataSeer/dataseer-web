@@ -216,7 +216,7 @@ router.post('/:id/metadata/validate', function (req, res, next) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
     doc.status = 'datasets';
-    doc.save(function (err) {
+    return doc.save(function (err) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       // Create logs
       else
@@ -270,7 +270,7 @@ router.post('/:id/datasets/validate', function (req, res, next) {
         else if (!AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator) && !check)
           return res.json({ 'err': true, 'res': null, 'msg': 'datasets not valid (at least one of them)' });
         doc.status = 'finish';
-        doc.save(function (err) {
+        return doc.save(function (err) {
           if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
           // Create logs
           else
@@ -307,7 +307,7 @@ router.post('/:id/datasets/backToMetadata', function (req, res, next) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
     doc.status = 'metadata';
-    doc.save(function (err) {
+    return doc.save(function (err) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       // Create logs
       else
@@ -342,7 +342,7 @@ router.post('/:id/finish/reopen', function (req, res, next) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
     doc.status = 'metadata';
-    doc.save(function (err) {
+    return doc.save(function (err) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       // Create logs
       else

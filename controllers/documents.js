@@ -440,7 +440,7 @@ Self.delete = function (documentId, cb) {
     let actions = [
       // Delete DocumentsLogs
       function (callback) {
-        return DocumentsLogs.deleteOne({ document: doc._id.toString() }, function (err) {
+        return DocumentsLogs.deleteMany({ document: doc._id.toString() }, function (err) {
           return callback(err);
         });
       },
@@ -537,6 +537,7 @@ Self.extractMetadata = function (doc, cb) {
         let metadata = XML.extractMetadata(XML.load(data.toString()));
         metadata.document = doc._id; // Link it to the document
         return DocumentsMetadata.create(metadata, function (err, metadata) {
+          if (err) return cb(err);
           doc.metadata = metadata._id; // Link it to the metadata
           return doc.save(function (err) {
             if (err) return cb(err);
@@ -576,6 +577,7 @@ Self.updateMetadata = function (doc, user, cb) {
               action: 'RELOAD METADATA'
             },
             function (err, log) {
+              if (err) return cb(err);
               doc.logs.push(log._id);
               return doc.save(function (err) {
                 if (err) return cb(err);
@@ -614,6 +616,7 @@ Self.extractDatasets = function (doc, dataTypes, cb) {
               deleted: []
             };
           return DocumentsDatasets.create(item, function (err, datasets) {
+            if (err) return cb(err);
             doc.datasets = datasets._id; // Link it to the datasets
             return doc.save(function (err) {
               if (err) return cb(err);

@@ -13,7 +13,6 @@ const AccountsManager = require('../lib/accounts.js'),
 
 const Organisations = require('../models/organisations.js'),
   Accounts = require('../models/accounts.js'),
-  DocumentsLogs = require('../models/documents.logs.js'),
   Documents = require('../models/documents.js');
 
 const DocumentsController = require('../controllers/documents.js');
@@ -72,7 +71,6 @@ router.get('/', function (req, res, next) {
     .sort({ _id: -1 })
     .limit(limit)
     .skip(skip)
-    .select('+logs')
     .populate('organisation')
     .populate('metadata')
     .populate('owner')
@@ -202,6 +200,7 @@ router.post('/:id/metadata', function (req, res, next) {
   let transaction = Documents.findOne({ _id: req.params.id });
   // Execute transaction
   return transaction.exec(function (err, doc) {
+    if (err) return next(err);
     return DocumentsController.updateMetadata(doc, req.user._id, function (err) {
       if (err || !doc) return res.status(404).send('Document not found');
       return res.redirect(`./${doc.status}` + AccountsManager.addTokenInURL(req.query));
