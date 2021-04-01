@@ -72,7 +72,7 @@ Self.authenticate = function (req, res, next) {
       if (err || !decoded) return next();
       return Accounts.findOne({ _id: decoded.accountId }, function (err, user) {
         if (err || !user) return next();
-        return Documents.findOne({ _id: decoded.documentId }, function (err, doc) {
+        return Documents.findOne({ _id: decoded.documentId, token: token }, function (err, doc) {
           if (err || !doc) return next();
           if (doc._id.toString() === decoded.documentId) {
             req.user = user; // Set user
