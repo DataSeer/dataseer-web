@@ -51,7 +51,14 @@ const View = {
       return HtmlBuilder.button({ class: 'btn btn-danger btn-sm btn-lite' }).text(text).append(View.icons.delete());
     },
     save: function (text = '') {
-      return HtmlBuilder.button({ class: 'btn btn-primary btn-sm' }).text(text).append(View.icons.save());
+      return HtmlBuilder.button({ class: 'btn btn-primary btn-sm' }).append(
+        View.icons.save().append(HtmlBuilder.div({ text: text }))
+      );
+    },
+    check: function (text = '') {
+      return HtmlBuilder.button({ class: 'btn btn-primary btn-sm' }).append(
+        View.icons.check().append(HtmlBuilder.div({ text: text }))
+      );
     },
     cancel: function (text = '') {
       return HtmlBuilder.button({ class: 'btn btn-primary btn-sm' }).text(text).append(View.icons.cancel());
