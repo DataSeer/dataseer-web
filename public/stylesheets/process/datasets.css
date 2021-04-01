@@ -346,18 +346,18 @@ i {
   display: inline-block;
 }
 
-#dataset-form .form-row:last-child button {
+#dataset-form .form-row button {
   float: left;
   display: inline-block;
   margin-left: 4px;
   margin-right: 4px; 
 }
 
-#dataset-form .form-row:last-child button i {
+#dataset-form .form-row button i {
   font-size: 1rem;
 }
 
-#dataset-form .form-row:last-child button div {
+#dataset-form .form-row button div {
   font-weight: normal;
   margin-left: 5px;
   display: inline;
