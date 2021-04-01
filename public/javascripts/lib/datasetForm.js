@@ -23,8 +23,8 @@ const DatasetForm = function (events) {
       class: 'container-fluid lock',
       text: 'At least one dataset must be added to be able to use this form'
     }),
-    save: new View.buttons.save('Save for later '),
-    validation: new View.buttons.default('Validate'),
+    save: new View.buttons.save('Save for later'),
+    validation: new View.buttons.check('Validate'),
     help: new View.buttons.help('Help'),
     unlink: new View.buttons.unlink(),
     'dataset.status': new View.status.edition('dataset.status'),
@@ -204,12 +204,8 @@ const DatasetForm = function (events) {
     .append(View.forms.row().append(elements['dataset.DOI'].elements().container))
     .append(View.forms.row().append(elements['dataset.comments'].elements().container))
     .append(
-      View.forms
-        .row()
-        .addClass('buttons-container')
-        .append(elements['save'])
-        .append(elements['validation'])
-        .append(elements['help'])
+      View.forms.row().addClass('buttons-container').append(elements['save']).append(elements['validation'])
+      // .append(elements['help'])
     )
     .append(elements['lock']);
 

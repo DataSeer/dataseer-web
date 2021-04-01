@@ -4,46 +4,11 @@
 
 'use strict';
 
-const DocumentsDatasets = require('../models/documents.datasets.js'),
-  Accounts = require('../models/accounts.js'),
-  Documents = require('../models/documents.js');
+const DocumentsDatasets = require('../models/documents.datasets.js');
 
 const DocumentsController = require('../controllers/documents.js');
 
-const JWT = require('../lib/jwt.js');
-
 let Self = {};
-
-/**
- * Authenticate account with JWT (documentToken)
- * @param {object} req - req express variable
- * @param {object} res - res express variable
- * @param {function} next - next express variable
- * @returns {undefined} undefined
- */
-Self.authenticate = function (req, res, next) {
-  // If user is already authenticated with session, just go next
-  if (req.user) return next();
-  // Get token
-  let token = req.query.documentToken;
-  if (!token) return next();
-  // Just try to authenticate. If it fail, just go next
-  else
-    return JWT.check(token, req.app.get('private.key'), {}, function (err, decoded) {
-      if (err || !decoded) return next();
-      return Accounts.findOne({ _id: decoded.accountId }, function (err, user) {
-        if (err || !user) return next();
-        return DocumentsDatasets.findOne({ document: decoded.documentId }, function (err, datasets) {
-          if (err || !datasets) return next();
-          if (datasets.document.toString() === decoded.documentId) {
-            req.user = user; // Set user
-            res.locals = { useDocumentToken: true };
-          }
-          return next();
-        });
-      });
-    });
-};
 
 /**
  * Check validation of datasets
@@ -316,7 +281,7 @@ Self.createDataset = function (opts = {}) {
     name: opts.name, // name
     comments: opts.comments, // comments
     text: opts.text, // text of sentence
-    status: 'saved' // text of sentence
+    status: opts.status === 'valid' && opts.name && (opts.DOI || opts.comments) ? 'valid' : 'saved' // text of sentence
   };
 };
 
