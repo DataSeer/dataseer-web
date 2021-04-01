@@ -10,12 +10,14 @@ const express = require('express'),
 
 const Mailer = require('../lib/mailer.js'),
   JWT = require('../lib/jwt.js'),
-  AccountsManager = require('../lib/accounts.js'),
-  Accounts = require('../models/accounts.js'),
-  AccountsController = require('../controllers/accounts.js'),
+  AccountsManager = require('../lib/accounts.js');
+
+const Accounts = require('../models/accounts.js'),
   Organisations = require('../models/organisations.js'),
   Roles = require('../models/roles.js'),
-  Documents = require('../models/documents.js'),
+  Documents = require('../models/documents.js');
+
+const AccountsController = require('../controllers/accounts.js'),
   DocumentsController = require('../controllers/documents.js');
 
 const conf = require('../conf/conf.json'),
@@ -164,6 +166,28 @@ router.post('/accounts', function (req, res, next) {
             }
           );
         });
+      });
+    });
+  } else if (typeof req.body.revoke_token !== 'undefined' && req.body.revoke_token === '') {
+    // If username is not set
+    if (typeof req.body.username !== 'string') {
+      req.flash('error', 'Invalid username !');
+      return res.redirect('./accounts');
+    }
+    return Accounts.findOne({ username: req.body.username }).exec(function (err, user) {
+      // If MongoDB error has occured
+      if (err) return next(err);
+      // If username is not set
+      if (!user) {
+        req.flash('error', 'User ' + user.username + ' does not exist !');
+        return res.redirect('./accounts');
+      }
+      user.tokens.api = '';
+      return user.save(function (err) {
+        if (err) return next(err);
+        // If process succeed
+        req.flash('success', 'Token of User ' + user.username + ' have been successfully revoked');
+        return res.redirect('./accounts');
       });
     });
   }
