@@ -49,11 +49,14 @@ block content
                   ul
                     each val, index in document.metadata.authors
                       if val.name
-                        li #{val.name}
-                          ul
-                            if val.name && val.affiliations
-                              each aff, index in val.affiliations
-                                li #{aff}
+                        if (val.email)
+                          <li> #{val.name} (<strong>#{val.email}</strong>)
+                        else
+                          li #{val.name}
+                        ul
+                          if val.name && val.affiliations
+                            each aff, index in val.affiliations
+                              li #{aff}
 
         if current_user.role.label === 'curator'
           div(class='row row-margin')
@@ -64,11 +67,11 @@ block content
 
         div(class='row row-margin')
           div(class='col-12')
-            button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;')
+            button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Copy URL to clipboard')
               <i class="fas fa-link"></i> Get public URL of this document
             input.form-control.hidden(type='text' id='public_url' name='public_url' value=publicURL)
             a(href='mailto:?subject='+ encodeURIComponent(mail.subject) + '&body=' + encodeURIComponent(mail.body) target='_blank')
-              button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Send it by email')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email')
                 <i class="far fa-envelope"></i> Share with colleague
 
         div(class='row crud-button-action')

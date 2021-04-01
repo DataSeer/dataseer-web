@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 let Schema = new mongoose.Schema(
   {
-    logs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DocumentsLogs', select: false }], // refers to documents.logs collection items
+    logs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DocumentsLogs' }], // refers to documents.logs collection items
     pdf: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentsFiles' }, // refers to documents.files collection item (pdf)
     tei: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentsFiles' }, // refers to documents.files collection item (tei)
     files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DocumentsFiles' }], // refers to documents.files collection items (all kind of files)

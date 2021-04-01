@@ -13,7 +13,6 @@ const AccountsManager = require('../lib/accounts.js'),
 
 const Organisations = require('../models/organisations.js'),
   Accounts = require('../models/accounts.js'),
-  DocumentsLogs = require('../models/documents.logs.js'),
   Documents = require('../models/documents.js');
 
 const DocumentsController = require('../controllers/documents.js');
@@ -69,9 +68,9 @@ router.get('/', function (req, res, next) {
   if (!isCuractor) query['organisation'] = req.user.organisation._id;
   // Init transaction
   let transaction = Documents.find(query)
+    .sort({ _id: -1 })
     .limit(limit)
     .skip(skip)
-    .select('+logs')
     .populate('organisation')
     .populate('metadata')
     .populate('owner')
@@ -201,6 +200,7 @@ router.post('/:id/metadata', function (req, res, next) {
   let transaction = Documents.findOne({ _id: req.params.id });
   // Execute transaction
   return transaction.exec(function (err, doc) {
+    if (err) return next(err);
     return DocumentsController.updateMetadata(doc, req.user._id, function (err) {
       if (err || !doc) return res.status(404).send('Document not found');
       return res.redirect(`./${doc.status}` + AccountsManager.addTokenInURL(req.query));
@@ -218,14 +218,23 @@ router.get('/:id/datasets', function (req, res, next) {
   return transaction.exec(function (err, doc) {
     if (err || !doc) return res.status(404).send('Document not found');
     if (doc.status !== 'datasets') return res.redirect(`./${doc.status}` + AccountsManager.addTokenInURL(req.query));
-    else
+    else {
+      let publicURL = conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token;
       return res.render(path.join('documents', 'datasets'), {
         route: 'documents/:id/datasets',
-        publicURL: conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token,
+        publicURL: publicURL,
+        mail: {
+          subject: Mailer.getShareWithColleagueSubject(),
+          body: Mailer.getShareWithColleagueBodyTxt({
+            metadata: doc.metadata,
+            url: publicURL
+          })
+        },
         conf: conf,
         document: doc,
         current_user: req.user
       });
+    }
   });
 });
 
@@ -239,14 +248,23 @@ router.get('/:id/finish', function (req, res, next) {
   return transaction.exec(function (err, doc) {
     if (err || !doc) return res.status(404).send('Document not found');
     if (doc.status !== 'finish') return res.redirect(`./${doc.status}` + AccountsManager.addTokenInURL(req.query));
-    else
+    else {
+      let publicURL = conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token;
       return res.render(path.join('documents', 'finish'), {
         route: 'documents/:id/finish',
-        publicURL: conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token,
+        publicURL: publicURL,
+        mail: {
+          subject: Mailer.getShareWithColleagueSubject(),
+          body: Mailer.getShareWithColleagueBodyTxt({
+            metadata: doc.metadata,
+            url: publicURL
+          })
+        },
         conf: conf,
         document: doc,
         current_user: req.user
       });
+    }
   });
 });
 
