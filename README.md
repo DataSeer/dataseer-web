@@ -110,11 +110,9 @@ crontab -e
 0 0 * * * /path/to/dataseer-web/db-save/save.sh > /dev/null 2>&1
 ```
 
-It will run ``mongodump`` every day (at 00:00). To restore data, go to the desired save directory & run ``mongorestore``.
+It will run ``mongodump`` every day (at 00:00). To restore data, go to the desired save directory & run ``mongorestore``. Files will be available in data.tar archive.
 
-Note: There is one directory per day (1/ is used for monday, 2/ is used for tuesday, etc). If you want to restore data from the last friday, you must use the directory **./db-save/5/dump/**.
-
-**Important: it only backup/restore mongodb data. Files stored on FileSystem are not managed by this script.**
+Note: There is one directory per day (1/ is used for monday, 2/ is used for tuesday, etc). If you want to restore data from the last friday, you must use the directory **./db-save/5/**.
 
 ## Configuration
 
