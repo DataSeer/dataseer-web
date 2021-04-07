@@ -333,6 +333,31 @@ DataSeerAPI.validateDatasets = function (documentId, done) {
 };
 
 /**
+ * Send mail to Authors
+ * @param {string} documentId Id of document
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @returns {undefined} undefined
+ */
+DataSeerAPI.sendMailToAuthors = function (documentId, done) {
+  return jQuery.ajax({
+    type: 'POST',
+    contentType: 'application/json; charset=utf-8',
+    headers: {
+      'X-HTTP-Method-Override': 'POST'
+    },
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/sendDocumentURLToAuthors'),
+    data: JSON.stringify({}),
+    success: function (data) {
+      return done(null, data);
+    },
+    error: function (data) {
+      return done(data);
+    },
+    dataType: 'json'
+  });
+};
+
+/**
  * Get document by id
  * @param {string} documentId Id of document
  * @param {object} opts JSON object containing all data

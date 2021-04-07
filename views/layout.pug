@@ -107,6 +107,7 @@ html
 
   if route === 'documents/:id/metadata'
     script(src=conf.root + 'javascripts/process/metadata.js')
+    script(src=conf.root + 'javascripts/sendMailToAuthors.js')
   else if route === 'documents/:id/datasets'
     script(src=conf.root + 'javascripts/process/datasets.js')
     if current_user
