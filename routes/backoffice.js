@@ -149,7 +149,7 @@ router.post('/accounts', function (req, res, next) {
           if (err) return next(err);
           return Mailer.sendMail(
             {
-              'username': user.username,
+              'to': user.username,
               'subject': Mailer.getNewAPITokenSubject(),
               'text': Mailer.getNewAPITokenBodyTxt({ token: token }),
               'html': Mailer.getNewAPITokenBodyHtml({ token: token })

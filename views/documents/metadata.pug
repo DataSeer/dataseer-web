@@ -61,9 +61,11 @@ block content
         if current_user.role.label === 'curator'
           div(class='row row-margin')
             div(class='col-12')
-              form(ref='reload_metada' id='reload_metada' method='post')
+              form(ref='reload_metada' id='reload_metada' method='post' style='display: inline-block; width: auto;')
                 button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' id='addDocuments' style='margin-left:10px;')
                   <i class="fas fa-sync-alt"></i> Reload metadata
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='sendMailToAuthors' style='margin-left:10px;' title='Send email to authors')
+                <i class="far fa-envelope"></i> Send email to authors <i class="fas fa-sync-alt fa-spin hidden"></i> 
 
         div(class='row row-margin')
           div(class='col-12')
