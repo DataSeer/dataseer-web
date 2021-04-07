@@ -240,7 +240,7 @@ router.post('/forgotPassword', function (req, res) {
           );
           return Mailer.sendMail(
             {
-              'username': user.username,
+              'to': user.username,
               'subject': Mailer.getResetPasswordSubject(),
               'text': Mailer.getResetPasswordBodyTxt({ url: url }),
               'html': Mailer.getResetPasswordBodyHtml({ url: url })
