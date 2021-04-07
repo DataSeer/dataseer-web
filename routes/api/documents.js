@@ -226,7 +226,24 @@ router.post('/:id/sendDocumentURLToAuthors', function (req, res, next) {
         },
         function (err) {
           if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-          else return res.json({ 'err': false, 'res': true });
+          else
+            return DocumentsLogs.create(
+              {
+                document: doc._id,
+                user: req.user._id,
+                action: 'SEND EMAILS TO AUTHORS'
+              },
+              function (err, log) {
+                if (err)
+                  return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+                doc.logs.push(log._id);
+                return doc.save(function (err) {
+                  if (err)
+                    return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+                  else return res.json({ 'err': false, 'res': true });
+                });
+              }
+            );
         }
       );
   });
