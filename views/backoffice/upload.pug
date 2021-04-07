@@ -33,10 +33,16 @@ block content
                   select.custom-select(style='margin-left:10px;' name='existing_journal' id='existing_journal')
                     option(selected value='') ----------
                     each organisation, index in organisations
-                      option(value=organisation.name) #{organisation.name}
+                      if (params && params.existing_journal === organisation.name)
+                        option(value=organisation.name selected) #{organisation.name}
+                      else
+                        option(value=organisation.name) #{organisation.name}
                 div(class='col-12')
                   label(for='journal' style='font-style: italic;') If the journal is not present in the list above, set informations here:
-                  input(type='text' placeholder='Journal' class='form-control' name='journal' id='journal' value='' style='margin-left:10px;')
+                  if (params && params.journal)
+                    input(type='text' placeholder='Journal' class='form-control' name='journal' id='journal' value=params.journal style='margin-left:10px;')
+                  else
+                    input(type='text' placeholder='Journal' class='form-control' name='journal' id='journal' value='' style='margin-left:10px;')
             if (current_user.role.label === 'curator')
               div(class='row')
                 div(class='col-12')
@@ -44,24 +50,40 @@ block content
                 div(class='col-12')
                   label(for='account' style='font-style: italic;') If the user already exsit, select it:
                   select.custom-select(style='margin-left:10px;' name='account' id='account')
-                    option(selected value='') ----------
+                    option(value='') ----------
                     each account, index in accounts
-                      option(value=account.username + ";" + account.fullname) #{account.username}
+                      if ((params && params.account === account.username + ";" + account.fullname) || (params && !params.account && current_user.username === account.username))
+                        option(value=account.username + ";" + account.fullname selected) #{account.username}
+                      else
+                        option(value=account.username + ";" + account.fullname) #{account.username}
                 div(class='col-12')
                   label(for='fullname' style='font-style: italic;') If the user is not present in the list above, set informations here:
-                  input(type='text' placeholder='Full Name' class='form-control' name='fullname' id='fullname' value='' style='margin-left:10px;')
-                  input(type='text' placeholder='Email' class='form-control' name='email' id='email' value='' style='margin-left:10px;')
+                  if (params && params.fullname)
+                    input(type='text' placeholder='Full Name' class='form-control' name='fullname' id='fullname' value=params.fullname style='margin-left:10px;')
+                  else
+                    input(type='text' placeholder='Full Name' class='form-control' name='fullname' id='fullname' value='' style='margin-left:10px;')
+                  if (params && params.email)
+                    input(type='text' placeholder='Email' class='form-control' name='email' id='email' value=params.email style='margin-left:10px;')
+                  else
+                    input(type='text' placeholder='Email' class='form-control' name='email' id='email' value='' style='margin-left:10px;')
               div(class='row')
                 div(class='col-12')
-                  input(type='checkbox' class='form-control checked' name='dataseerML' id='dataseerML' value='true' style='margin-left:10px;')
+                  if (Object.keys(params).length === 0 || (params && params.dataseerML))
+                    input(type='checkbox' class='form-control checked' name='dataseerML' id='dataseerML' value='true' style='margin-left:10px;' checked)
+                  else
+                    input(type='checkbox' class='form-control checked' name='dataseerML' id='dataseerML' value='true' style='margin-left:10px;')
                   label(for='dataseerML') Identify datasets automatically
             div(class='row')
               div(class='col-12')
-                input(type='checkbox' class='form-control checked' name='already_assessed' id='already_assessed' value='true' style='margin-left:10px;')
+                if (params && params.already_assessed)
+                  input(type='checkbox' class='form-control checked' name='already_assessed' id='already_assessed' value='true' style='margin-left:10px;' checked)
+                else
+                  input(type='checkbox' class='form-control checked' name='already_assessed' id='already_assessed' value='true' style='margin-left:10px;')
                 label(for='already_assessed') This is a new version of an article DataSeer has already assessed
             div(class='row')
               div(class='col-12')
                   button.blue.btn.btn-primary.waves-effect.waves-light(type='submit' id='addDocuments' style='margin-left:10px;') Upload document
+                  a.blue.btn.btn-primary.waves-effect.waves-light(href=conf.root + 'backoffice/upload' style='margin-left:10px;') Reset form
 
     div(class='row')
       div(class='col-12' style='background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-top:10px;')

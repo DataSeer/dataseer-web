@@ -12,5 +12,8 @@ cd $DAY;
 # erase previous save
 rm -rf dump/
 
-# save
+# save mongodb
 mongodump;
+
+# save File System
+tar -cvf data.tar ../../data/

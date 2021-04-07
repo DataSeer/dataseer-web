@@ -205,6 +205,33 @@ router.get('/:id/metadata', function (req, res, next) {
   });
 });
 
+/* POST metadata of document */
+router.post('/:id/sendDocumentURLToAuthors', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id }).populate('metadata');
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    else if (!doc.metadata) return res.json({ 'err': true, 'res': null, 'msg': 'metadata not found' });
+    else
+      return Mailer.sendDocumentURLToAuthorsMail(
+        doc,
+        {
+          authors: doc.metadata.authors.map(function (item) {
+            return item.email;
+          })
+        },
+        function (err) {
+          if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+          else return res.json({ 'err': false, 'res': true });
+        }
+      );
+  });
+});
+
 /* POST validate metadata of document */
 router.post('/:id/metadata/validate', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
