@@ -44,9 +44,12 @@ block content
                 div(class='col-12')
                   label(for='account' style='font-style: italic;') If the user already exsit, select it:
                   select.custom-select(style='margin-left:10px;' name='account' id='account')
-                    option(selected value='') ----------
+                    option(value='') ----------
                     each account, index in accounts
-                      option(value=account.username + ";" + account.fullname) #{account.username}
+                      if current_user.username !== account.username
+                        option(value=account.username + ";" + account.fullname) #{account.username}
+                      else
+                        option(value=account.username + ";" + account.fullname selected) #{account.username}
                 div(class='col-12')
                   label(for='fullname' style='font-style: italic;') If the user is not present in the list above, set informations here:
                   input(type='text' placeholder='Full Name' class='form-control' name='fullname' id='fullname' value='' style='margin-left:10px;')
