@@ -316,7 +316,9 @@ router.get('/:id', function (req, res, next) {
   // Execute transaction
   return transaction.exec(function (err, doc) {
     if (err || !doc) return res.status(404).send('Document not found');
-    return res.redirect(`./${doc.status}` + AccountsManager.addTokenInURL(req.query));
+    return res.redirect(
+      `${conf.root}documents/${doc._id.toString()}/${doc.status}` + AccountsManager.addTokenInURL(req.query)
+    );
   });
 });
 
