@@ -6,6 +6,7 @@
 
 const express = require('express'),
   router = express.Router(),
+  url = require('url'),
   path = require('path');
 
 const Mailer = require('../lib/mailer.js'),
@@ -325,6 +326,7 @@ router.get('/upload', function (req, res, next) {
           success = req.flash('success');
         return res.render(path.join('backoffice', 'upload'), {
           route: 'backoffice/upload',
+          params: req.query,
           accounts: accounts.sort(function (a, b) {
             return a.username.localeCompare(b.username);
           }),
@@ -362,7 +364,12 @@ router.post('/upload', function (req, res, next) {
   let opts = DocumentsController.getUploadParams(Object.assign({ files: req.files }, req.body), req.user);
   if (opts instanceof Error) {
     req.flash('error', opts.toString());
-    return res.redirect('./upload');
+    return res.redirect(
+      url.format({
+        pathname: './upload',
+        query: req.body
+      })
+    );
   }
   opts.privateKey = req.app.get('private.key');
   opts.dataTypes = req.app.get('dataTypes');
@@ -378,7 +385,12 @@ router.post('/upload', function (req, res, next) {
       if (err || !doc) {
         console.log(err);
         req.flash('error', 'Error while uploading document !');
-        return res.redirect('./upload');
+        return res.redirect(
+          url.format({
+            pathname: './upload',
+            query: req.body
+          })
+        );
       }
       // Send upload email to curators
       Mailer.sendDocumentUploadMail(doc, opts, req.user.username);
