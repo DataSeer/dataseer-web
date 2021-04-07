@@ -9,4 +9,4 @@ data/*
 # node modules
 node_modules/
 # mongodb save
-db-save/[0-6]/dump
+db-save/[1-7]/dump
