@@ -40,10 +40,14 @@
 
   showLoop();
 
+  $('#pdf-loading-loop-infos').text(`Downloading Document data...`);
   // Get data of current document with datasets informations
   return DataSeerAPI.getDocument(documentId, { datasets: true }, function (err, doc) {
+    $('#pdf-loading-loop-infos').text(`Downloading PDF file...`);
     return DataSeerAPI.getPDF(doc.pdf, function (err, pdf) {
+      $('#pdf-loading-loop-infos').text(`Downloading TEI file...`);
       return DataSeerAPI.getTEI(doc.tei, function (err, tei) {
+        $('#pdf-loading-loop-infos').text(`Loading PDF pages...`);
         let currentDocument = {
           datasets: convertDatasetsFromAPI(doc.datasets),
           metadata: doc.metadata,
