@@ -194,27 +194,8 @@ body {
   display: none;
 }
 
-#user-navbar-lg {
-  display: table;
-}
-
-#user-navbar-lg > div {
-  padding-top: 10px;
-  padding-bottom: 10px;
-  text-align: center;
-  display: table-cell;
-  vertical-align: middle;
-}
-
-#user-lg,
-#navbar-lg {
-  display: table-cell;
-}
-
 #user-lg {
   font-size: 1.5em;
-  margin-top: 10px;
-  margin-bottom: 10px;
 }
 
 #user-lg label {
@@ -226,12 +207,16 @@ body {
 #navbar-lg ul {
   list-style: none;
   margin: 0px;
+  padding: 0px;
+  margin-left: 25px;
 }
 
 #navbar-lg li {
+  vertical-align: middle;
   display: inline-block;
   font-size: 1.25em;
   margin-right: 15px;
+  margin-bottom: 5px;
 }
 
 .row-margin {

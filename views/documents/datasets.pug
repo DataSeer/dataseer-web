@@ -3,18 +3,9 @@ extends ../layout
 block content
 
   div(id='user-navbar-lg' class='col-12' style='min-height:45px; background-color:#FFFFFF; border:1px solid #184D7E; border-radius: 20px; margin-bottom:10px;')
-    div
-      div(id='user-lg' style='position:absolute; top:4px; right:10px; text-align:right;')
-        if current_user && !useDocumentToken
-          label(style='font-size:small;') Connected as: <b>#{current_user.username}</b> (#{current_user.role.label}, #{current_user.organisation.name})
-        else
-          label(style='font-size:small;') 
-            a(href=conf.root + 'signup') Sign up 
-            | or 
-            a(href=conf.root + 'signin') Sign in 
-            | to access DataSeer
-      div(id='navbar-lg')
-        ul(style='padding-left: 15px;')
+    div(class='row align-items-center' style='margin-top: 15px; margin-bottom: 15px;')
+      div(class='col-8' id='navbar-lg')
+        ul
           li
             img(src=conf.root + 'img/DataSeer-logo-min.png' width='25')
           
@@ -51,6 +42,17 @@ block content
             a(href='mailto:?subject='+ encodeURIComponent(mail.subject) + '&body=' + encodeURIComponent(mail.body) target='_blank')
               button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email')
                 <i class="far fa-envelope"></i>
+      div(class='col-4' id='user-lg')
+        div(style='font-size:small; float: right; margin-right: 25px; height: 100%; margin-top: -2px;')
+          if current_user && !useDocumentToken
+              div(style='display: inline-block; margin-right: 5px;') Connected as:
+              div(style='display: inline-block; margin-right: 5px;') <b>#{current_user.username}</b>
+              div(style='display: inline-block;') (#{current_user.role.label}, #{current_user.organisation.name})
+          else
+            a(href=conf.root + 'signup') Sign up 
+            div(style='display: inline-block; margin-right: 5px; margin-left: 5px;') or 
+            a(href=conf.root + 'signin') Sign in 
+            div(style='display: inline-block; margin-right: 5px; margin-left: 5px;') to access DataSeer
 
   div(class='row' style='margin-bottom:5px;')
     div(class='col-12')
