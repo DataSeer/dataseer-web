@@ -16,7 +16,7 @@ block content
           form(ref='uploadForm' id='uploadForm' action=conf.root+route method='post' encType='multipart/form-data')
             div(class='row')
               div(class='col-12')
-                label(for='file') Upload you file here
+                label(for='file') Upload your file here
                 input(type='file' class='form-control' name='file' id='file' style='margin-left:10px;')
             div(class='row')
               div(class='col-12')
@@ -27,9 +27,9 @@ block content
             if (current_user.role.label === 'curator')
               div(class='row')
                 div(class='col-12')
-                  label(for='existing_journal') Which journal will be sent to
+                  label(for='existing_journal') Which journal is this file from
                 div(class='col-12')
-                  label(for='existing_journal' style='font-style: italic;') If the journal already exsit, select it:
+                  label(for='existing_journal' style='font-style: italic;') If the journal already exists, select it:
                   select.custom-select(style='margin-left:10px;' name='existing_journal' id='existing_journal')
                     option(selected value='') ----------
                     each organisation, index in organisations
@@ -38,7 +38,7 @@ block content
                       else
                         option(value=organisation.name) #{organisation.name}
                 div(class='col-12')
-                  label(for='journal' style='font-style: italic;') If the journal is not present in the list above, set informations here:
+                  label(for='journal' style='font-style: italic;') If the journal is not present in the list above, set information here:
                   if (params && params.journal)
                     input(type='text' placeholder='Journal' class='form-control' name='journal' id='journal' value=params.journal style='margin-left:10px;')
                   else
@@ -48,7 +48,7 @@ block content
                 div(class='col-12')
                   label(for='account') Email
                 div(class='col-12')
-                  label(for='account' style='font-style: italic;') If the user already exsit, select it:
+                  label(for='account' style='font-style: italic;') If the user already exists, select it:
                   select.custom-select(style='margin-left:10px;' name='account' id='account')
                     option(value='') ----------
                     each account, index in accounts
@@ -57,7 +57,7 @@ block content
                       else
                         option(value=account.username + ";" + account.fullname) #{account.username}
                 div(class='col-12')
-                  label(for='fullname' style='font-style: italic;') If the user is not present in the list above, set informations here:
+                  label(for='fullname' style='font-style: italic;') If the user is not present in the list above, set information here:
                   if (params && params.fullname)
                     input(type='text' placeholder='Full Name' class='form-control' name='fullname' id='fullname' value=params.fullname style='margin-left:10px;')
                   else
