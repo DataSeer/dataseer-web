@@ -18,7 +18,7 @@ let Schema = new mongoose.Schema(
 
 // Populate Accounts data to ensure AccountsManager process
 Schema.pre(/^find/, function (next) {
-  this.populate('user');
+  this.populate({ path: 'user', select: '-tokens' });
   return next();
 });
 
