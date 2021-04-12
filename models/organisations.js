@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 const Schema = new mongoose.Schema(
   {
-    name: { type: String, default: 'None', index: true } // name of organisation
+    name: { type: String, default: 'None', required: true, unique: true } // name of organisation
   },
   { minimize: false }
 );
