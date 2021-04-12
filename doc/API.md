@@ -231,6 +231,14 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
       <td>optional</td>
       <td>If this parameter is set document.datasets will be filled with data.<br/>Else this property will only contain an id.</td>
     </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>logs</td>
+      <td>optional</td>
+      <td><strong>Only available for curators:</strong><br/>If this parameter is set document.logs will be filled with data.<br/>Else this property will only contain a list of ids.</td>
+    </tr>
   </tbody>
 </table>
 
