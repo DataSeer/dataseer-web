@@ -30,6 +30,7 @@ router.get('/', function (req, res, next) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   let limit = parseInt(req.query.limit),
     skip = parseInt(req.query.skip),
+    isCurator = AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator),
     query = {};
   if (isNaN(limit)) limit = 20;
   if (isNaN(skip) || skip < 0) skip = 0;
@@ -41,10 +42,11 @@ router.get('/', function (req, res, next) {
   if (req.query.files) transaction.populate('files');
   if (req.query.metadata) transaction.populate('metadata');
   if (req.query.datasets) transaction.populate('datasets');
-  return transaction.exec(function (err, doc) {
+  if (isCurator && req.query.logs) transaction.populate('logs');
+  return transaction.exec(function (err, docs) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
-    return res.json({ 'err': false, 'res': doc });
+    else if (!docs) return res.json({ 'err': true, 'res': null, 'msg': 'document(s) not found' });
+    return res.json({ 'err': false, 'res': docs });
   });
 });
 

@@ -249,7 +249,7 @@ router.post('/organisations', function (req, res, next) {
         req.flash('error', 'Invalid organisation !');
         return res.redirect('./organisations');
       }
-      organisation.name = req.body.name;
+      organisation.name = req.body.name.replace(/\s+/gm, ' ');
       return organisation.save(function (err) {
         // If MongoDB error has occured
         if (err) return next(err);
@@ -259,18 +259,29 @@ router.post('/organisations', function (req, res, next) {
     });
   } else if (typeof req.body.create !== 'undefined' && req.body.create === '') {
     // If organisation name is not set
-    if (typeof req.body.name !== 'string') {
+    if (typeof req.body.name !== 'string' || !req.body.name) {
       req.flash('error', 'Invalid organisation name !');
       return res.redirect('./organisations');
     }
-    return Organisations.create({ 'name': req.body.name }, function (err, organisation) {
-      // If organisation already exist
+    let name = req.body.name.replace(/\s+/gm, ' ');
+    return Organisations.findOne({ 'name': name }, function (err, organisation) {
       if (err) {
+        req.flash('error', 'An error has occured !');
+        return res.redirect('./organisations');
+      }
+      if (organisation) {
         req.flash('error', 'Organisation already exist !');
         return res.redirect('./organisations');
       }
-      req.flash('success', 'Organisation ' + organisation.name + ' have been successfully created');
-      return res.redirect('./organisations');
+      return Organisations.create({ 'name': name }, function (err, organisation) {
+        // If organisation already exist
+        if (err) {
+          req.flash('error', 'An error has occured !');
+          return res.redirect('./organisations');
+        }
+        req.flash('success', 'Organisation ' + organisation.name + ' have been successfully created');
+        return res.redirect('./organisations');
+      });
     });
   } else if (typeof req.body.delete !== 'undefined' && req.body.delete === '') {
     // If organisation id is not set
