@@ -6,6 +6,9 @@
   - [Credentials](#credentials)
   - [Results](#results)
   - [Available Routes](#available-routes)
+    - [Accounts](#accounts)
+    - [Roles](#roles)
+    - [Organisations](#organisations)
     - [Documents](#documents)
     - [Documents Files](#documents-files)
     - [Documents Datasets](#documents-datasets)
@@ -107,6 +110,21 @@ In case of success, API will return this kind of object:
 
 All these routes return a JSON object:
 
+### Accounts
+
+  - [(GET) /api/accounts](#get-apiaccounts)
+  - [(GET) /api/accounts/:id](#get-apiaccountsid)
+
+### Roles
+
+  - [(GET) /api/roles](#get-apiroles)
+  - [(GET) /api/roles/:id](#get-apirolesid)
+
+### Oganisations
+
+  - [(GET) /api/organisations](#get-apiorganisations)
+  - [(GET) /api/organisations/:id](#get-apiorganisationsid)
+
 ### Documents
 
   - [(GET) /api/documents](#get-apidocuments)
@@ -145,6 +163,330 @@ All these routes return a JSON object:
   - [(POST) /api/dataseer-ml/processDataseerSentence](#post-apidataseer-mlprocessdataseersentence)
   - [(GET) /api/dataseer-ml/jsonDataTypes](#get-apidataseer-mljsondatatypes)
   - [(GET) /api/dataseer-ml/resyncJsonDataTypes](#get-apidataseer-mlresyncjsondatatypes)
+
+---
+
+### (GET) /api/accounts/
+
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route return all accounts (JSON formated).
+
+#### Role required
+
+Accessible to users with the following role : **curator**.
+
+#### Parameters
+
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Request type</th>
+      <th>Response type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>limit</td>
+      <td>optional</td>
+      <td>Maximum number of returned results (default:20)</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>skip</td>
+      <td>optional</td>
+      <td>Number of documents skipped (default:0)</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>organisation</td>
+      <td>optional</td>
+      <td>Use this parameter (set it with an organisation id) to filter results by organisation</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>role</td>
+      <td>optional</td>
+      <td>Use this parameter (set it with a role id) to filter results by role</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return all accounts (JSON formated)
+curl "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/accounts?token=MY_TOKEN"
+```
+
+#### Result
+
+```js
+{
+  "err": false,
+  "res": [{...}] // Array of accounts JSON representation (see models section to get more infos)
+}
+```
+
+---
+
+### (GET) /api/accounts/:id
+
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route return an account (JSON formated).
+
+#### Role required
+
+Accessible to users with the following role : **curator**.
+
+#### Parameters
+
+No parameters available
+
+#### How to request
+
+```bash
+# Will return the account (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
+curl "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+```
+
+#### Result
+
+```js
+{
+  "err": false,
+  "res": {...} // An account JSON representation (see models section to get more infos)
+}
+```
+
+---
+
+
+### (GET) /api/roles/
+
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route return all roles (JSON formated).
+
+#### Role required
+
+Accessible to users with the following role : **curator**.
+
+#### Parameters
+
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Request type</th>
+      <th>Response type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>limit</td>
+      <td>optional</td>
+      <td>Maximum number of returned results (default:20)</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>skip</td>
+      <td>optional</td>
+      <td>Number of documents skipped (default:0)</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return all roles (JSON formated)
+curl "http://localhost:3000/api/roles" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/roles?token=MY_TOKEN"
+```
+
+#### Result
+
+```js
+{
+  "err": false,
+  "res": [{...}] // Array of roles JSON representation (see models section to get more infos)
+}
+```
+
+---
+
+### (GET) /api/roles/:id
+
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route return a role (JSON formated).
+
+#### Role required
+
+Accessible to users with the following role : **curator**.
+
+#### Parameters
+
+No parameters available
+
+#### How to request
+
+```bash
+# Will return role (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
+curl "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+```
+
+#### Result
+
+```js
+{
+  "err": false,
+  "res": {...} // A role JSON representation (see models section to get more infos)
+}
+```
+
+---
+
+
+### (GET) /api/organisations/
+
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route return all organisations (JSON formated).
+
+#### Role required
+
+Accessible to users with the following role : **curator**.
+
+#### Parameters
+
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Request type</th>
+      <th>Response type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>limit</td>
+      <td>optional</td>
+      <td>Maximum number of returned results (default:20)</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>skip</td>
+      <td>optional</td>
+      <td>Number of documents skipped (default:0)</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return all organisations (JSON formated)
+curl "http://localhost:3000/api/organisations" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/organisations?token=MY_TOKEN"
+```
+
+#### Result
+
+```js
+{
+  "err": false,
+  "res": [{...}] // Array of organisations JSON representation (see models section to get more infos)
+}
+```
+
+---
+
+### (GET) /api/organisations/:id
+
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route return an organisation (JSON formated).
+
+#### Role required
+
+Accessible to users with the following role : **curator**.
+
+#### Parameters
+
+No parameters available
+
+#### How to request
+
+```bash
+# Will return the organisation (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
+curl "http://localhost:3000/api/organisations/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/organisations/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+```
+
+#### Result
+
+```js
+{
+  "err": false,
+  "res": {...} // An organisation JSON representation (see models section to get more infos)
+}
+```
 
 ---
 

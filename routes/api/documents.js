@@ -291,7 +291,7 @@ router.get('/:id/datasets', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role do not grant access to this part of website');
   // Init transaction
-  let transaction = DocumentsDatasets.find({ document: req.params.id });
+  let transaction = DocumentsDatasets.findOne({ document: req.params.id });
   // Execute transaction
   return transaction.exec(function (err, datasets) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
