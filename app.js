@@ -24,6 +24,9 @@ const express = require('express'),
 
 const indexRouter = require('./routes/index.js'),
   documentsRouter = require('./routes/api/documents.js'),
+  accountsRouter = require('./routes/api/accounts.js'),
+  organisationsRouter = require('./routes/api/organisations.js'),
+  rolesRouter = require('./routes/api/roles.js'),
   documentsFilesRouter = require('./routes/api/documents.files.js'),
   documentsDatasetsRouter = require('./routes/api/documents.datasets.js'),
   documentsMetadataRouter = require('./routes/api/documents.metadata.js'),
@@ -142,6 +145,9 @@ db.once('open', function () {
 
           app.use('/', indexRouter);
           app.use('/api/documents', documentsRouter);
+          app.use('/api/accounts', accountsRouter);
+          app.use('/api/organisations', organisationsRouter);
+          app.use('/api/roles', rolesRouter);
           app.use('/api/files', documentsFilesRouter);
           app.use('/api/datasets', documentsDatasetsRouter);
           app.use('/api/metadata', documentsMetadataRouter);
