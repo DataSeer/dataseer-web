@@ -23,9 +23,9 @@ Structure of data:
 
 ```js
 {
-  // "username": { "type": String, "default": "" }  <- this property is handled by passport package
-  // "hash": { "type": String, "default": "" }  <- this property is handled by passport package
-  // "salt": { "type": String, "default": "" }  <- this property is handled by passport package
+  "username": { "type": String, "default": "" },
+  "hash": { "type": String, "default": "" }, // hidden property, you cannot get it with API
+  "salt": { "type": String, "default": "" }, // hidden property, you cannot get it with API
   "fullname": { "type": String, "default": "" },
   "role": { "type": mongoose.Schema.Types.ObjectId, "ref": "Roles", "required": true }, // refers to roles collection item
   "organisation": { "type": mongoose.Schema.Types.ObjectId, "ref": "Organisations", "required": true }, // refers to organisations collection item
