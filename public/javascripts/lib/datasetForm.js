@@ -169,7 +169,14 @@ const DatasetForm = function (events, isCurator) {
         placeholder: 'Enter the message here or leave it empty',
         value: ''
       },
-      {}
+      {
+        onChange: function (element) {
+          elements['dataset.status'].modified();
+          self.dataset.status = elements['dataset.status'].value();
+          self.dataset.notification = element.value();
+          events.onChange(element);
+        }
+      }
     ),
     'dataset.DOI': new View.properties.editable.text(
       {
