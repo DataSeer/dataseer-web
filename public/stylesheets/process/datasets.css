@@ -344,7 +344,6 @@ i {
 }
 
 #dataset-form .form-row button {
-  float: left;
   display: inline-block;
   margin-left: 4px;
   margin-right: 4px; 

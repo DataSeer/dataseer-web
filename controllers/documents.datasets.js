@@ -79,7 +79,7 @@ Self.newDataset = function (opts = {}, cb) {
           dataset: {
             sentenceId: opts.dataset.sentenceId,
             id: opts.dataset.id,
-            reuse: opts.dataset.reuse,
+            reuse: opts.dataset.reuse ? opts.dataset.reuse : false,
             type: opts.dataset.subType ? opts.dataset.dataType + ':' + opts.dataset.subType : opts.dataset.dataType,
             cert: opts.dataset.cert
           }
@@ -141,7 +141,7 @@ Self.updateDataset = function (opts = {}, cb) {
             dataset: {
               sentenceId: opts.dataset.sentenceId,
               id: opts.dataset.id,
-              reuse: opts.dataset.reuse,
+              reuse: opts.dataset.reuse ? opts.dataset.reuse : false,
               type: opts.dataset.subType ? opts.dataset.dataType + ':' + opts.dataset.subType : opts.dataset.dataType,
               cert: opts.dataset.cert
             }
@@ -271,18 +271,19 @@ Self.deleteCorresp = function (opts = {}, cb) {
 /**
  * Create new dataset JSON object
  * @param {object} opts - JSON containing all data
- * @param {string} opts.dataset.id - Dataset id
- * @param {string} opts.dataset.sentenceId - Dataset sentence id
- * @param {string} opts.dataset.cert - Dataset cert value (between 0 and 1)
- * @param {string} opts.dataset.dataType - Dataset dataType
- * @param {string} opts.dataset.subType - Dataset subType
- * @param {string} opts.dataset.description - Dataset description
- * @param {string} opts.dataset.bestDataFormatForSharing - Dataset best data format for sharing
- * @param {string} opts.dataset.mostSuitableRepositories - Dataset most suitable repositories
- * @param {string} opts.dataset.DOI - Dataset DOI
- * @param {string} opts.dataset.name - Dataset name
- * @param {string} opts.dataset.comments - Dataset comments
- * @param {string} opts.dataset.text - Dataset text of sentence
+ * @param {string} opts.id - Dataset id
+ * @param {string} opts.sentenceId - Dataset sentence id
+ * @param {string} opts.reuse - Dataset reuse
+ * @param {string} opts.cert - Dataset cert value (between 0 and 1)
+ * @param {string} opts.dataType - Dataset dataType
+ * @param {string} opts.subType - Dataset subType
+ * @param {string} opts.description - Dataset description
+ * @param {string} opts.bestDataFormatForSharing - Dataset best data format for sharing
+ * @param {string} opts.mostSuitableRepositories - Dataset most suitable repositories
+ * @param {string} opts.DOI - Dataset DOI
+ * @param {string} opts.name - Dataset name
+ * @param {string} opts.comments - Dataset comments
+ * @param {string} opts.text - Dataset text of sentence
  * @returns {object} opts - JSON containing all data
  */
 Self.createDataset = function (opts = {}) {
