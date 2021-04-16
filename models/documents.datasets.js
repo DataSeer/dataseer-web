@@ -14,7 +14,7 @@ let Dataset = new mongoose.Schema(
   {
     id: { type: String, default: '' }, // id
     sentenceId: { type: String, default: '' }, // sentence id
-    reuse: { type: Boolean, default: false }, // resuse property
+    reuse: { type: Boolean, default: false }, // reuse property
     notification: { type: String, default: '' }, // notification property
     cert: { type: String, default: '' }, // cert value (between 0 and 1)
     dataType: { type: String, default: '' }, // dataType
