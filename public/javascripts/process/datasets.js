@@ -89,6 +89,7 @@
             defaultDataset = {
               status: _status.modified,
               id: '',
+              reuse: false,
               cert: '0',
               dataType: defaultDataType,
               subType: '',
@@ -165,7 +166,7 @@
                   : currentDocument.datasets.current[dataset['dataset.id']].dataType +
                     ':' +
                     currentDocument.datasets.current[dataset['dataset.id']].subType;
-              documentView.updateDataset(user, dataset['dataset.id'], fullDataType);
+              documentView.updateDataset(user, dataset['dataset.id'], fullDataType, dataset['dataset.reuse']);
               let keys = Object.keys(currentDocument.datasets.current[dataset['dataset.id']]);
               for (var i = 0; i < keys.length; i++) {
                 if (typeof dataset['dataset.' + keys[i]] !== 'undefined')
@@ -342,7 +343,7 @@
                   index += 1;
                   newId = 'dataset-' + index;
                 }
-                return documentView.addDataset(user, newId, defaultDataType, function (err, res) {
+                return documentView.addDataset(user, newId, defaultDataType, false, function (err, res) {
                   if (err) {
                     $('#datasets-error-modal-label').html('Add Dataset');
                     if (typeof res === 'string') $('#datasets-error-modal-body').html(res);
@@ -358,6 +359,7 @@
                       defaultDataset
                     );
                     currentDocument.datasets.current[newId].id = newId;
+                    currentDocument.datasets.current[newId].reuse = res.reuse;
                     currentDocument.datasets.current[newId].sentenceId = res.sentenceId;
                     currentDocument.datasets.current[newId].cert = res.cert;
                     currentDocument.datasets.current[newId].dataType = getDataType(res.datatype);

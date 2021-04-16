@@ -659,6 +659,35 @@ Self.addDatasetInTEI = function (opts = {}, cb) {
 };
 
 /**
+ * Update dataset in TEI file
+ * @param {object} opts - JSON object containing all data
+ * @param {string} opts.documentId - Document id
+ * @param {object} opts.dataset - JSON object containing all dataset infos
+ * @param {string} opts.dataset.sentenceId - Dataset sentenceId
+ * @param {string} opts.dataset.id - Dataset id
+ * @param {string} opts.dataset.type - Dataset type
+ * @param {string} opts.dataset.cert - Dataset cert
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.updateDatasetInTEI = function (opts = {}, cb) {
+  return Documents.findById(opts.documentId).exec(function (err, doc) {
+    if (err) return cb(err);
+    else
+      return DocumentsFilesController.readFile(doc.tei, function (err, data) {
+        if (err) return cb(err);
+        let newXml = XML.updateDataset(XML.load(data.toString()), opts.dataset);
+        if (!newXml) return cb(new Error('Add dataset failed'));
+        else
+          return DocumentsFilesController.rewriteFile(doc.tei, newXml, function (err) {
+            if (err) return cb(err);
+            else return cb(null);
+          });
+      });
+  });
+};
+
+/**
  * Delete dataset in TEI file
  * @param {object} opts JSON object containing all data
  * @param {string} opts.documentId - Document id

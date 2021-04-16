@@ -40,6 +40,7 @@ Self.checkValidation = function (id, cb) {
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
  * @param {string} opts.dataset.sentenceId - Dataset sentence id
+ * @param {boolean} opts.dataset.reuse - Dataset reuse property
  * @param {string} opts.dataset.cert - Dataset cert value (between 0 and 1)
  * @param {string} opts.dataset.dataType - Dataset dataType
  * @param {string} opts.dataset.subType - Dataset subType
@@ -78,6 +79,7 @@ Self.newDataset = function (opts = {}, cb) {
           dataset: {
             sentenceId: opts.dataset.sentenceId,
             id: opts.dataset.id,
+            reuse: opts.dataset.reuse,
             type: opts.dataset.subType ? opts.dataset.dataType + ':' + opts.dataset.subType : opts.dataset.dataType,
             cert: opts.dataset.cert
           }
@@ -97,6 +99,7 @@ Self.newDataset = function (opts = {}, cb) {
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
  * @param {string} opts.dataset.sentenceId - Dataset sentence id
+ * @param {boolean} opts.dataset.reuse - Dataset reuse property
  * @param {string} opts.dataset.cert - Dataset cert value (between 0 and 1)
  * @param {string} opts.dataset.dataType - Dataset dataType
  * @param {string} opts.dataset.subType - Dataset subType
@@ -132,7 +135,22 @@ Self.updateDataset = function (opts = {}, cb) {
     else
       return datasets.save(function (err, res) {
         if (err) return cb(err);
-        return cb(null);
+        return DocumentsController.updateDatasetInTEI(
+          {
+            documentId: datasets.document,
+            dataset: {
+              sentenceId: opts.dataset.sentenceId,
+              id: opts.dataset.id,
+              reuse: opts.dataset.reuse,
+              type: opts.dataset.subType ? opts.dataset.dataType + ':' + opts.dataset.subType : opts.dataset.dataType,
+              cert: opts.dataset.cert
+            }
+          },
+          function (err, res) {
+            if (err) return cb(err);
+            return cb(null);
+          }
+        );
       });
   });
 };
@@ -271,6 +289,7 @@ Self.createDataset = function (opts = {}) {
   return {
     id: opts.id, // id
     sentenceId: opts.sentenceId, // sentence id
+    reuse: opts.reuse ? opts.reuse : false, // dataset reuse
     cert: opts.cert, // cert value (between 0 and 1)
     dataType: opts.dataType, // dataType
     subType: opts.subType, //  subType

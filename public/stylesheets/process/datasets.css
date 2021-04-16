@@ -364,9 +364,15 @@ i {
 #dataset-form .form-row input {
   display: inline-block;
 }
+
 #dataset-form .form-row select {
   display: inline-block;
   width: 75%;
+}
+
+#dataset-form .form-row input[type="checkbox"] {
+  display: inline-block;
+  width: 25px;
 }
 
 /*document-view*/

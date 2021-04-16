@@ -44,6 +44,21 @@ const DatasetForm = function (events) {
       },
       {}
     ),
+    'dataset.reuse': new View.properties.editable.checkbox(
+      {
+        id: 'dataset.reuse',
+        key: 'reuse: ',
+        value: ''
+      },
+      {
+        onChange: function (element) {
+          elements['dataset.status'].modified();
+          self.dataset.status = elements['dataset.status'].value();
+          self.dataset.reuse = element.value();
+          events.onChange(element);
+        }
+      }
+    ),
     'dataset.customDataType': new View.properties.editable.text(
       {
         id: 'dataset.customDataType',
@@ -194,6 +209,7 @@ const DatasetForm = function (events) {
         .append(elements['unlink'])
     )
     // .append(View.forms.row().append(elements['dataset.cert'].elements().container)) // fix-161 : hide cert
+    .append(View.forms.row().append(elements['dataset.reuse'].elements().container))
     .append(View.forms.row().append(elements['dataset.dataType'].elements().container))
     .append(View.forms.row().append(elements['dataset.subType'].elements().container))
     .append(View.forms.row().append(elements['dataset.customDataType'].elements().container))
@@ -268,6 +284,7 @@ const DatasetForm = function (events) {
     }
     elements['dataset.id'].view();
     elements['dataset.cert'].view();
+    elements['dataset.reuse'].view();
     let certValue = parseFloat(elements['dataset.cert'].value());
     if (certValue === 0.0) elements['dataset.cert'].elements().container.parent().hide();
     else elements['dataset.cert'].elements().container.parent().show();
@@ -296,6 +313,7 @@ const DatasetForm = function (events) {
         'dataset.status': elements['dataset.status'].value(),
         'dataset.id': elements['dataset.id'].value(),
         'dataset.cert': elements['dataset.cert'].value(),
+        'dataset.reuse': elements['dataset.reuse'].value(),
         'dataset.dataType':
           elements['dataset.dataType'].value() !== ''
             ? elements['dataset.dataType'].value()
@@ -311,6 +329,7 @@ const DatasetForm = function (events) {
     elements['dataset.status'].value(dataset.status);
     elements['dataset.id'].value(dataset.id);
     elements['dataset.cert'].value(parseFloat(dataset.cert).toFixed(4));
+    elements['dataset.reuse'].value(dataset.reuse);
     elements['dataset.dataType'].value(dataset.dataType);
     if (elements['dataset.dataType'].value() === '') {
       self.showCustomDataType();

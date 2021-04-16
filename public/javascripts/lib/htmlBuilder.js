@@ -30,6 +30,11 @@ const HtmlBuilder = {
       .attr('value', options.value)
       .addClass('form-control');
   },
+  checkbox: function (options = {}) {
+    let el = jQuery('<input/>').attr('type', 'checkbox').addClass('form-control');
+    if (options.value) el.attr('checked', true);
+    return el;
+  },
   textarea: function (options = {}) {
     return jQuery('<textarea/>')
       .attr('placeholder', options.placeholder)
