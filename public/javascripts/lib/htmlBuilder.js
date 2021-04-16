@@ -8,6 +8,7 @@ const HtmlBuilder = {
   div: function (options = {}) {
     let result = jQuery('<div/>').addClass(options.class).text(options.text);
     if (options.id) result.attr('id', options.id);
+    if (options.title) result.attr('title', options.title);
     if (options.value) result.attr('value', options.value);
     return result;
   },
@@ -29,6 +30,11 @@ const HtmlBuilder = {
       .attr('placeholder', options.placeholder)
       .attr('value', options.value)
       .addClass('form-control');
+  },
+  checkbox: function (options = {}) {
+    let el = jQuery('<input/>').attr('type', 'checkbox').addClass('form-control');
+    if (options.value) el.attr('checked', true);
+    return el;
   },
   textarea: function (options = {}) {
     return jQuery('<textarea/>')
