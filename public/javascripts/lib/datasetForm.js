@@ -4,7 +4,7 @@
 
 'use strict';
 
-const DatasetForm = function (events) {
+const DatasetForm = function (events, isCurator) {
   let self = this;
 
   self.selectedElement = undefined;
@@ -161,6 +161,16 @@ const DatasetForm = function (events) {
         }
       }
     ),
+    'dataset.notification': new View.properties.editable.notification(
+      {
+        editable: isCurator,
+        id: 'dataset.notification',
+        key: 'Enter a message here (or leave it empty so nothing will be displayed): ',
+        placeholder: 'Enter the message here or leave it empty',
+        value: ''
+      },
+      {}
+    ),
     'dataset.DOI': new View.properties.editable.text(
       {
         id: 'dataset.DOI',
@@ -217,6 +227,7 @@ const DatasetForm = function (events) {
     .append(View.forms.row().append(elements['dataset.bestDataFormatForSharing'].elements().container))
     .append(View.forms.row().append(elements['dataset.mostSuitableRepositories'].elements().container))
     .append(View.forms.row().append(elements['dataset.name'].elements().container))
+    .append(View.forms.row().append(elements['dataset.notification'].elements().container))
     .append(View.forms.row().append(elements['dataset.DOI'].elements().container))
     .append(View.forms.row().append(elements['dataset.comments'].elements().container))
     .append(
@@ -295,6 +306,10 @@ const DatasetForm = function (events) {
     elements['dataset.bestDataFormatForSharing'].view();
     elements['dataset.mostSuitableRepositories'].view();
     elements['dataset.name'].edit(false);
+    elements['dataset.notification'].view();
+    if (!isCurator && !elements['dataset.notification'].value().length)
+      elements['dataset.notification'].elements().container.parent().hide();
+    else elements['dataset.notification'].elements().container.parent().show();
     elements['dataset.DOI'].edit(false);
     elements['dataset.comments'].view();
   };
@@ -323,6 +338,7 @@ const DatasetForm = function (events) {
         'dataset.bestDataFormatForSharing': elements['dataset.bestDataFormatForSharing'].value(),
         'dataset.mostSuitableRepositories': elements['dataset.mostSuitableRepositories'].value(),
         'dataset.name': elements['dataset.name'].value(),
+        'dataset.notification': elements['dataset.notification'].value(),
         'dataset.DOI': elements['dataset.DOI'].value(),
         'dataset.comments': elements['dataset.comments'].value()
       };
@@ -337,6 +353,7 @@ const DatasetForm = function (events) {
     } else self.hideCustomDataType();
     elements['dataset.subType'].value(dataset.subType);
     elements['dataset.name'].value(dataset.name);
+    elements['dataset.notification'].value(dataset.notification);
     elements['dataset.DOI'].value(dataset.DOI);
     elements['dataset.comments'].value(dataset.comments);
     return self.values();

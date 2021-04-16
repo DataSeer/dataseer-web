@@ -324,6 +324,11 @@ i {
   display: inline-block;
 }
 
+#dataset-form #dataset\.notification .notification {
+  width: 100%;
+  margin-bottom: 0px !important;
+}
+
 #dataset-form .form-row {
   margin-bottom: 20px;
 }

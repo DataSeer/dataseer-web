@@ -256,84 +256,89 @@
           let hasChanged = false; // tell us if there is some change
 
           // All components
-          let datasetForm = new DatasetForm({
-              // On final validation
-              onValidation: function (dataset) {
-                let currentId = datasetForm.id();
-                if (user.role === 'curator') {
-                  datasetsList.datasets.statusOf(currentId, _status.valid);
-                  return saveDataset(dataset, _status.valid);
-                }
-                if (
-                  currentId === '' ||
-                  typeof currentDocument.datasets.current === 'undefined' ||
-                  typeof currentDocument.datasets.current[currentId] === 'undefined'
-                ) {
-                  $('#datasets-error-modal-label').html('Final validation');
-                  $('#datasets-error-modal-body').html('Please, add at least one dataset before validate');
-                  $('#datasets-error-modal-btn').click();
-                } else if (dataset['dataset.DOI'] === '' && dataset['dataset.comments'] === '') {
-                  $('#datasets-error-modal-label').html('Final validation');
-                  $('#datasets-error-modal-body').html(
-                    'To validate, please provide a DOI or enter comments explaining why this dataset cannot be shared'
-                  );
-                  $('#datasets-error-modal-btn').click();
-                } else if (dataset['dataset.dataType'] === '') {
-                  $('#datasets-error-modal-label').html('Final validation');
-                  $('#datasets-error-modal-body').html('To validate, please provide a datatype (predefined or custom)');
-                  $('#datasets-error-modal-btn').click();
-                } else {
-                  datasetsList.datasets.statusOf(currentId, _status.valid);
-                  saveDataset(dataset, _status.valid);
-                }
-              },
-              // On save
-              onSave: function (dataset) {
-                let currentId = datasetForm.id();
-                if (user.role === 'curator') {
-                  datasetsList.datasets.statusOf(currentId, _status.saved);
-                  return saveDataset(dataset, _status.saved);
-                }
-                if (
-                  currentId === '' ||
-                  typeof currentDocument.datasets.current === 'undefined' ||
-                  typeof currentDocument.datasets.current[currentId] === 'undefined'
-                ) {
-                  $('#datasets-error-modal-label').html('Save dataset');
-                  $('#datasets-error-modal-body').html('Please, add at least one dataset before saving');
-                  $('#datasets-error-modal-btn').click();
-                } else {
-                  datasetsList.datasets.statusOf(currentId, _status.saved);
-                  saveDataset(dataset, _status.saved);
-                }
-              },
-              onIdClick: function (id) {
-                datasetsList.select(id);
-                datasetForm.link(currentDocument.datasets.current[id], documentView.color(id));
-                documentView.views.scrollTo(id);
-              },
-              onChange: function (element) {
-                datasetsList.datasets.statusOf(datasetForm.id(), _status.modified);
-                hasChanged = true;
-              },
-              onUnlink: function (element) {
-                let id = element.attr('corresp').substring(1); // Remove '#' of corresp attribute
-                DataSeerAPI.deleteCorresp(
-                  {
-                    datasetsId: doc.datasets._id,
-                    dataset: { id: id, sentenceId: element.attr('sentenceid') }
-                  },
-                  function (err, res) {
-                    console.log(err, res);
-                    if (err) return err; // Need to define error behavior
-                    documentView.deleteCorresp(element);
-                    documentView.views.unselectCanvas();
-                    datasetForm.link(currentDocument.datasets.current[id], documentView.color(id));
-                    documentView.views.scrollTo(id);
+          let datasetForm = new DatasetForm(
+              {
+                // On final validation
+                onValidation: function (dataset) {
+                  let currentId = datasetForm.id();
+                  if (user.role === 'curator') {
+                    datasetsList.datasets.statusOf(currentId, _status.valid);
+                    return saveDataset(dataset, _status.valid);
                   }
-                );
-              }
-            }),
+                  if (
+                    currentId === '' ||
+                    typeof currentDocument.datasets.current === 'undefined' ||
+                    typeof currentDocument.datasets.current[currentId] === 'undefined'
+                  ) {
+                    $('#datasets-error-modal-label').html('Final validation');
+                    $('#datasets-error-modal-body').html('Please, add at least one dataset before validate');
+                    $('#datasets-error-modal-btn').click();
+                  } else if (dataset['dataset.DOI'] === '' && dataset['dataset.comments'] === '') {
+                    $('#datasets-error-modal-label').html('Final validation');
+                    $('#datasets-error-modal-body').html(
+                      'To validate, please provide a DOI or enter comments explaining why this dataset cannot be shared'
+                    );
+                    $('#datasets-error-modal-btn').click();
+                  } else if (dataset['dataset.dataType'] === '') {
+                    $('#datasets-error-modal-label').html('Final validation');
+                    $('#datasets-error-modal-body').html(
+                      'To validate, please provide a datatype (predefined or custom)'
+                    );
+                    $('#datasets-error-modal-btn').click();
+                  } else {
+                    datasetsList.datasets.statusOf(currentId, _status.valid);
+                    saveDataset(dataset, _status.valid);
+                  }
+                },
+                // On save
+                onSave: function (dataset) {
+                  let currentId = datasetForm.id();
+                  if (user.role === 'curator') {
+                    datasetsList.datasets.statusOf(currentId, _status.saved);
+                    return saveDataset(dataset, _status.saved);
+                  }
+                  if (
+                    currentId === '' ||
+                    typeof currentDocument.datasets.current === 'undefined' ||
+                    typeof currentDocument.datasets.current[currentId] === 'undefined'
+                  ) {
+                    $('#datasets-error-modal-label').html('Save dataset');
+                    $('#datasets-error-modal-body').html('Please, add at least one dataset before saving');
+                    $('#datasets-error-modal-btn').click();
+                  } else {
+                    datasetsList.datasets.statusOf(currentId, _status.saved);
+                    saveDataset(dataset, _status.saved);
+                  }
+                },
+                onIdClick: function (id) {
+                  datasetsList.select(id);
+                  datasetForm.link(currentDocument.datasets.current[id], documentView.color(id));
+                  documentView.views.scrollTo(id);
+                },
+                onChange: function (element) {
+                  datasetsList.datasets.statusOf(datasetForm.id(), _status.modified);
+                  hasChanged = true;
+                },
+                onUnlink: function (element) {
+                  let id = element.attr('corresp').substring(1); // Remove '#' of corresp attribute
+                  DataSeerAPI.deleteCorresp(
+                    {
+                      datasetsId: doc.datasets._id,
+                      dataset: { id: id, sentenceId: element.attr('sentenceid') }
+                    },
+                    function (err, res) {
+                      console.log(err, res);
+                      if (err) return err; // Need to define error behavior
+                      documentView.deleteCorresp(element);
+                      documentView.views.unselectCanvas();
+                      datasetForm.link(currentDocument.datasets.current[id], documentView.color(id));
+                      documentView.views.scrollTo(id);
+                    }
+                  );
+                }
+              },
+              user.role !== 'standard_user'
+            ),
             datasetsList = new DatasetsList(currentDocument.datasets.current, {
               onNewDataset: function () {
                 if (typeof currentDocument.datasets.current === 'undefined') currentDocument.datasets.current = {};

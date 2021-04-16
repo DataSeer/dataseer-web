@@ -445,6 +445,64 @@ const View = {
 
         return self;
       },
+      notification: function (data, events) {
+        let self = this,
+          elements = {
+            container: HtmlBuilder.div({ id: data.id, class: '', text: '' }),
+            key: HtmlBuilder.div({ class: 'key', text: data.key }),
+            data: data.editable
+              ? HtmlBuilder.input({
+                  type: 'text',
+                  placeholder: data.placeholder,
+                  value: data.value
+                })
+              : HtmlBuilder.div({
+                  class: 'notification alert alert-info',
+                  text: data.value,
+                  title: 'This message come from a curator'
+                })
+          };
+
+        if (data.editable)
+          elements.data.bind('input propertychange', function () {
+            self.value(elements.data.val());
+            events.onChange(self);
+          });
+
+        self.id = function (value) {
+          if (typeof value === 'undefined') return elements.container.attr('id');
+          elements.container.attr('id', id);
+          return self.id();
+        };
+
+        self.value = function (value) {
+          if (typeof value === 'undefined')
+            if (data.editable) return elements.data.val();
+            else return elements.data.html();
+          else {
+            if (data.editable) elements.data.val(value);
+            else elements.data.html(value);
+            return self.value();
+          }
+        };
+
+        self.removeChildrens = function () {
+          elements.data.detach();
+        };
+
+        self.view = function () {
+          self.removeChildrens();
+          if (data.editable) elements.key.appendTo(elements.container);
+          elements.data.appendTo(elements.container);
+          return self.elements().container;
+        };
+
+        self.elements = function () {
+          return elements;
+        };
+
+        return self;
+      },
       select: function (data, events) {
         let self = this,
           elements = {

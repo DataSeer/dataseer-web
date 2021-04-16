@@ -274,6 +274,7 @@ Self.deleteCorresp = function (opts = {}, cb) {
  * @param {string} opts.id - Dataset id
  * @param {string} opts.sentenceId - Dataset sentence id
  * @param {string} opts.reuse - Dataset reuse
+ * @param {string} opts.notification - Dataset notification
  * @param {string} opts.cert - Dataset cert value (between 0 and 1)
  * @param {string} opts.dataType - Dataset dataType
  * @param {string} opts.subType - Dataset subType
@@ -291,6 +292,7 @@ Self.createDataset = function (opts = {}) {
     id: opts.id, // id
     sentenceId: opts.sentenceId, // sentence id
     reuse: opts.reuse ? opts.reuse : false, // dataset reuse
+    notification: opts.notification, // dataset notification
     cert: opts.cert, // cert value (between 0 and 1)
     dataType: opts.dataType, // dataType
     subType: opts.subType, //  subType

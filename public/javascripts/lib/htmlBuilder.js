@@ -8,6 +8,7 @@ const HtmlBuilder = {
   div: function (options = {}) {
     let result = jQuery('<div/>').addClass(options.class).text(options.text);
     if (options.id) result.attr('id', options.id);
+    if (options.title) result.attr('title', options.title);
     if (options.value) result.attr('value', options.value);
     return result;
   },
