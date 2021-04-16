@@ -226,8 +226,8 @@ const DatasetForm = function (events, isCurator) {
     .append(View.forms.row().append(elements['dataset.description'].elements().container))
     .append(View.forms.row().append(elements['dataset.bestDataFormatForSharing'].elements().container))
     .append(View.forms.row().append(elements['dataset.mostSuitableRepositories'].elements().container))
-    .append(View.forms.row().append(elements['dataset.name'].elements().container))
     .append(View.forms.row().append(elements['dataset.notification'].elements().container))
+    .append(View.forms.row().append(elements['dataset.name'].elements().container))
     .append(View.forms.row().append(elements['dataset.DOI'].elements().container))
     .append(View.forms.row().append(elements['dataset.comments'].elements().container))
     .append(
