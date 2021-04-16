@@ -4,7 +4,7 @@
 
 'use strict';
 
-const DatasetForm = function (events) {
+const DatasetForm = function (events, isCurator) {
   let self = this;
 
   self.selectedElement = undefined;
@@ -43,6 +43,21 @@ const DatasetForm = function (events) {
         value: ''
       },
       {}
+    ),
+    'dataset.reuse': new View.properties.editable.checkbox(
+      {
+        id: 'dataset.reuse',
+        key: 'reuse: ',
+        value: ''
+      },
+      {
+        onChange: function (element) {
+          elements['dataset.status'].modified();
+          self.dataset.status = elements['dataset.status'].value();
+          self.dataset.reuse = element.value();
+          events.onChange(element);
+        }
+      }
     ),
     'dataset.customDataType': new View.properties.editable.text(
       {
@@ -146,6 +161,16 @@ const DatasetForm = function (events) {
         }
       }
     ),
+    'dataset.notification': new View.properties.editable.notification(
+      {
+        editable: isCurator,
+        id: 'dataset.notification',
+        key: 'Enter a message here (or leave it empty so nothing will be displayed): ',
+        placeholder: 'Enter the message here or leave it empty',
+        value: ''
+      },
+      {}
+    ),
     'dataset.DOI': new View.properties.editable.text(
       {
         id: 'dataset.DOI',
@@ -194,12 +219,14 @@ const DatasetForm = function (events) {
         .append(elements['unlink'])
     )
     // .append(View.forms.row().append(elements['dataset.cert'].elements().container)) // fix-161 : hide cert
+    .append(View.forms.row().append(elements['dataset.reuse'].elements().container))
     .append(View.forms.row().append(elements['dataset.dataType'].elements().container))
     .append(View.forms.row().append(elements['dataset.subType'].elements().container))
     .append(View.forms.row().append(elements['dataset.customDataType'].elements().container))
     .append(View.forms.row().append(elements['dataset.description'].elements().container))
     .append(View.forms.row().append(elements['dataset.bestDataFormatForSharing'].elements().container))
     .append(View.forms.row().append(elements['dataset.mostSuitableRepositories'].elements().container))
+    .append(View.forms.row().append(elements['dataset.notification'].elements().container))
     .append(View.forms.row().append(elements['dataset.name'].elements().container))
     .append(View.forms.row().append(elements['dataset.DOI'].elements().container))
     .append(View.forms.row().append(elements['dataset.comments'].elements().container))
@@ -268,6 +295,7 @@ const DatasetForm = function (events) {
     }
     elements['dataset.id'].view();
     elements['dataset.cert'].view();
+    elements['dataset.reuse'].view();
     let certValue = parseFloat(elements['dataset.cert'].value());
     if (certValue === 0.0) elements['dataset.cert'].elements().container.parent().hide();
     else elements['dataset.cert'].elements().container.parent().show();
@@ -278,6 +306,10 @@ const DatasetForm = function (events) {
     elements['dataset.bestDataFormatForSharing'].view();
     elements['dataset.mostSuitableRepositories'].view();
     elements['dataset.name'].edit(false);
+    elements['dataset.notification'].view();
+    if (!isCurator && !elements['dataset.notification'].value().length)
+      elements['dataset.notification'].elements().container.parent().hide();
+    else elements['dataset.notification'].elements().container.parent().show();
     elements['dataset.DOI'].edit(false);
     elements['dataset.comments'].view();
   };
@@ -296,6 +328,7 @@ const DatasetForm = function (events) {
         'dataset.status': elements['dataset.status'].value(),
         'dataset.id': elements['dataset.id'].value(),
         'dataset.cert': elements['dataset.cert'].value(),
+        'dataset.reuse': elements['dataset.reuse'].value(),
         'dataset.dataType':
           elements['dataset.dataType'].value() !== ''
             ? elements['dataset.dataType'].value()
@@ -305,12 +338,14 @@ const DatasetForm = function (events) {
         'dataset.bestDataFormatForSharing': elements['dataset.bestDataFormatForSharing'].value(),
         'dataset.mostSuitableRepositories': elements['dataset.mostSuitableRepositories'].value(),
         'dataset.name': elements['dataset.name'].value(),
+        'dataset.notification': elements['dataset.notification'].value(),
         'dataset.DOI': elements['dataset.DOI'].value(),
         'dataset.comments': elements['dataset.comments'].value()
       };
     elements['dataset.status'].value(dataset.status);
     elements['dataset.id'].value(dataset.id);
     elements['dataset.cert'].value(parseFloat(dataset.cert).toFixed(4));
+    elements['dataset.reuse'].value(dataset.reuse);
     elements['dataset.dataType'].value(dataset.dataType);
     if (elements['dataset.dataType'].value() === '') {
       self.showCustomDataType();
@@ -318,6 +353,7 @@ const DatasetForm = function (events) {
     } else self.hideCustomDataType();
     elements['dataset.subType'].value(dataset.subType);
     elements['dataset.name'].value(dataset.name);
+    elements['dataset.notification'].value(dataset.notification);
     elements['dataset.DOI'].value(dataset.DOI);
     elements['dataset.comments'].value(dataset.comments);
     return self.values();

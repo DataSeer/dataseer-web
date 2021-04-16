@@ -324,6 +324,11 @@ i {
   display: inline-block;
 }
 
+#dataset-form #dataset\.notification .notification {
+  width: 100%;
+  margin-bottom: 0px !important;
+}
+
 #dataset-form .form-row {
   margin-bottom: 20px;
 }
@@ -344,7 +349,6 @@ i {
 }
 
 #dataset-form .form-row button {
-  float: left;
   display: inline-block;
   margin-left: 4px;
   margin-right: 4px; 
@@ -364,9 +368,15 @@ i {
 #dataset-form .form-row input {
   display: inline-block;
 }
+
 #dataset-form .form-row select {
   display: inline-block;
   width: 75%;
+}
+
+#dataset-form .form-row input[type="checkbox"] {
+  display: inline-block;
+  width: 25px;
 }
 
 /*document-view*/

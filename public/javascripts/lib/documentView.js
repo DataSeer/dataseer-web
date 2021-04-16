@@ -87,6 +87,7 @@ const DocumentView = function (events) {
               .attr('id', options.id)
               .attr(options.user.role, options.user.id)
               .attr('type', dataType)
+              .attr('reuse', options.reuse)
               .attr('cert', cert);
             target.removeAttr('class');
             jQuery(target).parents('div[type]').attr('subtype', 'dataseer');
@@ -244,12 +245,12 @@ const DocumentView = function (events) {
     return styles;
   };
 
-  self.updateDataset = function (user, id, dataType) {
-    return datasets.update(user, id, dataType);
+  self.updateDataset = function (user, id, dataType, reuse) {
+    return datasets.update(user, id, dataType, reuse);
   };
 
-  self.addDataset = function (user, id, dataType, cb) {
-    return datasets.add(user, id, dataType, function (err, res) {
+  self.addDataset = function (user, id, dataType, reuse, cb) {
+    return datasets.add(user, id, dataType, reuse, function (err, res) {
       return cb(err, res);
     });
   };
@@ -403,12 +404,12 @@ const DocumentView = function (events) {
       });
     },
     // add dataset
-    add: function (user, id, dataType, cb) {
+    add: function (user, id, dataType, reuse, cb) {
       let selection = selectedElements();
       if (selection.err) return cb(true, 'Please select the sentence that contains the new dataset');
       return selectionToSenctence(
         selection,
-        { id: id, dataType: dataType, getdataType: true, user: user },
+        { id: id, dataType: dataType, getdataType: true, user: user, reuse: reuse },
         events.datasets.click,
         function (err, res) {
           if (err) return cb(err, res);
@@ -424,6 +425,7 @@ const DocumentView = function (events) {
           }
           return cb(null, {
             datatype: res.attr('type'),
+            reuse: res.attr('reuse'),
             cert: res.attr('cert'),
             sentenceId: sentenceid
           });
@@ -431,9 +433,10 @@ const DocumentView = function (events) {
       );
     },
     // add dataset
-    update: function (user, id, dataType) {
+    update: function (user, id, dataType, reuse) {
       jQuery('#' + id)
         .attr('type', dataType)
+        .attr('reuse', reuse)
         .attr(user.role, user.id);
     },
     // remove dataset
