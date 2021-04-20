@@ -234,10 +234,8 @@ router.post('/forgotPassword', function (req, res) {
               conf: conf,
               error: err.toString()
             });
-          let url = path.join(
-            conf.root,
-            'resetPassword?token=' + user.tokens.resetPassword + '&username=' + user.username
-          );
+          let url =
+            conf.root + 'resetPassword?resetPasswordToken=' + user.tokens.resetPassword + '&username=' + user.username;
           return Mailer.sendMail(
             {
               'to': user.username,
