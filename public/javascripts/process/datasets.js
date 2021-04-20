@@ -179,6 +179,12 @@
                 dataset['dataset.id'],
                 currentDocument.datasets.current[dataset['dataset.id']].status
               );
+              datasetsList.datasets.textOf(
+                dataset['dataset.id'],
+                currentDocument.datasets.current[dataset['dataset.id']].name
+                  ? currentDocument.datasets.current[dataset['dataset.id']].name
+                  : currentDocument.datasets.current[dataset['dataset.id']].id
+              );
               currentDocument.source = documentView.source();
               return DataSeerAPI.updateDataset(
                 {
@@ -316,7 +322,10 @@
                   documentView.views.scrollTo(id);
                 },
                 onChange: function (element) {
-                  datasetsList.datasets.statusOf(datasetForm.id(), _status.modified);
+                  let id = datasetForm.id(),
+                    name = datasetForm.getProperty('name');
+                  datasetsList.datasets.statusOf(id, _status.modified);
+                  datasetsList.datasets.textOf(id, name ? name : id);
                   hasChanged = true;
                 },
                 onUnlink: function (element) {
@@ -388,7 +397,7 @@
                         } // Need to define error behavior
                         hasChanged = false;
                         datasetsList.add(
-                          newId,
+                          currentDocument.datasets.current[newId],
                           documentView.color(newId),
                           currentDocument.datasets.current[newId].status
                         );
