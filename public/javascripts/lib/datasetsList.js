@@ -5,7 +5,10 @@
 'use strict';
 
 const DatasetsList = function (data, events) {
-  let datasets = {};
+  let datasets = {
+    HTMLElements: {},
+    data: {}
+  };
 
   let elements = {
       container: HtmlBuilder.div({
@@ -35,12 +38,13 @@ const DatasetsList = function (data, events) {
     mapping = {};
 
   self.datasets = {
-    add: function (id) {
-      datasets[id] = new View.links.static(
+    add: function (dataset) {
+      datasets.data[dataset.id] = dataset;
+      datasets.HTMLElements[dataset.id] = new View.links.static(
         {
           class: 'form-row',
-          text: id,
-          value: id,
+          text: dataset.name ? dataset.name : dataset.id,
+          value: dataset.id,
           style: ''
         },
         {
@@ -55,24 +59,27 @@ const DatasetsList = function (data, events) {
           }
         }
       );
-      let _elements = datasets[id].elements(),
+      let _elements = datasets.HTMLElements[dataset.id].elements(),
         container = _elements.container;
-      mapping[id] = container;
+      mapping[dataset.id] = container;
       _elements.link.attr('title', 'Link selected sentence to this dataset');
       elements.datasetsListItemsContainer.append(container);
       elements.empty.hide();
     },
     remove: function (id) {
-      datasets[id].delete();
-      delete datasets[id];
+      datasets.HTMLElements[id].delete();
+      delete datasets.HTMLElements[id];
       delete mapping[id];
-      if (Object.keys(datasets).length === 0) elements.empty.show();
+      if (Object.keys(datasets.HTMLElements).length === 0) elements.empty.show();
+    },
+    textOf: function (id, value) {
+      if (typeof value !== 'undefined') datasets.HTMLElements[id].elements().data.text(value);
     },
     statusOf: function (id, value) {
-      if (typeof value !== 'undefined') datasets[id].elements().status.value(value);
+      if (typeof value !== 'undefined') datasets.HTMLElements[id].elements().status.value(value);
     },
     styleOf: function (id, value) {
-      if (typeof value !== 'undefined') datasets[id].elements().data.attr('style', value);
+      if (typeof value !== 'undefined') datasets.HTMLElements[id].elements().data.attr('style', value);
     }
   };
 
@@ -120,19 +127,19 @@ const DatasetsList = function (data, events) {
     scrollTo(id);
   };
 
-  self.add = function (id, style, status) {
-    self.datasets.add(id);
-    self.datasets.statusOf(id, status);
-    self.datasets.styleOf(id, style);
+  self.add = function (dataset, style, status) {
+    self.datasets.add(dataset);
+    self.datasets.statusOf(dataset.id, status);
+    self.datasets.styleOf(dataset.id, style);
   };
 
   self.init = function (id, styles, status) {
     jQuery(id).empty().append(elements.container);
     // Add all inputs
     for (let key in data) {
-      self.datasets.add(data[key].id);
-      self.datasets.statusOf(datasets[key].value(), status[key]);
-      self.datasets.styleOf(datasets[key].value(), styles[key]);
+      self.datasets.add(data[key]);
+      self.datasets.statusOf(datasets.HTMLElements[key].value(), status[key]);
+      self.datasets.styleOf(datasets.HTMLElements[key].value(), styles[key]);
     }
   };
 
