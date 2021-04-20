@@ -267,6 +267,10 @@ const DatasetForm = function (events, isCurator) {
     if (typeof value === 'undefined') return elements['dataset.id'].value();
   };
 
+  self.getProperty = function (property) {
+    return elements['dataset.' + property].value();
+  };
+
   self.init = function (id) {
     jQuery(id).empty().append(elements.container).append(elements.lock);
     self.refresh();
