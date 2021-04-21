@@ -508,6 +508,8 @@ i {
 }
 
 #datasets-list .form-row > .item {
+  padding-right: 5px;
+  padding-left: 5px;
   display: block;
   margin-bottom: 8px;
 }
