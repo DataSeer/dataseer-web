@@ -16,6 +16,7 @@ let Dataset = new mongoose.Schema(
     sentenceId: { type: String, default: '' }, // sentence id
     reuse: { type: Boolean, default: false }, // reuse property
     notification: { type: String, default: '' }, // notification property
+    highlight: { type: Boolean, default: false }, // notification property
     cert: { type: String, default: '' }, // cert value (between 0 and 1)
     dataType: { type: String, default: '' }, // dataType
     subType: { type: String, default: '' }, //  subType

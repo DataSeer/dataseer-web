@@ -141,76 +141,53 @@
               }
               return result;
             },
-            nextDataset = function (status) {
-              let result = IndexOfNextDataset(status);
+            reorder = function (data, index) {
+              return data.slice(index).concat(data.slice(0, index));
+            },
+            nextDataset = function (status, currentId) {
+              let result = IndexOfNextDataset(status, currentId);
               if (result.index > -1) return currentDocument.datasets.current[result.key];
               else return null;
             },
-            IndexOfNextDataset = function (status) {
+            IndexOfNextDataset = function (status, currentId) {
               let result = -1,
-                keys = Object.keys(currentDocument.datasets.current);
-              for (var i = 0; i < keys.length; i++) {
-                let key = keys[i];
+                keys = Object.keys(currentDocument.datasets.current),
+                indexOfCurrentId = keys.indexOf(currentId),
+                arr = reorder(keys, indexOfCurrentId > -1 ? indexOfCurrentId + 1 : 0);
+
+              for (var i = 0; i < arr.length; i++) {
+                let key = arr[i];
                 if (currentDocument.datasets.current[key] && currentDocument.datasets.current[key].status === status)
                   return {
                     index: i,
-                    key: keys[i]
+                    key: arr[i]
                   };
               }
               return result;
             },
-            saveDataset = function (dataset, status) {
-              let fullDataType =
-                currentDocument.datasets.current[dataset['dataset.id']].subType === ''
-                  ? currentDocument.datasets.current[dataset['dataset.id']].dataType
-                  : currentDocument.datasets.current[dataset['dataset.id']].dataType +
-                    ':' +
-                    currentDocument.datasets.current[dataset['dataset.id']].subType;
-              documentView.updateDataset(user, dataset['dataset.id'], fullDataType, dataset['dataset.reuse']);
-              let keys = Object.keys(currentDocument.datasets.current[dataset['dataset.id']]);
-              for (var i = 0; i < keys.length; i++) {
-                if (typeof dataset['dataset.' + keys[i]] !== 'undefined')
-                  currentDocument.datasets.current[dataset['dataset.id']][keys[i]] = dataset['dataset.' + keys[i]];
-              }
-              if (currentDocument.datasets.current[dataset['dataset.id']].name === '')
-                currentDocument.datasets.current[dataset['dataset.id']].name = dataset['dataset.id'];
-              currentDocument.datasets.current[dataset['dataset.id']].status = status;
-              datasetsList.datasets.statusOf(
-                dataset['dataset.id'],
-                currentDocument.datasets.current[dataset['dataset.id']].status
-              );
-              datasetsList.datasets.textOf(
-                dataset['dataset.id'],
-                currentDocument.datasets.current[dataset['dataset.id']].name
-                  ? currentDocument.datasets.current[dataset['dataset.id']].name
-                  : currentDocument.datasets.current[dataset['dataset.id']].id
-              );
-              currentDocument.source = documentView.source();
+            saveDataset = function (dataset, cb) {
+              dataset.status = _status.valid;
               return DataSeerAPI.updateDataset(
                 {
                   datasetsId: doc.datasets._id,
-                  dataset: currentDocument.datasets.current[dataset['dataset.id']]
+                  dataset: dataset
                 },
                 function (err, res) {
                   console.log(err, res);
-                  if (err) return err; // Need to define error behavior
+                  let hasCallback = cb && typeof cb === 'function';
+                  if (err) return hasCallback ? cb(err) : err; // Need to define error behavior
+                  if (res.err) return hasCallback ? cb(res) : res; // Need to define error behavior
+                  let result = res.res;
+                  currentDocument.datasets.current[result.id] = result;
+                  let fullDataType = result.subType === '' ? result.dataType : result.dataType + ':' + result.subType;
                   // Update dataType in XML
-                  let nextStatus = status === _status.saved ? _status.modified : _status.saved;
+                  documentView.updateDataset(user, result.id, fullDataType, result.reuse);
+                  datasetsList.datasets.textOf(result.id, result.name ? result.name : result.id);
+                  datasetsList.datasets.highlightOf(result.id, result.highlight);
+                  datasetsList.datasets.statusOf(result.id, result.status);
+                  datasetForm.refreshStatus(result.status);
                   hasChanged = false;
-                  let next = nextDataset(nextStatus);
-                  if (next !== null) {
-                    datasetsList.select(next.id);
-                    datasetForm.link(next, documentView.color(next.id));
-                    documentView.views.scrollTo(next.id);
-                  } else {
-                    datasetsList.select(dataset['dataset.id']);
-                    datasetForm.link(
-                      currentDocument.datasets.current[dataset['dataset.id']],
-                      documentView.color(dataset['dataset.id'])
-                    );
-                    documentView.views.scrollTo(dataset['dataset.id']);
-                  }
-                  // return location.reload();
+                  return hasCallback ? cb(null, result) : undefined;
                 }
               );
             },
@@ -224,7 +201,6 @@
               );
               currentDocument.datasets.deleted.push(currentDocument.datasets.current[id]);
               delete currentDocument.datasets.current[id];
-              currentDocument.source = documentView.source();
               return DataSeerAPI.deleteDataset(
                 {
                   datasetsId: doc.datasets._id,
@@ -259,62 +235,92 @@
               return result;
             };
 
-          let hasChanged = false; // tell us if there is some change
+          let lastSave = Date.now(),
+            lastChange = Date.now(),
+            saving = false,
+            saveAfterCooldownTimeOut = false, // will contain timeout of save after cooldown
+            hasChanged = false, // tell us if there is some change
+            autoSave = function (dataset, cb) {
+              if (hasChanged && !saving && lastChange - lastSave > 2000) {
+                saving = true;
+                return saveDataset(dataset, function (err, res) {
+                  $('#fixedMsgBottomRight').text('All changes saved !').removeClass().addClass('saved').fadeOut('slow');
+                  lastSave = Date.now();
+                  hasChanged = false;
+                  saving = false;
+                  if (cb && typeof cb === 'function') return cb(err, res);
+                });
+              } else {
+                if (saveAfterCooldownTimeOut === false)
+                  saveAfterCooldownTimeOut = window.setTimeout(function () {
+                    saving = true;
+                    return saveDataset(datasetForm.values(), function () {
+                      $('#fixedMsgBottomRight')
+                        .text('All changes saved !')
+                        .removeClass()
+                        .addClass('saved')
+                        .fadeOut('slow');
+                      lastSave = Date.now();
+                      hasChanged = false;
+                      saving = false;
+                      window.clearTimeout(saveAfterCooldownTimeOut);
+                      saveAfterCooldownTimeOut = false;
+                    });
+                  }, 2000);
+              }
+            },
+            throwAutoSave = function (dataset, cb) {
+              $('#fixedMsgBottomRight').text('Saving...').removeClass().addClass('saving').show();
+              lastChange = Date.now();
+              hasChanged = true;
+              autoSave(dataset, cb);
+            };
 
           // All components
           let datasetForm = new DatasetForm(
               {
                 // On final validation
                 onValidation: function (dataset) {
-                  let currentId = datasetForm.id();
-                  if (user.role === 'curator') {
-                    datasetsList.datasets.statusOf(currentId, _status.valid);
-                    return saveDataset(dataset, _status.valid);
-                  }
-                  if (
-                    currentId === '' ||
-                    typeof currentDocument.datasets.current === 'undefined' ||
-                    typeof currentDocument.datasets.current[currentId] === 'undefined'
-                  ) {
-                    $('#datasets-error-modal-label').html('Final validation');
-                    $('#datasets-error-modal-body').html('Please, add at least one dataset before validate');
-                    $('#datasets-error-modal-btn').click();
-                  } else if (dataset['dataset.DOI'] === '' && dataset['dataset.comments'] === '') {
-                    $('#datasets-error-modal-label').html('Final validation');
-                    $('#datasets-error-modal-body').html(
-                      'To validate, please provide a DOI or enter comments explaining why this dataset cannot be shared'
-                    );
-                    $('#datasets-error-modal-btn').click();
-                  } else if (dataset['dataset.dataType'] === '') {
-                    $('#datasets-error-modal-label').html('Final validation');
-                    $('#datasets-error-modal-body').html(
-                      'To validate, please provide a datatype (predefined or custom)'
-                    );
-                    $('#datasets-error-modal-btn').click();
-                  } else {
-                    datasetsList.datasets.statusOf(currentId, _status.valid);
-                    saveDataset(dataset, _status.valid);
-                  }
+                  return saveDataset(dataset, function (err, res) {
+                    if (user.role !== 'curator') {
+                      if (dataset.name === '') {
+                        $('#datasets-error-modal-label').html('Dataset validation');
+                        $('#datasets-error-modal-body').html(
+                          'Before moving on, please provide a name for this dataset'
+                        );
+                        $('#datasets-error-modal-btn').click();
+                        return;
+                      } else if (res.DOI === '' && res.comments === '') {
+                        $('#datasets-error-modal-label').html('Dataset validation');
+                        $('#datasets-error-modal-body').html(
+                          'Please provide either a DOI for the dataset or a comment in the comment box'
+                        );
+                        $('#datasets-error-modal-btn').click();
+                        return;
+                      } else if (dataset.dataType === '') {
+                        $('#datasets-error-modal-label').html('Dataset validation');
+                        $('#datasets-error-modal-body').html(
+                          'To validate, please provide a datatype (predefined or custom)'
+                        );
+                        $('#datasets-error-modal-btn').click();
+                        return;
+                      }
+                    }
+                    let next = nextDataset('saved', res.id);
+                    if (next !== null) {
+                      datasetsList.select(next.id);
+                      datasetForm.link(next, documentView.color(next.id));
+                      documentView.views.scrollTo(next.id);
+                    } else {
+                      datasetsList.select(res.id);
+                      datasetForm.link(res, documentView.color(res.id));
+                      documentView.views.scrollTo(res.id);
+                    }
+                  });
                 },
                 // On save
                 onSave: function (dataset) {
-                  let currentId = datasetForm.id();
-                  if (user.role === 'curator') {
-                    datasetsList.datasets.statusOf(currentId, _status.saved);
-                    return saveDataset(dataset, _status.saved);
-                  }
-                  if (
-                    currentId === '' ||
-                    typeof currentDocument.datasets.current === 'undefined' ||
-                    typeof currentDocument.datasets.current[currentId] === 'undefined'
-                  ) {
-                    $('#datasets-error-modal-label').html('Save dataset');
-                    $('#datasets-error-modal-body').html('Please, add at least one dataset before saving');
-                    $('#datasets-error-modal-btn').click();
-                  } else {
-                    datasetsList.datasets.statusOf(currentId, _status.saved);
-                    saveDataset(dataset, _status.saved);
-                  }
+                  return alert('feature disabled');
                 },
                 onIdClick: function (id) {
                   datasetsList.select(id);
@@ -323,10 +329,15 @@
                 },
                 onChange: function (element) {
                   let id = datasetForm.id(),
-                    name = datasetForm.getProperty('name');
+                    name = datasetForm.getProperty('name'),
+                    highlight = datasetForm.getProperty('highlight');
                   datasetsList.datasets.statusOf(id, _status.modified);
                   datasetsList.datasets.textOf(id, name ? name : id);
-                  hasChanged = true;
+                  datasetsList.datasets.highlightOf(id, highlight);
+                  throwAutoSave(datasetForm.values());
+                },
+                onLeave: function (element) {
+                  if (hasChanged) saveDataset(datasetForm.values());
                 },
                 onUnlink: function (element) {
                   let id = element.attr('corresp').substring(1); // Remove '#' of corresp attribute
@@ -380,7 +391,6 @@
                     currentDocument.datasets.current[newId].subType = getSubType(res.datatype);
                     currentDocument.datasets.current[newId].text = documentView.getTextOfDataset(newId);
                     currentDocument.datasets.current[newId].status = _status.saved;
-                    currentDocument.source = documentView.source();
                     return DataSeerAPI.createDataset(
                       {
                         datasetsId: doc.datasets._id,
@@ -431,7 +441,6 @@
                   $('#datasets-error-modal-btn').click();
                 } else {
                   hasChanged = true;
-                  currentDocument.source = documentView.source();
                   result.res.click();
                   return DataSeerAPI.createCorresp(
                     {

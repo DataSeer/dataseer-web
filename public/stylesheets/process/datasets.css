@@ -324,6 +324,12 @@ i {
   display: inline-block;
 }
 
+#dataset-form #dataset\.description .value,
+#dataset-form #dataset\.bestDataFormatForSharing .value,
+#dataset-form #dataset\.mostSuitableRepositories .value {
+  display: block;
+}
+
 #dataset-form #dataset\.notification .notification {
   width: 100%;
   margin-bottom: 0px !important;
@@ -516,7 +522,12 @@ i {
 
 #datasets-list .selected {
   border: 1px solid lightgray;
-  background-color: #EEEEEE;
+  background-color: #EEEEEE !important;
+}
+
+#datasets-list .highlighted {
+border: 3px solid gold !important;
+background-color: lightyellow;
 }
 
 #datasets-list .form-row {
@@ -649,6 +660,32 @@ i {
 
 .fa-check {
   font-size: 16px;
+}
+
+#fixedMsgBottomRight {
+  display: none;
+  z-index: 100000;
+  font-size: 1.25em;
+  font-style: oblique;
+  margin: 5px;
+  padding: 5px;
+  position: fixed;
+  bottom: 0px;
+  right: 0px; 
+}
+
+.saving {
+  display: auto;
+  border: solid gray 2px;
+  background-color: lightgray;
+  color: black;
+}
+
+.saved {
+  display: auto;
+  border: solid green 2px;
+  background-color: lightgreen;
+  color: green;
 }
 
 #datasets-error-modal .modal-header {
