@@ -24,7 +24,7 @@ const DatasetForm = function (events, isCurator) {
       text: 'At least one dataset must be added to be able to use this form'
     }),
     save: new View.buttons.save('Save for later'),
-    validation: new View.buttons.check('Validate'),
+    validation: new View.buttons.check('Done with this Dataset'),
     help: new View.buttons.help('Help'),
     unlink: new View.buttons.unlink(),
     'dataset.status': new View.status.edition('dataset.status'),
@@ -47,7 +47,7 @@ const DatasetForm = function (events, isCurator) {
     'dataset.reuse': new View.properties.editable.checkbox(
       {
         id: 'dataset.reuse',
-        key: 'reuse: ',
+        key: 're-use: ',
         value: ''
       },
       {
@@ -55,7 +55,11 @@ const DatasetForm = function (events, isCurator) {
           elements['dataset.status'].modified();
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.reuse = element.value();
+          self.setDataFromDatatype();
           events.onChange(element);
+        },
+        onLeave: function () {
+          events.onLeave();
         }
       }
     ),
@@ -90,6 +94,7 @@ const DatasetForm = function (events, isCurator) {
         onCancel: function (element) {},
         onChange: function (element) {
           elements['dataset.status'].modified();
+          self.dataset.status = elements['dataset.status'].value();
           self.setDataType();
           events.onChange(element);
         }
@@ -108,6 +113,7 @@ const DatasetForm = function (events, isCurator) {
         onCancel: function (element) {},
         onChange: function (element) {
           elements['dataset.status'].modified();
+          self.dataset.status = elements['dataset.status'].value();
           self.setSubType();
           events.onChange(element);
         }
@@ -158,6 +164,27 @@ const DatasetForm = function (events, isCurator) {
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.name = element.value();
           events.onChange(element);
+        },
+        onLeave: function () {
+          events.onLeave();
+        }
+      }
+    ),
+    'dataset.highlight': new View.properties.editable.checkbox(
+      {
+        id: 'dataset.highlight',
+        key: 'Highlight this dataset: ',
+        value: ''
+      },
+      {
+        onChange: function (element) {
+          elements['dataset.status'].modified();
+          self.dataset.status = elements['dataset.status'].value();
+          self.dataset.highlight = element.value();
+          events.onChange(element);
+        },
+        onLeave: function () {
+          events.onLeave();
         }
       }
     ),
@@ -175,6 +202,9 @@ const DatasetForm = function (events, isCurator) {
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.notification = element.value();
           events.onChange(element);
+        },
+        onLeave: function () {
+          events.onLeave();
         }
       }
     ),
@@ -194,6 +224,9 @@ const DatasetForm = function (events, isCurator) {
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.DOI = element.value();
           events.onChange(element);
+        },
+        onLeave: function () {
+          events.onLeave();
         }
       }
     ),
@@ -211,6 +244,9 @@ const DatasetForm = function (events, isCurator) {
           self.dataset.status = elements['dataset.status'].value();
           self.dataset.comments = element.value();
           events.onChange(element);
+        },
+        onLeave: function () {
+          events.onLeave();
         }
       }
     )
@@ -233,14 +269,12 @@ const DatasetForm = function (events, isCurator) {
     .append(View.forms.row().append(elements['dataset.description'].elements().container))
     .append(View.forms.row().append(elements['dataset.bestDataFormatForSharing'].elements().container))
     .append(View.forms.row().append(elements['dataset.mostSuitableRepositories'].elements().container))
+    .append(View.forms.row().append(elements['dataset.highlight'].elements().container))
     .append(View.forms.row().append(elements['dataset.notification'].elements().container))
     .append(View.forms.row().append(elements['dataset.name'].elements().container))
     .append(View.forms.row().append(elements['dataset.DOI'].elements().container))
     .append(View.forms.row().append(elements['dataset.comments'].elements().container))
-    .append(
-      View.forms.row().addClass('buttons-container').append(elements['save']).append(elements['validation'])
-      // .append(elements['help'])
-    )
+    .append(View.forms.row().addClass('buttons-container').append(elements['validation']))
     .append(elements['lock']);
 
   elements.unlink.click(function () {
@@ -317,6 +351,8 @@ const DatasetForm = function (events, isCurator) {
     elements['dataset.bestDataFormatForSharing'].view();
     elements['dataset.mostSuitableRepositories'].view();
     elements['dataset.name'].edit(false);
+    if (isCurator) elements['dataset.highlight'].view();
+    else elements['dataset.highlight'].elements().container.parent().hide();
     elements['dataset.notification'].view();
     if (!isCurator && !elements['dataset.notification'].value().length)
       elements['dataset.notification'].elements().container.parent().hide();
@@ -333,26 +369,13 @@ const DatasetForm = function (events, isCurator) {
     return elements;
   };
 
+  self.refreshStatus = function (status) {
+    elements['dataset.status'].value(status);
+  };
+
   self.values = function (dataset) {
-    if (typeof dataset === 'undefined')
-      return {
-        'dataset.status': elements['dataset.status'].value(),
-        'dataset.id': elements['dataset.id'].value(),
-        'dataset.cert': elements['dataset.cert'].value(),
-        'dataset.reuse': elements['dataset.reuse'].value(),
-        'dataset.dataType':
-          elements['dataset.dataType'].value() !== ''
-            ? elements['dataset.dataType'].value()
-            : elements['dataset.customDataType'].value(),
-        'dataset.subType': elements['dataset.subType'].value(),
-        'dataset.description': elements['dataset.description'].value(),
-        'dataset.bestDataFormatForSharing': elements['dataset.bestDataFormatForSharing'].value(),
-        'dataset.mostSuitableRepositories': elements['dataset.mostSuitableRepositories'].value(),
-        'dataset.name': elements['dataset.name'].value(),
-        'dataset.notification': elements['dataset.notification'].value(),
-        'dataset.DOI': elements['dataset.DOI'].value(),
-        'dataset.comments': elements['dataset.comments'].value()
-      };
+    if (typeof dataset === 'undefined') return self.dataset;
+    self.dataset = dataset;
     elements['dataset.status'].value(dataset.status);
     elements['dataset.id'].value(dataset.id);
     elements['dataset.cert'].value(parseFloat(dataset.cert).toFixed(4));
@@ -365,6 +388,7 @@ const DatasetForm = function (events, isCurator) {
     elements['dataset.subType'].value(dataset.subType);
     elements['dataset.name'].value(dataset.name);
     elements['dataset.notification'].value(dataset.notification);
+    elements['dataset.highlight'].value(dataset.highlight);
     elements['dataset.DOI'].value(dataset.DOI);
     elements['dataset.comments'].value(dataset.comments);
     return self.values();
@@ -459,6 +483,31 @@ const DatasetForm = function (events, isCurator) {
     self.setDataFromDatatype();
   };
 
+  self.setDataReUseAdvice = function () {
+    if (self.dataset.reuse) {
+      elements['dataset.mostSuitableRepositories'].help({
+        href: encodeURI(self.metadata['dataset re-use'].url)
+      });
+      elements['dataset.description'].value(
+        self.metadata['dataset re-use'].description ? self.metadata['dataset re-use'].description : ''
+      );
+      elements['dataset.bestDataFormatForSharing'].value(
+        self.metadata['dataset re-use'].bestDataFormatForSharing
+          ? self.metadata['dataset re-use'].bestDataFormatForSharing
+          : ''
+      );
+      elements['dataset.mostSuitableRepositories'].value(
+        self.metadata['dataset re-use'].mostSuitableRepositories
+          ? self.metadata['dataset re-use'].mostSuitableRepositories
+          : ''
+      );
+    }
+    self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
+    self.dataset.description = elements['dataset.description'].value();
+    self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
+    self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
+  };
+
   self.setDataFromDatatype = function () {
     if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
       elements['dataset.mostSuitableRepositories'].help({
@@ -477,7 +526,6 @@ const DatasetForm = function (events, isCurator) {
           ? self.metadata[self.dataset.dataType].mostSuitableRepositories
           : ''
       );
-      return true;
     } else {
       elements['dataset.mostSuitableRepositories'].help({
         href: 'http://wiki.dataseer.io/doku.php'
@@ -489,7 +537,7 @@ const DatasetForm = function (events, isCurator) {
     self.dataset.description = elements['dataset.description'].value();
     self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
     self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
-    return false;
+    self.setDataReUseAdvice();
   };
 
   self.setSubType = function () {
@@ -518,8 +566,11 @@ const DatasetForm = function (events, isCurator) {
           ? self.metadata[self.dataset.subType].mostSuitableRepositories
           : self.metadata[self.dataset.dataType].mostSuitableRepositories
       );
-      return true;
-    } else return false;
+    }
+    self.dataset.description = elements['dataset.description'].value();
+    self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
+    self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
+    self.setDataReUseAdvice();
   };
 
   return self;

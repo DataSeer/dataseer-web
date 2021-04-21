@@ -125,6 +125,7 @@ Structure of data:
   "sentenceId": { "type": String, "default": "" }, // sentence id
   "cert": { "type": String, "default": "" }, // cert value (between 0 and 1)
   "reuse": { "type": Boolean, "default": false }, // reuse property
+  "highlight": { "type": Boolean, "default": false }, // highlight property
   "notification": { "type": String, "default": '' }, // notification property
   "dataType": { "type": String, "default": "" }, // dataType
   "subType": { "type": String, "default": "" }, //  subType

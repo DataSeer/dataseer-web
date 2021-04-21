@@ -266,23 +266,27 @@ const View = {
 
         elements.input.bind('input propertychange', function () {
           self.value(elements.input.val());
-          events.onChange(self);
+          if (events.onChange) events.onChange(self);
+        });
+
+        elements.input.blur(function () {
+          if (events.onLeave) events.onLeave();
         });
 
         elements.edit.click(function () {
           self.edit();
-          events.onEdit(self);
+          if (events.onEdit) events.onEdit(self);
         });
 
         elements.save.click(function () {
           self.value(elements.input.val());
           self.view();
-          events.onSave(self);
+          if (events.onSave) events.onSave(self);
         });
 
         elements.cancel.click(function () {
           self.view();
-          events.onCancel(self);
+          if (events.onCancel) events.onCancel(self);
         });
 
         self.id = function (value) {
@@ -355,7 +359,11 @@ const View = {
 
         elements.data.bind('input propertychange', function () {
           self.value(elements.data.val());
-          events.onChange(self);
+          if (events.onChange) events.onChange(self);
+        });
+
+        elements.data.blur(function () {
+          if (events.onLeave) events.onLeave();
         });
 
         self.id = function (value) {
@@ -406,7 +414,11 @@ const View = {
 
         elements.data.bind('input propertychange', function () {
           self.value(elements.data.prop('checked'));
-          events.onChange(self);
+          if (events.onChange) events.onChange(self);
+        });
+
+        elements.data.blur(function () {
+          if (events.onLeave) events.onLeave();
         });
 
         self.id = function (value) {
@@ -463,11 +475,16 @@ const View = {
                 })
           };
 
-        if (data.editable)
+        if (data.editable) {
           elements.data.bind('input propertychange', function () {
             self.value(elements.data.val());
-            events.onChange(self);
+            if (events.onChange) events.onChange(self);
           });
+
+          elements.data.blur(function () {
+            if (events.onLeave) events.onLeave();
+          });
+        }
 
         self.id = function (value) {
           if (typeof value === 'undefined') return elements.container.attr('id');
@@ -517,23 +534,27 @@ const View = {
 
         elements.input.bind('input propertychange', function () {
           self.value(elements.input.val());
-          events.onChange(self);
+          if (events.onChange) events.onChange(self);
+        });
+
+        elements.input.blur(function () {
+          if (events.onLeave) events.onLeave();
         });
 
         elements.edit.click(function () {
           self.edit();
-          events.onEdit(self);
+          if (events.onEdit) events.onEdit(self);
         });
 
         elements.save.click(function () {
           self.value(elements.input.val());
           self.view();
-          events.onSave(self);
+          if (events.onSave) events.onSave(self);
         });
 
         elements.cancel.click(function () {
           self.view();
-          events.onCancel(self);
+          if (events.onCancel) events.onCancel(self);
         });
 
         self.options = function (values) {
@@ -648,15 +669,15 @@ const View = {
         .append(elements['delete']);
 
       elements.data.click(function () {
-        events.onClick(self.value());
+        if (events.onClick) events.onClick(self.value());
       });
 
       elements.delete.click(function () {
-        events.onDelete(self.value());
+        if (events.onDelete) events.onDelete(self.value());
       });
 
       elements.link.click(function () {
-        events.onLink(self.value());
+        if (events.onLink) events.onLink(self.value());
       });
 
       return self;
@@ -696,16 +717,16 @@ const View = {
         .append(elements['delete']);
 
       elements.data.click(function () {
-        events.onClick(self.value());
+        if (events.onClick) events.onClick(self.value());
       });
 
       elements.delete.click(function () {
         elements.container.remove();
-        events.onDelete(self.value());
+        if (events.onDelete) events.onDelete(self.value());
       });
 
       elements.link.click(function () {
-        events.onLink(self.value());
+        if (events.onLink) events.onLink(self.value());
       });
 
       return self;

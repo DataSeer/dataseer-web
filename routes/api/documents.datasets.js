@@ -48,9 +48,9 @@ router.post('/:id/dataset', function (req, res, next) {
     return res.json({ 'err': true, 'res': null, 'msg': 'dataset must be defined' });
   return DocumentsDatasetsController.newDataset(
     { datasetsId: req.params.id, dataset: req.body.dataset },
-    function (err) {
+    function (err, dataset) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      else return res.json({ 'err': false, 'res': true });
+      else return res.json({ 'err': false, 'res': dataset });
     }
   );
 });
@@ -61,9 +61,9 @@ router.put('/:id/dataset', function (req, res, next) {
     return res.status(401).send('Your current role do not grant access to this part of website');
   return DocumentsDatasetsController.updateDataset(
     { datasetsId: req.params.id, dataset: req.body.dataset },
-    function (err) {
+    function (err, dataset) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      else return res.json({ 'err': false, 'res': true });
+      else return res.json({ 'err': false, 'res': dataset });
     }
   );
 });

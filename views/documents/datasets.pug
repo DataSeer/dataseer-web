@@ -81,6 +81,8 @@ block content
           div(id='document-view-container')
             div(id='document-view' class='' style='padding:0;')
 
+    <span id="fixedMsgBottomRight">Saving...</span>
+
     div(class='col-4' style='height:100%; padding-left:5px;')
       div(id='dataset-form-container' class='foot-col' style='height:93%;')
         div(class='wrapper')
@@ -90,7 +92,7 @@ block content
             if document
               if document.status !== 'metadata'
                 button(id='back_to_metadata' class='btn btn-primary' style='height:80%;line-height: 0;') Metadata
-        button(id='datasets_validation' class='btn btn-primary' style='height:80%;line-height: 0;') Finish
+        button(id='datasets_validation' class='btn btn-primary' style='height:80%;line-height: 0;') Finish all Datasets
 
             
 

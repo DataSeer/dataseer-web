@@ -42,7 +42,7 @@ const DatasetsList = function (data, events) {
       datasets.data[dataset.id] = dataset;
       datasets.HTMLElements[dataset.id] = new View.links.static(
         {
-          class: 'form-row',
+          class: 'form-row' + (dataset.highlight ? ' highlighted' : ''),
           text: dataset.name ? dataset.name : dataset.id,
           value: dataset.id,
           style: ''
@@ -71,6 +71,10 @@ const DatasetsList = function (data, events) {
       delete datasets.HTMLElements[id];
       delete mapping[id];
       if (Object.keys(datasets.HTMLElements).length === 0) elements.empty.show();
+    },
+    highlightOf: function (id, value) {
+      if (value) datasets.HTMLElements[id].elements().container.addClass('highlighted');
+      else datasets.HTMLElements[id].elements().container.removeClass('highlighted');
     },
     textOf: function (id, value) {
       if (typeof value !== 'undefined') datasets.HTMLElements[id].elements().data.text(value);
