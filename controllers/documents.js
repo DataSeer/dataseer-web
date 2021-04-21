@@ -107,7 +107,7 @@ Self.authenticate = function (req, res, next) {
  * @returns {object} Options for Self.upload() function or new Error(msg)
  */
 Self.getUploadParams = function (params = {}, user) {
-  params.journal = params.journal.replace(/\s+/gm, ' ');
+  if (typeof params.journal === 'string') params.journal = params.journal.replace(/\s+/gm, ' ');
   // If file is not set
   if (!params.files || !params.files['file']) return new Error('You must select a file !');
   let alreadyAssessed = !!params.already_assessed,
