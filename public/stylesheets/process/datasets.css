@@ -599,7 +599,7 @@ i {
 }
 
 #datasets-list .form-row button {
-  padding-bottom: 1px;
+  padding-bottom: 0px;
   min-height: 22px;
   min-width: 22px;
   display: inline-block;
