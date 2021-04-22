@@ -365,6 +365,7 @@ i {
 }
 
 #dataset-form .form-row button div {
+  font-family: "Open Sans", "Lucida Grande", Helvetica, sans-serif;
   font-weight: normal;
   margin-left: 5px;
   display: inline;
