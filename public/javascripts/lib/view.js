@@ -56,7 +56,7 @@ const View = {
       );
     },
     check: function (text = '') {
-      return HtmlBuilder.button({ class: 'btn btn-primary btn-sm' }).append(
+      return HtmlBuilder.button({ class: 'btn btn-primary' }).append(
         View.icons.check().append(HtmlBuilder.div({ text: text }))
       );
     },

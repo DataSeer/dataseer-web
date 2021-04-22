@@ -166,6 +166,7 @@
               return result;
             },
             saveDataset = function (dataset, cb) {
+              $('#fixedMsgBottomRight').text('Saving...').removeClass().addClass('saving').show();
               dataset.status = _status.valid;
               return DataSeerAPI.updateDataset(
                 {
@@ -174,6 +175,7 @@
                 },
                 function (err, res) {
                   console.log(err, res);
+                  $('#fixedMsgBottomRight').text('All changes saved !').removeClass().addClass('saved').fadeOut('slow');
                   let hasCallback = cb && typeof cb === 'function';
                   if (err) return hasCallback ? cb(err) : err; // Need to define error behavior
                   if (res.err) return hasCallback ? cb(res) : res; // Need to define error behavior
@@ -244,7 +246,6 @@
               if (hasChanged && !saving && lastChange - lastSave > 2000) {
                 saving = true;
                 return saveDataset(dataset, function (err, res) {
-                  $('#fixedMsgBottomRight').text('All changes saved !').removeClass().addClass('saved').fadeOut('slow');
                   lastSave = Date.now();
                   hasChanged = false;
                   saving = false;
@@ -255,11 +256,6 @@
                   saveAfterCooldownTimeOut = window.setTimeout(function () {
                     saving = true;
                     return saveDataset(datasetForm.values(), function () {
-                      $('#fixedMsgBottomRight')
-                        .text('All changes saved !')
-                        .removeClass()
-                        .addClass('saved')
-                        .fadeOut('slow');
                       lastSave = Date.now();
                       hasChanged = false;
                       saving = false;
@@ -281,42 +277,43 @@
               {
                 // On final validation
                 onValidation: function (dataset) {
-                  return saveDataset(dataset, function (err, res) {
-                    if (user.role !== 'curator') {
-                      if (dataset.name === '') {
-                        $('#datasets-error-modal-label').html('Dataset validation');
-                        $('#datasets-error-modal-body').html(
-                          'Before moving on, please provide a name for this dataset'
-                        );
-                        $('#datasets-error-modal-btn').click();
-                        return;
-                      } else if (res.DOI === '' && res.comments === '') {
-                        $('#datasets-error-modal-label').html('Dataset validation');
-                        $('#datasets-error-modal-body').html(
-                          'Please provide either a DOI for the dataset or a comment in the comment box'
-                        );
-                        $('#datasets-error-modal-btn').click();
-                        return;
-                      } else if (dataset.dataType === '') {
-                        $('#datasets-error-modal-label').html('Dataset validation');
-                        $('#datasets-error-modal-body').html(
-                          'To validate, please provide a datatype (predefined or custom)'
-                        );
-                        $('#datasets-error-modal-btn').click();
-                        return;
+                  if (hasChanged)
+                    return saveDataset(dataset, function (err, res) {
+                      if (user.role !== 'curator') {
+                        if (dataset.name === '') {
+                          $('#datasets-error-modal-label').html('Dataset validation');
+                          $('#datasets-error-modal-body').html(
+                            'Before moving on, please provide a name for this dataset'
+                          );
+                          $('#datasets-error-modal-btn').click();
+                          return;
+                        } else if (res.DOI === '' && res.comments === '') {
+                          $('#datasets-error-modal-label').html('Dataset validation');
+                          $('#datasets-error-modal-body').html(
+                            'Please provide either a DOI for the dataset or a comment in the comment box'
+                          );
+                          $('#datasets-error-modal-btn').click();
+                          return;
+                        } else if (dataset.dataType === '') {
+                          $('#datasets-error-modal-label').html('Dataset validation');
+                          $('#datasets-error-modal-body').html(
+                            'To validate, please provide a datatype (predefined or custom)'
+                          );
+                          $('#datasets-error-modal-btn').click();
+                          return;
+                        }
                       }
-                    }
-                    let next = nextDataset('saved', res.id);
-                    if (next !== null) {
-                      datasetsList.select(next.id);
-                      datasetForm.link(next, documentView.color(next.id));
-                      documentView.views.scrollTo(next.id);
-                    } else {
-                      datasetsList.select(res.id);
-                      datasetForm.link(res, documentView.color(res.id));
-                      documentView.views.scrollTo(res.id);
-                    }
-                  });
+                      let next = nextDataset('saved', res.id);
+                      if (next !== null) {
+                        datasetsList.select(next.id);
+                        datasetForm.link(next, documentView.color(next.id));
+                        documentView.views.scrollTo(next.id);
+                      } else {
+                        datasetsList.select(res.id);
+                        datasetForm.link(res, documentView.color(res.id));
+                        documentView.views.scrollTo(res.id);
+                      }
+                    });
                 },
                 // On save
                 onSave: function (dataset) {
