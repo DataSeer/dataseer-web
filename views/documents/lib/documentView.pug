@@ -1,0 +1,13 @@
+div(id='documentView')
+  <div class="btn-group btn-group-toggle" id="documentView.viewSelection" data-toggle="buttons">
+    <div class="btn btn-secondary btn-sm">full text<input type="radio" name="options" id="documentView.viewSelection.tei.all" value="allVisible" autocomplete="off"></div>
+    <div class="btn btn-secondary btn-sm">section<input type="radio" name="options" id="documentView.viewSelection.tei.dataseer" value="onlyDataseer" autocomplete="off"></div>
+    <div class="btn btn-secondary btn-sm">paragraph<input type="radio" name="options" id="documentView.viewSelection.tei.dataset" value="onlyDatasets" autocomplete="off"></div>
+    <div class="btn btn-secondary btn-sm active">PDF<input type="radio" name="options" id="documentView.viewSelection.pdf" value="pdf" autocomplete="off" checked=""></div>
+  </div>
+  <div id ="documentView.screen">
+    <div id="documentView.screen.container">
+      <div id="xml" class="hidden"></div>
+      <div id="pdf"></div>
+    </div>
+  </div>

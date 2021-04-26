@@ -4,574 +4,546 @@
 
 'use strict';
 
-const DatasetForm = function (events, isCurator) {
+const DatasetForm = function (id = 'datasetForm', events = {}) {
   let self = this;
-
-  self.selectedElement = undefined;
-  self.dataset = {};
-  self.dataTypes = {};
-  self.metadata = {};
-
-  let elements = {
-    container: HtmlBuilder.div({
-      id: 'dataset-form-form',
-      class: 'container-fluid',
-      text: ''
-    }),
-    lock: HtmlBuilder.div({
-      id: 'dataset-form-lock',
-      class: 'container-fluid lock',
-      text: 'At least one dataset must be added to be able to use this form'
-    }),
-    save: new View.buttons.save('Save for later'),
-    validation: new View.buttons.check('Done with this Dataset'),
-    help: new View.buttons.help('Help'),
-    unlink: new View.buttons.unlink(),
-    'dataset.status': new View.status.edition('dataset.status'),
-    'dataset.id': new View.properties.uneditable.text(
-      {
-        id: 'dataset.id',
-        key: 'DataSet',
-        value: ''
-      },
-      {}
-    ),
-    'dataset.cert': new View.properties.uneditable.text(
-      {
-        id: 'dataset.cert',
-        key: 'cert: ',
-        value: ''
-      },
-      {}
-    ),
-    'dataset.reuse': new View.properties.editable.checkbox(
-      {
-        id: 'dataset.reuse',
-        key: 're-use: ',
-        value: ''
-      },
-      {
-        onChange: function (element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.reuse = element.value();
-          self.setDataFromDatatype();
-          events.onChange(element);
-        },
-        onLeave: function () {
-          events.onLeave();
-        }
-      }
-    ),
-    'dataset.customDataType': new View.properties.editable.text(
-      {
-        id: 'dataset.customDataType',
-        key: 'Custom Data type: ',
-        value: ''
-      },
-      {
-        onEdit: function (element) {},
-        onSave: function (element) {},
-        onCancel: function (element) {},
-        onChange: function (element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.dataType = element.value();
-          events.onChange(element);
-        }
-      }
-    ),
-    'dataset.dataType': new View.properties.editable.select(
-      {
-        id: 'dataset.dataType',
-        key: 'Data type: ',
-        value: '',
-        options: []
-      },
-      {
-        onEdit: function (element) {},
-        onSave: function (element) {},
-        onCancel: function (element) {},
-        onChange: function (element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.setDataType();
-          events.onChange(element);
-        }
-      }
-    ),
-    'dataset.subType': new View.properties.editable.select(
-      {
-        id: 'dataset.subType',
-        key: 'Sub type: ',
-        value: '',
-        options: []
-      },
-      {
-        onEdit: function (element) {},
-        onSave: function (element) {},
-        onCancel: function (element) {},
-        onChange: function (element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.setSubType();
-          events.onChange(element);
-        }
-      }
-    ),
-    'dataset.description': new View.properties.uneditable.text(
-      {
-        id: 'dataset.description',
-        key: 'Description: ',
-        value: ''
-      },
-      {}
-    ),
-    'dataset.bestDataFormatForSharing': new View.properties.uneditable.text(
-      {
-        id: 'dataset.bestDataFormatForSharing',
-        key: 'Best data format for sharing: ',
-        value: ''
-      },
-      {}
-    ),
-    'dataset.mostSuitableRepositories': new View.properties.uneditable.text(
-      {
-        id: 'dataset.mostSuitableRepositories',
-        key: 'Most suitable Repositories: ',
-        value: '',
-        help: {
-          title: 'If you disagree with this information, please edit the Dataseer Wiki available at: ',
-          href: 'http://wiki.dataseer.ai/doku.php',
-          text: '?'
-        }
-      },
-      {}
-    ),
-    'dataset.name': new View.properties.editable.text(
-      {
-        id: 'dataset.name',
-        key: "Please provide a name for this dataset (e.g. 'sampling locations'): ",
-        value: '',
-        placeholder: 'n/a'
-      },
-      {
-        onEdit: function (element) {},
-        onSave: function (element) {},
-        onCancel: function (element) {},
-        onChange: function (element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.name = element.value();
-          events.onChange(element);
-        },
-        onLeave: function () {
-          events.onLeave();
-        }
-      }
-    ),
-    'dataset.highlight': new View.properties.editable.checkbox(
-      {
-        id: 'dataset.highlight',
-        key: 'Highlight this dataset: ',
-        value: ''
-      },
-      {
-        onChange: function (element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.highlight = element.value();
-          events.onChange(element);
-        },
-        onLeave: function () {
-          events.onLeave();
-        }
-      }
-    ),
-    'dataset.notification': new View.properties.editable.notification(
-      {
-        editable: isCurator,
-        id: 'dataset.notification',
-        key: 'Enter a message here (or leave it empty so nothing will be displayed): ',
-        placeholder: 'Enter the message here or leave it empty',
-        value: ''
-      },
-      {
-        onChange: function (element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.notification = element.value();
-          events.onChange(element);
-        },
-        onLeave: function () {
-          events.onLeave();
-        }
-      }
-    ),
-    'dataset.DOI': new View.properties.editable.text(
-      {
-        id: 'dataset.DOI',
-        key: 'Please provide the DOI (or other stable link) to this dataset: ',
-        value: '',
-        placeholder: 'n/a'
-      },
-      {
-        onEdit: function (element) {},
-        onSave: function (element) {},
-        onCancel: function (element) {},
-        onChange: function (element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.DOI = element.value();
-          events.onChange(element);
-        },
-        onLeave: function () {
-          events.onLeave();
-        }
-      }
-    ),
-    'dataset.comments': new View.properties.editable.textarea(
-      {
-        id: 'dataset.comments',
-        key: 'Please enter any comments here (such as a reason why this dataset cannot be shared): ',
-        value: '',
-        rows: 3,
-        placeholder: 'n/a'
-      },
-      {
-        onChange: function (element) {
-          elements['dataset.status'].modified();
-          self.dataset.status = elements['dataset.status'].value();
-          self.dataset.comments = element.value();
-          events.onChange(element);
-        },
-        onLeave: function () {
-          events.onLeave();
-        }
-      }
-    )
+  this.id = id;
+  this.container = $(`#${this.id} #datasetForm\\.container`); // container of datasetForm
+  this.message = $(`#${this.id} #datasetForm\\.message`);
+  this.resources = {
+    metadata: {},
+    dataTypes: {},
+    subTypes: {}
   };
+  this.dataset = {};
+  this.events = events;
+  // onDatasetIdClick
+  $(`#${this.id} div[key="dataset\\.id"], #${this.id} div[key="dataset\\.label"]`)
+    .parent()
+    .click(function () {
+      if (typeof self.events.onDatasetIdClick === 'function') return self.events.onDatasetIdClick(self.getDataset());
+    });
+  // onDatasetDoneClick
+  $(`#${this.id} button[name="datasetForm\\.done"]`).click(function () {
+    if (typeof self.events.onDatasetDoneClick === 'function') return self.events.onDatasetDoneClick(self.getDataset());
+  });
+  // onDatasetUnlinkClick
+  $(`#${this.id} button[name="datasetForm\\.unlink"]`).click(function () {
+    if (typeof self.events.onDatasetUnlinkClick === 'function')
+      return self.events.onDatasetUnlinkClick(self.getDataset());
+  });
+  // onRefreshDatatypesClick
+  $(`#${this.id} button[name="datasetForm\\.refreshDatatypes"]`).click(function () {
+    if (typeof self.events.onRefreshDatatypesClick === 'function') return self.events.onRefreshDatatypesClick();
+  });
+  // input text event
+  this.container.find('input[type="text"]').bind('input propertychange', function (event) {
+    let el = $(this),
+      target = el.attr('target').replace('dataset.', '');
+    if (typeof self.properties[target] === 'function') {
+      self.properties[target](el.val());
+      if (typeof self.events.onPropertyChange === 'function')
+        self.events.onPropertyChange(target, self.properties[target]());
+    }
+  });
+  // input checkbox event
+  this.container.find('input[type="checkbox"]').bind('input propertychange', function (event) {
+    let el = $(this),
+      target = el.attr('target').replace('dataset.', '');
+    if (typeof self.properties[target] === 'function') {
+      self.properties[target](el.prop('checked'));
+      if (typeof self.events.onPropertyChange === 'function')
+        self.events.onPropertyChange(target, self.properties[target]());
+    }
+  });
+  // select event
+  this.container.find('select').bind('input propertychange', function (event) {
+    let el = $(this),
+      option = el.find('option:selected'),
+      target = el.attr('target').replace('dataset.', ''),
+      value = option.attr('value');
+    if (typeof self.properties[target] === 'function') {
+      self.properties[target](value);
+      if (typeof self.events.onPropertyChange === 'function')
+        self.events.onPropertyChange(target, self.properties[target]());
+    }
+  });
+  // textarea event
+  this.container.find('textarea').bind('input propertychange', function (event) {
+    let el = $(this),
+      target = el.attr('target').replace('dataset.', '');
+    if (typeof self.properties[target] === 'function') {
+      self.properties[target](el.val());
+      if (typeof self.events.onPropertyChange === 'function')
+        self.events.onPropertyChange(target, self.properties[target]());
+    }
+  });
+  // Set or get a property
+  this.properties = {
+    id: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.id;
+      self.container.find('div[key="dataset\\.id"]').attr('value', value).text(value);
+      self.dataset.id = value;
+      // input change behaviors
+      self.updateLabel(value);
+      // ----------------------
+      return self.dataset.id;
+    },
+    status: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.status;
+      self.container
+        .find('div[key="dataset\\.status"]')
+        .attr('value', value)
+        .empty()
+        .append(self.getIconOfStatus(value));
+      self.dataset.status = value;
+      return self.dataset.status;
+    },
+    reuse: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.reuse;
+      let reuse = value === 'false' || value === false ? false : !!value;
+      self.container.find('div[key="dataset\\.reuse"]').attr('value', reuse);
+      if (inputs) self.container.find('input[type="checkbox"][name="datasetForm\\.reuse"]').prop('checked', reuse);
+      self.dataset.reuse = reuse;
+      // input change behaviors
+      self.refreshDatatypeInfos(); // refresh datatype infos
+      // ----------------------
+      return self.dataset.reuse;
+    },
+    dataType: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.dataType;
+      self.container.find('div[key="dataset\\.dataType"]').attr('value', value);
+      if (inputs)
+        self.container.find(`select[name="datasetForm\\.dataType"] option[value="${value}"]`).prop('selected', true);
+      self.dataset.dataType = value;
+      // input change behaviors
+      self.setSubtypes(); // set subtypes
+      self.refreshDatatypeInfos(); // refresh datatype infos
+      // ----------------------
+      return self.dataset.dataType;
+    },
+    subType: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.subType;
+      self.container.find('div[key="dataset\\.subType"]').attr('value', value);
+      if (inputs)
+        self.container.find(`select[name="datasetForm\\.subType"] option[value="${value}"]`).prop('selected', true);
+      self.dataset.subType = value;
+      // input change behaviors
+      self.refreshDatatypeInfos(); // refresh datatype infos
+      // ----------------------
+      return self.dataset.subType;
+    },
+    customDataType: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.customDataType;
+      self.container.find('div[key="dataset\\.customDataType"]').attr('value', value);
+      if (inputs) self.container.find('input[type="text"][name="datasetForm\\.customDataType"]').val(value);
+      self.dataset.customDataType = value;
+      return self.dataset.customDataType;
+    },
+    description: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.description;
+      let text = value === '' ? 'n/a' : value;
+      self.container.find('div[key="dataset\\.description"]').attr('value', value).html(text);
+      self.dataset.description = value;
+      return self.dataset.description;
+    },
+    bestDataFormatForSharing: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.bestDataFormatForSharing;
+      let text = value === '' ? 'n/a' : value;
+      self.container.find('div[key="dataset\\.bestDataFormatForSharing"]').attr('value', value).html(text);
+      self.dataset.bestDataFormatForSharing = value;
+      return self.dataset.bestDataFormatForSharing;
+    },
+    help: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.help;
+      let data = value === '' ? 'http://wiki.dataseer.ai/doku.php' : value;
+      self.container.find('a[key="dataset\\.help"]').attr('value', data).attr('href', data);
+      self.dataset.help = data;
+      return self.dataset.help;
+    },
+    mostSuitableRepositories: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.mostSuitableRepositories;
+      let text = value === '' ? 'n/a' : value;
+      self.container.find('div[key="dataset\\.mostSuitableRepositories"]').attr('value', value).html(text);
+      self.dataset.mostSuitableRepositories = value;
+      return self.dataset.mostSuitableRepositories;
+    },
+    bestPracticeForIndicatingReUseOfExistingData: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.bestPracticeForIndicatingReUseOfExistingData;
+      let text = value === '' ? 'n/a' : value;
+      self.container
+        .find('div[key="dataset\\.bestPracticeForIndicatingReUseOfExistingData"]')
+        .attr('value', value)
+        .html(text);
+      self.dataset.bestPracticeForIndicatingReUseOfExistingData = value;
+      return self.dataset.bestPracticeForIndicatingReUseOfExistingData;
+    },
+    highlight: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.highlight;
+      let highlight = value === 'false' ? false : !!value;
+      self.container.find('div[key="dataset\\.highlight"]').attr('value', highlight);
+      if (inputs)
+        self.container.find('input[type="checkbox"][name="datasetForm\\.highlight"]').prop('checked', highlight);
+      self.dataset.highlight = highlight;
+      return self.dataset.highlight;
+    },
+    notification: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.notification;
+      self.container.find('div[key="dataset\\.notification"]').attr('value', value).text(value);
+      if (inputs) self.container.find('input[type="text"][name="datasetForm\\.notification"]').val(value);
+      self.dataset.notification = value;
+      // input change behaviors
+      // Hide notification if empty, else show
+      if (!self.dataset.notification) self.container.find('div[key="dataset\\.notification"]').hide();
+      else self.container.find('div[key="dataset\\.notification"]').show();
+      // ----------------------
+      return self.dataset.notification;
+    },
+    name: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.name;
+      self.container.find('div[key="dataset\\.name"]').attr('value', value);
+      if (inputs) self.container.find('input[type="text"][name="datasetForm\\.name"]').val(value);
+      self.dataset.name = value;
+      // input change behaviors
+      self.updateLabel(value);
+      // ----------------------
+      return self.dataset.name;
+    },
+    DOI: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.DOI;
+      self.container.find('div[key="dataset\\.DOI"]').attr('value', value);
+      if (inputs) self.container.find('input[type="text"][name="datasetForm\\.DOI"]').val(value);
+      self.dataset.DOI = value;
+      return self.dataset.DOI;
+    },
+    comments: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.comments;
+      self.container.find('div[key="dataset\\.comments"]').attr('value', value);
+      if (inputs) self.container.find('textarea[name="datasetForm\\.comments"]').val(value);
+      self.dataset.comments = value;
+      return self.dataset.comments;
+    }
+  };
+  this.setInitialazingMessage();
+  return this;
+};
 
-  // Add all inputs
-  elements.container
+// update label of dataset
+DatasetForm.prototype.updateLabel = function (value = '') {
+  let data = value ? value : this.dataset.id;
+  // Update label
+  this.container.find('div[key="dataset\\.label"]').attr('value', data).text(data);
+};
+
+// get current dataset id
+DatasetForm.prototype.currentId = function () {
+  return this.dataset.id;
+};
+
+// get current dataset (API formated)
+DatasetForm.prototype.getDataset = function () {
+  return {
+    id: this.dataset.id,
+    status: this.dataset.status,
+    reuse: this.dataset.reuse,
+    dataType: this.dataset.dataType,
+    subType: this.dataset.subType,
+    description: this.dataset.description,
+    bestDataFormatForSharing: this.dataset.bestDataFormatForSharing,
+    mostSuitableRepositories: this.dataset.mostSuitableRepositories,
+    bestPracticeForIndicatingReUseOfExistingData: this.dataset.bestPracticeForIndicatingReUseOfExistingData,
+    highlight: this.dataset.highlight,
+    notification: this.dataset.notification,
+    name: this.dataset.name,
+    DOI: this.dataset.DOI,
+    comments: this.dataset.comments
+  };
+};
+
+// Attach event
+DatasetForm.prototype.attach = function (event, fn) {
+  this.events[event] = fn;
+};
+
+// Get resource property for an given datatype (or subtype) id
+DatasetForm.prototype.getResourceOf = function (id, key, subKey) {
+  if (
+    !id ||
+    !key ||
+    !this.resources ||
+    !this.resources.metadata ||
+    !this.resources.metadata[id] ||
+    !this.resources.metadata[id][key]
+  )
+    return '';
+  else {
+    let result = subKey ? this.resources.metadata[id][key][subKey] : this.resources.metadata[id][key];
+    return result ? result : '';
+  }
+};
+
+// Extract some infos (based on resources)
+DatasetForm.prototype.extractInfos = function (keys, properties) {
+  let self = this,
+    result = {};
+  keys.map(function (key) {
+    result[key] = {};
+    properties.map(function (property) {
+      if (typeof property === 'string') result[key][property] = self.getResourceOf(self.dataset[key], property);
+      else if (typeof property === 'object')
+        result[key][property.key] = self.getResourceOf(self.dataset[key], property.subKey);
+    });
+  });
+  return result;
+};
+
+// Update datatype infos (based on resources)
+DatasetForm.prototype.updateDatatypeInfos = function () {
+  let self = this,
+    hasChanged = false,
+    properties = [
+      'description',
+      'bestDataFormatForSharing',
+      'bestPracticeForIndicatingReUseOfExistingData',
+      { key: 'mostSuitableRepositories', subKey: this.dataset.reuse ? 'reuse' : 'default' }
+    ],
+    keys = ['dataType', 'subType'],
+    metadata = this.extractInfos(keys, properties);
+  // Set datatype/subtype infos
+  properties.map(function (property) {
+    let old = self.dataset[property];
+    keys.map(function (key) {
+      if (typeof property === 'string') {
+        if (metadata[key][property] && self.dataset[property] !== metadata[key][property])
+          self.dataset[property] = metadata[key][property];
+      } else if (typeof property === 'object' && property.key) {
+        if (metadata[key][property.key] && self.dataset[property.key] !== metadata[key][property.key])
+          self.dataset[property.key] = metadata[key][property.key];
+      }
+    });
+    if (self.dataset[property] !== old) hasChanged = true;
+  });
+  return hasChanged;
+};
+
+// Refresh datatype infos (based on resources)
+DatasetForm.prototype.refreshDatatypeInfos = function () {
+  let self = this,
+    properties = [
+      'description',
+      'bestDataFormatForSharing',
+      'bestPracticeForIndicatingReUseOfExistingData',
+      { key: 'mostSuitableRepositories', subKey: this.dataset.reuse ? 'reuse' : 'default' },
+      'help'
+    ],
+    keys = ['dataType', 'subType'],
+    metadata = this.extractInfos(keys, properties);
+  // Set datatype/subtype infos
+  properties.map(function (property) {
+    keys.map(function (key) {
+      if (typeof property === 'string')
+        self.properties[property](metadata[key][property] ? metadata[key][property] : undefined);
+      else if (typeof property === 'object' && property.key)
+        self.properties[property.key](metadata[key][property.key] ? metadata[key][property.key] : undefined);
+    });
+  });
+  if (this.dataset.reuse) {
+    this.container.find('div[key="dataset\\.bestDataFormatForSharing"]').parent().hide();
+    this.container.find('div[key="dataset\\.bestPracticeForIndicatingReUseOfExistingData"]').parent().show();
+  } else {
+    this.container.find('div[key="dataset\\.bestDataFormatForSharing"]').parent().show();
+    this.container.find('div[key="dataset\\.bestPracticeForIndicatingReUseOfExistingData"]').parent().hide();
+  }
+};
+
+// Build default options
+DatasetForm.prototype.defaultOption = function () {
+  return $('<option>').text('None').attr('value', '');
+};
+
+// Build options (datatypes)
+DatasetForm.prototype.buildOptions = function (datatypes = []) {
+  let options = [this.defaultOption()];
+  for (let i = 0; i < datatypes.length; i++) {
+    options.push($('<option>').text(datatypes[i].label).attr('value', datatypes[i].id));
+  }
+  return options;
+};
+
+// Load Resources
+DatasetForm.prototype.loadResources = function (resources) {
+  this.resources = resources;
+  this.setDatatypes();
+  this.setSubtypes();
+  this.setEmptyMessage();
+};
+
+// refresh Datatype view
+DatasetForm.prototype.refreshDatatypeView = function () {
+  if (!this.dataset.dataType || (!this.dataset.dataType && !this.dataset.subType))
+    this.container.find('div[key="dataset\\.customDataType"]').parent().show();
+  else this.container.find('div[key="dataset\\.customDataType"]').parent().hide();
+};
+
+// Set dataTypes
+DatasetForm.prototype.getOptionsInfo = function (ids = []) {
+  let self = this;
+  return ids
+    .map(function (key) {
+      if (typeof self.resources.metadata[key] === 'object')
+        return {
+          id: self.resources.metadata[key].id,
+          label: self.resources.metadata[key].label,
+          count: self.resources.metadata[key].count ? self.resources.metadata[key].count : 0
+        };
+      else
+        return {
+          id: 'unknow',
+          label: 'unknow',
+          count: -1
+        };
+    })
+    .sort(function (a, b) {
+      return b.count - a.count;
+    });
+};
+
+// Set dataTypes
+DatasetForm.prototype.setDatatypes = function () {
+  let data = this.getOptionsInfo(Object.keys(this.resources.dataTypes)),
+    options = this.buildOptions(data),
+    select = this.container.find('select[name="datasetForm\\.dataType"]');
+  select.empty();
+  options.map(function (item) {
+    select.append(item);
+  });
+  let value = options[0].attr('value');
+  this.properties['dataType'](value);
+  this.refreshDatatypeView();
+};
+
+// Set subTypes
+DatasetForm.prototype.setSubtypes = function () {
+  let data =
+      this.dataset.dataType && this.dataset.dataType
+        ? this.getOptionsInfo(this.resources.dataTypes[this.dataset.dataType])
+        : [],
+    options = this.buildOptions(data),
+    select = this.container.find('select[name="datasetForm\\.subType"]');
+  select.empty();
+  options.map(function (item) {
+    select.append(item);
+  });
+  let value = options[0].attr('value');
+  this.properties['subType'](value);
+  this.refreshDatatypeView();
+};
+
+// Set view for curator or not
+DatasetForm.prototype.setView = function (opts = {}) {
+  if (opts.isCurator) {
+    this.container.find('input[type="text"][name="datasetForm\\.notification"]').parent().show();
+    this.container.find('button[name="datasetForm\\.refreshDatatypes"]').parent().show();
+    this.container.find('input[type="checkbox"][name="datasetForm\\.highlight"]').parent().show();
+  } else {
+    this.container.find('input[type="text"][name="datasetForm\\.notification"]').parent().hide();
+    this.container.find('button[name="datasetForm\\.refreshDatatypes"]').parent().hide();
+    this.container.find('input[type="checkbox"][name="datasetForm\\.highlight"]').parent().hide();
+  }
+  if (opts.isCorresp) {
+    this.container.find('button[name="datasetForm\\.unlink"]').show();
+  } else {
+    this.container.find('button[name="datasetForm\\.unlink"]').hide();
+  }
+};
+
+// Return icon for a given status
+DatasetForm.prototype.getIconOfStatus = function (status) {
+  let i = $('<i>');
+  if (status === 'valid') i.addClass('fas fa-check success-color-dark').attr('title', 'This dataset is valid');
+  else if (status === 'saved') i.addClass('far fa-save success-color-dark').attr('title', 'This dataset is saved');
+  else if (status === 'modified') i.addClass('fas fa-pen warning-color-dark').attr('title', 'This dataset is modified');
+  else if (status === 'loading')
+    i.addClass('fas fa-spinner success-color-dark').attr('title', 'This dataset is updating');
+  else i.addClass('far fa-question-circle').attr('title', 'Unknow status');
+  return i;
+};
+
+// Link dataset to datasetForm
+DatasetForm.prototype.link = function (dataset, opts = {}, callback) {
+  this.dataset = Object.assign({}, dataset);
+  // Set all values
+  for (let key in dataset) {
+    if (typeof this.properties[key] === 'function') {
+      this.dataset[key] = dataset[key];
+    }
+  }
+  // Try to update some missing data concerning datatype/subtype
+  let update = this.updateDatatypeInfos();
+  // Set properties
+  for (let key in dataset) {
+    if (typeof this.properties[key] === 'function') {
+      this.properties[key](this.dataset[key], true);
+    }
+  }
+  this.setView({ isCurator: opts.isCurator, isCorresp: opts.isCorresp });
+  this.color();
+  this.hideMessage();
+  return callback(null, { shouldSave: update, dataset: this.dataset });
+};
+
+// Link dataset to datasetForm
+DatasetForm.prototype.unlink = function (dataset) {
+  this.dataset = {};
+  this.uncolor();
+  this.setEmptyMessage();
+  return this.showMessage();
+};
+
+// Set color on dataset id
+DatasetForm.prototype.color = function () {
+  return this.container
+    .find('div[key="dataset\\.id"], div[key="dataset\\.label"]')
+    .parent()
+    .css('color', this.dataset.color.foreground)
+    .css('background-color', this.dataset.color.background.rgba);
+};
+
+// Unset color on dataset id
+DatasetForm.prototype.uncolor = function () {
+  return this.container.find('div[key="dataset\\.id"]');
+};
+
+// Set status "modified"
+DatasetForm.prototype.modified = function () {
+  return this.properties['status']('modified');
+};
+
+// Set status "modified"
+DatasetForm.prototype.loading = function () {
+  return this.properties['status']('loading');
+};
+
+// Set Empty datasetForm Message
+DatasetForm.prototype.hideMessage = function () {
+  return this.message.addClass('hide');
+};
+
+// Set Empty datasetForm Message
+DatasetForm.prototype.showMessage = function () {
+  return this.message.removeClass('hide');
+};
+
+// Set Empty datasetForm Message
+DatasetForm.prototype.setEmptyMessage = function () {
+  return this.message
+    .empty()
+    .append($('<div>').text('At least one dataset must be added to be able to use this form'))
     .append(
-      View.forms
-        .row()
-        .append(elements['dataset.id'].elements().container)
-        .append(elements['dataset.status'].elements().container)
-        .append(elements['unlink'])
-    )
-    // .append(View.forms.row().append(elements['dataset.cert'].elements().container)) // fix-161 : hide cert
-    .append(View.forms.row().append(elements['dataset.reuse'].elements().container))
-    .append(View.forms.row().append(elements['dataset.dataType'].elements().container))
-    .append(View.forms.row().append(elements['dataset.subType'].elements().container))
-    .append(View.forms.row().append(elements['dataset.customDataType'].elements().container))
-    .append(View.forms.row().append(elements['dataset.description'].elements().container))
-    .append(View.forms.row().append(elements['dataset.bestDataFormatForSharing'].elements().container))
-    .append(View.forms.row().append(elements['dataset.mostSuitableRepositories'].elements().container))
-    .append(View.forms.row().append(elements['dataset.highlight'].elements().container))
-    .append(View.forms.row().append(elements['dataset.notification'].elements().container))
-    .append(View.forms.row().append(elements['dataset.name'].elements().container))
-    .append(View.forms.row().append(elements['dataset.DOI'].elements().container))
-    .append(View.forms.row().append(elements['dataset.comments'].elements().container))
-    .append(View.forms.row().addClass('buttons-container').append(elements['validation']))
-    .append(elements['lock']);
+      $('<div>').text('Select a sentence that concerns a dataset, click it and then click the button "Add new Dataset')
+    );
+};
 
-  elements.unlink.click(function () {
-    events.onUnlink(self.selectedElement);
-  });
-
-  elements.unlink.attr('title', 'Unlink selected sentence to this dataset');
-
-  elements.save.click(function () {
-    self.dataset = self.values();
-    events.onSave(self.dataset);
-  });
-
-  elements.validation.click(function () {
-    self.dataset = self.values();
-    events.onValidation(self.dataset);
-  });
-
-  elements['dataset.id'].elements().data.click(function () {
-    events.onIdClick(elements['dataset.id'].value());
-  });
-
-  self.id = function () {
-    if (typeof value === 'undefined') return elements['dataset.id'].value();
-  };
-
-  self.getProperty = function (property) {
-    return elements['dataset.' + property].value();
-  };
-
-  self.init = function (id) {
-    jQuery(id).empty().append(elements.container).append(elements.lock);
-    self.refresh();
-    self.lock();
-  };
-
-  self.lock = function () {
-    self.refresh();
-    $('#dataset-form-form').hide();
-    $('#dataset-form-lock').show();
-  };
-
-  self.unlock = function () {
-    self.refresh();
-    $('#dataset-form-form').show();
-    $('#dataset-form-lock').hide();
-  };
-
-  self.refresh = function (options) {
-    if (typeof options !== 'undefined') {
-      if (typeof options.unlink !== 'undefined') options.unlink ? elements['unlink'].show() : elements['unlink'].hide();
-    }
-    if (typeof self.dataset.dataType !== 'undefined' || typeof self.dataset.subType !== 'undefined') {
-      let param =
-          typeof self.dataset.subType !== 'undefined' && self.dataset.subType !== ''
-            ? self.dataset.subType
-            : self.dataset.dataType,
-        url =
-          typeof self.metadata[param] !== 'undefined' ? self.metadata[param].url : 'http://wiki.dataseer.io/doku.php';
-      elements['dataset.mostSuitableRepositories'].help({
-        href: encodeURI(url)
-      });
-    }
-    elements['dataset.id'].view();
-    elements['dataset.cert'].view();
-    elements['dataset.reuse'].view();
-    let certValue = parseFloat(elements['dataset.cert'].value());
-    if (certValue === 0.0) elements['dataset.cert'].elements().container.parent().hide();
-    else elements['dataset.cert'].elements().container.parent().show();
-    elements['dataset.dataType'].edit(false);
-    elements['dataset.subType'].edit(false);
-    elements['dataset.customDataType'].edit(false);
-    elements['dataset.description'].view();
-    elements['dataset.bestDataFormatForSharing'].view();
-    elements['dataset.mostSuitableRepositories'].view();
-    elements['dataset.name'].edit(false);
-    if (isCurator) elements['dataset.highlight'].view();
-    else elements['dataset.highlight'].elements().container.parent().hide();
-    elements['dataset.notification'].view();
-    if (!isCurator && !elements['dataset.notification'].value().length)
-      elements['dataset.notification'].elements().container.parent().hide();
-    else elements['dataset.notification'].elements().container.parent().show();
-    elements['dataset.DOI'].edit(false);
-    elements['dataset.comments'].view();
-  };
-
-  self.style = function (style) {
-    elements['dataset.id'].elements().data.attr('style', style);
-  };
-
-  self.elements = function () {
-    return elements;
-  };
-
-  self.refreshStatus = function (status) {
-    elements['dataset.status'].value(status);
-  };
-
-  self.values = function (dataset) {
-    if (typeof dataset === 'undefined') return self.dataset;
-    self.dataset = dataset;
-    elements['dataset.status'].value(dataset.status);
-    elements['dataset.id'].value(dataset.id);
-    elements['dataset.cert'].value(parseFloat(dataset.cert).toFixed(4));
-    elements['dataset.reuse'].value(dataset.reuse);
-    elements['dataset.dataType'].value(dataset.dataType);
-    if (elements['dataset.dataType'].value() === '') {
-      self.showCustomDataType();
-      elements['dataset.customDataType'].value(dataset.dataType);
-    } else self.hideCustomDataType();
-    elements['dataset.subType'].value(dataset.subType);
-    elements['dataset.name'].value(dataset.name);
-    elements['dataset.notification'].value(dataset.notification);
-    elements['dataset.highlight'].value(dataset.highlight);
-    elements['dataset.DOI'].value(dataset.DOI);
-    elements['dataset.comments'].value(dataset.comments);
-    return self.values();
-  };
-
-  self.link = function (dataset, style, element) {
-    self.unlock();
-    self.style(style);
-    self.dataset = dataset;
-    self.selectedElement = element;
-    self.setDataTypes();
-    self.setSubTypes();
-    self.values(dataset);
-    self.setDataFromDatatype();
-    self.setDataFromSubtype();
-    self.refresh({
-      unlink: typeof self.selectedElement !== 'undefined' && typeof self.selectedElement.attr('corresp') !== 'undefined'
-    });
-  };
-
-  self.loadData = function (data) {
-    self.dataTypes = data.dataTypes;
-    self.metadata = data.metadata;
-    self.setDataTypes();
-    self.setSubTypes();
-  };
-
-  self.setDataTypes = function () {
-    let options = [];
-    for (let key in self.dataTypes) {
-      options.push({
-        value: key,
-        text: self.metadata[key].label || key
-      });
-    }
-    options.sort(function (a, b) {
-      if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
-      else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
-      else return 0;
-    });
-    options.unshift({
-      value: '',
-      text: 'None'
-    });
-    elements['dataset.dataType'].options(options);
-  };
-
-  self.setSubTypes = function () {
-    let subTypes = self.dataTypes[self.dataset.dataType],
-      options = [];
-    if (Array.isArray(subTypes)) {
-      for (var i = 0; i < subTypes.length; i++) {
-        options.push({
-          value: subTypes[i],
-          text: self.metadata[subTypes[i]].label || subTypes[i]
-        });
-      }
-      options.sort(function (a, b) {
-        if (self.metadata[a.value].count < self.metadata[b.value].count) return 1;
-        else if (self.metadata[a.value].count > self.metadata[b.value].count) return -1;
-        else return 0;
-      });
-    }
-    options.unshift({
-      value: '',
-      text: 'None'
-    });
-    elements['dataset.subType'].options(options);
-    return true;
-  };
-
-  self.showCustomDataType = function () {
-    return $('.form-row:has(#dataset\\.customDataType)').show();
-  };
-
-  self.hideCustomDataType = function () {
-    elements['dataset.customDataType'].value('');
-    return $('.form-row:has(#dataset\\.customDataType)').hide();
-  };
-
-  self.setDataType = function () {
-    self.dataset.status = elements['dataset.status'].value();
-    if (elements['dataset.dataType'].value() === '') {
-      self.showCustomDataType();
-      self.dataset.dataType = elements['dataset.customDataType'].value();
-    } else {
-      self.hideCustomDataType();
-      self.dataset.dataType = elements['dataset.dataType'].value();
-    }
-    self.dataset.subType = '';
-    self.setSubTypes();
-    self.setDataFromDatatype();
-  };
-
-  self.setDataReUseAdvice = function () {
-    if (self.dataset.reuse) {
-      elements['dataset.mostSuitableRepositories'].help({
-        href: encodeURI(self.metadata['dataset re-use'].url)
-      });
-      elements['dataset.description'].value(
-        self.metadata['dataset re-use'].description ? self.metadata['dataset re-use'].description : ''
-      );
-      elements['dataset.bestDataFormatForSharing'].value(
-        self.metadata['dataset re-use'].bestDataFormatForSharing
-          ? self.metadata['dataset re-use'].bestDataFormatForSharing
-          : ''
-      );
-      elements['dataset.mostSuitableRepositories'].value(
-        self.metadata['dataset re-use'].mostSuitableRepositories
-          ? self.metadata['dataset re-use'].mostSuitableRepositories
-          : ''
-      );
-    }
-    self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
-    self.dataset.description = elements['dataset.description'].value();
-    self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
-    self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
-  };
-
-  self.setDataFromDatatype = function () {
-    if (typeof self.metadata[self.dataset.dataType] !== 'undefined') {
-      elements['dataset.mostSuitableRepositories'].help({
-        href: encodeURI(self.metadata[self.dataset.dataType].url)
-      });
-      elements['dataset.description'].value(
-        self.metadata[self.dataset.dataType].description ? self.metadata[self.dataset.dataType].description : ''
-      );
-      elements['dataset.bestDataFormatForSharing'].value(
-        self.metadata[self.dataset.dataType].bestDataFormatForSharing
-          ? self.metadata[self.dataset.dataType].bestDataFormatForSharing
-          : ''
-      );
-      elements['dataset.mostSuitableRepositories'].value(
-        self.metadata[self.dataset.dataType].mostSuitableRepositories
-          ? self.metadata[self.dataset.dataType].mostSuitableRepositories
-          : ''
-      );
-    } else {
-      elements['dataset.mostSuitableRepositories'].help({
-        href: 'http://wiki.dataseer.io/doku.php'
-      });
-      elements['dataset.description'].value('');
-      elements['dataset.bestDataFormatForSharing'].value('');
-      elements['dataset.mostSuitableRepositories'].value('');
-    }
-    self.dataset.description = elements['dataset.description'].value();
-    self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
-    self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
-    self.setDataReUseAdvice();
-  };
-
-  self.setSubType = function () {
-    self.dataset.status = elements['dataset.status'].value();
-    self.dataset.subType = elements['dataset.subType'].value();
-    if (!self.setDataFromSubtype()) self.setDataFromDatatype();
-  };
-
-  self.setDataFromSubtype = function () {
-    if (typeof self.metadata[self.dataset.subType] !== 'undefined') {
-      elements['dataset.mostSuitableRepositories'].help({
-        href: encodeURI(self.metadata[self.dataset.subType].url)
-      });
-      elements['dataset.description'].value(
-        self.metadata[self.dataset.subType].description
-          ? self.metadata[self.dataset.subType].description
-          : self.metadata[self.dataset.dataType].description
-      );
-      elements['dataset.bestDataFormatForSharing'].value(
-        self.metadata[self.dataset.subType].bestDataFormatForSharing
-          ? self.metadata[self.dataset.subType].bestDataFormatForSharing
-          : self.metadata[self.dataset.dataType].bestDataFormatForSharing
-      );
-      elements['dataset.mostSuitableRepositories'].value(
-        self.metadata[self.dataset.subType].mostSuitableRepositories
-          ? self.metadata[self.dataset.subType].mostSuitableRepositories
-          : self.metadata[self.dataset.dataType].mostSuitableRepositories
-      );
-    }
-    self.dataset.description = elements['dataset.description'].value();
-    self.dataset.bestDataFormatForSharing = elements['dataset.bestDataFormatForSharing'].value();
-    self.dataset.mostSuitableRepositories = elements['dataset.mostSuitableRepositories'].value();
-    self.setDataReUseAdvice();
-  };
-
-  return self;
+// Set Intializing datasetForm Message
+DatasetForm.prototype.setInitialazingMessage = function () {
+  return this.message.empty().append($('<div>').text('Populating dataset Form...'));
 };

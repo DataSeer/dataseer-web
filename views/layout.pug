@@ -86,13 +86,19 @@ html
 
   script(src=conf.root + 'javascripts/lib/jquery.js')
   if document
+    if current_user
+      div(id='user_id' class='data' value=(current_user._id))
+      div(id='user_username' class='data' value=(current_user.username))
+      div(id='user_role' class='data' value=(current_user.role.label))
     div(id='document.id' class='data' value=(document._id))
+    script(src=conf.root + 'javascripts/lib/lodash.min.js')
+    script(src=conf.root + 'javascripts/lib/async.min.js')
     script(src=conf.root + 'javascripts/lib/randomColor.min.js')
-    script(src=conf.root + 'javascripts/lib/htmlBuilder.js')
-    script(src=conf.root + 'javascripts/lib/view.js')
+    script(src=conf.root + 'javascripts/lib/colors.js')
     script(src=conf.root + 'javascripts/lib/documentView.js')
     script(src=conf.root + 'javascripts/lib/datasetForm.js')
     script(src=conf.root + 'javascripts/lib/datasetsList.js')
+    script(src=conf.root + 'javascripts/lib/documentHandler.js')
     script(src=conf.root + 'javascripts/dataseerAPI.js')
     script(src=conf.root + 'javascripts/pdf.js/build/generic/build/pdf.js')
     script(src=conf.root + 'javascripts/pdf.js/build/generic/build/pdf.worker.js')
@@ -110,10 +116,6 @@ html
     script(src=conf.root + 'javascripts/sendMailToAuthors.js')
   else if route === 'documents/:id/datasets'
     script(src=conf.root + 'javascripts/process/datasets.js')
-    if current_user
-      div(id='user_id' class='data' value=(current_user._id))
-      div(id='user_username' class='data' value=(current_user.username))
-      div(id='user_role' class='data' value=(current_user.role.label))
   else if route === 'documents/:id/finish'
     script(src=conf.root + 'javascripts/process/finish.js')
 

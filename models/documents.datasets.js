@@ -22,6 +22,7 @@ let Dataset = new mongoose.Schema(
     subType: { type: String, default: '' }, //  subType
     description: { type: String, default: '' }, // description
     bestDataFormatForSharing: { type: String, default: '' }, // best data format for sharing
+    bestPracticeForIndicatingReUseOfExistingData: { type: String, default: '' }, // best practice for indicating re-use of existing data
     mostSuitableRepositories: { type: String, default: '' }, // most suitable repositories
     DOI: { type: String, default: '' }, // DOI
     name: { type: String, default: '' }, // name

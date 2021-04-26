@@ -283,12 +283,12 @@ const PdfViewer = function (id, events) {
                 scale: infos.scale
               };
               pageRendered++;
-              $('#pdf-loading-loop-infos').text(`${pageRendered}/${pdfDocument.numPages} page(s) loaded`);
-              if (pageRendered >= pdfDocument.numPages) {
-                self.setup(annotations, pages);
-                self.sortPages();
-                return done();
-              }
+              return done();
+              // if (pageRendered >= pdfDocument.numPages) {
+              //   self.setup(annotations, pages);
+              //   self.sortPages();
+              //   return done();
+              // }
             });
           });
         }
