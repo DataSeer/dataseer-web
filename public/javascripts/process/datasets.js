@@ -29,10 +29,10 @@
       $('#loading-loop').hide();
     };
 
-  window.addEventListener('unhandledrejection', function (event) {
-    alert(`An error has occured while processing this document... (${documentId})`);
-    hideLoop();
-  });
+  // window.addEventListener('unhandledrejection', function (event) {
+  //   alert(`An error has occured while processing this document... (${documentId})`);
+  //   hideLoop();
+  // });
 
   showLoop();
 
@@ -56,7 +56,7 @@
             datasets: doc.datasets,
             metadata: doc.metadata,
             tei: tei.data,
-            pdf: { buffer: pdf.data.data, sentences: pdf.metadata.sentences }
+            pdf: { buffer: pdf.data.data, metadata: pdf.metadata }
           });
 
           currentDocument.link({ documentView: documentView, datasetsList: datasetsList, datasetForm: datasetForm });

@@ -5,7 +5,6 @@
 'use strict';
 
 const DocumentHandler = function (opts = {}) {
-  console.log(opts);
   let self = this;
   this.ids = opts.ids;
   // It will save a dataset (secure way to not DDOS mongoDB server)
@@ -26,10 +25,12 @@ const DocumentHandler = function (opts = {}) {
     'documentView': false
   };
   this.colors = new Colors();
+  let pdf = { buffer: opts.pdf.buffer, metadata: { sentences: opts.pdf.metadata.sentences, colors: {} } };
   // Add colors to datasets
   for (let i = 0; i < opts.datasets.current.length; i++) {
     opts.datasets.current[i].index = i;
     opts.datasets.current[i].color = this.colors.randomColor();
+    pdf.metadata.colors[opts.datasets.current[i].id] = opts.datasets.current[i].color;
   }
   this.user = opts.user;
   this.datatypes = opts.datatypes;
@@ -37,7 +38,7 @@ const DocumentHandler = function (opts = {}) {
   this.currentDataset = null;
   this.metadata = opts.metadata;
   this.tei = opts.tei;
-  this.pdf = { buffer: opts.pdf.buffer, sentences: opts.pdf.sentences };
+  this.pdf = pdf;
   $('#datasets-confirm-modal-valid').click(function () {
     return self.onModalConfirmAccept();
   });
@@ -66,9 +67,10 @@ DocumentHandler.prototype.isReady = function (key, value) {
 
 // Attach event
 DocumentHandler.prototype.init = function () {
-  console.log('init');
-  this.selectDataset(this.getFirstDataset());
-  if (this.isReady() && typeof this.events.onReady === 'function') return this.events.onReady();
+  this.selectDataset(this.getFirstDataset(), function () {
+    console.log('init');
+    if (typeof self.events.onReady === 'function') return self.events.onReady();
+  });
 };
 
 // Check if document has change(s) not saved
@@ -147,26 +149,32 @@ DocumentHandler.prototype.valid = function (id) {
 };
 
 // Select a dataset
-DocumentHandler.prototype.selectDataset = function (dataset) {
+DocumentHandler.prototype.selectDataset = function (dataset, cb) {
   if (dataset) {
     let self = this,
       id = dataset.id;
     this.currentDataset = dataset;
-    this.datasetsList.select(this.currentDataset.id);
-    this.datasetForm.link(
-      this.currentDataset,
-      { isCurator: this.user.isCurator, isCorresp: false },
-      function (err, res) {
-        if (err) console.log('dataset not selected');
-        if (res) {
-          if (res.shouldSave) {
-            console.log('Should save selected dataset', res);
-            self.updateDataset(res.dataset.id, res.dataset);
-            self.autoSave(id);
-          } else return console.log('Selected dataset up to date');
+    this.documentView.select(this.currentDataset.id, function (err) {
+      self.datasetsList.select(self.currentDataset.id);
+      self.datasetForm.link(
+        self.currentDataset,
+        { isCurator: self.user.isCurator, isCorresp: false },
+        function (err, res) {
+          if (err) {
+            console.log('dataset not selected');
+            return cb(err);
+          }
+          if (res) {
+            if (res.shouldSave) {
+              console.log('Should save selected dataset', res);
+              self.updateDataset(res.dataset.id, res.dataset);
+              self.autoSave(id);
+              if (typeof cb === 'function') return cb(null, id);
+            } else return console.log('Selected dataset up to date');
+          } else return cb(true);
         }
-      }
-    ); // refresh datasetForm
+      ); // refresh datasetForm
+    });
   }
 };
 
@@ -319,8 +327,8 @@ DocumentHandler.prototype.link = function (opts = {}) {
   let self = this;
   if (opts.documentView) {
     this.documentView = opts.documentView;
-    this.documentView.renderPDF(this.pdf, function () {
-      console.log('PDF rendered');
+    this.documentView.init(this.pdf, function () {
+      console.log('PDF Loaded');
       self.isReady('documentView', true);
     });
   }
@@ -349,25 +357,25 @@ DocumentHandler.prototype.synchronize = function () {
   if (this.datasetsList) {
     // Attach datasetsList events
     this.datasetsList.attach('onDatasetLoaded', function (dataset) {
-      console.log(dataset);
+      // console.log(dataset);
     });
     this.datasetsList.attach('onDatasetClick', function (dataset) {
-      console.log(dataset);
+      // console.log(dataset);
       self.selectDataset(self.getDataset(dataset.id)); // set current dataset
     });
     this.datasetsList.attach('onDatasetCheck', function (dataset) {
-      console.log(dataset);
+      // console.log(dataset);
     });
     this.datasetsList.attach('onDatasetDelete', function (dataset) {
-      console.log(dataset);
+      // console.log(dataset);
       self.deleteDataset(dataset.id);
     });
     this.datasetsList.attach('onDatasetLink', function (dataset) {
-      console.log(dataset);
+      // console.log(dataset);
     });
     this.datasetsList.attach('onNewDatasetClick', function () {});
     this.datasetsList.attach('onMergeSelectionClick', function (ids) {
-      console.log(ids);
+      // console.log(ids);
       if (ids.length <= 1)
         self.showModalError({
           title: 'Merge selection error',
@@ -376,7 +384,7 @@ DocumentHandler.prototype.synchronize = function () {
       else self.mergeDatasets(ids);
     });
     this.datasetsList.attach('onDeleteSelectionClick', function (ids) {
-      console.log(ids);
+      // console.log(ids);
       if (ids.length <= 0)
         self.showModalError({
           title: 'Merge selection error',
@@ -388,7 +396,7 @@ DocumentHandler.prototype.synchronize = function () {
   if (this.datasetForm) {
     // Attach datasetsList events
     this.datasetForm.attach('onPropertyChange', function (property, value) {
-      console.log(property, value);
+      // console.log(property, value);
       self.modified();
       self.currentDataset[property] = value;
       self.autoSave(self.currentDataset.id);
@@ -397,19 +405,19 @@ DocumentHandler.prototype.synchronize = function () {
         else self.datasetsList.unhighlight(self.currentDataset.id);
     });
     this.datasetForm.attach('onDatasetIdClick', function (dataset) {
-      console.log(dataset);
+      // console.log(dataset);
       self.selectDataset(self.getDataset(dataset.id));
     });
     this.datasetForm.attach('onDatasetDoneClick', function (dataset) {
-      console.log(dataset);
+      // console.log(dataset);
       if (self.hasChanged[dataset.id]) self.autoSave(dataset.id);
       self.selectDataset(self.getNextDataset(dataset.id));
     });
     this.datasetForm.attach('onDatasetUnlinkClick', function (dataset) {
-      console.log(dataset);
+      // console.log(dataset);
     });
     this.datasetForm.attach('onRefreshDatatypesClick', function (dataset) {
-      console.log(dataset);
+      // console.log(dataset);
     });
   }
 };

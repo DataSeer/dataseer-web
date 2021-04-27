@@ -56,7 +56,7 @@ body {
   margin-left: 20px;
   display: inline-block;
   width: calc(100% - 225px);
-  overflow-x: auto;
+  overflow-x: scroll;
   margin-bottom: 10px;
   border-top-right-radius: 20px;
   border-top-left-radius: 20px;
@@ -207,7 +207,6 @@ body {
   margin-right: 20px;
   display: inline-block;
   width: 175px;
-  height: 25px;
   float: right;
   text-align: right;
 }
@@ -484,7 +483,7 @@ body {
   cursor: pointer;
   display: table;
   width: 100%; /*Optional*/
-  table-layout: auto; /*Optional*/
+  table-layout: fixed; /*Optional*/
   border-spacing: 0px; /*Optional*/
   height:20px;
   overflow: hidden;
@@ -528,7 +527,7 @@ body {
   z-index: 1000;
 }
 
-#documentView #pdfViewer .contourLayer {
+#documentView #pdfViewer .contoursLayer {
   background-color: transparent;
   z-index: 3000;
 }
@@ -538,54 +537,54 @@ body {
   z-index: 2000;
 }
 
-#documentView #pdfViewer .contourLayer .contour {
+#documentView #pdfViewer .contoursLayer .contour {
   background-color: transparent;
   z-index: 3100;
   cursor: pointer;
 }
 
-#documentView #pdfViewer .contourLayer .contour div {
+#documentView #pdfViewer .contoursLayer .contour div {
   background-color: transparent;
 }
 
-#documentView #pdfViewer .contourLayer .contour div[events="true"] {
+#documentView #pdfViewer .contoursLayer .contour div[events="true"] {
   z-index: 3120;
   background-color: transparent;
 }
 
-#documentView #pdfViewer .contourLayer .contour canvas {
+#documentView #pdfViewer .contoursLayer .contour canvas {
   z-index: 3110;
 }
 
-#documentView #pdfViewer .contourLayer .contour[datasetid] canvas {
+#documentView #pdfViewer .contoursLayer .contour[datasetid] canvas {
   z-index: 3115;
 }
 
-#documentView #pdfViewer .contourLayer .contour.activeContourDataset,
-#documentView #pdfViewer .contourLayer .contour.activeContourSentence,
-#documentView #pdfViewer .contourLayer .contour.selected {
+#documentView #pdfViewer .contoursLayer .contour.activeContourDataset,
+#documentView #pdfViewer .contoursLayer .contour.activeContourSentence,
+#documentView #pdfViewer .contoursLayer .contour.selected {
   z-index: 3200;
 }
 
-#documentView #pdfViewer .contourLayer .contour.activeContourDataset canvas,
-#documentView #pdfViewer .contourLayer .contour.activeContourSentence canvas,
-#documentView #pdfViewer .contourLayer .contour.selected canvas {
+#documentView #pdfViewer .contoursLayer .contour.activeContourDataset canvas,
+#documentView #pdfViewer .contoursLayer .contour.activeContourSentence canvas,
+#documentView #pdfViewer .contoursLayer .contour.selected canvas {
   z-index: 3210;
 }
 
-#documentView #pdfViewer .contourLayer .contour.activeContourDataset div[events="true"] ,
-#documentView #pdfViewer .contourLayer .contour.activeContourSentence div[events="true"] ,
-#documentView #pdfViewer .contourLayer .contour.selected div[events="true"]  {
+#documentView #pdfViewer .contoursLayer .contour.activeContourDataset div[events="true"] ,
+#documentView #pdfViewer .contoursLayer .contour.activeContourSentence div[events="true"] ,
+#documentView #pdfViewer .contoursLayer .contour.selected div[events="true"]  {
   z-index: 3220;
 }
 
-#documentView #pdfViewer .contourLayer .contour.hover canvas,
-#documentView #pdfViewer .contourLayer .contour.hover canvas {
+#documentView #pdfViewer .contoursLayer .contour.hover canvas,
+#documentView #pdfViewer .contoursLayer .contour.hover canvas {
   z-index: 3215;
 }
 
-#documentView #pdfViewer .contourLayer .contour.hover div[events="true"] ,
-#documentView #pdfViewer .contourLayer .contour.hover div[events="true"]   {
+#documentView #pdfViewer .contoursLayer .contour.hover div[events="true"] ,
+#documentView #pdfViewer .contoursLayer .contour.hover div[events="true"]   {
   z-index: 3225;
 }
 
@@ -594,7 +593,7 @@ body {
   cursor: pointer;
 }
 
-#documentView #pdfViewer .contourLayer {
+#documentView #pdfViewer .contoursLayer {
     position: absolute;
     left: 0px;
     top: 0px;

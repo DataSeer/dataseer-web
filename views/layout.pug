@@ -102,7 +102,6 @@ html
     script(src=conf.root + 'javascripts/dataseerAPI.js')
     script(src=conf.root + 'javascripts/pdf.js/build/generic/build/pdf.js')
     script(src=conf.root + 'javascripts/pdf.js/build/generic/build/pdf.worker.js')
-    script(src=conf.root + 'javascripts/lib/pdfManager.js')
     script(src=conf.root + 'javascripts/lib/pdfViewer.js')
     script(src=conf.root + 'javascripts/publicUrl.js')
   else if search
@@ -123,7 +122,3 @@ html
   script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js' integrity='sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM' crossorigin='anonymous')
   script(src='https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js' data-cfasync='false')
   script(src=conf.root + 'javascripts/cookies.js')
-
-  if current_user
-    include ./lib/userflow.pug
-  include ./lib/crisp.pug

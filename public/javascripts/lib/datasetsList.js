@@ -130,7 +130,6 @@ DatasetsList.prototype.load = function (datasets = [], cb) {
   return async.eachSeries(
     datasets,
     function (dataset, callback) {
-      console.log(dataset);
       self.add(dataset);
       if (typeof self.events.onDatasetLoaded === 'function') self.events.onDatasetLoaded(dataset);
       return callback();
