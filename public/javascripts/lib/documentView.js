@@ -4,535 +4,253 @@
 
 'use strict';
 
-const Colors = function () {
-  let self = this,
-    colors = ['#ff0000', '#ffa500', '#ffff00', '#008000', '#0000ff', '#4b0082', '#ee82ee'],
-    // colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'],
-    index = 0;
-  self.backgroundColor = function (alpha) {
-    let result = randomColor({
-      // 'luminosity': 'light',
-      hue: colors[index],
-      format: 'rgba',
-      alpha: alpha
+const DocumentView = function (id, events = {}) {
+  let self = this;
+  this.id = id;
+  this.selectedSentence = {};
+  this.currentDatasetId;
+  this.viewersEvents = {
+    onClick: function (sentence) {
+      let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId),
+        isDataset = !!result.datasetId;
+      if (isDataset) {
+        if (typeof self.events.onDatasetClick === 'function') self.events.onDatasetClick(result);
+      } else {
+        if (self.selectedSentence.sentenceId === result.sentenceId) {
+          self.unselectSentence(result);
+        } else {
+          // unselect previous selected sentence
+          if (self.selectedSentence.sentenceId) {
+            self.unselectSentence(self.selectedSentence);
+          }
+          self.selectSentence(result);
+        }
+        if (typeof self.events.onSentenceClick === 'function') self.events.onSentenceClick(result);
+      }
+    },
+    onHover: function (sentence) {
+      let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId),
+        isDataset = !!result.datasetId;
+      // console.log(result);
+      if (isDataset) {
+        if (typeof self.events.onDatasetHover === 'function') self.events.onDatasetHover(result);
+      } else {
+        if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(result);
+      }
+      self.hoverSentence({
+        sentenceId: result.sentenceId,
+        isDataset: isDataset,
+        isSelected: self.selectedSentence && result.sentenceId === self.selectedSentence.sentenceId
+      });
+    },
+    onEndHover: function (sentence) {
+      let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId),
+        isDataset = !!result.datasetId;
+      // console.log(result);
+      if (isDataset) {
+        if (typeof self.events.onDatasetHover === 'function') self.events.onDatasetHover(result);
+      } else {
+        if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(result);
+      }
+      self.endHoverSentence({
+        sentenceId: result.sentenceId,
+        isDataset: isDataset,
+        isSelected: self.selectedSentence && result.sentenceId === self.selectedSentence.sentenceId
+      });
+    }
+  };
+  // documentView elements
+  this.screen = $('#documentView\\.screen');
+  this.pdf = $('#pdf');
+  this.xml = $('#xml');
+  // Listen scroll
+  this.currentScroll = 0;
+  this.screen.scroll(
+    _.throttle(function () {
+      if (self.pdfVisible) {
+        let scrollTop = self.screen.scrollTop(),
+          direction = scrollTop > self.currentScroll ? +1 : -1;
+        self.currentScroll = scrollTop;
+        self.pdfViewer.onScroll(scrollTop + self.screen.height(), direction);
+      }
+    }, 333)
+  );
+  // Element initialization
+  this.xml.hide();
+  this.pdfVisible = true;
+  // On button click
+  $('#documentView\\.viewSelection\\.tei\\.all')
+    .parent()
+    .click(function () {
+      console.log('TEI all');
+      self.pdfVisible = false;
+      self.pdf.hide();
+      self.xml.show();
+      self.xml.find('*.hidden').removeClass('hidden');
+      self.selectDataset(self.currentDatasetId);
     });
-    index = index < colors.length - 1 ? index + 1 : 0;
-    return result;
-  };
-  self.color = function (backgroundColor) {
-    let regex = /^rgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d*(?:\.\d+)?)\)$/,
-      matches = backgroundColor.match(regex),
-      R = matches[1],
-      G = matches[2],
-      B = matches[3],
-      A = matches[4];
-    // Calculate the perceptive luminance (aka luma) - human eye favors green color...
-    let luma = (0.299 * R + 0.587 * G + 0.114 * B) / 255;
-    // Return black for bright colors, white for dark colors
-    return luma > 0.5 ? 'black' : 'white';
-  };
-  return self;
+  $('#documentView\\.viewSelection\\.tei\\.dataseer')
+    .parent()
+    .click(function () {
+      console.log('TEI dataseer');
+      self.pdfVisible = false;
+      self.pdf.hide();
+      self.xml.show();
+      self.xml.find('*.hidden').removeClass('hidden');
+      self.xml.find('text > div > div, text > div > *:not(div)').map(function (i, el) {
+        let element = $(el);
+        if (element.find('s[id], s[corresp]').length === 0) return element.addClass('hidden');
+      });
+      self.selectDataset(self.currentDatasetId);
+    });
+  $('#documentView\\.viewSelection\\.tei\\.dataset')
+    .parent()
+    .click(function () {
+      console.log('TEI dataset');
+      self.pdfVisible = false;
+      self.pdf.hide();
+      self.xml.show();
+      self.xml.find('*.hidden').removeClass('hidden');
+      self.xml.find('text > div, text > *:not(div)').map(function (i, el) {
+        let element = $(el);
+        if (element.find('s[id], s[corresp]').length === 0) return element.addClass('hidden');
+      });
+      self.selectDataset(self.currentDatasetId);
+    });
+  $('#documentView\\.viewSelection\\.pdf')
+    .parent()
+    .click(function () {
+      console.log('PDF');
+      self.pdfVisible = true;
+      self.pdf.show();
+      self.xml.hide();
+      self.selectDataset(self.currentDatasetId);
+    });
+  // Events
+  this.events = events;
+  return this;
 };
 
-const DocumentView = function (events) {
+// Attach event
+DocumentView.prototype.attach = function (event, fn) {
+  this.events[event] = fn;
+};
+
+// Get selected sentence or undefined
+DocumentView.prototype.getSelectedSentence = function () {
+  if (this.selectedSentence.sentenceId) return this.selectedSentence;
+};
+
+// Get sentence
+DocumentView.prototype.getSentence = function (sentenceId) {
+  return this.xmlViewer.getInfosOfSentence(sentenceId);
+};
+
+// Init documentView
+DocumentView.prototype.init = function (opts, cb) {
   let self = this,
-    colors = new Colors();
-
-  let elements = {
-    container: HtmlBuilder.div({ id: '', class: 'container-fluid', text: '' })
-  };
-
-  // get paragraphs without Datasets
-  let paragraphsWithoutDatasets = function () {
-      let paragraphs = elements.container.find('text > div > div, text > div > *:not(div)');
-      return paragraphs.map(function (i, el) {
-        if (jQuery(el).find('s[id], s[corresp]').length === 0) return el;
-      });
-    },
-    sectionsWithoutDatasets = function () {
-      let paragraphs = elements.container.find('text > div, text > *:not(div)');
-      return paragraphs.map(function (i, el) {
-        if (jQuery(el).find('s[id], s[corresp]').length === 0) return el;
-      });
-    },
-    // get selected element (if it is in container)
-    selectedElements = function () {
-      let selection = jQuery('tei s.selected');
-      if (selection.length > 0) {
-        return {
-          err: null,
-          res: {
-            sentence: selection
-          }
-        };
-      } else {
-        return {
-          err: true,
-          res: null
-        };
-      }
-    },
-    selectionToSenctence = function (selection, options, clickEvent, cb) {
-      let target = null;
-      if (typeof selection.res.sentence !== 'undefined') {
-        if (options.getdataType) {
-          return DataSeerAPI.getdataType(selection.res.sentence, function (err, res) {
-            if (err) {
-              return cb(err, res);
-            }
-            let dataType = res['datatype'] ? res['datatype'] : options.dataType,
-              cert = res['cert'] ? res['cert'] : 0;
-            // if dataType is set, then it's not a corresp
-            target = selection.res.sentence
-              .attr('id', options.id)
-              .attr(options.user.role, options.user.id)
-              .attr('type', dataType)
-              .attr('reuse', options.reuse)
-              .attr('cert', cert);
-            target.removeAttr('class');
-            jQuery(target).parents('div[type]').attr('subtype', 'dataseer');
-            target.click(function (event) {
-              let el = jQuery(event.target);
-              scrollTo(el);
-              clickEvent(options.id, el);
-            });
-            return cb(null, target);
-          });
-        } else {
-          target = selection.res.sentence.attr('corresp', '#' + options.id).attr(options.user.role, options.user.id);
-          target.removeAttr('class');
-          jQuery(target).parents('div[type]').attr('subtype', 'dataseer');
-          target.click(function (event) {
-            let el = jQuery(event.target);
-            scrollTo(el);
-            clickEvent(options.id, el);
-          });
-          return target;
-        }
-      }
-    },
-    // scroll ot dataset position
-    scrollTo = function (el) {
-      if ($('#xml').is(':visible')) {
-        let position = el.position().top + elements.container.parent().parent().parent().scrollTop() - 24;
-        return elements.container.parent().parent().parent().animate({ scrollTop: position });
-      } else {
-        let isCorrep = typeof el.attr('corresp') !== 'undefined',
-          id = isCorrep ? el.attr('corresp').replace('#', '') : el.attr('id');
-        self.views.scrollTo(id, isCorrep);
-      }
-    };
-
-  self.init = function (id, doc, cb) {
-    self.doc = doc;
-    self.mainContainer = jQuery(id);
-    self.mainContainer.empty().append($('<div id="xml">').append(elements.container));
-
-    self.hasPdf = !!self.doc.pdf;
-
-    if (self.hasPdf) {
-      self.mainContainer.append($('<div id="pdf">'));
-      $('#xml').hide();
-      self.pdfViewer = new PdfViewer('pdf', {
-        click: function (sentenceId, element) {
-          let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]'),
-            pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
-            pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
-            isDataset =
-              typeof xmlSentenceElement.attr('id') !== 'undefined' ||
-              typeof xmlSentenceElement.attr('corresp') !== 'undefined',
-            lastSelectedSentence = $('s.selected'),
-            lastSelectedContour = $('#pdf .contourLayer > div.contour[sentenceid].selected');
-          xmlSentenceElement.click();
-          lastSelectedSentence.removeClass('selected');
-          lastSelectedContour.removeClass('selected');
-          self.pdfViewer.unselectCanvas(lastSelectedContour.attr('sentenceid'));
-          self.pdfViewer.hoverCanvas(sentenceId, isDataset, pdfContour.hasClass('selected'));
-          if (xmlSentenceElement.hasClass('selected')) {
-            pdfSentenceElements.addClass('selected');
-            pdfContour.addClass('selected');
-            self.pdfViewer.selectCanvas(sentenceId);
-          }
-        },
-        hover: function (sentenceId, element) {
-          let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]');
-          let pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
-            pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
-            isDataset =
-              typeof xmlSentenceElement.attr('id') !== 'undefined' ||
-              typeof xmlSentenceElement.attr('corresp') !== 'undefined';
-          pdfSentenceElements.addClass('hover');
-          self.pdfViewer.hoverCanvas(sentenceId, isDataset, pdfContour.hasClass('selected'));
-          if (isDataset) {
-            pdfContour.addClass('activeContourDataset');
-          } else {
-            pdfContour.addClass('activeContourSentence');
-          }
-        },
-        endHover: function (sentenceId, element) {
-          let xmlSentenceElement = $('tei s[sentenceid="' + sentenceId + '"]');
-          let pdfSentenceElements = $('#pdf s[sentenceid="' + sentenceId + '"]'),
-            pdfContour = $('#pdf .contourLayer > div.contour[sentenceid="' + sentenceId + '"]'),
-            isDataset =
-              typeof xmlSentenceElement.attr('id') !== 'undefined' ||
-              typeof xmlSentenceElement.attr('corresp') !== 'undefined';
-          self.pdfViewer.endHoverCanvas(sentenceId, isDataset, pdfContour.hasClass('selected'));
-          if (isDataset) {
-            pdfContour.removeClass('activeContourDataset');
-          } else {
-            pdfContour.removeClass('activeContourSentence');
-          }
-        }
-      });
-      return self.pdfViewer.render(self.doc.pdf.data.data, self.doc.pdf.metadata.sentences, function () {
-        self.finishInit(self.doc);
-        let sentenceid = datasets.all().first().attr('sentenceid') || '0';
-        self.pdfViewer.scrollToSentence(sentenceid);
+    xml = opts.xml.toString('utf8').replace(/\s/gm, ' ');
+  this.xmlViewer = new XmlViewer('xml', 'documentView\\.screen', this.viewersEvents);
+  if (opts.pdf) {
+    this.pdfVisible = true;
+    this.pdfViewer = new PdfViewer('pdf', 'documentView\\.screen', this.viewersEvents);
+  }
+  return this.xmlViewer.load({ xmlString: xml, colors: opts.colors }, function (datasetsInfos) {
+    if (opts.pdf)
+      return self.pdfViewer.load(opts.pdf, datasetsInfos, function () {
+        self.pdfViewer.setPage(0);
         return cb();
       });
-    } else {
-      self.finishInit(self.doc);
+    else {
+      $('#documentView\\.viewSelection\\.tei\\.all').click();
+      $('#documentView\\.viewSelection\\.pdf').parent().remove();
       return cb();
     }
-  };
+  });
+};
 
-  self.finishInit = function (doc) {
-    self.source(self.doc.source);
+// Hover a sentence
+DocumentView.prototype.hoverSentence = function (sentence) {
+  if (this.pdfViewer) this.pdfViewer.hoverSentence(sentence);
+  this.xmlViewer.hoverSentence(sentence);
+};
 
-    datasets.all().click(function (event) {
-      let el = jQuery(event.target),
-        id = el.attr('id');
-      scrollTo(el);
-      events.datasets.click(id, el);
+// Unhover a sentence
+DocumentView.prototype.endHoverSentence = function (sentence) {
+  if (this.pdfViewer) this.pdfViewer.endHoverSentence(sentence);
+  this.xmlViewer.endHoverSentence(sentence);
+};
+
+// Select a sentence
+DocumentView.prototype.selectSentence = function (sentence) {
+  this.selectedSentence = sentence;
+  if (this.pdfViewer) this.pdfViewer.selectSentence(sentence);
+  this.xmlViewer.selectSentence(sentence);
+};
+
+// Unselect a sentence
+DocumentView.prototype.unselectSentence = function (sentence) {
+  this.selectedSentence = {};
+  if (this.pdfViewer) this.pdfViewer.unselectSentence(sentence);
+  this.xmlViewer.unselectSentence(sentence);
+};
+
+// Select a dataset
+DocumentView.prototype.selectDataset = function (id, cb) {
+  let self = this;
+  this.currentDatasetId = id;
+  if (this.pdfVisible)
+    return this.pdfViewer.selectDataset(id, function (position) {
+      if (position) self.screen.animate({ scrollTop: position });
+      else console.log('dataset not selected');
+      return typeof cb === 'function' ? cb() : undefined;
     });
-
-    corresps.all().click(function (event) {
-      let el = jQuery(event.target),
-        id = el.attr('corresp').replace('#', '');
-      scrollTo(el);
-      events.datasets.click(id, el);
+  else
+    return this.xmlViewer.selectDataset(id, function (position) {
+      if (position) self.screen.animate({ scrollTop: position + self.screen.scrollTop() - self.screen.height() / 1.8 });
+      else console.log('dataset not selected');
+      return typeof cb === 'function' ? cb() : undefined;
     });
+};
 
-    datasets.colors();
-    corresps.colors();
-  };
-
-  self.source = function (source) {
-    if (typeof source === 'undefined') {
-      let copy = $('#xml > div').clone();
-      copy.find('*[style]').removeAttr('style').find('*[class]').removeAttr('class');
-      return copy.html();
-    }
-    elements.container.html(source.replace(/\s/gm, ' '));
-    let s = elements.container.find('s:not([corresp]):not([id])');
-    s.on('click', sentences.click);
-    s.hover(sentences.hover, sentences.endHover);
-
-    return self.source();
-  };
-
-  self.color = function (id) {
-    return datasets.styleOf(id);
-  };
-
-  self.colors = function () {
-    let styles = {};
-    datasets.all().each(function () {
-      let id = jQuery(this).attr('id'),
-        style = datasets.styleOf(id);
-      styles[id] = style;
+// Select a Corresp
+DocumentView.prototype.selectCorresp = function (dataset, cb) {
+  let self = this;
+  this.currentDatasetId = dataset.id;
+  if (this.pdfVisible)
+    return this.pdfViewer.selectCorresp(dataset.sentenceId, function (position) {
+      if (position) self.screen.animate({ scrollTop: position });
+      else console.log('dataset not selected');
+      return typeof cb === 'function' ? cb() : undefined;
     });
-    return styles;
-  };
-
-  self.updateDataset = function (user, id, dataType, reuse) {
-    return datasets.update(user, id, dataType, reuse);
-  };
-
-  self.addDataset = function (user, id, dataType, reuse, cb) {
-    return datasets.add(user, id, dataType, reuse, function (err, res) {
-      return cb(err, res);
+  else
+    return this.xmlViewer.selectCorresp(dataset.id, function (position) {
+      if (position) self.screen.animate({ scrollTop: position + self.screen.scrollTop() - self.screen.height() / 1.8 });
+      else console.log('dataset not selected');
+      return typeof cb === 'function' ? cb() : undefined;
     });
-  };
+};
 
-  self.getTextOfDataset = function (id) {
-    return datasets.get(id).text();
-  };
+// Add a dataset
+DocumentView.prototype.addDataset = function (dataset) {
+  if (this.pdfViewer) this.pdfViewer.addDataset(dataset);
+  this.xmlViewer.addDataset(dataset);
+};
 
-  self.deleteDataset = function (id) {
-    return datasets.remove(id);
-  };
+// Remove a dataset
+DocumentView.prototype.removeDataset = function (dataset) {
+  if (this.pdfViewer) this.pdfViewer.removeDataset(dataset);
+  this.xmlViewer.removeDataset(dataset);
+};
 
-  self.addCorresp = function (user, id) {
-    return corresps.add(user, id);
-  };
+// Add a corresp
+DocumentView.prototype.addCorresp = function (dataset, sentenceId) {
+  if (this.pdfViewer) this.pdfViewer.addCorresp(dataset, sentenceId);
+  this.xmlViewer.addCorresp(dataset, sentenceId);
+};
 
-  self.deleteAllCorresps = function (id) {
-    return corresps.removeAll(id);
-  };
-
-  self.deleteCorresp = function (el) {
-    return corresps.remove(el);
-  };
-
-  self.views = {
-    unselectCanvas: function () {
-      $('#pdf .contourLayer > div.contour[sentenceid].selected').removeClass('selected');
-    },
-    // scroll ot dataset position
-    scrollTo: function (id, isCorresp = false) {
-      let element = isCorresp ? corresps.get(id) : datasets.get(id),
-        position =
-          self.hasPdf && $('#pdf').is(':visible')
-            ? self.pdfViewer.scrollToSentence(element.attr('sentenceid')) +
-              elements.container.parent().parent().scrollTop() -
-              14
-            : element.position().top + elements.container.parent().parent().parent().scrollTop() - 14;
-      return elements.container.parent().parent().parent().animate({ scrollTop: position });
-    },
-    // set All elements visible
-    allVisible: function () {
-      paragraphsWithoutDatasets().removeClass();
-      sectionsWithoutDatasets().removeClass();
-      $('#pdf').hide();
-      $('#xml').show();
-      $('#datasetsListItems .selected .item').click();
-    },
-    // set only dataseer elements visible
-    onlyDataseer: function () {
-      self.views.allVisible();
-      sectionsWithoutDatasets().addClass('hidden');
-      $('#pdf').hide();
-      $('#xml').show();
-      $('#datasetsListItems .selected .item').click();
-    },
-    // set only datasets elements visible
-    onlyDatasets: function () {
-      self.views.allVisible();
-      self.views.onlyDataseer();
-      paragraphsWithoutDatasets().addClass('hidden');
-      $('#pdf').hide();
-      $('#xml').show();
-      $('#datasetsListItems .selected .item').click();
-    },
-    // set only PDF elements visible
-    pdf: function () {
-      $('#xml').hide();
-      $('#pdf').show();
-      $('#datasetsListItems .selected .item').click();
-    }
-  };
-
-  // Sentences features
-  let sentences = {
-    new: function (sentenceid, coords, html) {
-      return jQuery('<s/>').attr('sentenceid', sentenceid).attr('coords', coords).html(html);
-    },
-    click: function () {
-      let previousSelection = elements.container.find('s.selected'),
-        selected = jQuery(this);
-      if (
-        !selected.attr('corresp') &&
-        !selected.attr('id') &&
-        selected.find('s[corresp]').length + selected.find('s[id]').length === 0
-      ) {
-        selected.addClass('selected');
-        if (previousSelection.length > 0) {
-          previousSelection.removeAttr('class');
-        }
-      }
-    },
-    hover: function () {
-      let selected = jQuery(this);
-      if (
-        !selected.attr('corresp') &&
-        !selected.attr('id') &&
-        selected.find('s[corresp]').length + selected.find('s[id]').length === 0
-      ) {
-        selected.addClass('hover');
-      }
-    },
-    endHover: function () {
-      let selected = jQuery(this);
-      if (
-        !selected.attr('corresp') &&
-        !selected.attr('id') &&
-        selected.find('s[corresp]').length + selected.find('s[id]').length === 0
-      ) {
-        selected.removeClass('hover');
-      }
-    }
-  };
-
-  // Datasets features
-  let datasets = {
-    // get element of given dataset
-    get: function (id) {
-      return elements.container.find('tei s[id="' + id + '"]');
-    },
-    // get elements of all datasets
-    all: function () {
-      return elements.container.find('tei s[id]');
-    },
-    // get cert of given dataset
-    certOf: function (id) {
-      let cert = parseFloat(datasets.get(id).attr('cert'));
-      if (!cert || cert <= 0.5) cert = 0.5;
-      return cert;
-    },
-    // get/set dataType of given dataset
-    dataTypeOf: function (id, value) {
-      if (typeof value === 'undefined') return datasets.get(id).attr('type');
-      datasets.get(id).attr('type', value);
-      return datasets.dataTypeOf(id);
-    },
-    // get/set style of given dataset
-    styleOf: function (id, value) {
-      if (typeof value === 'undefined') return datasets.get(id).attr('style');
-      datasets.get(id).attr('style', value);
-      return datasets.styleOf(id);
-    },
-    // set colors of datasets
-    colors: function () {
-      datasets.all().each(function () {
-        let el = jQuery(this),
-          id = el.attr('id'),
-          backgroundColor = colors.backgroundColor(datasets.certOf(id)),
-          color = colors.color(backgroundColor);
-        datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
-        if (self.hasPdf) self.pdfViewer.setColor(el.attr('sentenceid'), backgroundColor, id);
-      });
-    },
-    // add dataset
-    add: function (user, id, dataType, reuse, cb) {
-      let selection = selectedElements();
-      if (selection.err) return cb(true, 'Please select the sentence that contains the new dataset');
-      return selectionToSenctence(
-        selection,
-        { id: id, dataType: dataType, getdataType: true, user: user, reuse: reuse },
-        events.datasets.click,
-        function (err, res) {
-          if (err) return cb(err, res);
-          let backgroundColor = colors.backgroundColor(datasets.certOf(id)),
-            color = colors.color(backgroundColor),
-            parent = res.parents('div').first();
-          parent.attr('subtype', 'dataseer');
-          datasets.styleOf(id, 'background-color:' + backgroundColor + ';' + 'color: ' + color);
-          let sentenceid = datasets.get(id).attr('sentenceid');
-          if (self.hasPdf) {
-            self.pdfViewer.setColor(sentenceid, backgroundColor, id);
-            PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
-          }
-          return cb(null, {
-            datatype: res.attr('type'),
-            reuse: res.attr('reuse'),
-            cert: res.attr('cert'),
-            sentenceId: sentenceid
-          });
-        }
-      );
-    },
-    // add dataset
-    update: function (user, id, dataType, reuse) {
-      jQuery('#' + id)
-        .attr('type', dataType)
-        .attr('reuse', reuse)
-        .attr(user.role, user.id);
-    },
-    // remove dataset
-    remove: function (id) {
-      let dataset = datasets.get(id),
-        parent = dataset.parents('div[subtype]'),
-        newElement = sentences.new(dataset.attr('sentenceid'), dataset.attr('coords'), dataset.html()).clone();
-      dataset.replaceWith(newElement);
-      newElement.click(sentences.click).hover(sentences.hover, sentences.endHover);
-      if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
-      if (self.hasPdf) {
-        let sentenceid = dataset.attr('sentenceid');
-        self.pdfViewer.removeColor(sentenceid);
-        PdfManager.unlinkDatasetToSentence(self.doc, sentenceid);
-      }
-    }
-  };
-
-  // Corresps features
-  let corresps = {
-    // get element of given correp
-    get: function (id) {
-      return elements.container.find('tei s[corresp="#' + id + '"]');
-    },
-    // get elements of all correps
-    all: function () {
-      return elements.container.find('tei s[corresp]');
-    },
-    // get/set style of given correp
-    styleOf: function (id, value) {
-      if (typeof value === 'undefined') return corresps.get(id).attr('style');
-      corresps.get(id).attr('style', value);
-      return corresps.styleOf(id);
-    },
-    // set colors of correps
-    colors: function () {
-      corresps.all().each(function () {
-        let el = jQuery(this),
-          id = el.attr('corresp').replace('#', ''),
-          style = datasets.styleOf(id),
-          color = style.split(';')[0].split(':')[1];
-        corresps.styleOf(id, style);
-        if (self.hasPdf) self.pdfViewer.setColor(el.attr('sentenceid'), color, id);
-      });
-    },
-    // add correp
-    add: function (user, id) {
-      let selection = selectedElements();
-      if (selection.err) return selection;
-      let target = selectionToSenctence(selection, { id: id, getdataType: false, user: user }, events.corresps.click),
-        parent = target.parents('div').first(),
-        style = datasets.styleOf(id),
-        color = style.split(';')[0].split(':')[1];
-      parent.attr('subtype', 'dataseer');
-      corresps.styleOf(id, style);
-      let sentenceid = selection.res.sentence.attr('sentenceid');
-      if (self.hasPdf) {
-        self.pdfViewer.setColor(sentenceid, color, id);
-        PdfManager.linkDatasetToSentence(self.doc, sentenceid, id);
-      }
-      return {
-        err: false,
-        res: target,
-        sentenceId: sentenceid
-      };
-    },
-    // remove correp
-    remove: function (el) {
-      let parent = el.parents('div[subtype]'),
-        newElement = sentences.new(el.attr('sentenceid'), el.attr('coords'), el.html()).clone();
-      el.replaceWith(newElement);
-      newElement.click(sentences.click).hover(sentences.hover, sentences.endHover);
-      if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
-      if (self.hasPdf) {
-        let sentenceid = el.attr('sentenceid');
-        self.pdfViewer.removeColor(sentenceid);
-        PdfManager.unlinkDatasetToSentence(self.doc, sentenceid);
-      }
-    },
-    // remove all correp
-    removeAll: function (id) {
-      let _corresps = corresps.get(id).each(function () {
-        let el = jQuery(this),
-          parent = el.parents('div[subtype]'),
-          newElement = sentences.new(el.attr('sentenceid'), el.attr('coords'), el.html()).clone();
-        el.replaceWith(newElement);
-        newElement.click(sentences.click).hover(sentences.hover, sentences.endHover);
-        if (!parent.has('s[id]').length && !parent.has('s[corresp]').length) parent.removeAttr('subtype');
-        if (self.hasPdf) {
-          let sentenceid = el.attr('sentenceid');
-          self.pdfViewer.removeColor(sentenceid);
-          PdfManager.unlinkDatasetToSentence(self.doc, sentenceid);
-        }
-      });
-    }
-  };
-
-  return self;
+// Remove a corresp
+DocumentView.prototype.removeCorresp = function (dataset, sentenceId) {
+  if (this.pdfViewer) this.pdfViewer.removeCorresp(dataset, sentenceId);
+  this.xmlViewer.removeCorresp(dataset, sentenceId);
 };

@@ -1,0 +1,125 @@
+div(id='datasetForm')
+  <div id="datasetForm.message">
+    <div>At least one dataset must be added to be able to use this form</div>
+    <div>Select a sentence that concerns a dataset, click it and then click the button "Add new Dataset"</div>
+  </div>
+  <div id="datasetForm.container">
+    <table>
+      <tr class="custom-row">
+        <th>
+          <div key="dataset.label" value=""></div>
+          <div key="dataset.status" value="unknow"><i class="far fa-question-circle"></i></div>
+          <button name='datasetForm.unlink' class="btn btn-danger btn-sm btn-lite" title="Unlink selected sentence to this dataset">
+            <i class="fas fa-unlink"></i>
+          </button>
+        </th>
+      </tr>
+      <tr class="custom-row" style="display: none;">
+        <td>
+          <div key="dataset.id" value="undefined">undefined</div>
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>re-use:</div>
+          <div key="dataset.reuse" value="false"></div>
+          <input name="datasetForm.reuse" target="dataset.reuse" type="checkbox" class="form-control">
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Data type:</div>
+          <div key="dataset.dataType" value=""></div>
+          <select name="datasetForm.dataType" target="dataset.dataType" class="form-control"></select>
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Sub type:</div>
+          <div key="dataset.subType" value=""></div>
+          <select name="datasetForm.subType" target="dataset.subType" class="form-control"></select>
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Custom Data type:</div>
+          <div key="dataset.customDataType" value=""></div>
+          <input name="datasetForm.customDataType" target="dataset.customDataType" type="text" class="form-control">
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Description:</div>
+          <div key="dataset.description" value="undefined">undefined</div>
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Best practice for sharing this type of data:</div>
+          <div key="dataset.bestDataFormatForSharing" value="undefined">undefined</div>
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Best practice for indicating re-use of existing data:</div>
+          <div key="dataset.bestPracticeForIndicatingReUseOfExistingData" value="undefined">undefined</div>
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Most suitable repositories:</div>
+          <a key="dataset.url" value="http://wiki.dataseer.ai/doku.php" href="http://wiki.dataseer.ai/doku.php" target="_blank"><i class="fas fa-question"></i></a>
+          <div key="dataset.mostSuitableRepositories" value="undefined">undefined</div>
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Highlight this dataset:</div>
+          <div key="dataset.highlight" value="false"></div>
+          <input name="datasetForm.highlight" target="dataset.highlight" type="checkbox" class="form-control">
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div key="dataset.notification" value="" class="notification alert alert-info" title="This message come from a curator"></div>
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Enter a message here (or leave it empty so nothing will be displayed):</div>
+          <input name="datasetForm.notification" target="dataset.notification" value="" type="text" placeholder="Enter the message here or leave it empty" class="form-control">
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Please provide a name for this dataset (e.g. 'sampling locations'):</div>
+          <div key="dataset.name" value=""></div>
+          <input name="datasetForm.name" target="dataset.name" value="" type="text" placeholder="Provide the name here" class="form-control">
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Please provide the DOI (or other stable link) to this dataset:</div>
+          <div key="dataset.DOI" value=""></div>
+          <input name="datasetForm.DOI" target="dataset.DOI" value="" type="text" placeholder="Provide the DOI here" class="form-control">
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <div>Please enter any comments here (such as a reason why this dataset cannot be shared):</div>
+          <div key="dataset.comments" value=""></div>
+          <textarea name="datasetForm.comments" target="dataset.comments" value="" type="text" placeholder="Enter any comments here" class="form-control"></textarea>
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <button name='datasetForm.done' class='btn btn-primary'><i class="fas fa-check"></i> Done with this Dataset</button>
+        </td>
+      </tr>
+      <tr class="custom-row">
+        <td>
+          <button name='datasetForm.refreshDatatypes' class="btn btn-primary btn-sm" loading='false'>Refresh Datatypes <i class="fas fa-sync-alt"></i></button>
+        </td>
+      </tr>
+    </table>
+  </div>

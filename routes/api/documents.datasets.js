@@ -16,7 +16,7 @@ const DocumentsDatasetsController = require('../../controllers/documents.dataset
 /* PUT on datasets */
 router.put('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   return DocumentsDatasets.findOne({ _id: req.params.id }, function (err, datasets) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else if (!datasets) return res.json({ 'err': true, 'res': null, 'msg': 'datasets not found' });
@@ -33,7 +33,7 @@ router.put('/:id', function (req, res, next) {
 /* POST check validation of datasets */
 router.post('/:id/checkValidation', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   return DocumentsDatasetsController.checkValidation(req.params.id, function (err, check) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else return res.json({ 'err': false, 'res': check });
@@ -43,14 +43,14 @@ router.post('/:id/checkValidation', function (req, res, next) {
 /* POST dataset of datasets */
 router.post('/:id/dataset', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   if (!req.body.dataset || typeof req.body.dataset !== 'object')
     return res.json({ 'err': true, 'res': null, 'msg': 'dataset must be defined' });
   return DocumentsDatasetsController.newDataset(
     { datasetsId: req.params.id, dataset: req.body.dataset },
-    function (err) {
+    function (err, dataset) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      else return res.json({ 'err': false, 'res': true });
+      else return res.json({ 'err': false, 'res': dataset });
     }
   );
 });
@@ -58,12 +58,12 @@ router.post('/:id/dataset', function (req, res, next) {
 /* PUT dataset of datasets */
 router.put('/:id/dataset', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   return DocumentsDatasetsController.updateDataset(
     { datasetsId: req.params.id, dataset: req.body.dataset },
-    function (err) {
+    function (err, dataset) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      else return res.json({ 'err': false, 'res': true });
+      else return res.json({ 'err': false, 'res': dataset });
     }
   );
 });
@@ -71,7 +71,7 @@ router.put('/:id/dataset', function (req, res, next) {
 /* DELETE dataset of datasets */
 router.delete('/:id/dataset', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   return DocumentsDatasetsController.deleteDataset(
     { datasetsId: req.params.id, dataset: req.body.dataset },
     function (err) {
@@ -84,7 +84,7 @@ router.delete('/:id/dataset', function (req, res, next) {
 /* POST corresp of datasets */
 router.post('/:id/corresp', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   return DocumentsDatasetsController.newCorresp(
     { datasetsId: req.params.id, dataset: req.body.dataset },
     function (err) {
@@ -97,7 +97,7 @@ router.post('/:id/corresp', function (req, res, next) {
 /* DELETE corresp of datasets */
 router.delete('/:id/corresp', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   return DocumentsDatasetsController.deleteCorresp(
     { datasetsId: req.params.id, dataset: req.body.dataset },
     function (err) {

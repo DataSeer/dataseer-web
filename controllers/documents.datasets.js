@@ -70,23 +70,24 @@ Self.newDataset = function (opts = {}, cb) {
       }
     }
     // add new dataset
-    datasets.current.push(Self.createDataset(opts.dataset));
-    return datasets.save(function () {
+    let dataset = Self.createDataset(opts.dataset);
+    datasets.current.push(dataset);
+    return datasets.save(function (err, res) {
       if (err) return cb(err);
       return DocumentsController.addDatasetInTEI(
         {
           documentId: datasets.document,
           dataset: {
-            sentenceId: opts.dataset.sentenceId,
-            id: opts.dataset.id,
-            reuse: opts.dataset.reuse ? opts.dataset.reuse : false,
-            type: opts.dataset.subType ? opts.dataset.dataType + ':' + opts.dataset.subType : opts.dataset.dataType,
-            cert: opts.dataset.cert
+            sentenceId: dataset.sentenceId,
+            id: dataset.id,
+            reuse: dataset.reuse ? dataset.reuse : false,
+            type: dataset.subType ? dataset.dataType + ':' + dataset.subType : dataset.dataType,
+            cert: dataset.cert
           }
         },
-        function (err, res) {
+        function (err) {
           if (err) return cb(err);
-          return cb(null);
+          return cb(null, dataset);
         }
       );
     });
@@ -123,12 +124,14 @@ Self.updateDataset = function (opts = {}, cb) {
     if (err) return cb(err);
     else if (!datasets) return cb(new Error('Datasets not found'));
     // Check dataset with opts.id already exist
-    let updated = false;
+    let updated = false,
+      dataset;
     for (let i = 0; i < datasets.current.length; i++) {
       // update dataset
       if (datasets.current[i].id === opts.dataset.id) {
         updated = true;
         datasets.current[i] = Self.createDataset(opts.dataset);
+        dataset = datasets.current[i];
       }
     }
     if (!updated) return cb(new Error('Dataset not updated'));
@@ -139,16 +142,16 @@ Self.updateDataset = function (opts = {}, cb) {
           {
             documentId: datasets.document,
             dataset: {
-              sentenceId: opts.dataset.sentenceId,
-              id: opts.dataset.id,
-              reuse: opts.dataset.reuse ? opts.dataset.reuse : false,
-              type: opts.dataset.subType ? opts.dataset.dataType + ':' + opts.dataset.subType : opts.dataset.dataType,
-              cert: opts.dataset.cert
+              sentenceId: dataset.sentenceId,
+              id: dataset.id,
+              reuse: dataset.reuse ? dataset.reuse : false,
+              type: dataset.subType ? dataset.dataType + ':' + dataset.subType : dataset.dataType,
+              cert: dataset.cert
             }
           },
-          function (err, res) {
+          function (err) {
             if (err) return cb(err);
-            return cb(null);
+            return cb(null, dataset);
           }
         );
       });
@@ -184,7 +187,7 @@ Self.deleteDataset = function (opts = {}, cb) {
     }
     if (!deleted || !sentenceId) return cb(new Error('Dataset not found'));
     else
-      return datasets.save(function () {
+      return datasets.save(function (err, res) {
         if (err) return cb(err);
         return DocumentsController.deleteDatasetInTEI(
           {
@@ -292,18 +295,20 @@ Self.createDataset = function (opts = {}) {
     id: opts.id, // id
     sentenceId: opts.sentenceId, // sentence id
     reuse: opts.reuse ? opts.reuse : false, // dataset reuse
+    highlight: opts.highlight ? opts.highlight : false, // dataset highlight
     notification: opts.notification, // dataset notification
     cert: opts.cert, // cert value (between 0 and 1)
     dataType: opts.dataType, // dataType
     subType: opts.subType, //  subType
     description: opts.description, // description
     bestDataFormatForSharing: opts.bestDataFormatForSharing, // best data format for sharing
+    bestPracticeForIndicatingReUseOfExistingData: opts.bestPracticeForIndicatingReUseOfExistingData, // best practice for indicating re-use of existing data
     mostSuitableRepositories: opts.mostSuitableRepositories, // most suitable repositories
     DOI: opts.DOI, // DOI
     name: opts.name, // name
     comments: opts.comments, // comments
     text: opts.text, // text of sentence
-    status: opts.status === 'valid' && opts.name && (opts.DOI || opts.comments) ? 'valid' : 'saved' // text of sentence
+    status: opts.dataType && opts.name && (opts.DOI || opts.comments) ? 'valid' : 'saved' // text of sentence
   };
 };
 

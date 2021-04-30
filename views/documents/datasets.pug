@@ -54,53 +54,16 @@ block content
             a(href=conf.root + 'signin') Sign in 
             div(style='display: inline-block; margin-right: 5px; margin-left: 5px;') to access DataSeer
 
-  div(class='row' style='margin-bottom:5px;')
+  div(class='row')
     div(class='col-12')
-      div(class='' style='border:1px solid #184D7E;background-color:#FFF; border-radius: 20px;')
-        div(id='datasets-list' style='border:0px;height: 115px; border-radius: 20px;')
+      include ./lib/datasetsList.pug
     
-  div(class='row' style='height:70%;flex:1 0 auto;')
-    div(class='col-8' style='height:100%;padding-right:0px;')
-      div(class='' style='height:100%;')        
-        div(id='view-selection' class='btn-group btn-group-toggle' data-toggle='buttons' style='overflow:hidden;padding:0;margin:0;height:20px;border-top-left-radius: 20px;border-top-right-radius: 20px;')
-          if document.pdf
-            label(class='btn btn-secondary btn-sm') full text
-              input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off')
-          else
-            label(class='btn btn-secondary btn-sm active') full text
-              input(type='radio' name='options' id='tei_all_visible' value='allVisible' autocomplete='off' checked)
-          label(class='btn btn-secondary btn-sm') section
-            input(type='radio' name='options' id='tei_only_dataseer' value='onlyDataseer' autocomplete='off')
-          label(class='btn btn-secondary btn-sm') paragraph
-            input(type='radio' name='options' id='tei_only_datasets' value='onlyDatasets' autocomplete='off')
-          if document.pdf
-            label(class='btn btn-secondary btn-sm active') PDF
-              input(type='radio' name='options' id='pdf_all_visible' value='pdf' autocomplete='off' checked)
+  div(class='row' style="height:65%;flex:1 0 auto;")
+    div(class='col-8' style="height:100%; margin-top: 15px;")
+      include ./lib/documentView.pug
 
-        div(class='foot-col' style='height:calc(100% - 20px); overflow: hidden; border-bottom-left-radius: 20px;border-bottom-right-radius: 20px;')
-          div(id='document-view-container')
-            div(id='document-view' class='' style='padding:0;')
-
-    div(class='col-4' style='height:100%; padding-left:5px;')
-      div(id='dataset-form-container' class='foot-col' style='height:93%;')
-        div(class='wrapper')
-          div(id='dataset-form' class='form')
-      div(class='' style='display: flex; align-items: center; justify-content: center; height:7%; width:100%')
-        if current_user
-            if document
-              if document.status !== 'metadata'
-                button(id='back_to_metadata' class='btn btn-primary' style='height:80%;line-height: 0;') Metadata
-        button(id='datasets_validation' class='btn btn-primary' style='height:80%;line-height: 0;') Finish
-
-            
-
-  include ../modals/quit.pug
-  include ../modals/documents/datasets.pug
-  include ../modals/help.pug
-
-  <div id="pdf-loading-loop">
-    <div class="loader-container">
-      <div id="pdf-loading-loop-infos"></div>
-      <div class="loader"></div> 
-    </div>
-  </div>
+    div(class='col-4' style="height:100%; margin-top: 15px;")
+      include ./lib/datasetForm.pug
+      div(id='process-buttons')
+        button(id='back_to_metadata' class='btn btn-primary') Back to Metadata
+        button(id='datasets_validation' class='btn btn-primary') Finish all Datasets

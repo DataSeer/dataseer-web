@@ -9,3 +9,8 @@
   overflow-y: auto;
   margin-bottom: 15px;
 }
+
+#standard_user_feedback_link,
+#annotator_feedback_link {
+  float: right;
+}

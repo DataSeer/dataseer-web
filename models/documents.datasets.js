@@ -16,11 +16,13 @@ let Dataset = new mongoose.Schema(
     sentenceId: { type: String, default: '' }, // sentence id
     reuse: { type: Boolean, default: false }, // reuse property
     notification: { type: String, default: '' }, // notification property
+    highlight: { type: Boolean, default: false }, // notification property
     cert: { type: String, default: '' }, // cert value (between 0 and 1)
     dataType: { type: String, default: '' }, // dataType
     subType: { type: String, default: '' }, //  subType
     description: { type: String, default: '' }, // description
     bestDataFormatForSharing: { type: String, default: '' }, // best data format for sharing
+    bestPracticeForIndicatingReUseOfExistingData: { type: String, default: '' }, // best practice for indicating re-use of existing data
     mostSuitableRepositories: { type: String, default: '' }, // most suitable repositories
     DOI: { type: String, default: '' }, // DOI
     name: { type: String, default: '' }, // name

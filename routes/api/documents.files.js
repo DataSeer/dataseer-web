@@ -20,7 +20,7 @@ const conf = require('../../conf/conf.json');
 /* GET file of document */
 router.get('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = DocumentsFiles.findOne({ _id: req.params.id }).select('+path'); // path is not returned by default;
   // Execute transaction
@@ -38,7 +38,7 @@ router.get('/:id', function (req, res, next) {
 /* GET file of document with data (buffer) */
 router.get('/:id/buffer', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = DocumentsFiles.findOne({ _id: req.params.id }).lean(); // path is not returned by default;
   // Execute transaction
@@ -56,7 +56,7 @@ router.get('/:id/buffer', function (req, res, next) {
 /* GET file of document with data (string) */
 router.get('/:id/string', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = DocumentsFiles.findOne({ _id: req.params.id }).lean(); // path is not returned by default;
   // Execute transaction

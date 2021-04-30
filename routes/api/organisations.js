@@ -16,7 +16,7 @@ const conf = require('../../conf/conf.json');
 /* GET ALL Organisations */
 router.get('/', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   let limit = parseInt(req.query.limit),
     skip = parseInt(req.query.skip),
     query = {};
@@ -34,7 +34,7 @@ router.get('/', function (req, res, next) {
 /* GET SINGLE Organisation BY ID */
 router.get('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Organisations.findOne({ _id: req.params.id });
   // Execute transaction

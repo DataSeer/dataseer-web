@@ -27,7 +27,7 @@ const conf = require('../../conf/conf.json');
 /* GET ALL Documents */
 router.get('/', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   let limit = parseInt(req.query.limit),
     skip = parseInt(req.query.skip),
     isCurator = AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator),
@@ -85,7 +85,7 @@ router.post('/', function (req, res, next) {
 /* GET SINGLE Document BY ID */
 router.get('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id });
   // Populate dependings on the parameters
@@ -105,17 +105,31 @@ router.get('/:id', function (req, res, next) {
 /* DELETE SINGLE Document BY ID */
 router.delete('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   return DocumentsController.delete(req.params.id, function (err) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else return res.json({ 'err': false, 'res': true });
   });
 });
 
+/* Extract metadata from XML */
+router.post('/:id/extractPDFMetadata', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
+  return Documents.findOne({ _id: req.params.id }).exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    return DocumentsController.extractPDFMetadata(doc, function (err, metadata) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+      else return res.json({ 'err': false, 'res': metadata });
+    });
+  });
+});
+
 /* GET PDF of document */
 router.get('/:id/pdf', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id });
   // Execute transaction
@@ -134,7 +148,7 @@ router.get('/:id/pdf', function (req, res, next) {
 /* GET PDF of document */
 router.get('/:id/pdf/content', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id });
   // Execute transaction
@@ -159,7 +173,7 @@ router.get('/:id/pdf/content', function (req, res, next) {
 /* GET TEI of document */
 router.get('/:id/tei/', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id });
   // Execute transaction
@@ -178,7 +192,7 @@ router.get('/:id/tei/', function (req, res, next) {
 /* GET TEI of document */
 router.get('/:id/tei/content', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id });
   // Execute transaction
@@ -196,7 +210,7 @@ router.get('/:id/tei/content', function (req, res, next) {
 /* GET metadata of document */
 router.get('/:id/metadata', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = DocumentsMetadata.findOne({ document: req.params.id });
   // Execute transaction
@@ -210,7 +224,7 @@ router.get('/:id/metadata', function (req, res, next) {
 /* POST metadata of document */
 router.post('/:id/sendDocumentURLToAuthors', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id }).populate('metadata');
   // Execute transaction
@@ -254,7 +268,7 @@ router.post('/:id/sendDocumentURLToAuthors', function (req, res, next) {
 /* POST validate metadata of document */
 router.post('/:id/metadata/validate', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id });
   // Execute transaction
@@ -289,7 +303,7 @@ router.post('/:id/metadata/validate', function (req, res, next) {
 /* GET datasets of document */
 router.get('/:id/datasets', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = DocumentsDatasets.findOne({ document: req.params.id });
   // Execute transaction
@@ -303,7 +317,7 @@ router.get('/:id/datasets', function (req, res, next) {
 /* POST validate datasets of document */
 router.post('/:id/datasets/validate', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id });
   // Execute transaction
@@ -345,7 +359,7 @@ router.post('/:id/datasets/validate', function (req, res, next) {
 /* POST backToMetadata document */
 router.post('/:id/datasets/backToMetadata', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id });
   // Execute transaction
@@ -380,7 +394,7 @@ router.post('/:id/datasets/backToMetadata', function (req, res, next) {
 /* POST reopen document */
 router.post('/:id/finish/reopen', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id });
   // Execute transaction
@@ -415,7 +429,7 @@ router.post('/:id/finish/reopen', function (req, res, next) {
 /* GET files of document */
 router.get('/:id/files', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = DocumentsFiles.find({ document: req.params.id });
   // Execute transaction
