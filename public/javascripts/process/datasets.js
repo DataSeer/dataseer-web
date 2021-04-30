@@ -93,14 +93,9 @@
             return DataSeerAPI.validateDatasets(documentId, function (err, res) {
               console.log(err, res);
               if (err || res.err) {
+                currentDocument.throwDatasetsNotValidError();
               } else return (window.location.href = window.location.href.replace(/(\/?datasets\/?)$/, ''));
             });
-          });
-
-          // On confirm button click of modal
-          $('#datasets-confirm-modal-valid').click(function () {
-            let id = $('#datasets-confirm-modal-data').html();
-            datasetsList.delete(id);
           });
 
           // On back_to_metadata click
