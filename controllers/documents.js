@@ -511,7 +511,7 @@ Self.extractPDFMetadata = function (doc, cb) {
         return DocumentsFiles.findById(doc.pdf).exec(function (err, file) {
           if (err) return cb(err);
           // Add metadata in file
-          file.metadata = { sentences: XML.extractPDFSentencesMetadata(XML.load(data.toString())) };
+          file.metadata = XML.extractPDFSentencesMetadata(XML.load(data.toString()));
           return file.save(function (err) {
             if (err) return cb(err);
             else return cb(null);

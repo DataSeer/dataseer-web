@@ -77,7 +77,8 @@ body {
   display: table;
   width: 100%; /*Optional*/
   table-layout: auto; /*Optional*/
-  border-spacing: 10px; /*Optional*/
+  -webkit-border-horizontal-spacing: 85px;
+  -webkit-border-vertical-spacing: 10px;
 }
 
 #datasetsList #datasetsList\.container\.items\.container .item.selected,
@@ -235,28 +236,53 @@ body {
   overflow: hidden; 
 }
 
+#datasetForm .fas.fa-pen {
+  -webkit-text-stroke: 1px white;
+}
+
 #datasetForm .far.fa-question-circle {
+  -webkit-text-stroke: 1px white;
   height: 20px;
   width: 20px;
   font-size: 20px;
 }
 
 #datasetForm .fas.fa-spinner {
+  -webkit-text-stroke: 1px white;
   height: 20px;
   width: 20px;
   font-size: 20px;
 }
 
 #datasetForm .fas.fa-check {
+  -webkit-text-stroke: 1px white;
   height: 18px;
   width: 20px;
   font-size: 18px;
 }
 
-#datasetForm .fas.fa-save {
+#datasetForm .far.fa-save {
   height: 20px;
   width: 20px;
-  font-size: 18px;
+  font-size: 20px;
+  padding: 0px;
+  position: absolute;
+  top: -2px;
+  left: -2px;
+}
+
+#datasetForm .custom-row div[key="dataset\.status"][value="saved"] {
+  border-top-right-radius: 7px;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  padding: 0px;
+  margin-left: 5px;
+  overflow: visible;
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  position: relative;
 }
 
 #datasetForm\.message div {
@@ -339,6 +365,12 @@ body {
   width: 75%;
 }
 
+#datasetForm .custom-row button[name="datasetForm\.unlink"] {
+  margin-left: 10px;
+  border: 1px solid white;
+  border-radius: 5px;
+}
+
 #datasetForm .custom-row input[type="checkbox"] {
   display: inline-block;
   width: 25px;
@@ -356,6 +388,19 @@ body {
   display: block;
   margin-top: 5px;
   width: 100%;
+}
+
+#datasetForm .custom-row a[key="dataset\.url"] > i {
+  color: #184D7E;
+  width: 10px;
+  height: 14px;
+  font-size: 14px;
+}
+
+#datasetForm .custom-row a[key="dataset\.url"] {
+  width: 20px;
+  height: 14px;
+  font-size: 14px;
 }
 
 #datasetForm .custom-row div[key="dataset\.status"] {
@@ -410,35 +455,45 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  opacity: 0.75;
+  width: 100%;
+  height: 100%;
+  opacity: 0.90;
   background-color: white;
 }
 
-#loading-loop-infos {
+#loading-loop .infos .top {
+  font-size: 2em;
+}
+
+#loading-loop .infos .sub {
+  font-size: 1em;
+}
+
+#loading-loop .infos {
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
   z-index: 100000;
   position: absolute;
-  top: 50%;
-  left: 20%;
-  width: 60%;
-  height: 100px;
+  top: calc(50% - 100px);
+  height: 200px;
+  width: 100%;
   font-size: 3em;
   font-weight: bold;
   text-align: center;
 }
 
-#loading-loop .loader-container {
-  width: 100%;
-  height: 100%;
-  opacity: 1;
-}
-
-#loading-loop .loader-container .loader {
+#loading-loop .loader {
+  position: absolute;
+  top: calc(50% - 125px);
+  left: calc(50% - 125px);
   border: 16px solid #f3f3f3; /* Light grey */
   border-top: 16px solid #3498db; /* Blue */
   border-radius: 50%;
   width: 250px;
   height: 250px;
-  animation: spin 2s linear infinite;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
@@ -506,14 +561,44 @@ body {
   overflow: scroll;
   font-family: Times, "Times New Roman", serif;
   font-size: 14px;
+  padding: 10px;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
+}
+
+#xml s {
+  cursor: pointer;
+  text-decoration: none;
+  margin-right: 6px;
+  padding: 3px;
+  line-height: 21px;
+}
+
+#xml * {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+#xml s.selected {
+  cursor: pointer;
+  background-color: black;
+  color: white;
+}
+
+#xml s.hover {
+  cursor: pointer;
+  background-color: gray;
+  color: white;
 }
 
 #documentView\.screen\.container {
   padding:0;
 }
-
 
 #documentView #pdfViewer {
   background: lightgray;
@@ -637,6 +722,31 @@ body {
   overflow: hidden;
 }
 
+#documentView #pdf #pdfViewerInfos {
+  position: absolute;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 2px;
+  top: 30px;
+  right: 40px;
+  padding: 5px;
+  z-index: 10000;
+}
+
+#documentView #pdf #pdfViewerMessage {
+  position: absolute;
+  text-align: center;
+  font-style: italic;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 2px;
+  top: 60px;
+  right: 40px;
+  padding: 5px;
+  min-width: 120px;
+  z-index: 10000;
+}
+
 /* -------------------------------------------------- */
 
 #user-navbar {
@@ -745,18 +855,49 @@ i {
   color: green;
 }
 
+.modal-backdrop {
+   background-color: gray;
+   opacity: 0.90;
+   z-index: 10000;
+}
+
+#datasets-error-modal {
+  z-index: 11000;
+}
+
+#datasets-error-modal > * {
+  opacity: 1;
+}
+
 #datasets-error-modal .modal-header {
   color: white;
-  background-color: rgb(0, 123, 255);
+  background-color: #184D7E;
+}
+
+#datasets-error-modal .modal-header > #datasets-error-modal-label {
+  font-size: 1.5rem;
 }
 
 #datasets-error-modal .modal-body {
+  font-size: 1.25rem;
   color: #CC0000;
+}
+
+#datasets-confirm-modal {
+  z-index: 11000;
+}
+
+#datasets-confirm-modal > * {
+  opacity: 1;
 }
 
 #datasets-confirm-modal .modal-header {
   color: white;
-  background-color: rgb(0, 123, 255);
+  background-color: #184D7E;
+}
+
+#datasets-confirm-modal .modal-header > #datasets-confirm-modal-label {
+  font-size: 1.5rem;
 }
 
 #datasets-confirm-modal .modal-data {
@@ -765,15 +906,7 @@ i {
 
 #datasets-confirm-modal .modal-body {
   color: #CC0000;
-}
-
-#quit-modal .modal-header {
-  color: white;
-  background-color: #ffbb33;
-}
-
-#quit-modal .modal-body {
-  color: #CC0000;
+  font-size: 1.25rem;
 }
 
 .right{

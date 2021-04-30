@@ -91,6 +91,12 @@ html
       div(id='user_username' class='data' value=(current_user.username))
       div(id='user_role' class='data' value=(current_user.role.label))
     div(id='document.id' class='data' value=(document._id))
+    include ./modals/documents/datasets.pug
+    div#loading-loop
+      div.loader
+      div.infos
+        div.top
+        div.sub
     script(src=conf.root + 'javascripts/lib/lodash.min.js')
     script(src=conf.root + 'javascripts/lib/async.min.js')
     script(src=conf.root + 'javascripts/lib/randomColor.min.js')
@@ -103,6 +109,7 @@ html
     script(src=conf.root + 'javascripts/pdf.js/build/generic/build/pdf.js')
     script(src=conf.root + 'javascripts/pdf.js/build/generic/build/pdf.worker.js')
     script(src=conf.root + 'javascripts/lib/pdfViewer.js')
+    script(src=conf.root + 'javascripts/lib/xmlViewer.js')
     script(src=conf.root + 'javascripts/publicUrl.js')
   else if search
     script(src=conf.root + 'javascripts/search.js')
@@ -122,3 +129,7 @@ html
   script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js' integrity='sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM' crossorigin='anonymous')
   script(src='https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.js' data-cfasync='false')
   script(src=conf.root + 'javascripts/cookies.js')
+  
+  if current_user
+    include ./lib/userflow.pug
+  include ./lib/crisp.pug

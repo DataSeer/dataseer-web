@@ -15,15 +15,13 @@
       role: $('#user_role').attr('value')
     },
     showLoop = function () {
-      let loop = $('#loading-loop'),
-        container = loop.find('.loader-container'),
-        loader = container.find('.loader'),
-        width = $('html').width();
-      loop.css('width', width);
-      loop.css('height', window.document.body.clientHeight);
-      container.css('padding-top', `${window.document.body.clientHeight * 0.5 - loader.height() * 0.5}px`);
-      container.css('padding-left', `${width * 0.5 - loader.width() * 0.5}px`);
-      loop.show();
+      $('#loading-loop .infos').show();
+    },
+    setTextLoop = function (text) {
+      $('#loading-loop .infos .sub').text(text);
+    },
+    setHeaderLoop = function (text) {
+      $('#loading-loop .infos .top').text(text);
     },
     hideLoop = function () {
       $('#loading-loop').hide();
@@ -35,29 +33,42 @@
   // });
 
   showLoop();
-
+  setHeaderLoop('Initializing DataSeer UI');
   const documentView = new DocumentView('documentView'),
     datasetsList = new DatasetsList('datasetsList'),
     datasetForm = new DatasetForm('datasetForm');
 
+  setTextLoop('Downloading datasets...');
   // Get data of current document with datasets informations
   return DataSeerAPI.getDocument(documentId, { datasets: true }, function (err, doc) {
+    setTextLoop('Downloading PDF...');
     // Get PDF content
     return DataSeerAPI.getPDF(doc.pdf, function (err, pdf) {
+      setTextLoop('Downloading TEI...');
       // Get TEI content
       return DataSeerAPI.getTEI(doc.tei, function (err, tei) {
+        setTextLoop('Downloading datatypes...');
         // Get datatypes
-        DataSeerAPI.jsonDataTypes(function (err, datatypes) {
+        return DataSeerAPI.jsonDataTypes(function (err, datatypes) {
           if (err) return alert('Error : Datatypes unavailable, dataseer-ml service does not respond');
-          const currentDocument = new DocumentHandler({
-            ids: { document: doc._id, datasets: doc.datasets._id },
-            user: user,
-            datatypes: datatypes,
-            datasets: doc.datasets,
-            metadata: doc.metadata,
-            tei: tei.data,
-            pdf: { buffer: pdf.data.data, metadata: pdf.metadata }
-          });
+          setTextLoop('PDF initialization...');
+          const currentDocument = new DocumentHandler(
+            {
+              ids: { document: doc._id, datasets: doc.datasets._id },
+              user: user,
+              datatypes: datatypes,
+              datasets: doc.datasets,
+              metadata: doc.metadata,
+              tei: tei.data,
+              pdf: { buffer: pdf.data.data, metadata: pdf.metadata }
+            },
+            {
+              onReady: function () {
+                console.log('ready');
+                hideLoop();
+              }
+            }
+          );
 
           currentDocument.link({ documentView: documentView, datasetsList: datasetsList, datasetForm: datasetForm });
 

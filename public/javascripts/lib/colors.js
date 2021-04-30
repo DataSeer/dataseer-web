@@ -6,7 +6,7 @@
 
 const Colors = function () {
   let self = this,
-    colors = ['#ff0000', '#ffa500', '#ffff00', '#008000', '#0000ff', '#4b0082', '#ee82ee'], // list of available colors
+    colors = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#9400d3'], // list of available colors
     regex = /^rgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d*(?:\.\d+)?)\)$/, // rgba regex
     c = 0, // current color index
     // Get the current color (never return same color)

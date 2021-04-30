@@ -308,7 +308,7 @@ Self.createDataset = function (opts = {}) {
     name: opts.name, // name
     comments: opts.comments, // comments
     text: opts.text, // text of sentence
-    status: opts.name && (opts.DOI || opts.comments) ? 'valid' : 'saved' // text of sentence
+    status: opts.dataType && opts.name && (opts.DOI || opts.comments) ? 'valid' : 'saved' // text of sentence
   };
 };
 

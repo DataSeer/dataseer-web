@@ -14,6 +14,7 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
     dataTypes: {},
     subTypes: {}
   };
+  this.defaultDataType = undefined; // will contain the default dataType
   this.dataset = {};
   this.events = events;
   // onDatasetIdClick
@@ -27,13 +28,22 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
     if (typeof self.events.onDatasetDoneClick === 'function') return self.events.onDatasetDoneClick(self.getDataset());
   });
   // onDatasetUnlinkClick
-  $(`#${this.id} button[name="datasetForm\\.unlink"]`).click(function () {
+  $(`#${this.id} button[name="datasetForm\\.unlink"]`).click(function (event) {
+    event.stopPropagation();
     if (typeof self.events.onDatasetUnlinkClick === 'function')
       return self.events.onDatasetUnlinkClick(self.getDataset());
   });
   // onRefreshDatatypesClick
   $(`#${this.id} button[name="datasetForm\\.refreshDatatypes"]`).click(function () {
-    if (typeof self.events.onRefreshDatatypesClick === 'function') return self.events.onRefreshDatatypesClick();
+    let el = $(this);
+    if (el.attr('loading').toString() === 'false' && typeof self.events.onRefreshDatatypesClick === 'function') {
+      el.attr('loading', true);
+      el.find('i').addClass('fa-spin');
+      return self.events.onRefreshDatatypesClick(function () {
+        el.attr('loading', false);
+        el.find('i').removeClass('fa-spin');
+      });
+    }
   });
   // input text event
   this.container.find('input[type="text"]').bind('input propertychange', function (event) {
@@ -105,7 +115,7 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
       if (inputs) self.container.find('input[type="checkbox"][name="datasetForm\\.reuse"]').prop('checked', reuse);
       self.dataset.reuse = reuse;
       // input change behaviors
-      self.refreshDatatypeInfos(); // refresh datatype infos
+      self.refreshDatatypeInfos(); // refresh dataType infos
       // ----------------------
       return self.dataset.reuse;
     },
@@ -117,7 +127,7 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
       self.dataset.dataType = value;
       // input change behaviors
       self.setSubtypes(); // set subtypes
-      self.refreshDatatypeInfos(); // refresh datatype infos
+      self.refreshDatatypeInfos(); // refresh dataType infos
       // ----------------------
       return self.dataset.dataType;
     },
@@ -128,7 +138,7 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
         self.container.find(`select[name="datasetForm\\.subType"] option[value="${value}"]`).prop('selected', true);
       self.dataset.subType = value;
       // input change behaviors
-      self.refreshDatatypeInfos(); // refresh datatype infos
+      self.refreshDatatypeInfos(); // refresh dataType infos
       // ----------------------
       return self.dataset.subType;
     },
@@ -153,12 +163,12 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
       self.dataset.bestDataFormatForSharing = value;
       return self.dataset.bestDataFormatForSharing;
     },
-    help: function (value, inputs = false) {
-      if (typeof value === 'undefined') return self.dataset.help;
+    url: function (value, inputs = false) {
+      if (typeof value === 'undefined') return self.dataset.url;
       let data = value === '' ? 'http://wiki.dataseer.ai/doku.php' : value;
-      self.container.find('a[key="dataset\\.help"]').attr('value', data).attr('href', data);
-      self.dataset.help = data;
-      return self.dataset.help;
+      self.container.find('a[key="dataset\\.url"]').attr('value', data).attr('href', data);
+      self.dataset.url = data;
+      return self.dataset.url;
     },
     mostSuitableRepositories: function (value, inputs = false) {
       if (typeof value === 'undefined') return self.dataset.mostSuitableRepositories;
@@ -245,7 +255,7 @@ DatasetForm.prototype.getDataset = function () {
     id: this.dataset.id,
     status: this.dataset.status,
     reuse: this.dataset.reuse,
-    dataType: this.dataset.dataType,
+    dataType: this.dataset.dataType ? this.dataset.dataType : this.dataset.customDataType,
     subType: this.dataset.subType,
     description: this.dataset.description,
     bestDataFormatForSharing: this.dataset.bestDataFormatForSharing,
@@ -264,7 +274,7 @@ DatasetForm.prototype.attach = function (event, fn) {
   this.events[event] = fn;
 };
 
-// Get resource property for an given datatype (or subtype) id
+// Get resource property for an given dataType (or subType) id
 DatasetForm.prototype.getResourceOf = function (id, key, subKey) {
   if (
     !id ||
@@ -296,7 +306,7 @@ DatasetForm.prototype.extractInfos = function (keys, properties) {
   return result;
 };
 
-// Update datatype infos (based on resources)
+// Update dataType infos (based on resources)
 DatasetForm.prototype.updateDatatypeInfos = function () {
   let self = this,
     hasChanged = false,
@@ -308,7 +318,7 @@ DatasetForm.prototype.updateDatatypeInfos = function () {
     ],
     keys = ['dataType', 'subType'],
     metadata = this.extractInfos(keys, properties);
-  // Set datatype/subtype infos
+  // Set dataType/subType infos
   properties.map(function (property) {
     let old = self.dataset[property];
     keys.map(function (key) {
@@ -325,7 +335,7 @@ DatasetForm.prototype.updateDatatypeInfos = function () {
   return hasChanged;
 };
 
-// Refresh datatype infos (based on resources)
+// Refresh dataType infos (based on resources)
 DatasetForm.prototype.refreshDatatypeInfos = function () {
   let self = this,
     properties = [
@@ -333,11 +343,11 @@ DatasetForm.prototype.refreshDatatypeInfos = function () {
       'bestDataFormatForSharing',
       'bestPracticeForIndicatingReUseOfExistingData',
       { key: 'mostSuitableRepositories', subKey: this.dataset.reuse ? 'reuse' : 'default' },
-      'help'
+      'url'
     ],
     keys = ['dataType', 'subType'],
     metadata = this.extractInfos(keys, properties);
-  // Set datatype/subtype infos
+  // Set dataType/subType infos
   properties.map(function (property) {
     keys.map(function (key) {
       if (typeof property === 'string')
@@ -371,6 +381,11 @@ DatasetForm.prototype.buildOptions = function (datatypes = []) {
 
 // Load Resources
 DatasetForm.prototype.loadResources = function (resources) {
+  this.defaultDataType = Object.keys(resources.dataTypes).sort(function (a, b) {
+    if (resources.metadata[a].count < resources.metadata[b].count) return 1;
+    else if (resources.metadata[a].count > resources.metadata[b].count) return -1;
+    else return 0;
+  })[0];
   this.resources = resources;
   this.setDatatypes();
   this.setSubtypes();
@@ -477,7 +492,7 @@ DatasetForm.prototype.link = function (dataset, opts = {}, callback) {
       this.dataset[key] = dataset[key];
     }
   }
-  // Try to update some missing data concerning datatype/subtype
+  // Try to update some missing data concerning dataType/subType
   let update = this.updateDatatypeInfos();
   // Set properties
   for (let key in dataset) {
@@ -488,7 +503,7 @@ DatasetForm.prototype.link = function (dataset, opts = {}, callback) {
   this.setView({ isCurator: opts.isCurator, isCorresp: opts.isCorresp });
   this.color();
   this.hideMessage();
-  return callback(null, { shouldSave: update, dataset: this.dataset });
+  return typeof callback === 'function' ? callback(null, { shouldSave: update, dataset: this.dataset }) : undefined;
 };
 
 // Link dataset to datasetForm

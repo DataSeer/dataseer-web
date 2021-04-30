@@ -49,8 +49,9 @@ DataSeerAPI.rootURL = function () {
 /**
  * Delete a given dataset
  * @param {object} opts JSON object containing all data
- * @param {string} opts.datasetsId Id of dataset
- * @param {string} opts.sentenceId Id of sentence
+ * @param {string} opts.datasetsId Id of datasets
+ * @param {string} opts.dataset.datasetId Id of dataset
+ * @param {string} opts.dataset.sentenceId Id of sentence
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
@@ -116,8 +117,8 @@ DataSeerAPI.createDataset = function (opts = {}, done) {
  * Delete a given corresp
  * @param {object} opts JSON object containing all data
  * @param {string} opts.datasetsId Id of datasets
- * @param {string} opts.datasetId Id of dataset
- * @param {string} opts.sentenceId Id of sentence
+ * @param {string} opts.dataset.datasetId Id of dataset
+ * @param {string} opts.dataset.sentenceId Id of sentence
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
@@ -144,8 +145,8 @@ DataSeerAPI.deleteCorresp = function (opts = {}, done) {
  * Create new corresp to datasets
  * @param {object} opts JSON object containing all data
  * @param {string} opts.datasetsId Id of datasets
- * @param {string} opts.datasetId Id of dataset
- * @param {string} opts.sentenceId Id of sentence
+ * @param {string} opts.dataset.datasetId Id of dataset
+ * @param {string} opts.dataset.sentenceId Id of sentence
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
@@ -465,7 +466,7 @@ DataSeerAPI.getdataType = function (sentence, done) {
     cache: false,
     type: 'POST',
     url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/dataseer-ml/processDataseerSentence'),
-    data: 'text=' + encodeURIComponent(sentence.text()),
+    data: 'text=' + encodeURIComponent(sentence),
     success: function (data) {
       let result = DataSeerAPI.extractDatatypeFrom(JSON.parse(data));
       return done(null, result);
