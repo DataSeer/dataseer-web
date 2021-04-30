@@ -66,7 +66,7 @@ __If you try to access an unauthorized route, the app will return an HTTP 401 er
 ```bash
 # HTTP 401 will be returned
 $ curl "http://localhost:3000/documents/5ffa06e61c157616a5c6bae7" -H "Authorization: Bearer WRONG_TOKEN"
-# > Your current role do not grant access to this part of website
+# > Your current role does not grant you access to this part of the website
 #  This error is caused by: a wrong token, an expired token, a blacklisted token 
 ```
 
