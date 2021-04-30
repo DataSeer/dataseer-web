@@ -218,10 +218,34 @@ DocumentHandler.prototype.selectCorresp = function (datasetId, sentenceId, cb) {
   } else return typeof cb === 'function' ? cb(true) : undefined;
 };
 
+// Show error on finish
+DocumentHandler.prototype.throwDatasetsNotValidError = function () {
+  this.showModalError({
+    title: 'Error: Datasets validation',
+    body: 'Please validate all datasets below before moving on the next step.',
+    data: this.getDatasetsNotValidList()
+  });
+};
+
+// Build error msg
+DocumentHandler.prototype.getDatasetsNotValidList = function () {
+  let datasets = this.datasets.current.filter(function (dataset) {
+    return dataset.status !== 'valid';
+  });
+  return `<ul>${datasets
+    .map(function (dataset) {
+      return `<li>(${dataset.id}) ${dataset.name ? dataset.name : dataset.id}</li>`;
+    })
+    .join('')}</ul>`;
+};
+
 // Show error modal
 DocumentHandler.prototype.showModalError = function (opts = {}) {
   $('#datasets-error-modal-label').html(opts.title);
   $('#datasets-error-modal-body').html(opts.body);
+  $('#datasets-error-modal-data').html(opts.data);
+  if (opts.data) $('#datasets-error-modal-data').show();
+  else $('#datasets-error-modal-data').hide();
   $('#datasets-error-modal-btn').click();
 };
 
@@ -231,6 +255,8 @@ DocumentHandler.prototype.showModalConfirm = function (opts = {}, confirm) {
   $('#datasets-confirm-modal-action').attr('value', opts.action);
   $('#datasets-confirm-modal-body').html(opts.body);
   $('#datasets-confirm-modal-data').html(opts.data);
+  if (opts.data) $('#datasets-confirm-modal-data').show();
+  else $('#datasets-confirm-modal-data').hide();
   $('#datasets-confirm-modal-btn').click();
 };
 
@@ -297,7 +323,6 @@ DocumentHandler.prototype.mergeDatasets = function (datasets, cb) {
 
 // Delete some datasets
 DocumentHandler.prototype.deleteDatasets = function (datasets, cb) {
-  console.log(datasets);
   let self = this;
   return async.mapSeries(
     datasets,

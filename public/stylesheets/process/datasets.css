@@ -878,6 +878,19 @@ i {
   font-size: 1.5rem;
 }
 
+#datasets-error-modal .modal-data {
+  display: none;
+}
+
+#datasets-error-modal .modal-data > ul {
+
+}
+
+#datasets-error-modal .modal-data > ul > li {
+  margin-bottom: 5px;
+  font-size: 1rem;
+}
+
 #datasets-error-modal .modal-body {
   font-size: 1.25rem;
   color: #CC0000;
