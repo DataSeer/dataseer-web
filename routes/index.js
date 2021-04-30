@@ -81,7 +81,7 @@ router.post('/signup', function (req, res, next) {
     }
     // If user is logged in
     if (typeof req.user !== 'undefined')
-      return res.status(401).send('Your current role do not grant access to this part of website');
+      return res.status(401).send('Your current role does not grant you access to this part of the website');
     // If username is not set OR well formed
     if (typeof req.body.fullname !== 'string' || req.body.fullname.length <= 0)
       return res.render('signup', {
@@ -171,7 +171,7 @@ router.post('/signup', function (req, res, next) {
 router.get('/forgotPassword', function (req, res) {
   // If user is logged in
   if (typeof req.user !== 'undefined')
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   res.render('forgotPassword', { route: 'forgotPassword', conf: conf });
 });
 
@@ -179,7 +179,7 @@ router.get('/forgotPassword', function (req, res) {
 router.post('/forgotPassword', function (req, res) {
   // If user is logged in
   if (typeof req.user !== 'undefined')
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // If username is not set OR well formed
   if (typeof req.body.username !== 'string' || !AccountsController.RegExp.email.test(req.body.username))
     res.render('forgotPassword', {
@@ -275,7 +275,7 @@ router.post('/forgotPassword', function (req, res) {
 router.get('/resetPassword', function (req, res) {
   // If user is logged in
   if (typeof req.user !== 'undefined')
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   res.render('resetPassword', {
     route: 'resetPassword',
     conf: conf,
@@ -288,7 +288,7 @@ router.get('/resetPassword', function (req, res) {
 router.post('/resetPassword', function (req, res) {
   // If user is logged in
   if (typeof req.user !== 'undefined')
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // If username is not set OR not well formed
   if (typeof req.body.username !== 'string' || !AccountsController.RegExp.email.test(req.body.username))
     return res.render('resetPassword', {
@@ -365,7 +365,7 @@ router.post('/resetPassword', function (req, res) {
 router.get('/settings', function (req, res) {
   // If user is not logged in OR is not at least a standard_user
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   return res.render('settings', {
     route: 'settings',
     conf: conf,
@@ -377,7 +377,7 @@ router.get('/settings', function (req, res) {
 router.post('/settings', function (req, res) {
   // If user is not logged in OR is not at least a standard_user
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // If current_password is not set OR is not well formed
   if (
     typeof req.body.current_password !== 'string' ||
@@ -475,7 +475,7 @@ router.post(
 router.get('/signout', function (req, res) {
   // If user is not logged in OR is not at least a standard_user
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   req.logout();
   return res.redirect('./');
 });
@@ -484,7 +484,7 @@ router.get('/signout', function (req, res) {
 router.get('/myDocuments', function (req, res) {
   // If user is not logged in OR is not at least a standard_user
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   let query = { 'owner': req.user.id },
     limit = parseInt(req.query.limit),
     skip = parseInt(req.query.skip),
