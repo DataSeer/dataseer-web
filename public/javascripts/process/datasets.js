@@ -18,7 +18,7 @@
       $('#loading-loop .infos').show();
     },
     setTextLoop = function (text) {
-      $('#loading-loop .infos .sub').text(text);
+      $('#loading-loop .infos .sub').html(text);
     },
     setHeaderLoop = function (text) {
       $('#loading-loop .infos .top').text(text);
@@ -52,6 +52,20 @@
         return DataSeerAPI.jsonDataTypes(function (err, datatypes) {
           if (err) return alert('Error : Datatypes unavailable, dataseer-ml service does not respond');
           setTextLoop('PDF initialization...');
+          if (!pdf.metadata || !pdf.metadata.pages) {
+            if (user.isCurator) {
+              setTextLoop('Updating PDF metadata...');
+              return DataSeerAPI.extractPDFMetadata(doc._id, function (err, res) {
+                $('.loader').hide();
+                console.log(err, res);
+                if (res.data.res && res.data.res.pages) {
+                  setTextLoop(
+                    `This document has been updated.<br/>If the document is still not "usable" after this update, please re-upload this document.<br/><a href="${res.url}" target="_blank">PDF link of this document</a><br/>You must reload this page to work on this document.`
+                  );
+                } else setTextLoop(`This document cannot be updated, please re-upload it. (<a href ="${res.url}" target="_blank">PDF link of this document</a>)`);
+              });
+            } else setTextLoop('This document must be updated by a curator');
+          }
           const currentDocument = new DocumentHandler(
             {
               ids: { document: doc._id, datasets: doc.datasets._id },

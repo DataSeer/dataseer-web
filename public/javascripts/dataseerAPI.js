@@ -209,6 +209,34 @@ DataSeerAPI.updateDataset = function (opts = {}, done) {
 };
 
 /**
+ * Extract PDF metadata for a given dataset
+ * @param {string} documentId Id of document
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @returns {undefined} undefined
+ */
+DataSeerAPI.extractPDFMetadata = function (documentId, done) {
+  return jQuery.ajax({
+    type: 'POST',
+    contentType: 'application/json; charset=utf-8',
+    headers: {
+      'X-HTTP-Method-Override': 'POST'
+    },
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/extractPDFMetadata'),
+    data: JSON.stringify({}),
+    success: function (data) {
+      return done(false, {
+        url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/pdf/content'),
+        data: data
+      });
+    },
+    error: function () {
+      return done(true);
+    },
+    dataType: 'json'
+  });
+};
+
+/**
  * Reopen document (back to "Metadata" process)
  * @param {string} documentId Id of document
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)

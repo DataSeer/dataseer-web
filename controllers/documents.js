@@ -514,7 +514,7 @@ Self.extractPDFMetadata = function (doc, cb) {
           file.metadata = XML.extractPDFSentencesMetadata(XML.load(data.toString()));
           return file.save(function (err) {
             if (err) return cb(err);
-            else return cb(null);
+            else return cb(null, file.metadata);
           });
         });
     });
