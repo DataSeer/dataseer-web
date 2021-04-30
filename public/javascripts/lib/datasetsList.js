@@ -32,7 +32,6 @@ const DatasetsList = function (id = 'datasetsList', events = {}) {
         // self.animationFinished = true;
         element.animate({ scrollLeft: position }, 300, function () {
           self.animationFinished = true;
-          console.log('animate end');
         });
       }
     },

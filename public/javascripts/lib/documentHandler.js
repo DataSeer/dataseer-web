@@ -274,6 +274,44 @@ DocumentHandler.prototype.saveDataset = function (id, cb) {
   );
 };
 
+// Merge some datasets
+DocumentHandler.prototype.mergeDatasets = function (datasets, cb) {
+  if (datasets.length > 1) {
+    let self = this,
+      target = this.getDataset(datasets[0].id);
+    return async.mapSeries(
+      datasets.slice(1),
+      function (item, callback) {
+        let dataset = Object.assign({}, self.getDataset(item.id));
+        return self.deleteDataset(dataset.id, function (err, res) {
+          return self.addCorresp({ dataset: target, sentenceId: dataset.sentenceId }, function (err, dataset) {
+            return callback(err);
+          });
+        });
+      },
+      function (err) {
+        return cb(err);
+      }
+    );
+  } else return cb();
+};
+
+// Delete some datasets
+DocumentHandler.prototype.deleteDatasets = function (datasets, cb) {
+  let self = this;
+  return async.mapSeries(
+    datasets,
+    function (dataset, callback) {
+      return self.deleteDataset(dataset.id, function (err, res) {
+        return callback(err);
+      });
+    },
+    function (err) {
+      return cb(err);
+    }
+  );
+};
+
 // Delete a dataset
 DocumentHandler.prototype.deleteDataset = function (id, cb) {
   let self = this,
@@ -291,7 +329,7 @@ DocumentHandler.prototype.deleteDataset = function (id, cb) {
       self.datasets.deleted.push(self.datasets.current.splice(dataset.index, 1)[0]); // delete current dataset
       self.datasetsList.delete(id);
       self.documentView.removeDataset(dataset);
-      return cb();
+      return cb(undefined, res);
     }
   );
 };
@@ -304,9 +342,12 @@ DocumentHandler.prototype.deleteCorresp = function (opts = {}, cb) {
     console.log(err, res);
     if (err) return cb(err); // Need to define error behavior
     if (res.err) return cb(true, res); // Need to define error behavior
-    self.removeCorresp({ dataset: self.getDataset(opts.id), sentenceId: opts.sentenceId }, function (err, dataset) {
-      return cb(err, dataset);
-    });
+    return self.removeCorresp(
+      { dataset: self.getDataset(opts.id), sentenceId: opts.sentenceId },
+      function (err, dataset) {
+        return cb(err, dataset);
+      }
+    );
   });
 };
 
@@ -324,7 +365,6 @@ DocumentHandler.prototype.newDatasetId = function () {
 // Create new Dataset
 DocumentHandler.prototype.newDataset = function (opts = {}, cb) {
   let self = this;
-  console.log(opts);
   return DataSeerAPI.getdataType(opts.text, function (err, res) {
     if (err) return cb(err, res);
     if (res.err) return cb(true, res);
@@ -371,14 +411,12 @@ DocumentHandler.prototype.newCorresp = function (opts = {}, cb) {
 
 // Add  new Corresp
 DocumentHandler.prototype.addCorresp = function (opts = {}, cb) {
-  console.log(opts);
   this.documentView.addCorresp(opts.dataset, opts.sentenceId);
   return cb(null, this.getDataset(opts.dataset.id));
 };
 
 // Remove Corresp
 DocumentHandler.prototype.removeCorresp = function (opts = {}, cb) {
-  console.log(opts);
   this.documentView.removeCorresp(opts.dataset, opts.sentenceId);
   return cb(null, this.getDataset(opts.dataset.id));
 };
@@ -395,7 +433,7 @@ DocumentHandler.prototype.refreshDataset = function (id) {
         if (res.shouldSave) {
           console.log('Should save selected dataset', res);
           self.updateDataset(res.dataset.id, res.dataset);
-          self.autoSave(id);
+          return self.autoSave(id);
         } else console.log('Selected dataset up to date', res);
       }
     });
@@ -459,7 +497,7 @@ DocumentHandler.prototype.link = function (opts = {}) {
     this.documentView = opts.documentView;
     this.documentView.init({ pdf: this.pdf, xml: this.tei, colors: this.colors }, function () {
       console.log('documentView ready !');
-      self.isReady('documentView', true);
+      return self.isReady('documentView', true);
     });
   }
   // Init datasetForm First
@@ -487,7 +525,6 @@ DocumentHandler.prototype.synchronize = function () {
   if (this.documentView) {
     // Attach documentView events
     this.documentView.attach('onDatasetClick', function (sentence) {
-      console.log(sentence);
       if (sentence.isCorresp) return self.selectCorresp(sentence.datasetId, sentence.sentenceId);
       else if (sentence.isDataset) return self.selectDataset(sentence.datasetId);
       else console.log('onDatasetClick: case not handled', sentence);
@@ -509,8 +546,8 @@ DocumentHandler.prototype.synchronize = function () {
     });
     this.datasetsList.attach('onDatasetDelete', function (dataset) {
       let nextId = self.getNextDataset(dataset.id).id;
-      self.deleteDataset(dataset.id, function () {
-        self.selectDataset(nextId);
+      return self.deleteDataset(dataset.id, function () {
+        return self.selectDataset(nextId);
       });
     });
     this.datasetsList.attach('onDatasetLink', function (dataset) {
@@ -518,8 +555,7 @@ DocumentHandler.prototype.synchronize = function () {
       if (selectedSentence && selectedSentence.sentenceId) {
         return self.newCorresp({ id: dataset.id, sentenceId: selectedSentence.sentenceId }, function (err, dataset) {
           if (err) return console.log(err);
-          console.log('onDatasetLink');
-          self.selectCorresp(dataset.id, selectedSentence.sentenceId);
+          return self.selectCorresp(dataset.id, selectedSentence.sentenceId);
         });
       }
       return self.showModalError({
@@ -534,7 +570,7 @@ DocumentHandler.prototype.synchronize = function () {
           { text: selectedSentence.text, sentenceId: selectedSentence.sentenceId },
           function (err, dataset) {
             if (err) return console.log(err);
-            self.selectDataset(dataset.id);
+            return self.selectDataset(dataset.id);
           }
         );
       } else
@@ -546,20 +582,30 @@ DocumentHandler.prototype.synchronize = function () {
     this.datasetsList.attach('onMergeSelectionClick', function (ids) {
       // console.log(ids);
       if (ids.length <= 1)
-        self.showModalError({
+        return self.showModalError({
           title: 'Error: Merge selection',
           body: 'You must select at least two datasets'
         });
-      else self.mergeDatasets(ids);
+      else {
+        let id = ids[0].id;
+        return self.mergeDatasets(ids, function () {
+          return self.selectDataset(id);
+        });
+      }
     });
     this.datasetsList.attach('onDeleteSelectionClick', function (ids) {
       // console.log(ids);
       if (ids.length <= 0)
-        self.showModalError({
+        return self.showModalError({
           title: 'Error: Delete selection',
           body: 'You must select at least one dataset'
         });
-      else self.deleteDatasets(ids);
+      else {
+        let nextId = self.getNextDataset(ids[ids.length - 1].id).id;
+        return self.deleteDatasets(ids, function () {
+          return self.selectDataset(nextId);
+        });
+      }
     });
   }
   if (this.datasetForm) {
@@ -575,7 +621,7 @@ DocumentHandler.prototype.synchronize = function () {
     });
     this.datasetForm.attach('onDatasetIdClick', function (dataset) {
       // console.log(dataset);
-      self.selectDataset(dataset.id);
+      return self.selectDataset(dataset.id);
     });
     this.datasetForm.attach('onDatasetDoneClick', function (dataset) {
       // console.log(dataset);
@@ -599,14 +645,13 @@ DocumentHandler.prototype.synchronize = function () {
         }
       }
       if (self.hasChanged[dataset.id]) self.autoSave(dataset.id);
-      self.selectDataset(self.getNextDataset(dataset.id).id);
+      return self.selectDataset(self.getNextDataset(dataset.id).id);
     });
     this.datasetForm.attach('onDatasetUnlinkClick', function (dataset) {
-      console.log(dataset);
       if (self.currentCorresp && self.currentCorresp.sentenceId) {
         return self.deleteCorresp({ id: dataset.id, sentenceId: self.currentCorresp.sentenceId }, function (err) {
           if (err) return console.log(err);
-          self.selectDataset(dataset.id);
+          return self.selectDataset(dataset.id);
         });
       }
       return self.showModalError({

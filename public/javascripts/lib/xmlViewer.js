@@ -129,7 +129,6 @@ XmlViewer.prototype.removeCorresps = function (dataset) {
 
 // Remove a corresp
 XmlViewer.prototype.removeCorresp = function (dataset, sentenceId) {
-  console.log(dataset, sentenceId);
   let el = this.viewer.find(`s[sentenceId="${sentenceId}"]`);
   if (el.get(0)) return el.removeAttr('corresp').css('color', '').css('background-color', '');
 };
