@@ -55,7 +55,7 @@ body {
 #datasetsList #datasetsList\.container\.items {
   margin-left: 20px;
   display: inline-block;
-  width: calc(100% - 225px);
+  width: calc(100% - 275px);
   overflow-x: scroll;
   margin-bottom: 10px;
   border-top-right-radius: 20px;

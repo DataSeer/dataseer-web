@@ -62,7 +62,7 @@ __If you try to access an unauthorized route, the app will return an HTTP 401 er
 
 ```
  HTTP 401 returned
-Your current role do not grant access to this part of website
+Your current role does not grant you access to this part of the website
 ```
 
 ## Results

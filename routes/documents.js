@@ -26,7 +26,7 @@ router.get('/', function (req, res, next) {
     typeof req.user === 'undefined' ||
     !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.annotator, AccountsManager.match.weight)
   )
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   let limit = parseInt(req.query.limit),
     skip = parseInt(req.query.skip),
     status = req.query.status,
@@ -121,7 +121,7 @@ router.get('/', function (req, res, next) {
 /* POST on all documents page */
 router.post('/', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   if (typeof req.body.update !== 'undefined' && req.body.update === '') {
     if (typeof req.body.organisation !== 'string' || req.body.organisation.length <= 0) {
       req.flash('error', 'Incorrect organisation');
@@ -204,7 +204,7 @@ router.post('/', function (req, res, next) {
 /* GET on given document metadata page */
 router.get('/:id/metadata', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id }).populate('metadata');
   // Execute transaction
@@ -234,7 +234,7 @@ router.get('/:id/metadata', function (req, res, next) {
 /* POST on given document metadata page */
 router.post('/:id/metadata', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id });
   // Execute transaction
@@ -250,7 +250,7 @@ router.post('/:id/metadata', function (req, res, next) {
 /* GET on given document datasets page */
 router.get('/:id/datasets', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id }).populate('datasets');
   // Execute transaction
@@ -280,7 +280,7 @@ router.get('/:id/datasets', function (req, res, next) {
 /* GET on given document finish page */
 router.get('/:id/finish', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id }).populate('metadata').populate('datasets');
   // Execute transaction
@@ -310,7 +310,7 @@ router.get('/:id/finish', function (req, res, next) {
 /* GET SINGLE Document BY ID */
 router.get('/:id', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
   let transaction = Documents.findOne({ _id: req.params.id }).populate('metadata');
   // Execute transaction

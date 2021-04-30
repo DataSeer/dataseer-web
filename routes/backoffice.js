@@ -28,7 +28,7 @@ const conf = require('../conf/conf.json'),
 router.get('/accounts', function (req, res, next) {
   // If user is not logged in OR is not at least a curator
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   let limit = parseInt(req.query.limit),
     skip = parseInt(req.query.skip),
     role = req.query.role,
@@ -73,7 +73,7 @@ router.get('/accounts', function (req, res, next) {
 router.post('/accounts', function (req, res, next) {
   // If user is not logged in OR is not at least a curator
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   if (typeof req.body.update !== 'undefined' && req.body.update === '') {
     // If username is not set
     if (typeof req.body.username !== 'string') {
@@ -199,7 +199,7 @@ router.post('/accounts', function (req, res, next) {
 router.get('/organisations', function (req, res, next) {
   // If user is not logged in OR is not at least a curator
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   let limit = parseInt(req.query.limit),
     skip = parseInt(req.query.skip);
   if (isNaN(limit) || limit < 0) limit = 20;
@@ -229,7 +229,7 @@ router.get('/organisations', function (req, res, next) {
 router.post('/organisations', function (req, res, next) {
   // If user is not logged in OR is not at least a curator
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   if (typeof req.body.update !== 'undefined' && req.body.update === '') {
     // If organisation id is not set
     if (typeof req.body._id !== 'string') {
@@ -324,7 +324,7 @@ router.post('/organisations', function (req, res, next) {
 router.get('/upload', function (req, res, next) {
   // If user is not logged in OR is not at least a standard_user
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   // If user is a curator
   if (AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
     return Organisations.find({}).exec(function (err, organisations) {
@@ -371,7 +371,7 @@ router.get('/upload', function (req, res, next) {
 /* POST on upload page */
 router.post('/upload', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role do not grant access to this part of website');
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
   let opts = DocumentsController.getUploadParams(Object.assign({ files: req.files }, req.body), req.user);
   if (opts instanceof Error) {
     req.flash('error', opts.toString());
