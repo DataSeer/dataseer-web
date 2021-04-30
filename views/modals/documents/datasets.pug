@@ -2,7 +2,7 @@
 button.blue.btn.btn-primary.waves-effect.waves-light(id='datasets-error-modal-btn' type='button' data-toggle='modal' data-target='#datasets-error-modal' class='hidden modal fade')
 // Modal
 div(class='modal fade' id='datasets-error-modal' tabindex='-1' role='dialog' aria-labelledby='datasets-error-modal-label' aria-hidden='true')
-  div(class='modal-dialog modal-lg modal-dialog-centered datasets-error-modal-lg' role='document')
+  div(class='modal-dialog modal-lg modal-dialog-centered' role='document')
     div(class='modal-content')
       div(class='modal-header')
         h5(class='modal-title' id='datasets-error-modal-label') #Title
@@ -14,12 +14,13 @@ div(class='modal fade' id='datasets-error-modal' tabindex='-1' role='dialog' ari
 button.blue.btn.btn-primary.waves-effect.waves-light(id='datasets-confirm-modal-btn' type='button' data-toggle='modal' data-target='#datasets-confirm-modal' class='hidden modal fade')
 // Modal
 div(class='modal fade' id='datasets-confirm-modal' tabindex='-1' role='dialog' aria-labelledby='datasets-confirm-modal-label' aria-hidden='true')
-  div(class='modal-dialog modal-dialog-centered datasets-confirm-modal-lg' role='document')
+  div(class='modal-dialog modal-dialog-centered' role='document')
     div(class='modal-content')
       div(class='modal-header')
         h5(class='modal-title' id='datasets-confirm-modal-label') #Title
         button.blue.btn.btn-primary.waves-effect.waves-light(type='button' class='close' data-dismiss='modal' aria-label='Close')
           span(aria-hidden='true') &times;
+      div(class='hidden' id='datasets-confirm-modal-action' value="")
       div(class='modal-data' id='datasets-confirm-modal-data') #Data
       div(class='modal-body' id='datasets-confirm-modal-body') #Body
       div(class='modal-footer')

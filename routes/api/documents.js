@@ -112,6 +112,20 @@ router.delete('/:id', function (req, res, next) {
   });
 });
 
+/* Extract metadata from XML */
+router.post('/:id/extractPDFMetadata', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
+    return res.status(401).send('Your current role do not grant access to this part of website');
+  return Documents.findOne({ _id: req.params.id }).exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    return DocumentsController.extractPDFMetadata(doc, function (err, metadata) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+      else return res.json({ 'err': false, 'res': metadata });
+    });
+  });
+});
+
 /* GET PDF of document */
 router.get('/:id/pdf', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))

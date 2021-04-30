@@ -302,12 +302,13 @@ Self.createDataset = function (opts = {}) {
     subType: opts.subType, //  subType
     description: opts.description, // description
     bestDataFormatForSharing: opts.bestDataFormatForSharing, // best data format for sharing
+    bestPracticeForIndicatingReUseOfExistingData: opts.bestPracticeForIndicatingReUseOfExistingData, // best practice for indicating re-use of existing data
     mostSuitableRepositories: opts.mostSuitableRepositories, // most suitable repositories
     DOI: opts.DOI, // DOI
     name: opts.name, // name
     comments: opts.comments, // comments
     text: opts.text, // text of sentence
-    status: opts.status === 'valid' && opts.name && (opts.DOI || opts.comments) ? 'valid' : 'saved' // text of sentence
+    status: opts.dataType && opts.name && (opts.DOI || opts.comments) ? 'valid' : 'saved' // text of sentence
   };
 };
 
