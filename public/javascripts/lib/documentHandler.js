@@ -28,7 +28,6 @@ const DocumentHandler = function (opts = {}, events) {
   this.colors = {};
   // Add colors to datasets
   for (let i = 0; i < opts.datasets.current.length; i++) {
-    opts.datasets.current[i].index = i;
     opts.datasets.current[i].color = this._colors.randomColor();
     this.colors[opts.datasets.current[i].id] = opts.datasets.current[i].color;
   }
@@ -298,6 +297,7 @@ DocumentHandler.prototype.mergeDatasets = function (datasets, cb) {
 
 // Delete some datasets
 DocumentHandler.prototype.deleteDatasets = function (datasets, cb) {
+  console.log(datasets);
   let self = this;
   return async.mapSeries(
     datasets,
@@ -316,6 +316,7 @@ DocumentHandler.prototype.deleteDatasets = function (datasets, cb) {
 DocumentHandler.prototype.deleteDataset = function (id, cb) {
   let self = this,
     dataset = this.getDataset(id);
+  console.log(id, dataset);
   this.loading(id);
   return DataSeerAPI.deleteDataset(
     {
@@ -326,7 +327,8 @@ DocumentHandler.prototype.deleteDataset = function (id, cb) {
       console.log(err, res);
       if (err) return cb(err); // Need to define error behavior
       if (res.err) return cb(true, res); // Need to define error behavior
-      self.datasets.deleted.push(self.datasets.current.splice(dataset.index, 1)[0]); // delete current dataset
+      let index = self.getDatasetIndex(dataset.id);
+      self.datasets.deleted.push(self.datasets.current.splice(index, 1)[0]); // delete current dataset
       self.datasetsList.delete(id);
       self.documentView.removeDataset(dataset);
       return cb(undefined, res);
@@ -387,7 +389,6 @@ DocumentHandler.prototype.newDataset = function (opts = {}, cb) {
 // Add  new Dataset
 DocumentHandler.prototype.addDataset = function (dataset, cb) {
   dataset.color = this._colors.randomColor();
-  dataset.index = this.datasets.current.length;
   this.colors[dataset.id] = dataset.color;
   this.datasets.current.push(dataset);
   this.documentView.addDataset(dataset);
@@ -429,13 +430,7 @@ DocumentHandler.prototype.refreshDataset = function (id) {
   if (this.datasetForm.currentId() === id)
     this.datasetForm.link(dataset, { isCurator: this.user.isCurator, isCorresp: false }, function (err, res) {
       if (err) console.log('dataset not selected');
-      if (res) {
-        if (res.shouldSave) {
-          console.log('Should save selected dataset', res);
-          self.updateDataset(res.dataset.id, res.dataset);
-          return self.autoSave(id);
-        } else console.log('Selected dataset up to date', res);
-      }
+      else console.log('dataset refreshed');
     });
 };
 
@@ -450,16 +445,25 @@ DocumentHandler.prototype.getFirstDataset = function () {
   return this.datasets.current[0];
 };
 
+// return index of dataset
+DocumentHandler.prototype.getDatasetIndex = function (id) {
+  for (let i = 0; i < this.datasets.current.length; i++) {
+    if (this.datasets.current[i].id === id) return i;
+  }
+  return -1;
+};
+
 // Get the first not "valid" dataset (or undefined)
-DocumentHandler.prototype.getFirstDatasetNotValid = function (currentId = 0) {
-  let data = this.reorder(
-    this.datasets.current.map(function (item) {
-      return { index: item.index, id: item.id, status: item.status };
-    }),
-    currentId + 1
-  ); // reorder infos in new Array
+DocumentHandler.prototype.getFirstDatasetNotValid = function (id) {
+  let index = this.getDatasetIndex(id),
+    data = this.reorder(
+      this.datasets.current.map(function (item) {
+        return { id: item.id, status: item.status };
+      }),
+      index + 1
+    ); // reorder infos in new Array
   for (let i = 0; i < data.length; i++) {
-    if (data[i].status !== 'valid') return this.datasets.current[data[i].index];
+    if (data[i].status !== 'valid') return this.getDataset(data[i].id);
   }
   return null;
 };
@@ -467,7 +471,7 @@ DocumentHandler.prototype.getFirstDatasetNotValid = function (currentId = 0) {
 // Get the next dataset (or undefined)
 DocumentHandler.prototype.getNextDataset = function (id) {
   let dataset = this.getDataset(id),
-    firstChoice = this.getFirstDatasetNotValid(dataset.index),
+    firstChoice = this.getFirstDatasetNotValid(dataset.id),
     secondChoice = this.getFirstDataset();
   if (firstChoice) return firstChoice;
   else if (secondChoice) return secondChoice;
@@ -613,7 +617,7 @@ DocumentHandler.prototype.synchronize = function () {
     this.datasetForm.attach('onPropertyChange', function (property, value) {
       // console.log(property, value);
       self.modified();
-      self.currentDataset[property] = value;
+      self.updateDataset(self.currentDataset.id, self.datasetForm.getDataset());
       self.autoSave(self.currentDataset.id);
       if (property === 'highlight')
         if (value) self.datasetsList.highlight(self.currentDataset.id);

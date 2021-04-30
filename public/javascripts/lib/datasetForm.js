@@ -300,7 +300,7 @@ DatasetForm.prototype.extractInfos = function (keys, properties) {
     properties.map(function (property) {
       if (typeof property === 'string') result[key][property] = self.getResourceOf(self.dataset[key], property);
       else if (typeof property === 'object')
-        result[key][property.key] = self.getResourceOf(self.dataset[key], property.subKey);
+        result[key][property.key] = self.getResourceOf(self.dataset[key], property.key, property.subKey);
     });
   });
   return result;
@@ -319,8 +319,8 @@ DatasetForm.prototype.updateDatatypeInfos = function () {
     keys = ['dataType', 'subType'],
     metadata = this.extractInfos(keys, properties);
   // Set dataType/subType infos
+  let old = Object.assign({}, this.dataset);
   properties.map(function (property) {
-    let old = self.dataset[property];
     keys.map(function (key) {
       if (typeof property === 'string') {
         if (metadata[key][property] && self.dataset[property] !== metadata[key][property])
@@ -330,8 +330,10 @@ DatasetForm.prototype.updateDatatypeInfos = function () {
           self.dataset[property.key] = metadata[key][property.key];
       }
     });
-    if (self.dataset[property] !== old) hasChanged = true;
   });
+  for (let property in this.dataset) {
+    if (this.dataset[property] !== old[property]) hasChanged = true;
+  }
   return hasChanged;
 };
 
@@ -431,25 +433,20 @@ DatasetForm.prototype.setDatatypes = function () {
   options.map(function (item) {
     select.append(item);
   });
-  let value = options[0].attr('value');
-  this.properties['dataType'](value);
+  this.properties['dataType']('');
   this.refreshDatatypeView();
 };
 
 // Set subTypes
 DatasetForm.prototype.setSubtypes = function () {
-  let data =
-      this.dataset.dataType && this.dataset.dataType
-        ? this.getOptionsInfo(this.resources.dataTypes[this.dataset.dataType])
-        : [],
+  let data = this.dataset.dataType ? this.getOptionsInfo(this.resources.dataTypes[this.dataset.dataType]) : [],
     options = this.buildOptions(data),
     select = this.container.find('select[name="datasetForm\\.subType"]');
   select.empty();
   options.map(function (item) {
     select.append(item);
   });
-  let value = options[0].attr('value');
-  this.properties['subType'](value);
+  this.properties['subType']('');
   this.refreshDatatypeView();
 };
 
@@ -500,6 +497,8 @@ DatasetForm.prototype.link = function (dataset, opts = {}, callback) {
       this.properties[key](this.dataset[key], true);
     }
   }
+  this.properties['dataType'](dataset['dataType'], true);
+  this.properties['subType'](dataset['subType'], true);
   this.setView({ isCurator: opts.isCurator, isCorresp: opts.isCorresp });
   this.color();
   this.hideMessage();
