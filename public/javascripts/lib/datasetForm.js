@@ -482,6 +482,10 @@ DatasetForm.prototype.getIconOfStatus = function (status) {
 
 // Link dataset to datasetForm
 DatasetForm.prototype.link = function (dataset, opts = {}, callback) {
+  if (!dataset) {
+    this.setEmptyMessage();
+    return typeof callback === 'function' ? callback(true) : undefined;
+  }
   this.dataset = Object.assign({}, dataset);
   // Set all values
   for (let key in dataset) {
@@ -506,7 +510,7 @@ DatasetForm.prototype.link = function (dataset, opts = {}, callback) {
 };
 
 // Link dataset to datasetForm
-DatasetForm.prototype.unlink = function (dataset) {
+DatasetForm.prototype.unlink = function () {
   this.dataset = {};
   this.uncolor();
   this.setEmptyMessage();
