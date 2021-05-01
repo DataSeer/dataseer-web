@@ -8,7 +8,7 @@ const DocumentHandler = function (opts = {}, events) {
   let self = this;
   this.ids = opts.ids;
   // It will save a dataset (secure way to not DDOS mongoDB server)
-  this.autoSave = _.debounce(this.saveDataset, 750);
+  this.autoSave = _.debounce(this.saveDataset, 2000);
   // It will store change states for each dataset
   this.hasChanged = {};
   // Events
@@ -286,6 +286,7 @@ DocumentHandler.prototype.updateDataset = function (id, data = {}) {
 
 // Save a dataset
 DocumentHandler.prototype.saveDataset = function (id, cb) {
+  if (!this.hasChanged[id]) return typeof cb === 'function' ? cb(err, res) : undefined;
   let self = this,
     dataset = this.getDataset(id);
   this.loading(id);
@@ -657,6 +658,9 @@ DocumentHandler.prototype.synchronize = function () {
       if (property === 'highlight')
         if (value) self.datasetsList.highlight(self.currentDataset.id);
         else self.datasetsList.unhighlight(self.currentDataset.id);
+    });
+    this.datasetForm.attach('onLeave', function () {
+      self.saveDataset(self.currentDataset.id);
     });
     this.datasetForm.attach('onDatasetIdClick', function (dataset) {
       // console.log(dataset);

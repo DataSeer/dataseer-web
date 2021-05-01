@@ -55,6 +55,11 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
         self.events.onPropertyChange(target, self.properties[target]());
     }
   });
+  this.container.find('input[type="text"]').focusout(function (event) {
+    let el = $(this),
+      target = el.attr('target').replace('dataset.', '');
+    if (typeof self.events.onLeave === 'function') self.events.onLeave(target, self.properties[target]());
+  });
   // input checkbox event
   this.container.find('input[type="checkbox"]').bind('input propertychange', function (event) {
     let el = $(this),
@@ -64,6 +69,11 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
       if (typeof self.events.onPropertyChange === 'function')
         self.events.onPropertyChange(target, self.properties[target]());
     }
+  });
+  this.container.find('input[type="checkbox"]').focusout(function (event) {
+    let el = $(this),
+      target = el.attr('target').replace('dataset.', '');
+    if (typeof self.events.onLeave === 'function') self.events.onLeave(target, self.properties[target]());
   });
   // select event
   this.container.find('select').bind('input propertychange', function (event) {
@@ -77,6 +87,11 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
         self.events.onPropertyChange(target, self.properties[target]());
     }
   });
+  this.container.find('select').focusout(function (event) {
+    let el = $(this),
+      target = el.attr('target').replace('dataset.', '');
+    if (typeof self.events.onLeave === 'function') self.events.onLeave(target, self.properties[target]());
+  });
   // textarea event
   this.container.find('textarea').bind('input propertychange', function (event) {
     let el = $(this),
@@ -86,6 +101,11 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
       if (typeof self.events.onPropertyChange === 'function')
         self.events.onPropertyChange(target, self.properties[target]());
     }
+  });
+  this.container.find('textarea').focusout(function (event) {
+    let el = $(this),
+      target = el.attr('target').replace('dataset.', '');
+    if (typeof self.events.onLeave === 'function') self.events.onLeave(target, self.properties[target]());
   });
   // Set or get a property
   this.properties = {
