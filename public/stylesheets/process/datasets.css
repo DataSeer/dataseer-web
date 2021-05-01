@@ -81,7 +81,7 @@ body {
 
 #datasetsList #datasetsList\.container\.items\.container .item.selected,
 #datasetsList #datasetsList\.container\.items\.container .item.selected.highlight {
-  border-color: black !important;
+  border: 5px solid black !important;
 }
 
 #datasetsList #datasetsList\.container\.items\.container .item.highlight div[key="dataset.checked"] {
@@ -113,12 +113,14 @@ body {
 }
 
 #datasetsList #datasetsList\.container\.items\.container .item button[name="datasetsList.link"] {
+  height: 21px;
   position: absolute;
   top: 2px;
   right: 30px;
 }
 
 #datasetsList #datasetsList\.container\.items\.container .item button[name="datasetsList.delete"] {
+  height: 21px;
   position: absolute;
   top: 2px;
   right: 60px;
