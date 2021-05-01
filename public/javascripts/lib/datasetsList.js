@@ -106,21 +106,24 @@ DatasetsList.prototype.getSelectedItem = function () {
 // Refresh Empty Message display
 DatasetsList.prototype.refreshMsg = function () {
   let items = this.container.children('.item');
-  if (items.length > 0) this.message.hide();
-  else {
-    this.setEmptyMessage();
-    this.message.show();
-  }
+  if (items.length > 0) {
+    this.scrollContainer.css('overflow-x', 'scroll');
+    this.message.hide();
+  } else this.setEmptyMessage();
 };
 
 // Set Empty datasetsList Message
 DatasetsList.prototype.setEmptyMessage = function () {
-  return this.message.text('DataSeer has not detected any datasets in this document');
+  this.scrollContainer.css('overflow-x', 'auto');
+  this.message.show();
+  this.message.text('DataSeer has not detected any datasets in this document');
 };
 
 // Set Intializing datasetsList Message
 DatasetsList.prototype.setInitialazingMessage = function () {
-  return this.message.text('Populating datasets list...');
+  this.scrollContainer.css('overflow-x', 'auto');
+  this.message.text('Populating datasets list...');
+  this.message.show();
 };
 
 // Load some datasets
@@ -168,6 +171,7 @@ DatasetsList.prototype.add = function (dataset) {
         .addClass('item')
         .attr('key', 'dataset.id')
         .attr('value', dataset.id)
+        .attr('sentenceId', dataset.sentenceId)
         .css('background-color', dataset.color.background.rgba)
         .css('border-color', dataset.color.background.rgba),
       label: $('<div>')
@@ -204,6 +208,13 @@ DatasetsList.prototype.add = function (dataset) {
     .append(elements.delete)
     .append(elements.status);
   this.container.append(elements.item);
+  // sort elements by sentenceId
+  this.container
+    .find('.item[sentenceId]')
+    .sort(function (a, b) {
+      return parseInt($(a).attr('sentenceId'), 10) - parseInt($(b).attr('sentenceId'), 10);
+    })
+    .appendTo(this.container);
   this.refreshMsg();
   // events
   elements.item.click(function (event) {

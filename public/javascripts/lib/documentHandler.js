@@ -71,11 +71,19 @@ DocumentHandler.prototype.isReady = function (key, value) {
 
 // Attach event
 DocumentHandler.prototype.init = function () {
-  let self = this;
-  this.selectDataset(this.getFirstDataset().id, function () {
+  let self = this,
+    dataset = this.getFirstDataset();
+  if (dataset && dataset.id) {
+    this.selectDataset(dataset.id, function () {
+      console.log('init');
+      if (typeof self.events.onReady === 'function') return self.events.onReady();
+    });
+  } else {
     console.log('init');
+    this.datasetForm.setEmptyMessage();
+    this.datasetsList.setEmptyMessage();
     if (typeof self.events.onReady === 'function') return self.events.onReady();
-  });
+  }
 };
 
 // Check if document has change(s) not saved
@@ -161,13 +169,13 @@ DocumentHandler.prototype.loading = function (id) {
 
 // Select a dataset
 DocumentHandler.prototype.selectDataset = function (id, cb) {
-  if (id) {
-    let self = this;
-    this.currentDataset = this.getDataset(id);
-    this.currentCorresp = null;
-    if (this.documentView.selectedSentence && this.documentView.selectedSentence.sentenceId)
-      this.documentView.unselectSentence(this.documentView.selectedSentence);
-    this.documentView.selectDataset(this.currentDataset.id, function (err) {
+  let self = this;
+  this.currentDataset = this.getDataset(id);
+  this.currentCorresp = null;
+  if (this.documentView.selectedSentence && this.documentView.selectedSentence.sentenceId)
+    this.documentView.unselectSentence(this.documentView.selectedSentence);
+  if (this.currentDataset)
+    return this.documentView.selectDataset(this.currentDataset.id, function (err) {
       self.datasetsList.select(self.currentDataset.id);
       self.datasetForm.link(
         self.currentDataset,
@@ -191,7 +199,7 @@ DocumentHandler.prototype.selectDataset = function (id, cb) {
         }
       ); // refresh datasetForm
     });
-  } else return typeof cb === 'function' ? cb(true) : undefined;
+  else return typeof cb === 'function' ? cb(true) : undefined;
 };
 
 // Select a dataset
@@ -341,8 +349,8 @@ DocumentHandler.prototype.deleteDatasets = function (datasets, cb) {
 DocumentHandler.prototype.deleteDataset = function (id, cb) {
   let self = this,
     dataset = this.getDataset(id);
-  console.log(id, dataset);
   this.loading(id);
+  this.datasetForm.unlink();
   return DataSeerAPI.deleteDataset(
     {
       datasetsId: this.ids.datasets,
@@ -353,7 +361,7 @@ DocumentHandler.prototype.deleteDataset = function (id, cb) {
       if (err) return cb(err); // Need to define error behavior
       if (res.err) return cb(true, res); // Need to define error behavior
       let index = self.getDatasetIndex(dataset.id);
-      self.datasets.deleted.push(self.datasets.current.splice(index, 1)[0]); // delete current dataset
+      if (index > -1) self.datasets.deleted.push(self.datasets.current.splice(index, 1)[0]); // delete current dataset
       self.datasetsList.delete(id);
       self.documentView.removeDataset(dataset);
       return cb(undefined, res);
@@ -536,7 +544,7 @@ DocumentHandler.prototype.link = function (opts = {}) {
     this.datasetForm.loadResources(this.datatypes);
     console.log('datasetForm ready !');
   }
-  // the datasetList
+  // the datasetsList
   if (opts.datasetsList) {
     this.datasetsList = opts.datasetsList;
     // Load data in datasetsList
@@ -574,8 +582,9 @@ DocumentHandler.prototype.synchronize = function () {
       // console.log(dataset);
     });
     this.datasetsList.attach('onDatasetDelete', function (dataset) {
-      let nextId = self.getNextDataset(dataset.id).id;
-      return self.deleteDataset(dataset.id, function () {
+      let nextDataset = self.getNextDataset(dataset.id),
+        nextId = nextDataset.id ? nextDataset.id : undefined;
+      return self.deleteDataset(nextDataset.id, function () {
         return self.selectDataset(nextId);
       });
     });
@@ -630,7 +639,8 @@ DocumentHandler.prototype.synchronize = function () {
           body: 'You must select at least one dataset'
         });
       else {
-        let nextId = self.getNextDataset(ids[ids.length - 1].id).id;
+        let dataset = self.getNextDataset(ids[ids.length - 1].id),
+          nextId = dataset.id;
         return self.deleteDatasets(ids, function () {
           return self.selectDataset(nextId);
         });
@@ -674,7 +684,9 @@ DocumentHandler.prototype.synchronize = function () {
         }
       }
       if (self.hasChanged[dataset.id]) self.autoSave(dataset.id);
-      return self.selectDataset(self.getNextDataset(dataset.id).id);
+      let nextDataset = self.getNextDataset(dataset.id),
+        id = nextDataset.id;
+      return self.selectDataset(id);
     });
     this.datasetForm.attach('onDatasetUnlinkClick', function (dataset) {
       if (self.currentCorresp && self.currentCorresp.sentenceId) {
