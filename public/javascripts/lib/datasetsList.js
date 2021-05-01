@@ -168,6 +168,7 @@ DatasetsList.prototype.add = function (dataset) {
         .addClass('item')
         .attr('key', 'dataset.id')
         .attr('value', dataset.id)
+        .attr('sentenceId', dataset.sentenceId)
         .css('background-color', dataset.color.background.rgba)
         .css('border-color', dataset.color.background.rgba),
       label: $('<div>')
@@ -204,6 +205,13 @@ DatasetsList.prototype.add = function (dataset) {
     .append(elements.delete)
     .append(elements.status);
   this.container.append(elements.item);
+  // sort elements by sentenceId
+  this.container
+    .find('.item[sentenceId]')
+    .sort(function (a, b) {
+      return parseInt($(a).attr('sentenceId'), 10) - parseInt($(b).attr('sentenceId'), 10);
+    })
+    .appendTo(this.container);
   this.refreshMsg();
   // events
   elements.item.click(function (event) {
