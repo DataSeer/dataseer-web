@@ -585,7 +585,7 @@ DocumentHandler.prototype.synchronize = function () {
     this.datasetsList.attach('onDatasetDelete', function (dataset) {
       let nextDataset = self.getNextDataset(dataset.id),
         nextId = nextDataset.id ? nextDataset.id : undefined;
-      return self.deleteDataset(nextDataset.id, function () {
+      return self.deleteDataset(dataset.id, function () {
         return self.selectDataset(nextId);
       });
     });
