@@ -76,8 +76,7 @@ body {
   cursor: pointer;
   display: table;
   table-layout: auto; /*Optional*/
-  -webkit-border-horizontal-spacing: 85px;
-  -webkit-border-vertical-spacing: 10px;
+  border-spacing: 85px 10px;
 }
 
 #datasetsList #datasetsList\.container\.items\.container .item.selected,
