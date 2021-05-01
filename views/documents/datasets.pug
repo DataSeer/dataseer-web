@@ -42,6 +42,8 @@ block content
             a(href='mailto:?subject='+ encodeURIComponent(mail.subject) + '&body=' + encodeURIComponent(mail.body) target='_blank')
               button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email')
                 <i class="far fa-envelope"></i>
+            a(href=conf.root + 'api/documents/' + document._id.toString() + '/pdf/content?documentToken=' + document.token target='_blank')
+              button.blue.btn.btn-primary.waves-effect.waves-light(type='button' style='margin-left:10px;' title='Get the original PDF') PDF
       div(class='col-4' id='user-lg')
         div(style='font-size:small; float: right; margin-right: 25px; height: 100%; margin-top: -2px;')
           if current_user && !useDocumentToken
