@@ -267,6 +267,19 @@ const PdfViewer = function (id, screenId, events = {}) {
   return this;
 };
 
+// Get order of appearance of sentences
+PdfViewer.prototype.getSentencesMapping = function () {
+  let c = 0,
+    result = {};
+  for (let page in this.metadata.pages) {
+    for (let sentenceId in this.metadata.pages[page]) {
+      result[sentenceId] = c;
+      c++; // incremente counter
+    }
+  }
+  return result;
+};
+
 // Render the PDF
 PdfViewer.prototype.load = function (pdf, xmlMetadata, cb) {
   console.log('Loading PDF...');
