@@ -4,7 +4,7 @@
 
 'use strict';
 
-const workerSrcPath = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.worker.min.js';
+const workerSrcPath = '../javascripts/pdf.js/build/pdf.worker.js';
 
 if (typeof pdfjsLib === 'undefined' || (!pdfjsLib && !pdfjsLib.getDocument)) {
   console.error('Please build the pdfjs-dist library using\n' + '  `gulp dist-install`');
