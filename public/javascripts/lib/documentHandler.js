@@ -31,6 +31,7 @@ const DocumentHandler = function (opts = {}, events) {
     opts.datasets.current[i].color = this._colors.randomColor();
     this.colors[opts.datasets.current[i].id] = opts.datasets.current[i].color;
   }
+  this.sentencesMapping = undefined;
   this.user = opts.user;
   this.datatypes = opts.datatypes;
   this.datasets = opts.datasets;
@@ -69,10 +70,20 @@ DocumentHandler.prototype.isReady = function (key, value) {
   }
 };
 
+// Refresh the sentences mapping
+DocumentHandler.prototype.refreshSentencesMapping = function () {
+  if (this.sentencesMapping) {
+    if (this.documentView.pdfVisible) this.datasetsList.setSentencesMapping(this.sentencesMapping.pdf);
+    else this.datasetsList.setSentencesMapping(this.sentencesMapping.xml);
+  }
+};
+
 // Attach event
 DocumentHandler.prototype.init = function () {
   let self = this,
     dataset = this.getFirstDataset();
+  this.sentencesMapping = this.documentView.getSentencesMapping();
+  this.refreshSentencesMapping();
   if (dataset && dataset.id) {
     this.selectDataset(dataset.id, function () {
       console.log('init');
@@ -567,8 +578,19 @@ DocumentHandler.prototype.synchronize = function () {
       else if (sentence.isDataset) return self.selectDataset(sentence.datasetId);
       else console.log('onDatasetClick: case not handled', sentence);
     });
-    // Attach documentView events
     this.documentView.attach('onSentenceClick', function (sentence) {});
+    this.documentView.attach('onFulltextView', function () {
+      return self.refreshSentencesMapping();
+    });
+    this.documentView.attach('onSectionView', function () {
+      return self.refreshSentencesMapping();
+    });
+    this.documentView.attach('onParagraphView', function () {
+      return self.refreshSentencesMapping();
+    });
+    this.documentView.attach('onPdfView', function () {
+      return self.refreshSentencesMapping();
+    });
   }
   if (this.datasetsList) {
     // Attach datasetsList events

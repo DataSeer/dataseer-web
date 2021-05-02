@@ -12,6 +12,7 @@ const DatasetsList = function (id = 'datasetsList', events = {}) {
   this.message = $(`#${this.id} #datasetsList\\.container\\.items\\.message`);
   this.events = events;
   this.animationFinished = true;
+  this.sentencesMapping = undefined;
   this.debouncedScroll = _.debounce(
     function (position) {
       self.scrollContainer.animate({ scrollLeft: position }, 200);
@@ -53,6 +54,30 @@ const DatasetsList = function (id = 'datasetsList', events = {}) {
   });
   this.setInitialazingMessage();
   return this;
+};
+
+// Set mapping of sentences
+DatasetsList.prototype.setSentencesMapping = function (sentencesMapping) {
+  this.sentencesMapping = sentencesMapping;
+  this.sortItems();
+};
+
+// Refresh order of items
+DatasetsList.prototype.sortItems = function () {
+  let self = this;
+  this.container
+    .find('.item[sentenceId]')
+    .sort(function (a, b) {
+      let aPos = self.sentencesMapping[$(a).attr('sentenceId')],
+        bPos = self.sentencesMapping[$(b).attr('sentenceId')],
+        aIsInteger = Number.isInteger(aPos),
+        bIsInteger = Number.isInteger(bPos);
+      if (aIsInteger && !bIsInteger) return -1;
+      if (!aIsInteger && bIsInteger) return 1;
+      if (!aIsInteger && !bIsInteger) return 0;
+      return aPos - bPos;
+    })
+    .appendTo(this.container);
 };
 
 // Return icon for a given status
@@ -209,12 +234,7 @@ DatasetsList.prototype.add = function (dataset) {
     .append(elements.status);
   this.container.append(elements.item);
   // sort elements by sentenceId
-  this.container
-    .find('.item[sentenceId]')
-    .sort(function (a, b) {
-      return parseInt($(a).attr('sentenceId'), 10) - parseInt($(b).attr('sentenceId'), 10);
-    })
-    .appendTo(this.container);
+  if (this.sentencesMapping) this.sortItems();
   this.refreshMsg();
   // events
   elements.item.click(function (event) {

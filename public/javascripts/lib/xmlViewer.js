@@ -27,6 +27,15 @@ XmlViewer.prototype.attach = function (event, fn) {
   this.events[event] = fn;
 };
 
+// Get order of appearance of sentences
+XmlViewer.prototype.getSentencesMapping = function () {
+  let result = {};
+  this.viewer.find(`s[sentenceId]`).map(function (i, el) {
+    result[$(el).attr('sentenceId')] = i;
+  });
+  return result;
+};
+
 // hoverSentence
 XmlViewer.prototype.hoverSentence = function (sentence) {
   if (!sentence.isDataset && !sentence.isSelected)

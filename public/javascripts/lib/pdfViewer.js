@@ -4,7 +4,7 @@
 
 'use strict';
 
-const workerSrcPath = '../javascripts/pdf.js/build/pdf.worker.js';
+const workerSrcPath = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.worker.min.js';
 
 if (typeof pdfjsLib === 'undefined' || (!pdfjsLib && !pdfjsLib.getDocument)) {
   console.error('Please build the pdfjs-dist library using\n' + '  `gulp dist-install`');
@@ -265,6 +265,19 @@ const PdfViewer = function (id, screenId, events = {}) {
   // Events
   this.events = events;
   return this;
+};
+
+// Get order of appearance of sentences
+PdfViewer.prototype.getSentencesMapping = function () {
+  let c = 0,
+    result = {};
+  for (let page in this.metadata.pages) {
+    for (let sentenceId in this.metadata.pages[page]) {
+      result[sentenceId] = c;
+      c++; // incremente counter
+    }
+  }
+  return result;
 };
 
 // Render the PDF

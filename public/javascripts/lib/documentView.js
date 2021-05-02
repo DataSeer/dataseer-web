@@ -88,6 +88,7 @@ const DocumentView = function (id, events = {}) {
       self.xml.show();
       self.xml.find('*.hidden').removeClass('hidden');
       self.selectDataset(self.currentDatasetId);
+      return typeof self.events.onFulltextView === 'function' ? self.events.onFulltextView() : undefined;
     });
   $('#documentView\\.viewSelection\\.tei\\.dataseer')
     .parent()
@@ -102,6 +103,7 @@ const DocumentView = function (id, events = {}) {
         if (element.find('s[id], s[corresp]').length === 0) return element.addClass('hidden');
       });
       self.selectDataset(self.currentDatasetId);
+      return typeof self.events.onSectionView === 'function' ? self.events.onSectionView() : undefined;
     });
   $('#documentView\\.viewSelection\\.tei\\.dataset')
     .parent()
@@ -116,6 +118,7 @@ const DocumentView = function (id, events = {}) {
         if (element.find('s[id], s[corresp]').length === 0) return element.addClass('hidden');
       });
       self.selectDataset(self.currentDatasetId);
+      return typeof self.events.onParagraphView === 'function' ? self.events.onParagraphView() : undefined;
     });
   $('#documentView\\.viewSelection\\.pdf')
     .parent()
@@ -125,6 +128,7 @@ const DocumentView = function (id, events = {}) {
       self.pdf.show();
       self.xml.hide();
       self.selectDataset(self.currentDatasetId);
+      return typeof self.events.onPdfView === 'function' ? self.events.onPdfView() : undefined;
     });
   // Events
   this.events = events;
@@ -134,6 +138,14 @@ const DocumentView = function (id, events = {}) {
 // Attach event
 DocumentView.prototype.attach = function (event, fn) {
   this.events[event] = fn;
+};
+
+// Get selected sentence or undefined
+DocumentView.prototype.getSentencesMapping = function () {
+  return {
+    pdf: this.pdfViewer ? this.pdfViewer.getSentencesMapping() : undefined,
+    xml: this.xmlViewer ? this.xmlViewer.getSentencesMapping() : undefined
+  };
 };
 
 // Get selected sentence or undefined
