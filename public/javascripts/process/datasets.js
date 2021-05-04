@@ -12,6 +12,7 @@
       id: $('#user_id').attr('value'),
       username: $('#user_username').attr('value'),
       isCurator: $('#user_role').attr('value') === 'curator',
+      isAnnotator: $('#user_role').attr('value') === 'annotator',
       role: $('#user_role').attr('value')
     },
     showLoop = function () {
@@ -53,7 +54,7 @@
           if (err) return alert('Error : Datatypes unavailable, dataseer-ml service does not respond');
           setTextLoop('PDF initialization...');
           if (!pdf.metadata || !pdf.metadata.pages) {
-            if (user.isCurator) {
+            if (user.isCurator || user.isAnnotator) {
               setTextLoop('Updating PDF metadata...');
               return DataSeerAPI.extractPDFMetadata(doc._id, function (err, res) {
                 $('.loader').hide();
@@ -64,7 +65,7 @@
                   );
                 } else setTextLoop(`This document cannot be updated, please re-upload it. (<a href ="${res.url}" target="_blank">PDF link of this document</a>)`);
               });
-            } else setTextLoop('This document must be updated by a curator');
+            } else setTextLoop('This document must be updated by a curator or an annotator');
           }
           const currentDocument = new DocumentHandler(
             {

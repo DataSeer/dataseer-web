@@ -190,7 +190,7 @@ DocumentHandler.prototype.selectDataset = function (id, cb) {
       self.datasetsList.select(self.currentDataset.id);
       self.datasetForm.link(
         self.currentDataset,
-        { isCurator: self.user.isCurator, isCorresp: false },
+        { isCurator: self.user.isCurator || self.user.isAnnotator, isCorresp: false },
         function (err, res) {
           if (err) {
             console.log('dataset not selected');
@@ -224,7 +224,7 @@ DocumentHandler.prototype.selectCorresp = function (datasetId, sentenceId, cb) {
       self.datasetsList.select(self.currentCorresp.datasetId);
       self.datasetForm.link(
         self.getDataset(self.currentCorresp.datasetId),
-        { isCurator: self.user.isCurator, isCorresp: true },
+        { isCurator: self.user.isCurator || self.user.isAnnotator, isCorresp: true },
         function (err, res) {
           if (err) {
             console.log('corresp not selected');
@@ -473,10 +473,14 @@ DocumentHandler.prototype.refreshDataset = function (id) {
     dataset = this.getDataset(id);
   this.datasetsList.update(id, dataset);
   if (this.datasetForm.currentId() === id)
-    this.datasetForm.link(dataset, { isCurator: this.user.isCurator, isCorresp: false }, function (err, res) {
-      if (err) console.log('dataset not selected');
-      else console.log('dataset refreshed');
-    });
+    this.datasetForm.link(
+      dataset,
+      { isCurator: this.user.isCurator || this.user.isAnnotator, isCorresp: false },
+      function (err, res) {
+        if (err) console.log('dataset not selected');
+        else console.log('dataset refreshed');
+      }
+    );
 };
 
 // Reorder an array
