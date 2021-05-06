@@ -5,21 +5,21 @@
 
 .authors-container {
   font-weight: normal;
-  height: 250px;
+  max-height: 250px;
   overflow-y: auto;
   margin-bottom: 15px;
 }
 
 .statements-container {
   font-weight: normal;
-  height: 75px;
+  max-height: 125px;
   overflow-y: auto;
   margin-bottom: 15px;
 }
 
 .datasets-container {
   font-weight: normal;
-  height: 400px;
+  max-height: 400px;
   overflow-y: auto;
   margin-bottom: 15px;
 }
