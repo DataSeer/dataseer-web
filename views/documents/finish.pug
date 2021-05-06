@@ -5,22 +5,26 @@ block content
   div(class='container-fluid')
 
     if current_user
-        if document
-          if document.status !== 'metadata'
-            button.blue.btn.btn-primary.waves-effect.waves-light#reopen_document.btn.btn-primary
-             <i class="fas fa-undo-alt"></i> Reopen document
-            button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Copy URL to clipboard')
-              <i class="fas fa-link"></i> Get public URL of this document
-            input.form-control.hidden(type='text' id='public_url' name='public_url' value=publicURL)
-            a(href='mailto:?subject='+ encodeURIComponent(mail.subject) + '&body=' + encodeURIComponent(mail.body) target='_blank')
-              button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email')
-                <i class="far fa-envelope"></i> Share with colleague
-            if(current_user.role.label === "standard_user")
-              a(href='https://docs.google.com/forms/d/e/1FAIpQLScRVw-GPA-15VVrYFADXJUKByA7SV5oDwv6ynAjOxt2W5QT7A/viewform?usp=sf_link' id='standard_user_feedback_link' target='_blank')
-                button.btn.btn-primary.waves-effect.waves-light.bg-primary(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email') Give feedback about your DataSeer experience
-            else
-              a(href='https://docs.google.com/forms/d/e/1FAIpQLSeURLXaNchVJEawPaiBrC--cM2mXc1zMEcaR4hu8MZyv44nHw/viewform?usp=sf_link' id='annotator_feedback_link' target='_blank')
-                button.btn.btn-primary.waves-effect.waves-light.bg-primary(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email') Annotator feedback
+      if document
+        if document.status !== 'metadata'
+          button.blue.btn.btn-primary.waves-effect.waves-light#reopen_document(type='button' title='Reopen this document')
+           <i class="fas fa-undo-alt"></i> Reopen document
+      button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Copy URL to clipboard')
+        <i class="fas fa-link"></i> Get public URL of this document
+      input.form-control.hidden(type='text' id='public_url' name='public_url' value=publicURL)
+      a(href='mailto:?subject='+ encodeURIComponent(mail.subject) + '&body=' + encodeURIComponent(mail.body) target='_blank')
+        button.blue.btn.btn-primary.waves-effect.waves-light(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email')
+          <i class="far fa-envelope"></i> Share with colleague
+      if(current_user.role.label === "standard_user")
+        a(href='https://docs.google.com/forms/d/e/1FAIpQLScRVw-GPA-15VVrYFADXJUKByA7SV5oDwv6ynAjOxt2W5QT7A/viewform?usp=sf_link' id='standard_user_feedback_link' target='_blank')
+          button.btn.btn-primary.waves-effect.waves-light.bg-primary(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email') Give feedback about your DataSeer experience
+      else
+        a(href='https://docs.google.com/forms/d/e/1FAIpQLSeURLXaNchVJEawPaiBrC--cM2mXc1zMEcaR4hu8MZyv44nHw/viewform?usp=sf_link' id='annotator_feedback_link' target='_blank')
+          button.btn.btn-primary.waves-effect.waves-light.bg-primary(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email') Annotator feedback
+      if(current_user.role.label !== "standard_user")
+        div(class='row-margin')
+          button.blue.btn.btn-primary.waves-effect.waves-light#refresh_datasets(type='button' title='Refresh datasets informations')
+            <i class="fas fa-sync-alt"></i> Refresh datasets
 
     if document.isDataSeer
       
