@@ -11,7 +11,8 @@ const AccountsManager = require('../../lib/accounts.js');
 
 const DocumentsDatasets = require('../../models/documents.datasets.js');
 
-const DocumentsDatasetsController = require('../../controllers/documents.datasets.js');
+const DocumentsController = require('../../controllers/documents.js'),
+  DocumentsDatasetsController = require('../../controllers/documents.datasets.js');
 
 /* PUT on datasets */
 router.put('/:id', function (req, res, next) {
@@ -46,7 +47,7 @@ router.post('/:id/dataset', function (req, res, next) {
     return res.status(401).send('Your current role does not grant you access to this part of the website');
   if (!req.body.dataset || typeof req.body.dataset !== 'object')
     return res.json({ 'err': true, 'res': null, 'msg': 'dataset must be defined' });
-  return DocumentsDatasetsController.newDataset(
+  return DocumentsController.newDataset(
     { datasetsId: req.params.id, dataset: req.body.dataset },
     function (err, dataset) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
@@ -59,7 +60,7 @@ router.post('/:id/dataset', function (req, res, next) {
 router.put('/:id/dataset', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
-  return DocumentsDatasetsController.updateDataset(
+  return DocumentsController.updateDataset(
     { datasetsId: req.params.id, dataset: req.body.dataset },
     function (err, dataset) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
@@ -72,39 +73,30 @@ router.put('/:id/dataset', function (req, res, next) {
 router.delete('/:id/dataset', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
-  return DocumentsDatasetsController.deleteDataset(
-    { datasetsId: req.params.id, dataset: req.body.dataset },
-    function (err) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      else return res.json({ 'err': false, 'res': true });
-    }
-  );
+  return DocumentsController.deleteDataset({ datasetsId: req.params.id, dataset: req.body.dataset }, function (err) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+    else return res.json({ 'err': false, 'res': true });
+  });
 });
 
 /* POST corresp of datasets */
 router.post('/:id/corresp', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
-  return DocumentsDatasetsController.newCorresp(
-    { datasetsId: req.params.id, dataset: req.body.dataset },
-    function (err) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      else return res.json({ 'err': false, 'res': true });
-    }
-  );
+  return DocumentsController.newCorresp({ datasetsId: req.params.id, dataset: req.body.dataset }, function (err) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+    else return res.json({ 'err': false, 'res': true });
+  });
 });
 
 /* DELETE corresp of datasets */
 router.delete('/:id/corresp', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
-  return DocumentsDatasetsController.deleteCorresp(
-    { datasetsId: req.params.id, dataset: req.body.dataset },
-    function (err) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      else return res.json({ 'err': false, 'res': true });
-    }
-  );
+  return DocumentsController.deleteCorresp({ datasetsId: req.params.id, dataset: req.body.dataset }, function (err) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+    else return res.json({ 'err': false, 'res': true });
+  });
 });
 
 module.exports = router;

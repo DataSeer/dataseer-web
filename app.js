@@ -44,9 +44,7 @@ const Accounts = require('./models/accounts.js'),
   Roles = require('./models/roles.js');
 
 const AccountsController = require('./controllers/accounts.js'),
-  DocumentsController = require('./controllers/documents.js'),
-  DocumentsFilesController = require('./controllers/documents.files.js'),
-  DocumentsDatasetsController = require('./controllers/documents.datasets.js');
+  DocumentsController = require('./controllers/documents.js');
 
 // mongoose object
 const mongoose = require('mongoose');

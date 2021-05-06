@@ -200,8 +200,9 @@ DocumentHandler.prototype.selectDataset = function (id, cb) {
             if (res.shouldSave) {
               console.log('Should save selected dataset', res);
               self.updateDataset(res.dataset.id, res.dataset);
-              self.autoSave(id);
-              return typeof cb === 'function' ? cb(null, id) : undefined;
+              self.modified(res.dataset.id);
+              self.saveDataset(res.dataset.id);
+              return typeof cb === 'function' ? cb(null, res.dataset.id) : undefined;
             } else {
               console.log('Selected dataset up to date');
               return typeof cb === 'function' ? cb(true) : undefined;
@@ -297,9 +298,9 @@ DocumentHandler.prototype.updateDataset = function (id, data = {}) {
 
 // Save a dataset
 DocumentHandler.prototype.saveDataset = function (id, cb) {
-  if (!this.hasChanged[id]) return typeof cb === 'function' ? cb(err, res) : undefined;
   let self = this,
     dataset = this.getDataset(id);
+  if (!this.hasChanged[id]) return typeof cb === 'function' ? cb(null, dataset) : undefined;
   this.loading(id);
   return DataSeerAPI.updateDataset(
     {
@@ -419,7 +420,13 @@ DocumentHandler.prototype.newDataset = function (opts = {}, cb) {
     let dataType = res['datatype'] ? res['datatype'] : self.datasetForm.defaultDataType,
       cert = res['cert'] ? res['cert'] : 0;
     // return cb(err, );
-    let dataset = { id: self.newDatasetId(), dataType: dataType, cert: cert, sentenceId: opts.sentenceId };
+    let dataset = {
+      id: self.newDatasetId(),
+      dataType: dataType,
+      cert: cert,
+      sentenceId: opts.sentenceId,
+      text: opts.text
+    };
     return DataSeerAPI.createDataset({ datasetsId: self.datasets._id, dataset: dataset }, function (err, res) {
       if (err) return cb(err, res);
       if (res.err) return cb(true, res);
