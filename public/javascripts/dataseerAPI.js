@@ -262,6 +262,31 @@ DataSeerAPI.reopenDocument = function (documentId, done) {
 };
 
 /**
+ * Refresh datasets informations
+ * @param {string} documentId Id of document
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @returns {undefined} undefined
+ */
+DataSeerAPI.refreshDatasets = function (documentId, done) {
+  return jQuery.ajax({
+    type: 'POST',
+    contentType: 'application/json; charset=utf-8',
+    headers: {
+      'X-HTTP-Method-Override': 'POST'
+    },
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/finish/refreshDatasets'),
+    data: JSON.stringify({}),
+    success: function (data) {
+      return done(false, data);
+    },
+    error: function () {
+      return done(true);
+    },
+    dataType: 'json'
+  });
+};
+
+/**
  * Back to "Metadata" process from "datasets" step
  * @param {string} documentId Id of document
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
