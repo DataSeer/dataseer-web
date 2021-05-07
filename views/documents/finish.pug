@@ -101,31 +101,32 @@ block content
                 <tr>
                   <th class='font-weight-bold' colspan='2'>Dataset #{index+1} :</th>
                 </tr>
-                </tr>
+                <tr>
                   <td><i>Dataset Id:</i></td>
                   <td><i>##{dataset.id}</i></td>
                 </tr>
+                <tr>
                   <td>Dataset Name:</td>
                   if dataset.name
                     <td>#{dataset.name}</td>
                   else
                     <td>Please provide a name to this dataset</td>
                 </tr>
-                </tr>
+                <tr>
                   <td>Data Type:</td>
                   if dataset.subType !== ''
                     <td>#{dataset.dataType} - #{dataset.subType}</td>
                   else
                     <td>#{dataset.dataType}</td>
                 </tr>
-                </tr>
+                <tr>
                   <td>Data Sentence:</td>
                   if dataset.text
                     <td>#{dataset.text}</td>
                   else
                     <td>n/a</td>
                 </tr>
-                </tr>
+                <tr>
                   <td>Stable Identifier:</td>
                   if dataset.DOI
                     <td>
@@ -134,7 +135,7 @@ block content
                   else
                     <td>Please provide the DOI (or other stable link) to this dataset</td>
                 </tr>
-                </tr>
+                <tr>
                   <td>Comments:</td>
                   if dataset.comments
                     <td>#{dataset.comments}</td>
@@ -159,27 +160,28 @@ block content
                 <tr>
                   <th class='font-weight-bold' colspan='2'>Dataset #{index+1} :</th>
                 </tr>
+                <tr>
                   <td>Dataset Name:</td>
                   if dataset.name
                     <td>#{dataset.name}</td>
                   else
                     <td>n/a</td>
                 </tr>
-                </tr>
+                <tr>
                   <td>Data Type:</td>
                   if dataset.subType !== ''
                     <td>#{dataset.dataType} - #{dataset.subType}</td>
                   else
                     <td>#{dataset.dataType}</td>
                 </tr>
-                </tr>
+                <tr>
                   <td>Data Sentence:</td>
                   if dataset.text
                     <td>#{dataset.text}</td>
                   else
                     <td>n/a</td>
                 </tr>
-                </tr>
+                <tr>
                   <td>Stable Identifier:</td>
                   if dataset.DOI
                     <td>
@@ -188,7 +190,7 @@ block content
                   else
                     <td>n/a</td>
                 </tr>
-                </tr>
+                <tr>
                   <td>Comments:</td>
                   if dataset.comments
                     <td>#{dataset.comments}</td>
