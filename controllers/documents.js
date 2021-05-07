@@ -634,6 +634,7 @@ Self.extractDatasets = function (doc, dataTypes, cb) {
  * Update datasets informations in MongoDB (based on the stored TEI file of given document)
  * @param {object} doc - Options available
  * @param {mongoose.Schema.Types.ObjectId} doc.tei - TEI file id
+ * @param {object} doc.datasets - Datasets of the document
  * @param {object} dataTypes - DataTypes JSON (stored in app.get('dataTypes'))
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
@@ -647,7 +648,15 @@ Self.refreshDatasets = function (doc, dataTypes, cb) {
         return DocumentsFiles.findById(doc.pdf).exec(function (err, file) {
           if (err) return cb(err);
           // Add metadata in MongoDB
-          let datasets = XML.extractDatasets(XML.load(data.toString()), dataTypes);
+          let datasetsMapping = {},
+            newDatasets = XML.extractDatasets(XML.load(data.toString()), dataTypes).reduce(function (acc, dataset) {
+              acc[dataset.id] = { text: dataset.text };
+              return acc;
+            }, datasetsMapping),
+            datasets = doc.datasets.current.map(function (dataset) {
+              dataset.text = datasetsMapping[dataset.id].text;
+              return dataset;
+            });
           return async.mapSeries(
             datasets,
             function (dataset, callback) {
