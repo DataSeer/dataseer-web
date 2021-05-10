@@ -41,7 +41,7 @@ const DocumentHandler = function (opts = {}, events) {
   this.tei = opts.tei;
   if (opts.pdf)
     this.pdf = {
-      buffer: opts.pdf.buffer,
+      url: opts.pdf.url,
       metadata: { sentences: opts.pdf.metadata.sentences, pages: opts.pdf.metadata.pages }
     };
   $('#datasets-confirm-modal-valid').click(function () {

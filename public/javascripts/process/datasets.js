@@ -44,7 +44,7 @@
   return DataSeerAPI.getDocument(documentId, { datasets: true }, function (err, doc) {
     setTextLoop('Downloading PDF...');
     // Get PDF content
-    return DataSeerAPI.getPDF(doc.pdf, function (err, pdf) {
+    return DataSeerAPI.getPDF(documentId, function (err, pdf) {
       setTextLoop('Downloading TEI...');
       // Get TEI content
       return DataSeerAPI.getTEI(doc.tei, function (err, tei) {
@@ -81,7 +81,10 @@
               datasets: doc.datasets,
               metadata: doc.metadata,
               tei: tei.data,
-              pdf: { buffer: pdf.data.data, metadata: pdf.metadata }
+              pdf: {
+                url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/pdf/content'),
+                metadata: pdf.metadata
+              }
             },
             {
               onReady: function () {
