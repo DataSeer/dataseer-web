@@ -292,7 +292,7 @@ PdfViewer.prototype.load = function (pdf, xmlMetadata, cb) {
   console.log('Loading PDF...');
   let self = this;
   this.viewer.empty();
-  return this.loadPDF(pdf.buffer, function (err, pdfDocument) {
+  return this.loadPDF(pdf.url, function (err, pdfDocument) {
     console.log('Load of PDF done.');
     self.pdfLoaded = true;
     self.pdfDocument = pdfDocument;
@@ -435,10 +435,10 @@ PdfViewer.prototype.refreshNumPage = function (scrollPosition) {
 };
 
 // Load PDF file
-PdfViewer.prototype.loadPDF = function (buffer, cb) {
+PdfViewer.prototype.loadPDF = function (url, cb) {
   let self = this;
   let loadingTask = pdfjsLib.getDocument({
-    data: buffer,
+    url: url,
     cMapUrl: CMAP_URL,
     cMapPacked: CMAP_PACKED
   });
