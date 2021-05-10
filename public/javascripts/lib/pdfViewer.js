@@ -269,14 +269,21 @@ const PdfViewer = function (id, screenId, events = {}) {
 
 // Get order of appearance of sentences
 PdfViewer.prototype.getSentencesMapping = function () {
-  let c = 0,
+  let arr = [],
     result = {};
   for (let page in this.metadata.pages) {
     for (let sentenceId in this.metadata.pages[page]) {
-      result[sentenceId] = c;
-      c++; // incremente counter
+      arr.push({ page: page, sentenceId: sentenceId, location: this.metadata.pages[page][sentenceId].location });
     }
   }
+  let sortedArr = arr.sort(function (a, b) {
+    if (a.page !== b.page) return a.page - b.page;
+    if (a.location.min.y === b.location.min.y) return a.location.min.x - b.location.min.x;
+    else return a.location.min.y - b.location.min.y;
+  });
+  sortedArr.map(function (item, i) {
+    result[item.sentenceId] = i;
+  });
   return result;
 };
 
