@@ -428,12 +428,12 @@ DataSeerAPI.getDocument = function (documentId, opts = {}, done) {
 
 /**
  * Get file by id
- * @param {string} fileId Id of file
+ * @param {string} documentId Id of document
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
-DataSeerAPI.getPDF = function (fileId, done) {
-  jQuery.get(DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/files/' + fileId + '/buffer'), function (data) {
+DataSeerAPI.getPDF = function (documentId, done) {
+  jQuery.get(DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/pdf'), function (data) {
     return done(data.err, data.res);
   });
 };
