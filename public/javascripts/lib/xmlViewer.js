@@ -130,6 +130,16 @@ XmlViewer.prototype.addCorresp = function (dataset, sentenceId) {
       .css('background-color', dataset.color.background.rgb);
 };
 
+// Get all corresps
+XmlViewer.prototype.getCorresps = function (dataset) {
+  return this.viewer
+    .find(`s[corresp="#${dataset.id}"]`)
+    .map(function () {
+      return { sentenceId: $(this).attr('sentenceId'), datasetId: dataset.id };
+    })
+    .get();
+};
+
 // Remove a corresp
 XmlViewer.prototype.removeCorresps = function (dataset) {
   let el = this.viewer.find(`s[corresp="#${dataset.id}"]`);

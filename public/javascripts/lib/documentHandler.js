@@ -328,11 +328,21 @@ DocumentHandler.prototype.mergeDatasets = function (datasets, cb) {
     return async.mapSeries(
       datasets.slice(1),
       function (item, callback) {
-        let dataset = Object.assign({}, self.getDataset(item.id));
+        let dataset = Object.assign({}, self.getDataset(item.id)),
+          corresps = self.documentView.getCorresps(dataset);
+        corresps.push({ sentenceId: dataset.sentenceId, datasetId: dataset.id });
         return self.deleteDataset(dataset.id, function (err, res) {
-          return self.addCorresp({ dataset: target, sentenceId: dataset.sentenceId }, function (err, dataset) {
-            return callback(err);
-          });
+          return async.mapSeries(
+            corresps,
+            function (corresp, next) {
+              return self.addCorresp({ dataset: target, sentenceId: corresp.sentenceId }, function (err) {
+                return next(err);
+              });
+            },
+            function (err) {
+              return callback(err);
+            }
+          );
         });
       },
       function (err) {
