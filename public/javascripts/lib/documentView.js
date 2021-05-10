@@ -225,6 +225,11 @@ DocumentView.prototype.selectDataset = function (id, cb) {
     });
 };
 
+// Get all corresps
+DocumentView.prototype.getCorresps = function (dataset) {
+  return this.xmlViewer.getCorresps(dataset);
+};
+
 // Select a Corresp
 DocumentView.prototype.selectCorresp = function (dataset, cb) {
   let self = this;
