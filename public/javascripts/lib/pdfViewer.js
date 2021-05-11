@@ -257,7 +257,8 @@ const PdfViewer = function (id, screenId, events = {}) {
   // pdf properties
   this.pdfLoaded = false;
   this.pdfDocument;
-  this.pdfPages; // cached render pages
+  this.pdfPages = {}; // cached render pages
+  this.currentPage = 0;
   // metadata properties
   this.metadata = {};
   // datasets properties
@@ -329,12 +330,18 @@ PdfViewer.prototype.hideMessage = function () {
 PdfViewer.prototype.selectDataset = function (id, cb) {
   let self = this,
     pages = this.getPagesOfDataset(id),
+    allPages = this.getPages(),
     maxPage = Math.max(...pages);
-  if (maxPage > 0)
-    this.renderUntilPage(maxPage, function (err) {
+  if (maxPage > 0) {
+    let numPages = [];
+    if (maxPage > 1) numPages.push(maxPage - 1);
+    numPages.push(maxPage);
+    if (allPages.length > 2 && maxPage < allPages[allPages.length - 2]) numPages.push(maxPage + 1);
+    this.renderPages(numPages, function (err) {
       if (err) return cb(err);
       return cb(self.scrollToDataset(id));
     });
+  } else return cb(new Error('invalid dataset id'));
 };
 
 // Select a dataset
@@ -391,6 +398,7 @@ PdfViewer.prototype.getPdfPage = function (numPage, cb) {
     return this.pdfDocument
       .getPage(numPage)
       .then(function (pdfPage) {
+        self.pdfPages[numPage] = pdfPage;
         return cb(null, pdfPage);
       })
       .catch((err) => {
@@ -405,33 +413,35 @@ PdfViewer.prototype.setPage = function (numPage) {
 };
 
 // Get PdfPages
-PdfViewer.prototype.onScroll = function (scrollPosition, direction) {
-  this.refreshNumPage(scrollPosition - 50 * direction);
-  if (scrollPosition >= this.viewer.height() - 50 * direction) {
+PdfViewer.prototype.onScroll = function (scrollInfos, direction) {
+  this.currentPage = this.refreshNumPage(scrollInfos);
+  if (direction > 0) {
     this.renderNextPage(function (err, res) {
       console.log('nextPageLoaded');
+    });
+  } else {
+    this.renderPreviousPage(function (err, res) {
+      console.log('previousPageLoaded');
     });
   }
 };
 
 // Get PdfPages
-PdfViewer.prototype.refreshNumPage = function (scrollPosition) {
+PdfViewer.prototype.refreshNumPage = function (scrollInfos) {
   let pages = this.viewer.find('div[class="page"]'),
+    maxHeight = this.viewer.outerHeight(),
     height = 0,
-    offSetTop = this.screen.offset().top,
-    screenHeight = this.screen.outerHeight(),
-    numPage = 1;
+    coeff = scrollInfos.position / scrollInfos.height,
+    numPage = 0;
   for (let i = 0; i < pages.length; i++) {
     let page = pages[i],
-      el = $(page),
-      a = offSetTop - el.offset().top,
-      min = -el.outerHeight() * 0.15,
-      max = el.outerHeight() * 0.95;
+      el = $(page);
     height += el.outerHeight();
-    if (a > min && a < max) break;
-    numPage += 1;
+    numPage = parseInt(el.attr('data-page-number'));
+    if (height / maxHeight > coeff) break;
   }
   this.infos.empty().append(`Page ${numPage}/${this.pdfDocument.numPages}`);
+  return numPage;
 };
 
 // Load PDF file
@@ -471,10 +481,37 @@ PdfViewer.prototype.renderUntilPage = function (numPage, cb) {
   );
 };
 
+// Render given pages
+PdfViewer.prototype.renderPages = function (numPages, cb) {
+  // Loading document
+  let self = this;
+  return async.eachSeries(
+    numPages,
+    function (numPage, callback) {
+      return self.renderPage({ numPage: numPage }, function (err, res) {
+        return callback(err);
+      });
+    },
+    function (err) {
+      if (err) console.log(err);
+      return cb(err);
+    }
+  );
+};
+
 // Render next page (or nothing if all pages already rendered)
 PdfViewer.prototype.renderNextPage = function (cb) {
-  let lastPage = this.viewer.find(`.page[data-page-number]`).last(),
-    numPage = parseInt(lastPage.attr('data-page-number')) + 1;
+  let numPage = this.currentPage + 1;
+  if (numPage <= this.pdfDocument.numPages) {
+    return this.renderPage({ numPage: numPage }, function (err, numPage) {
+      return cb(err, numPage);
+    });
+  } else return cb();
+};
+
+// Render next page (or nothing if all pages already rendered)
+PdfViewer.prototype.renderPreviousPage = function (cb) {
+  let numPage = this.currentPage - 1;
   if (numPage <= this.pdfDocument.numPages) {
     return this.renderPage({ numPage: numPage }, function (err, numPage) {
       return cb(err, numPage);
@@ -507,7 +544,6 @@ PdfViewer.prototype.renderPage = function (opts, cb) {
   let self = this,
     force = !!opts.force,
     numPage = opts.numPage;
-
   if (!numPage) return cb(new Error('numPage required'));
   else if (!force && this.viewer.find(`.page[data-page-number="${numPage}"]`).get(0)) return cb();
   else
@@ -804,14 +840,15 @@ PdfViewer.prototype.scrollToDataset = function (datasetId) {
   let element = this.viewer.find(`s[datasetId="${datasetId}"]`).first(),
     numPage = parseInt(element.parent().parent().attr('data-page-number')),
     pages = this.viewer.find('div[class="page"]'),
-    i = 1,
     height = 0;
-  pages.map(function () {
-    if (i < numPage) {
-      height += $(this).outerHeight();
-      i += 1;
-    }
-  });
+  for (let i = 0; i < pages.length; i++) {
+    let page = pages[i],
+      el = $(page),
+      currentNumPage = parseInt(el.attr('data-page-number'));
+    if (currentNumPage === numPage) break;
+    height += el.outerHeight();
+  }
+  this.currentPage = numPage;
   return height + element.position().top;
 };
 
@@ -820,14 +857,15 @@ PdfViewer.prototype.scrollToSentence = function (sentenceId) {
   let element = this.viewer.find(`s[sentenceId="${sentenceId}"]`).first(),
     numPage = parseInt(element.parent().parent().attr('data-page-number')),
     pages = this.viewer.find('div[class="page"]'),
-    i = 1,
     height = 0;
-  pages.map(function () {
-    if (i < numPage) {
-      height += $(this).outerHeight();
-      i += 1;
-    }
-  });
+  for (let i = 0; i < pages.length; i++) {
+    let page = pages[i],
+      el = $(page),
+      currentNumPage = parseInt(el.attr('data-page-number'));
+    if (currentNumPage === numPage) break;
+    height += el.outerHeight();
+  }
+  this.currentPage = numPage;
   return height + element.position().top;
 };
 
