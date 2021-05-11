@@ -71,7 +71,7 @@ const DocumentView = function (id, events = {}) {
         let scrollTop = self.screen.scrollTop(),
           direction = scrollTop > self.currentScroll ? +1 : -1;
         self.currentScroll = scrollTop;
-        self.pdfViewer.onScroll(scrollTop + self.screen.height(), direction);
+        self.pdfViewer.onScroll({ position: scrollTop, height: self.screen.prop('scrollHeight') }, direction);
       }
     }, 333)
   );
@@ -208,19 +208,22 @@ DocumentView.prototype.unselectSentence = function (sentence) {
 };
 
 // Select a dataset
-DocumentView.prototype.selectDataset = function (id, cb) {
+DocumentView.prototype.selectDataset = function (opts, cb) {
   let self = this;
-  this.currentDatasetId = id;
+  this.currentDatasetId = opts.id;
   if (this.pdfVisible)
-    return this.pdfViewer.selectDataset(id, function (position) {
-      if (position) self.screen.animate({ scrollTop: position });
-      else console.log('dataset not selected');
+    return this.pdfViewer.selectDataset(opts.id, function (position) {
+      if (position) {
+        if (opts.noAnim) self.screen.scrollTop(position);
+        else self.screen.animate({ scrollTop: position });
+      } else console.log('dataset not selected');
       return typeof cb === 'function' ? cb() : undefined;
     });
   else
-    return this.xmlViewer.selectDataset(id, function (position) {
-      if (position) self.screen.animate({ scrollTop: position + self.screen.scrollTop() - self.screen.height() / 1.8 });
-      else console.log('dataset not selected');
+    return this.xmlViewer.selectDataset(opts.id, function (position) {
+      if (position) {
+        self.screen.animate({ scrollTop: position + self.screen.scrollTop() - self.screen.height() / 1.8 });
+      } else console.log('dataset not selected');
       return typeof cb === 'function' ? cb() : undefined;
     });
 };
