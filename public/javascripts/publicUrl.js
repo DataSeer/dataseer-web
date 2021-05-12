@@ -8,7 +8,7 @@
   // On public URL click
   $('#getPublicURL').click(function () {
     return fallbackCopyTextToClipboard(document.getElementById('public_url').value, function (err) {
-      if (err) alert('An error has occured, the public URL is not copied');
+      if (err) alert('An error has occurred, the public URL is not copied');
       else alert('Public URL copied');
     });
   });
