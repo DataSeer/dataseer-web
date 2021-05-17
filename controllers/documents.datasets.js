@@ -67,7 +67,7 @@ Self.createDataset = function (opts = {}) {
       ? opts.bestPracticeForIndicatingReUseOfExistingData
       : '', // best practice for indicating re-use of existing data
     mostSuitableRepositories: opts.mostSuitableRepositories ? opts.mostSuitableRepositories : '', // most suitable repositories
-    DOI: opts.DOI, // DOI
+    DOI: opts.DOI ? opts.DOI : '', // DOI
     name: opts.name ? opts.name : '', // name
     comments: opts.comments ? opts.comments : '', // comments
     text: opts.text ? opts.text : '', // text of sentence
