@@ -440,7 +440,7 @@ router.post('/:id/finish/refreshDatasets', function (req, res, next) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
     else
-      return DocumentsController.refreshDatasets(doc, req.app.get('dataTypes'), function (err) {
+      return DocumentsController.refreshDatasets(req.user, doc, req.app.get('dataTypes'), function (err) {
         if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
         return res.json({ 'err': false, 'res': true });
       });

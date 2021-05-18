@@ -48,7 +48,7 @@ router.post('/:id/dataset', function (req, res, next) {
   if (!req.body.dataset || typeof req.body.dataset !== 'object')
     return res.json({ 'err': true, 'res': null, 'msg': 'dataset must be defined' });
   return DocumentsController.newDataset(
-    { datasetsId: req.params.id, dataset: req.body.dataset },
+    { user: req.user, datasetsId: req.params.id, dataset: req.body.dataset },
     function (err, dataset) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       else return res.json({ 'err': false, 'res': dataset });
@@ -61,7 +61,7 @@ router.put('/:id/dataset', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
   return DocumentsController.updateDataset(
-    { datasetsId: req.params.id, dataset: req.body.dataset },
+    { user: req.user, datasetsId: req.params.id, dataset: req.body.dataset },
     function (err, dataset) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       else return res.json({ 'err': false, 'res': dataset });
@@ -73,10 +73,13 @@ router.put('/:id/dataset', function (req, res, next) {
 router.delete('/:id/dataset', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
-  return DocumentsController.deleteDataset({ datasetsId: req.params.id, dataset: req.body.dataset }, function (err) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else return res.json({ 'err': false, 'res': true });
-  });
+  return DocumentsController.deleteDataset(
+    { user: req.user, datasetsId: req.params.id, dataset: req.body.dataset },
+    function (err) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+      else return res.json({ 'err': false, 'res': true });
+    }
+  );
 });
 
 /* POST corresp of datasets */
