@@ -19,6 +19,7 @@ const XmlViewer = function (id, screenId, events = {}) {
   this.container.append(this.viewer);
   // Events
   this.events = events;
+  this.sentencesMapping = { object: undefined, array: undefined };
   return this;
 };
 
@@ -28,11 +29,31 @@ XmlViewer.prototype.attach = function (event, fn) {
 };
 
 // Get order of appearance of sentences
+XmlViewer.prototype.getSentences = function (selectedSentences, lastSentence) {
+  let sentences = [lastSentence].concat(selectedSentences),
+    min = Infinity,
+    max = -Infinity;
+  for (let i = 0; i < sentences.length; i++) {
+    let index = this.sentencesMapping.array.indexOf(sentences[i].sentenceId);
+    min = index > -1 && index < min ? index : min;
+    max = index > -1 && index > max ? index : max;
+  }
+  if (min !== Infinity && max !== -Infinity) return this.sentencesMapping.array.slice(min, max + 1);
+  else return [];
+};
+
+// Get order of appearance of sentences
 XmlViewer.prototype.getSentencesMapping = function () {
+  if (typeof this.sentencesMapping.object !== 'undefined') return this.sentencesMapping.object;
   let result = {};
   this.viewer.find(`s[sentenceId]`).map(function (i, el) {
     result[$(el).attr('sentenceId')] = i;
   });
+  this.sentencesMapping.object = result;
+  this.sentencesMapping.array = new Array(Object.keys(result).length);
+  for (var key in result) {
+    this.sentencesMapping.array[parseInt(result[key])] = key;
+  }
   return result;
 };
 
@@ -78,8 +99,8 @@ XmlViewer.prototype.unselectSentence = function (sentence) {
 XmlViewer.prototype.getInfosOfSentence = function (sentenceId) {
   let el = this.viewer.find(`s[sentenceId="${sentenceId}"]`);
   if (el.get(0)) {
-    let isCorresp = el.attr('corresp') ? true : false,
-      isDataset = el.attr('id') ? true : false,
+    let isCorresp = typeof el.attr('corresp') !== 'undefined',
+      isDataset = typeof el.attr('id') !== 'undefined',
       datasetId = isCorresp ? el.attr('corresp').replace('#', '') : el.attr('id');
     return {
       sentenceId: el.attr('sentenceId'),

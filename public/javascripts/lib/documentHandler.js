@@ -80,10 +80,12 @@ DocumentHandler.prototype.refreshSentencesMapping = function () {
 
 // Attach event
 DocumentHandler.prototype.init = function () {
-  let self = this,
-    dataset = this.getFirstDataset();
+  // refresh mapping
   this.sentencesMapping = this.documentView.getSentencesMapping();
   this.refreshSentencesMapping();
+  let self = this,
+    firstId = this.datasetsList.getFirstDatasetId(),
+    dataset = firstId ? this.getDataset(firstId) : {};
   if (dataset && dataset.id) {
     this.selectDataset({ id: dataset.id, noAnim: true }, function () {
       console.log('init');
@@ -180,11 +182,12 @@ DocumentHandler.prototype.loading = function (id) {
 
 // Select a dataset
 DocumentHandler.prototype.selectDataset = function (opts, cb) {
+  console.log(opts);
   let self = this;
   this.currentDataset = this.getDataset(opts.id);
   this.currentCorresp = null;
-  if (this.documentView.selectedSentence && this.documentView.selectedSentence.sentenceId)
-    this.documentView.unselectSentence(this.documentView.selectedSentence);
+  let selectedSentences = this.documentView.getSelectedSentences();
+  if (selectedSentences.length > 0) this.documentView.unselectSentences(selectedSentences);
   if (this.currentDataset)
     return this.documentView.selectDataset({ id: this.currentDataset.id, noAnim: opts.noAnim }, function (err) {
       self.datasetsList.select(self.currentDataset.id);
@@ -219,8 +222,8 @@ DocumentHandler.prototype.selectCorresp = function (datasetId, sentenceId, cb) {
   if (datasetId && sentenceId) {
     let self = this;
     this.currentCorresp = { datasetId: datasetId, sentenceId: sentenceId };
-    if (this.documentView.selectedSentence && this.documentView.selectedSentence.sentenceId)
-      this.documentView.unselectSentence(this.documentView.selectedSentence);
+    let selectedSentences = this.documentView.getSelectedSentences();
+    if (selectedSentences.length > 0) this.documentView.unselectSentences(selectedSentences);
     this.documentView.selectCorresp({ id: datasetId, sentenceId: sentenceId }, function (err) {
       self.datasetsList.select(self.currentCorresp.datasetId);
       self.datasetForm.link(
@@ -421,9 +424,11 @@ DocumentHandler.prototype.newDatasetId = function () {
 };
 
 // Create new Dataset
-DocumentHandler.prototype.newDataset = function (opts = {}, cb) {
-  let self = this;
-  return DataSeerAPI.getdataType(opts.text, function (err, res) {
+DocumentHandler.prototype.newDataset = function (sentences = {}, cb) {
+  let self = this,
+    datasetSentence = sentences[0],
+    correspsSentences = sentences.slice(1);
+  return DataSeerAPI.getdataType(datasetSentence.text, function (err, res) {
     if (err) return cb(err, res);
     if (res.err) return cb(true, res);
     console.log(err, res);
@@ -434,15 +439,19 @@ DocumentHandler.prototype.newDataset = function (opts = {}, cb) {
       id: self.newDatasetId(),
       dataType: dataType,
       cert: cert,
-      sentenceId: opts.sentenceId,
-      text: opts.text
+      sentenceId: datasetSentence.sentenceId,
+      text: datasetSentence.text
     };
     return DataSeerAPI.createDataset({ datasetsId: self.datasets._id, dataset: dataset }, function (err, res) {
       if (err) return cb(err, res);
       if (res.err) return cb(true, res);
       console.log(err, res);
       return self.addDataset(res.res, function (err, dataset) {
-        return cb(err, dataset);
+        if (correspsSentences.length === 0) return cb(err, dataset);
+        else
+          return self.newCorresp({ datasetId: dataset.id, sentences: correspsSentences }, function (err, dataset) {
+            return cb(err, dataset);
+          });
       });
     });
   });
@@ -460,16 +469,30 @@ DocumentHandler.prototype.addDataset = function (dataset, cb) {
 
 // Create new Corresp
 DocumentHandler.prototype.newCorresp = function (opts = {}, cb) {
-  let self = this;
-  let dataset = { id: opts.id, sentenceId: opts.sentenceId };
-  return DataSeerAPI.createCorresp({ datasetsId: self.datasets._id, dataset: dataset }, function (err, res) {
-    if (err) return cb(err, res);
-    if (res.err) return cb(true, res);
-    console.log(err, res);
-    return self.addCorresp({ dataset: self.getDataset(opts.id), sentenceId: opts.sentenceId }, function (err, dataset) {
+  let self = this,
+    dataset = self.getDataset(opts.datasetId);
+  return async.mapSeries(
+    opts.sentences,
+    function (sentence, next) {
+      return DataSeerAPI.createCorresp(
+        { datasetsId: self.datasets._id, dataset: { id: opts.datasetId, sentenceId: sentence.sentenceId } },
+        function (err, res) {
+          if (err) return cb(err, res);
+          if (res.err) return cb(true, res);
+          console.log(err, res);
+          return self.addCorresp(
+            { dataset: self.getDataset(opts.datasetId), sentenceId: sentence.sentenceId },
+            function (err, dataset) {
+              return next(err);
+            }
+          );
+        }
+      );
+    },
+    function (err) {
       return cb(err, dataset);
-    });
-  });
+    }
+  );
 };
 
 // Add  new Corresp
@@ -500,17 +523,6 @@ DocumentHandler.prototype.refreshDataset = function (id) {
     );
 };
 
-// Reorder an array
-DocumentHandler.prototype.reorder = function (data, index) {
-  if (index > data.length) return data;
-  return data.slice(index).concat(data.slice(0, index));
-};
-
-// Get the first dataset (or undefined)
-DocumentHandler.prototype.getFirstDataset = function () {
-  return this.datasets.current[0];
-};
-
 // return index of dataset
 DocumentHandler.prototype.getDatasetIndex = function (id) {
   for (let i = 0; i < this.datasets.current.length; i++) {
@@ -519,28 +531,13 @@ DocumentHandler.prototype.getDatasetIndex = function (id) {
   return -1;
 };
 
-// Get the first not "valid" dataset (or undefined)
-DocumentHandler.prototype.getFirstDatasetNotValid = function (id) {
-  let index = this.getDatasetIndex(id),
-    data = this.reorder(
-      this.datasets.current.map(function (item) {
-        return { id: item.id, status: item.status };
-      }),
-      index + 1
-    ); // reorder infos in new Array
-  for (let i = 0; i < data.length; i++) {
-    if (data[i].status !== 'valid') return this.getDataset(data[i].id);
-  }
-  return null;
-};
-
 // Get the next dataset (or undefined)
 DocumentHandler.prototype.getNextDataset = function (id) {
   let dataset = this.getDataset(id),
-    firstChoice = this.getFirstDatasetNotValid(dataset.id),
-    secondChoice = this.getFirstDataset();
-  if (firstChoice) return firstChoice;
-  else if (secondChoice) return secondChoice;
+    firstChoice = this.datasetsList.getFirstDatasetIdNotValid(dataset.id),
+    secondChoice = this.datasetsList.getFirstDatasetId();
+  if (firstChoice) return this.getDataset(firstChoice);
+  else if (secondChoice) return this.getDataset(secondChoice);
   return dataset;
 };
 
@@ -633,32 +630,29 @@ DocumentHandler.prototype.synchronize = function () {
       });
     });
     this.datasetsList.attach('onDatasetLink', function (dataset) {
-      let selectedSentence = self.documentView.selectedSentence;
-      if (selectedSentence && selectedSentence.sentenceId) {
-        return self.newCorresp({ id: dataset.id, sentenceId: selectedSentence.sentenceId }, function (err, dataset) {
-          if (err) return console.log(err);
-          return self.selectCorresp(dataset.id, selectedSentence.sentenceId);
+      let selectedSentences = self.documentView.getSelectedSentences();
+      if (selectedSentences.length === 0)
+        return self.showModalError({
+          title: 'Error: Link sentence to dataset',
+          body: 'You must select a sentence before linking it to the dataset'
         });
-      }
-      return self.showModalError({
-        title: 'Error: Link sentence to dataset',
-        body: 'You must select a sentence before linking it to the dataset'
-      });
+      else
+        return self.newCorresp({ datasetId: dataset.id, sentences: selectedSentences }, function (err, dataset) {
+          if (err) return console.log(err);
+          return self.selectCorresp(dataset.id, selectedSentences[selectedSentences.length - 1].sentenceId);
+        });
     });
     this.datasetsList.attach('onNewDatasetClick', function () {
-      let selectedSentence = self.documentView.selectedSentence;
-      if (selectedSentence && selectedSentence.sentenceId && selectedSentence.text) {
-        return self.newDataset(
-          { text: selectedSentence.text, sentenceId: selectedSentence.sentenceId },
-          function (err, dataset) {
-            if (err) return console.log(err);
-            return self.selectDataset({ id: dataset.id });
-          }
-        );
-      } else
+      let selectedSentences = self.documentView.getSelectedSentences();
+      if (selectedSentences.length === 0)
         return self.showModalError({
           title: 'Error: New dataset',
           body: 'You must select a sentence to create a new dataset'
+        });
+      else
+        return self.newDataset(selectedSentences, function (err, dataset) {
+          if (err) return console.log(err);
+          return self.selectDataset({ id: dataset.id });
         });
     });
     this.datasetsList.attach('onMergeSelectionClick', function (ids) {
