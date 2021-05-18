@@ -56,6 +56,43 @@ const DatasetsList = function (id = 'datasetsList', events = {}) {
   return this;
 };
 
+// Reorder an array
+DatasetsList.prototype.getDatasetsIds = function (id) {
+  let datasets = this.container
+    .find('.item[sentenceId]')
+    .map(function (index, elem) {
+      return { id: $(elem).attr('value'), status: $(elem).find('[key="dataset\\.status"]').attr('value') };
+    })
+    .get();
+  if (typeof id === 'string') {
+    let index = datasets.reduce(
+      function (acc, item) {
+        if (!acc.continue) return acc;
+        acc.continue = acc.id !== item.id;
+        acc.index++;
+        return acc;
+      },
+      { continue: true, index: -1, id: id }
+    ).index;
+    if (index > -1) datasets = datasets.slice(index + 1).concat(datasets.slice(0, index + 1));
+  }
+  return datasets;
+};
+
+// Get the first not "valid" dataset (or undefined)
+DatasetsList.prototype.getFirstDatasetIdNotValid = function (id) {
+  let datasets = this.getDatasetsIds(id);
+  for (let i = 0; i < datasets.length; i++) {
+    if (datasets[i].status !== 'valid') return datasets[i].id;
+  }
+  return null;
+};
+
+// Get the first dataset (or undefined)
+DatasetsList.prototype.getFirstDatasetId = function () {
+  return this.container.find('.item[sentenceId]:first-child').attr('value');
+};
+
 // Set mapping of sentences
 DatasetsList.prototype.setSentencesMapping = function (sentencesMapping) {
   this.sentencesMapping = sentencesMapping;

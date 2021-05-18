@@ -7,8 +7,10 @@
 const DocumentView = function (id, events = {}) {
   let self = this;
   this.id = id;
-  this.selectedSentence = {};
+  this.selectedSentences = {};
   this.currentDatasetId;
+  this.shiftPressed = false;
+  this.ctrlPressed = false;
   this.viewersEvents = {
     onClick: function (sentence) {
       let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId),
@@ -16,14 +18,38 @@ const DocumentView = function (id, events = {}) {
       if (isDataset) {
         if (typeof self.events.onDatasetClick === 'function') self.events.onDatasetClick(result);
       } else {
-        if (self.selectedSentence.sentenceId === result.sentenceId) {
-          self.unselectSentence(result);
+        if (self.ctrlPressed) {
+          if (self.isSelected(result)) {
+            self.unselectSentence(result);
+            self.hoverSentence({
+              sentenceId: result.sentenceId,
+              isDataset: false,
+              isSelected: false
+            });
+          } else self.selectSentence(result);
+        } else if (self.shiftPressed) {
+          let selectedSentences = self.getSelectedSentences();
+          if (selectedSentences.length) {
+            let sentences = self.getSentences(selectedSentences, result);
+            for (let i = 0; i < sentences.length; i++) {
+              if (typeof sentences[i] === 'string') {
+                let sentence = self.getSentence(sentences[i]);
+                if (!sentence.isDataset && !sentence.isCorresp) self.selectSentence(sentence);
+              }
+            }
+          } else console.log('At least one sentence must be selected');
         } else {
-          // unselect previous selected sentence
-          if (self.selectedSentence.sentenceId) {
-            self.unselectSentence(self.selectedSentence);
+          if (self.isSelected(result)) {
+            self.unselectSentences(self.getSelectedSentences());
+            self.hoverSentence({
+              sentenceId: result.sentenceId,
+              isDataset: false,
+              isSelected: false
+            });
+          } else {
+            self.unselectSentences(self.getSelectedSentences());
+            self.selectSentence(result);
           }
-          self.selectSentence(result);
         }
         if (typeof self.events.onSentenceClick === 'function') self.events.onSentenceClick(result);
       }
@@ -31,7 +57,6 @@ const DocumentView = function (id, events = {}) {
     onHover: function (sentence) {
       let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId),
         isDataset = !!result.datasetId;
-      // console.log(result);
       if (isDataset) {
         if (typeof self.events.onDatasetHover === 'function') self.events.onDatasetHover(result);
       } else {
@@ -40,13 +65,12 @@ const DocumentView = function (id, events = {}) {
       self.hoverSentence({
         sentenceId: result.sentenceId,
         isDataset: isDataset,
-        isSelected: self.selectedSentence && result.sentenceId === self.selectedSentence.sentenceId
+        isSelected: self.isSelected(result)
       });
     },
     onEndHover: function (sentence) {
       let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId),
         isDataset = !!result.datasetId;
-      // console.log(result);
       if (isDataset) {
         if (typeof self.events.onDatasetHover === 'function') self.events.onDatasetHover(result);
       } else {
@@ -55,7 +79,7 @@ const DocumentView = function (id, events = {}) {
       self.endHoverSentence({
         sentenceId: result.sentenceId,
         isDataset: isDataset,
-        isSelected: self.selectedSentence && result.sentenceId === self.selectedSentence.sentenceId
+        isSelected: self.isSelected(result)
       });
     }
   };
@@ -78,6 +102,15 @@ const DocumentView = function (id, events = {}) {
   // Element initialization
   this.xml.hide();
   this.pdfVisible = true;
+  // Key events listeners
+  $(document).keydown(function (event) {
+    if (event.key === 'Control') self.ctrlPressed = true;
+    else if (event.key === 'Shift') self.shiftPressed = true;
+  });
+  $(document).keyup(function (event) {
+    if (event.key === 'Control') self.ctrlPressed = false;
+    else if (event.key === 'Shift') self.shiftPressed = false;
+  });
   // On button click
   $('#documentView\\.viewSelection\\.tei\\.all')
     .parent()
@@ -87,7 +120,7 @@ const DocumentView = function (id, events = {}) {
       self.pdf.hide();
       self.xml.show();
       self.xml.find('*.hidden').removeClass('hidden');
-      self.selectDataset(self.currentDatasetId);
+      self.selectDataset({ id: self.currentDatasetId });
       return typeof self.events.onFulltextView === 'function' ? self.events.onFulltextView() : undefined;
     });
   $('#documentView\\.viewSelection\\.tei\\.dataseer')
@@ -102,7 +135,7 @@ const DocumentView = function (id, events = {}) {
         let element = $(el);
         if (element.find('s[id], s[corresp]').length === 0) return element.addClass('hidden');
       });
-      self.selectDataset(self.currentDatasetId);
+      self.selectDataset({ id: self.currentDatasetId });
       return typeof self.events.onSectionView === 'function' ? self.events.onSectionView() : undefined;
     });
   $('#documentView\\.viewSelection\\.tei\\.dataset')
@@ -117,7 +150,7 @@ const DocumentView = function (id, events = {}) {
         let element = $(el);
         if (element.find('s[id], s[corresp]').length === 0) return element.addClass('hidden');
       });
-      self.selectDataset(self.currentDatasetId);
+      self.selectDataset({ id: self.currentDatasetId });
       return typeof self.events.onParagraphView === 'function' ? self.events.onParagraphView() : undefined;
     });
   $('#documentView\\.viewSelection\\.pdf')
@@ -127,12 +160,20 @@ const DocumentView = function (id, events = {}) {
       self.pdfVisible = true;
       self.pdf.show();
       self.xml.hide();
-      self.selectDataset(self.currentDatasetId);
+      self.selectDataset({ id: self.currentDatasetId });
       return typeof self.events.onPdfView === 'function' ? self.events.onPdfView() : undefined;
     });
   // Events
   this.events = events;
   return this;
+};
+
+// Check if the given sentence is selected
+DocumentView.prototype.isSelected = function (sentence) {
+  return (
+    typeof this.selectedSentences[sentence.sentenceId] === 'object' &&
+    this.selectedSentences[sentence.sentenceId].sentenceId
+  );
 };
 
 // Attach event
@@ -148,9 +189,11 @@ DocumentView.prototype.getSentencesMapping = function () {
   };
 };
 
-// Get selected sentence or undefined
-DocumentView.prototype.getSelectedSentence = function () {
-  if (this.selectedSentence.sentenceId) return this.selectedSentence;
+// Get part of sentences
+DocumentView.prototype.getSentences = function (selectedSentences, lastSentence) {
+  return this.pdfVisible
+    ? this.pdfViewer.getSentences(selectedSentences, lastSentence)
+    : this.xmlViewer.getSentences(selectedSentences, lastSentence);
 };
 
 // Get sentence
@@ -195,16 +238,28 @@ DocumentView.prototype.endHoverSentence = function (sentence) {
 
 // Select a sentence
 DocumentView.prototype.selectSentence = function (sentence) {
-  this.selectedSentence = sentence;
+  this.selectedSentences[sentence.sentenceId] = sentence;
   if (this.pdfViewer) this.pdfViewer.selectSentence(sentence);
   this.xmlViewer.selectSentence(sentence);
 };
 
 // Unselect a sentence
 DocumentView.prototype.unselectSentence = function (sentence) {
-  this.selectedSentence = {};
+  delete this.selectedSentences[sentence.sentenceId];
   if (this.pdfViewer) this.pdfViewer.unselectSentence(sentence);
   this.xmlViewer.unselectSentence(sentence);
+};
+
+// Unselect all selected sentences
+DocumentView.prototype.unselectSentences = function (sentences) {
+  for (let i = 0; i < sentences.length; i++) {
+    this.unselectSentence(sentences[i]);
+  }
+};
+
+// Get selected sentence or undefined
+DocumentView.prototype.getSelectedSentences = function () {
+  if (this.selectedSentences) return Object.values(this.selectedSentences);
 };
 
 // Select a dataset

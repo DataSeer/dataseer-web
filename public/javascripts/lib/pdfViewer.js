@@ -67,7 +67,7 @@ const Chunk = function (data, scale) {
   this.y = Math.floor((parseFloat(data.y) - MARGIN_CHUNK.y) * scale);
   this.w = Math.ceil((parseFloat(data.w) + MARGIN_CHUNK.w * 2) * scale);
   this.h = Math.ceil((parseFloat(data.h) + MARGIN_CHUNK.h * 2) * scale);
-  this.p = parseInt(data.p);
+  this.p = parseInt(data.p, 10);
   return this;
 };
 
@@ -259,6 +259,7 @@ const PdfViewer = function (id, screenId, events = {}) {
   this.pdfDocument;
   this.pdfPages = {}; // cached render pages
   this.currentPage = 0;
+  this.sentencesMapping = { object: undefined, array: undefined };
   // metadata properties
   this.metadata = {};
   // datasets properties
@@ -269,7 +270,22 @@ const PdfViewer = function (id, screenId, events = {}) {
 };
 
 // Get order of appearance of sentences
+PdfViewer.prototype.getSentences = function (selectedSentences, lastSentence) {
+  let sentences = [lastSentence].concat(selectedSentences),
+    min = Infinity,
+    max = -Infinity;
+  for (let i = 0; i < sentences.length; i++) {
+    let index = this.sentencesMapping.array.indexOf(sentences[i].sentenceId);
+    min = index > -1 && index < min ? index : min;
+    max = index > -1 && index > max ? index : max;
+  }
+  if (min !== Infinity && max !== -Infinity) return this.sentencesMapping.array.slice(min, max + 1);
+  else return [];
+};
+
+// Get order of appearance of sentences
 PdfViewer.prototype.getSentencesMapping = function () {
+  if (typeof this.sentencesMapping.object !== 'undefined') return this.sentencesMapping.object;
   let arr = [],
     result = {};
   for (let page in this.metadata.pages) {
@@ -285,6 +301,11 @@ PdfViewer.prototype.getSentencesMapping = function () {
   sortedArr.map(function (item, i) {
     result[item.sentenceId] = i;
   });
+  this.sentencesMapping.object = result;
+  this.sentencesMapping.array = new Array(Object.keys(result).length);
+  for (var key in result) {
+    this.sentencesMapping.array[parseInt(result[key], 10)] = key;
+  }
   return result;
 };
 
@@ -353,7 +374,7 @@ PdfViewer.prototype.selectCorresp = function (id, cb) {
 PdfViewer.prototype.getPagesOfDataset = function (id) {
   if (this.datasets && this.datasets[id] && typeof this.metadata.sentences[this.datasets[id]].pages === 'object')
     return Object.keys(this.metadata.sentences[this.datasets[id]].pages).map(function (item) {
-      return parseInt(item);
+      return parseInt(item, 10);
     });
   else return [];
 };
@@ -362,7 +383,7 @@ PdfViewer.prototype.getPagesOfDataset = function (id) {
 PdfViewer.prototype.getPagesOfSentence = function (id) {
   if (this.metadata.sentences)
     return Object.keys(this.metadata.sentences[id].pages).map(function (item) {
-      return parseInt(item);
+      return parseInt(item, 10);
     });
   else return [];
 };
@@ -416,13 +437,9 @@ PdfViewer.prototype.setPage = function (numPage) {
 PdfViewer.prototype.onScroll = function (scrollInfos, direction) {
   this.currentPage = this.refreshNumPage(scrollInfos);
   if (direction > 0) {
-    this.renderNextPage(function (err, res) {
-      console.log('nextPageLoaded');
-    });
+    this.renderNextPage(function (err, res) {});
   } else {
-    this.renderPreviousPage(function (err, res) {
-      console.log('previousPageLoaded');
-    });
+    this.renderPreviousPage(function (err, res) {});
   }
 };
 
@@ -437,7 +454,7 @@ PdfViewer.prototype.refreshNumPage = function (scrollInfos) {
     let page = pages[i],
       el = $(page);
     height += el.outerHeight();
-    numPage = parseInt(el.attr('data-page-number'));
+    numPage = parseInt(el.attr('data-page-number'), 10);
     if (height / maxHeight > coeff) break;
   }
   this.infos.empty().append(`Page ${numPage}/${this.pdfDocument.numPages}`);
@@ -624,7 +641,7 @@ PdfViewer.prototype.buildAreas = function (chunks = {}, scales, numPage) {
     result = [];
   for (let sentenceId in chunks) {
     let sentenceChunks = chunks[sentenceId].filter(function (chunk) {
-        return parseInt(chunk.p) === numPage;
+        return parseInt(chunk.p, 10) === numPage;
       }),
       lines = {
         'lines': new Lines(sentenceChunks, scales).all(),
@@ -838,13 +855,13 @@ PdfViewer.prototype.removeDataset = function (dataset) {
 // Scroll to a sentence
 PdfViewer.prototype.scrollToDataset = function (datasetId) {
   let element = this.viewer.find(`s[datasetId="${datasetId}"]`).first(),
-    numPage = parseInt(element.parent().parent().attr('data-page-number')),
+    numPage = parseInt(element.parent().parent().attr('data-page-number'), 10),
     pages = this.viewer.find('div[class="page"]'),
     height = 0;
   for (let i = 0; i < pages.length; i++) {
     let page = pages[i],
       el = $(page),
-      currentNumPage = parseInt(el.attr('data-page-number'));
+      currentNumPage = parseInt(el.attr('data-page-number'), 10);
     if (currentNumPage === numPage) break;
     height += el.outerHeight();
   }
@@ -855,13 +872,13 @@ PdfViewer.prototype.scrollToDataset = function (datasetId) {
 // Scroll to a sentence
 PdfViewer.prototype.scrollToSentence = function (sentenceId) {
   let element = this.viewer.find(`s[sentenceId="${sentenceId}"]`).first(),
-    numPage = parseInt(element.parent().parent().attr('data-page-number')),
+    numPage = parseInt(element.parent().parent().attr('data-page-number'), 10),
     pages = this.viewer.find('div[class="page"]'),
     height = 0;
   for (let i = 0; i < pages.length; i++) {
     let page = pages[i],
       el = $(page),
-      currentNumPage = parseInt(el.attr('data-page-number'));
+      currentNumPage = parseInt(el.attr('data-page-number'), 10);
     if (currentNumPage === numPage) break;
     height += el.outerHeight();
   }
