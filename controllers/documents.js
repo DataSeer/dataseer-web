@@ -632,14 +632,15 @@ Self.extractDatasets = function (doc, dataTypes, cb) {
 
 /**
  * Update datasets informations in MongoDB (based on the stored TEI file of given document)
- * @param {object} doc - Options available
+ * @param {object} user - User
+ * @param {object} doc - Document
  * @param {mongoose.Schema.Types.ObjectId} doc.tei - TEI file id
  * @param {object} doc.datasets - Datasets of the document
  * @param {object} dataTypes - DataTypes JSON (stored in app.get('dataTypes'))
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.refreshDatasets = function (doc, dataTypes, cb) {
+Self.refreshDatasets = function (user, doc, dataTypes, cb) {
   if (doc.tei)
     // Read TEI file (containing PDF metadata)
     return DocumentsFilesController.readFile(doc.tei, function (err, data) {
@@ -661,7 +662,7 @@ Self.refreshDatasets = function (doc, dataTypes, cb) {
             datasets,
             function (dataset, callback) {
               return Self.updateDataset(
-                { noXML: true, datasetsId: doc.datasets._id, dataset: dataset },
+                { user: user, noXML: true, datasetsId: doc.datasets._id, dataset: dataset },
                 function (err, res) {
                   return callback(err);
                 }
@@ -679,6 +680,7 @@ Self.refreshDatasets = function (doc, dataTypes, cb) {
 /**
  * Create new dataset
  * @param {object} opts - JSON containing all data
+ * @param {string} opts.user - User
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
  * @param {string} opts.dataset.sentenceId - Dataset sentence id
@@ -729,7 +731,28 @@ Self.newDataset = function (opts = {}, cb) {
         },
         function (err) {
           if (err) return cb(err);
-          return cb(null, dataset);
+          // Get Document
+          return Documents.findOne({ _id: datasets.document }).exec(function (err, doc) {
+            if (err) return cb(err);
+            // Create logs
+            return DocumentsLogs.create(
+              {
+                document: doc._id,
+                user: opts.user._id,
+                action: 'NEW DATASET ' + dataset.id
+              },
+              function (err, log) {
+                if (err) return cb(err);
+                else if (!log) return cb(new Error('Log not found'));
+                doc.logs.push(log._id);
+                if (err) return cb(err);
+                return doc.save(function (err) {
+                  if (err) return cb(err);
+                  return cb(null, dataset);
+                });
+              }
+            );
+          });
         }
       );
     });
@@ -739,6 +762,7 @@ Self.newDataset = function (opts = {}, cb) {
 /**
  * Update dataset
  * @param {object} opts - JSON containing all data
+ * @param {string} opts.user - User
  * @param {string} opts.noXML - update dataset only in mongodb & not in XML
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
@@ -797,7 +821,45 @@ Self.updateDataset = function (opts = {}, cb) {
             },
             function (err) {
               if (err) return cb(err);
-              return cb(null, dataset);
+              // Get Document
+              return Documents.findOne({ _id: datasets.document }).exec(function (err, doc) {
+                if (err) return cb(err);
+                return DocumentsLogs.findOne(
+                  {
+                    document: doc._id,
+                    user: opts.user._id,
+                    action: 'UPDATE DATASET ' + dataset.id
+                  },
+                  function (err, log) {
+                    if (err) return cb(err);
+                    if (log) {
+                      log.date = Date.now();
+                      return log.save(function (err) {
+                        if (err) return cb(err);
+                        return cb(null, dataset);
+                      });
+                    }
+                    // Create logs
+                    return DocumentsLogs.create(
+                      {
+                        document: doc._id,
+                        user: opts.user._id,
+                        action: 'UPDATE DATASET ' + dataset.id
+                      },
+                      function (err, log) {
+                        if (err) return cb(err);
+                        else if (!log) return cb(new Error('Log not found'));
+                        doc.logs.push(log._id);
+                        if (err) return cb(err);
+                        return doc.save(function (err) {
+                          if (err) return cb(err);
+                          return cb(null, dataset);
+                        });
+                      }
+                    );
+                  }
+                );
+              });
             }
           );
       });
@@ -807,6 +869,7 @@ Self.updateDataset = function (opts = {}, cb) {
 /**
  * Delete dataset
  * @param {object} opts - JSON containing all data
+ * @param {string} opts.user - User
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
  * @returns {undefined} undefined
@@ -842,7 +905,28 @@ Self.deleteDataset = function (opts = {}, cb) {
           },
           function (err, res) {
             if (err) return cb(err);
-            return cb(null);
+            // Get Document
+            return Documents.findOne({ _id: datasets.document }).exec(function (err, doc) {
+              if (err) return cb(err);
+              // Create logs
+              return DocumentsLogs.create(
+                {
+                  document: doc._id,
+                  user: opts.user._id,
+                  action: 'DELETE DATASET ' + opts.dataset.id
+                },
+                function (err, log) {
+                  if (err) return cb(err);
+                  else if (!log) return cb(new Error('Log not found'));
+                  doc.logs.push(log._id);
+                  if (err) return cb(err);
+                  return doc.save(function (err) {
+                    if (err) return cb(err);
+                    return cb(null);
+                  });
+                }
+              );
+            });
           }
         );
       });

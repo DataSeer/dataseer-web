@@ -57,18 +57,20 @@ Self.createDataset = function (opts = {}) {
     sentenceId: opts.sentenceId, // sentence id
     reuse: opts.reuse ? opts.reuse : false, // dataset reuse
     highlight: opts.highlight ? opts.highlight : false, // dataset highlight
-    notification: opts.notification, // dataset notification
-    cert: opts.cert, // cert value (between 0 and 1)
-    dataType: opts.dataType, // dataType
-    subType: opts.subType, //  subType
-    description: opts.description, // description
-    bestDataFormatForSharing: opts.bestDataFormatForSharing, // best data format for sharing
-    bestPracticeForIndicatingReUseOfExistingData: opts.bestPracticeForIndicatingReUseOfExistingData, // best practice for indicating re-use of existing data
-    mostSuitableRepositories: opts.mostSuitableRepositories, // most suitable repositories
-    DOI: opts.DOI, // DOI
-    name: opts.name, // name
-    comments: opts.comments, // comments
-    text: opts.text, // text of sentence
+    notification: opts.notification ? opts.notification : '', // dataset notification
+    cert: opts.cert ? opts.cert : 0, // cert value (between 0 and 1)
+    dataType: opts.dataType ? opts.dataType : '', // dataType
+    subType: opts.subType ? opts.subType : '', //  subType
+    description: opts.description ? opts.description : '', // description
+    bestDataFormatForSharing: opts.bestDataFormatForSharing ? opts.bestDataFormatForSharing : '', // best data format for sharing
+    bestPracticeForIndicatingReUseOfExistingData: opts.bestPracticeForIndicatingReUseOfExistingData
+      ? opts.bestPracticeForIndicatingReUseOfExistingData
+      : '', // best practice for indicating re-use of existing data
+    mostSuitableRepositories: opts.mostSuitableRepositories ? opts.mostSuitableRepositories : '', // most suitable repositories
+    DOI: opts.DOI ? opts.DOI : '', // DOI
+    name: opts.name ? opts.name : '', // name
+    comments: opts.comments ? opts.comments : '', // comments
+    text: opts.text ? opts.text : '', // text of sentence
     status: opts.dataType && opts.name && (opts.DOI || opts.comments) ? 'valid' : 'saved' // text of sentence
   };
 };
