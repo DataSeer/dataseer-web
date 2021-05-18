@@ -97,6 +97,13 @@ router.get('/', function (req, res, next) {
             return res;
           });
         }
+        // reorder logs
+        for (let i = 0; i < docs.length; i++) {
+          let doc = docs[i];
+          doc.logs = doc.logs.sort(function (a, b) {
+            return new Date(b.date) - new Date(a.date);
+          });
+        }
         return res.render(path.join('documents', 'all'), {
           route: 'documents',
           conf: conf,
