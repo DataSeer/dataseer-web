@@ -32,27 +32,27 @@ block content
     
     div(class='row row-margin')
       div(class='value d-block statements-container')
-        each dataset in document.datasets.current
+        each dataset, index in document.datasets.current
           if dataset.DOI
             div(class='col-12')
               if dataset.name
                 div(class='value d-block' style="margin-bottom: 4px;") #{dataset.name}: 
                   a(href=dataset.DOI) #{dataset.DOI}
               else
-                div(class='value d-block' style="margin-bottom: 4px;") #{dataset.id}: 
+                div(class='value d-block' style="margin-bottom: 4px;") Dataset #{index + 1}: 
                   a(href=dataset.DOI) #{dataset.DOI}
           else if dataset.comments
             div(class='col-12')
               if dataset.name
                 div(class='value d-block' style="margin-bottom: 4px;") #{dataset.name}: #{dataset.comments}
               else
-                div(class='value d-block' style="margin-bottom: 4px;") #{dataset.id}: #{dataset.comments}
+                div(class='value d-block' style="margin-bottom: 4px;") Dataset #{index + 1}: #{dataset.comments}
           else
             div(class='col-12')
               if dataset.name
-                div(class='value d-block' style="margin-bottom: 4px;") #{dataset.name}: Please provide the DOI (or other stable link) or enter any comments (such as a reason why this dataset cannot be shared)
+                div(class='value d-block' style="margin-bottom: 4px;") #{dataset.name}: .
               else
-                div(class='value d-block' style="margin-bottom: 4px;") ##{dataset.id}: Please provide the DOI (or other stable link) or enter any comments (such as a reason why this dataset cannot be shared)
+                div(class='value d-block' style="margin-bottom: 4px;") Dataset #{index + 1}: .
 
     div(class='row row-margin')
       if document.metadata.authors.length > 0
@@ -100,10 +100,6 @@ block content
               each dataset, index in document.datasets.current
                 <tr>
                   <th class='font-weight-bold' colspan='2'>Dataset #{index+1} :</th>
-                </tr>
-                <tr>
-                  <td><i>Dataset Id:</i></td>
-                  <td><i>##{dataset.id}</i></td>
                 </tr>
                 <tr>
                   <td>Dataset Name:</td>
