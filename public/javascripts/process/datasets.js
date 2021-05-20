@@ -53,12 +53,7 @@
         return DataSeerAPI.jsonDataTypes(function (err, datatypes) {
           if (err) return alert('Error : Datatypes unavailable, dataseer-ml service does not respond');
           setTextLoop('PDF initialization...');
-          let needUpdate =
-            !pdf.metadata ||
-            !pdf.metadata.pages ||
-            typeof pdf.metadata.pages[Object.keys(pdf.metadata.pages)[0]][
-              Object.keys(pdf.metadata.pages[Object.keys(pdf.metadata.pages)[0]])[0]
-            ] !== 'object';
+          let needUpdate = typeof pdf.metadata.version === 'undefined' || pdf.metadata.version < 1;
           if (needUpdate) {
             if (user.isCurator || user.isAnnotator) {
               setTextLoop('Updating PDF metadata...');
