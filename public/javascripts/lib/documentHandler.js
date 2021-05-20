@@ -182,7 +182,6 @@ DocumentHandler.prototype.loading = function (id) {
 
 // Select a dataset
 DocumentHandler.prototype.selectDataset = function (opts, cb) {
-  console.log(opts);
   let self = this;
   this.currentDataset = this.getDataset(opts.id);
   this.currentCorresp = null;

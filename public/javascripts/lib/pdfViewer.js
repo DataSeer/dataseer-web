@@ -33,34 +33,6 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   HOVER_BORDER_COLOR = 'rgba(0, 0, 0, 1)',
   SELECTED_BORDER_COLOR = 'rgba(105, 105, 105, 1)';
 
-const median = function (values) {
-    if (values.length === 0) return undefined;
-    values.sort(function (a, b) {
-      return a - b;
-    });
-    let half = Math.floor(values.length / 2);
-    if (values.length % 2) return values[half];
-    return (values[half - 1] + values[half]) / 2.0;
-  },
-  getInterlinesLength = function (paragraphs) {
-    let stats = {};
-    for (let i = 0; i < paragraphs.length; i++) {
-      if (paragraphs[i].lines.length > 1)
-        for (let j = 0; j < paragraphs[i].lines.length - 1; j++) {
-          let previous = paragraphs[i].lines[j],
-            next = paragraphs[i].lines[j + 1],
-            interline = Math.abs(previous.min.y + previous.h / 2 - (next.min.y + next.h / 2));
-          if (typeof stats[previous.p] === 'undefined') stats[previous.p] = [interline];
-          else stats[previous.p].push(interline);
-        }
-    }
-    let result = {};
-    for (let key in stats) {
-      result[key] = median(stats[key]);
-    }
-    return result;
-  };
-
 // Representation of a chunk in PDF
 const Chunk = function (data, scale) {
   this.x = Math.floor((parseFloat(data.x) - MARGIN_CHUNK.x) * scale);
@@ -124,9 +96,9 @@ Line.prototype.isIn = function (chunk) {
 };
 
 // Representation of multipes lines in PDF (atteched to a given sentence)
-const Lines = function (chunks, scales) {
+const Lines = function (chunks, scale) {
   this.collection = [new Line()];
-  if (Array.isArray(chunks)) this.addChunks(chunks, scales);
+  if (Array.isArray(chunks)) this.addChunks(chunks, scale);
   return this;
 };
 
@@ -146,11 +118,10 @@ Lines.prototype.newLine = function (chunk) {
 };
 
 // Add chunk to this group of lines
-Lines.prototype.addChunks = function (chunks = [], scales = {}) {
+Lines.prototype.addChunks = function (chunks = [], scale = 1) {
   for (let i = 0; i < chunks.length; i++) {
     let line = this.getLast(),
       item = chunks[i],
-      scale = scales[item.p],
       chunk = new Chunk(item, scale);
     if (line.isIn(chunk)) line.addChunk(chunk);
     else this.newLine(chunk);
@@ -286,25 +257,36 @@ PdfViewer.prototype.getSentences = function (selectedSentences, lastSentence) {
 // Get order of appearance of sentences
 PdfViewer.prototype.getSentencesMapping = function () {
   if (typeof this.sentencesMapping.object !== 'undefined') return this.sentencesMapping.object;
-  let arr = [],
-    result = {};
+  let result = {},
+    sentences = {};
+  // Get useful infos about sentences
   for (let page in this.metadata.pages) {
-    for (let sentenceId in this.metadata.pages[page]) {
-      arr.push({ page: page, sentenceId: sentenceId, location: this.metadata.pages[page][sentenceId].location });
+    for (let sentenceId in this.metadata.pages[page].sentences) {
+      sentences[sentenceId] = {
+        sentenceId: sentenceId,
+        page: page,
+        minY: this.metadata.sentences[sentenceId].pages[page].min.y,
+        column: this.metadata.sentences[sentenceId].pages[page].columns[
+          this.metadata.sentences[sentenceId].pages[page].columns.length - 1
+        ]
+      };
     }
   }
-  let sortedArr = arr.sort(function (a, b) {
-    if (a.page !== b.page) return a.page - b.page;
-    if (a.location.min.y === b.location.min.y) return a.location.min.x - b.location.min.x;
-    else return a.location.min.y - b.location.min.y;
-  });
-  sortedArr.map(function (item, i) {
-    result[item.sentenceId] = i;
-  });
+  // Sort sentences & store result
+  Object.values(sentences)
+    .sort(function (a, b) {
+      if (a.page !== b.page) return a.page - b.page;
+      else if (a.column !== b.column) return a.column - b.column;
+      else if (a.minY !== b.minY) return a.minY - b.minY;
+      else return 0;
+    })
+    .map(function (sentence, index) {
+      result[sentence.sentenceId] = index;
+    });
   this.sentencesMapping.object = result;
   this.sentencesMapping.array = new Array(Object.keys(result).length);
   for (var key in result) {
-    this.sentencesMapping.array[parseInt(result[key], 10)] = key;
+    this.sentencesMapping.array[parseInt(result[key])] = key;
   }
   return result;
 };
@@ -584,23 +566,14 @@ PdfViewer.prototype.renderPage = function (opts, cb) {
             viewport: viewport
           })
           .promise.then(function () {
-            // build chunks
-            let chunks = {};
-            for (let sentenceId in self.metadata.pages[numPage]) {
-              let sentence = self.metadata.sentences[sentenceId];
-              chunks[sentenceId] = sentence.chunks;
-            }
             // Build Contours
-            let scales = {};
-            scales[numPage] = the_scale;
-            let contours = self.buildAreas(chunks, scales, numPage);
-            // Build Contours
+            let contours = self.buildAreas(the_scale, numPage);
+            // Insert Contours
             contours.map(function (contour) {
               self.insertContours(contour);
-              // Build Contours
             });
-            // Build Sentences
-            self.insertSentences(chunks, numPage, the_scale);
+            // Insert Sentences
+            self.insertSentences(the_scale, numPage);
             self.insertDatasets(numPage);
             page.setAttribute('data-loaded', 'true');
             self.hideMessage();
@@ -636,22 +609,38 @@ PdfViewer.prototype.refresh = function (cb) {
 };
 
 // Build all Areas
-PdfViewer.prototype.buildAreas = function (chunks = {}, scales, numPage) {
+PdfViewer.prototype.buildAreas = function (scale, numPage) {
   let paragraphs = [],
+    interlines = {},
     result = [];
-  for (let sentenceId in chunks) {
-    let sentenceChunks = chunks[sentenceId].filter(function (chunk) {
+  if (this.metadata.pages[numPage] && this.metadata.pages[numPage].sentences) {
+    for (let sentenceId in this.metadata.pages[numPage].sentences) {
+      if (
+        this.metadata.sentences[sentenceId] &&
+        this.metadata.sentences[sentenceId].areas &&
+        this.metadata.sentences[sentenceId].areas.length > 0
+      ) {
+        // Calculate interlines
+        this.metadata.sentences[sentenceId].areas.map(function (areas) {
+          for (let key in areas.interlines) {
+            interlines[key] = areas.interlines[key] * scale;
+          }
+        });
+      }
+      // Calculate chunks
+      let chunks = this.metadata.sentences[sentenceId].chunks.filter(function (chunk) {
         return parseInt(chunk.p, 10) === numPage;
-      }),
-      lines = {
-        'lines': new Lines(sentenceChunks, scales).all(),
+      });
+      let lines = {
+        'lines': new Lines(chunks, scale).all(),
         'sentenceId': sentenceId
       };
-    paragraphs.push(lines);
-  }
-  let interlines = getInterlinesLength(paragraphs);
-  for (let i = 0; i < paragraphs.length; i++) {
-    result.push(new Areas(paragraphs[i], interlines).all());
+      paragraphs.push(lines);
+    }
+    // Create new areas
+    for (let i = 0; i < paragraphs.length; i++) {
+      result.push(new Areas(paragraphs[i], interlines).all());
+    }
   }
   return result;
 };
@@ -678,39 +667,42 @@ PdfViewer.prototype.buildBorders = function (area) {
 };
 
 // Add sentence
-PdfViewer.prototype.insertSentences = function (sentences, page, scale) {
+PdfViewer.prototype.insertSentences = function (scale, numPage) {
   let self = this,
-    annotationsContainer = this.container.find(`.page[data-page-number="${page}"] .annotationsLayer`);
-  for (let key in sentences) {
-    let chunks = sentences[key];
-    for (let i = 0; i < chunks.length; i++) {
-      let chunk = chunks[i],
-        ch = new Chunk(chunk, scale);
-      //make events the area
-      let element = document.createElement('s'),
-        attributes = `width:${ch.w}px; height:${ch.h}px; position:absolute; top:${ch.y}px; left:${ch.x}px;`;
-      element.setAttribute('style', attributes);
-      element.setAttribute('sentenceId', chunk.sentenceId);
-      element.setAttribute('isPdf', true);
-      // the link here goes to the bibliographical reference
-      element.onclick = function () {
-        let el = $(this);
-        if (typeof self.events.onClick === 'function')
-          return self.events.onClick({ sentenceId: el.attr('sentenceId'), datasetId: el.attr('datasetId') });
-      };
-      element.onmouseover = function () {
-        let el = $(this);
-        if (typeof self.events.onHover === 'function')
-          return self.events.onHover({ sentenceId: el.attr('sentenceId'), datasetId: el.attr('datasetId') });
-      };
-      element.onmouseout = function () {
-        let el = $(this);
-        if (typeof self.events.onEndHover === 'function')
-          return self.events.onEndHover({ sentenceId: el.attr('sentenceId'), datasetId: el.attr('datasetId') });
-      };
-      annotationsContainer.append(element);
+    annotationsContainer = this.container.find(`.page[data-page-number="${numPage}"] .annotationsLayer`);
+  if (this.metadata.pages[numPage] && this.metadata.pages[numPage].sentences)
+    for (let sentenceId in this.metadata.pages[numPage].sentences) {
+      let chunks = this.metadata.sentences[sentenceId].chunks.filter(function (chunk) {
+        return parseInt(chunk.p, 10) === numPage;
+      });
+      for (let i = 0; i < chunks.length; i++) {
+        let chunk = chunks[i],
+          ch = new Chunk(chunk, scale);
+        //make events the area
+        let element = document.createElement('s'),
+          attributes = `width:${ch.w}px; height:${ch.h}px; position:absolute; top:${ch.y}px; left:${ch.x}px;`;
+        element.setAttribute('style', attributes);
+        element.setAttribute('sentenceId', sentenceId);
+        element.setAttribute('isPdf', true);
+        // the link here goes to the bibliographical reference
+        element.onclick = function () {
+          let el = $(this);
+          if (typeof self.events.onClick === 'function')
+            return self.events.onClick({ sentenceId: el.attr('sentenceId'), datasetId: el.attr('datasetId') });
+        };
+        element.onmouseover = function () {
+          let el = $(this);
+          if (typeof self.events.onHover === 'function')
+            return self.events.onHover({ sentenceId: el.attr('sentenceId'), datasetId: el.attr('datasetId') });
+        };
+        element.onmouseout = function () {
+          let el = $(this);
+          if (typeof self.events.onEndHover === 'function')
+            return self.events.onEndHover({ sentenceId: el.attr('sentenceId'), datasetId: el.attr('datasetId') });
+        };
+        annotationsContainer.append(element);
+      }
     }
-  }
 };
 
 // Build an empty page
