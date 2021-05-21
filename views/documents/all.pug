@@ -52,12 +52,12 @@ block content
                       option(value='finish') Process finished
                 div Modified By: 
                   select.custom-select(style='width: auto' name='user')
-                    if (params.organisation)
+                    if (params.user)
                       option(value='') All
                     else
                       option(value='' selected) All
                     each account in accounts
-                      if (params.account && params.account === account._id.toString())
+                      if (params.user && params.user === account._id.toString())
                         option(value=account._id selected) #{account.username}
                       else
                         option(value=account._id) #{account.username}
