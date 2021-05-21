@@ -126,6 +126,7 @@ block content
                   div(class='col-12')
                     form.accounts(role='form', action=conf.root + route, method='post')
                       div(class='form-row')
+                        input.form-control(type='text' name='redirectUrl' class='hidden' value=redirectUrl)
                         if current_user.role.label === 'curator'
                           div(class='col-1')
                             div(class="hidden") #{JSON.stringify(document.metadata)}

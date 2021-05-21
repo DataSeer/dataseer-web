@@ -106,6 +106,7 @@ router.get('/', function (req, res, next) {
         }
         return res.render(path.join('documents', 'all'), {
           route: 'documents',
+          redirectUrl: `.${req.originalUrl}`,
           conf: conf,
           params: req.query,
           accounts: accounts.sort(function (a, b) {
@@ -129,58 +130,59 @@ router.get('/', function (req, res, next) {
 router.post('/', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
+  let redirectUrl = typeof req.body.redirectUrl !== 'string' ? './documents' : req.body.redirectUrl;
   if (typeof req.body.update !== 'undefined' && req.body.update === '') {
     if (typeof req.body.organisation !== 'string' || req.body.organisation.length <= 0) {
       req.flash('error', 'Incorrect organisation');
-      return res.redirect('./documents');
+      return res.redirect(redirectUrl);
     }
     if (typeof req.body.id !== 'string' || req.body.id.length <= 0) {
       req.flash('error', 'Incorrect document');
-      return res.redirect('./documents');
+      return res.redirect(redirectUrl);
     }
     return Documents.findOne({ _id: req.body.id }, function (err, doc) {
       if (err) {
         req.flash('error', err.message);
-        return res.redirect('./documents');
+        return res.redirect(redirectUrl);
       }
       doc.organisation = req.body.organisation;
       return doc.save(function (err) {
         if (err) {
           req.flash('error', err.message);
-          return res.redirect('./documents');
+          return res.redirect(redirectUrl);
         }
         req.flash('success', 'Organisation of document ' + doc._id + ' has been successfully updated');
-        return res.redirect('./documents');
+        return res.redirect(redirectUrl);
       });
     });
   } else if (typeof req.body.delete !== 'undefined' && req.body.delete === '') {
     if (typeof req.body.id !== 'string' || req.body.id.length <= 0) {
       req.flash('error', 'Incorrect document');
-      return res.redirect('./documents');
+      return res.redirect(redirectUrl);
     }
     return DocumentsController.delete(req.body.id, function (err) {
       if (err) {
         req.flash('error', err.message);
-        return res.redirect('./documents');
+        return res.redirect(redirectUrl);
       }
       req.flash('success', 'Document ' + req.body.id + ' has been successfully deleted');
-      return res.redirect('./documents');
+      return res.redirect(redirectUrl);
     });
   } else if (typeof req.body.generate_token !== 'undefined' && req.body.generate_token === '') {
     if (typeof req.body.id !== 'string' || req.body.id.length <= 0) {
       req.flash('error', 'Incorrect document');
-      return res.redirect('./documents');
+      return res.redirect(redirectUrl);
     }
     // If privateKey not found
     let privateKey = req.app.get('private.key');
     if (!privateKey) {
       req.flash('error', 'Server unable to create new JWT (private key not found)');
-      return res.redirect('./documents');
+      return res.redirect(redirectUrl);
     }
     return Documents.findOne({ _id: req.body.id }, function (err, doc) {
       if (err) {
         req.flash('error', err.message);
-        return res.redirect('./documents');
+        return res.redirect(redirectUrl);
       }
       return JWT.create(
         { documentId: doc._id, accountId: conf.tokens.documents.accountId },
@@ -190,22 +192,22 @@ router.post('/', function (req, res, next) {
           // If JWT error has occured
           if (err) {
             req.flash('error', `Server unable to create new JWT (${err.message})`);
-            return res.redirect('./documents');
+            return res.redirect(redirectUrl);
           }
           doc.token = token;
           return doc.save(function (err) {
             if (err) {
               req.flash('error', err.message);
-              return res.redirect('./documents');
+              return res.redirect(redirectUrl);
             }
             req.flash('success', 'Token of document ' + doc._id + ' has been successfully updated');
-            return res.redirect('./documents');
+            return res.redirect(redirectUrl);
           });
         }
       );
     });
   }
-  return res.redirect('./documents');
+  return res.redirect(redirectUrl);
 });
 
 /* GET on given document metadata page */
