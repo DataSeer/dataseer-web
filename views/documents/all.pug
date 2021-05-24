@@ -61,7 +61,7 @@ block content
                         option(value=account._id selected) #{account.username}
                       else
                         option(value=account._id) #{account.username}
-                if (current_user.role.label === 'curator')        
+                if (current_user.role.label === 'curator')
                   div Organisation: 
                     select.custom-select(style='width: auto' name='organisation')
                       if (params.organisation)
@@ -82,6 +82,20 @@ block content
                   input.form-control(style='display: inline-block; width: auto;' type='text' name='limit' placeholder='Maximum number of results' value=(params.limit))
                 div(style='display:block; margin-top:25px;')
                   button.btn.btn-primary.waves-effect.waves-light(type='submit') Search for documents
+        if (current_user.role.label === 'curator')
+          form.accounts(role='form', action=conf.root + route, method='post')
+            div(class='row')
+              div(class='col-12 text-center' style='margin-top:10px;')
+                div(class='header') Update multiple documents:
+              div(class='col-12 text-center' style='margin-top:10px;')
+                div Organisation: 
+                  select.custom-select(style='width: auto' name='organisation')
+                    option(value='' selected) Select an organisation
+                    each organisation in organisations
+                      option(value=organisation._id) #{organisation.name}
+                  input.form-control(type='text' name='ids' class='hidden' value="")
+                  button.btn.btn-primary.waves-effect.waves-light(type='submit' name='multipleUpdates' title='Update the selected document(s)' style='margin-left:15px;') Update
+                div(class='selected-documents-count' style='margin-bottom:25px;') 0 document(s) selected
           div(class='row')
             div(class='col-12 text-center')
               div(class='header')  All documents
@@ -130,6 +144,7 @@ block content
                         if current_user.role.label === 'curator'
                           div(class='col-1')
                             div(class="hidden") #{JSON.stringify(document.metadata)}
+                            input.form-control(type="checkbox" name="isSelected" document-id=document._id style='display: inline-block; width: auto; vertical-align: top; margin-top: 4px; margin-right: 3px;')
                             if (document.metadata.manuscript_id !== "")
                               a.document-link(target='_blank' href=conf.root + 'documents/' + document._id) #{document.metadata.manuscript_id}
                             else if (document.pdf)
