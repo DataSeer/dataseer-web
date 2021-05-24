@@ -206,6 +206,32 @@ router.post('/', function (req, res, next) {
         }
       );
     });
+  } else if (typeof req.body.multipleUpdates !== 'undefined' && req.body.multipleUpdates === '') {
+    if (typeof req.body.organisation !== 'string' || req.body.organisation.length <= 0) {
+      req.flash('error', 'You must select an organisation');
+      return res.redirect(redirectUrl);
+    }
+    if (typeof req.body.ids !== 'string' || req.body.ids.length <= 0) {
+      req.flash('error', 'You must select at least one document');
+      return res.redirect(redirectUrl);
+    }
+    let ids = req.body.ids.split(';');
+    if (!Array.isArray(ids) || ids.length < 0) {
+      req.flash('error', 'You must select at least one document');
+      return res.redirect(redirectUrl);
+    }
+    return Documents.updateMany({ _id: { $in: ids } }, { organisation: req.body.organisation }, function (err, result) {
+      if (err) {
+        req.flash('error', err.message);
+        return res.redirect(redirectUrl);
+      }
+      if (!result.ok) {
+        req.flash('error', 'An error has occured');
+        return res.redirect(redirectUrl);
+      }
+      req.flash('success', 'Organisation of the ' + ids.length + ' selected document(s) has been successfully updated');
+      return res.redirect(redirectUrl);
+    });
   }
   return res.redirect(redirectUrl);
 });

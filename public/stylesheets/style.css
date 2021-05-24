@@ -42,8 +42,8 @@ body {
 
 .document-link {
   overflow: hidden;
-  max-width: 100%;
-  display: block;
+  max-width: calc(100% - 20px);
+  display: inline-block;
   text-overflow: ellipsis;
 }
 
