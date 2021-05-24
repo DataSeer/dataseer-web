@@ -84,6 +84,7 @@ block content
                   button.btn.btn-primary.waves-effect.waves-light(type='submit') Search for documents
         if (current_user.role.label === 'curator')
           form.accounts(role='form', action=conf.root + route, method='post')
+            input.form-control(type='text' name='redirectUrl' class='hidden' value=redirectUrl)
             div(class='row')
               div(class='col-12 text-center' style='margin-top:10px;')
                 div(class='header') Update multiple documents:
