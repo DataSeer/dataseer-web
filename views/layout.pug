@@ -114,6 +114,9 @@ html
   else if search
     script(src=conf.root + 'javascripts/search.js')
 
+  if route === 'documents'
+    script(src=conf.root + 'javascripts/process/multipleUpdate.js')
+
   if route === 'backoffice/accounts'
     script(src=conf.root + 'javascripts/process/backoffice.js')
 
