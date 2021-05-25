@@ -605,6 +605,23 @@ body {
   background: lightgray;
 }
 
+.pdfViewerScrollMarkers {
+    position: absolute;
+    height: 100%;
+    width: 12px;
+    pointer-events: none;
+    top: 0;
+    right: 30px;
+    padding-top: 25px;
+    padding-bottom: 2px;
+}
+
+.pdfViewerScrollMarkers span {
+    /* markers */
+    position: absolute;
+    width: 100%;
+}
+
 #documentView #pdfViewer .page {
   margin-bottom: 10px;
 }
@@ -633,11 +650,6 @@ body {
   background-color: transparent;
 }
 
-#documentView #pdfViewer .contoursLayer .contour div[events="true"] {
-  z-index: 3120;
-  background-color: transparent;
-}
-
 #documentView #pdfViewer .contoursLayer .contour canvas {
   z-index: 3110;
 }
@@ -658,20 +670,9 @@ body {
   z-index: 3210;
 }
 
-#documentView #pdfViewer .contoursLayer .contour.activeContourDataset div[events="true"] ,
-#documentView #pdfViewer .contoursLayer .contour.activeContourSentence div[events="true"] ,
-#documentView #pdfViewer .contoursLayer .contour.selected div[events="true"]  {
-  z-index: 3220;
-}
-
 #documentView #pdfViewer .contoursLayer .contour.hover canvas,
 #documentView #pdfViewer .contoursLayer .contour.hover canvas {
   z-index: 3215;
-}
-
-#documentView #pdfViewer .contoursLayer .contour.hover div[events="true"] ,
-#documentView #pdfViewer .contoursLayer .contour.hover div[events="true"]   {
-  z-index: 3225;
 }
 
 #documentView #pdfViewer .annotationsLayer s {
