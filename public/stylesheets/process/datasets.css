@@ -606,20 +606,19 @@ body {
 }
 
 .pdfViewerScrollMarkers {
-    position: absolute;
-    height: 100%;
-    width: 12px;
-    pointer-events: none;
-    top: 0;
-    right: 30px;
-    padding-top: 25px;
-    padding-bottom: 2px;
+  position: absolute;
+  height: calc(100% - 25px);
+  width: 12px;
+  top: 25px;
+  right: 30px;
+  overflow: hidden;
 }
 
 .pdfViewerScrollMarkers span {
-    /* markers */
-    position: absolute;
-    width: 100%;
+  /* markers */
+  cursor: pointer;
+  position: absolute;
+  width: 100%;
 }
 
 #documentView #pdfViewer .page {
