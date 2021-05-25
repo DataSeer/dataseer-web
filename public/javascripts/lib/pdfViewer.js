@@ -855,6 +855,9 @@ PdfViewer.prototype.addMarker = function (dataset) {
   marker.attr('sentenceId', dataset.sentenceId);
   marker.attr('spanTop', spanTop);
   marker.attr('spanBottom', spanBottom);
+  marker.click(function () {
+    return contour.click();
+  });
 };
 
 // Remove marker in scrollbar
