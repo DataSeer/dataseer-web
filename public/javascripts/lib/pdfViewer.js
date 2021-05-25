@@ -15,30 +15,23 @@ else pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrcPath;
 
 const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   MARGIN_CHUNK = {
-    x: 2,
-    y: 2,
-    w: 2,
-    h: 2
-  },
-  MARGIN_CONTOUR = {
-    x: 3,
-    y: 3,
-    w: 3,
-    h: 3
+    top: 2,
+    left: 2,
+    bottom: 2,
+    right: 2
   },
   CMAP_PACKED = true,
-  BORDER_RADIUS = 0, // Not handled yet
-  BORDER_WIDTH = 2, // Need to be an even number
+  BORDER_WIDTH = 4, // Need to be an even number
   REMOVED_BORDER_COLOR = false,
   HOVER_BORDER_COLOR = 'rgba(0, 0, 0, 1)',
   SELECTED_BORDER_COLOR = 'rgba(105, 105, 105, 1)';
 
 // Representation of a chunk in PDF
 const Chunk = function (data, scale) {
-  this.x = Math.floor((parseFloat(data.x) - MARGIN_CHUNK.x) * scale);
-  this.y = Math.floor((parseFloat(data.y) - MARGIN_CHUNK.y) * scale);
-  this.w = Math.ceil((parseFloat(data.w) + MARGIN_CHUNK.w * 2) * scale);
-  this.h = Math.ceil((parseFloat(data.h) + MARGIN_CHUNK.h * 2) * scale);
+  this.x = Math.floor((parseFloat(data.x) - MARGIN_CHUNK.left) * scale);
+  this.y = Math.floor((parseFloat(data.y) - MARGIN_CHUNK.top) * scale);
+  this.w = Math.ceil((parseFloat(data.w) + MARGIN_CHUNK.left + MARGIN_CHUNK.right) * scale);
+  this.h = Math.ceil((parseFloat(data.h) + MARGIN_CHUNK.top + MARGIN_CHUNK.bottom) * scale);
   this.p = parseInt(data.p, 10);
   return this;
 };
@@ -221,10 +214,13 @@ const PdfViewer = function (id, screenId, events = {}) {
   this.viewer = $(`<div id="${this.viewerId}" class="pdfViewer"></div>`);
   this.viewerElement = this.viewer.get(0);
   this.infos = $(`<div id="${this.viewerId}Infos" class="pdfViewerInfos"></div>`);
-  this.infosElements = this.infos.get(0);
+  this.infosElement = this.infos.get(0);
   this.message = $(`<div id="${this.viewerId}Message" class="pdfViewerMessage"></div>`);
-  this.messageElements = this.infos.get(0);
+  this.messageElement = this.infos.get(0);
+  this.scrollMarkers = $(`<div id="${this.viewerId}ScrollMarkers" class="pdfViewerScrollMarkers"></div>`);
+  this.scrollMarkersElement = this.scrollMarkers.get(0);
   this.container.append(this.infos).append(this.message).append(this.viewer);
+  this.screen.append(this.scrollMarkers);
   // pdf properties
   this.pdfLoaded = false;
   this.pdfDocument;
@@ -518,6 +514,24 @@ PdfViewer.prototype.renderPreviousPage = function (cb) {
   } else return cb();
 };
 
+// Refresh markers
+PdfViewer.prototype.refreshMarkers = function () {
+  let self = this;
+  return this.scrollMarkers.find('span').map(function () {
+    let span = $(this),
+      markerElement = span.get(0),
+      sentenceId = span.attr('sentenceId'),
+      contours = self.viewer.find(`.contoursLayer > .contour[sentenceId="${sentenceId}"]`),
+      contour = contours.find('canvas').first(),
+      spanTop = self.scrollToSentence(sentenceId),
+      spanBottom = spanTop + parseInt(contours.attr('contour-height')),
+      markerTop = Math.ceil((spanTop * self.screen.outerHeight()) / self.container.prop('scrollHeight')),
+      markerBottom = Math.ceil((spanBottom * self.screen.outerHeight()) / self.container.prop('scrollHeight'));
+    markerElement.style.top = markerTop + 'px';
+    markerElement.style.height = markerBottom - markerTop + 'px';
+  });
+};
+
 // Insert datasets
 PdfViewer.prototype.insertDatasets = function (numPage) {
   let self = this,
@@ -575,6 +589,8 @@ PdfViewer.prototype.renderPage = function (opts, cb) {
             // Insert Sentences
             self.insertSentences(the_scale, numPage);
             self.insertDatasets(numPage);
+            // refresh markers scroll
+            self.refreshMarkers();
             page.setAttribute('data-loaded', 'true');
             self.hideMessage();
             return cb(null, numPage);
@@ -658,8 +674,14 @@ PdfViewer.prototype.insertContours = function (areas) {
 // Build borders
 PdfViewer.prototype.buildBorders = function (area) {
   let container = $('<div>'),
-    borders = this.getSquares(area);
-  container.attr('sentenceId', area.sentenceId).attr('class', 'contour');
+    borders = this.getCanvas(area);
+  container
+    .attr('sentenceId', area.sentenceId)
+    .attr('contour-width', area.w)
+    .attr('contour-height', area.h)
+    .attr('contour-top', area.min.y)
+    .attr('contour-left', area.min.x)
+    .attr('class', 'contour');
   borders.map(function (item) {
     return container.append(item);
   });
@@ -753,30 +775,28 @@ PdfViewer.prototype.setEvents = function (items) {
   let self = this;
   for (let i = 0; i < items.length; i++) {
     let item = items[i];
-    if (item.attr('events') === 'true') {
-      let element = item.get(0);
-      // the link here goes to the bibliographical reference
-      element.onclick = function () {
-        let el = $(this);
-        if (typeof self.events.onClick === 'function')
-          return self.events.onClick({
-            sentenceId: el.attr('sentenceId'),
-            datasetId: el.attr('datasetId')
-          });
-      };
-      element.onmouseover = function () {
-        let el = $(this);
-        self.viewer.find(`.contour[sentenceId="${el.attr('sentenceId')}"]`).addClass('hover');
-        if (typeof self.events.onHover === 'function')
-          return self.events.onHover({ sentenceId: el.attr('sentenceId'), datasetId: el.attr('datasetId') });
-      };
-      element.onmouseout = function () {
-        let el = $(this);
-        self.viewer.find(`.contour[sentenceId="${el.attr('sentenceId')}"]`).removeClass('hover');
-        if (typeof self.events.onEndHover === 'function')
-          return self.events.onEndHover({ sentenceId: el.attr('sentenceId'), datasetId: el.attr('datasetId') });
-      };
-    }
+    let element = item.get(0);
+    // the link here goes to the bibliographical reference
+    element.onclick = function () {
+      let el = $(this);
+      if (typeof self.events.onClick === 'function')
+        return self.events.onClick({
+          sentenceId: el.attr('sentenceId'),
+          datasetId: el.attr('datasetId')
+        });
+    };
+    element.onmouseover = function () {
+      let el = $(this);
+      self.viewer.find(`.contour[sentenceId="${el.attr('sentenceId')}"]`).addClass('hover');
+      if (typeof self.events.onHover === 'function')
+        return self.events.onHover({ sentenceId: el.attr('sentenceId'), datasetId: el.attr('datasetId') });
+    };
+    element.onmouseout = function () {
+      let el = $(this);
+      self.viewer.find(`.contour[sentenceId="${el.attr('sentenceId')}"]`).removeClass('hover');
+      if (typeof self.events.onEndHover === 'function')
+        return self.events.onEndHover({ sentenceId: el.attr('sentenceId'), datasetId: el.attr('datasetId') });
+    };
   }
 };
 
@@ -791,6 +811,7 @@ PdfViewer.prototype.addCorresp = function (dataset, sentenceId) {
     .find(`.annotationsLayer > s[sentenceId="${sentenceId}"]`)
     .attr('color', dataset.color.background.rgb)
     .attr('datasetId', dataset.id);
+  this.addMarker({ sentenceId: sentenceId, color: dataset.color });
 };
 
 // Remove Color to a sentence
@@ -798,6 +819,7 @@ PdfViewer.prototype.removeCorresp = function (dataset, sentenceId) {
   this.setCanvasColor(sentenceId, BORDER_WIDTH, REMOVED_BORDER_COLOR);
   this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentenceId}"]`).removeAttr('color').removeAttr('datasetId');
   this.viewer.find(`.annotationsLayer > s[sentenceId="${sentenceId}"]`).removeAttr('color').removeAttr('datasetId');
+  this.removeMarker({ sentenceId: sentenceId });
 };
 
 // Remove Color to a sentence
@@ -812,7 +834,32 @@ PdfViewer.prototype.removeCorresps = function (dataset) {
   this.viewer.find(`.annotationsLayer > s[datasetId="${dataset.id}"]`).removeAttr('color').removeAttr('datasetId');
   for (let i = 0; i < ids.length; i++) {
     this.setCanvasColor(ids[i], BORDER_WIDTH, REMOVED_BORDER_COLOR);
+    this.removeMarker({ sentenceId: ids[i] });
   }
+};
+
+// Insert marker in scrollbar
+PdfViewer.prototype.addMarker = function (dataset) {
+  let contours = this.viewer.find(`.contoursLayer > .contour[sentenceId="${dataset.sentenceId}"]`),
+    contour = contours.find('canvas').first(),
+    spanTop = this.scrollToSentence(dataset.sentenceId),
+    spanBottom = spanTop + parseInt(contours.attr('contour-height')),
+    markerTop = Math.ceil((spanTop * this.screen.outerHeight()) / this.container.prop('scrollHeight')),
+    markerBottom = Math.ceil((spanBottom * this.screen.outerHeight()) / this.container.prop('scrollHeight')),
+    markerElement = document.createElement('span'),
+    marker = $(markerElement);
+  markerElement.style.backgroundColor = dataset.color.background.rgb;
+  markerElement.style.top = markerTop + 'px';
+  markerElement.style.height = markerBottom - markerTop + 'px';
+  this.scrollMarkersElement.appendChild(markerElement);
+  marker.attr('sentenceId', dataset.sentenceId);
+  marker.attr('spanTop', spanTop);
+  marker.attr('spanBottom', spanBottom);
+};
+
+// Remove marker in scrollbar
+PdfViewer.prototype.removeMarker = function (dataset) {
+  this.scrollMarkers.find(`span[sentenceId="${dataset.sentenceId}"]`).remove();
 };
 
 // Set Color to a sentence
@@ -827,6 +874,7 @@ PdfViewer.prototype.addDataset = function (dataset) {
     .find(`.annotationsLayer > s[sentenceId="${dataset.sentenceId}"]`)
     .attr('color', dataset.color.background.rgb)
     .attr('datasetId', dataset.id);
+  this.addMarker(dataset);
 };
 
 // Remove Color to a sentence
@@ -842,6 +890,7 @@ PdfViewer.prototype.removeDataset = function (dataset) {
     .removeAttr('color')
     .removeAttr('datasetId');
   this.removeCorresps(dataset);
+  this.removeMarker(dataset);
 };
 
 // Scroll to a sentence
@@ -978,534 +1027,428 @@ PdfViewer.prototype.buildCanvas = function (_x, _y, _w, _h, p, sentenceId, borde
   return newCanvas;
 };
 
-// build div
-PdfViewer.prototype.buildDiv = function (x, y, w, h, sentenceId, events = true) {
-  let newDiv = $('<div>')
-    .attr('style', `width:${w}px; height:${h}px; position:absolute; top:${y}px; left:${x}px;`)
-    .attr('sentenceId', sentenceId)
-    .attr('events', events);
-  return newDiv;
-};
-
 // Get squares of given area (usefull to display borders)
-PdfViewer.prototype.getSquares = function (area) {
-  let lines = area.getLines(),
-    sentenceId = area.sentenceId;
-  /*
-   * Borders :
-   * // Top
-   * { 'x0': xMin, 'y0': yMin, 'x1': xMax, 'y1': yMin },
-   * // Right
-   * { 'x0': xMax, 'y0': yMin, 'x1': xMax, 'y1': yMax },
-   * // Bottom
-   * { 'x0': xMax, 'y0': yMax, 'x1': xMin, 'y1': yMax },
-   * // Left
-   * { 'x0': xMin, 'y0': yMax, 'x1': xMin, 'y1': yMin },
-   */
-  // case area is a rectangle
-  if (
-    lines.length === 1 ||
-    (lines[0].min.x === lines[lines.length - 1].min.x && lines[0].max.x < lines[lines.length - 1].max.x)
-  ) {
-    let x = area.min.x - MARGIN_CONTOUR.x - BORDER_WIDTH / 2,
-      y = area.min.y - MARGIN_CONTOUR.y - BORDER_WIDTH / 2,
-      w = area.w + MARGIN_CONTOUR.w + BORDER_WIDTH,
-      h = area.h + MARGIN_CONTOUR.h + BORDER_WIDTH,
-      xMin = BORDER_WIDTH,
-      xMax = w - BORDER_WIDTH,
-      yMin = BORDER_WIDTH,
-      yMax = h - BORDER_WIDTH,
-      borders = [
-        { x0: xMin, y0: yMin, x1: xMax, y1: yMin },
-        { x0: xMax, y0: yMin, x1: xMax, y1: yMax },
-        { x0: xMax, y0: yMax, x1: xMin, y1: yMax },
-        { x0: xMin, y0: yMax, x1: xMin, y1: yMin }
-      ],
-      divs = [this.buildDiv(x, y, w, h, sentenceId)],
-      canvas = [this.buildCanvas(x, y, w, h, area.p, sentenceId, borders)];
-    this.setEvents(divs);
-    return divs.concat(canvas);
-  }
-  // case area is 2 separate rectangles
-  if (lines.length === 2 && lines[lines.length - 1].max.x < lines[0].min.x) {
-    let divs = [],
-      canvas = [];
-    for (let i = 0; i < lines.length; i++) {
-      let x = lines[i].min.x - MARGIN_CONTOUR.x - BORDER_WIDTH / 2,
-        y = lines[i].min.y - MARGIN_CONTOUR.y - BORDER_WIDTH / 2,
-        w = lines[i].w + MARGIN_CONTOUR.w + BORDER_WIDTH,
-        h = lines[i].h + MARGIN_CONTOUR.h + BORDER_WIDTH,
-        xMin = BORDER_WIDTH,
-        xMax = w - BORDER_WIDTH,
-        yMin = BORDER_WIDTH,
-        yMax = h - BORDER_WIDTH,
-        borders =
-          i === 0
-            ? [
-                { x0: xMin, y0: yMin, x1: xMax, y1: yMin },
-                { x0: xMax, y0: yMax, x1: xMin, y1: yMax },
-                { x0: xMin, y0: yMax, x1: xMin, y1: yMin }
-              ]
-            : [
-                { x0: xMin, y0: yMin, x1: xMax, y1: yMin },
-                { x0: xMax, y0: yMin, x1: xMax, y1: yMax },
-                { x0: xMax, y0: yMax, x1: xMin, y1: yMax }
-              ];
-      divs.push(this.buildDiv(x, y, w, h, sentenceId));
-      canvas.push(this.buildCanvas(x, y, w, h, area.p, sentenceId, borders));
-    }
-    this.setEvents(divs);
-    return divs.concat(canvas);
-  }
-  /* case there is shapes like this :
-   * xo  oo
-   * oo  ox
-   */
-  if (lines[lines.length - 1].min.x === lines[0].min.x || lines[lines.length - 1].max.x === lines[0].max.x) {
-    let divs = [],
-      canvas = [],
-      height = Math.round((area.h + MARGIN_CONTOUR.h + BORDER_WIDTH) / lines.length),
-      topLeftCornerEmpty = lines[0].min.x > lines[lines.length - 1].min.x,
-      topHeight = height * (topLeftCornerEmpty ? 1 : lines.length - 1),
-      bottomHeight = height * (topLeftCornerEmpty ? lines.length - 1 : 1),
-      top = {
-        x: lines[0].min.x - MARGIN_CONTOUR.x - BORDER_WIDTH / 2,
-        y: lines[0].min.y - MARGIN_CONTOUR.y - BORDER_WIDTH / 2,
-        w: lines[0].w + MARGIN_CONTOUR.w + BORDER_WIDTH,
-        h: topHeight
-      },
-      bottom = {
-        x: lines[lines.length - 1].min.x - MARGIN_CONTOUR.x - BORDER_WIDTH / 2,
-        y: top.y + topHeight,
-        w: lines[lines.length - 1].w + MARGIN_CONTOUR.w + BORDER_WIDTH,
-        h: bottomHeight
-      },
-      xMin = { top: BORDER_WIDTH / 2, bottom: BORDER_WIDTH / 2 },
-      xMax = { top: top.w - BORDER_WIDTH / 2, bottom: bottom.w - BORDER_WIDTH / 2 },
-      yMin = { top: BORDER_WIDTH / 2, bottom: BORDER_WIDTH / 2 },
-      yMax = { top: top.h - BORDER_WIDTH / 2, bottom: bottom.h - BORDER_WIDTH / 2 };
-    top.borders = topLeftCornerEmpty
-      ? [
-          { x0: xMin.top, y0: yMin.top, x1: xMax.top, y1: yMin.top }, // Top
-          { x0: xMax.top, y0: yMin.top, x1: xMax.top, y1: BORDER_WIDTH + yMax.top }, // Right
-          { x0: xMin.top, y0: BORDER_WIDTH + yMax.top, x1: xMin.top, y1: yMin.top } // left
-        ]
-      : [
-          { x0: xMin.top, y0: yMin.top, x1: xMax.top, y1: yMin.top }, // Top
-          { x0: xMax.top, y0: yMin.top, x1: xMax.top, y1: yMax.top }, // Right
-          { x0: xMax.top, y0: yMax.top, x1: xMax.bottom - BORDER_WIDTH / 2, y1: yMax.top }, // Bottom
-          { x0: xMin.top, y0: BORDER_WIDTH + yMax.top, x1: xMin.top, y1: yMin.top } // Left
-        ];
-    bottom.borders = topLeftCornerEmpty
-      ? [
-          { x0: xMin.bottom, y0: yMin.bottom, x1: BORDER_WIDTH + (top.x - bottom.x), y1: yMin.bottom }, // Top
-          { x0: xMax.bottom, y0: 0, x1: xMax.bottom, y1: yMax.bottom }, // Right
-          { x0: xMax.bottom, y0: yMax.bottom, x1: xMin.bottom, y1: yMax.bottom }, // Bottom
-          { x0: xMin.bottom, y0: yMax.bottom, x1: xMin.bottom, y1: yMin.bottom } // Left
-        ]
-      : [
-          { x0: xMax.bottom, y0: 0, x1: xMax.bottom, y1: yMax.bottom }, // Right
-          { x0: xMax.bottom, y0: yMax.bottom, x1: xMin.bottom, y1: yMax.bottom }, // Bottom
-          { x0: xMin.bottom, y0: yMax.bottom, x1: xMin.bottom, y1: 0 } // left
-        ];
-    if (topLeftCornerEmpty) {
-      divs.push(this.buildDiv(top.x, top.y, top.w, top.h, sentenceId));
-      divs.push(this.buildDiv(bottom.x, bottom.y, bottom.w, bottom.h, sentenceId));
-      canvas.push(this.buildCanvas(top.x, top.y, top.w, top.h, area.p, sentenceId, top.borders));
-      canvas.push(this.buildCanvas(bottom.x, bottom.y, bottom.w, bottom.h, area.p, sentenceId, bottom.borders));
-    } else {
-      divs.push(this.buildDiv(bottom.x, bottom.y, bottom.w, bottom.h, sentenceId));
-      divs.push(this.buildDiv(top.x, top.y, top.w, top.h, sentenceId));
-      canvas.push(this.buildCanvas(bottom.x, bottom.y, bottom.w, bottom.h, area.p, sentenceId, bottom.borders));
-      canvas.push(this.buildCanvas(top.x, top.y, top.w, top.h, area.p, sentenceId, top.borders));
-    }
-    this.setEvents(divs);
-    return divs.concat(canvas);
-  }
-  // case area is some complex rectangles
-  /* There is 4 possible cases ([3*3]) :
-   * xoo  xoo  xxo  xxo
-   * ooo  ooo  ooo  ooo
-   * oox  oxx  oox  oxx
-   *
-   * wich can be summarized by (by modifying the value of xCenter) :
-   * xxo xoo
-   * ooo ooo
-   * oxx oox
-   *
-   * Notes :
-   * o = there is content
-   * x = there is no content
-   */
-  let fistLineMinX_gt_lastLineMaxX = lines[0].min.x > lines[lines.length - 1].max.x,
-    bottomLeftEmpty = lines[lines.length - 2].min.x > lines[lines.length - 1].min.x,
-    xCenter = fistLineMinX_gt_lastLineMaxX
-      ? {
-          min: lines[lines.length - 1].max.x,
-          max: lines[0].min.x
-        }
-      : {
-          min: lines[0].min.x,
-          max: lines[lines.length - 1].max.x
-        },
-    topLeft = {
-      x: area.min.x - MARGIN_CONTOUR.x,
-      y: area.min.y - MARGIN_CONTOUR.y,
-      w: xCenter.min - area.min.x + MARGIN_CONTOUR.w / 3,
-      h:
-        (lines[1].min.y === lines[0].max.y
-          ? lines[1].min.y
-          : lines[1].min.y < lines[0].max.y
-          ? lines[0].max.y
-          : lines[1].min.y - (lines[1].min.y - lines[0].max.y) / 2) -
-        area.min.y +
-        MARGIN_CONTOUR.h / 3
+PdfViewer.prototype.getCanvas = function (area) {
+  let self = this,
+    lines = area.getLines(),
+    container = {
+      min: { x: Infinity, y: Infinity },
+      max: { x: -Infinity, y: -Infinity },
+      w: 0,
+      h: 0
     },
-    topMiddle = {
-      x: topLeft.x + topLeft.w,
-      y: topLeft.y,
-      w: xCenter.max - xCenter.min + MARGIN_CONTOUR.w / 3,
-      h: topLeft.h
-    },
-    topRight = {
-      x: topMiddle.x + topMiddle.w,
-      y: topLeft.y,
-      w: area.max.x - xCenter.max + MARGIN_CONTOUR.w / 3,
-      h: topLeft.h
-    },
-    middleLeft = {
-      x: topLeft.x,
-      y: topLeft.y + topLeft.h,
-      w: topLeft.w,
-      h:
-        (lines[lines.length - 1].min.y === lines[lines.length - 2].max.y
-          ? lines[lines.length - 1].min.y
-          : lines[lines.length - 1].min.y < lines[lines.length - 2].max.y
-          ? lines[lines.length - 2].max.y
-          : lines[lines.length - 2].max.y - (lines[lines.length - 2].max.y - lines[lines.length - 1].min.y) / 2) -
-        (topLeft.y + topLeft.h) +
-        MARGIN_CONTOUR.h / 3
-    },
-    center = {
-      x: topMiddle.x,
-      y: middleLeft.y,
-      w: topMiddle.w,
-      h: middleLeft.h
-    },
-    middleRight = {
-      x: topRight.x,
-      y: middleLeft.y,
-      w: topRight.w,
-      h: middleLeft.h
-    },
-    bottomLeft = {
-      x: middleLeft.x,
-      y: middleLeft.y + middleLeft.h,
-      w: middleLeft.w,
-      h: area.max.y - (middleLeft.y + middleLeft.h) + MARGIN_CONTOUR.h / 3
-    },
-    bottomMiddle = {
-      x: center.x,
-      y: bottomLeft.y,
-      w: center.w,
-      h: bottomLeft.h
-    },
-    bottomRight = {
-      x: topRight.x,
-      y: bottomLeft.y,
-      w: topRight.w,
-      h: bottomLeft.h
-    },
-    events,
-    divsInfos = [topLeft, topMiddle, topRight, middleLeft, center, middleRight, bottomLeft, bottomMiddle, bottomRight],
-    divs = [],
-    canvasInfos = [],
     canvas = [];
-  if (fistLineMinX_gt_lastLineMaxX) {
-    /* case :
-     * xxo
-     * ooo
-     * oxx
+  let sortedLines = lines.sort(function (a, b) {
+    if (a.min.y === b.min.y) {
+      return a.min.x < b.min.x;
+    } else return a.min.y < b.min.y;
+  });
+  // calculate min/max values
+  for (let i = 0; i < sortedLines.length; i++) {
+    let square = sortedLines[i],
+      min = {
+        x: square.min.x - BORDER_WIDTH / 2,
+        y: square.min.y - BORDER_WIDTH / 2
+      },
+      max = {
+        x: square.max.x + BORDER_WIDTH / 2,
+        y: square.max.y + BORDER_WIDTH / 2
+      };
+    container.min.x = min.x < container.min.x ? min.x : container.min.x;
+    container.min.y = min.y < container.min.y ? min.y : container.min.y;
+    container.max.x = max.x > container.max.x ? max.x : container.max.x;
+    container.max.y = max.y > container.max.y ? max.y : container.max.y;
+  }
+  // height & width
+  container.w = container.max.x - container.min.x;
+  container.h = container.max.y - container.min.y;
+  // Consctruction du contour
+  let firstLine = sortedLines[0],
+    secondLine = sortedLines.length === 1 ? sortedLines[0] : sortedLines[1],
+    beforeLastLine = sortedLines.length < 2 ? sortedLines[sortedLines.length - 1] : sortedLines[sortedLines.length - 2],
+    lastLine = sortedLines[sortedLines.length - 1],
+    centerSquare = {};
+  // calculate center square corners
+  centerSquare.topLeftCorner = { x: firstLine.min.x, y: Math.round((secondLine.min.y + firstLine.max.y) / 2) };
+  centerSquare.bottomRightCorner = { x: lastLine.max.x, y: Math.round((lastLine.min.y + beforeLastLine.max.y) / 2) };
+  centerSquare.topRightCorner = { x: centerSquare.bottomRightCorner.x, y: centerSquare.topLeftCorner.y };
+  centerSquare.bottomLeftCorner = { x: centerSquare.topLeftCorner.x, y: centerSquare.bottomRightCorner.y };
+  // "round" shape of contour
+  if (Math.abs(centerSquare.topLeftCorner.x - container.min.x) <= 2 * BORDER_WIDTH)
+    centerSquare.topLeftCorner.x = container.min.x;
+  if (Math.abs(centerSquare.topLeftCorner.y - container.min.y) <= 2 * BORDER_WIDTH)
+    centerSquare.topLeftCorner.y = container.min.y;
+  if (Math.abs(centerSquare.topRightCorner.x - container.max.x) <= 2 * BORDER_WIDTH)
+    centerSquare.topRightCorner.x = container.max.x;
+  if (Math.abs(centerSquare.topRightCorner.y - container.min.y) <= 2 * BORDER_WIDTH)
+    centerSquare.topRightCorner.y = container.min.y;
+  if (Math.abs(centerSquare.bottomLeftCorner.x - container.min.x) <= 2 * BORDER_WIDTH)
+    centerSquare.bottomLeftCorner.x = container.min.x;
+  if (Math.abs(centerSquare.bottomLeftCorner.y - container.max.y) <= 2 * BORDER_WIDTH)
+    centerSquare.bottomLeftCorner.y = container.max.y;
+  if (Math.abs(centerSquare.bottomRightCorner.x - container.max.x) <= 2 * BORDER_WIDTH)
+    centerSquare.bottomRightCorner.x = container.max.x;
+  if (Math.abs(centerSquare.bottomRightCorner.y - container.max.y) <= 2 * BORDER_WIDTH)
+    centerSquare.bottomRightCorner.y = container.max.y;
+  // Detect shape of contour-
+  if (sortedLines.length === 2 && centerSquare.bottomRightCorner.x < centerSquare.topLeftCorner.x) {
+    /*
+     * case:
+     * 0 1
+     * 1 0
+     * -> 2 canvas on 2 lines
+     * shape is 2 different squares
      */
-    events = [false, false, true, true, true, true, true, false, false];
-    let xTopCanvas = topRight.x - BORDER_WIDTH / 2,
-      yTopCanvas = topRight.y - BORDER_WIDTH / 2,
-      wTopCanvas = topRight.w + BORDER_WIDTH,
-      hTopCanvas = topRight.h + BORDER_WIDTH,
-      xMinTopCanvasBorder = BORDER_WIDTH / 2,
-      xMaxTopCanvasBorder = wTopCanvas - BORDER_WIDTH / 2,
-      yMinTopCanvasBorder = BORDER_WIDTH / 2,
-      yMaxTopCanvasBorder = hTopCanvas - BORDER_WIDTH / 2,
-      bordersTopCanvas = [
+    canvas.push({
+      min: { x: firstLine.min.x, y: container.min.y },
+      max: { x: container.max.x, y: firstLine.max.y },
+      borders: [
+        { x0: firstLine.min.x, y0: container.min.y, x1: container.max.x, y1: container.min.y },
+        { x0: container.max.x, y0: firstLine.max.y, x1: firstLine.min.x, y1: firstLine.max.y },
+        { x0: firstLine.min.x, y0: container.min.y, x1: firstLine.min.x, y1: firstLine.max.y }
+      ]
+    });
+    canvas.push({
+      min: { x: lastLine.min.x, y: lastLine.min.y },
+      max: { x: lastLine.max.x, y: container.max.y },
+      borders: [
+        { x0: lastLine.min.x, y0: lastLine.min.y, x1: lastLine.max.x, y1: lastLine.min.y },
+        { x0: lastLine.max.x, y0: lastLine.min.y, x1: lastLine.max.x, y1: container.max.y },
+        { x0: lastLine.min.x, y0: container.max.y, x1: lastLine.max.x, y1: container.max.y }
+      ]
+    });
+  } else if (
+    sortedLines.length === 1 ||
+    (centerSquare.topLeftCorner.x === container.min.x &&
+      centerSquare.bottomLeftCorner.x === container.min.x &&
+      centerSquare.topRightCorner.x === container.max.x &&
+      centerSquare.bottomRightCorner.x === container.max.x)
+  ) {
+    /*
+     * case:
+     * 1 1
+     * 1 1
+     * -> 1 canvas on 1 to N lines
+     * shape is a square
+     */
+    canvas.push({
+      min: { x: container.min.x, y: container.min.y },
+      max: { x: container.max.x, y: container.max.y },
+      borders: [
+        { x0: container.min.x, y0: container.min.y, x1: container.max.x, y1: container.min.y },
+        { x0: container.max.x, y0: container.min.y, x1: container.max.x, y1: container.max.y },
+        { x0: container.max.x, y0: container.max.y, x1: container.min.x, y1: container.max.y },
+        { x0: container.min.x, y0: container.max.y, x1: container.min.x, y1: container.min.y }
+      ]
+    });
+  } else if (
+    centerSquare.topLeftCorner.x === container.min.x &&
+    centerSquare.bottomLeftCorner.x === container.min.x &&
+    centerSquare.topRightCorner.x < container.max.x &&
+    centerSquare.bottomRightCorner.x < container.max.x
+  ) {
+    /*
+     * case:
+     * 1 1
+     * 1 0
+     * -> 2 canvas
+     */
+    canvas.push({
+      min: { x: container.min.x, y: container.min.y },
+      max: { x: container.max.x, y: centerSquare.bottomRightCorner.y },
+      borders: [
+        { x0: container.min.x, y0: centerSquare.bottomRightCorner.y, x1: container.min.x, y1: container.min.y },
+        { x0: container.min.x, y0: container.min.y, x1: container.max.x, y1: container.min.y },
+        { x0: container.max.x, y0: container.min.y, x1: container.max.x, y1: centerSquare.bottomRightCorner.y },
         {
-          // Top
-          x0: xMinTopCanvasBorder,
-          y0: yMinTopCanvasBorder,
-          x1: xMaxTopCanvasBorder,
-          y1: yMinTopCanvasBorder
-        },
-        {
-          // Right
-          x0: xMaxTopCanvasBorder,
-          y0: yMinTopCanvasBorder,
-          x1: xMaxTopCanvasBorder,
-          y1: hTopCanvas // JOIN BORDERS
-        },
-        {
-          // Left
-          x0: xMinTopCanvasBorder,
-          y0: hTopCanvas, // JOIN BORDERS
-          x1: xMinTopCanvasBorder,
-          y1: yMinTopCanvasBorder
+          x0: container.max.x,
+          y0: centerSquare.bottomRightCorner.y,
+          x1: centerSquare.bottomRightCorner.x - BORDER_WIDTH / 2,
+          y1: centerSquare.bottomRightCorner.y
         }
-      ],
-      topCanvas = {
-        x: xTopCanvas,
-        y: yTopCanvas,
-        w: wTopCanvas,
-        h: hTopCanvas,
-        borders: bordersTopCanvas
-      };
-    let xMiddleCanvas = middleLeft.x - BORDER_WIDTH / 2,
-      yMiddleCanvas = middleLeft.y - BORDER_WIDTH / 2,
-      wMiddleCanvas = middleRight.x + middleRight.w - middleLeft.x + BORDER_WIDTH,
-      hMiddleCanvas = middleLeft.h + BORDER_WIDTH,
-      xMinMiddleCanvasBorder = BORDER_WIDTH / 2,
-      xTopMaxMiddleCanvasBorder = center.x + center.w - middleLeft.x + BORDER_WIDTH,
-      xBottomMinMiddleCanvasBorder = center.x - middleLeft.x - BORDER_WIDTH,
-      xMaxMiddleCanvasBorder = wMiddleCanvas - BORDER_WIDTH / 2,
-      yMinMiddleCanvasBorder = BORDER_WIDTH / 2,
-      yMaxMiddleCanvasBorder = hMiddleCanvas - BORDER_WIDTH / 2,
-      bordersMiddleCanvas = [
+      ]
+    });
+    canvas.push({
+      min: { x: container.min.x, y: centerSquare.bottomRightCorner.y },
+      max: { x: centerSquare.bottomRightCorner.x, y: container.max.y },
+      borders: [
+        { x0: container.min.x, y0: centerSquare.bottomRightCorner.y, x1: container.min.x, y1: container.max.y },
+        { x0: container.min.x, y0: container.max.y, x1: centerSquare.bottomRightCorner.x, y1: container.max.y },
         {
-          // Top
-          x0: xMinMiddleCanvasBorder,
-          y0: yMinMiddleCanvasBorder,
-          x1: xTopMaxMiddleCanvasBorder,
-          y1: yMinMiddleCanvasBorder
-        },
-        {
-          // Right
-          x0: xMaxMiddleCanvasBorder,
-          y0: 0, // JOIN BORDERS
-          x1: xMaxMiddleCanvasBorder,
-          y1: yMaxMiddleCanvasBorder
-        },
-        {
-          // Bottom
-          x0: xMaxMiddleCanvasBorder,
-          y0: yMaxMiddleCanvasBorder,
-          x1: xBottomMinMiddleCanvasBorder,
-          y1: yMaxMiddleCanvasBorder
-        },
-        {
-          // Left
-          x0: xMinMiddleCanvasBorder,
-          y0: hMiddleCanvas, // JOIN BORDERS
-          x1: xMinMiddleCanvasBorder,
-          y1: yMinMiddleCanvasBorder
+          x0: centerSquare.bottomRightCorner.x,
+          y0: container.max.y,
+          x1: centerSquare.bottomRightCorner.x,
+          y1: centerSquare.bottomRightCorner.y - BORDER_WIDTH / 2
         }
-      ],
-      middleCanvas = {
-        x: xMiddleCanvas,
-        y: yMiddleCanvas,
-        w: wMiddleCanvas,
-        h: hMiddleCanvas,
-        borders: bordersMiddleCanvas
-      };
-    let xBottomCanvas = bottomLeft.x - BORDER_WIDTH / 2,
-      yBottomCanvas = bottomLeft.y - BORDER_WIDTH,
-      wBottomCanvas = bottomLeft.w + BORDER_WIDTH,
-      hBottomCanvas = bottomLeft.h + BORDER_WIDTH,
-      xMinBottomCanvasBorder = BORDER_WIDTH / 2,
-      xMaxBottomCanvasBorder = wBottomCanvas - BORDER_WIDTH / 2,
-      yMinBottomCanvasBorder = BORDER_WIDTH / 2,
-      yMaxBottomCanvasBorder = hBottomCanvas - BORDER_WIDTH / 2,
-      bordersBottomCanvas = [
+      ]
+    });
+  } else if (
+    centerSquare.topLeftCorner.x > container.min.x &&
+    centerSquare.bottomLeftCorner.x > container.min.x &&
+    centerSquare.topRightCorner.x === container.max.x &&
+    centerSquare.bottomRightCorner.x === container.max.x
+  ) {
+    /*
+     * case:
+     * 0 1
+     * 1 1
+     * -> 2 canvas
+     */
+    canvas.push({
+      min: { x: centerSquare.topLeftCorner.x, y: container.min.y },
+      max: { x: container.max.x, y: centerSquare.topLeftCorner.y },
+      borders: [
         {
-          // Right
-          x0: xMaxBottomCanvasBorder,
-          y0: yMinBottomCanvasBorder,
-          x1: xMaxBottomCanvasBorder,
-          y1: yMaxBottomCanvasBorder
+          x0: centerSquare.topLeftCorner.x,
+          y0: centerSquare.topLeftCorner.y + BORDER_WIDTH / 2,
+          x1: centerSquare.topLeftCorner.x,
+          y1: container.min.y
         },
+        { x0: centerSquare.topLeftCorner.x, y0: container.min.y, x1: container.max.x, y1: container.min.y },
         {
-          // Bottom
-          x0: xMaxBottomCanvasBorder,
-          y0: yMaxBottomCanvasBorder,
-          x1: xMinBottomCanvasBorder,
-          y1: yMaxBottomCanvasBorder
-        },
-        {
-          // Left
-          x0: xMinBottomCanvasBorder,
-          y0: yMaxBottomCanvasBorder,
-          x1: xMinBottomCanvasBorder,
-          y1: 0 // JOIN BORDERS
+          x0: container.max.x,
+          y0: container.min.y,
+          x1: container.max.x,
+          y1: centerSquare.topLeftCorner.y + BORDER_WIDTH / 2
         }
-      ],
-      bottomCanvas = {
-        x: xBottomCanvas,
-        y: yBottomCanvas,
-        w: wBottomCanvas,
-        h: hBottomCanvas,
-        borders: bordersBottomCanvas
-      };
-    canvasInfos.push(topCanvas);
-    canvasInfos.push(middleCanvas);
-    canvasInfos.push(bottomCanvas);
+      ]
+    });
+    canvas.push({
+      min: { x: container.min.x, y: centerSquare.topLeftCorner.y },
+      max: { x: container.max.x, y: container.max.y },
+      borders: [
+        {
+          x0: centerSquare.topLeftCorner.x + BORDER_WIDTH / 2,
+          y0: centerSquare.topLeftCorner.y,
+          x1: container.min.x,
+          y1: centerSquare.topLeftCorner.y
+        },
+        { x0: container.min.x, y0: centerSquare.topLeftCorner.y, x1: container.min.x, y1: container.max.y },
+        { x0: container.min.x, y0: container.max.y, x1: container.max.x, y1: container.max.y },
+        {
+          x0: container.max.x,
+          y0: container.max.y,
+          x1: container.max.x,
+          y1: centerSquare.topRightCorner.y - BORDER_WIDTH / 2
+        }
+      ]
+    });
   } else {
-    /* case :
-     * xoo
-     * ooo
-     * oox
-     */
-    events = [false, true, true, true, true, true, true, true, false];
-    let xTopCanvas = topMiddle.x - BORDER_WIDTH / 2,
-      yTopCanvas = topMiddle.y - BORDER_WIDTH / 2,
-      wTopCanvas = topRight.x + topRight.w - topMiddle.x + BORDER_WIDTH,
-      hTopCanvas = topMiddle.h + BORDER_WIDTH,
-      xMinTopCanvasBorder = BORDER_WIDTH / 2,
-      xMaxTopCanvasBorder = wTopCanvas - BORDER_WIDTH / 2,
-      yMinTopCanvasBorder = BORDER_WIDTH / 2,
-      yMaxTopCanvasBorder = hTopCanvas - BORDER_WIDTH / 2,
-      bordersTopCanvas = [
-        {
-          // Top
-          x0: xMinTopCanvasBorder,
-          y0: yMinTopCanvasBorder,
-          x1: xMaxTopCanvasBorder,
-          y1: yMinTopCanvasBorder
-        },
-        {
-          // Right
-          x0: xMaxTopCanvasBorder,
-          y0: yMinTopCanvasBorder,
-          x1: xMaxTopCanvasBorder,
-          y1: hTopCanvas // JOIN BORDERS
-        },
-        {
-          // Left
-          x0: xMinTopCanvasBorder,
-          y0: hTopCanvas, // JOIN BORDERS
-          x1: xMinTopCanvasBorder,
-          y1: yMinTopCanvasBorder
-        }
-      ],
-      topCanvas = {
-        x: xTopCanvas,
-        y: yTopCanvas,
-        w: wTopCanvas,
-        h: hTopCanvas,
-        borders: bordersTopCanvas
-      };
-    let xMiddleCanvas = middleLeft.x - BORDER_WIDTH / 2,
-      yMiddleCanvas = middleLeft.y - BORDER_WIDTH / 2,
-      wMiddleCanvas = middleRight.x + middleRight.w - middleLeft.x + BORDER_WIDTH,
-      hMiddleCanvas = middleLeft.h + BORDER_WIDTH,
-      xMinMiddleCanvasBorder = BORDER_WIDTH / 2,
-      xTopMaxMiddleCanvasBorder = center.x - middleLeft.x + BORDER_WIDTH / 2,
-      xBottomMinMiddleCanvasBorder = middleRight.x - middleLeft.x - BORDER_WIDTH / 2,
-      xMaxMiddleCanvasBorder = wMiddleCanvas - BORDER_WIDTH / 2,
-      yMinMiddleCanvasBorder = BORDER_WIDTH / 2,
-      yMaxMiddleCanvasBorder = hMiddleCanvas - BORDER_WIDTH / 2,
-      bordersMiddleCanvas = [
-        {
-          // Top
-          x0: xMinMiddleCanvasBorder,
-          y0: yMinMiddleCanvasBorder,
-          x1: xTopMaxMiddleCanvasBorder,
-          y1: yMinMiddleCanvasBorder
-        },
-        {
-          // Right
-          x0: xMaxMiddleCanvasBorder,
-          y0: 0, // JOIN BORDERS
-          x1: xMaxMiddleCanvasBorder,
-          y1: yMaxMiddleCanvasBorder
-        },
-        {
-          // Bottom
-          x0: xMaxMiddleCanvasBorder,
-          y0: yMaxMiddleCanvasBorder,
-          x1: xBottomMinMiddleCanvasBorder,
-          y1: yMaxMiddleCanvasBorder
-        },
-        {
-          // Left
-          x0: xMinMiddleCanvasBorder,
-          y0: hMiddleCanvas, // JOIN BORDERS
-          x1: xMinMiddleCanvasBorder,
-          y1: yMinMiddleCanvasBorder
-        }
-      ],
-      middleCanvas = {
-        x: xMiddleCanvas,
-        y: yMiddleCanvas,
-        w: wMiddleCanvas,
-        h: hMiddleCanvas,
-        borders: bordersMiddleCanvas
-      };
-    let xBottomCanvas = bottomLeft.x - BORDER_WIDTH / 2,
-      yBottomCanvas = bottomLeft.y - BORDER_WIDTH / 2,
-      wBottomCanvas = bottomMiddle.x + bottomMiddle.w - bottomLeft.x + BORDER_WIDTH,
-      hBottomCanvas = bottomMiddle.y + bottomMiddle.h - bottomLeft.y + BORDER_WIDTH,
-      xMinBottomCanvasBorder = BORDER_WIDTH / 2,
-      xMaxBottomCanvasBorder = wBottomCanvas - BORDER_WIDTH / 2,
-      yMinBottomCanvasBorder = BORDER_WIDTH / 2,
-      yMaxBottomCanvasBorder = hBottomCanvas - BORDER_WIDTH / 2,
-      bordersBottomCanvas = [
-        {
-          // Right
-          x0: xMaxBottomCanvasBorder,
-          y0: yMinBottomCanvasBorder, // NO NEED TO JOIN BORDERS
-          x1: xMaxBottomCanvasBorder,
-          y1: yMaxBottomCanvasBorder
-        },
-        {
-          // Bottom
-          x0: xMaxBottomCanvasBorder,
-          y0: yMaxBottomCanvasBorder,
-          x1: xMinBottomCanvasBorder,
-          y1: yMaxBottomCanvasBorder
-        },
-        {
-          // Left
-          x0: xMinBottomCanvasBorder,
-          y0: yMaxBottomCanvasBorder,
-          x1: xMinBottomCanvasBorder,
-          y1: 0 // JOIN BORDERS
-        }
-      ],
-      bottomCanvas = {
-        x: xBottomCanvas,
-        y: yBottomCanvas,
-        w: wBottomCanvas,
-        h: hBottomCanvas,
-        borders: bordersBottomCanvas
-      };
-    canvasInfos.push(middleCanvas);
-    canvasInfos.push(topCanvas);
-    canvasInfos.push(bottomCanvas);
+    if (centerSquare.topLeftCorner.x > centerSquare.bottomRightCorner.x) {
+      /*
+       * case:
+       * 0 0 1
+       * 1 1 1
+       * 1 0 0
+       * 3 canvas
+       */
+      // Be careful, here topLeftCorner is on the right of topRightCorner, so do not trust variable names
+      canvas.push({
+        min: { x: centerSquare.topLeftCorner.x, y: container.min.y },
+        max: { x: container.max.x, y: centerSquare.topLeftCorner.y },
+        borders: [
+          {
+            x0: centerSquare.topLeftCorner.x,
+            y0: centerSquare.topLeftCorner.y + BORDER_WIDTH / 2,
+            x1: centerSquare.topLeftCorner.x,
+            y1: container.min.y
+          },
+          { x0: centerSquare.topLeftCorner.x, y0: container.min.y, x1: container.max.x, y1: container.min.y },
+          {
+            x0: container.max.x,
+            y0: container.min.y,
+            x1: container.max.x,
+            y1: centerSquare.topLeftCorner.y + BORDER_WIDTH / 2
+          }
+        ]
+      });
+      // Be careful, here topLeftCorner is on the right of topRightCorner, so do not trust variable names
+      canvas.push({
+        min: { x: container.min.x, y: centerSquare.topLeftCorner.y },
+        max: { x: container.max.x, y: centerSquare.bottomRightCorner.y },
+        borders: [
+          {
+            x0: centerSquare.topLeftCorner.x + BORDER_WIDTH / 2,
+            y0: centerSquare.topLeftCorner.y,
+            x1: container.min.x,
+            y1: centerSquare.topLeftCorner.y
+          },
+          {
+            x0: container.min.x,
+            y0: centerSquare.topLeftCorner.y,
+            x1: container.min.x,
+            y1: centerSquare.bottomRightCorner.y
+          },
+          {
+            x0: centerSquare.bottomRightCorner.x - BORDER_WIDTH / 2,
+            y0: centerSquare.bottomRightCorner.y,
+            x1: container.max.x,
+            y1: centerSquare.bottomRightCorner.y
+          },
+          {
+            x0: container.max.x,
+            y0: centerSquare.bottomRightCorner.y,
+            x1: container.max.x,
+            y1: centerSquare.topLeftCorner.y
+          }
+        ]
+      });
+      // Be careful, here topLeftCorner is on the right of topRightCorner, so do not trust variable names
+      canvas.push({
+        min: { x: container.min.x, y: centerSquare.bottomRightCorner.y },
+        max: { x: centerSquare.bottomRightCorner.x, y: container.max.y },
+        borders: [
+          {
+            x0: container.min.x,
+            y0: centerSquare.bottomRightCorner.y - BORDER_WIDTH / 2,
+            x1: container.min.x,
+            y1: container.max.y
+          },
+          { x0: container.min.x, y0: container.max.y, x1: centerSquare.bottomRightCorner.x, y1: container.max.y },
+          {
+            x0: centerSquare.bottomRightCorner.x,
+            y0: container.max.y,
+            x1: centerSquare.bottomRightCorner.x,
+            y1: centerSquare.bottomRightCorner.y - BORDER_WIDTH / 2
+          }
+        ]
+      });
+    } else {
+      /*
+       * case:
+       * 0 1 1
+       * 1 1 1
+       * 1 1 0
+       * 2 canvas
+       */
+      canvas.push({
+        min: { x: centerSquare.topLeftCorner.x, y: container.min.y },
+        max: { x: container.max.x, y: centerSquare.bottomRightCorner.y },
+        borders: [
+          {
+            x0: centerSquare.topLeftCorner.x,
+            y0: centerSquare.topLeftCorner.y,
+            x1: centerSquare.topLeftCorner.x,
+            y1: container.min.y
+          },
+          { x0: centerSquare.topLeftCorner.x, y0: container.min.y, x1: container.max.x, y1: container.min.y },
+          { x0: container.max.x, y0: container.min.y, x1: container.max.x, y1: centerSquare.bottomRightCorner.y },
+          {
+            x0: container.max.x,
+            y0: centerSquare.bottomRightCorner.y,
+            x1: centerSquare.bottomRightCorner.x - BORDER_WIDTH / 2,
+            y1: centerSquare.bottomRightCorner.y
+          }
+        ]
+      });
+      canvas.push({
+        min: { x: container.min.x, y: centerSquare.topLeftCorner.y },
+        max: { x: centerSquare.bottomRightCorner.x, y: container.max.y },
+        borders: [
+          {
+            x0: centerSquare.topLeftCorner.x + BORDER_WIDTH / 2,
+            y0: centerSquare.topLeftCorner.y,
+            x1: container.min.x,
+            y1: centerSquare.topLeftCorner.y
+          },
+          { x0: container.min.x, y0: centerSquare.topLeftCorner.y, x1: container.min.x, y1: container.max.y },
+          { x0: container.min.x, y0: container.max.y, x1: centerSquare.bottomRightCorner.x, y1: container.max.y },
+          {
+            x0: centerSquare.bottomRightCorner.x,
+            y0: container.max.y,
+            x1: centerSquare.bottomRightCorner.x,
+            y1: centerSquare.bottomRightCorner.y - BORDER_WIDTH / 2
+          }
+        ]
+      });
+      /*
+        3 canvas
+        canvas.push({
+            min: { x: centerSquare.topLeftCorner.x, y: container.min.y },
+            max: { x: container.max.x, y: centerSquare.topRightCorner.y },
+            borders: [
+              {
+                x0: centerSquare.topLeftCorner.x,
+                y0: centerSquare.topLeftCorner.y + BORDER_WIDTH / 2,
+                x1: centerSquare.topLeftCorner.x,
+                y1: container.min.y
+              },
+              { x0: centerSquare.topLeftCorner.x, y0: container.min.y, x1: container.max.x, y1: container.min.y },
+              { x0: container.max.x, y0: container.min.y, x1: container.max.x, y1: centerSquare.topRightCorner.y }
+            ]
+          });
+          canvas.push({
+            min: { x: container.min.x, y: centerSquare.topLeftCorner.y },
+            max: { x: container.max.x, y: centerSquare.bottomRightCorner.y },
+            borders: [
+              {
+                x0: centerSquare.topLeftCorner.x + BORDER_WIDTH / 2,
+                y0: centerSquare.topLeftCorner.y,
+                x1: container.min.x,
+                y1: centerSquare.topLeftCorner.y
+              },
+              {
+                x0: container.min.x,
+                y0: centerSquare.topLeftCorner.y,
+                x1: container.min.x,
+                y1: centerSquare.bottomRightCorner.y
+              },
+              {
+                x0: centerSquare.bottomRightCorner.x - BORDER_WIDTH / 2,
+                y0: centerSquare.bottomRightCorner.y,
+                x1: container.max.x,
+                y1: centerSquare.bottomRightCorner.y
+              },
+              {
+                x0: container.max.x,
+                y0: centerSquare.bottomRightCorner.y,
+                x1: container.max.x,
+                y1: centerSquare.topRightCorner.y
+              }
+            ]
+          });
+          canvas.push({
+            min: { x: container.min.x, y: centerSquare.bottomLeftCorner.y },
+            max: { x: centerSquare.bottomRightCorner.x, y: container.max.y },
+            borders: [
+              {
+                x0: container.min.x,
+                y0: centerSquare.bottomLeftCorner.y - BORDER_WIDTH / 2,
+                x1: container.min.x,
+                y1: container.max.y
+              },
+              {
+                x0: container.min.x,
+                y0: container.max.y,
+                x1: centerSquare.bottomRightCorner.x,
+                y1: container.max.y
+              },
+              {
+                x0: centerSquare.bottomRightCorner.x,
+                y0: container.max.y,
+                x1: centerSquare.bottomRightCorner.x,
+                y1: centerSquare.bottomRightCorner.y
+              }
+            ]
+          });
+        */
+    }
   }
-  // Build canvas
-  for (let i = 0; i < canvasInfos.length; i++) {
-    canvas.push(
-      this.buildCanvas(
-        canvasInfos[i].x,
-        canvasInfos[i].y,
-        canvasInfos[i].w,
-        canvasInfos[i].h,
-        area.p,
-        sentenceId,
-        canvasInfos[i].borders
-      )
-    );
-  }
-  // Build div
-  for (let i = 0; i < divsInfos.length; i++) {
-    divs.push(this.buildDiv(divsInfos[i].x, divsInfos[i].y, divsInfos[i].w, divsInfos[i].h, sentenceId, events[i]));
-  }
-  this.setEvents(divs);
-  return divs.concat(canvas);
+  // update canvas coordinates values relative to the container
+  canvas = canvas.map(function (item) {
+    let w = item.max.x - item.min.x,
+      h = item.max.y - item.min.y,
+      borders = item.borders.map(function (border) {
+        return {
+          x0: border.x0 - item.min.x,
+          y0: border.y0 - item.min.y,
+          x1: border.x1 - item.min.x,
+          y1: border.y1 - item.min.y
+        };
+      });
+    return self.buildCanvas(item.min.x, item.min.y, w, h, area.p, area.sentenceId, borders);
+  });
+  // set events on canvas
+  this.setEvents(canvas);
+  return canvas;
 };
