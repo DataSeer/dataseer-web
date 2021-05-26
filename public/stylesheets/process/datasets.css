@@ -557,12 +557,24 @@ body {
   vertical-align: middle;
 }
 
+#documentView\.screen.no-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+#documentView\.screen.no-scroll {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 #documentView\.screen {
   height: 100%;
   overflow: scroll;
   font-family: Times, "Times New Roman", serif;
   font-size: 14px;
-  padding: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 20px;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
 }
@@ -606,19 +618,42 @@ body {
 }
 
 .pdfViewerScrollMarkers {
+  z-index: 4000;
   position: absolute;
-  height: calc(100% - 25px);
-  width: 12px;
+  height: calc(100% - 28px);
+  width: 16px;
   top: 25px;
   right: 30px;
+  max-height: calc(100% - 28px);
   overflow: hidden;
+  background-color: gainsboro;
 }
 
 .pdfViewerScrollMarkers span {
+  -webkit-transition: all .8s ease;
+  -moz-transition: all .8s ease;
+  -ms-transition: all .8s ease;
+  -o-transition: all .8s ease;
+  transition: all .8s ease;
+}
+
+.pdfViewerScrollMarkers span.marker {
   /* markers */
+  z-index: 4100;
   cursor: pointer;
   position: absolute;
-  width: 100%;
+  margin-left: 2px;
+  width: 12px;
+}
+
+.pdfViewerScrollMarkers span.cursor {
+  /* markers */
+  z-index: 4200;
+  position: absolute;
+  width: 16px;
+  height: 6px;
+  border: solid 1px #184D7E;
+  border-radius: 0px;
 }
 
 #documentView #pdfViewer .page {
