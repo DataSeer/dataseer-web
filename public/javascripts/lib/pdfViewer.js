@@ -220,6 +220,9 @@ const PdfViewer = function (id, screenId, events = {}) {
   this.scrollMarkers = $(`<div id="${this.viewerId}ScrollMarkers" class="pdfViewerScrollMarkers"></div>`);
   this.scrollMarkersElement = this.scrollMarkers.get(0);
   this.container.append(this.infos).append(this.message).append(this.viewer);
+  this.scrollMarkersCursor = $('<span class="cursor"></span>');
+  this.scrollMarkersCursorElement = this.scrollMarkersCursor.get(0);
+  this.scrollMarkers.append(this.scrollMarkersCursor); // Add cursor in scroll Markers
   this.screen.append(this.scrollMarkers);
   // pdf properties
   this.pdfLoaded = false;
@@ -411,13 +414,41 @@ PdfViewer.prototype.setPage = function (numPage) {
   this.infos.empty().append(`Page ${numPage}/${this.pdfDocument.numPages}`);
 };
 
+// hide scroll markers
+PdfViewer.prototype.hideMarkers = function () {
+  /*this.screen.removeClass('no-scroll');*/
+  this.scrollMarkers.hide();
+};
+
+// hide scroll markers
+PdfViewer.prototype.showMarkers = function () {
+  /*this.screen.addClass('no-scroll');*/
+  this.scrollMarkers.show();
+};
+
+// Refresh scroll cursor
+PdfViewer.prototype.refreshScrollCursor = function (scrollInfos) {
+  let spanTop = scrollInfos.position,
+    spanBottom = spanTop + this.screen.height(),
+    markerTop = Math.ceil((spanTop * this.screen.height()) / this.container.prop('scrollHeight')),
+    markerBottom = Math.ceil((spanBottom * this.screen.height()) / this.container.prop('scrollHeight'));
+  this.scrollMarkersCursorElement.style.top = markerTop + 'px';
+  this.scrollMarkersCursorElement.style.height = markerBottom - markerTop + 'px';
+};
+
 // Get PdfPages
 PdfViewer.prototype.onScroll = function (scrollInfos, direction) {
+  let self = this;
   this.currentPage = this.refreshNumPage(scrollInfos);
+  this.refreshScrollCursor(scrollInfos);
   if (direction > 0) {
-    this.renderNextPage(function (err, res) {});
+    this.renderNextPage(function (err, res) {
+      self.refreshScrollCursor(scrollInfos);
+    });
   } else {
-    this.renderPreviousPage(function (err, res) {});
+    this.renderPreviousPage(function (err, res) {
+      self.refreshScrollCursor(scrollInfos);
+    });
   }
 };
 
@@ -496,6 +527,7 @@ PdfViewer.prototype.renderPages = function (numPages, cb) {
 
 // Render next page (or nothing if all pages already rendered)
 PdfViewer.prototype.renderNextPage = function (cb) {
+  let self = this;
   let numPage = this.currentPage + 1;
   if (numPage <= this.pdfDocument.numPages) {
     return this.renderPage({ numPage: numPage }, function (err, numPage) {
@@ -506,6 +538,7 @@ PdfViewer.prototype.renderNextPage = function (cb) {
 
 // Render next page (or nothing if all pages already rendered)
 PdfViewer.prototype.renderPreviousPage = function (cb) {
+  let self = this;
   let numPage = this.currentPage - 1;
   if (numPage <= this.pdfDocument.numPages) {
     return this.renderPage({ numPage: numPage }, function (err, numPage) {
@@ -517,7 +550,7 @@ PdfViewer.prototype.renderPreviousPage = function (cb) {
 // Refresh markers
 PdfViewer.prototype.refreshMarkers = function () {
   let self = this;
-  return this.scrollMarkers.find('span').map(function () {
+  return this.scrollMarkers.find('span.marker').map(function () {
     let span = $(this),
       markerElement = span.get(0),
       sentenceId = span.attr('sentenceId'),
@@ -525,8 +558,8 @@ PdfViewer.prototype.refreshMarkers = function () {
       contour = contours.find('canvas').first(),
       spanTop = self.scrollToSentence(sentenceId),
       spanBottom = spanTop + parseInt(contours.attr('contour-height')),
-      markerTop = Math.ceil((spanTop * self.screen.outerHeight()) / self.container.prop('scrollHeight')),
-      markerBottom = Math.ceil((spanBottom * self.screen.outerHeight()) / self.container.prop('scrollHeight'));
+      markerTop = Math.ceil((spanTop * self.screen.height()) / self.container.prop('scrollHeight')),
+      markerBottom = Math.ceil((spanBottom * self.screen.height()) / self.container.prop('scrollHeight'));
     markerElement.style.top = markerTop + 'px';
     markerElement.style.height = markerBottom - markerTop + 'px';
   });
@@ -844,14 +877,15 @@ PdfViewer.prototype.addMarker = function (dataset) {
     contour = contours.find('canvas').first(),
     spanTop = this.scrollToSentence(dataset.sentenceId),
     spanBottom = spanTop + parseInt(contours.attr('contour-height')),
-    markerTop = Math.ceil((spanTop * this.screen.outerHeight()) / this.container.prop('scrollHeight')),
-    markerBottom = Math.ceil((spanBottom * this.screen.outerHeight()) / this.container.prop('scrollHeight')),
+    markerTop = Math.ceil((spanTop * this.screen.height()) / this.container.prop('scrollHeight')),
+    markerBottom = Math.ceil((spanBottom * this.screen.height()) / this.container.prop('scrollHeight')),
     markerElement = document.createElement('span'),
     marker = $(markerElement);
   markerElement.style.backgroundColor = dataset.color.background.rgb;
   markerElement.style.top = markerTop + 'px';
   markerElement.style.height = markerBottom - markerTop + 'px';
   this.scrollMarkersElement.appendChild(markerElement);
+  marker.addClass('marker');
   marker.attr('sentenceId', dataset.sentenceId);
   marker.attr('spanTop', spanTop);
   marker.attr('spanBottom', spanBottom);

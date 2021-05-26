@@ -91,13 +91,12 @@ const DocumentView = function (id, events = {}) {
   this.currentScroll = 0;
   this.screen.scroll(
     _.throttle(function () {
-      if (self.pdfVisible) {
-        let scrollTop = self.screen.scrollTop(),
-          direction = scrollTop > self.currentScroll ? +1 : -1;
-        self.currentScroll = scrollTop;
+      let scrollTop = self.screen.scrollTop(),
+        direction = scrollTop > self.currentScroll ? +1 : -1;
+      self.currentScroll = scrollTop;
+      if (self.pdfVisible)
         self.pdfViewer.onScroll({ position: scrollTop, height: self.screen.prop('scrollHeight') }, direction);
-      }
-    }, 333)
+    }, 200)
   );
   // Element initialization
   this.xml.hide();
@@ -118,6 +117,7 @@ const DocumentView = function (id, events = {}) {
       console.log('TEI all');
       self.pdfVisible = false;
       self.pdf.hide();
+      self.pdfViewer.hideMarkers();
       self.xml.show();
       self.xml.find('*.hidden').removeClass('hidden');
       self.selectDataset({ id: self.currentDatasetId });
@@ -129,6 +129,7 @@ const DocumentView = function (id, events = {}) {
       console.log('TEI dataseer');
       self.pdfVisible = false;
       self.pdf.hide();
+      self.pdfViewer.hideMarkers();
       self.xml.show();
       self.xml.find('*.hidden').removeClass('hidden');
       self.xml.find('text > div > div, text > div > *:not(div)').map(function (i, el) {
@@ -144,6 +145,7 @@ const DocumentView = function (id, events = {}) {
       console.log('TEI dataset');
       self.pdfVisible = false;
       self.pdf.hide();
+      self.pdfViewer.hideMarkers();
       self.xml.show();
       self.xml.find('*.hidden').removeClass('hidden');
       self.xml.find('text > div, text > *:not(div)').map(function (i, el) {
@@ -159,6 +161,7 @@ const DocumentView = function (id, events = {}) {
       console.log('PDF');
       self.pdfVisible = true;
       self.pdf.show();
+      self.pdfViewer.showMarkers();
       self.xml.hide();
       self.selectDataset({ id: self.currentDatasetId });
       return typeof self.events.onPdfView === 'function' ? self.events.onPdfView() : undefined;
