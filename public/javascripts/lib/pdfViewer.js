@@ -430,8 +430,8 @@ PdfViewer.prototype.showMarkers = function () {
 PdfViewer.prototype.refreshScrollCursor = function (scrollInfos) {
   let spanTop = scrollInfos.position,
     spanBottom = spanTop + this.screen.height(),
-    markerTop = Math.ceil((spanTop * this.screen.height()) / this.container.prop('scrollHeight')),
-    markerBottom = Math.ceil((spanBottom * this.screen.height()) / this.container.prop('scrollHeight'));
+    markerTop = Math.floor((spanTop * this.screen.height()) / this.container.prop('scrollHeight')),
+    markerBottom = Math.floor((spanBottom * this.screen.height()) / this.container.prop('scrollHeight'));
   this.scrollMarkersCursorElement.style.top = markerTop + 'px';
   this.scrollMarkersCursorElement.style.height = markerBottom - markerTop + 'px';
 };
@@ -551,17 +551,22 @@ PdfViewer.prototype.renderPreviousPage = function (cb) {
 PdfViewer.prototype.refreshMarkers = function () {
   let self = this;
   return this.scrollMarkers.find('span.marker').map(function () {
-    let span = $(this),
-      markerElement = span.get(0),
-      sentenceId = span.attr('sentenceId'),
-      contours = self.viewer.find(`.contoursLayer > .contour[sentenceId="${sentenceId}"]`),
-      contour = contours.find('canvas').first(),
+    let marker = $(this),
+      markerElement = marker.get(0),
+      sentenceId = marker.attr('sentenceId'),
       spanTop = self.scrollToSentence(sentenceId),
-      spanBottom = spanTop + parseInt(contours.attr('contour-height')),
-      markerTop = Math.ceil((spanTop * self.screen.height()) / self.container.prop('scrollHeight')),
-      markerBottom = Math.ceil((spanBottom * self.screen.height()) / self.container.prop('scrollHeight'));
+      spanBottom = spanTop + parseInt(marker.attr('contour-height')),
+      spanLeft = parseInt(marker.attr('contour-left')),
+      spanRight = spanLeft + parseInt(marker.attr('contour-width')),
+      markerTop = Math.floor((spanTop * self.screen.height()) / self.container.prop('scrollHeight')),
+      markerBottom = Math.floor((spanBottom * self.screen.height()) / self.container.prop('scrollHeight')),
+      markerLeft = Math.floor((spanLeft * self.screen.width()) / self.container.width()),
+      markerRight = Math.floor((spanRight * self.screen.width()) / self.container.width()),
+      coeff = self.scrollMarkers.outerWidth() / self.container.outerWidth();
     markerElement.style.top = markerTop + 'px';
+    markerElement.style.left = parseInt(markerLeft * coeff) + 'px';
     markerElement.style.height = markerBottom - markerTop + 'px';
+    markerElement.style.width = parseInt((markerRight - markerLeft) * coeff) + 'px';
   });
 };
 
@@ -873,24 +878,36 @@ PdfViewer.prototype.removeCorresps = function (dataset) {
 
 // Insert marker in scrollbar
 PdfViewer.prototype.addMarker = function (dataset) {
-  let contours = this.viewer.find(`.contoursLayer > .contour[sentenceId="${dataset.sentenceId}"]`),
-    contour = contours.find('canvas').first(),
-    spanTop = this.scrollToSentence(dataset.sentenceId),
-    spanBottom = spanTop + parseInt(contours.attr('contour-height')),
-    markerTop = Math.ceil((spanTop * this.screen.height()) / this.container.prop('scrollHeight')),
-    markerBottom = Math.ceil((spanBottom * this.screen.height()) / this.container.prop('scrollHeight')),
-    markerElement = document.createElement('span'),
-    marker = $(markerElement);
-  markerElement.style.backgroundColor = dataset.color.background.rgb;
-  markerElement.style.top = markerTop + 'px';
-  markerElement.style.height = markerBottom - markerTop + 'px';
-  this.scrollMarkersElement.appendChild(markerElement);
-  marker.addClass('marker');
-  marker.attr('sentenceId', dataset.sentenceId);
-  marker.attr('spanTop', spanTop);
-  marker.attr('spanBottom', spanBottom);
-  marker.click(function () {
-    return contour.click();
+  let self = this,
+    contours = this.viewer.find(`.contoursLayer > .contour[sentenceId="${dataset.sentenceId}"]`);
+  return contours.map(function () {
+    let contour = $(this),
+      canvas = contour.find('canvas').first(),
+      spanTop = self.scrollToSentence(dataset.sentenceId),
+      spanBottom = spanTop + parseInt(contour.attr('contour-height')),
+      spanLeft = parseInt(contour.attr('contour-left')),
+      spanRight = spanLeft + parseInt(contour.attr('contour-width')),
+      markerTop = Math.floor((spanTop * self.screen.height()) / self.container.prop('scrollHeight')),
+      markerBottom = Math.floor((spanBottom * self.screen.height()) / self.container.prop('scrollHeight')),
+      markerLeft = Math.floor((spanLeft * self.screen.width()) / self.container.width()),
+      markerRight = Math.floor((spanRight * self.screen.width()) / self.container.width()),
+      markerElement = document.createElement('span'),
+      marker = $(markerElement),
+      coeff = self.scrollMarkers.outerWidth() / self.container.outerWidth();
+    markerElement.style.backgroundColor = dataset.color.background.rgb;
+    markerElement.style.top = markerTop + 'px';
+    markerElement.style.left = parseInt(markerLeft * coeff) + 'px';
+    markerElement.style.height = markerBottom - markerTop + 'px';
+    markerElement.style.width = parseInt((markerRight - markerLeft) * coeff) + 'px';
+    self.scrollMarkersElement.appendChild(markerElement);
+    marker.addClass('marker');
+    marker.attr('sentenceId', dataset.sentenceId);
+    marker.attr('contour-height', contour.attr('contour-height'));
+    marker.attr('contour-left', contour.attr('contour-left'));
+    marker.attr('contour-width', contour.attr('contour-width'));
+    marker.click(function () {
+      return canvas.click();
+    });
   });
 };
 
