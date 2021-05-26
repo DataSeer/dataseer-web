@@ -142,9 +142,15 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
     dataType: function (value, inputs = false) {
       if (typeof value === 'undefined') return self.dataset.dataType;
       self.container.find('div[key="dataset\\.dataType"]').attr('value', value);
-      if (inputs)
-        self.container.find(`select[name="datasetForm\\.dataType"] option[value="${value}"]`).prop('selected', true);
-      self.dataset.dataType = value;
+      let option = self.container.find(`select[name="datasetForm\\.dataType"] option[value="${value}"]`);
+      if (inputs) {
+        option.prop('selected', true);
+      }
+      if (option.length === 0) {
+        self.properties['customDataType'](value, true);
+        self.dataset.dataType = '';
+        self.container.find(`select[name="datasetForm\\.dataType"] option:first-child`).prop('selected', true);
+      } else self.dataset.dataType = value;
       // input change behaviors
       self.setSubtypes(); // set subtypes
       self.refreshDatatypeInfos(); // refresh dataType infos
@@ -326,37 +332,6 @@ DatasetForm.prototype.extractInfos = function (keys, properties) {
   return result;
 };
 
-// Update dataType infos (based on resources)
-DatasetForm.prototype.updateDatatypeInfos = function () {
-  let self = this,
-    hasChanged = false,
-    properties = [
-      'description',
-      'bestDataFormatForSharing',
-      'bestPracticeForIndicatingReUseOfExistingData',
-      { key: 'mostSuitableRepositories', subKey: this.dataset.reuse ? 'reuse' : 'default' }
-    ],
-    keys = ['dataType', 'subType'],
-    metadata = this.extractInfos(keys, properties);
-  // Set dataType/subType infos
-  let old = Object.assign({}, this.dataset);
-  properties.map(function (property) {
-    keys.map(function (key) {
-      if (typeof property === 'string') {
-        if (metadata[key][property] && self.dataset[property] !== metadata[key][property])
-          self.dataset[property] = metadata[key][property];
-      } else if (typeof property === 'object' && property.key) {
-        if (metadata[key][property.key] && self.dataset[property.key] !== metadata[key][property.key])
-          self.dataset[property.key] = metadata[key][property.key];
-      }
-    });
-  });
-  for (let property in this.dataset) {
-    if (this.dataset[property] !== old[property]) hasChanged = true;
-  }
-  return hasChanged;
-};
-
 // Refresh dataType infos (based on resources)
 DatasetForm.prototype.refreshDatatypeInfos = function () {
   let self = this,
@@ -370,6 +345,10 @@ DatasetForm.prototype.refreshDatatypeInfos = function () {
     keys = ['dataType', 'subType'],
     metadata = this.extractInfos(keys, properties);
   // Set dataType/subType infos
+  properties.map(function (property) {
+    if (typeof property === 'string') self.properties[property]('');
+    else if (typeof property === 'object' && property.key) self.properties[property.key]('');
+  });
   properties.map(function (property) {
     keys.map(function (key) {
       if (typeof property === 'string')
@@ -506,27 +485,20 @@ DatasetForm.prototype.link = function (dataset, opts = {}, callback) {
     this.setEmptyMessage();
     return typeof callback === 'function' ? callback(true) : undefined;
   }
-  this.dataset = Object.assign({}, dataset);
-  // Set all values
-  for (let key in dataset) {
-    if (typeof this.properties[key] === 'function') {
-      this.dataset[key] = dataset[key];
-    }
-  }
-  // Try to update some missing data concerning dataType/subType
-  let update = this.updateDatatypeInfos();
+  this.datasetColor = dataset.color;
   // Set properties
   for (let key in dataset) {
     if (typeof this.properties[key] === 'function') {
-      this.properties[key](this.dataset[key], true);
+      this.properties[key](dataset[key], true);
     }
   }
+  this.properties['customDataType']('', true);
   this.properties['dataType'](dataset['dataType'], true);
   this.properties['subType'](dataset['subType'], true);
   this.setView({ isCurator: opts.isCurator, isCorresp: opts.isCorresp });
   this.color();
   this.hideMessage();
-  return typeof callback === 'function' ? callback(null, { shouldSave: update, dataset: this.dataset }) : undefined;
+  return typeof callback === 'function' ? callback(null, { shouldSave: false, dataset: this.dataset }) : undefined;
 };
 
 // Link dataset to datasetForm
@@ -542,8 +514,8 @@ DatasetForm.prototype.color = function () {
   return this.container
     .find('div[key="dataset\\.id"], div[key="dataset\\.label"]')
     .parent()
-    .css('color', this.dataset.color.foreground)
-    .css('background-color', this.dataset.color.background.rgba);
+    .css('color', this.datasetColor.foreground)
+    .css('background-color', this.datasetColor.background.rgba);
 };
 
 // Unset color on dataset id
