@@ -233,7 +233,7 @@ DatasetsList.prototype.add = function (dataset) {
         .addClass('item')
         .attr('key', 'dataset.id')
         .attr('value', dataset.id)
-        .attr('sentenceId', dataset.sentenceId)
+        .attr('sentenceId', dataset.sentences[0].id)
         .css('background-color', dataset.color.background.rgba)
         .css('border-color', dataset.color.background.rgba),
       label: $('<div>')
@@ -278,7 +278,11 @@ DatasetsList.prototype.add = function (dataset) {
     self.select(dataset.id);
     self.scrollTo(dataset.id);
     if (typeof self.events.onDatasetClick === 'function')
-      return self.events.onDatasetClick({ id: dataset.id, checked: $(this).hasClass('checked') });
+      return self.events.onDatasetClick({
+        id: dataset.id,
+        sentenceId: dataset.sentences[0].id,
+        checked: $(this).hasClass('checked')
+      });
   });
   elements.link.click(function (event) {
     event.preventDefault();
@@ -288,7 +292,7 @@ DatasetsList.prototype.add = function (dataset) {
       i = checked.children('i'),
       isChecked = checked.attr('value') !== 'true';
     if (typeof self.events.onDatasetLink === 'function')
-      return self.events.onDatasetLink({ id: dataset.id, checked: isChecked });
+      return self.events.onDatasetLink({ id: dataset.id, sentenceId: dataset.sentences[0].id, checked: isChecked });
   });
   elements.delete.click(function (event) {
     event.preventDefault();
@@ -298,7 +302,7 @@ DatasetsList.prototype.add = function (dataset) {
       i = checked.children('i'),
       isChecked = checked.attr('value') !== 'true';
     if (typeof self.events.onDatasetDelete === 'function')
-      return self.events.onDatasetDelete({ id: dataset.id, checked: isChecked });
+      return self.events.onDatasetDelete({ id: dataset.id, sentenceId: dataset.sentences[0].id, checked: isChecked });
   });
   elements.checked.click(function (event) {
     event.preventDefault();
@@ -318,7 +322,7 @@ DatasetsList.prototype.add = function (dataset) {
       item.removeClass('checked');
     }
     if (typeof self.events.onDatasetCheck === 'function')
-      return self.events.onDatasetCheck({ id: dataset.id, checked: isChecked });
+      return self.events.onDatasetCheck({ id: dataset.id, sentenceId: dataset.sentences[0].id, checked: isChecked });
   });
 };
 
@@ -363,6 +367,7 @@ DatasetsList.prototype.select = function (id) {
 
 // Unselect a dataset
 DatasetsList.prototype.unselect = function (id) {
+  if (!id) return this.container.find(`.item`).removeClass('selected');
   let dataset = this.container.find(`.item[key="dataset.id"][value="${id}"]`);
   if (!dataset.get().length) return false;
   if (dataset.hasClass('selected')) dataset.removeClass('selected');

@@ -275,6 +275,11 @@ DatasetForm.prototype.currentId = function () {
   return this.dataset.id;
 };
 
+// get current dataset sentence
+DatasetForm.prototype.currentSentence = function () {
+  return this.datasetSentence;
+};
+
 // get current dataset (API formated)
 DatasetForm.prototype.getDataset = function () {
   return {
@@ -364,6 +369,35 @@ DatasetForm.prototype.refreshDatatypeInfos = function () {
     this.container.find('div[key="dataset\\.bestDataFormatForSharing"]').parent().show();
     this.container.find('div[key="dataset\\.bestPracticeForIndicatingReUseOfExistingData"]').parent().hide();
   }
+};
+
+// Get dataType infos (based on resources)
+DatasetForm.prototype.getDatatypeInfos = function (dataType, subType) {
+  let self = this,
+    result = {},
+    properties = [
+      'description',
+      'bestDataFormatForSharing',
+      'bestPracticeForIndicatingReUseOfExistingData',
+      { key: 'mostSuitableRepositories', subKey: this.dataset.reuse ? 'reuse' : 'default' },
+      'url'
+    ],
+    keys = ['dataType', 'subType'],
+    metadata = this.extractInfos(keys, properties);
+  // Set dataType/subType infos
+  properties.map(function (property) {
+    if (typeof property === 'string') result[property] = '';
+    else if (typeof property === 'object' && property.key) result[property.key] = '';
+  });
+  properties.map(function (property) {
+    keys.map(function (key) {
+      if (typeof property === 'string')
+        result[property] = metadata[key][property] ? metadata[key][property] : result[property];
+      else if (typeof property === 'object' && property.key)
+        result[property.key] = metadata[key][property.key] ? metadata[key][property.key] : result[property.key];
+    });
+  });
+  return result;
 };
 
 // Build default options
@@ -460,10 +494,10 @@ DatasetForm.prototype.setView = function (opts = {}) {
     this.container.find('button[name="datasetForm\\.refreshDatatypes"]').parent().hide();
     this.container.find('input[type="checkbox"][name="datasetForm\\.highlight"]').parent().hide();
   }
-  if (opts.isCorresp) {
-    this.container.find('button[name="datasetForm\\.unlink"]').show();
-  } else {
+  if (opts.isLink === false) {
     this.container.find('button[name="datasetForm\\.unlink"]').hide();
+  } else {
+    this.container.find('button[name="datasetForm\\.unlink"]').show();
   }
 };
 
@@ -479,13 +513,8 @@ DatasetForm.prototype.getIconOfStatus = function (status) {
   return i;
 };
 
-// Link dataset to datasetForm
-DatasetForm.prototype.link = function (dataset, opts = {}, callback) {
-  if (!dataset) {
-    this.setEmptyMessage();
-    return typeof callback === 'function' ? callback(true) : undefined;
-  }
-  this.datasetColor = dataset.color;
+// update dataset
+DatasetForm.prototype.updateDataset = function (dataset) {
   // Set properties
   for (let key in dataset) {
     if (typeof this.properties[key] === 'function') {
@@ -495,10 +524,38 @@ DatasetForm.prototype.link = function (dataset, opts = {}, callback) {
   this.properties['customDataType']('', true);
   this.properties['dataType'](dataset['dataType'], true);
   this.properties['subType'](dataset['subType'], true);
-  this.setView({ isCurator: opts.isCurator, isCorresp: opts.isCorresp });
+};
+
+// link dataset
+DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
+  if (datasets && datasets.length > 0) {
+    this.refreshDatasetsList(datasets);
+  }
+  this.refreshDataset(data, opts, callback);
+};
+
+// refresh dataset list
+DatasetForm.prototype.refreshDatasetsList = function (datasets) {};
+
+// refresh dataset
+DatasetForm.prototype.refreshDataset = function (data = {}, opts = {}, callback) {
+  if (!data.dataset) {
+    this.setEmptyMessage();
+    return typeof callback === 'function' ? callback(true) : undefined;
+  }
+  this.datasetColor = data.dataset.color;
+  this.datasetSentence = data.sentence;
+  this.updateDataset(data.dataset);
+  let shouldSave =
+    this.properties['description']() !== data.dataset.description ||
+    this.properties['bestDataFormatForSharing']() !== data.dataset.bestDataFormatForSharing ||
+    this.properties['mostSuitableRepositories']() !== data.dataset.mostSuitableRepositories ||
+    this.properties['bestPracticeForIndicatingReUseOfExistingData']() !==
+      data.dataset.bestPracticeForIndicatingReUseOfExistingData;
+  this.setView({ isCurator: opts.isCurator, isLink: opts.isLink });
   this.color();
   this.hideMessage();
-  return typeof callback === 'function' ? callback(null, { shouldSave: false, dataset: this.dataset }) : undefined;
+  return typeof callback === 'function' ? callback(null, { shouldSave: shouldSave, dataset: this.dataset }) : undefined;
 };
 
 // Link dataset to datasetForm
@@ -547,10 +604,8 @@ DatasetForm.prototype.showMessage = function () {
 DatasetForm.prototype.setEmptyMessage = function () {
   return this.message
     .empty()
-    .append($('<div>').text('At least one dataset must be added to be able to use this form'))
-    .append(
-      $('<div>').text('Select a sentence that concerns a dataset, click it and then click the button "Add new Dataset')
-    );
+    .append($('<div>').text('The selected sentences are not linked to a dataset'))
+    .append($('<div>').text('If they are, click the button "Add new Dataset"'));
 };
 
 // Set Intializing datasetForm Message

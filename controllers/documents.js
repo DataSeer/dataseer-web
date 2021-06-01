@@ -306,7 +306,8 @@ Self.upload = function (opts = {}, events, cb) {
                         documentId: acc._id,
                         file: {
                           name: opts.file.name + '.xml.tei',
-                          data: XML.addSentencesId(res), // Add sentences id in TEI
+                          // data: XML.addSentencesId(res), // Add sentences id in TEI
+                          data: XML.convertOldFormat(XML.load(Self.addSentencesId(res))),
                           mimetype: 'text/xml'
                         }
                       },
@@ -552,6 +553,48 @@ Self.extractMetadata = function (doc, cb) {
 };
 
 /**
+ * Update TEI file
+ * @param {object} doc - Options available
+ * @param {mongoose.Schema.Types.ObjectId} doc.tei - TEI file id
+ * @param {object} user - Options available
+ * @param {mongoose.Schema.Types.ObjectId} user._id - User id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.updateTEI = function (doc, user, cb) {
+  if (doc.tei)
+    // Read TEI file (containing PDF metadata)
+    return DocumentsFilesController.readFile(doc.tei, function (err, data) {
+      if (err) return cb(err);
+      else {
+        // Get metadata
+        let newXML = XML.convertOldFormat(XML.load(data.toString()));
+        // Update them
+        return DocumentsFilesController.rewriteFile(doc.tei, newXML, function (err, data) {
+          if (err) return cb(err);
+          // Create logs
+          return DocumentsLogs.create(
+            {
+              document: doc._id,
+              user: user._id,
+              action: 'UPDATE TEI'
+            },
+            function (err, log) {
+              if (err) return cb(err);
+              doc.logs.push(log._id);
+              return doc.save(function (err) {
+                if (err) return cb(err);
+                return cb(null, true);
+              });
+            }
+          );
+        });
+      }
+    });
+  else return cb(new Error('There is no TEI file in this document'));
+};
+
+/**
  * Update metadata stored TEI file of given document and create MongoDB item
  * @param {object} doc - Options available
  * @param {mongoose.Schema.Types.ObjectId} doc.tei - TEI file id
@@ -650,14 +693,7 @@ Self.refreshDatasets = function (user, doc, dataTypes, cb) {
           if (err) return cb(err);
           // Add metadata in MongoDB
           let datasetsMapping = {},
-            newDatasets = XML.extractDatasets(XML.load(data.toString()), dataTypes).reduce(function (acc, dataset) {
-              acc[dataset.id] = { text: dataset.text };
-              return acc;
-            }, datasetsMapping),
-            datasets = doc.datasets.current.map(function (dataset) {
-              dataset.text = datasetsMapping[dataset.id].text;
-              return dataset;
-            });
+            datasets = XML.extractDatasets(XML.load(data.toString()), dataTypes);
           return async.mapSeries(
             datasets,
             function (dataset, callback) {
@@ -683,7 +719,8 @@ Self.refreshDatasets = function (user, doc, dataTypes, cb) {
  * @param {string} opts.user - User
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
- * @param {string} opts.dataset.sentenceId - Dataset sentence id
+ * @param {string} opts.dataset.dataInstanceId - Dataset dataInstanceId
+ * @param {string} opts.dataset.sentences - Dataset sentences
  * @param {boolean} opts.dataset.reuse - Dataset reuse property
  * @param {string} opts.dataset.cert - Dataset cert value (between 0 and 1)
  * @param {string} opts.dataset.dataType - Dataset dataType
@@ -694,7 +731,6 @@ Self.refreshDatasets = function (user, doc, dataTypes, cb) {
  * @param {string} opts.dataset.DOI - Dataset DOI
  * @param {string} opts.dataset.name - Dataset name
  * @param {string} opts.dataset.comments - Dataset comments
- * @param {string} opts.dataset.text - Dataset text of sentence
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -722,10 +758,12 @@ Self.newDataset = function (opts = {}, cb) {
         {
           documentId: datasets.document,
           dataset: {
-            sentenceId: dataset.sentenceId,
+            sentenceId: dataset.sentences[dataset.sentences.length - 1].id,
             id: dataset.id,
+            dataInstanceId: dataset.dataInstanceId,
             reuse: dataset.reuse ? dataset.reuse : false,
-            type: dataset.subType ? dataset.dataType + ':' + dataset.subType : dataset.dataType,
+            type: dataset.dataType,
+            subtype: dataset.subType,
             cert: dataset.cert
           }
         },
@@ -766,7 +804,8 @@ Self.newDataset = function (opts = {}, cb) {
  * @param {string} opts.noXML - update dataset only in mongodb & not in XML
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
- * @param {string} opts.dataset.sentenceId - Dataset sentence id
+ * @param {string} opts.dataset.dataInstanceId - Dataset dataInstanceId
+ * @param {string} opts.dataset.sentence - Dataset sentence
  * @param {boolean} opts.dataset.reuse - Dataset reuse property
  * @param {string} opts.dataset.cert - Dataset cert value (between 0 and 1)
  * @param {string} opts.dataset.dataType - Dataset dataType
@@ -777,7 +816,6 @@ Self.newDataset = function (opts = {}, cb) {
  * @param {string} opts.dataset.DOI - Dataset DOI
  * @param {string} opts.dataset.name - Dataset name
  * @param {string} opts.dataset.comments - Dataset comments
- * @param {string} opts.dataset.text - Dataset text of sentence
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -812,10 +850,11 @@ Self.updateDataset = function (opts = {}, cb) {
             {
               documentId: datasets.document,
               dataset: {
-                sentenceId: dataset.sentenceId,
                 id: dataset.id,
+                dataInstanceId: dataset.dataInstanceId,
                 reuse: dataset.reuse ? dataset.reuse : false,
-                type: dataset.subType ? dataset.dataType + ':' + dataset.subType : dataset.dataType,
+                type: dataset.dataType,
+                subtype: dataset.subType,
                 cert: dataset.cert
               }
             },
@@ -884,24 +923,22 @@ Self.deleteDataset = function (opts = {}, cb) {
     if (err) return cb(err);
     else if (!datasets) return cb(new Error('Datasets not found'));
     // Check dataset with opts.id already exist
-    let deleted = false,
-      sentenceId;
+    let deleted = false;
     for (let i = 0; i < datasets.current.length; i++) {
       // update dataset
       if (datasets.current[i].id === opts.dataset.id) {
         datasets.deleted.push(datasets.current.splice(i, 1)[0]);
-        sentenceId = datasets.deleted[datasets.deleted.length - 1].sentenceId;
         deleted = true;
       }
     }
-    if (!deleted || !sentenceId) return cb(new Error('Dataset not found'));
+    if (!deleted) return cb(new Error('Dataset not found'));
     else
       return datasets.save(function (err, res) {
         if (err) return cb(err);
         return Self.deleteDatasetInTEI(
           {
             documentId: datasets.document,
-            dataset: { sentenceId: sentenceId }
+            dataset: { id: opts.dataset.id }
           },
           function (err, res) {
             if (err) return cb(err);
@@ -934,70 +971,110 @@ Self.deleteDataset = function (opts = {}, cb) {
 };
 
 /**
- * Create new corresp
+ * Create new link
  * @param {object} opts - JSON containing all data
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
- * @param {string} opts.dataset.sentenceId - Dataset sentence id
+ * @param {string} opts.sentence - Linked sentence
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.newCorresp = function (opts = {}, cb) {
+Self.linkSentence = function (opts = {}, cb) {
   // If there is not enough data to create new dataset
   if (!opts.dataset || !opts.dataset.id) return cb(new Error('Not enough data'));
+  if (!opts.sentence || !opts.sentence.id || !opts.sentence.text) return cb(new Error('Not enough data'));
   // Init transaction
   let transaction = DocumentsDatasets.findOne({ _id: opts.datasetsId });
   // Execute transaction
   return transaction.exec(function (err, datasets) {
     if (err) return cb(err);
     else if (!datasets) return cb(new Error('Datasets not found'));
-    return Self.addCorrespInTEI(
-      {
-        documentId: datasets.document,
-        dataset: {
-          sentenceId: opts.dataset.sentenceId,
-          id: opts.dataset.id
-        }
-      },
-      function (err, res) {
-        if (err) return cb(err);
-        return cb(null);
+    // Check dataset with opts.id already exist
+    let updated = false,
+      dataset;
+    for (let i = 0; i < datasets.current.length; i++) {
+      // update dataset
+      if (datasets.current[i].id === opts.dataset.id) {
+        updated = true;
+        dataset = datasets.current[i];
+        dataset.sentences.push({ id: opts.sentence.id, text: opts.sentence.text });
       }
-    );
+    }
+    if (!updated) return cb(new Error('Dataset not updated'));
+    else
+      return datasets.save(function (err, res) {
+        if (err) return cb(err);
+        return Self.linkSentenceInTEI(
+          {
+            documentId: datasets.document,
+            dataset: {
+              sentenceId: opts.sentence.id,
+              id: opts.dataset.id
+            }
+          },
+          function (err, res) {
+            if (err) return cb(err);
+            return cb(null);
+          }
+        );
+      });
   });
 };
 
 /**
- * Delete corresp
+ * Delete link
  * @param {object} opts - JSON containing all data
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
- * @param {string} opts.dataset.sentenceId - Dataset sentence id
+ * @param {string} opts.sentence - Linked sentence
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.deleteCorresp = function (opts = {}, cb) {
+Self.unlinkSentence = function (opts = {}, cb) {
   // If there is not enough data to create new dataset
   if (!opts.dataset || !opts.dataset.id) return cb(new Error('Not enough data'));
+  if (!opts.sentence || !opts.sentence.id) return cb(new Error('Not enough data'));
   // Init transaction
   let transaction = DocumentsDatasets.findOne({ _id: opts.datasetsId });
   // Execute transaction
   return transaction.exec(function (err, datasets) {
     if (err) return cb(err);
     else if (!datasets) return cb(new Error('Datasets not found'));
-    return Self.deleteCorrespInTEI(
-      {
-        documentId: datasets.document,
-        dataset: {
-          sentenceId: opts.dataset.sentenceId,
-          id: opts.dataset.id
+    // Check dataset with opts.id already exist
+    let updated = false,
+      dataset;
+    for (let i = 0; i < datasets.current.length; i++) {
+      // update dataset
+      if (datasets.current[i].id === opts.dataset.id) {
+        dataset = datasets.current[i];
+        let sentenceIndex = dataset.sentences.reduce(function (acc, sentence, index) {
+          if (sentence.id === opts.sentence.id) acc = index;
+          return acc;
+        }, -1);
+        if (sentenceIndex > -1) {
+          updated = true;
+          dataset.sentences.splice(sentenceIndex, 1);
         }
-      },
-      function (err, res) {
-        if (err) return cb(err);
-        return cb(null);
       }
-    );
+    }
+    if (!updated) return cb(new Error('Dataset not updated'));
+    else
+      return datasets.save(function (err, res) {
+        if (err) return cb(err);
+        return Self.unlinkSentenceInTEI(
+          {
+            documentId: datasets.document,
+            dataset: {
+              sentenceId: opts.sentence.id,
+              id: opts.dataset.id
+            }
+          },
+          function (err, res) {
+            if (err) return cb(err);
+            return cb(null);
+          }
+        );
+      });
   });
 };
 
@@ -1007,6 +1084,7 @@ Self.deleteCorresp = function (opts = {}, cb) {
  * @param {string} opts.documentId - Document id
  * @param {object} opts.dataset - JSON object containing all dataset infos
  * @param {string} opts.dataset.sentenceId - Dataset sentenceId
+ * @param {string} opts.dataset.dataInstanceId - Dataset dataInstanceId
  * @param {string} opts.dataset.id - Dataset id
  * @param {string} opts.dataset.type - Dataset type
  * @param {string} opts.dataset.cert - Dataset cert
@@ -1036,6 +1114,7 @@ Self.addDatasetInTEI = function (opts = {}, cb) {
  * @param {string} opts.documentId - Document id
  * @param {object} opts.dataset - JSON object containing all dataset infos
  * @param {string} opts.dataset.sentenceId - Dataset sentenceId
+ * @param {string} opts.dataset.dataInstanceId - Dataset dataInstanceId
  * @param {string} opts.dataset.id - Dataset id
  * @param {string} opts.dataset.type - Dataset type
  * @param {string} opts.dataset.cert - Dataset cert
@@ -1064,7 +1143,7 @@ Self.updateDatasetInTEI = function (opts = {}, cb) {
  * @param {object} opts JSON object containing all data
  * @param {string} opts.documentId - Document id
  * @param {object} opts.dataset - JSON object containing all dataset infos
- * @param {string} opts.dataset.sentenceId - Dataset sentenceId
+ * @param {string} opts.dataset.id - Dataset id
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -1086,7 +1165,7 @@ Self.deleteDatasetInTEI = function (opts = {}, cb) {
 };
 
 /**
- * Add corresp in TEI file
+ * Add link in TEI file
  * @param {object} opts JSON object containing all data
  * @param {string} opts.documentId - Document id
  * @param {object} opts.dataset - JSON object containing all dataset infos
@@ -1095,14 +1174,14 @@ Self.deleteDatasetInTEI = function (opts = {}, cb) {
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.addCorrespInTEI = function (opts = {}, cb) {
+Self.linkSentenceInTEI = function (opts = {}, cb) {
   return Documents.findById(opts.documentId).exec(function (err, doc) {
     if (err) return cb(err);
     else
       return DocumentsFilesController.readFile(doc.tei, function (err, data) {
         if (err) return cb(err);
-        let newXml = XML.addCorresp(XML.load(data.toString()), opts.dataset);
-        if (!newXml) return cb(new Error('Add corresp failed'));
+        let newXml = XML.linkSentence(XML.load(data.toString()), opts.dataset);
+        if (!newXml) return cb(new Error('Add link failed'));
         else
           return DocumentsFilesController.rewriteFile(doc.tei, newXml, function (err) {
             if (err) return cb(err);
@@ -1113,7 +1192,7 @@ Self.addCorrespInTEI = function (opts = {}, cb) {
 };
 
 /**
- * Delete corresp in TEI file
+ * Delete link in TEI file
  * @param {object} opts JSON object containing all data
  * @param {string} opts.documentId - Document id
  * @param {object} opts.dataset - JSON object containing all dataset infos
@@ -1122,14 +1201,14 @@ Self.addCorrespInTEI = function (opts = {}, cb) {
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.deleteCorrespInTEI = function (opts = {}, cb) {
+Self.unlinkSentenceInTEI = function (opts = {}, cb) {
   return Documents.findById(opts.documentId).exec(function (err, doc) {
     if (err) return cb(err);
     else
       return DocumentsFilesController.readFile(doc.tei, function (err, data) {
         if (err) return cb(err);
-        let newXml = XML.deleteCorresp(XML.load(data.toString()), opts.dataset);
-        if (!newXml) return cb(new Error('Delete corresp failed'));
+        let newXml = XML.unlinkSentence(XML.load(data.toString()), opts.dataset);
+        if (!newXml) return cb(new Error('Delete link failed'));
         else
           return DocumentsFilesController.rewriteFile(doc.tei, newXml, function (err) {
             if (err) return cb(err);

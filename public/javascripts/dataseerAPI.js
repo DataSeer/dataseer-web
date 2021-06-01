@@ -51,7 +51,6 @@ DataSeerAPI.rootURL = function () {
  * @param {object} opts JSON object containing all data
  * @param {string} opts.datasetsId Id of datasets
  * @param {string} opts.dataset.datasetId Id of dataset
- * @param {string} opts.dataset.sentenceId Id of sentence
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
@@ -81,6 +80,7 @@ DataSeerAPI.deleteDataset = function (opts = {}, done) {
  * @param {object} opts.dataset Dataset options
  * @param {string} opts.dataset.status Dataset status
  * @param {string} opts.dataset.id Dataset id
+ * @param {string} opts.dataset.datainstanceId Dataset datainstanceId
  * @param {string} opts.dataset.cert Dataset cert
  * @param {string} opts.dataset.dataType Dataset dataType
  * @param {string} opts.dataset.subType Dataset subType
@@ -114,23 +114,23 @@ DataSeerAPI.createDataset = function (opts = {}, done) {
 };
 
 /**
- * Delete a given corresp
+ * Delete a given dataset link
  * @param {object} opts JSON object containing all data
  * @param {string} opts.datasetsId Id of datasets
  * @param {string} opts.dataset.datasetId Id of dataset
- * @param {string} opts.dataset.sentenceId Id of sentence
+ * @param {string} opts.sentence Sentence
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
-DataSeerAPI.deleteCorresp = function (opts = {}, done) {
+DataSeerAPI.unlinkSentence = function (opts = {}, done) {
   return jQuery.ajax({
     type: 'DELETE',
     contentType: 'application/json; charset=utf-8',
     headers: {
       'X-HTTP-Method-Override': 'DELETE'
     },
-    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/datasets/' + opts.datasetsId + '/corresp'),
-    data: JSON.stringify({ dataset: opts.dataset }),
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/datasets/' + opts.datasetsId + '/unlink'),
+    data: JSON.stringify({ dataset: opts.dataset, sentence: opts.sentence }),
     success: function (data) {
       return done(false, data);
     },
@@ -142,23 +142,23 @@ DataSeerAPI.deleteCorresp = function (opts = {}, done) {
 };
 
 /**
- * Create new corresp to datasets
+ * Create new link to datasets
  * @param {object} opts JSON object containing all data
  * @param {string} opts.datasetsId Id of datasets
  * @param {string} opts.dataset.datasetId Id of dataset
- * @param {string} opts.dataset.sentenceId Id of sentence
+ * @param {string} opts.sentence Sentence
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
-DataSeerAPI.createCorresp = function (opts = {}, done) {
+DataSeerAPI.linkSentence = function (opts = {}, done) {
   return jQuery.ajax({
     type: 'POST',
     contentType: 'application/json; charset=utf-8',
     headers: {
       'X-HTTP-Method-Override': 'POST'
     },
-    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/datasets/' + opts.datasetsId + '/corresp'),
-    data: JSON.stringify({ dataset: opts.dataset }),
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/datasets/' + opts.datasetsId + '/link'),
+    data: JSON.stringify({ dataset: opts.dataset, sentence: opts.sentence }),
     success: function (data) {
       return done(false, data);
     },
@@ -222,6 +222,34 @@ DataSeerAPI.extractPDFMetadata = function (documentId, done) {
       'X-HTTP-Method-Override': 'POST'
     },
     url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/extractPDFMetadata'),
+    data: JSON.stringify({}),
+    success: function (data) {
+      return done(false, {
+        url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/pdf/content'),
+        data: data
+      });
+    },
+    error: function () {
+      return done(true);
+    },
+    dataType: 'json'
+  });
+};
+
+/**
+ * Update XML of the TEI file for a given dataset
+ * @param {string} documentId Id of document
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @returns {undefined} undefined
+ */
+DataSeerAPI.updateTEI = function (documentId, done) {
+  return jQuery.ajax({
+    type: 'POST',
+    contentType: 'application/json; charset=utf-8',
+    headers: {
+      'X-HTTP-Method-Override': 'POST'
+    },
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/updateTEI'),
     data: JSON.stringify({}),
     success: function (data) {
       return done(false, {

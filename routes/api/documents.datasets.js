@@ -82,24 +82,30 @@ router.delete('/:id/dataset', function (req, res, next) {
   );
 });
 
-/* POST corresp of datasets */
-router.post('/:id/corresp', function (req, res, next) {
+/* POST link of datasets */
+router.post('/:id/link', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
-  return DocumentsController.newCorresp({ datasetsId: req.params.id, dataset: req.body.dataset }, function (err) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else return res.json({ 'err': false, 'res': true });
-  });
+  return DocumentsController.linkSentence(
+    { user: req.user, datasetsId: req.params.id, dataset: req.body.dataset, sentence: req.body.sentence },
+    function (err) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+      else return res.json({ 'err': false, 'res': true });
+    }
+  );
 });
 
-/* DELETE corresp of datasets */
-router.delete('/:id/corresp', function (req, res, next) {
+/* DELETE link of datasets */
+router.delete('/:id/unlink', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
-  return DocumentsController.deleteCorresp({ datasetsId: req.params.id, dataset: req.body.dataset }, function (err) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else return res.json({ 'err': false, 'res': true });
-  });
+  return DocumentsController.unlinkSentence(
+    { user: req.user, datasetsId: req.params.id, dataset: req.body.dataset, sentence: req.body.sentence },
+    function (err) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+      else return res.json({ 'err': false, 'res': true });
+    }
+  );
 });
 
 module.exports = router;

@@ -129,6 +129,23 @@ router.post('/:id/extractPDFMetadata', function (req, res, next) {
   });
 });
 
+/* update XML of TEI file */
+router.post('/:id/updateTEI', function (req, res, next) {
+  if (
+    typeof req.user === 'undefined' ||
+    !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.annotator, AccountsManager.match.weight)
+  )
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
+  return Documents.findOne({ _id: req.params.id }).exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    return DocumentsController.updateTEI(doc, req.user, function (err, isUpdated) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+      else return res.json({ 'err': false, 'res': isUpdated });
+    });
+  });
+});
+
 /* GET PDF of document */
 router.get('/:id/pdf', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))

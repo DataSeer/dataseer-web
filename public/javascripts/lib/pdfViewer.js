@@ -346,9 +346,22 @@ PdfViewer.prototype.selectDataset = function (id, cb) {
   } else return cb(new Error('invalid dataset id'));
 };
 
-// Select a dataset
-PdfViewer.prototype.selectCorresp = function (id, cb) {
-  return cb(this.scrollToSentence(id));
+// Select a sentence
+PdfViewer.prototype.scrollToSentence = function (id, cb) {
+  let self = this,
+    pages = this.getPagesOfSentence(id),
+    allPages = this.getPages(),
+    maxPage = Math.max(...pages);
+  if (maxPage > 0) {
+    let numPages = [];
+    if (maxPage > 1) numPages.push(maxPage - 1);
+    numPages.push(maxPage);
+    if (allPages.length > 2 && maxPage < allPages[allPages.length - 2]) numPages.push(maxPage + 1);
+    this.renderPages(numPages, function (err) {
+      if (err) return cb(err);
+      return cb(self.scrollToSentence(id));
+    });
+  } else return cb(new Error('invalid sentence id'));
 };
 
 // Get Pages of a given datasetId

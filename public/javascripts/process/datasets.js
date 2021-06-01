@@ -53,18 +53,21 @@
         return DataSeerAPI.jsonDataTypes(function (err, datatypes) {
           if (err) return alert('Error : Datatypes unavailable, dataseer-ml service does not respond');
           setTextLoop('PDF initialization...');
-          let needUpdate = typeof pdf.metadata.version === 'undefined' || pdf.metadata.version < 1;
+          let needUpdate = false;
           if (needUpdate) {
             if (user.isCurator || user.isAnnotator) {
               setTextLoop('Updating PDF metadata...');
-              return DataSeerAPI.extractPDFMetadata(doc._id, function (err, res) {
-                $('.loader').hide();
+              return DataSeerAPI.updateTEI(doc._id, function (err, res) {
                 console.log(err, res);
-                if (res.data.res && res.data.res.pages) {
-                  setTextLoop(
-                    `This document has been updated.<br/>If the document is still not "usable" after this update, please re-upload this document.<br/><a href="${res.url}" target="_blank">PDF link of this document</a><br/>You must reload this page to work on this document.`
-                  );
-                } else setTextLoop(`This document cannot be updated, please re-upload it. (<a href ="${res.url}" target="_blank">PDF link of this document</a>)`);
+                return DataSeerAPI.refreshDatasets(doc._id, function (err, res) {
+                  console.log(err, res);
+                  $('.loader').hide();
+                  if (res.data.res) {
+                    setTextLoop(
+                      `This document has been updated.<br/>If the document is still not "usable" after this update, please re-upload this document.<br/><a href="${res.url}" target="_blank">PDF link of this document</a><br/>You must reload this page to work on this document.`
+                    );
+                  } else setTextLoop(`This document cannot be updated, please re-upload it. (<a href ="${res.url}" target="_blank">PDF link of this document</a>)`);
+                });
               });
             } else setTextLoop('This document must be updated by a curator or an annotator');
           }
@@ -75,11 +78,12 @@
               datatypes: datatypes,
               datasets: doc.datasets,
               metadata: doc.metadata,
-              tei: tei.data,
+              tei:
+                tei.data /*,
               pdf: {
                 url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/pdf/content'),
                 metadata: pdf.metadata
-              }
+              }*/
             },
             {
               onReady: function () {

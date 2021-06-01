@@ -8,77 +8,62 @@ const DocumentView = function (id, events = {}) {
   let self = this;
   this.id = id;
   this.selectedSentences = {};
-  this.currentDatasetId;
+  this.currentScrolledSentence;
   this.shiftPressed = false;
   this.ctrlPressed = false;
   this.viewersEvents = {
     onClick: function (sentence) {
-      let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId),
-        isDataset = !!result.datasetId;
-      if (isDataset) {
-        if (typeof self.events.onDatasetClick === 'function') self.events.onDatasetClick(result);
-      } else {
-        if (self.ctrlPressed) {
-          if (self.isSelected(result)) {
-            self.unselectSentence(result);
-            self.hoverSentence({
-              sentenceId: result.sentenceId,
-              isDataset: false,
-              isSelected: false
-            });
-          } else self.selectSentence(result);
-        } else if (self.shiftPressed) {
-          let selectedSentences = self.getSelectedSentences();
-          if (selectedSentences.length) {
-            let sentences = self.getSentences(selectedSentences, result);
-            for (let i = 0; i < sentences.length; i++) {
-              if (typeof sentences[i] === 'string') {
-                let sentence = self.getSentence(sentences[i]);
-                if (!sentence.isDataset && !sentence.isCorresp) self.selectSentence(sentence);
-              }
+      let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId);
+      if (self.ctrlPressed) {
+        if (self.isSelected(result)) {
+          self.unselectSentence(result);
+          self.hoverSentence({
+            sentenceId: result.sentenceId,
+            hasDatasets: result.hasDatasets,
+            isSelected: false
+          });
+        } else self.selectSentence(result);
+      } else if (self.shiftPressed) {
+        let selectedSentences = self.getSelectedSentences();
+        if (selectedSentences.length) {
+          let sentences = self.getSentences(selectedSentences, result);
+          for (let i = 0; i < sentences.length; i++) {
+            if (typeof sentences[i] === 'string') {
+              let sentence = self.getSentence(sentences[i]);
+              self.selectSentence(sentence);
             }
-          } else console.log('At least one sentence must be selected');
-        } else {
-          if (self.isSelected(result)) {
-            self.unselectSentences(self.getSelectedSentences());
-            self.hoverSentence({
-              sentenceId: result.sentenceId,
-              isDataset: false,
-              isSelected: false
-            });
-          } else {
-            self.unselectSentences(self.getSelectedSentences());
-            self.selectSentence(result);
           }
+        } else console.log('At least one sentence must be selected');
+      } else {
+        if (self.isSelected(result)) {
+          self.unselectSentences(self.getSelectedSentences());
+          self.hoverSentence({
+            sentenceId: result.sentenceId,
+            hasDatasets: result.hasDatasets,
+            isSelected: false
+          });
+        } else {
+          self.unselectSentences(self.getSelectedSentences());
+          self.selectSentence(result);
         }
-        if (typeof self.events.onSentenceClick === 'function') self.events.onSentenceClick(result);
       }
+      if (typeof self.events.onSentenceClick === 'function') self.events.onSentenceClick(result);
     },
     onHover: function (sentence) {
-      let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId),
-        isDataset = !!result.datasetId;
-      if (isDataset) {
-        if (typeof self.events.onDatasetHover === 'function') self.events.onDatasetHover(result);
-      } else {
-        if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(result);
-      }
+      let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId);
+      if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(result);
       self.hoverSentence({
         sentenceId: result.sentenceId,
-        isDataset: isDataset,
+        hasDatasets: result.hasDatasets,
         isSelected: self.isSelected(result)
       });
     },
     onEndHover: function (sentence) {
-      let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId),
-        isDataset = !!result.datasetId;
-      if (isDataset) {
-        if (typeof self.events.onDatasetHover === 'function') self.events.onDatasetHover(result);
-      } else {
-        if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(result);
-      }
+      let result = self.xmlViewer.getInfosOfSentence(sentence.sentenceId);
+      if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(result);
       self.endHoverSentence({
         sentenceId: result.sentenceId,
-        isDataset: isDataset,
+        hasDatasets: result.hasDatasets,
         isSelected: self.isSelected(result)
       });
     }
@@ -117,10 +102,10 @@ const DocumentView = function (id, events = {}) {
       console.log('TEI all');
       self.pdfVisible = false;
       self.pdf.hide();
-      self.pdfViewer.hideMarkers();
+      if (self.pdfViewer) self.pdfViewer.hideMarkers();
       self.xml.show();
       self.xml.find('*.hidden').removeClass('hidden');
-      self.selectDataset({ id: self.currentDatasetId });
+      self.scrollToSentence({ id: self.currentDatasetId });
       return typeof self.events.onFulltextView === 'function' ? self.events.onFulltextView() : undefined;
     });
   $('#documentView\\.viewSelection\\.tei\\.dataseer')
@@ -129,14 +114,14 @@ const DocumentView = function (id, events = {}) {
       console.log('TEI dataseer');
       self.pdfVisible = false;
       self.pdf.hide();
-      self.pdfViewer.hideMarkers();
+      if (self.pdfViewer) self.pdfViewer.hideMarkers();
       self.xml.show();
       self.xml.find('*.hidden').removeClass('hidden');
       self.xml.find('text > div > div, text > div > *:not(div)').map(function (i, el) {
         let element = $(el);
         if (element.find('s[id], s[corresp]').length === 0) return element.addClass('hidden');
       });
-      self.selectDataset({ id: self.currentDatasetId });
+      self.scrollToSentence({ id: self.currentDatasetId });
       return typeof self.events.onSectionView === 'function' ? self.events.onSectionView() : undefined;
     });
   $('#documentView\\.viewSelection\\.tei\\.dataset')
@@ -145,14 +130,14 @@ const DocumentView = function (id, events = {}) {
       console.log('TEI dataset');
       self.pdfVisible = false;
       self.pdf.hide();
-      self.pdfViewer.hideMarkers();
+      if (self.pdfViewer) self.pdfViewer.hideMarkers();
       self.xml.show();
       self.xml.find('*.hidden').removeClass('hidden');
       self.xml.find('text > div, text > *:not(div)').map(function (i, el) {
         let element = $(el);
         if (element.find('s[id], s[corresp]').length === 0) return element.addClass('hidden');
       });
-      self.selectDataset({ id: self.currentDatasetId });
+      self.scrollToSentence({ id: self.currentDatasetId });
       return typeof self.events.onParagraphView === 'function' ? self.events.onParagraphView() : undefined;
     });
   $('#documentView\\.viewSelection\\.pdf')
@@ -161,9 +146,9 @@ const DocumentView = function (id, events = {}) {
       console.log('PDF');
       self.pdfVisible = true;
       self.pdf.show();
-      self.pdfViewer.showMarkers();
+      if (self.pdfViewer) self.pdfViewer.showMarkers();
       self.xml.hide();
-      self.selectDataset({ id: self.currentDatasetId });
+      self.scrollToSentence({ id: self.currentDatasetId });
       return typeof self.events.onPdfView === 'function' ? self.events.onPdfView() : undefined;
     });
   // Events
@@ -265,12 +250,12 @@ DocumentView.prototype.getSelectedSentences = function () {
   if (this.selectedSentences) return Object.values(this.selectedSentences);
 };
 
-// Select a dataset
-DocumentView.prototype.selectDataset = function (opts, cb) {
+// Scroll to a sentence
+DocumentView.prototype.scrollToSentence = function (opts, cb) {
   let self = this;
-  this.currentDatasetId = opts.id;
+  this.currentScrolledSentence = opts.id;
   if (this.pdfVisible)
-    return this.pdfViewer.selectDataset(opts.id, function (position) {
+    return this.pdfViewer.scrollToSentence(opts.id, function (position) {
       if (position) {
         if (opts.noAnim) self.screen.scrollTop(position);
         else self.screen.animate({ scrollTop: position });
@@ -278,7 +263,7 @@ DocumentView.prototype.selectDataset = function (opts, cb) {
       return typeof cb === 'function' ? cb() : undefined;
     });
   else
-    return this.xmlViewer.selectDataset(opts.id, function (position) {
+    return this.xmlViewer.scrollToSentence(opts.id, function (position) {
       if (position) {
         self.screen.animate({ scrollTop: position + self.screen.scrollTop() - self.screen.height() / 1.8 });
       } else console.log('dataset not selected');
@@ -286,33 +271,15 @@ DocumentView.prototype.selectDataset = function (opts, cb) {
     });
 };
 
-// Get all corresps
-DocumentView.prototype.getCorresps = function (dataset) {
-  return this.xmlViewer.getCorresps(dataset);
-};
-
-// Select a Corresp
-DocumentView.prototype.selectCorresp = function (dataset, cb) {
-  let self = this;
-  this.currentDatasetId = dataset.id;
-  if (this.pdfVisible)
-    return this.pdfViewer.selectCorresp(dataset.sentenceId, function (position) {
-      if (position) self.screen.animate({ scrollTop: position });
-      else console.log('dataset not selected');
-      return typeof cb === 'function' ? cb() : undefined;
-    });
-  else
-    return this.xmlViewer.selectCorresp(dataset.id, function (position) {
-      if (position) self.screen.animate({ scrollTop: position + self.screen.scrollTop() - self.screen.height() / 1.8 });
-      else console.log('dataset not selected');
-      return typeof cb === 'function' ? cb() : undefined;
-    });
+// Get all Links
+DocumentView.prototype.getLinks = function (dataset) {
+  return this.xmlViewer.getLinks(dataset);
 };
 
 // Add a dataset
-DocumentView.prototype.addDataset = function (dataset) {
-  if (this.pdfViewer) this.pdfViewer.addDataset(dataset);
-  this.xmlViewer.addDataset(dataset);
+DocumentView.prototype.addDataset = function (dataset, sentenceId) {
+  if (this.pdfViewer) this.pdfViewer.addDataset(dataset, sentenceId);
+  this.xmlViewer.addDataset(dataset, sentenceId);
 };
 
 // Remove a dataset
@@ -322,13 +289,13 @@ DocumentView.prototype.removeDataset = function (dataset) {
 };
 
 // Add a corresp
-DocumentView.prototype.addCorresp = function (dataset, sentenceId) {
-  if (this.pdfViewer) this.pdfViewer.addCorresp(dataset, sentenceId);
-  this.xmlViewer.addCorresp(dataset, sentenceId);
+DocumentView.prototype.addLink = function (dataset, sentenceId) {
+  if (this.pdfViewer) this.pdfViewer.addLink(dataset, sentenceId);
+  this.xmlViewer.addLink(dataset, sentenceId);
 };
 
 // Remove a corresp
-DocumentView.prototype.removeCorresp = function (dataset, sentenceId) {
-  if (this.pdfViewer) this.pdfViewer.removeCorresp(dataset, sentenceId);
-  this.xmlViewer.removeCorresp(dataset, sentenceId);
+DocumentView.prototype.removeLink = function (dataset, sentenceId) {
+  if (this.pdfViewer) this.pdfViewer.removeLink(dataset, sentenceId);
+  this.xmlViewer.removeLink(dataset, sentenceId);
 };
