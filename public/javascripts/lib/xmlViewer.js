@@ -136,8 +136,7 @@ XmlViewer.prototype.colorize = function (dataset, sentenceId) {
     dataset.color.background &&
     dataset.color.background.rgb
   ) {
-    if (!el.attr('color'))
-      el.css('color', dataset.color.foreground).css('background-color', dataset.color.background.rgb);
+    el.css('color', dataset.color.foreground).css('background-color', dataset.color.background.rgb);
     let colors = el.attr('colors') ? JSON.parse(el.attr('colors')) : {};
     colors[dataset.dataInstanceId] = dataset.color;
     el.attr('colors', JSON.stringify(colors));
@@ -145,20 +144,19 @@ XmlViewer.prototype.colorize = function (dataset, sentenceId) {
 };
 
 // uncolorize a sentence
-XmlViewer.prototype.uncolorize = function (dataset, sentenceId) {
+XmlViewer.prototype.uncolorize = function (dataInstanceId, sentenceId) {
+  console.log(dataInstanceId, sentenceId);
   let el = this.viewer.find(`s[xml\\:id="${sentenceId}"]`);
-  if (
-    el.get(0) &&
-    dataset &&
-    dataset.color &&
-    dataset.color.foreground &&
-    dataset.color.background &&
-    dataset.color.background.rgb
-  ) {
-    if (el.attr('color')) el.css('color', '').css('background-color', '');
+  if (el.get(0)) {
     let colors = el.attr('colors') ? JSON.parse(el.attr('colors')) : {};
-    colors[dataset.dataInstanceId] = undefined;
-    el.attr('colors', JSON.stringify(colors));
+    delete colors[dataInstanceId];
+    let keys = Object.keys(colors);
+    if (keys.length > 0) {
+      let lastColor = colors[keys[keys.length - 1]];
+      el.attr('colors', JSON.stringify(colors))
+        .css('color', lastColor.foreground)
+        .css('background-color', lastColor.background.rgb);
+    } else el.removeAttr('colors').css('color', '').css('background-color', '');
   }
 };
 
@@ -180,13 +178,18 @@ XmlViewer.prototype.addLink = function (dataset, sentenceId) {
 XmlViewer.prototype.getLinks = function (dataset) {
   return this.viewer
     .find(`s[corresp]`)
-    .reduce(function (acc) {
-      let el = $(this);
+    .get()
+    .reduce(function (acc, item) {
+      let el = $(item);
       if (el.attr('corresp').indexOf(`#${dataset.dataInstanceId}`) > -1)
-        acc.push({ sentenceId: el.attr('xml:id'), datasetId: dataset.id, dataInstance: dataset.dataInstanceId });
+        acc.push({
+          sentenceId: el.attr('xml:id'),
+          datasetId: dataset.id,
+          dataInstance: dataset.dataInstanceId,
+          text: el.text()
+        });
       return acc;
-    }, [])
-    .get();
+    }, []);
 };
 
 // Remove links
@@ -203,8 +206,11 @@ XmlViewer.prototype.removeLink = function (dataset, sentenceId) {
   if (el.get(0)) {
     let nbCorresps = el.attr('corresp').split(' ').length;
     if (nbCorresps === 1) {
-      el.removeAttr('corresp');
-    } else el.attr('corresp', el.attr('corresp').replace(`#${dataset.dataInstanceId}`, '').trim());
+      el.removeAttr('corresp').removeAttr('colors', '').css('color', '').css('background-color', '');
+    } else {
+      el.attr('corresp', el.attr('corresp').replace(`#${dataset.dataInstanceId}`, '').trim());
+      this.uncolorize(dataset.dataInstanceId, sentenceId);
+    }
   }
 };
 
@@ -218,21 +224,18 @@ XmlViewer.prototype.load = function (opts = {}, cb) {
     .find('s')
     .click(function () {
       let el = $(this);
-      if (typeof self.events.onClick === 'function')
-        return self.events.onClick(self.getInfosOfSentence(el.attr('xml:id')));
+      if (typeof self.events.onClick === 'function') return self.events.onClick(el.attr('xml:id'));
     })
     .hover(
       // in
       function () {
         let el = $(this);
-        if (typeof self.events.onHover === 'function')
-          return self.events.onHover(self.getInfosOfSentence(el.attr('xml:id')));
+        if (typeof self.events.onHover === 'function') return self.events.onHover(el.attr('xml:id'));
       },
       // out
       function () {
         let el = $(this);
-        if (typeof self.events.onEndHover === 'function')
-          return self.events.onEndHover(self.getInfosOfSentence(el.attr('xml:id')));
+        if (typeof self.events.onEndHover === 'function') return self.events.onEndHover(el.attr('xml:id'));
       }
     );
   this.dataInstancesList = this.viewer.find('list[type="dataInstance"]');
@@ -246,6 +249,7 @@ XmlViewer.prototype.load = function (opts = {}, cb) {
   }
   this.datasetsListElement = this.dataInstancesList.get(0);
   let datasets = {},
+    links = [],
     dataInstances = {};
   this.dataInstancesList.find('dataInstance').map(function () {
     let el = $(this),
@@ -274,13 +278,14 @@ XmlViewer.prototype.load = function (opts = {}, cb) {
   // Color corresps
   this.viewer.find('s[corresp]').map(function () {
     let el = $(this),
-      dataInstanceIds = el.attr('corresp').replace('#', '').split(' ');
+      dataInstanceIds = el.attr('corresp').replace(/#/gm, '').split(' ');
     dataInstanceIds.map(function (dataInstanceId) {
+      links.push({ dataset: datasets[dataInstanceId], sentenceId: el.attr('xml:id') });
       self.colorize(datasets[dataInstanceId], el.attr('xml:id'));
     });
   });
   return cb({
     colors: opts.colors,
-    datasets: datasets
+    links: links
   });
 };

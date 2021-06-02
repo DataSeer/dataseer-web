@@ -78,12 +78,11 @@
               datatypes: datatypes,
               datasets: doc.datasets,
               metadata: doc.metadata,
-              tei:
-                tei.data /*,
+              tei: tei.data,
               pdf: {
                 url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/pdf/content'),
                 metadata: pdf.metadata
-              }*/
+              }
             },
             {
               onReady: function () {

@@ -307,7 +307,7 @@ Self.upload = function (opts = {}, events, cb) {
                         file: {
                           name: opts.file.name + '.xml.tei',
                           // data: XML.addSentencesId(res), // Add sentences id in TEI
-                          data: XML.convertOldFormat(XML.load(Self.addSentencesId(res))),
+                          data: XML.convertOldFormat(XML.load(XML.addSentencesId(res))),
                           mimetype: 'text/xml'
                         }
                       },
@@ -1014,7 +1014,27 @@ Self.linkSentence = function (opts = {}, cb) {
           },
           function (err, res) {
             if (err) return cb(err);
-            return cb(null);
+            return Documents.findOne({ _id: datasets.document }).exec(function (err, doc) {
+              if (err) return cb(err);
+              if (updated)
+                return DocumentsLogs.create(
+                  {
+                    document: doc._id,
+                    user: opts.user._id,
+                    action: 'ADD DATASET LINK ' + opts.dataset.id
+                  },
+                  function (err, log) {
+                    if (err) return cb(err);
+                    else if (!log) return cb(new Error('Log not found'));
+                    doc.logs.push(log._id);
+                    if (err) return cb(err);
+                    return doc.save(function (err) {
+                      if (err) return cb(err);
+                      return cb(null);
+                    });
+                  }
+                );
+            });
           }
         );
       });
@@ -1042,18 +1062,25 @@ Self.unlinkSentence = function (opts = {}, cb) {
     else if (!datasets) return cb(new Error('Datasets not found'));
     // Check dataset with opts.id already exist
     let updated = false,
+      deleted = false,
       dataset;
     for (let i = 0; i < datasets.current.length; i++) {
       // update dataset
       if (datasets.current[i].id === opts.dataset.id) {
         dataset = datasets.current[i];
-        let sentenceIndex = dataset.sentences.reduce(function (acc, sentence, index) {
-          if (sentence.id === opts.sentence.id) acc = index;
-          return acc;
-        }, -1);
-        if (sentenceIndex > -1) {
-          updated = true;
-          dataset.sentences.splice(sentenceIndex, 1);
+        if (dataset.sentences.length === 1) {
+          // delete the dataset
+          datasets.deleted.push(datasets.current.splice(i, 1)[0]);
+          deleted = true;
+        } else {
+          let sentenceIndex = dataset.sentences.reduce(function (acc, sentence, index) {
+            if (sentence.id === opts.sentence.id) acc = index;
+            return acc;
+          }, -1);
+          if (sentenceIndex > -1) {
+            updated = true;
+            dataset.sentences.splice(sentenceIndex, 1);
+          }
         }
       }
     }
@@ -1071,7 +1098,45 @@ Self.unlinkSentence = function (opts = {}, cb) {
           },
           function (err, res) {
             if (err) return cb(err);
-            return cb(null);
+            return Documents.findOne({ _id: datasets.document }).exec(function (err, doc) {
+              if (err) return cb(err);
+              if (deleted)
+                return DocumentsLogs.create(
+                  {
+                    document: doc._id,
+                    user: opts.user._id,
+                    action: 'DELETE DATASET ' + opts.dataset.id
+                  },
+                  function (err, log) {
+                    if (err) return cb(err);
+                    else if (!log) return cb(new Error('Log not found'));
+                    doc.logs.push(log._id);
+                    if (err) return cb(err);
+                    return doc.save(function (err) {
+                      if (err) return cb(err);
+                      return cb(null);
+                    });
+                  }
+                );
+              if (updated)
+                return DocumentsLogs.create(
+                  {
+                    document: doc._id,
+                    user: opts.user._id,
+                    action: 'DELETE DATASET LINK ' + opts.dataset.id
+                  },
+                  function (err, log) {
+                    if (err) return cb(err);
+                    else if (!log) return cb(new Error('Log not found'));
+                    doc.logs.push(log._id);
+                    if (err) return cb(err);
+                    return doc.save(function (err) {
+                      if (err) return cb(err);
+                      return cb(null);
+                    });
+                  }
+                );
+            });
           }
         );
       });

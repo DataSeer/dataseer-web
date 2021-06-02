@@ -7,8 +7,11 @@
 const DatasetForm = function (id = 'datasetForm', events = {}) {
   let self = this;
   this.id = id;
+  this.screen = $(`#${this.id}\\.screen`);
   this.container = $(`#${this.id} #datasetForm\\.container`); // container of datasetForm
   this.message = $(`#${this.id} #datasetForm\\.message`);
+  this.datasetsTabs = this.container.find('div[key="datasets"]'); // datasets list
+  this.datasetTab = this.datasetsTabs.find('div.tpl[key="datasets"]'); // dataset tab tpl
   this.resources = {
     metadata: {},
     dataTypes: {},
@@ -17,6 +20,36 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
   this.defaultDataType = undefined; // will contain the default dataType
   this.dataset = {};
   this.events = events;
+  this.buttons = {
+    'display-left': this.screen.find(`.task-bar button[name="display-left"]`),
+    'display-middle': this.screen.find(`.task-bar button[name="display-middle"]`),
+    'display-right': this.screen.find(`.task-bar button[name="display-right"]`),
+    'hide': this.screen.find(`.task-bar button[name="hide"]`),
+    'show': this.screen.find(`.task-bar button[name="show"]`)
+  };
+  // On button click
+  this.buttons['display-left'].click(function () {
+    self.screen.removeClass().addClass('display-left');
+    self.hide();
+    self.show();
+  });
+  this.buttons['display-middle'].click(function () {
+    self.screen.removeClass().addClass('display-middle');
+    self.hide();
+    self.show();
+  });
+  this.buttons['display-right'].click(function () {
+    self.screen.removeClass().addClass('display-right');
+    self.hide();
+    self.show();
+  });
+  this.buttons['hide'].click(function () {
+    console.log('ok');
+    self.hide();
+  });
+  this.buttons['show'].click(function () {
+    self.show();
+  });
   // onDatasetIdClick
   $(`#${this.id} div[key="dataset\\.id"], #${this.id} div[key="dataset\\.label"]`)
     .parent()
@@ -268,6 +301,21 @@ DatasetForm.prototype.updateLabel = function (value = '') {
   let data = value ? value : this.dataset.id;
   // Update label
   this.container.find('div[key="dataset\\.label"]').attr('value', data).text(data);
+  this.container.find(`div[key="dataset\\.tab"][dataset-id="${this.dataset.id}"]`).attr('value', data).text(data);
+};
+
+// refresh label of dataset
+DatasetForm.prototype.refreshLabel = function () {
+  let data = this.dataset.name ? this.dataset.name : this.dataset.id;
+  // Update label
+  this.container.find('div[key="dataset\\.label"]').attr('value', data).text(data);
+  this.container.find(`div[key="dataset\\.tab"][dataset-id="${this.dataset.id}"]`).attr('value', data).text(data);
+};
+
+// refresh text of dataset
+DatasetForm.prototype.refreshText = function (text) {
+  // Update text
+  this.container.find('div[key="sentence\\.text"]').attr('value', text).text(text);
 };
 
 // get current dataset id
@@ -277,7 +325,7 @@ DatasetForm.prototype.currentId = function () {
 
 // get current dataset sentence
 DatasetForm.prototype.currentSentence = function () {
-  return this.datasetSentence;
+  return this.dataset.sentence;
 };
 
 // get current dataset (API formated)
@@ -526,16 +574,76 @@ DatasetForm.prototype.updateDataset = function (dataset) {
   this.properties['subType'](dataset['subType'], true);
 };
 
+// update dataset
+DatasetForm.prototype.updateSentence = function (sentence) {
+  // Set properties
+  // $('.sentence-img').attr('src', sentence.url);
+  // $('.sentence-text').text(sentence.text);
+};
+
 // link dataset
 DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
-  if (datasets && datasets.length > 0) {
-    this.refreshDatasetsList(datasets);
-  }
-  this.refreshDataset(data, opts, callback);
+  let self = this;
+  let text = data.dataset.sentences
+    .sort(function (a, b) {
+      let c = parseInt(a.id.replace('sentence-', '')),
+        d = parseInt(b.id.replace('sentence-', ''));
+      return c - d;
+    })
+    .map(function (item) {
+      return item.text;
+    })
+    .join('');
+  this.refreshText(text);
+  this.refreshDataset(data, opts, function (err, res) {
+    if (datasets && datasets.length > 0) {
+      self.refreshDatasetsList(datasets);
+    }
+    return callback(err, res);
+  });
 };
 
 // refresh dataset list
-DatasetForm.prototype.refreshDatasetsList = function (datasets) {};
+DatasetForm.prototype.refreshDatasetsList = function (datasets) {
+  this.clearTabs();
+  for (let i = 0; i < datasets.length; i++) {
+    this.addTab(datasets[i], { width: Math.floor((1 / datasets.length) * 100) });
+  }
+  this.refreshLabel();
+};
+
+// clear tabs in datasets list
+DatasetForm.prototype.clearTabs = function () {
+  return this.datasetsTabs.find('div[key="dataset"]').map(function () {
+    let el = $(this);
+    if (!el.hasClass('tpl')) el.remove();
+  });
+};
+
+// add tab in datasets list
+DatasetForm.prototype.addTab = function (dataset, opts) {
+  let self = this;
+  let newTab = this.datasetsTabs.find('div.tpl[key="dataset"]').clone();
+  newTab.removeClass('tpl');
+  // color
+  newTab.css('color', dataset.color.foreground).css('background-color', dataset.color.background.rgba);
+  // dataset & sentence properties
+  if (dataset.id === this.dataset.id) newTab.addClass('selected');
+  newTab.css('width', `${opts.width}%`);
+  newTab.click(function () {
+    let el = $(this),
+      datasetId = el.find('div[key="dataset\\.tab"]').attr('dataset-id'),
+      sentenceId = el.find('div[key="sentence\\.id"]').attr('value'),
+      sentenceText = el.find('div[key="sentence\\.text"]').attr('value');
+    if (typeof self.events.onTabClick !== 'undefined')
+      self.events.onTabClick({ dataset: { id: datasetId }, sentence: { id: sentenceId, text: sentenceText } });
+  });
+  newTab.find('div[key="dataset\\.tab"]').attr('value', dataset.id).attr('dataset-id', dataset.id).text(dataset.id);
+  newTab.find('div[key="dataset\\.label"]').attr('value', dataset.id).text(dataset.id);
+  newTab.find('div[key="sentence\\.id"]').attr('value', this.dataset.sentence.id);
+  newTab.find('div[key="sentence\\.text"]').attr('value', this.dataset.sentence.text);
+  return this.datasetsTabs.append(newTab);
+};
 
 // refresh dataset
 DatasetForm.prototype.refreshDataset = function (data = {}, opts = {}, callback) {
@@ -543,9 +651,10 @@ DatasetForm.prototype.refreshDataset = function (data = {}, opts = {}, callback)
     this.setEmptyMessage();
     return typeof callback === 'function' ? callback(true) : undefined;
   }
-  this.datasetColor = data.dataset.color;
-  this.datasetSentence = data.sentence;
+  this.dataset.color = data.dataset.color;
+  this.dataset.sentence = data.sentence;
   this.updateDataset(data.dataset);
+  // this.updateSentence(data.sentence);
   let shouldSave =
     this.properties['description']() !== data.dataset.description ||
     this.properties['bestDataFormatForSharing']() !== data.dataset.bestDataFormatForSharing ||
@@ -571,8 +680,8 @@ DatasetForm.prototype.color = function () {
   return this.container
     .find('div[key="dataset\\.id"], div[key="dataset\\.label"]')
     .parent()
-    .css('color', this.datasetColor.foreground)
-    .css('background-color', this.datasetColor.background.rgba);
+    .css('color', this.dataset.color.foreground)
+    .css('background-color', this.dataset.color.background.rgba);
 };
 
 // Unset color on dataset id
@@ -611,4 +720,22 @@ DatasetForm.prototype.setEmptyMessage = function () {
 // Set Intializing datasetForm Message
 DatasetForm.prototype.setInitialazingMessage = function () {
   return this.message.empty().append($('<div>').text('Populating dataset Form...'));
+};
+
+// Hide datasetForm
+DatasetForm.prototype.hide = function () {
+  this.container.hide();
+  this.buttons['hide'].hide();
+  this.buttons['show'].show();
+  this.buttons['display-middle'].hide();
+  this.screen.removeClass('maximized').addClass('minimized');
+};
+
+// Show datasetForm
+DatasetForm.prototype.show = function () {
+  this.container.show();
+  this.buttons['hide'].show();
+  this.buttons['show'].hide();
+  this.buttons['display-middle'].show();
+  this.screen.removeClass('minimized').addClass('maximized');
 };
