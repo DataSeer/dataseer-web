@@ -302,7 +302,16 @@ DocumentView.prototype.addLink = function (dataset, sentenceId) {
 
 // Remove a corresp
 DocumentView.prototype.removeLink = function (dataset, sentenceId) {
-  console.log(dataset, sentenceId);
   if (this.pdfViewer) this.pdfViewer.removeLink(dataset, sentenceId);
   this.xmlViewer.removeLink(dataset, sentenceId);
+};
+
+// display left
+DocumentView.prototype.displayLeft = function () {
+  if (this.pdfViewer) this.pdfViewer.displayLeft();
+};
+
+// display right
+DocumentView.prototype.displayRight = function () {
+  if (this.pdfViewer) this.pdfViewer.displayRight();
 };

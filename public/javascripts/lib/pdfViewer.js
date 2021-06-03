@@ -220,11 +220,11 @@ const PdfViewer = function (id, screenId, events = {}) {
   this.containerElement = this.container.get(0);
   this.viewer = $(`<div id="${this.viewerId}" class="pdfViewer"></div>`);
   this.viewerElement = this.viewer.get(0);
-  this.infos = $(`<div id="${this.viewerId}Infos" class="pdfViewerInfos"></div>`);
+  this.infos = $(`<div id="${this.viewerId}Infos" class="display-left"></div>`);
   this.infosElement = this.infos.get(0);
-  this.message = $(`<div id="${this.viewerId}Message" class="pdfViewerMessage"></div>`);
+  this.message = $(`<div id="${this.viewerId}Message" class="display-left"></div>`);
   this.messageElement = this.infos.get(0);
-  this.scrollMarkers = $(`<div id="${this.viewerId}ScrollMarkers" class="pdfViewerScrollMarkers"></div>`);
+  this.scrollMarkers = $(`<div id="${this.viewerId}ScrollMarkers" class="display-left"></div>`);
   this.scrollMarkersElement = this.scrollMarkers.get(0);
   this.container.append(this.infos).append(this.message).append(this.viewer);
   this.scrollMarkersCursor = $('<span class="cursor"></span>');
@@ -1018,6 +1018,20 @@ PdfViewer.prototype.hoverSentence = function (sentence) {
 // endHoverSentence
 PdfViewer.prototype.endHoverSentence = function (sentence) {
   this.endHoverCanvas(sentence.sentenceId, sentence.isSelected);
+};
+
+// displayLeft
+PdfViewer.prototype.displayLeft = function () {
+  this.infos.removeClass().addClass('display-left');
+  this.message.removeClass().addClass('display-left');
+  this.scrollMarkers.removeClass().addClass('display-left');
+};
+
+// displayRight
+PdfViewer.prototype.displayRight = function () {
+  this.infos.removeClass().addClass('display-right');
+  this.message.removeClass().addClass('display-right');
+  this.scrollMarkers.removeClass().addClass('display-right');
 };
 
 // Build borders

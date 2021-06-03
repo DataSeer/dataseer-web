@@ -591,7 +591,6 @@ DocumentHandler.prototype.synchronize = function () {
     // Attach documentView events
     this.documentView.attach('onDatasetClick', function (sentence) {});
     this.documentView.attach('onSentenceClick', function (sentence) {
-      console.log('onSentenceClick');
       return self.selectSentence({ id: sentence.sentenceId, disableSelection: true });
     });
     this.documentView.attach('onFulltextView', function () {
@@ -754,11 +753,16 @@ DocumentHandler.prototype.synchronize = function () {
       return self.selectSentence({ id: data.sentence.id, selectedDatasetId: data.dataset.id });
     });
     this.datasetForm.attach('onRefreshDatatypesClick', function (done) {
-      console.log('onRefreshDatatypesClick');
       return DataSeerAPI.resyncJsonDataTypes(function (err, res) {
         console.log(err, res);
         return done();
       });
+    });
+    this.datasetForm.attach('onDisplayLeftClick', function () {
+      self.documentView.displayRight();
+    });
+    this.datasetForm.attach('onDisplayRightClick', function () {
+      self.documentView.displayLeft();
     });
   }
 };

@@ -32,6 +32,7 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
     self.screen.removeClass().addClass('display-left');
     self.hide();
     self.show();
+    if (typeof self.events.onDisplayLeftClick === 'function') return self.events.onDisplayLeftClick();
   });
   this.buttons['display-middle'].click(function () {
     self.screen.removeClass().addClass('display-middle');
@@ -42,9 +43,9 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
     self.screen.removeClass().addClass('display-right');
     self.hide();
     self.show();
+    if (typeof self.events.onDisplayRightClick === 'function') return self.events.onDisplayRightClick();
   });
   this.buttons['hide'].click(function () {
-    console.log('ok');
     self.hide();
   });
   this.buttons['show'].click(function () {
