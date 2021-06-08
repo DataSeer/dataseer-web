@@ -941,7 +941,7 @@ Self.updateDataset = function (opts = {}, cb) {
                     log.date = Date.now();
                     return log.save(function (err) {
                       if (err) return cb(err);
-                      return cb(null, dataset);
+                      return cb(null, { mongo: mongoInfos, tei: teiInfos });
                     });
                   }
                   // Create logs
