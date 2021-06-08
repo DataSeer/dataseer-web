@@ -728,7 +728,9 @@ DatasetForm.prototype.hide = function () {
   this.container.hide();
   this.buttons['hide'].hide();
   this.buttons['show'].show();
+  this.buttons['display-left'].hide();
   this.buttons['display-middle'].hide();
+  this.buttons['display-right'].hide();
   this.screen.removeClass('maximized').addClass('minimized');
 };
 
@@ -738,5 +740,8 @@ DatasetForm.prototype.show = function () {
   this.buttons['hide'].show();
   this.buttons['show'].hide();
   this.buttons['display-middle'].show();
+  this.buttons['display-left'].show();
+  this.buttons['display-middle'].show();
+  this.buttons['display-right'].show();
   this.screen.removeClass('minimized').addClass('maximized');
 };

@@ -707,9 +707,12 @@ body {
   cursor: pointer;
   text-decoration: none;
   margin-right: 6px;
+  line-height: 26px;
   padding: 3px;
   line-height: 21px;
   z-index: 10;
+  color: black;
+  background-color: white;
 }
 
 #xml * {
@@ -724,17 +727,14 @@ body {
 
 #xml s.selected {
   cursor: pointer;
-  background-color: black !important;
-  color: white !important;
-  border: 1px solid black;
-  z-index: 11;
+  border: 2px solid black;
+  z-index: 100;
 }
 
 #xml s.hover {
   cursor: pointer;
-  background-color: gray !important;
-  color: white !important;
-  z-index: 12;
+  border: 2px dashed gray;
+  z-index: 110;
 }
 
 #documentView\.screen\.container {

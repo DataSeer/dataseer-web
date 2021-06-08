@@ -38,7 +38,7 @@ XmlViewer.prototype.getSentences = function (selectedSentences, lastSentence) {
     min = Infinity,
     max = -Infinity;
   for (let i = 0; i < sentences.length; i++) {
-    let index = this.sentencesMapping.array.indexOf(sentences[i].sentenceId);
+    let index = this.sentencesMapping.array.indexOf(sentences[i].id);
     min = index > -1 && index < min ? index : min;
     max = index > -1 && index > max ? index : max;
   }
@@ -49,6 +49,7 @@ XmlViewer.prototype.getSentences = function (selectedSentences, lastSentence) {
 // Get order of appearance of sentences
 XmlViewer.prototype.getSentencesMapping = function () {
   if (typeof this.sentencesMapping.object !== 'undefined') return this.sentencesMapping.object;
+  console.log('je ne devrait pas passer par là');
   let result = {};
   this.viewer.find(`s[xml\\:id]`).map(function (i, el) {
     result[$(el).attr('xml:id')] = i;
@@ -63,18 +64,18 @@ XmlViewer.prototype.getSentencesMapping = function () {
 
 // hoverSentence
 XmlViewer.prototype.hoverSentence = function (sentence) {
-  return this.viewer.find(`s[xml\\:id="${sentence.sentenceId}"]`).addClass('hover');
+  return this.viewer.find(`s[xml\\:id="${sentence.id}"]`).addClass('hover');
 };
 
 // endHoverSentence
 XmlViewer.prototype.endHoverSentence = function (sentence) {
-  return this.viewer.find(`s[xml\\:id="${sentence.sentenceId}"]`).removeClass('hover');
+  return this.viewer.find(`s[xml\\:id="${sentence.id}"]`).removeClass('hover');
 };
 
 // Scroll to a sentence
-XmlViewer.prototype.scrollToSentence = function (id, cb) {
-  if (id) {
-    let el = this.viewer.find(`s[xml\\:id="${id}"]`).first(),
+XmlViewer.prototype.scrollToSentence = function (sentence, cb) {
+  if (sentence.id) {
+    let el = this.viewer.find(`s[xml\\:id="${sentence.id}"]`).first(),
       position = el.position(),
       top = position ? position.top : 0;
     return cb(top);
@@ -83,22 +84,22 @@ XmlViewer.prototype.scrollToSentence = function (id, cb) {
 
 // Select a sentence
 XmlViewer.prototype.selectSentence = function (sentence) {
-  let el = this.viewer.find(`s[xml\\:id="${sentence.sentenceId}"]`).removeClass('hover').addClass('selected');
+  let el = this.viewer.find(`s[xml\\:id="${sentence.id}"]`).removeClass('hover').addClass('selected');
 };
 
 // Unselect a sentence
 XmlViewer.prototype.unselectSentence = function (sentence) {
-  let el = this.viewer.find(`s[xml\\:id="${sentence.sentenceId}"]`).removeClass('selected');
+  let el = this.viewer.find(`s[xml\\:id="${sentence.id}"]`).removeClass('selected');
 };
 
 // Select a sentence
-XmlViewer.prototype.getInfosOfSentence = function (sentenceId) {
-  let el = this.viewer.find(`s[xml\\:id="${sentenceId}"]`);
+XmlViewer.prototype.getInfosOfSentence = function (sentence) {
+  let el = this.viewer.find(`s[xml\\:id="${sentence.id}"]`);
   if (el.get(0)) {
     let hasDatasets = typeof el.attr('corresp') !== 'undefined',
       dataInstanceIds = hasDatasets ? el.attr('corresp').replace('#', '').split(' ') : [];
     return {
-      sentenceId: el.attr('xml:id'),
+      id: el.attr('xml:id'),
       dataInstanceIds: dataInstanceIds,
       hasDatasets: hasDatasets,
       text: el.text()
@@ -107,13 +108,13 @@ XmlViewer.prototype.getInfosOfSentence = function (sentenceId) {
 };
 
 // Add a dataset
-XmlViewer.prototype.addDataset = function (dataset, sentenceId) {
+XmlViewer.prototype.addDataset = function (dataset, sentence) {
   let $dataset = $(`<dataset id="${dataset.id}">`),
     $dataInstance = $(`<dataInstance id="${dataset.dataInstanceId}">`);
   if (this.datasetsList.find(`dataset[id="${dataset.id}"]`).length === 0) this.datasetsList.append($dataset);
   if (this.dataInstancesList.find(`dataInstance[id="${dataset.dataInstanceId}"]`).length === 0)
     this.dataInstancesList.append($dataInstance);
-  this.addLink(dataset, sentenceId);
+  this.addLink(dataset, sentence);
 };
 
 // Remove a dataset
@@ -126,8 +127,8 @@ XmlViewer.prototype.removeDataset = function (dataset) {
 };
 
 // colorize a sentence
-XmlViewer.prototype.colorize = function (dataset, sentenceId) {
-  let el = this.viewer.find(`s[xml\\:id="${sentenceId}"]`);
+XmlViewer.prototype.colorize = function (dataset, sentence) {
+  let el = this.viewer.find(`s[xml\\:id="${sentence.id}"]`);
   if (
     el.get(0) &&
     dataset &&
@@ -144,9 +145,8 @@ XmlViewer.prototype.colorize = function (dataset, sentenceId) {
 };
 
 // uncolorize a sentence
-XmlViewer.prototype.uncolorize = function (dataInstanceId, sentenceId) {
-  console.log(dataInstanceId, sentenceId);
-  let el = this.viewer.find(`s[xml\\:id="${sentenceId}"]`);
+XmlViewer.prototype.uncolorize = function (dataInstanceId, sentence) {
+  let el = this.viewer.find(`s[xml\\:id="${sentence.id}"]`);
   if (el.get(0)) {
     let colors = el.attr('colors') ? JSON.parse(el.attr('colors')) : {};
     delete colors[dataInstanceId];
@@ -161,8 +161,8 @@ XmlViewer.prototype.uncolorize = function (dataInstanceId, sentenceId) {
 };
 
 // Add a Link
-XmlViewer.prototype.addLink = function (dataset, sentenceId) {
-  let el = this.viewer.find(`s[xml\\:id="${sentenceId}"]`);
+XmlViewer.prototype.addLink = function (dataset, sentence) {
+  let el = this.viewer.find(`s[xml\\:id="${sentence.id}"]`);
   if (el.get(0)) {
     if (!el.attr('corresp')) el.attr('corresp', `#${dataset.dataInstanceId}`);
     else
@@ -170,7 +170,7 @@ XmlViewer.prototype.addLink = function (dataset, sentenceId) {
         'corresp',
         (el.attr('corresp').replace(`#${dataset.dataInstanceId}`, '') + ` #${dataset.dataInstanceId}`).trim()
       );
-    return this.colorize(dataset, sentenceId);
+    return this.colorize(dataset, sentence);
   }
 };
 
@@ -183,10 +183,8 @@ XmlViewer.prototype.getLinks = function (dataset) {
       let el = $(item);
       if (el.attr('corresp').indexOf(`#${dataset.dataInstanceId}`) > -1)
         acc.push({
-          sentenceId: el.attr('xml:id'),
-          datasetId: dataset.id,
-          dataInstance: dataset.dataInstanceId,
-          text: el.text()
+          sentence: { id: el.attr('xml:id'), text: el.text() },
+          dataset: { id: dataset.id, dataInstanceId: dataset.dataInstanceId }
         });
       return acc;
     }, []);
@@ -196,20 +194,20 @@ XmlViewer.prototype.getLinks = function (dataset) {
 XmlViewer.prototype.removeLinks = function (dataset) {
   let self = this;
   dataset.sentences.map(function (sentence) {
-    self.removeLink(dataset, sentence.id);
+    self.removeLink(dataset, sentence);
   });
 };
 
 // Remove a link
-XmlViewer.prototype.removeLink = function (dataset, sentenceId) {
-  let el = this.viewer.find(`s[xml\\:id="${sentenceId}"]`);
+XmlViewer.prototype.removeLink = function (dataset, sentence) {
+  let el = this.viewer.find(`s[xml\\:id="${sentence.id}"]`);
   if (el.get(0)) {
     let nbCorresps = el.attr('corresp').split(' ').length;
     if (nbCorresps === 1) {
       el.removeAttr('corresp').removeAttr('colors', '').css('color', '').css('background-color', '');
     } else {
       el.attr('corresp', el.attr('corresp').replace(`#${dataset.dataInstanceId}`, '').trim());
-      this.uncolorize(dataset.dataInstanceId, sentenceId);
+      this.uncolorize(dataset.dataInstanceId, sentence);
     }
   }
 };
@@ -218,24 +216,25 @@ XmlViewer.prototype.removeLink = function (dataset, sentenceId) {
 XmlViewer.prototype.load = function (opts = {}, cb) {
   console.log('Loading XML...');
   let self = this;
+  this.sentencesMapping = opts.mapping ? opts.mapping : {};
   this.viewer.html(opts.xmlString);
   // Init events
   this.viewer
     .find('s')
     .click(function () {
       let el = $(this);
-      if (typeof self.events.onClick === 'function') return self.events.onClick(el.attr('xml:id'));
+      if (typeof self.events.onClick === 'function') return self.events.onClick({ id: el.attr('xml:id') });
     })
     .hover(
       // in
       function () {
         let el = $(this);
-        if (typeof self.events.onHover === 'function') return self.events.onHover(el.attr('xml:id'));
+        if (typeof self.events.onHover === 'function') return self.events.onHover({ id: el.attr('xml:id') });
       },
       // out
       function () {
         let el = $(this);
-        if (typeof self.events.onEndHover === 'function') return self.events.onEndHover(el.attr('xml:id'));
+        if (typeof self.events.onEndHover === 'function') return self.events.onEndHover({ id: el.attr('xml:id') });
       }
     );
   this.dataInstancesList = this.viewer.find('list[type="dataInstance"]');
@@ -280,8 +279,8 @@ XmlViewer.prototype.load = function (opts = {}, cb) {
     let el = $(this),
       dataInstanceIds = el.attr('corresp').replace(/#/gm, '').split(' ');
     dataInstanceIds.map(function (dataInstanceId) {
-      links.push({ dataset: datasets[dataInstanceId], sentenceId: el.attr('xml:id') });
-      self.colorize(datasets[dataInstanceId], el.attr('xml:id'));
+      links.push({ dataset: datasets[dataInstanceId], sentence: { id: el.attr('xml:id') } });
+      self.colorize(datasets[dataInstanceId], { id: el.attr('xml:id') });
     });
   });
   return cb({

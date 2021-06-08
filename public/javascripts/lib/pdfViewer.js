@@ -131,7 +131,7 @@ Lines.prototype.addChunks = function (chunks = [], scale = 1) {
 // Represent an Area
 const Area = function (opts, first) {
   this.lines = [];
-  this.sentenceId = opts.sentenceId;
+  this.sentence = { id: opts.sentence.id };
   this.h = 0;
   this.w = 0;
   this.min = { x: Infinity, y: Infinity };
@@ -176,7 +176,7 @@ Area.prototype.isNext = function (line, margin) {
 // Represent a group of Areas
 const Areas = function (paragraph, interlines) {
   this.collection = [];
-  this.sentenceId = paragraph.sentenceId;
+  this.sentence = { id: paragraph.sentence.id };
   this.interlines = interlines;
   this.newArea();
   if (Array.isArray(paragraph.lines)) this.addLines(paragraph.lines);
@@ -185,7 +185,7 @@ const Areas = function (paragraph, interlines) {
 
 // Create a new Area
 Areas.prototype.newArea = function (line) {
-  return this.collection.push(new Area({ sentenceId: this.sentenceId }, line));
+  return this.collection.push(new Area({ sentence: { id: this.sentence.id } }, line));
 };
 
 // Get Last Area
@@ -252,7 +252,7 @@ PdfViewer.prototype.getSentences = function (selectedSentences, lastSentence) {
     min = Infinity,
     max = -Infinity;
   for (let i = 0; i < sentences.length; i++) {
-    let index = this.sentencesMapping.array.indexOf(sentences[i].sentenceId);
+    let index = this.sentencesMapping.array.indexOf(sentences[i].id);
     min = index > -1 && index < min ? index : min;
     max = index > -1 && index > max ? index : max;
   }
@@ -263,13 +263,14 @@ PdfViewer.prototype.getSentences = function (selectedSentences, lastSentence) {
 // Get order of appearance of sentences
 PdfViewer.prototype.getSentencesMapping = function () {
   if (typeof this.sentencesMapping.object !== 'undefined') return this.sentencesMapping.object;
+  console.log('je ne devrait pas passer par là');
   let result = {},
     sentences = {};
   // Get useful infos about sentences
   for (let page in this.metadata.pages) {
     for (let sentenceId in this.metadata.pages[page].sentences) {
       sentences[sentenceId] = {
-        sentenceId: sentenceId,
+        id: sentenceId,
         page: page,
         minY: this.metadata.sentences[sentenceId].pages[page].min.y,
         column: this.metadata.sentences[sentenceId].pages[page].columns[
@@ -287,7 +288,7 @@ PdfViewer.prototype.getSentencesMapping = function () {
       else return 0;
     })
     .map(function (sentence, index) {
-      result[sentence.sentenceId] = index;
+      result[sentence.id] = index;
     });
   this.sentencesMapping.object = result;
   this.sentencesMapping.array = new Array(Object.keys(result).length);
@@ -301,6 +302,7 @@ PdfViewer.prototype.getSentencesMapping = function () {
 PdfViewer.prototype.load = function (pdf, xmlMetadata, cb) {
   console.log('Loading PDF...');
   let self = this;
+  this.sentencesMapping = pdf.metadata.mapping;
   this.viewer.empty();
   return this.loadPDF(pdf.url, function (err, pdfDocument) {
     console.log('Load of PDF done.');
@@ -332,26 +334,28 @@ PdfViewer.prototype.hideMessage = function () {
   this.message.hide('fast');
 };
 
-// Get Pages of a given datasetId
-PdfViewer.prototype.getPagesOfDataset = function (id) {
+// Get Pages of a given dataset
+PdfViewer.prototype.getPagesOfDataset = function (dataset) {
   if (
     this.links &&
-    Array.isArray(this.links[id]) &&
-    this.links[id].length &&
-    typeof this.metadata.sentences[this.links[id][0]].pages === 'object'
+    Array.isArray(this.links[dataset.id]) &&
+    this.links[dataset.id].length &&
+    typeof this.metadata.sentences[this.links[dataset.id][0]].pages === 'object'
   )
-    return Object.keys(this.metadata.sentences[this.links[id][0]].pages).map(function (item) {
+    return Object.keys(this.metadata.sentences[this.links[dataset.id][0]].pages).map(function (item) {
       return parseInt(item, 10);
     });
   else return [];
 };
 
-// Get Pages of a given sentenceId
-PdfViewer.prototype.getPagesOfSentence = function (id) {
-  if (this.metadata.sentences)
-    return Object.keys(this.metadata.sentences[id].pages).map(function (item) {
-      return parseInt(item, 10);
-    });
+// Get Pages of a given sentence
+PdfViewer.prototype.getPagesOfSentence = function (sentence) {
+  if (this.metadata.sentences && sentence.id)
+    return Object.keys(this.metadata.sentences[sentence.id].pages)
+      .map(function (item) {
+        return parseInt(item, 10);
+      })
+      .sort();
   else return [];
 };
 
@@ -540,7 +544,7 @@ PdfViewer.prototype.refreshMarkers = function () {
     let marker = $(this),
       markerElement = marker.get(0),
       sentenceId = marker.attr('sentenceId'),
-      spanTop = self._scrollToSentence(sentenceId),
+      spanTop = self._scrollToSentence({ id: sentenceId }),
       spanBottom = spanTop + parseInt(marker.attr('contour-height')),
       spanLeft = parseInt(marker.attr('contour-left')),
       spanRight = spanLeft + parseInt(marker.attr('contour-width')),
@@ -562,12 +566,12 @@ PdfViewer.prototype.insertDatasets = function (numPage) {
     links = this.metadata.links;
   for (let i = 0; i < links.length; i++) {
     if (
-      this.getPagesOfSentence(links[i].sentenceId).indexOf(numPage) > -1 &&
+      this.getPagesOfSentence(links[i].sentence).indexOf(numPage) > -1 &&
       this.metadata.colors[links[i].dataset.id] &&
       this.metadata.colors[links[i].dataset.id].background &&
       this.metadata.colors[links[i].dataset.id].background.rgb
     ) {
-      self.addDataset(links[i].dataset, links[i].sentenceId);
+      self.addDataset(links[i].dataset, links[i].sentence);
     }
   }
 };
@@ -669,7 +673,7 @@ PdfViewer.prototype.buildAreas = function (scale, numPage) {
       });
       let lines = {
         'lines': new Lines(chunks, scale).all(),
-        'sentenceId': sentenceId
+        'sentence': { id: sentenceId }
       };
       paragraphs.push(lines);
     }
@@ -696,7 +700,7 @@ PdfViewer.prototype.buildBorders = function (area) {
   let container = $('<div>'),
     borders = this.getCanvas(area);
   container
-    .attr('sentenceId', area.sentenceId)
+    .attr('sentenceId', area.sentence.id)
     .attr('contour-width', area.w)
     .attr('contour-height', area.h)
     .attr('contour-top', area.min.y)
@@ -729,15 +733,16 @@ PdfViewer.prototype.insertSentences = function (scale, numPage) {
         // the link here goes to the bibliographical reference
         element.onclick = function () {
           let el = $(this);
-          if (typeof self.events.onClick === 'function') return self.events.onClick(el.attr('sentenceId'));
+          if (typeof self.events.onClick === 'function') return self.events.onClick({ id: el.attr('sentenceId') });
         };
         element.onmouseover = function () {
           let el = $(this);
-          if (typeof self.events.onHover === 'function') return self.events.onHover(el.attr('sentenceId'));
+          if (typeof self.events.onHover === 'function') return self.events.onHover({ id: el.attr('sentenceId') });
         };
         element.onmouseout = function () {
           let el = $(this);
-          if (typeof self.events.onEndHover === 'function') return self.events.onEndHover(el.attr('sentenceId'));
+          if (typeof self.events.onEndHover === 'function')
+            return self.events.onEndHover({ id: el.attr('sentenceId') });
         };
         annotationsContainer.append(element);
       }
@@ -796,29 +801,29 @@ PdfViewer.prototype.setEvents = function (items) {
     // the link here goes to the bibliographical reference
     element.onclick = function () {
       let el = $(this);
-      if (typeof self.events.onClick === 'function') return self.events.onClick(el.attr('sentenceId'));
+      if (typeof self.events.onClick === 'function') return self.events.onClick({ id: el.attr('sentenceId') });
     };
     element.onmouseover = function () {
       let el = $(this);
       self.viewer.find(`.contour[sentenceId="${el.attr('sentenceId')}"]`).addClass('hover');
-      if (typeof self.events.onHover === 'function') return self.events.onHover(el.attr('sentenceId'));
+      if (typeof self.events.onHover === 'function') return self.events.onHover({ id: el.attr('sentenceId') });
     };
     element.onmouseout = function () {
       let el = $(this);
       self.viewer.find(`.contour[sentenceId="${el.attr('sentenceId')}"]`).removeClass('hover');
-      if (typeof self.events.onEndHover === 'function') return self.events.onEndHover(el.attr('sentenceId'));
+      if (typeof self.events.onEndHover === 'function') return self.events.onEndHover({ id: el.attr('sentenceId') });
     };
   }
 };
 
 // Insert marker in scrollbar
-PdfViewer.prototype.addMarker = function (dataset) {
+PdfViewer.prototype.addMarker = function (dataset, sentence) {
   let self = this,
-    contours = this.viewer.find(`.contoursLayer > .contour[sentenceId="${dataset.sentenceId}"]`);
+    contours = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
   return contours.map(function () {
     let contour = $(this),
       canvas = contour.find('canvas').first(),
-      spanTop = self._scrollToSentence(dataset.sentenceId),
+      spanTop = self._scrollToSentence(sentence),
       spanBottom = spanTop + parseInt(contour.attr('contour-height')),
       spanLeft = parseInt(contour.attr('contour-left')),
       spanRight = spanLeft + parseInt(contour.attr('contour-width')),
@@ -836,7 +841,7 @@ PdfViewer.prototype.addMarker = function (dataset) {
     markerElement.style.width = parseInt((markerRight - markerLeft) * coeff) + 'px';
     self.scrollMarkersElement.appendChild(markerElement);
     marker.addClass('marker');
-    marker.attr('sentenceId', dataset.sentenceId);
+    marker.attr('sentenceId', sentence.id);
     marker.attr('contour-height', contour.attr('contour-height'));
     marker.attr('contour-left', contour.attr('contour-left'));
     marker.attr('contour-width', contour.attr('contour-width'));
@@ -847,29 +852,21 @@ PdfViewer.prototype.addMarker = function (dataset) {
 };
 
 // Remove marker in scrollbar
-PdfViewer.prototype.removeMarker = function (dataset) {
-  this.scrollMarkers.find(`span[sentenceId="${dataset.sentenceId}"]`).remove();
+PdfViewer.prototype.removeMarker = function (sentence) {
+  this.scrollMarkers.find(`span[sentenceId="${sentence.id}"]`).remove();
 };
 
 // Update marker in scrollbar
-PdfViewer.prototype.updateMarker = function (dataset) {
-  this.scrollMarkers
-    .find(`span[sentenceId="${dataset.sentenceId}"]`)
-    .css('background-color', dataset.color.background.rgb);
+PdfViewer.prototype.updateMarker = function (dataset, sentence) {
+  this.scrollMarkers.find(`span[sentenceId="${sentence.id}"]`).css('background-color', dataset.color.background.rgb);
 };
 
-// Set Color to a sentence
-PdfViewer.prototype.colorize = function (dataset, sentenceId) {};
-
-// Unset Color to a sentence
-PdfViewer.prototype.uncolorize = function (dataInstanceId, sentenceId) {};
-
 // Add a link
-PdfViewer.prototype.addLink = function (dataset, sentenceId) {
+PdfViewer.prototype.addLink = function (dataset, sentence) {
   if (typeof this.links[dataset.id] === 'undefined') this.links[dataset.id] = [];
-  this.links[dataset.id].push(sentenceId);
+  this.links[dataset.id].push(sentence.id);
   this.links[dataset.id].sort();
-  let contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentenceId}"]`);
+  let contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
   contour.attr('color', dataset.color.background.rgb);
   let colors = contour.attr('colors') ? JSON.parse(contour.attr('colors')) : {};
   colors[dataset.dataInstanceId] = dataset.color;
@@ -882,20 +879,20 @@ PdfViewer.prototype.addLink = function (dataset, sentenceId) {
   } else {
     contour.attr('corresp', `#${dataset.dataInstanceId}`);
   }
-  let annotation = this.viewer.find(`.annotationsLayer > s[sentenceId="${sentenceId}"]`);
+  let annotation = this.viewer.find(`.annotationsLayer > s[sentenceId="${sentence.id}"]`);
   if (annotation.attr('corresp')) {
     annotation.attr('corresp', annotation.attr('corresp') + ` #${dataset.dataInstanceId}`);
   } else {
     annotation.attr('corresp', `#${dataset.dataInstanceId}`);
   }
-  this.setCanvasColor(sentenceId, BORDER_WIDTH, dataset.color.background.rgb);
-  this.addMarker({ sentenceId: sentenceId, color: dataset.color });
+  this.setCanvasColor(sentence, BORDER_WIDTH, dataset.color.background.rgb);
+  this.addMarker({ color: dataset.color }, sentence);
 };
 
 // Remove a link
-PdfViewer.prototype.removeLink = function (dataset, sentenceId) {
-  this.links[dataset.id].splice(this.links[dataset.id].indexOf(sentenceId), 1);
-  let contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentenceId}"]`);
+PdfViewer.prototype.removeLink = function (dataset, sentence) {
+  this.links[dataset.id].splice(this.links[dataset.id].indexOf(sentence.id), 1);
+  let contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
   let colors = contour.attr('colors') ? JSON.parse(contour.attr('colors')) : {};
   delete colors[dataset.dataInstanceId];
   let keys = Object.keys(colors);
@@ -903,17 +900,17 @@ PdfViewer.prototype.removeLink = function (dataset, sentenceId) {
     let lastColor = colors[keys[keys.length - 1]];
     contour.attr('colors', JSON.stringify(colors));
     contour.attr('color', lastColor.background.rgb);
-    this.setCanvasColor(sentenceId, BORDER_WIDTH, lastColor.background.rgb);
-    this.updateMarker({ sentenceId: sentenceId, color: lastColor });
+    this.setCanvasColor(sentence, BORDER_WIDTH, lastColor.background.rgb);
+    this.updateMarker({ color: lastColor }, sentence);
   } else {
     contour.removeAttr('colors');
     contour.removeAttr('color');
-    this.setCanvasColor(sentenceId, BORDER_WIDTH, REMOVED_BORDER_COLOR);
-    this.removeMarker({ sentenceId: sentenceId });
+    this.setCanvasColor(sentence, BORDER_WIDTH, REMOVED_BORDER_COLOR);
+    this.removeMarker(sentence);
   }
   contour.attr('corresp', contour.attr('corresp').replace(`#${dataset.dataInstanceId}`, '').trim());
   if (contour.attr('corresp') === '') contour.removeAttr('corresp');
-  let annotation = this.viewer.find(`.annotationsLayer > s[sentenceId="${sentenceId}"]`);
+  let annotation = this.viewer.find(`.annotationsLayer > s[sentenceId="${sentence.id}"]`);
   annotation.attr('corresp', annotation.attr('corresp').replace(`#${dataset.dataInstanceId}`, '').trim());
   if (annotation.attr('corresp') === '') annotation.removeAttr('corresp');
 };
@@ -922,13 +919,13 @@ PdfViewer.prototype.removeLink = function (dataset, sentenceId) {
 PdfViewer.prototype.removeLinks = function (dataset) {
   let ids = [...this.links[dataset.id]];
   for (let i = 0; i < ids.length; i++) {
-    this.removeLink(dataset, ids[i]);
+    this.removeLink(dataset, { id: ids[i] });
   }
 };
 
 // Add a dataset
-PdfViewer.prototype.addDataset = function (dataset, sentenceId) {
-  this.addLink(dataset, sentenceId);
+PdfViewer.prototype.addDataset = function (dataset, sentence) {
+  this.addLink(dataset, sentence);
 };
 
 // Remove a dataset
@@ -937,8 +934,8 @@ PdfViewer.prototype.removeDataset = function (dataset) {
 };
 
 // Scroll to a sentence
-PdfViewer.prototype.scrollToDataset = function (datasetId) {
-  let element = this.viewer.find(`s[datasetId="${datasetId}"]`).first(),
+PdfViewer.prototype.scrollToDataset = function (dataset) {
+  let element = this.viewer.find(`s[datasetId="${dataset.id}"]`).first(),
     numPage = parseInt(element.parent().parent().attr('data-page-number'), 10),
     pages = this.viewer.find('div[class="page"]'),
     height = 0;
@@ -954,9 +951,9 @@ PdfViewer.prototype.scrollToDataset = function (datasetId) {
 };
 
 // Select a sentence
-PdfViewer.prototype.scrollToSentence = function (id, cb) {
+PdfViewer.prototype.scrollToSentence = function (sentence, cb) {
   let self = this,
-    pages = this.getPagesOfSentence(id),
+    pages = this.getPagesOfSentence(sentence),
     allPages = this.getPages(),
     maxPage = Math.max(...pages);
   if (maxPage > 0) {
@@ -966,14 +963,14 @@ PdfViewer.prototype.scrollToSentence = function (id, cb) {
     if (allPages.length > 2 && maxPage < allPages[allPages.length - 2]) numPages.push(maxPage + 1);
     this.renderPages(numPages, function (err) {
       if (err) return cb(err);
-      return cb(self._scrollToSentence(id));
+      return cb(self._scrollToSentence(sentence));
     });
   } else return cb(new Error('invalid sentence id'));
 };
 
 // Scroll to a sentence
-PdfViewer.prototype._scrollToSentence = function (sentenceId) {
-  let element = this.viewer.find(`s[sentenceId="${sentenceId}"]`).first(),
+PdfViewer.prototype._scrollToSentence = function (sentence) {
+  let element = this.viewer.find(`s[sentenceId="${sentence.id}"]`).first(),
     numPage = parseInt(element.parent().parent().attr('data-page-number'), 10),
     pages = this.viewer.find('div[class="page"]'),
     height = 0;
@@ -990,34 +987,34 @@ PdfViewer.prototype._scrollToSentence = function (sentenceId) {
 
 // selectSentence
 PdfViewer.prototype.selectSentence = function (sentence) {
-  let sentenceElement = this.viewer.find(`s[sentenceId="${sentence.sentenceId}"]`),
-    contourElement = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.sentenceId}"]`);
+  let sentenceElement = this.viewer.find(`s[sentenceId="${sentence.id}"]`),
+    contourElement = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
   if (sentenceElement) sentenceElement.addClass('selected');
   if (contourElement) {
     contourElement.addClass('selected');
-    this.selectCanvas(sentence.sentenceId, contourElement.attr('color'));
+    this.selectCanvas(sentence, contourElement.attr('color'));
   }
 };
 
 // unselectSentence
 PdfViewer.prototype.unselectSentence = function (sentence) {
-  let sentenceElement = this.viewer.find(`s[sentenceId="${sentence.sentenceId}"]`),
-    contourElement = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.sentenceId}"]`);
+  let sentenceElement = this.viewer.find(`s[sentenceId="${sentence.id}"]`),
+    contourElement = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
   if (sentenceElement) sentenceElement.removeClass('selected');
   if (contourElement) {
     contourElement.removeClass('selected');
-    this.unselectCanvas(sentence.sentenceId);
+    this.unselectCanvas(sentence);
   }
 };
 
 // hoverSentence
 PdfViewer.prototype.hoverSentence = function (sentence) {
-  return this.hoverCanvas(sentence.sentenceId, sentence.isSelected);
+  return this.hoverCanvas(sentence);
 };
 
 // endHoverSentence
 PdfViewer.prototype.endHoverSentence = function (sentence) {
-  this.endHoverCanvas(sentence.sentenceId, sentence.isSelected);
+  this.endHoverCanvas(sentence);
 };
 
 // displayLeft
@@ -1035,42 +1032,40 @@ PdfViewer.prototype.displayRight = function () {
 };
 
 // Build borders
-PdfViewer.prototype.unselectCanvas = function (sentenceId) {
-  let color = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentenceId}"]`).attr('color');
-  this.setCanvasColor(sentenceId, BORDER_WIDTH, color ? color : REMOVED_BORDER_COLOR);
+PdfViewer.prototype.unselectCanvas = function (sentence) {
+  let color = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`).attr('color');
+  this.setCanvasColor(sentence, BORDER_WIDTH, color ? color : REMOVED_BORDER_COLOR);
 };
 
 // Build borders
-PdfViewer.prototype.selectCanvas = function (sentenceId, color) {
-  this.setCanvasColor(sentenceId, SELECTED_BORDER_WIDTH, color ? color : SELECTED_BORDER_COLOR, true);
+PdfViewer.prototype.selectCanvas = function (sentence, color) {
+  this.setCanvasColor(sentence, SELECTED_BORDER_WIDTH, color ? color : SELECTED_BORDER_COLOR, true);
 };
 
 // Build borders
-PdfViewer.prototype.hoverCanvas = function (sentenceId, isSelected) {
-  let color = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentenceId}"]`).attr('color');
+PdfViewer.prototype.hoverCanvas = function (sentence) {
+  let color = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`).attr('color');
   this.setCanvasColor(
-    sentenceId,
-    isSelected ? SELECTED_BORDER_WIDTH : BORDER_WIDTH,
-    isSelected ? (color ? color : SELECTED_BORDER_COLOR) : color ? color : HOVER_BORDER_COLOR,
-    isSelected
+    sentence,
+    sentence.isSelected ? SELECTED_BORDER_WIDTH : BORDER_WIDTH,
+    sentence.isSelected ? (color ? color : SELECTED_BORDER_COLOR) : color ? color : HOVER_BORDER_COLOR
   );
 };
 
 // Build borders
-PdfViewer.prototype.endHoverCanvas = function (sentenceId, isSelected) {
-  let color = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentenceId}"]`).attr('color');
+PdfViewer.prototype.endHoverCanvas = function (sentence) {
+  let color = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`).attr('color');
   this.setCanvasColor(
-    sentenceId,
-    isSelected ? SELECTED_BORDER_WIDTH : BORDER_WIDTH,
-    isSelected ? (color ? color : SELECTED_BORDER_COLOR) : color ? color : REMOVED_BORDER_COLOR,
-    isSelected
+    sentence,
+    sentence.isSelected ? SELECTED_BORDER_WIDTH : BORDER_WIDTH,
+    sentence.isSelected ? (color ? color : SELECTED_BORDER_COLOR) : color ? color : REMOVED_BORDER_COLOR
   );
 };
 
 // Build borders
-PdfViewer.prototype.getSentenceDataURL = function (sentenceId) {
-  let contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentenceId}"]`),
-    p = this.getPagesOfSentence(sentenceId)[0],
+PdfViewer.prototype.getSentenceDataURL = function (sentence) {
+  let contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`),
+    p = this.getPagesOfSentence(sentence)[0],
     w = parseInt(contour.attr('contour-width')) + MARGIN_IMAGE.left + MARGIN_IMAGE.right,
     h = parseInt(contour.attr('contour-height')) + MARGIN_IMAGE.top + MARGIN_IMAGE.bottom,
     y = parseInt(contour.attr('contour-top')) - MARGIN_IMAGE.top,
@@ -1110,18 +1105,18 @@ PdfViewer.prototype.drawLines = function (canvas, lines, width, color = false, l
 };
 
 // Set color to a canvas
-PdfViewer.prototype.setCanvasColor = function (sentenceId, width, color, linedash = false) {
+PdfViewer.prototype.setCanvasColor = function (sentence, width, color) {
   let self = this,
     canvas = this.container
-      .find(`.contour[sentenceId="${sentenceId}"] canvas[sentenceId="${sentenceId}"]`)
+      .find(`.contour[sentenceId="${sentence.id}"] canvas[sentenceId="${sentence.id}"]`)
       .map(function () {
         let element = $(this);
-        self.drawLines(element, JSON.parse(element.attr('borders')), width, color, linedash);
+        self.drawLines(element, JSON.parse(element.attr('borders')), width, color, sentence.isSelected);
       });
 };
 
 // Build canvas
-PdfViewer.prototype.buildCanvas = function (_x, _y, _w, _h, p, sentenceId, borders = []) {
+PdfViewer.prototype.buildCanvas = function (_x, _y, _w, _h, p, sentence, borders = []) {
   let x = Math.floor(_x),
     y = Math.floor(_y),
     w = Math.floor(_w),
@@ -1129,7 +1124,7 @@ PdfViewer.prototype.buildCanvas = function (_x, _y, _w, _h, p, sentenceId, borde
   let mainCanvas = this.container.find(`canvas#page${p}`).get(0),
     newCanvas = $('<canvas>')
       .attr('style', `width:${w}px; height:${h}px; position:absolute; top:${y}px; left:${x}px;`)
-      .attr('sentenceId', sentenceId)
+      .attr('sentenceId', sentence.id)
       .attr('borders', JSON.stringify(borders)),
     canvasElement = newCanvas.get(0),
     ctx = canvasElement.getContext('2d');
@@ -1559,7 +1554,7 @@ PdfViewer.prototype.getCanvas = function (area) {
           y1: border.y1 - item.min.y
         };
       });
-    return self.buildCanvas(item.min.x, item.min.y, w, h, area.p, area.sentenceId, borders);
+    return self.buildCanvas(item.min.x, item.min.y, w, h, area.p, area.sentence, borders);
   });
   // set events on canvas
   this.setEvents(canvas);

@@ -54,7 +54,7 @@ Self.createDataset = function (opts = {}) {
   return {
     id: opts.id, // id
     dataInstanceId: opts.dataInstanceId, // dataInstance id
-    sentences: opts.sentences, // sentences
+    sentences: Array.isArray(opts.sentences) ? opts.sentences : [], // sentences
     reuse: opts.reuse ? opts.reuse : false, // dataset reuse
     highlight: opts.highlight ? opts.highlight : false, // dataset highlight
     notification: opts.notification ? opts.notification : '', // dataset notification
