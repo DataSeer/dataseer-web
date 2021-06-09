@@ -133,7 +133,6 @@ router.post('/:id/update', function (req, res, next) {
           function (next) {
             if (!updates.tei) return next();
             return DocumentsController.updateTEI(doc, req.user, function (err, isUpdated) {
-              console.log(err, isUpdated);
               return next(err);
             });
           },
@@ -141,7 +140,6 @@ router.post('/:id/update', function (req, res, next) {
           function (next) {
             if (!updates.tei) return next();
             return DocumentsController.refreshDatasets(req.user, doc, req.app.get('dataTypes'), function (err) {
-              console.log(err);
               return next(err);
             });
           },
@@ -149,7 +147,6 @@ router.post('/:id/update', function (req, res, next) {
           function (next) {
             if (!updates.pdf) return next();
             return DocumentsController.updatePDF(doc, req.user, function (err, isUpdated) {
-              console.log(err, isUpdated);
               return next(err);
             });
           }
