@@ -87,6 +87,7 @@
                 },
                 // update PDF file
                 function (acc, next) {
+                  if (!pdf.res) return next();
                   acc.needUpdate = acc.needUpdate || !pdf.res.metadata || pdf.res.metadata.version !== 2;
                   if (!acc.needUpdate) return next(null, acc);
                   return DataSeerAPI.updatePDF(doc._id, function (err, res) {
@@ -131,10 +132,12 @@
                     datasets: doc.datasets,
                     metadata: doc.metadata,
                     tei: { data: xmlString, metadata: tei.res.metadata },
-                    pdf: {
-                      url: pdfURL,
-                      metadata: pdf.res.metadata
-                    }
+                    pdf: !pdf.res
+                      ? {
+                          url: pdfURL,
+                          metadata: pdf.res.metadata
+                        }
+                      : undefined
                   },
                   {
                     onReady: function () {
