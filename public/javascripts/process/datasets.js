@@ -132,7 +132,7 @@
                     datasets: doc.datasets,
                     metadata: doc.metadata,
                     tei: { data: xmlString, metadata: tei.res.metadata },
-                    pdf: !pdf.res
+                    pdf: pdf.res
                       ? {
                           url: pdfURL,
                           metadata: pdf.res.metadata
