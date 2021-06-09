@@ -46,7 +46,7 @@
     setTextLoop('Downloading PDF...');
     // Get PDF file
     return DataSeerAPI.getPDF(documentId, function (err, pdf) {
-      if (err || pdf.err) return alert('Error : PDF unavailable');
+      if (err || pdf.err) alert('Error : PDF unavailable');
       setTextLoop('Downloading TEI...');
       // Get TEI file
       return DataSeerAPI.getTEI(documentId, function (err, tei) {
