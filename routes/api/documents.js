@@ -124,7 +124,7 @@ router.post('/:id/update', function (req, res, next) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
       else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
       let updates = {
-        tei: !doc.tei.metadata || doc.tei.metadata.version !== 2,
+        tei: doc.tei ? !doc.tei.metadata || doc.tei.metadata.version !== 2 : false,
         pdf: doc.pdf ? !doc.pdf.metadata || doc.pdf.metadata.version !== 2 : false
       };
       return async.mapSeries(
