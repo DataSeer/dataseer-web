@@ -27,11 +27,11 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
     right: 15
   },
   CMAP_PACKED = true,
-  BORDER_WIDTH = 4, // Need to be an even number
-  SELECTED_BORDER_WIDTH = 6,
+  BORDER_WIDTH = 6, // Need to be an even number
+  SELECTED_BORDER_WIDTH = 8,
   REMOVED_BORDER_COLOR = false,
-  HOVER_BORDER_COLOR = 'rgba(0, 0, 0, 1)',
-  SELECTED_BORDER_COLOR = 'rgba(105, 105, 105, 1)';
+  HOVER_BORDER_COLOR = 'rgba(105, 105, 105, 1)',
+  SELECTED_BORDER_COLOR = 'rgba(0, 0, 0, 1)';
 
 // Representation of a chunk in PDF
 const Chunk = function (data, scale) {
@@ -263,7 +263,6 @@ PdfViewer.prototype.getSentences = function (selectedSentences, lastSentence) {
 // Get order of appearance of sentences
 PdfViewer.prototype.getSentencesMapping = function () {
   if (typeof this.sentencesMapping.object !== 'undefined') return this.sentencesMapping.object;
-  console.log('je ne devrait pas passer par là');
   let result = {},
     sentences = {};
   // Get useful infos about sentences
@@ -292,7 +291,7 @@ PdfViewer.prototype.getSentencesMapping = function () {
     });
   this.sentencesMapping.object = result;
   this.sentencesMapping.array = new Array(Object.keys(result).length);
-  for (var key in result) {
+  for (let key in result) {
     this.sentencesMapping.array[parseInt(result[key])] = key;
   }
   return result;
@@ -1106,19 +1105,40 @@ PdfViewer.prototype.getSentenceDataURL = function (sentence) {
   return canvasElement.toDataURL('image/jpeg');
 };
 
-// Draw multiple lines
-PdfViewer.prototype.drawLines = function (canvas, lines, width, color = false, linedash = false) {
+// Draw borders & color text
+PdfViewer.prototype.colorImage = function (context, w, h, colors) {
+  // pull the entire image into an array of pixel data
+  let imageData = context.getImageData(0, 0, w, h);
+  let r, g, b;
+
+  // examine every pixel,
+  // change any old rgb to the new-rgb
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    // is this pixel the old rgb?
+    if (imageData.data[i] == oldRed && imageData.data[i + 1] == oldGreen && imageData.data[i + 2] == oldBlue) {
+      // change to your new rgb
+      r = imageData.data[i] = newRed;
+      g = imageData.data[i + 1] = newGreen;
+      b = imageData.data[i + 2] = newBlue;
+    }
+  }
+  // put the altered data back on the canvas
+  context.putImageData(imageData, 0, 0);
+};
+
+// Draw borders & colorize text
+PdfViewer.prototype.drawImage = function (canvas, lines, width, borderColor = false, linedash = false) {
   let canvasElement = canvas.get(0),
     ctx = canvasElement.getContext('2d'),
     img = new Image();
   img.src = canvas.attr('data-url');
   img.onload = function () {
     ctx.drawImage(img, 0, 0);
-    if (color) {
+    if (borderColor) {
       if (linedash) ctx.setLineDash([15, 5]);
       else ctx.setLineDash([]);
       ctx.lineWidth = width;
-      ctx.strokeStyle = color;
+      ctx.strokeStyle = borderColor;
       for (let i = 0; i < lines.length; i++) {
         ctx.beginPath();
         ctx.moveTo(Math.floor(lines[i].x0), Math.floor(lines[i].y0));
@@ -1131,13 +1151,13 @@ PdfViewer.prototype.drawLines = function (canvas, lines, width, color = false, l
 };
 
 // Set color to a canvas
-PdfViewer.prototype.setCanvasColor = function (sentence, width, color) {
+PdfViewer.prototype.setCanvasColor = function (sentence, width, borderColor, dashed) {
   let self = this,
     canvas = this.container
       .find(`.contour[sentenceId="${sentence.id}"] canvas[sentenceId="${sentence.id}"]`)
       .map(function () {
         let element = $(this);
-        self.drawLines(element, JSON.parse(element.attr('borders')), width, color, sentence.isSelected);
+        self.drawImage(element, JSON.parse(element.attr('borders')), width, borderColor, dashed);
       });
 };
 

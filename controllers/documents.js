@@ -617,15 +617,17 @@ Self.updateTEI = function (doc, user, cb) {
     // Read TEI file (containing PDF metadata)
     return DocumentsFiles.findOne({ _id: doc.tei }, function (err, file) {
       if (err) return cb(err);
+      if (!file) return cb(null, new Error('DocumentsFile not found'));
       return DocumentsFilesController.readFile(doc.tei, function (err, data) {
         if (err) return cb(err);
         else {
           // Get metadata
-          let newXML = XML.convertOldFormat(XML.load(data.toString()));
+          let version = !file.metadata || !file.metadata.version ? 1 : file.metadata.version;
+          let newXML = XML.convertOldFormat(XML.load(data.toString()), version);
           let metadata = XML.extractTEISentencesMetadata(XML.load(newXML));
           file.metadata = metadata;
           // Update them
-          return DocumentsFilesController.rewriteFile(doc.tei, newXML, function (err, data) {
+          return DocumentsFilesController.rewriteFile(doc.tei._id, newXML, function (err, data) {
             if (err) return cb(err);
             // Create logs
             return DocumentsLogs.create(

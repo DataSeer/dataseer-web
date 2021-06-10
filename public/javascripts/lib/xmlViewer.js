@@ -49,7 +49,6 @@ XmlViewer.prototype.getSentences = function (selectedSentences, lastSentence) {
 // Get order of appearance of sentences
 XmlViewer.prototype.getSentencesMapping = function () {
   if (typeof this.sentencesMapping.object !== 'undefined') return this.sentencesMapping.object;
-  console.log('je ne devrait pas passer par là');
   let result = {};
   this.viewer.find(`s[xml\\:id]`).map(function (i, el) {
     result[$(el).attr('xml:id')] = i;
@@ -112,16 +111,16 @@ XmlViewer.prototype.getInfosOfSentence = function (sentence) {
 XmlViewer.prototype.addDataset = function (dataset, sentence) {
   let $dataset = $(`<dataset id="${dataset.id}">`),
     $dataInstance = $(`<dataInstance id="${dataset.dataInstanceId}">`);
-  if (this.datasetsList.find(`dataset[id="${dataset.id}"]`).length === 0) this.datasetsList.append($dataset);
-  if (this.dataInstancesList.find(`dataInstance[id="${dataset.dataInstanceId}"]`).length === 0)
+  if (this.datasetsList.find(`dataset[xml\\:id="${dataset.id}"]`).length === 0) this.datasetsList.append($dataset);
+  if (this.dataInstancesList.find(`dataInstance[xml\\:id="${dataset.dataInstanceId}"]`).length === 0)
     this.dataInstancesList.append($dataInstance);
   this.addLink(dataset, sentence);
 };
 
 // Remove a dataset
 XmlViewer.prototype.removeDataset = function (dataset) {
-  let $dataset = this.datasetsList.find(`dataset[id="${dataset.id}"]`),
-    $dataInstance = this.dataInstancesList.find(`dataInstance[id="${dataset.dataInstanceId}"]`);
+  let $dataset = this.datasetsList.find(`dataset[xml\\:id="${dataset.id}"]`),
+    $dataInstance = this.dataInstancesList.find(`dataInstance[xml\\:id="${dataset.dataInstanceId}"]`);
   if ($dataset.length === 1) $dataset.remove();
   if ($dataInstance.length === 1) $dataInstance.remove();
   this.removeLinks(dataset);
@@ -254,7 +253,7 @@ XmlViewer.prototype.load = function (opts = {}, cb) {
   this.dataInstancesList.find('dataInstance').map(function () {
     let el = $(this),
       datasetId = el.attr('corresp').replace('#', ''),
-      dataInstanceId = el.attr('id'),
+      dataInstanceId = el.attr('xml:id'),
       cert = el.attr('cert'),
       reuse = el.attr('reuse');
     dataInstances[datasetId] = dataInstanceId;
@@ -267,7 +266,7 @@ XmlViewer.prototype.load = function (opts = {}, cb) {
   });
   this.datasetsList.find('dataset').map(function () {
     let el = $(this),
-      datasetId = el.attr('id'),
+      datasetId = el.attr('xml:id'),
       type = el.attr('type'),
       subtype = el.attr('subtype');
     datasets[dataInstances[datasetId]].color = opts.colors[datasetId];

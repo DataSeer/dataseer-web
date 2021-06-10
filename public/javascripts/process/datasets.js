@@ -6,6 +6,9 @@
 
 (function ($) {
   // Get current document Id
+
+  const PDF_METADATA_VERSION = 3;
+  const XML_METADATA_VERSION = 3;
   const documentId = $(document.getElementById('document.id')).attr('value'),
     save = function () {},
     user = {
@@ -65,7 +68,8 @@
                 // update TEI file
                 function (acc, next) {
                   console.log(acc);
-                  acc.needUpdate = acc.needUpdate || !tei.res.metadata || tei.res.metadata.version !== 2;
+                  acc.needUpdate =
+                    acc.needUpdate || !tei.res.metadata || tei.res.metadata.version !== XML_METADATA_VERSION;
                   if (!acc.needUpdate) return next(null, acc);
                   return DataSeerAPI.updateTEI(doc._id, function (err, res) {
                     console.log(err, res);
@@ -88,7 +92,8 @@
                 // update PDF file
                 function (acc, next) {
                   if (!pdf.res) return next();
-                  acc.needUpdate = acc.needUpdate || !pdf.res.metadata || pdf.res.metadata.version !== 2;
+                  acc.needUpdate =
+                    acc.needUpdate || !pdf.res.metadata || pdf.res.metadata.version !== PDF_METADATA_VERSION;
                   if (!acc.needUpdate) return next(null, acc);
                   return DataSeerAPI.updatePDF(doc._id, function (err, res) {
                     console.log(err, res);

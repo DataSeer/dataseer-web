@@ -102,7 +102,7 @@ const DocumentView = function (id, events = {}) {
       self.xml.find('*.hidden').removeClass('hidden');
       self.xml.find('text > div > div, text > div > *:not(div)').map(function (i, el) {
         let element = $(el);
-        if (element.find('s[id], s[corresp]').length === 0) return element.addClass('hidden');
+        if (element.find('s[corresp]').length === 0) return element.addClass('hidden');
       });
       self.scrollToSentence({ sentence: self.lastSelectedSentence, noAnim: true });
       return typeof self.events.onSectionView === 'function' ? self.events.onSectionView() : undefined;
@@ -118,7 +118,7 @@ const DocumentView = function (id, events = {}) {
       self.xml.find('*.hidden').removeClass('hidden');
       self.xml.find('text > div, text > *:not(div)').map(function (i, el) {
         let element = $(el);
-        if (element.find('s[id], s[corresp]').length === 0) return element.addClass('hidden');
+        if (element.find('s[corresp]').length === 0) return element.addClass('hidden');
       });
       self.scrollToSentence({ sentence: self.lastSelectedSentence, noAnim: true });
       return typeof self.events.onParagraphView === 'function' ? self.events.onParagraphView() : undefined;

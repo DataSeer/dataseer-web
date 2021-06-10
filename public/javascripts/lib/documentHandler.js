@@ -87,16 +87,16 @@ DocumentHandler.prototype.init = function () {
   this.refreshSentencesMapping();
   let self = this,
     firstId = this.datasetsList.getFirstDatasetId(),
-    dataset = firstId ? this.getDataset(firstId) : {};
-  if (dataset && dataset.sentences && dataset.sentences.length) {
-    this.selectSentence({ sentence: dataset.sentences[0], noAnim: true }, function () {
-      console.log('init');
+    dataset = firstId ? this.getDataset(firstId) : undefined,
+    sentence = dataset ? dataset.sentences[0] : { id: 'sentence-0' };
+  console.log('init');
+  if (sentence) {
+    this.selectSentence({ sentence: sentence, noAnim: true }, function () {
       if (typeof self.events.onReady === 'function') return self.events.onReady();
     });
   } else {
-    console.log('init');
-    this.datasetForm.setEmptyMessage();
-    this.datasetsList.setEmptyMessage();
+    this.datasetForm.hide();
+    this.datasetsList.refreshMsg();
     if (typeof self.events.onReady === 'function') return self.events.onReady();
   }
 };
@@ -703,8 +703,8 @@ DocumentHandler.prototype.synchronize = function () {
       self.saveDataset(dataset.id);
     });
     this.datasetForm.attach('onDatasetIdClick', function (dataset) {
-      // console.log(dataset);
-      if (dataset.id) return self.selectSentence({ sentence: dataset.sentences[0], selectedDataset: dataset });
+      let sentence = self.datasetForm.currentSentence();
+      if (dataset.id) return self.selectSentence({ sentence: sentence, selectedDataset: dataset });
     });
     this.datasetForm.attach('onDatasetDoneClick', function (dataset) {
       // console.log(dataset);
