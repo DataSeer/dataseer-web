@@ -851,7 +851,7 @@ body {
   z-index: 4000;
   position: absolute;
   height: calc(100% - 78px);
-  width: 20px;
+  width: 30px;
   max-height: calc(100% - 28px);
   overflow: hidden;
   background-color: gainsboro;

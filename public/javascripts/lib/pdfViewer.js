@@ -305,6 +305,7 @@ PdfViewer.prototype.load = function (pdf, xmlMetadata, cb) {
   this.sentencesMapping = pdf.metadata.mapping;
   this.viewer.empty();
   return this.loadPDF(pdf.url, function (err, pdfDocument) {
+    if (err) return console.log(err);
     console.log('Load of PDF done.');
     self.pdfLoaded = true;
     self.pdfDocument = pdfDocument;
@@ -315,7 +316,8 @@ PdfViewer.prototype.load = function (pdf, xmlMetadata, cb) {
       colors: xmlMetadata.colors
     };
     self.metadata = metadata;
-    self.renderPage({ numPage: 1 }, function (err) {
+    return self.renderPage({ numPage: 1 }, function (err) {
+      if (err) return console.log(err);
       return cb(err);
     });
   });
@@ -382,7 +384,7 @@ PdfViewer.prototype.insertPage = function (numPage, page) {
   if (!inserted) this.viewerElement.appendChild(page);
 };
 
-// Get PdfPages
+// Get PdfPage
 PdfViewer.prototype.getPdfPage = function (numPage, cb) {
   let self = this;
   if (this.pdfPages && this.pdfPages[numPage]) return cb(null, this.pdfPages[numPage]);
@@ -397,6 +399,30 @@ PdfViewer.prototype.getPdfPage = function (numPage, cb) {
         console.log(err);
         return cb(err);
       });
+};
+
+// Get PdfPages
+PdfViewer.prototype.getPdfPages = function (cb) {
+  let self = this;
+  return async.reduce(
+    this.getPages(),
+    {},
+    function (acc, numPage, callback) {
+      return self.getPdfPage(numPage, function (err, pdfPage) {
+        if (err) return callback(err);
+        let desiredWidth = self.viewerElement.offsetWidth,
+          viewport_tmp = pdfPage.getViewport({ scale: 1 }),
+          the_scale = desiredWidth / viewport_tmp.width,
+          viewport = pdfPage.getViewport({ scale: the_scale });
+        acc[numPage] = { w: viewport.width, h: viewport.height };
+        return callback(err, acc);
+      });
+    },
+    function (err, result) {
+      if (err) cb(err);
+      return cb(err, result);
+    }
+  );
 };
 
 // Get PdfPages
@@ -1039,7 +1065,7 @@ PdfViewer.prototype.unselectCanvas = function (sentence) {
 
 // Build borders
 PdfViewer.prototype.selectCanvas = function (sentence, color) {
-  this.setCanvasColor(sentence, SELECTED_BORDER_WIDTH, color ? color : SELECTED_BORDER_COLOR, true);
+  this.setCanvasColor(sentence, SELECTED_BORDER_WIDTH, color ? color : SELECTED_BORDER_COLOR);
 };
 
 // Build borders

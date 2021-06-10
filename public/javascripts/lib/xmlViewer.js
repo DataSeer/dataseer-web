@@ -102,6 +102,7 @@ XmlViewer.prototype.getInfosOfSentence = function (sentence) {
       id: el.attr('xml:id'),
       dataInstanceIds: dataInstanceIds,
       hasDatasets: hasDatasets,
+      isSelected: el.hasClass('selected'),
       text: el.text()
     };
   }

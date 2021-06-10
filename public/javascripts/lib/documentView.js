@@ -13,15 +13,11 @@ const DocumentView = function (id, events = {}) {
   this.ctrlPressed = false;
   this.viewersEvents = {
     onClick: function (element) {
-      let sentence = self.xmlViewer.getInfosOfSentence({ id: element.id });
+      let sentence = self.getSentence({ id: element.id });
       if (self.ctrlPressed) {
         if (self.isSelected(sentence)) {
           self.unselectSentence(sentence);
-          self.hoverSentence({
-            id: sentence.id,
-            hasDatasets: sentence.hasDatasets,
-            isSelected: false
-          });
+          self.hoverSentence(sentence);
         } else self.selectSentence(sentence);
       } else if (self.shiftPressed) {
         let selectedSentences = self.getSelectedSentences();
@@ -36,35 +32,23 @@ const DocumentView = function (id, events = {}) {
       } else {
         if (self.isSelected(sentence)) {
           self.unselectSentences(self.getSelectedSentences());
-          self.hoverSentence({
-            id: sentence.id,
-            hasDatasets: sentence.hasDatasets,
-            isSelected: false
-          });
+          self.hoverSentence(sentence);
         } else {
           self.unselectSentences(self.getSelectedSentences());
           self.selectSentence(sentence);
         }
       }
-      if (typeof self.events.onSentenceClick === 'function') self.events.onSentenceClick(sentence);
+      if (typeof self.events.onSentenceClick === 'function') self.events.onSentenceClick(self.getSentence(sentence));
     },
     onHover: function (element) {
-      let sentence = self.xmlViewer.getInfosOfSentence({ id: element.id });
-      if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(sentence);
-      self.hoverSentence({
-        id: sentence.id,
-        hasDatasets: sentence.hasDatasets,
-        isSelected: self.isSelected(sentence)
-      });
+      let sentence = self.getSentence({ id: element.id });
+      self.hoverSentence(sentence);
+      if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(self.getSentence(sentence));
     },
     onEndHover: function (element) {
-      let sentence = self.xmlViewer.getInfosOfSentence({ id: element.id });
-      if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(sentence);
-      self.endHoverSentence({
-        id: sentence.id,
-        hasDatasets: sentence.hasDatasets,
-        isSelected: self.isSelected(sentence)
-      });
+      let sentence = self.getSentence({ id: element.id });
+      self.endHoverSentence(sentence);
+      if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(self.getSentence(sentence));
     }
   };
   // documentView elements
@@ -216,29 +200,33 @@ DocumentView.prototype.init = function (opts, cb) {
 
 // Hover a sentence
 DocumentView.prototype.hoverSentence = function (sentence) {
-  if (this.pdfViewer) this.pdfViewer.hoverSentence(sentence);
   this.xmlViewer.hoverSentence(sentence);
+  let _sentence = this.getSentence(sentence);
+  if (this.pdfViewer) this.pdfViewer.hoverSentence(_sentence);
 };
 
 // Unhover a sentence
 DocumentView.prototype.endHoverSentence = function (sentence) {
-  if (this.pdfViewer) this.pdfViewer.endHoverSentence(sentence);
   this.xmlViewer.endHoverSentence(sentence);
+  let _sentence = this.getSentence(sentence);
+  if (this.pdfViewer) this.pdfViewer.endHoverSentence(_sentence);
 };
 
 // Select a sentence
 DocumentView.prototype.selectSentence = function (sentence) {
-  this.lastSelectedSentence = sentence;
-  this.selectedSentences[sentence.id] = sentence;
-  if (this.pdfViewer) this.pdfViewer.selectSentence(sentence);
   this.xmlViewer.selectSentence(sentence);
+  let _sentence = this.getSentence(sentence);
+  this.lastSelectedSentence = _sentence;
+  this.selectedSentences[_sentence.id] = _sentence;
+  if (this.pdfViewer) this.pdfViewer.selectSentence(_sentence);
 };
 
 // Unselect a sentence
 DocumentView.prototype.unselectSentence = function (sentence) {
-  delete this.selectedSentences[sentence.id];
-  if (this.pdfViewer) this.pdfViewer.unselectSentence(sentence);
   this.xmlViewer.unselectSentence(sentence);
+  let _sentence = this.getSentence(sentence);
+  delete this.selectedSentences[_sentence.id];
+  if (this.pdfViewer) this.pdfViewer.unselectSentence(_sentence);
 };
 
 // Unselect all selected sentences
