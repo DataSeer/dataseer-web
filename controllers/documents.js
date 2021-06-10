@@ -307,7 +307,7 @@ Self.upload = function (opts = {}, events, cb) {
                         file: {
                           name: opts.file.name + '.xml.tei',
                           // data: XML.addSentencesId(res), // Add sentences id in TEI
-                          data: XML.convertOldFormat(XML.load(XML.addSentencesId(res))),
+                          data: XML.load(XML.addSentencesId(res)),
                           mimetype: 'text/xml'
                         }
                       },
