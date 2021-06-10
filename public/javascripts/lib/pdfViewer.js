@@ -28,7 +28,6 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   },
   CMAP_PACKED = true,
   BORDER_WIDTH = 6, // Need to be an even number
-  SELECTED_BORDER_WIDTH = 8,
   REMOVED_BORDER_COLOR = false,
   HOVER_BORDER_COLOR = 'rgba(105, 105, 105, 1)',
   SELECTED_BORDER_COLOR = 'rgba(0, 0, 0, 1)';
@@ -1064,7 +1063,7 @@ PdfViewer.prototype.unselectCanvas = function (sentence) {
 
 // Build borders
 PdfViewer.prototype.selectCanvas = function (sentence, color) {
-  this.setCanvasColor(sentence, SELECTED_BORDER_WIDTH, color ? color : SELECTED_BORDER_COLOR);
+  this.setCanvasColor(sentence, BORDER_WIDTH, color ? color : SELECTED_BORDER_COLOR);
 };
 
 // Build borders
@@ -1072,8 +1071,9 @@ PdfViewer.prototype.hoverCanvas = function (sentence) {
   let color = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`).attr('color');
   this.setCanvasColor(
     sentence,
-    sentence.isSelected ? SELECTED_BORDER_WIDTH : BORDER_WIDTH,
-    sentence.isSelected ? (color ? color : SELECTED_BORDER_COLOR) : color ? color : HOVER_BORDER_COLOR
+    BORDER_WIDTH,
+    sentence.isSelected ? (color ? color : SELECTED_BORDER_COLOR) : color ? color : HOVER_BORDER_COLOR,
+    true
   );
 };
 
@@ -1082,7 +1082,7 @@ PdfViewer.prototype.endHoverCanvas = function (sentence) {
   let color = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`).attr('color');
   this.setCanvasColor(
     sentence,
-    sentence.isSelected ? SELECTED_BORDER_WIDTH : BORDER_WIDTH,
+    BORDER_WIDTH,
     sentence.isSelected ? (color ? color : SELECTED_BORDER_COLOR) : color ? color : REMOVED_BORDER_COLOR
   );
 };
