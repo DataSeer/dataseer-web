@@ -733,7 +733,7 @@ body {
 
 #xml s.hover {
   cursor: pointer;
-  border: 2px dashed gray;
+  border: 2px dashed rgba(0, 0, 0, 1);
   z-index: 110;
 }
 

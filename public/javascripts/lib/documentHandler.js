@@ -91,6 +91,8 @@ DocumentHandler.prototype.init = function () {
     sentence = dataset ? dataset.sentences[0] : { id: 'sentence-0' };
   console.log('init');
   if (sentence) {
+    if (!dataset) this.datasetForm.hide();
+    this.datasetsList.refreshMsg();
     this.selectSentence({ sentence: sentence, noAnim: true }, function () {
       if (typeof self.events.onReady === 'function') return self.events.onReady();
     });
@@ -415,10 +417,12 @@ DocumentHandler.prototype.newDataset = function (sentences = {}, cb) {
     if (err) return cb(err, res);
     if (res.err) return cb(true, res);
     let dataType = res['datatype'] ? res['datatype'] : self.datasetForm.defaultDataType,
+      subType = res['subtype'] ? res['subtype'] : '',
       cert = res['cert'] ? res['cert'] : 0;
     let sentence = { id: datasetSentence.id, text: datasetSentence.text },
       dataset = {
         dataType: dataType,
+        subType: subType,
         cert: cert
       };
     return DataSeerAPI.createDataset(

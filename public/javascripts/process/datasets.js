@@ -49,6 +49,7 @@
     setTextLoop('Downloading PDF...');
     // Get PDF file
     return DataSeerAPI.getPDF(documentId, function (err, pdf) {
+      console.log(err, pdf);
       if (err || pdf.err) alert('Error : PDF unavailable');
       setTextLoop('Downloading TEI...');
       // Get TEI file
@@ -68,8 +69,10 @@
                 // update TEI file
                 function (acc, next) {
                   console.log(acc);
+                  if (!tei.res.metadata || tei.res.metadata.version > XML_METADATA_VERSION)
+                    return next(new Error('Bad version of TEI metadata'));
                   acc.needUpdate =
-                    acc.needUpdate || !tei.res.metadata || tei.res.metadata.version !== XML_METADATA_VERSION;
+                    acc.needUpdate || !tei.res.metadata || tei.res.metadata.version < XML_METADATA_VERSION;
                   if (!acc.needUpdate) return next(null, acc);
                   return DataSeerAPI.updateTEI(doc._id, function (err, res) {
                     console.log(err, res);
@@ -92,8 +95,10 @@
                 // update PDF file
                 function (acc, next) {
                   if (!pdf.res) return next();
+                  if (!pdf.res.metadata || pdf.res.metadata.version > PDF_METADATA_VERSION)
+                    return next(new Error('Bad version of PDF metadata'));
                   acc.needUpdate =
-                    acc.needUpdate || !pdf.res.metadata || pdf.res.metadata.version !== PDF_METADATA_VERSION;
+                    acc.needUpdate || !pdf.res.metadata || pdf.res.metadata.version < PDF_METADATA_VERSION;
                   if (!acc.needUpdate) return next(null, acc);
                   return DataSeerAPI.updatePDF(doc._id, function (err, res) {
                     console.log(err, res);
@@ -129,6 +134,10 @@
                   } else return setTextLoop('This document must be updated by a curator or an annotator');
                 }
 
+                if (err)
+                  return setTextLoop(
+                    `This document cannot be updated, please re-upload it. (<a href ="${pdfURL}" target="_blank">PDF link of this document</a>)`
+                  );
                 const currentDocument = new DocumentHandler(
                   {
                     ids: { document: doc._id, datasets: doc.datasets._id },

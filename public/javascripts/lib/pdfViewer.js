@@ -29,7 +29,7 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   CMAP_PACKED = true,
   BORDER_WIDTH = 6, // Need to be an even number
   REMOVED_BORDER_COLOR = false,
-  HOVER_BORDER_COLOR = 'rgba(105, 105, 105, 1)',
+  HOVER_BORDER_COLOR = 'rgba(0, 0, 0, 1)',
   SELECTED_BORDER_COLOR = 'rgba(0, 0, 0, 1)';
 
 // Representation of a chunk in PDF
@@ -891,7 +891,6 @@ PdfViewer.prototype.addLink = function (dataset, sentence) {
   this.links[dataset.id].push(sentence.id);
   this.links[dataset.id].sort();
   let contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
-  contour.attr('color', dataset.color.background.rgb);
   let colors = contour.attr('colors') ? JSON.parse(contour.attr('colors')) : {};
   colors[dataset.dataInstanceId] = dataset.color;
   contour.attr('colors', JSON.stringify(colors));
@@ -909,7 +908,8 @@ PdfViewer.prototype.addLink = function (dataset, sentence) {
   } else {
     annotation.attr('corresp', `#${dataset.dataInstanceId}`);
   }
-  this.setCanvasColor(sentence, BORDER_WIDTH, dataset.color.background.rgb);
+  this.colorize(sentence, dataset.color);
+  this.setCanvasBorder(sentence, BORDER_WIDTH, SELECTED_BORDER_COLOR);
   this.addMarker({ color: dataset.color }, sentence);
 };
 
@@ -923,13 +923,13 @@ PdfViewer.prototype.removeLink = function (dataset, sentence) {
   if (keys.length > 0) {
     let lastColor = colors[keys[keys.length - 1]];
     contour.attr('colors', JSON.stringify(colors));
-    contour.attr('color', lastColor.background.rgb);
-    this.setCanvasColor(sentence, BORDER_WIDTH, lastColor.background.rgb);
+    this.colorize(sentence, lastColor);
+    this.setCanvasBorder(sentence, BORDER_WIDTH, lastColor.background.rgb);
     this.updateMarker({ color: lastColor }, sentence);
   } else {
     contour.removeAttr('colors');
-    contour.removeAttr('color');
-    this.setCanvasColor(sentence, BORDER_WIDTH, REMOVED_BORDER_COLOR);
+    this.uncolorize(sentence);
+    this.setCanvasBorder(sentence, BORDER_WIDTH, REMOVED_BORDER_COLOR);
     this.removeMarker(sentence);
   }
   contour.attr('corresp', contour.attr('corresp').replace(`#${dataset.dataInstanceId}`, '').trim());
@@ -1016,7 +1016,7 @@ PdfViewer.prototype.selectSentence = function (sentence) {
   if (sentenceElement) sentenceElement.addClass('selected');
   if (contourElement) {
     contourElement.addClass('selected');
-    this.selectCanvas(sentence, contourElement.attr('color'));
+    this.selectCanvas(sentence);
   }
 };
 
@@ -1057,34 +1057,22 @@ PdfViewer.prototype.displayRight = function () {
 
 // Build borders
 PdfViewer.prototype.unselectCanvas = function (sentence) {
-  let color = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`).attr('color');
-  this.setCanvasColor(sentence, BORDER_WIDTH, color ? color : REMOVED_BORDER_COLOR);
+  this.setCanvasBorder(sentence, BORDER_WIDTH, REMOVED_BORDER_COLOR);
 };
 
 // Build borders
-PdfViewer.prototype.selectCanvas = function (sentence, color) {
-  this.setCanvasColor(sentence, BORDER_WIDTH, color ? color : SELECTED_BORDER_COLOR);
+PdfViewer.prototype.selectCanvas = function (sentence) {
+  this.setCanvasBorder(sentence, BORDER_WIDTH, SELECTED_BORDER_COLOR);
 };
 
 // Build borders
 PdfViewer.prototype.hoverCanvas = function (sentence) {
-  let color = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`).attr('color');
-  this.setCanvasColor(
-    sentence,
-    BORDER_WIDTH,
-    sentence.isSelected ? (color ? color : SELECTED_BORDER_COLOR) : color ? color : HOVER_BORDER_COLOR,
-    true
-  );
+  this.setCanvasBorder(sentence, BORDER_WIDTH, sentence.isSelected ? SELECTED_BORDER_COLOR : HOVER_BORDER_COLOR, true);
 };
 
 // Build borders
 PdfViewer.prototype.endHoverCanvas = function (sentence) {
-  let color = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`).attr('color');
-  this.setCanvasColor(
-    sentence,
-    BORDER_WIDTH,
-    sentence.isSelected ? (color ? color : SELECTED_BORDER_COLOR) : color ? color : REMOVED_BORDER_COLOR
-  );
+  this.setCanvasBorder(sentence, BORDER_WIDTH, sentence.isSelected ? SELECTED_BORDER_COLOR : REMOVED_BORDER_COLOR);
 };
 
 // Build borders
@@ -1105,33 +1093,65 @@ PdfViewer.prototype.getSentenceDataURL = function (sentence) {
   return canvasElement.toDataURL('image/jpeg');
 };
 
-// Draw borders & color text
-PdfViewer.prototype.colorImage = function (context, w, h, colors) {
-  // pull the entire image into an array of pixel data
-  let imageData = context.getImageData(0, 0, w, h);
-  let r, g, b;
-
-  // examine every pixel,
-  // change any old rgb to the new-rgb
-  for (let i = 0; i < imageData.data.length; i += 4) {
-    // is this pixel the old rgb?
-    if (imageData.data[i] == oldRed && imageData.data[i + 1] == oldGreen && imageData.data[i + 2] == oldBlue) {
-      // change to your new rgb
-      r = imageData.data[i] = newRed;
-      g = imageData.data[i + 1] = newGreen;
-      b = imageData.data[i + 2] = newBlue;
+// Colorize image
+PdfViewer.prototype.colorize = function (sentence, color) {
+  let self = this,
+    contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
+  contour.find(`canvas[sentenceId="${sentence.id}"]`).map(function () {
+    let canvas = $(this);
+    if (canvas.get(0).hasAttribute('colorized-data-url')) return; // there is already a background
+    let context = canvas.get(0).getContext('2d');
+    let w = parseInt(canvas.attr('width'));
+    let h = parseInt(canvas.attr('height'));
+    // pull the entire image into an array of pixel data
+    let imageData = context.getImageData(0, 0, w, h);
+    let r, g, b;
+    // examine every pixel
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      // is this pixel white
+      if (Colors.isWhite(imageData.data[i], imageData.data[i + 1], imageData.data[i + 2])) {
+        let rgb = Colors.rgb(color.background.rgb);
+        imageData.data[i] = rgb.r;
+        imageData.data[i + 1] = rgb.g;
+        imageData.data[i + 2] = rgb.b;
+      } else {
+        if (color.foreground === 'white') {
+          imageData.data[i] = 255 - imageData.data[i];
+          imageData.data[i + 1] = 255 - imageData.data[i + 1];
+          imageData.data[i + 2] = 255 - imageData.data[i + 2];
+        } else {
+          imageData.data[i] = imageData.data[i];
+          imageData.data[i + 1] = imageData.data[i + 1];
+          imageData.data[i + 2] = imageData.data[i + 2];
+        }
+      }
     }
-  }
-  // put the altered data back on the canvas
-  context.putImageData(imageData, 0, 0);
+    // put the altered data back on the canvas
+    context.putImageData(imageData, 0, 0);
+    canvas.attr('colorized-data-url', canvas.get(0).toDataURL('image/jpeg'));
+  });
+  contour.attr('background-color', color.background.rgb);
+  contour.attr('foreground-color', color.foreground);
+};
+
+PdfViewer.prototype.uncolorize = function (sentence) {
+  let self = this,
+    contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
+  contour.find(`canvas[sentenceId="${sentence.id}"]`).map(function () {
+    let canvas = $(this);
+    canvas.removeAttr('colorized-data-url');
+  });
+  contour.removeAttr('background-color');
+  contour.removeAttr('foreground-color');
 };
 
 // Draw borders & colorize text
 PdfViewer.prototype.drawImage = function (canvas, lines, width, borderColor = false, linedash = false) {
-  let canvasElement = canvas.get(0),
-    ctx = canvasElement.getContext('2d'),
-    img = new Image();
-  img.src = canvas.attr('data-url');
+  let ctx = canvas.get(0).getContext('2d');
+  let img = new Image();
+  img.src = canvas.get(0).hasAttribute('colorized-data-url')
+    ? canvas.attr('colorized-data-url')
+    : canvas.attr('data-url');
   img.onload = function () {
     ctx.drawImage(img, 0, 0);
     if (borderColor) {
@@ -1151,14 +1171,13 @@ PdfViewer.prototype.drawImage = function (canvas, lines, width, borderColor = fa
 };
 
 // Set color to a canvas
-PdfViewer.prototype.setCanvasColor = function (sentence, width, borderColor, dashed) {
+PdfViewer.prototype.setCanvasBorder = function (sentence, width, borderColor, dashed) {
   let self = this,
-    canvas = this.container
-      .find(`.contour[sentenceId="${sentence.id}"] canvas[sentenceId="${sentence.id}"]`)
-      .map(function () {
-        let element = $(this);
-        self.drawImage(element, JSON.parse(element.attr('borders')), width, borderColor, dashed);
-      });
+    contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
+  contour.find(`canvas[sentenceId="${sentence.id}"]`).map(function () {
+    let canvas = $(this);
+    self.drawImage(canvas, JSON.parse(canvas.attr('borders')), width, borderColor, dashed);
+  });
 };
 
 // Build canvas

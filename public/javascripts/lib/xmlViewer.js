@@ -137,10 +137,11 @@ XmlViewer.prototype.colorize = function (dataset, sentence) {
     dataset.color.background &&
     dataset.color.background.rgb
   ) {
-    el.css('color', dataset.color.foreground).css('background-color', dataset.color.background.rgb);
     let colors = el.attr('colors') ? JSON.parse(el.attr('colors')) : {};
     colors[dataset.dataInstanceId] = dataset.color;
     el.attr('colors', JSON.stringify(colors));
+    if (Object.keys(colors).length === 1)
+      el.css('color', dataset.color.foreground).css('background-color', dataset.color.background.rgb);
   }
 };
 

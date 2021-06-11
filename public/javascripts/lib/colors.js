@@ -43,13 +43,14 @@ const Colors = function () {
 };
 
 Colors.colors = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#9400d3']; // list of available colors
-Colors.regex = /^rgba\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3}),\s*(\d*(?:\.\d+)?)\)$/; // rgba regex
+Colors.regex = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+(?:\.\d+)?))?\)$/; // rgba regex
 
 // convert RGBA color to RGB color
 Colors.getRGB = function (color) {
   let rgb = Colors.rgb(color);
   return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 };
+
 // Get rgb values of a given color
 Colors.rgba = function (color) {
   let matches = color.match(Colors.regex),
@@ -59,6 +60,7 @@ Colors.rgba = function (color) {
     a = matches[4];
   return { r, g, b, a };
 };
+
 // Get rgb values of a given color
 Colors.rgb = function (color) {
   let matches = color.match(Colors.regex),
@@ -70,5 +72,6 @@ Colors.rgb = function (color) {
 
 // Check if a color is white
 Colors.isWhite = function (r, g, b) {
-  return 0.2126 * R + 0.7152 * G + 0.0722 * B > 96;
+  let result = Math.sqrt(r * r * 0.2126 + g * g * 0.7152 + b * b * 0.0722) / 255;
+  return result > 0.85;
 };
