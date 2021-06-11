@@ -22,10 +22,10 @@ const DocumentView = function (id, events = {}) {
       } else if (self.shiftPressed) {
         let selectedSentences = self.getSelectedSentences();
         if (selectedSentences.length) {
-          let sentences = self.getSentences(selectedSentences, sentence);
-          for (let i = 0; i < sentences.length; i++) {
-            if (typeof sentences[i] === 'string') {
-              self.selectSentence(self.getSentence(sentences[i]));
+          let sentencesIds = self.getSentences(selectedSentences, sentence);
+          for (let i = 0; i < sentencesIds.length; i++) {
+            if (typeof sentencesIds[i] === 'string') {
+              self.selectSentence(self.getSentence({ id: sentencesIds[i] }));
             }
           }
         } else console.log('At least one sentence must be selected');
