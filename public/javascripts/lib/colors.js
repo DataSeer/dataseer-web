@@ -73,5 +73,5 @@ Colors.rgb = function (color) {
 // Check if a color is white
 Colors.isWhite = function (r, g, b) {
   let result = Math.sqrt(r * r * 0.2126 + g * g * 0.7152 + b * b * 0.0722) / 255;
-  return result > 0.85;
+  return result > 0.6;
 };

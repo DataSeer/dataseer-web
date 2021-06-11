@@ -1114,6 +1114,7 @@ PdfViewer.prototype.colorize = function (sentence, color) {
         imageData.data[i] = rgb.r;
         imageData.data[i + 1] = rgb.g;
         imageData.data[i + 2] = rgb.b;
+        imageData.data[i + 3] = 255;
       } else {
         if (color.foreground === 'white') {
           imageData.data[i] = 255 - imageData.data[i];
