@@ -1,10 +1,9 @@
 html {
-  height: 100%;
   overflow: hidden;
+  overflow-y: auto;
 }
 
 body {
-  min-height: 100vh;
   flex-direction: column;
   margin-left: 50px;
   margin-right: 50px;
@@ -81,7 +80,7 @@ body {
 
 #datasetsList #datasetsList\.container\.items\.container .item.selected,
 #datasetsList #datasetsList\.container\.items\.container .item.selected.highlight {
-  border: 5px solid black !important;
+  border: 5px solid rgb(24, 77, 126) !important;
 }
 
 #datasetsList #datasetsList\.container\.items\.container .item.highlight div[key="dataset.checked"] {
@@ -227,14 +226,99 @@ body {
 
 /* ---------- DATASET FORM RULES ---------- */
 
-#datasetForm {
-  height: calc(100% - 50px);
-  border-radius: 20px;
+#datasetForm\.screen .sentence-display {
+  position: absolute;
+  top: 35px;
+  left: calc(-100%);
+  background-color: lightgray;
+  width: calc(100%);
+  cursor: pointer;
+  height: calc(100% - 28px - 50px);
+  z-index: 10000;
+}
+
+#datasetForm\.screen .sentence-img {
+  border: 1px solid black;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#datasetForm\.screen .task-bar {
+  display: none;
+  overflow: hidden;
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  background-color: lightgray;
+  height: 35px;
+  padding-top: 2px;
+  cursor: pointer;
+}
+
+#datasetForm\.screen .task-bar button[name="display-left"] {
+  position: absolute;
+  left: 5px;
+}
+
+/*#datasetForm\.screen .task-bar button[name="display-middle"] {  
+  position: absolute;
+  left: calc(50% - 10px - 20px);
+}*/
+
+#datasetForm\.screen .task-bar button[name="display-right"] {
+  position: absolute;
+  right: 50px;
+}
+
+#datasetForm\.screen .task-bar button[name="show"],
+#datasetForm\.screen .task-bar button[name="hide"] {
+  position: absolute;
+  right: 3px;
+}
+
+#datasetForm\.screen {
+  z-index: 10000;
+  /*position: absolute;
+  top: 25px;
+  width: calc(45%);*/
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
   border: 1px solid #184D7E;
   background-color: white;
-  padding-top: 15px;
+  padding-top: 35px;
   padding-bottom: 15px;
-  overflow: hidden; 
+}
+
+#datasetForm\.screen.minimized {
+  height: 0px;
+  padding-top: 20px;
+  border-radius: 0px;
+  width: 46px;
+}
+
+#datasetForm\.screen.minimized.display-middle {
+  left: calc(66.6% - 18px);
+}
+
+#datasetForm\.screen.maximized {
+  height: calc(100% - 28px - 50px);
+}
+
+#datasetForm\.screen.fixed {
+  position: fixed;
+}
+
+#datasetForm\.screen.display-middle {
+  left: calc(30% - 18px);
+}
+
+#datasetForm\.screen.display-left {
+  left: 19px;
+}
+
+#datasetForm\.screen.display-right {
+  right: 35px;
 }
 
 #datasetForm .fas.fa-pen {
@@ -270,6 +354,39 @@ body {
   position: absolute;
   top: -2px;
   left: -2px;
+}
+
+#datasetForm {
+  height: 100%;
+  overflow: hidden; 
+}
+
+#datasetForm .custom-row div[key="datasets"] {
+  width: 100%;
+  padding-bottom: 10px;
+}
+
+#datasetForm .custom-row div.tpl[key="dataset"] {
+  display: none;
+}
+
+#datasetForm .custom-row div.selected[key="dataset"] {
+  border: 1px solid black;
+}
+
+#datasetForm .custom-row div[key="dataset"] {
+  font-size: 1.25em;
+  font-weight: bold;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  padding-left: 5px;
+  padding-right: 5px;
+  text-align: center;
+  cursor: pointer;
+}
+
+#datasetForm .custom-row div[key="dataset\.sentence"] {
+  display: none !important;
 }
 
 #datasetForm .custom-row div[key="dataset\.status"][value="saved"] {
@@ -319,11 +436,12 @@ body {
 }
 
 #datasetForm table {
+  width: 100%;
   position: relative;
   border-collapse: collapse; 
 }
 
-#datasetForm th {
+#datasetForm .dataset-header {
   cursor: pointer;
   z-index: 10;
   padding-top: 5px;
@@ -339,6 +457,12 @@ body {
   justify-content: center;
   text-align: center;
   top: 0; /* Don't forget this, required for the stickiness */
+}
+
+#datasetForm th {
+  z-index: 100;
+  position: sticky;
+  top: 0;
 }
 
 #datasetForm th,
@@ -521,7 +645,7 @@ body {
 }
 
 #documentView {
-  height: 100%;
+  height: calc(100% - 50px);
   background-color: white;
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
@@ -583,8 +707,12 @@ body {
   cursor: pointer;
   text-decoration: none;
   margin-right: 6px;
+  line-height: 26px;
   padding: 3px;
-  line-height: 21px;
+  line-height: 30px;
+  z-index: 10;
+  color: black;
+  background-color: white;
 }
 
 #xml * {
@@ -599,14 +727,14 @@ body {
 
 #xml s.selected {
   cursor: pointer;
-  background-color: black;
-  color: white;
+  border: 2px solid rgb(24, 77, 126);
+  z-index: 100;
 }
 
 #xml s.hover {
   cursor: pointer;
-  background-color: gray;
-  color: white;
+  border: 2px dashed rgb(24, 77, 126);
+  z-index: 110;
 }
 
 #documentView\.screen\.container {
@@ -615,44 +743,6 @@ body {
 
 #documentView #pdfViewer {
   background: lightgray;
-}
-
-.pdfViewerScrollMarkers {
-  z-index: 4000;
-  position: absolute;
-  height: calc(100% - 28px);
-  width: 20px;
-  top: 25px;
-  right: 30px;
-  max-height: calc(100% - 28px);
-  overflow: hidden;
-  background-color: gainsboro;
-}
-
-.pdfViewerScrollMarkers span {
-  -webkit-transition: all .8s ease;
-  -moz-transition: all .8s ease;
-  -ms-transition: all .8s ease;
-  -o-transition: all .8s ease;
-  transition: all .8s ease;
-}
-
-.pdfViewerScrollMarkers span.marker {
-  /* markers */
-  z-index: 4100;
-  cursor: pointer;
-  position: absolute;
-  width: 12px;
-}
-
-.pdfViewerScrollMarkers span.cursor {
-  /* markers */
-  z-index: 4200;
-  position: absolute;
-  width: 100%;
-  height: 6px;
-  border: solid 1px #184D7E;
-  border-radius: 0px;
 }
 
 #documentView #pdfViewer .page {
@@ -687,7 +777,7 @@ body {
   z-index: 3110;
 }
 
-#documentView #pdfViewer .contoursLayer .contour[datasetid] canvas {
+#documentView #pdfViewer .contoursLayer .contour[corresp] canvas {
   z-index: 3115;
 }
 
@@ -757,15 +847,69 @@ body {
   overflow: hidden;
 }
 
+#pdfViewerScrollMarkers {
+  z-index: 4000;
+  position: absolute;
+  height: calc(100% - 78px);
+  width: 30px;
+  max-height: calc(100% - 28px);
+  overflow: hidden;
+  background-color: gainsboro;
+}
+
+#pdfViewerScrollMarkers.display-left {
+  top: 25px;
+  left: 30px;
+}
+
+#pdfViewerScrollMarkers.display-right {
+  top: 25px;
+  right: 30px;
+}
+
+#pdfViewerScrollMarkers span {
+  -webkit-transition: all .8s ease;
+  -moz-transition: all .8s ease;
+  -ms-transition: all .8s ease;
+  -o-transition: all .8s ease;
+  transition: all .8s ease;
+}
+
+#pdfViewerScrollMarkers span.marker {
+  /* markers */
+  z-index: 4100;
+  cursor: pointer;
+  position: absolute;
+  width: 12px;
+}
+
+#pdfViewerScrollMarkers span.cursor {
+  /* markers */
+  z-index: 4200;
+  position: absolute;
+  width: 100%;
+  height: 6px;
+  border: solid 1px #184D7E;
+  border-radius: 0px;
+}
+
 #documentView #pdf #pdfViewerInfos {
   position: absolute;
   background-color: white;
   border: 1px solid black;
   border-radius: 2px;
-  top: 30px;
-  right: 40px;
   padding: 5px;
   z-index: 10000;
+}
+
+#documentView #pdf #pdfViewerInfos.display-left {
+  top: 30px;
+  left: 40px;
+}
+
+#documentView #pdf #pdfViewerInfos.display-right {
+  top: 30px;
+  right: 40px;
 }
 
 #documentView #pdf #pdfViewerMessage {
@@ -775,11 +919,19 @@ body {
   background-color: white;
   border: 1px solid black;
   border-radius: 2px;
-  top: 60px;
-  right: 40px;
   padding: 5px;
   min-width: 120px;
   z-index: 10000;
+}
+
+#documentView #pdf #pdfViewerMessage.display-left {
+  top: 60px;
+  left: 40px;
+}
+
+#documentView #pdf #pdfViewerMessage.display-right {
+  top: 60px;
+  right: 40px;
 }
 
 /* -------------------------------------------------- */

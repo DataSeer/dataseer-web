@@ -6,6 +6,7 @@
 
 const express = require('express'),
   router = express.Router(),
+  async = require('async'),
   fs = require('fs');
 
 const Accounts = require('../../models/accounts.js'),
@@ -113,7 +114,58 @@ router.delete('/:id', function (req, res, next) {
 });
 
 /* Extract metadata from XML */
-router.post('/:id/extractPDFMetadata', function (req, res, next) {
+router.post('/:id/update', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
+  return Documents.findOne({ _id: req.params.id })
+    .populate('pdf')
+    .populate('tei')
+    .exec(function (err, doc) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+      else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+      let updates = {
+        tei: doc.tei ? !doc.tei.metadata || doc.tei.metadata.version !== 2 : false,
+        pdf: doc.pdf ? !doc.pdf.metadata || doc.pdf.metadata.version !== 2 : false
+      };
+      return async.mapSeries(
+        [
+          // update TEI file
+          function (next) {
+            if (!updates.tei) return next();
+            return DocumentsController.updateTEI(doc, req.user, function (err, isUpdated) {
+              return next(err);
+            });
+          },
+          // update datasets
+          function (next) {
+            if (!updates.tei) return next();
+            return DocumentsController.refreshDatasets(req.user, doc, req.app.get('dataTypes'), function (err) {
+              return next(err);
+            });
+          },
+          // update PDF file
+          function (next) {
+            if (!updates.pdf) return next();
+            return DocumentsController.updatePDF(doc, req.user, function (err, isUpdated) {
+              return next(err);
+            });
+          }
+        ],
+        function (action, next) {
+          return action(function (err) {
+            return next(err);
+          });
+        },
+        function (err) {
+          if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+          return res.json({ 'err': false, 'res': true });
+        }
+      );
+    });
+});
+
+/* Extract metadata from XML */
+router.post('/:id/updatePDF', function (req, res, next) {
   if (
     typeof req.user === 'undefined' ||
     !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.annotator, AccountsManager.match.weight)
@@ -122,9 +174,26 @@ router.post('/:id/extractPDFMetadata', function (req, res, next) {
   return Documents.findOne({ _id: req.params.id }).exec(function (err, doc) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
     else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
-    return DocumentsController.extractPDFMetadata(doc, function (err, metadata) {
+    return DocumentsController.updatePDF(doc, req.user, function (err, isUpdated) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      else return res.json({ 'err': false, 'res': metadata });
+      else return res.json({ 'err': false, 'res': isUpdated });
+    });
+  });
+});
+
+/* update XML of TEI file */
+router.post('/:id/updateTEI', function (req, res, next) {
+  if (
+    typeof req.user === 'undefined' ||
+    !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.annotator, AccountsManager.match.weight)
+  )
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
+  return Documents.findOne({ _id: req.params.id }).exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    return DocumentsController.updateTEI(doc, req.user, function (err, isUpdated) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+      else return res.json({ 'err': false, 'res': isUpdated });
     });
   });
 });

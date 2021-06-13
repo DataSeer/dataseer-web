@@ -59,7 +59,7 @@ const DatasetsList = function (id = 'datasetsList', events = {}) {
 // Reorder an array
 DatasetsList.prototype.getDatasetsIds = function (id) {
   let datasets = this.container
-    .find('.item[sentenceId]')
+    .find('.item[sentences]')
     .map(function (index, elem) {
       return { id: $(elem).attr('value'), status: $(elem).find('[key="dataset\\.status"]').attr('value') };
     })
@@ -90,7 +90,7 @@ DatasetsList.prototype.getFirstDatasetIdNotValid = function (id) {
 
 // Get the first dataset (or undefined)
 DatasetsList.prototype.getFirstDatasetId = function () {
-  return this.container.find('.item[sentenceId]:first-child').attr('value');
+  return this.container.find('.item[sentences]:first-child').attr('value');
 };
 
 // Set mapping of sentences
@@ -99,14 +99,19 @@ DatasetsList.prototype.setSentencesMapping = function (sentencesMapping) {
   this.sortItems();
 };
 
+// Get first sentence
+DatasetsList.prototype.getFirstSentenceOf = function (json) {
+  return JSON.parse(json)[0];
+};
+
 // Refresh order of items
 DatasetsList.prototype.sortItems = function () {
   let self = this;
   this.container
-    .find('.item[sentenceId]')
+    .find('.item[sentences]')
     .sort(function (a, b) {
-      let aPos = self.sentencesMapping[$(a).attr('sentenceId')],
-        bPos = self.sentencesMapping[$(b).attr('sentenceId')],
+      let aPos = self.sentencesMapping[self.getFirstSentenceOf($(a).attr('sentences')).id],
+        bPos = self.sentencesMapping[self.getFirstSentenceOf($(b).attr('sentences')).id],
         aIsInteger = Number.isInteger(aPos),
         bIsInteger = Number.isInteger(bPos);
       if (aIsInteger && !bIsInteger) return -1;
@@ -233,7 +238,8 @@ DatasetsList.prototype.add = function (dataset) {
         .addClass('item')
         .attr('key', 'dataset.id')
         .attr('value', dataset.id)
-        .attr('sentenceId', dataset.sentenceId)
+        .attr('sentences', JSON.stringify(dataset.sentences))
+        .attr('sentence', dataset.sentences[0].id)
         .css('background-color', dataset.color.background.rgba)
         .css('border-color', dataset.color.background.rgba),
       label: $('<div>')
@@ -270,15 +276,31 @@ DatasetsList.prototype.add = function (dataset) {
     .append(elements.delete)
     .append(elements.status);
   this.container.append(elements.item);
-  // sort elements by sentenceId
+  // sort elements by sentence Ids
   if (this.sentencesMapping) this.sortItems();
   this.refreshMsg();
   // events
   elements.item.click(function (event) {
     self.select(dataset.id);
     self.scrollTo(dataset.id);
-    if (typeof self.events.onDatasetClick === 'function')
-      return self.events.onDatasetClick({ id: dataset.id, checked: $(this).hasClass('checked') });
+    let elem = $(this);
+    if (typeof self.events.onDatasetClick === 'function') {
+      let sentences = JSON.parse(elem.attr('sentences')),
+        currentSentenceId = elem.attr('sentence'),
+        nextSentence = sentences.reduce(function (acc, item) {
+          if (acc === false) acc = item;
+          if (item.id === currentSentenceId) acc = false;
+          return acc;
+        }, false),
+        nextSentenceId = nextSentence === false ? sentences[0].id : nextSentence.id;
+      elem.attr('sentence', nextSentenceId);
+      return self.events.onDatasetClick({
+        id: dataset.id,
+        sentences: sentences,
+        sentence: { id: currentSentenceId },
+        checked: elem.hasClass('checked')
+      });
+    }
   });
   elements.link.click(function (event) {
     event.preventDefault();
@@ -288,7 +310,7 @@ DatasetsList.prototype.add = function (dataset) {
       i = checked.children('i'),
       isChecked = checked.attr('value') !== 'true';
     if (typeof self.events.onDatasetLink === 'function')
-      return self.events.onDatasetLink({ id: dataset.id, checked: isChecked });
+      return self.events.onDatasetLink({ id: dataset.id, sentences: dataset.sentences, checked: isChecked });
   });
   elements.delete.click(function (event) {
     event.preventDefault();
@@ -298,7 +320,7 @@ DatasetsList.prototype.add = function (dataset) {
       i = checked.children('i'),
       isChecked = checked.attr('value') !== 'true';
     if (typeof self.events.onDatasetDelete === 'function')
-      return self.events.onDatasetDelete({ id: dataset.id, checked: isChecked });
+      return self.events.onDatasetDelete({ id: dataset.id, sentences: dataset.sentences, checked: isChecked });
   });
   elements.checked.click(function (event) {
     event.preventDefault();
@@ -318,7 +340,7 @@ DatasetsList.prototype.add = function (dataset) {
       item.removeClass('checked');
     }
     if (typeof self.events.onDatasetCheck === 'function')
-      return self.events.onDatasetCheck({ id: dataset.id, checked: isChecked });
+      return self.events.onDatasetCheck({ id: dataset.id, sentences: dataset.sentences, checked: isChecked });
   });
 };
 
@@ -328,6 +350,7 @@ DatasetsList.prototype.update = function (id, dataset) {
   if (!element.get().length) return false;
   let label = dataset.name ? dataset.name : dataset.id;
   this.setStatus(dataset.id, dataset.status);
+  element.attr('sentences', JSON.stringify(dataset.sentences));
   element.find('div[key="dataset.label"]').attr('value', label).find('div.noselect').text(label);
 };
 
@@ -363,6 +386,7 @@ DatasetsList.prototype.select = function (id) {
 
 // Unselect a dataset
 DatasetsList.prototype.unselect = function (id) {
+  if (!id) return this.container.find(`.item`).removeClass('selected');
   let dataset = this.container.find(`.item[key="dataset.id"][value="${id}"]`);
   if (!dataset.get().length) return false;
   if (dataset.hasClass('selected')) dataset.removeClass('selected');
