@@ -117,8 +117,8 @@ block content
                 </tr>
                 <tr>
                   <td>Data Sentence:</td>
-                  if dataset.sentences
-                    <td>#{dataset.sentences.sort((a, b) => parseInt(a.id.replace('sentence-', '')) - parseInt(b.id.replace('sentence-', ''))).map((item) => item.text)}</td>
+                  if dataset.text
+                    <td>#{dataset.text}</td>
                   else
                     <td>n/a</td>
                 </tr>
@@ -172,8 +172,8 @@ block content
                 </tr>
                 <tr>
                   <td>Data Sentence:</td>
-                  if dataset.sentences
-                    <td>#{dataset.sentences.sort((a, b) => parseInt(a.id.replace('sentence-', '')) - parseInt(b.id.replace('sentence-', ''))).map((item) => item.text)}</td>
+                  if dataset.text
+                    <td>#{dataset.text}</td>
                   else
                     <td>n/a</td>
                 </tr>
