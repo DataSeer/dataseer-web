@@ -36,7 +36,7 @@ Self.checkValidation = function (id, cb) {
  * Create new dataset JSON object
  * @param {object} opts - JSON containing all data
  * @param {string} opts.id - Dataset id
- * @param {string} opts.dataInstance - DataInstance id
+ * @param {string} opts.sentenceId - Dataset sentence id
  * @param {string} opts.reuse - Dataset reuse
  * @param {string} opts.notification - Dataset notification
  * @param {string} opts.cert - Dataset cert value (between 0 and 1)
@@ -48,13 +48,13 @@ Self.checkValidation = function (id, cb) {
  * @param {string} opts.DOI - Dataset DOI
  * @param {string} opts.name - Dataset name
  * @param {string} opts.comments - Dataset comments
+ * @param {string} opts.text - Dataset text of sentence
  * @returns {object} opts - JSON containing all data
  */
 Self.createDataset = function (opts = {}) {
   return {
     id: opts.id, // id
-    dataInstanceId: opts.dataInstanceId, // dataInstance id
-    sentences: Array.isArray(opts.sentences) ? opts.sentences : [], // sentences
+    sentenceId: opts.sentenceId, // sentence id
     reuse: opts.reuse ? opts.reuse : false, // dataset reuse
     highlight: opts.highlight ? opts.highlight : false, // dataset highlight
     notification: opts.notification ? opts.notification : '', // dataset notification
@@ -70,6 +70,7 @@ Self.createDataset = function (opts = {}) {
     DOI: opts.DOI ? opts.DOI : '', // DOI
     name: opts.name ? opts.name : '', // name
     comments: opts.comments ? opts.comments : '', // comments
+    text: opts.text ? opts.text : '', // text of sentence
     status: opts.dataType && opts.name && (opts.DOI || opts.comments) ? 'valid' : 'saved' // text of sentence
   };
 };

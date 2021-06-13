@@ -16,7 +16,7 @@ router.post('/processDataseerSentence', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
   return DataSeerML.processSentence(req.body.text, function (err, body) {
-    if (err) return res.json(err);
+    if (err) return next(err);
     else return res.json(body);
   });
 });

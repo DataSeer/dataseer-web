@@ -7,11 +7,8 @@
 const DatasetForm = function (id = 'datasetForm', events = {}) {
   let self = this;
   this.id = id;
-  this.screen = $(`#${this.id}\\.screen`);
   this.container = $(`#${this.id} #datasetForm\\.container`); // container of datasetForm
   this.message = $(`#${this.id} #datasetForm\\.message`);
-  this.datasetsTabs = this.container.find('div[key="datasets"]'); // datasets list
-  this.datasetTab = this.datasetsTabs.find('div.tpl[key="datasets"]'); // dataset tab tpl
   this.resources = {
     metadata: {},
     dataTypes: {},
@@ -20,37 +17,6 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
   this.defaultDataType = undefined; // will contain the default dataType
   this.dataset = {};
   this.events = events;
-  this.buttons = {
-    'display-left': this.screen.find(`.task-bar button[name="display-left"]`),
-    'display-middle': this.screen.find(`.task-bar button[name="display-middle"]`),
-    'display-right': this.screen.find(`.task-bar button[name="display-right"]`),
-    'hide': this.screen.find(`.task-bar button[name="hide"]`),
-    'show': this.screen.find(`.task-bar button[name="show"]`)
-  };
-  // On button click
-  this.buttons['display-left'].click(function () {
-    self.screen.removeClass().addClass('display-left');
-    self.hide();
-    self.show();
-    if (typeof self.events.onDisplayLeftClick === 'function') return self.events.onDisplayLeftClick();
-  });
-  this.buttons['display-middle'].click(function () {
-    self.screen.removeClass().addClass('display-middle');
-    self.hide();
-    self.show();
-  });
-  this.buttons['display-right'].click(function () {
-    self.screen.removeClass().addClass('display-right');
-    self.hide();
-    self.show();
-    if (typeof self.events.onDisplayRightClick === 'function') return self.events.onDisplayRightClick();
-  });
-  this.buttons['hide'].click(function () {
-    self.hide();
-  });
-  this.buttons['show'].click(function () {
-    self.show();
-  });
   // onDatasetIdClick
   $(`#${this.id} div[key="dataset\\.id"], #${this.id} div[key="dataset\\.label"]`)
     .parent()
@@ -302,31 +268,11 @@ DatasetForm.prototype.updateLabel = function (value = '') {
   let data = value ? value : this.dataset.id;
   // Update label
   this.container.find('div[key="dataset\\.label"]').attr('value', data).text(data);
-  this.container.find(`div[key="dataset\\.tab"][dataset-id="${this.dataset.id}"]`).attr('value', data).text(data);
-};
-
-// refresh label of dataset
-DatasetForm.prototype.refreshLabel = function () {
-  let data = this.dataset.name ? this.dataset.name : this.dataset.id;
-  // Update label
-  this.container.find('div[key="dataset\\.label"]').attr('value', data).text(data);
-  this.container.find(`div[key="dataset\\.tab"][dataset-id="${this.dataset.id}"]`).attr('value', data).text(data);
-};
-
-// refresh text of dataset
-DatasetForm.prototype.refreshText = function (text) {
-  // Update text
-  this.container.find('div[key="sentence\\.text"]').attr('value', text).html(text);
 };
 
 // get current dataset id
 DatasetForm.prototype.currentId = function () {
   return this.dataset.id;
-};
-
-// get current dataset sentence
-DatasetForm.prototype.currentSentence = function () {
-  return this.dataset.sentence;
 };
 
 // get current dataset (API formated)
@@ -418,35 +364,6 @@ DatasetForm.prototype.refreshDatatypeInfos = function () {
     this.container.find('div[key="dataset\\.bestDataFormatForSharing"]').parent().show();
     this.container.find('div[key="dataset\\.bestPracticeForIndicatingReUseOfExistingData"]').parent().hide();
   }
-};
-
-// Get dataType infos (based on resources)
-DatasetForm.prototype.getDatatypeInfos = function (dataType, subType) {
-  let self = this,
-    result = {},
-    properties = [
-      'description',
-      'bestDataFormatForSharing',
-      'bestPracticeForIndicatingReUseOfExistingData',
-      { key: 'mostSuitableRepositories', subKey: this.dataset.reuse ? 'reuse' : 'default' },
-      'url'
-    ],
-    keys = ['dataType', 'subType'],
-    metadata = this.extractInfos(keys, properties);
-  // Set dataType/subType infos
-  properties.map(function (property) {
-    if (typeof property === 'string') result[property] = '';
-    else if (typeof property === 'object' && property.key) result[property.key] = '';
-  });
-  properties.map(function (property) {
-    keys.map(function (key) {
-      if (typeof property === 'string')
-        result[property] = metadata[key][property] ? metadata[key][property] : result[property];
-      else if (typeof property === 'object' && property.key)
-        result[property.key] = metadata[key][property.key] ? metadata[key][property.key] : result[property.key];
-    });
-  });
-  return result;
 };
 
 // Build default options
@@ -543,10 +460,10 @@ DatasetForm.prototype.setView = function (opts = {}) {
     this.container.find('button[name="datasetForm\\.refreshDatatypes"]').parent().hide();
     this.container.find('input[type="checkbox"][name="datasetForm\\.highlight"]').parent().hide();
   }
-  if (opts.isLink === false) {
-    this.container.find('button[name="datasetForm\\.unlink"]').hide();
-  } else {
+  if (opts.isCorresp) {
     this.container.find('button[name="datasetForm\\.unlink"]').show();
+  } else {
+    this.container.find('button[name="datasetForm\\.unlink"]').hide();
   }
 };
 
@@ -562,8 +479,13 @@ DatasetForm.prototype.getIconOfStatus = function (status) {
   return i;
 };
 
-// update dataset
-DatasetForm.prototype.updateDataset = function (dataset) {
+// Link dataset to datasetForm
+DatasetForm.prototype.link = function (dataset, opts = {}, callback) {
+  if (!dataset) {
+    this.setEmptyMessage();
+    return typeof callback === 'function' ? callback(true) : undefined;
+  }
+  this.datasetColor = dataset.color;
   // Set properties
   for (let key in dataset) {
     if (typeof this.properties[key] === 'function') {
@@ -573,99 +495,10 @@ DatasetForm.prototype.updateDataset = function (dataset) {
   this.properties['customDataType']('', true);
   this.properties['dataType'](dataset['dataType'], true);
   this.properties['subType'](dataset['subType'], true);
-};
-
-// update dataset
-DatasetForm.prototype.updateSentence = function (sentence) {
-  // Set properties
-  // $('.sentence-img').attr('src', sentence.url);
-  // $('.sentence-text').text(sentence.text);
-};
-
-// link dataset
-DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
-  let self = this;
-  let text = data.dataset.sentences
-    .sort(function (a, b) {
-      let c = parseInt(a.id.replace('sentence-', '')),
-        d = parseInt(b.id.replace('sentence-', ''));
-      return c - d;
-    })
-    .map(function (item) {
-      return item.text;
-    })
-    .join('<br/>');
-  this.refreshText(text);
-  this.refreshDataset(data, opts, function (err, res) {
-    if (datasets && datasets.length > 0) {
-      self.refreshDatasetsList(datasets);
-    }
-    return callback(err, res);
-  });
-};
-
-// refresh dataset list
-DatasetForm.prototype.refreshDatasetsList = function (datasets) {
-  this.clearTabs();
-  for (let i = 0; i < datasets.length; i++) {
-    this.addTab(datasets[i], { width: Math.floor((1 / datasets.length) * 100) });
-  }
-  this.refreshLabel();
-};
-
-// clear tabs in datasets list
-DatasetForm.prototype.clearTabs = function () {
-  return this.datasetsTabs.find('div[key="dataset"]').map(function () {
-    let el = $(this);
-    if (!el.hasClass('tpl')) el.remove();
-  });
-};
-
-// add tab in datasets list
-DatasetForm.prototype.addTab = function (dataset, opts) {
-  let self = this;
-  let newTab = this.datasetsTabs.find('div.tpl[key="dataset"]').clone();
-  newTab.removeClass('tpl');
-  // color
-  newTab.css('color', dataset.color.foreground).css('background-color', dataset.color.background.rgba);
-  // dataset & sentence properties
-  if (dataset.id === this.dataset.id) newTab.addClass('selected');
-  newTab.css('width', `${opts.width}%`);
-  newTab.click(function () {
-    let el = $(this),
-      datasetId = el.find('div[key="dataset\\.tab"]').attr('dataset-id'),
-      sentenceId = el.find('div[key="sentence\\.id"]').attr('value'),
-      sentenceText = el.find('div[key="sentence\\.text"]').attr('value');
-    if (typeof self.events.onTabClick !== 'undefined')
-      self.events.onTabClick({ dataset: { id: datasetId }, sentence: { id: sentenceId, text: sentenceText } });
-  });
-  newTab.find('div[key="dataset\\.tab"]').attr('value', dataset.id).attr('dataset-id', dataset.id).text(dataset.id);
-  newTab.find('div[key="dataset\\.label"]').attr('value', dataset.id).text(dataset.id);
-  newTab.find('div[key="sentence\\.id"]').attr('value', this.dataset.sentence.id);
-  newTab.find('div[key="sentence\\.text"]').attr('value', this.dataset.sentence.text);
-  return this.datasetsTabs.append(newTab);
-};
-
-// refresh dataset
-DatasetForm.prototype.refreshDataset = function (data = {}, opts = {}, callback) {
-  if (!data.dataset) {
-    this.setEmptyMessage();
-    return typeof callback === 'function' ? callback(true) : undefined;
-  }
-  this.dataset.color = data.dataset.color;
-  this.dataset.sentence = data.sentence;
-  this.updateDataset(data.dataset);
-  // this.updateSentence(data.sentence);
-  let shouldSave =
-    this.properties['description']() !== data.dataset.description ||
-    this.properties['bestDataFormatForSharing']() !== data.dataset.bestDataFormatForSharing ||
-    this.properties['mostSuitableRepositories']() !== data.dataset.mostSuitableRepositories ||
-    this.properties['bestPracticeForIndicatingReUseOfExistingData']() !==
-      data.dataset.bestPracticeForIndicatingReUseOfExistingData;
-  this.setView({ isCurator: opts.isCurator, isLink: opts.isLink });
+  this.setView({ isCurator: opts.isCurator, isCorresp: opts.isCorresp });
   this.color();
   this.hideMessage();
-  return typeof callback === 'function' ? callback(null, { shouldSave: shouldSave, dataset: this.dataset }) : undefined;
+  return typeof callback === 'function' ? callback(null, { shouldSave: false, dataset: this.dataset }) : undefined;
 };
 
 // Link dataset to datasetForm
@@ -681,8 +514,8 @@ DatasetForm.prototype.color = function () {
   return this.container
     .find('div[key="dataset\\.id"], div[key="dataset\\.label"]')
     .parent()
-    .css('color', this.dataset.color.foreground)
-    .css('background-color', this.dataset.color.background.rgba);
+    .css('color', this.datasetColor.foreground)
+    .css('background-color', this.datasetColor.background.rgba);
 };
 
 // Unset color on dataset id
@@ -714,34 +547,13 @@ DatasetForm.prototype.showMessage = function () {
 DatasetForm.prototype.setEmptyMessage = function () {
   return this.message
     .empty()
-    .append($('<div>').text('The selected sentences are not linked to a dataset'))
-    .append($('<div>').text('If they are, click the button "Add new Dataset"'));
+    .append($('<div>').text('At least one dataset must be added to be able to use this form'))
+    .append(
+      $('<div>').text('Select a sentence that concerns a dataset, click it and then click the button "Add new Dataset')
+    );
 };
 
 // Set Intializing datasetForm Message
 DatasetForm.prototype.setInitialazingMessage = function () {
   return this.message.empty().append($('<div>').text('Populating dataset Form...'));
-};
-
-// Hide datasetForm
-DatasetForm.prototype.hide = function () {
-  this.container.hide();
-  this.buttons['hide'].hide();
-  this.buttons['show'].show();
-  this.buttons['display-left'].hide();
-  this.buttons['display-middle'].hide();
-  this.buttons['display-right'].hide();
-  this.screen.removeClass('maximized').addClass('minimized');
-};
-
-// Show datasetForm
-DatasetForm.prototype.show = function () {
-  this.container.show();
-  this.buttons['hide'].show();
-  this.buttons['show'].hide();
-  this.buttons['display-middle'].show();
-  this.buttons['display-left'].show();
-  this.buttons['display-middle'].show();
-  this.buttons['display-right'].show();
-  this.screen.removeClass('minimized').addClass('maximized');
 };
