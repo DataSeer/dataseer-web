@@ -29,8 +29,8 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   CMAP_PACKED = true,
   BORDER_WIDTH = 6, // Need to be an even number
   REMOVED_BORDER_COLOR = false,
-  HOVER_BORDER_COLOR = 'rgba(0, 0, 0, 1)',
-  SELECTED_BORDER_COLOR = 'rgba(0, 0, 0, 1)';
+  HOVER_BORDER_COLOR = 'rgba(24, 77, 126, 1)',
+  SELECTED_BORDER_COLOR = 'rgba(24, 77, 126, 1)';
 
 // Representation of a chunk in PDF
 const Chunk = function (data, scale) {
@@ -595,7 +595,7 @@ PdfViewer.prototype.insertDatasets = function (numPage) {
       this.metadata.colors[links[i].dataset.id].background &&
       this.metadata.colors[links[i].dataset.id].background.rgb
     ) {
-      self.addDataset(links[i].dataset, links[i].sentence);
+      self.addDataset(links[i].dataset, links[i].sentence, false);
     }
   }
 };
@@ -886,7 +886,8 @@ PdfViewer.prototype.updateMarker = function (dataset, sentence) {
 };
 
 // Add a link
-PdfViewer.prototype.addLink = function (dataset, sentence) {
+PdfViewer.prototype.addLink = function (dataset, sentence, isSelected = true) {
+  let self = this;
   if (typeof this.links[dataset.id] === 'undefined') this.links[dataset.id] = [];
   this.links[dataset.id].push(sentence.id);
   this.links[dataset.id].sort();
@@ -908,13 +909,15 @@ PdfViewer.prototype.addLink = function (dataset, sentence) {
   } else {
     annotation.attr('corresp', `#${dataset.dataInstanceId}`);
   }
-  this.colorize(sentence, dataset.color);
-  this.setCanvasBorder(sentence, BORDER_WIDTH, SELECTED_BORDER_COLOR);
+  this.colorize(sentence, dataset.color, function () {
+    self.setCanvasBorder(sentence, BORDER_WIDTH, isSelected ? SELECTED_BORDER_COLOR : REMOVED_BORDER_COLOR);
+  });
   this.addMarker({ color: dataset.color }, sentence);
 };
 
 // Remove a link
 PdfViewer.prototype.removeLink = function (dataset, sentence) {
+  let self = this;
   this.links[dataset.id].splice(this.links[dataset.id].indexOf(sentence.id), 1);
   let contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
   let colors = contour.attr('colors') ? JSON.parse(contour.attr('colors')) : {};
@@ -923,9 +926,10 @@ PdfViewer.prototype.removeLink = function (dataset, sentence) {
   if (keys.length > 0) {
     let lastColor = colors[keys[keys.length - 1]];
     contour.attr('colors', JSON.stringify(colors));
-    this.colorize(sentence, lastColor);
-    this.setCanvasBorder(sentence, BORDER_WIDTH, lastColor.background.rgb);
-    this.updateMarker({ color: lastColor }, sentence);
+    this.colorize(sentence, lastColor, function () {
+      self.setCanvasBorder(sentence, BORDER_WIDTH, lastColor.background.rgb);
+      self.updateMarker({ color: lastColor }, sentence);
+    });
   } else {
     contour.removeAttr('colors');
     this.uncolorize(sentence);
@@ -948,8 +952,8 @@ PdfViewer.prototype.removeLinks = function (dataset) {
 };
 
 // Add a dataset
-PdfViewer.prototype.addDataset = function (dataset, sentence) {
-  this.addLink(dataset, sentence);
+PdfViewer.prototype.addDataset = function (dataset, sentence, isSelected = true) {
+  this.addLink(dataset, sentence, isSelected);
 };
 
 // Remove a dataset
@@ -1094,45 +1098,61 @@ PdfViewer.prototype.getSentenceDataURL = function (sentence) {
 };
 
 // Colorize image
-PdfViewer.prototype.colorize = function (sentence, color) {
+PdfViewer.prototype.colorize = function (sentence, color, cb) {
   let self = this,
     contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
-  contour.find(`canvas[sentenceId="${sentence.id}"]`).map(function () {
-    let canvas = $(this);
-    if (canvas.get(0).hasAttribute('colorized-data-url')) return; // there is already a background
-    let context = canvas.get(0).getContext('2d');
-    let w = parseInt(canvas.attr('width'));
-    let h = parseInt(canvas.attr('height'));
-    // pull the entire image into an array of pixel data
-    let imageData = context.getImageData(0, 0, w, h);
-    let r, g, b;
-    // examine every pixel
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      // is this pixel white
-      if (Colors.isWhite(imageData.data[i], imageData.data[i + 1], imageData.data[i + 2])) {
-        let rgb = Colors.rgb(color.background.rgb);
-        imageData.data[i] = rgb.r;
-        imageData.data[i + 1] = rgb.g;
-        imageData.data[i + 2] = rgb.b;
-        imageData.data[i + 3] = 255;
-      } else {
-        if (color.foreground === 'white') {
-          imageData.data[i] = 255 - imageData.data[i];
-          imageData.data[i + 1] = 255 - imageData.data[i + 1];
-          imageData.data[i + 2] = 255 - imageData.data[i + 2];
-        } else {
-          imageData.data[i] = imageData.data[i];
-          imageData.data[i + 1] = imageData.data[i + 1];
-          imageData.data[i + 2] = imageData.data[i + 2];
+  async.mapSeries(
+    contour
+      .find(`canvas[sentenceId="${sentence.id}"]`)
+      .map(function () {
+        return $(this);
+      })
+      .get(),
+    function (canvas, next) {
+      if (canvas.get(0).hasAttribute('colorized-data-url')) return next(); // there is already a background
+      let img = new Image();
+      img.src = canvas.attr('data-url');
+      img.onload = function () {
+        let context = canvas.get(0).getContext('2d');
+        context.drawImage(img, 0, 0);
+        let w = parseInt(canvas.attr('width'));
+        let h = parseInt(canvas.attr('height'));
+        // pull the entire image into an array of pixel data
+        let imageData = context.getImageData(0, 0, w, h);
+        let r, g, b;
+        // examine every pixel
+        for (let i = 0; i < imageData.data.length; i += 4) {
+          // is this pixel white
+          if (Colors.isWhite(imageData.data[i], imageData.data[i + 1], imageData.data[i + 2])) {
+            let rgb = Colors.rgb(color.background.rgb);
+            imageData.data[i] = rgb.r;
+            imageData.data[i + 1] = rgb.g;
+            imageData.data[i + 2] = rgb.b;
+            imageData.data[i + 3] = 255;
+          } else {
+            if (color.foreground === 'white') {
+              imageData.data[i] = 255 - imageData.data[i];
+              imageData.data[i + 1] = 255 - imageData.data[i + 1];
+              imageData.data[i + 2] = 255 - imageData.data[i + 2];
+            } else {
+              imageData.data[i] = imageData.data[i];
+              imageData.data[i + 1] = imageData.data[i + 1];
+              imageData.data[i + 2] = imageData.data[i + 2];
+            }
+          }
         }
-      }
+        // put the altered data back on the canvas
+        context.putImageData(imageData, 0, 0);
+        canvas.attr('colorized-data-url', canvas.get(0).toDataURL('image/jpeg'));
+        return next();
+      };
+    },
+    function () {
+      contour.attr('background-color', color.background.rgb);
+      contour.attr('foreground-color', color.foreground);
+      return cb();
     }
-    // put the altered data back on the canvas
-    context.putImageData(imageData, 0, 0);
-    canvas.attr('colorized-data-url', canvas.get(0).toDataURL('image/jpeg'));
-  });
-  contour.attr('background-color', color.background.rgb);
-  contour.attr('foreground-color', color.foreground);
+  );
 };
 
 PdfViewer.prototype.uncolorize = function (sentence) {

@@ -316,7 +316,7 @@ DatasetForm.prototype.refreshLabel = function () {
 // refresh text of dataset
 DatasetForm.prototype.refreshText = function (text) {
   // Update text
-  this.container.find('div[key="sentence\\.text"]').attr('value', text).text(text);
+  this.container.find('div[key="sentence\\.text"]').attr('value', text).html(text);
 };
 
 // get current dataset id
@@ -594,7 +594,7 @@ DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
     .map(function (item) {
       return item.text;
     })
-    .join('');
+    .join('<br/>');
   this.refreshText(text);
   this.refreshDataset(data, opts, function (err, res) {
     if (datasets && datasets.length > 0) {

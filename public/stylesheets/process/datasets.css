@@ -1,10 +1,9 @@
 html {
-  height: 100%;
   overflow: hidden;
+  overflow-y: auto;
 }
 
 body {
-  min-height: 100vh;
   flex-direction: column;
   margin-left: 50px;
   margin-right: 50px;
@@ -81,7 +80,7 @@ body {
 
 #datasetsList #datasetsList\.container\.items\.container .item.selected,
 #datasetsList #datasetsList\.container\.items\.container .item.selected.highlight {
-  border: 5px solid black !important;
+  border: 5px solid rgb(24, 77, 126) !important;
 }
 
 #datasetsList #datasetsList\.container\.items\.container .item.highlight div[key="dataset.checked"] {
@@ -246,6 +245,7 @@ body {
 }
 
 #datasetForm\.screen .task-bar {
+  display: none;
   overflow: hidden;
   position: absolute;
   top: 0px;
@@ -279,9 +279,9 @@ body {
 
 #datasetForm\.screen {
   z-index: 10000;
-  position: absolute;
+  /*position: absolute;
   top: 25px;
-  width: calc(45%);
+  width: calc(45%);*/
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
   border: 1px solid #184D7E;
@@ -727,13 +727,13 @@ body {
 
 #xml s.selected {
   cursor: pointer;
-  border: 2px solid black;
+  border: 2px solid rgb(24, 77, 126);
   z-index: 100;
 }
 
 #xml s.hover {
   cursor: pointer;
-  border: 2px dashed rgba(0, 0, 0, 1);
+  border: 2px dashed rgb(24, 77, 126);
   z-index: 110;
 }
 

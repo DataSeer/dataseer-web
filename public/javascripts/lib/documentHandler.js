@@ -91,13 +91,15 @@ DocumentHandler.prototype.init = function () {
     sentence = dataset ? dataset.sentences[0] : { id: 'sentence-0' };
   console.log('init');
   if (sentence) {
-    if (!dataset) this.datasetForm.hide();
+    // if (!dataset) this.datasetForm.hide();
+    if (!dataset) this.datasetForm.setEmptyMessage();
     this.datasetsList.refreshMsg();
     this.selectSentence({ sentence: sentence, noAnim: true }, function () {
       if (typeof self.events.onReady === 'function') return self.events.onReady();
     });
   } else {
-    this.datasetForm.hide();
+    // this.datasetForm.hide();
+    this.datasetForm.setEmptyMessage();
     this.datasetsList.refreshMsg();
     if (typeof self.events.onReady === 'function') return self.events.onReady();
   }
@@ -208,7 +210,8 @@ DocumentHandler.prototype.selectSentence = function (opts, cb) {
       );
     } else {
       self.datasetsList.unselect();
-      self.datasetForm.hide();
+      // self.datasetForm.hide();
+      self.datasetForm.setEmptyMessage();
       self.datasetForm.unlink();
       return typeof cb === 'function' ? cb(true) : undefined;
     }
@@ -488,7 +491,12 @@ DocumentHandler.prototype.newLinks = function (opts = {}, cb) {
 DocumentHandler.prototype.addLink = function (opts = {}, cb) {
   this.documentView.addLink(opts.dataset, opts.sentence);
   let dataset = this.getDataset(opts.dataset.id);
-  dataset.sentences.push(opts.sentence);
+  let sentenceAlreadyLinked = false;
+  dataset.sentences.map(function (sentence) {
+    if (sentence.id === opts.sentence.id) sentenceAlreadyLinked = true;
+  });
+  if (!sentenceAlreadyLinked) dataset.sentences.push(opts.sentence);
+  this.datasetsList.update(opts.dataset.id, opts.dataset);
   return cb(null, this.getDataset(dataset.id));
 };
 
@@ -501,6 +509,7 @@ DocumentHandler.prototype.removeLink = function (opts = {}, cb) {
       return acc;
     }, -1);
   if (index > -1) dataset.sentences.splice(index, 1); // delete sentence
+  this.datasetsList.update(opts.dataset.id, opts.dataset);
   return cb(null, this.getDataset(opts.dataset.id));
 };
 
@@ -620,7 +629,7 @@ DocumentHandler.prototype.synchronize = function () {
     });
     this.datasetsList.attach('onDatasetClick', function (dataset) {
       self.selectSentence({
-        sentence: dataset.sentences[0],
+        sentence: dataset.sentence, // this data contain the current selected sentence
         selectedDataset: dataset
       });
     });

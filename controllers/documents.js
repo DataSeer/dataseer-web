@@ -1083,7 +1083,11 @@ Self.linkSentence = function (opts = {}, cb) {
           if (datasets.current[i].id === opts.link.dataset.id) {
             updated = true;
             dataset = datasets.current[i];
-            dataset.sentences.push(teiInfos.sentence);
+            let sentenceAlreadyLinked = false;
+            dataset.sentences.map(function (sentence) {
+              if (sentence.id === teiInfos.sentence.id) sentenceAlreadyLinked = true;
+            });
+            if (!sentenceAlreadyLinked) dataset.sentences.push(teiInfos.sentence);
           }
         }
         if (!updated) return cb(new Error('dataset not linked in mongodb'));

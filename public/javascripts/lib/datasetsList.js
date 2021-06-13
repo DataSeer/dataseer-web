@@ -239,6 +239,7 @@ DatasetsList.prototype.add = function (dataset) {
         .attr('key', 'dataset.id')
         .attr('value', dataset.id)
         .attr('sentences', JSON.stringify(dataset.sentences))
+        .attr('sentence', dataset.sentences[0].id)
         .css('background-color', dataset.color.background.rgba)
         .css('border-color', dataset.color.background.rgba),
       label: $('<div>')
@@ -283,12 +284,23 @@ DatasetsList.prototype.add = function (dataset) {
     self.select(dataset.id);
     self.scrollTo(dataset.id);
     let elem = $(this);
-    if (typeof self.events.onDatasetClick === 'function')
+    if (typeof self.events.onDatasetClick === 'function') {
+      let sentences = JSON.parse(elem.attr('sentences')),
+        currentSentenceId = elem.attr('sentence'),
+        nextSentence = sentences.reduce(function (acc, item) {
+          if (acc === false) acc = item;
+          if (item.id === currentSentenceId) acc = false;
+          return acc;
+        }, false),
+        nextSentenceId = nextSentence === false ? sentences[0].id : nextSentence.id;
+      elem.attr('sentence', nextSentenceId);
       return self.events.onDatasetClick({
         id: dataset.id,
-        sentences: JSON.parse(elem.attr('sentences')),
+        sentences: sentences,
+        sentence: { id: currentSentenceId },
         checked: elem.hasClass('checked')
       });
+    }
   });
   elements.link.click(function (event) {
     event.preventDefault();
