@@ -498,6 +498,24 @@ router.post('/:id/finish/reopen', function (req, res, next) {
   });
 });
 
+/* POST refresh datasets of document */
+router.post('/:id/finish/refreshDatasets', function (req, res, next) {
+  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator))
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id }).populate('datasets');
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    else
+      return DocumentsController.refreshDatasets(req.user, doc, req.app.get('dataTypes'), function (err) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+        return res.json({ 'err': false, 'res': true });
+      });
+  });
+});
+
 /* GET files of document */
 router.get('/:id/files', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))

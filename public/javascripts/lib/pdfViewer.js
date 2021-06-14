@@ -895,19 +895,19 @@ PdfViewer.prototype.addLink = function (dataset, sentence, isSelected = true) {
   let colors = contour.attr('colors') ? JSON.parse(contour.attr('colors')) : {};
   colors[dataset.dataInstanceId] = dataset.color;
   contour.attr('colors', JSON.stringify(colors));
-  if (contour.attr('datasets')) {
+  if (contour.attr('corresp')) {
     contour.attr(
       'datasets',
-      (contour.attr('datasets').replace(`#${dataset.dataInstanceId}`, '') + ` #${dataset.dataInstanceId}`).trim()
+      (contour.attr('corresp').replace(`#${dataset.dataInstanceId}`, '') + ` #${dataset.dataInstanceId}`).trim()
     );
   } else {
-    contour.attr('datasets', `#${dataset.dataInstanceId}`);
+    contour.attr('corresp', `#${dataset.dataInstanceId}`);
   }
   let annotation = this.viewer.find(`.annotationsLayer > s[sentenceId="${sentence.id}"]`);
-  if (annotation.attr('datasets')) {
-    annotation.attr('datasets', annotation.attr('datasets') + ` #${dataset.dataInstanceId}`);
+  if (annotation.attr('corresp')) {
+    annotation.attr('corresp', annotation.attr('corresp') + ` #${dataset.dataInstanceId}`);
   } else {
-    annotation.attr('datasets', `#${dataset.dataInstanceId}`);
+    annotation.attr('corresp', `#${dataset.dataInstanceId}`);
   }
   this.colorize(sentence, dataset.color, function () {
     self.setCanvasBorder(sentence, BORDER_WIDTH, isSelected ? SELECTED_BORDER_COLOR : REMOVED_BORDER_COLOR);
@@ -936,11 +936,11 @@ PdfViewer.prototype.removeLink = function (dataset, sentence) {
     this.setCanvasBorder(sentence, BORDER_WIDTH, REMOVED_BORDER_COLOR);
     this.removeMarker(sentence);
   }
-  contour.attr('datasets', contour.attr('datasets').replace(`#${dataset.dataInstanceId}`, '').trim());
-  if (contour.attr('datasets') === '') contour.removeAttr('corresp');
+  contour.attr('corresp', contour.attr('corresp').replace(`#${dataset.dataInstanceId}`, '').trim());
+  if (contour.attr('corresp') === '') contour.removeAttr('corresp');
   let annotation = this.viewer.find(`.annotationsLayer > s[sentenceId="${sentence.id}"]`);
-  annotation.attr('datasets', annotation.attr('datasets').replace(`#${dataset.dataInstanceId}`, '').trim());
-  if (annotation.attr('datasets') === '') annotation.removeAttr('corresp');
+  annotation.attr('corresp', annotation.attr('corresp').replace(`#${dataset.dataInstanceId}`, '').trim());
+  if (annotation.attr('corresp') === '') annotation.removeAttr('corresp');
 };
 
 // Remove some links
