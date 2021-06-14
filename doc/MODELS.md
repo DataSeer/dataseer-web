@@ -119,10 +119,16 @@ Structure of data:
 Structure of data:
 
 ```js
+// Sentence
+{
+  "id": { "type": String, "default": "" }, // Id of sentence
+  "text": { "type": String, "default": "" } // Text of sentence
+}
+
 // Dataset
 {
   "id": { "type": String, "default": "" }, // id
-  "sentenceId": { "type": String, "default": "" }, // sentence id
+  "sentences": [Sentence], // sentence id
   "cert": { "type": String, "default": "" }, // cert value (between 0 and 1)
   "reuse": { "type": Boolean, "default": false }, // reuse property
   "highlight": { "type": Boolean, "default": false }, // highlight property
@@ -135,7 +141,6 @@ Structure of data:
   "DOI": { "type": String, "default": "" }, // DOI
   "name": { "type": String, "default": "" }, // name
   "comments": { "type": String, "default": "" }, // comments
-  "text": { "type": String, "default": "" }, // text of sentence
   "status": { "type": String, "default": "saved" } // text of sentence
 }
 

@@ -35,14 +35,16 @@ const DocumentHandler = function (opts = {}, events) {
   this.user = opts.user;
   this.datatypes = opts.datatypes;
   this.datasets = opts.datasets;
-  this.currentDataset = null;
-  this.currentCorresp = null;
   this.metadata = opts.metadata;
-  this.tei = opts.tei;
+  this.tei = { data: opts.tei.data, metadata: { mapping: opts.tei.metadata.mapping } };
   if (opts.pdf)
     this.pdf = {
       url: opts.pdf.url,
-      metadata: { sentences: opts.pdf.metadata.sentences, pages: opts.pdf.metadata.pages }
+      metadata: {
+        sentences: opts.pdf.metadata.sentences,
+        pages: opts.pdf.metadata.pages,
+        mapping: opts.pdf.metadata.mapping
+      }
     };
   $('#datasets-confirm-modal-valid').click(function () {
     return self.onModalConfirmAccept();
@@ -85,16 +87,20 @@ DocumentHandler.prototype.init = function () {
   this.refreshSentencesMapping();
   let self = this,
     firstId = this.datasetsList.getFirstDatasetId(),
-    dataset = firstId ? this.getDataset(firstId) : {};
-  if (dataset && dataset.id) {
-    this.selectDataset({ id: dataset.id, noAnim: true }, function () {
-      console.log('init');
+    dataset = firstId ? this.getDataset(firstId) : undefined,
+    sentence = dataset ? dataset.sentences[0] : { id: 'sentence-0' };
+  console.log('init');
+  if (sentence) {
+    // if (!dataset) this.datasetForm.hide();
+    if (!dataset) this.datasetForm.setEmptyMessage();
+    this.datasetsList.refreshMsg();
+    this.selectSentence({ sentence: sentence, noAnim: true }, function () {
       if (typeof self.events.onReady === 'function') return self.events.onReady();
     });
   } else {
-    console.log('init');
+    // this.datasetForm.hide();
     this.datasetForm.setEmptyMessage();
-    this.datasetsList.setEmptyMessage();
+    this.datasetsList.refreshMsg();
     if (typeof self.events.onReady === 'function') return self.events.onReady();
   }
 };
@@ -110,67 +116,30 @@ DocumentHandler.prototype.hasChanges = function () {
 
 // Change status of current dataset (or the one with the given id) to "modified"
 DocumentHandler.prototype.modified = function (id) {
-  if (typeof id === 'undefined') {
-    if (this.currentDataset) {
-      this.currentDataset.status = 'modified';
-      this.hasChanged[this.currentDataset.id] = true;
-      if (this.currentDataset.id === this.datasetForm.currentId()) this.datasetForm.modified();
-      this.datasetsList.update(this.currentDataset.id, this.currentDataset);
-    }
-  } else {
-    let dataset = this.getDataset(id);
-    if (dataset) {
-      dataset.status = 'modified';
-      this.hasChanged[dataset.id] = true;
-      if (dataset.id === this.datasetForm.currentId()) this.datasetForm.modified();
-      this.datasetsList.update(dataset.id, dataset);
-    }
-  }
-};
-
-// Change status of current dataset (or the one with the given id) to "removed"
-DocumentHandler.prototype.removed = function (id) {
-  if (typeof id === 'undefined') {
-    if (this.currentDataset) {
-      this.hasChanged[this.currentDataset.id] = undefined;
-    }
-  } else {
-    let dataset = this.getDataset(id);
-    if (dataset) {
-      this.hasChanged[dataset.id] = undefined;
-    }
+  let dataset = this.getDataset(id);
+  if (dataset) {
+    this.hasChanged[dataset.id] = true;
+    dataset.status = 'modified';
+    this.datasetsList.update(dataset.id, dataset);
+    if (dataset.id === this.datasetForm.currentId()) this.datasetForm.modified();
   }
 };
 
 // Change status of current dataset (or the one with the given id) to "saved"
 DocumentHandler.prototype.saved = function (id) {
-  if (typeof id === 'undefined') {
-    if (this.currentDataset) {
-      this.currentDataset.status = 'saved';
-      this.hasChanged[this.currentDataset.id] = false;
-    }
-  } else {
-    let dataset = this.getDataset(id);
-    if (dataset) {
-      dataset.status = 'saved';
-      this.hasChanged[dataset.id] = false;
-    }
+  let dataset = this.getDataset(id);
+  if (dataset) {
+    dataset.status = 'saved';
+    this.hasChanged[dataset.id] = false;
   }
 };
 
 // Change status of current dataset (or the one with the given id) to "valid"
 DocumentHandler.prototype.valid = function (id) {
-  if (typeof id === 'undefined') {
-    if (this.currentDataset) {
-      this.currentDataset.status = 'valid';
-      this.hasChanged[this.currentDataset.id] = true;
-    }
-  } else {
-    let dataset = this.getDataset(id);
-    if (dataset) {
-      dataset.status = 'valid';
-      this.hasChanged[dataset.id] = true;
-    }
+  let dataset = this.getDataset(id);
+  if (dataset) {
+    dataset.status = 'valid';
+    this.hasChanged[dataset.id] = true;
   }
 };
 
@@ -180,19 +149,46 @@ DocumentHandler.prototype.loading = function (id) {
   this.datasetsList.loading(id);
 };
 
-// Select a dataset
-DocumentHandler.prototype.selectDataset = function (opts, cb) {
-  let self = this;
-  this.currentDataset = this.getDataset(opts.id);
-  this.currentCorresp = null;
-  let selectedSentences = this.documentView.getSelectedSentences();
-  if (selectedSentences.length > 0) this.documentView.unselectSentences(selectedSentences);
-  if (this.currentDataset)
-    return this.documentView.selectDataset({ id: this.currentDataset.id, noAnim: opts.noAnim }, function (err) {
-      self.datasetsList.select(self.currentDataset.id);
+// Get datasets of a sentence
+DocumentHandler.prototype.getDatasetsOfSentence = function (sentence) {
+  return this.datasets.current.filter(function (dataset) {
+    return dataset.sentences.reduce(function (acc, item) {
+      return acc || item.id === sentence.id;
+    }, false);
+  });
+};
+
+// Select a sentence
+DocumentHandler.prototype.selectSentence = function (opts, cb) {
+  let self = this,
+    datasets = self.getDatasetsOfSentence(opts.sentence),
+    dataset =
+      datasets.length > 0
+        ? opts.selectedDataset && opts.selectedDataset.id
+          ? this.getDataset(opts.selectedDataset.id)
+          : datasets[0]
+        : undefined,
+    selectedSentences = this.documentView.getSelectedSentences();
+  return this.documentView.scrollToSentence({ sentence: opts.sentence, noAnim: opts.noAnim }, function (err) {
+    if (!opts.disableSelection) {
+      self.documentView.unselectSentences(selectedSentences);
+      self.documentView.selectSentence(opts.sentence);
+    }
+    if (dataset && self.documentView.getSelectedSentences().length === 1) {
+      let sentence = self.documentView.getSentence(opts.sentence);
+      self.datasetsList.select(dataset.id);
+      self.datasetForm.show();
       self.datasetForm.link(
-        self.currentDataset,
-        { isCurator: self.user.isCurator || self.user.isAnnotator, isCorresp: false },
+        {
+          dataset: dataset,
+          sentence: {
+            id: sentence.id,
+            text: sentence.text
+            // url: self.documentView.pdfViewer.getSentenceDataURL(sentence.id)
+          }
+        },
+        datasets,
+        { isCurator: self.user.isCurator || self.user.isAnnotator },
         function (err, res) {
           if (err) {
             console.log('dataset not selected');
@@ -201,8 +197,8 @@ DocumentHandler.prototype.selectDataset = function (opts, cb) {
           if (res) {
             if (res.shouldSave) {
               console.log('Should save selected dataset', res);
-              self.updateDataset(res.dataset.id, res.dataset);
               self.modified(res.dataset.id);
+              self.updateDataset(res.dataset.id, res.dataset);
               self.saveDataset(res.dataset.id);
               return typeof cb === 'function' ? cb(null, res.dataset.id) : undefined;
             } else {
@@ -211,33 +207,15 @@ DocumentHandler.prototype.selectDataset = function (opts, cb) {
             }
           } else return typeof cb === 'function' ? cb(true) : undefined;
         }
-      ); // refresh datasetForm
-    });
-  else return typeof cb === 'function' ? cb(true) : undefined;
-};
-
-// Select a dataset
-DocumentHandler.prototype.selectCorresp = function (datasetId, sentenceId, cb) {
-  if (datasetId && sentenceId) {
-    let self = this;
-    this.currentCorresp = { datasetId: datasetId, sentenceId: sentenceId };
-    let selectedSentences = this.documentView.getSelectedSentences();
-    if (selectedSentences.length > 0) this.documentView.unselectSentences(selectedSentences);
-    this.documentView.selectCorresp({ id: datasetId, sentenceId: sentenceId }, function (err) {
-      self.datasetsList.select(self.currentCorresp.datasetId);
-      self.datasetForm.link(
-        self.getDataset(self.currentCorresp.datasetId),
-        { isCurator: self.user.isCurator || self.user.isAnnotator, isCorresp: true },
-        function (err, res) {
-          if (err) {
-            console.log('corresp not selected');
-            return cb(err);
-          }
-          return typeof cb === 'function' ? cb(true) : undefined;
-        }
-      ); // refresh datasetForm
-    });
-  } else return typeof cb === 'function' ? cb(true) : undefined;
+      );
+    } else {
+      self.datasetsList.unselect();
+      // self.datasetForm.hide();
+      self.datasetForm.setEmptyMessage();
+      self.datasetForm.unlink();
+      return typeof cb === 'function' ? cb(true) : undefined;
+    }
+  });
 };
 
 // Show error on finish
@@ -331,20 +309,14 @@ DocumentHandler.prototype.mergeDatasets = function (datasets, cb) {
       datasets.slice(1),
       function (item, callback) {
         let dataset = Object.assign({}, self.getDataset(item.id)),
-          corresps = self.documentView.getCorresps(dataset);
-        corresps.push({ sentenceId: dataset.sentenceId, datasetId: dataset.id });
+          sentences = self.documentView.getLinks(dataset).map(function (link) {
+            return link.sentence;
+          });
         return self.deleteDataset(dataset.id, function (err, res) {
-          return async.mapSeries(
-            corresps,
-            function (corresp, next) {
-              return self.addCorresp({ dataset: target, sentenceId: corresp.sentenceId }, function (err) {
-                return next(err);
-              });
-            },
-            function (err) {
-              return callback(err);
-            }
-          );
+          if (err) return callback(err);
+          return self.newLinks({ dataset: { id: target.id }, sentences: sentences }, function (err) {
+            return callback(err);
+          });
         });
       },
       function (err) {
@@ -375,7 +347,7 @@ DocumentHandler.prototype.deleteDataset = function (id, cb) {
   let self = this,
     dataset = this.getDataset(id);
   this.loading(id);
-  this.datasetForm.unlink();
+  this.datasetForm.unlink(id);
   return DataSeerAPI.deleteDataset(
     {
       datasetsId: this.ids.datasets,
@@ -394,21 +366,26 @@ DocumentHandler.prototype.deleteDataset = function (id, cb) {
   );
 };
 
-// Delete a corresp
-DocumentHandler.prototype.deleteCorresp = function (opts = {}, cb) {
-  let self = this,
-    corresp = { id: opts.id, sentenceId: opts.sentenceId };
-  return DataSeerAPI.deleteCorresp({ datasetsId: self.datasets._id, dataset: corresp }, function (err, res) {
-    console.log(err, res);
-    if (err) return cb(err); // Need to define error behavior
-    if (res.err) return cb(true, res); // Need to define error behavior
-    return self.removeCorresp(
-      { dataset: self.getDataset(opts.id), sentenceId: opts.sentenceId },
-      function (err, dataset) {
-        return cb(err, dataset);
-      }
-    );
-  });
+// Delete a link
+DocumentHandler.prototype.deleteLink = function (opts = {}, cb) {
+  let self = this;
+  return DataSeerAPI.unlinkSentence(
+    {
+      datasetsId: self.datasets._id,
+      link: { dataset: { id: opts.dataset.id }, sentence: { id: opts.sentence.id } }
+    },
+    function (err, res) {
+      console.log(err, res);
+      if (err) return cb(err); // Need to define error behavior
+      if (res.err) return cb(true, res); // Need to define error behavior
+      return self.removeLink(
+        { dataset: self.getDataset(opts.dataset.id), sentence: { id: opts.sentence.id, text: opts.sentence.text } },
+        function (err, dataset) {
+          return cb(err, dataset);
+        }
+      );
+    }
+  );
 };
 
 // Create new DatasetId
@@ -422,65 +399,81 @@ DocumentHandler.prototype.newDatasetId = function () {
   return newId;
 };
 
+// Create new DatasetId
+DocumentHandler.prototype.newDataInstanceId = function () {
+  let index = 1,
+    newId = 'dataInstance-' + index;
+  while (this.dataInstanceExist(newId)) {
+    index += 1;
+    newId = 'dataInstance-' + index;
+  }
+  return newId;
+};
+
 // Create new Dataset
 DocumentHandler.prototype.newDataset = function (sentences = {}, cb) {
   let self = this,
     datasetSentence = sentences[0],
-    correspsSentences = sentences.slice(1);
+    linksSentences = sentences.slice(1);
   return DataSeerAPI.getdataType(datasetSentence.text, function (err, res) {
+    console.log(err, res);
     if (err) return cb(err, res);
     if (res.err) return cb(true, res);
-    console.log(err, res);
     let dataType = res['datatype'] ? res['datatype'] : self.datasetForm.defaultDataType,
+      subType = res['subtype'] ? res['subtype'] : '',
       cert = res['cert'] ? res['cert'] : 0;
-    // return cb(err, );
-    let dataset = {
-      id: self.newDatasetId(),
-      dataType: dataType,
-      cert: cert,
-      sentenceId: datasetSentence.sentenceId,
-      text: datasetSentence.text
-    };
-    return DataSeerAPI.createDataset({ datasetsId: self.datasets._id, dataset: dataset }, function (err, res) {
-      if (err) return cb(err, res);
-      if (res.err) return cb(true, res);
-      console.log(err, res);
-      return self.addDataset(res.res, function (err, dataset) {
-        if (correspsSentences.length === 0) return cb(err, dataset);
-        else
-          return self.newCorresp({ datasetId: dataset.id, sentences: correspsSentences }, function (err, dataset) {
-            return cb(err, dataset);
-          });
-      });
-    });
+    let sentence = { id: datasetSentence.id, text: datasetSentence.text },
+      dataset = {
+        dataType: dataType,
+        subType: subType,
+        cert: cert
+      };
+    return DataSeerAPI.createDataset(
+      { datasetsId: self.datasets._id, dataset: dataset, sentence: sentence },
+      function (err, res) {
+        console.log(err, res);
+        if (err) return cb(err, res);
+        if (res.err) return cb(true, res);
+        return self.addDataset(res.res, datasetSentence, function (err, dataset) {
+          if (linksSentences.length === 0) return cb(err, dataset);
+          else
+            return self.newLinks({ dataset: { id: dataset.id }, sentences: linksSentences }, function (err, dataset) {
+              return cb(err, dataset);
+            });
+        });
+      }
+    );
   });
 };
 
 // Add  new Dataset
-DocumentHandler.prototype.addDataset = function (dataset, cb) {
+DocumentHandler.prototype.addDataset = function (dataset, sentence, cb) {
   dataset.color = this._colors.randomColor();
   this.colors[dataset.id] = dataset.color;
   this.datasets.current.push(dataset);
-  this.documentView.addDataset(dataset);
+  this.documentView.addDataset(dataset, sentence);
   this.datasetsList.add(dataset);
   return cb(null, this.getDataset(dataset.id));
 };
 
-// Create new Corresp
-DocumentHandler.prototype.newCorresp = function (opts = {}, cb) {
+// Create new Links
+DocumentHandler.prototype.newLinks = function (opts = {}, cb) {
   let self = this,
-    dataset = self.getDataset(opts.datasetId);
+    dataset = self.getDataset(opts.dataset.id);
   return async.mapSeries(
     opts.sentences,
     function (sentence, next) {
-      return DataSeerAPI.createCorresp(
-        { datasetsId: self.datasets._id, dataset: { id: opts.datasetId, sentenceId: sentence.sentenceId } },
+      return DataSeerAPI.linkSentence(
+        {
+          datasetsId: self.datasets._id,
+          link: { dataset: { id: opts.dataset.id }, sentence: { id: sentence.id } }
+        },
         function (err, res) {
+          console.log(err, res);
           if (err) return cb(err, res);
           if (res.err) return cb(true, res);
-          console.log(err, res);
-          return self.addCorresp(
-            { dataset: self.getDataset(opts.datasetId), sentenceId: sentence.sentenceId },
+          return self.addLink(
+            { dataset: self.getDataset(opts.dataset.id), sentence: { id: sentence.id, text: sentence.text } },
             function (err, dataset) {
               return next(err);
             }
@@ -494,15 +487,29 @@ DocumentHandler.prototype.newCorresp = function (opts = {}, cb) {
   );
 };
 
-// Add  new Corresp
-DocumentHandler.prototype.addCorresp = function (opts = {}, cb) {
-  this.documentView.addCorresp(opts.dataset, opts.sentenceId);
-  return cb(null, this.getDataset(opts.dataset.id));
+// Add Link
+DocumentHandler.prototype.addLink = function (opts = {}, cb) {
+  this.documentView.addLink(opts.dataset, opts.sentence);
+  let dataset = this.getDataset(opts.dataset.id);
+  let sentenceAlreadyLinked = false;
+  dataset.sentences.map(function (sentence) {
+    if (sentence.id === opts.sentence.id) sentenceAlreadyLinked = true;
+  });
+  if (!sentenceAlreadyLinked) dataset.sentences.push(opts.sentence);
+  this.datasetsList.update(opts.dataset.id, opts.dataset);
+  return cb(null, this.getDataset(dataset.id));
 };
 
-// Remove Corresp
-DocumentHandler.prototype.removeCorresp = function (opts = {}, cb) {
-  this.documentView.removeCorresp(opts.dataset, opts.sentenceId);
+// Remove Link
+DocumentHandler.prototype.removeLink = function (opts = {}, cb) {
+  this.documentView.removeLink(opts.dataset, opts.sentence);
+  let dataset = this.getDataset(opts.dataset.id),
+    index = dataset.sentences.reduce(function (acc, item, i) {
+      if (item.id === opts.sentence.id) acc = i;
+      return acc;
+    }, -1);
+  if (index > -1) dataset.sentences.splice(index, 1); // delete sentence
+  this.datasetsList.update(opts.dataset.id, opts.dataset);
   return cb(null, this.getDataset(opts.dataset.id));
 };
 
@@ -512,9 +519,9 @@ DocumentHandler.prototype.refreshDataset = function (id) {
     dataset = this.getDataset(id);
   this.datasetsList.update(id, dataset);
   if (this.datasetForm.currentId() === id)
-    this.datasetForm.link(
+    this.datasetForm.updateDataset(
       dataset,
-      { isCurator: this.user.isCurator || this.user.isAnnotator, isCorresp: false },
+      { isCurator: this.user.isCurator || this.user.isAnnotator },
       function (err, res) {
         if (err) console.log('dataset not selected');
         else console.log('dataset refreshed');
@@ -556,6 +563,14 @@ DocumentHandler.prototype.datasetExist = function (id) {
   return false;
 };
 
+// Get the dataset with given id (or undefined)
+DocumentHandler.prototype.dataInstanceExist = function (id) {
+  for (let i = 0; i < this.datasets.current.length; i++) {
+    if (this.datasets.current[i].dataInstanceId === id) return true;
+  }
+  return false;
+};
+
 // Link some elements to the documentHandler
 DocumentHandler.prototype.link = function (opts = {}) {
   let self = this;
@@ -590,12 +605,10 @@ DocumentHandler.prototype.synchronize = function () {
   let self = this;
   if (this.documentView) {
     // Attach documentView events
-    this.documentView.attach('onDatasetClick', function (sentence) {
-      if (sentence.isCorresp) return self.selectCorresp(sentence.datasetId, sentence.sentenceId);
-      else if (sentence.isDataset) return self.selectDataset({ id: sentence.datasetId });
-      else console.log('onDatasetClick: case not handled', sentence);
+    this.documentView.attach('onDatasetClick', function (sentence) {});
+    this.documentView.attach('onSentenceClick', function (sentence) {
+      return self.selectSentence({ sentence: sentence, disableSelection: true });
     });
-    this.documentView.attach('onSentenceClick', function (sentence) {});
     this.documentView.attach('onFulltextView', function () {
       return self.refreshSentencesMapping();
     });
@@ -615,17 +628,18 @@ DocumentHandler.prototype.synchronize = function () {
       // console.log(dataset);
     });
     this.datasetsList.attach('onDatasetClick', function (dataset) {
-      // console.log(dataset);
-      self.selectDataset({ id: dataset.id }); // set current dataset
+      self.selectSentence({
+        sentence: dataset.sentence, // this data contain the current selected sentence
+        selectedDataset: dataset
+      });
     });
     this.datasetsList.attach('onDatasetCheck', function (dataset) {
       // console.log(dataset);
     });
     this.datasetsList.attach('onDatasetDelete', function (dataset) {
-      let nextDataset = self.getNextDataset(dataset.id),
-        nextId = nextDataset.id ? nextDataset.id : undefined;
+      let sentence = dataset.sentences[0];
       return self.deleteDataset(dataset.id, function () {
-        return self.selectDataset({ id: nextId });
+        return self.selectSentence({ sentence: sentence });
       });
     });
     this.datasetsList.attach('onDatasetLink', function (dataset) {
@@ -636,9 +650,9 @@ DocumentHandler.prototype.synchronize = function () {
           body: 'You must select a sentence before linking it to the dataset'
         });
       else
-        return self.newCorresp({ datasetId: dataset.id, sentences: selectedSentences }, function (err, dataset) {
+        return self.newLinks({ dataset: { id: dataset.id }, sentences: selectedSentences }, function (err, dataset) {
           if (err) return console.log(err);
-          return self.selectCorresp(dataset.id, selectedSentences[selectedSentences.length - 1].sentenceId);
+          return self.selectSentence({ sentence: selectedSentences[selectedSentences.length - 1] });
         });
     });
     this.datasetsList.attach('onNewDatasetClick', function () {
@@ -651,7 +665,7 @@ DocumentHandler.prototype.synchronize = function () {
       else
         return self.newDataset(selectedSentences, function (err, dataset) {
           if (err) return console.log(err);
-          return self.selectDataset({ id: dataset.id });
+          return self.selectSentence({ sentence: dataset.sentences[0], selectedDataset: dataset });
         });
     });
     this.datasetsList.attach('onMergeSelectionClick', function (ids) {
@@ -662,9 +676,10 @@ DocumentHandler.prototype.synchronize = function () {
           body: 'You must select at least two datasets'
         });
       else {
-        let id = ids[0].id;
+        let id = ids[0].id,
+          dataset = self.getDataset(id);
         return self.mergeDatasets(ids, function () {
-          return self.selectDataset({ id: id });
+          return self.selectSentence({ sentence: dataset.sentences[0], selectedDataset: dataset });
         });
       }
     });
@@ -679,7 +694,7 @@ DocumentHandler.prototype.synchronize = function () {
         let dataset = self.getNextDataset(ids[ids.length - 1].id),
           nextId = dataset.id;
         return self.deleteDatasets(ids, function () {
-          return self.selectDataset({ id: nextId });
+          return self.selectSentence({ sentence: dataset.sentences[0], selectedDataset: dataset });
         });
       }
     });
@@ -688,19 +703,21 @@ DocumentHandler.prototype.synchronize = function () {
     // Attach datasetsList events
     this.datasetForm.attach('onPropertyChange', function (property, value) {
       // console.log(property, value);
-      self.modified();
-      self.updateDataset(self.currentDataset.id, self.datasetForm.getDataset());
-      self.autoSave(self.currentDataset.id);
+      let dataset = self.datasetForm.getDataset();
+      self.modified(dataset.id);
+      self.updateDataset(dataset.id, dataset);
+      self.autoSave(dataset.id);
       if (property === 'highlight')
-        if (value) self.datasetsList.highlight(self.currentDataset.id);
-        else self.datasetsList.unhighlight(self.currentDataset.id);
+        if (value) self.datasetsList.highlight(dataset.id);
+        else self.datasetsList.unhighlight(dataset.id);
     });
     this.datasetForm.attach('onLeave', function () {
-      self.saveDataset(self.currentDataset.id);
+      let dataset = self.datasetForm.getDataset();
+      self.saveDataset(dataset.id);
     });
     this.datasetForm.attach('onDatasetIdClick', function (dataset) {
-      // console.log(dataset);
-      return self.selectDataset({ id: dataset.id });
+      let sentence = self.datasetForm.currentSentence();
+      if (dataset.id) return self.selectSentence({ sentence: sentence, selectedDataset: dataset });
     });
     this.datasetForm.attach('onDatasetDoneClick', function (dataset) {
       // console.log(dataset);
@@ -724,28 +741,40 @@ DocumentHandler.prototype.synchronize = function () {
         }
       }
       if (self.hasChanged[dataset.id]) self.autoSave(dataset.id);
-      let nextDataset = self.getNextDataset(dataset.id),
-        id = nextDataset.id;
-      return self.selectDataset({ id: id });
+      let nextDataset = self.getNextDataset(dataset.id);
+      return self.selectSentence({ sentence: nextDataset.sentences[0], selectedDataset: nextDataset });
     });
     this.datasetForm.attach('onDatasetUnlinkClick', function (dataset) {
-      if (self.currentCorresp && self.currentCorresp.sentenceId) {
-        return self.deleteCorresp({ id: dataset.id, sentenceId: self.currentCorresp.sentenceId }, function (err) {
-          if (err) return console.log(err);
-          return self.selectDataset({ id: dataset.id });
+      let sentence = self.datasetForm.currentSentence(),
+        modifiedDataset = self.getDataset(dataset.id);
+      if (!modifiedDataset) return console.log('bad dataset id');
+      if (!modifiedDataset.sentences) return console.log('empty sentences');
+      if (modifiedDataset.sentences.length === 1) {
+        let sentence = modifiedDataset.sentences[0];
+        return self.deleteDataset(dataset.id, function () {
+          return self.selectSentence({ sentence: sentence });
         });
-      }
-      return self.showModalError({
-        title: 'Error: Link sentence to dataset',
-        body: 'You must select a sentence before linking it to the dataset'
-      });
+      } else
+        return self.deleteLink({ dataset: dataset, sentence: sentence }, function (err) {
+          if (err) return console.log(err);
+          return self.selectSentence({ sentence: sentence });
+        });
+    });
+    this.datasetForm.attach('onTabClick', function (data) {
+      console.log('onTabClick');
+      return self.selectSentence({ sentence: data.sentence, selectedDataset: data.dataset });
     });
     this.datasetForm.attach('onRefreshDatatypesClick', function (done) {
-      console.log('onRefreshDatatypesClick');
       return DataSeerAPI.resyncJsonDataTypes(function (err, res) {
         console.log(err, res);
         return done();
       });
+    });
+    this.datasetForm.attach('onDisplayLeftClick', function () {
+      self.documentView.displayRight();
+    });
+    this.datasetForm.attach('onDisplayRightClick', function () {
+      self.documentView.displayLeft();
     });
   }
 };

@@ -47,40 +47,16 @@ DataSeerAPI.rootURL = function () {
 };
 
 /**
- * Delete a given dataset
- * @param {object} opts JSON object containing all data
- * @param {string} opts.datasetsId Id of datasets
- * @param {string} opts.dataset.datasetId Id of dataset
- * @param {string} opts.dataset.sentenceId Id of sentence
- * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
- * @returns {undefined} undefined
- */
-DataSeerAPI.deleteDataset = function (opts = {}, done) {
-  return jQuery.ajax({
-    type: 'DELETE',
-    contentType: 'application/json; charset=utf-8',
-    headers: {
-      'X-HTTP-Method-Override': 'DELETE'
-    },
-    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/datasets/' + opts.datasetsId + '/dataset'),
-    data: JSON.stringify({ dataset: opts.dataset }),
-    success: function (data) {
-      return done(false, data);
-    },
-    error: function () {
-      return done(true);
-    },
-    dataType: 'json'
-  });
-};
-
-/**
  * Create new dataset to datasets
  * @param {object} opts JSON object containing all data
  * @param {string} opts.datasetsId Id of document datasets
+ * @param {object} opts.sentence Sentence options
+ * @param {string} opts.sentence.id Sentence id
+ * @param {string} opts.sentence.text Sentence text
  * @param {object} opts.dataset Dataset options
  * @param {string} opts.dataset.status Dataset status
  * @param {string} opts.dataset.id Dataset id
+ * @param {string} opts.dataset.datainstanceId Dataset datainstanceId
  * @param {string} opts.dataset.cert Dataset cert
  * @param {string} opts.dataset.dataType Dataset dataType
  * @param {string} opts.dataset.subType Dataset subType
@@ -102,63 +78,7 @@ DataSeerAPI.createDataset = function (opts = {}, done) {
       'X-HTTP-Method-Override': 'POST'
     },
     url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/datasets/' + opts.datasetsId + '/dataset'),
-    data: JSON.stringify({ dataset: opts.dataset }),
-    success: function (data) {
-      return done(false, data);
-    },
-    error: function () {
-      return done(true);
-    },
-    dataType: 'json'
-  });
-};
-
-/**
- * Delete a given corresp
- * @param {object} opts JSON object containing all data
- * @param {string} opts.datasetsId Id of datasets
- * @param {string} opts.dataset.datasetId Id of dataset
- * @param {string} opts.dataset.sentenceId Id of sentence
- * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
- * @returns {undefined} undefined
- */
-DataSeerAPI.deleteCorresp = function (opts = {}, done) {
-  return jQuery.ajax({
-    type: 'DELETE',
-    contentType: 'application/json; charset=utf-8',
-    headers: {
-      'X-HTTP-Method-Override': 'DELETE'
-    },
-    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/datasets/' + opts.datasetsId + '/corresp'),
-    data: JSON.stringify({ dataset: opts.dataset }),
-    success: function (data) {
-      return done(false, data);
-    },
-    error: function () {
-      return done(true);
-    },
-    dataType: 'json'
-  });
-};
-
-/**
- * Create new corresp to datasets
- * @param {object} opts JSON object containing all data
- * @param {string} opts.datasetsId Id of datasets
- * @param {string} opts.dataset.datasetId Id of dataset
- * @param {string} opts.dataset.sentenceId Id of sentence
- * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
- * @returns {undefined} undefined
- */
-DataSeerAPI.createCorresp = function (opts = {}, done) {
-  return jQuery.ajax({
-    type: 'POST',
-    contentType: 'application/json; charset=utf-8',
-    headers: {
-      'X-HTTP-Method-Override': 'POST'
-    },
-    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/datasets/' + opts.datasetsId + '/corresp'),
-    data: JSON.stringify({ dataset: opts.dataset }),
+    data: JSON.stringify({ dataset: opts.dataset, sentence: opts.sentence }),
     success: function (data) {
       return done(false, data);
     },
@@ -209,25 +129,136 @@ DataSeerAPI.updateDataset = function (opts = {}, done) {
 };
 
 /**
- * Extract PDF metadata for a given dataset
- * @param {string} documentId Id of document
+ * Delete a given dataset
+ * @param {object} opts JSON object containing all data
+ * @param {string} opts.datasetsId Id of datasets
+ * @param {string} opts.dataset.id Id of dataset
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
-DataSeerAPI.extractPDFMetadata = function (documentId, done) {
+DataSeerAPI.deleteDataset = function (opts = {}, done) {
+  return jQuery.ajax({
+    type: 'DELETE',
+    contentType: 'application/json; charset=utf-8',
+    headers: {
+      'X-HTTP-Method-Override': 'DELETE'
+    },
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/datasets/' + opts.datasetsId + '/dataset'),
+    data: JSON.stringify({ dataset: opts.dataset }),
+    success: function (data) {
+      return done(false, data);
+    },
+    error: function () {
+      return done(true);
+    },
+    dataType: 'json'
+  });
+};
+
+/**
+ * Create new link to datasets
+ * @param {object} opts JSON object containing all data
+ * @param {string} opts.datasetsId Id of datasets
+ * @param {object} opts.link Link
+ * @param {object} opts.link.sentence Sentence
+ * @param {string} opts.link.sentence.id Sentence id
+ * @param {object} opts.link.dataset Dataset
+ * @param {string} opts.link.dataset.id Dataset id
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @returns {undefined} undefined
+ */
+DataSeerAPI.linkSentence = function (opts = {}, done) {
   return jQuery.ajax({
     type: 'POST',
     contentType: 'application/json; charset=utf-8',
     headers: {
       'X-HTTP-Method-Override': 'POST'
     },
-    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/extractPDFMetadata'),
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/datasets/' + opts.datasetsId + '/link'),
+    data: JSON.stringify({ link: opts.link }),
+    success: function (data) {
+      return done(false, data);
+    },
+    error: function () {
+      return done(true);
+    },
+    dataType: 'json'
+  });
+};
+
+/**
+ * Delete a given dataset link
+ * @param {object} opts JSON object containing all data
+ * @param {string} opts.datasetsId Id of datasets
+ * @param {object} opts.link Link
+ * @param {object} opts.link.sentence Sentence
+ * @param {string} opts.link.sentence.id Sentence id
+ * @param {object} opts.link.dataset Dataset
+ * @param {string} opts.link.dataset.id Dataset id
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @returns {undefined} undefined
+ */
+DataSeerAPI.unlinkSentence = function (opts = {}, done) {
+  return jQuery.ajax({
+    type: 'DELETE',
+    contentType: 'application/json; charset=utf-8',
+    headers: {
+      'X-HTTP-Method-Override': 'DELETE'
+    },
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/datasets/' + opts.datasetsId + '/unlink'),
+    data: JSON.stringify({ link: opts.link }),
+    success: function (data) {
+      return done(false, data);
+    },
+    error: function () {
+      return done(true);
+    },
+    dataType: 'json'
+  });
+};
+
+/**
+ * Extract PDF metadata for a given dataset
+ * @param {string} documentId Id of document
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @returns {undefined} undefined
+ */
+DataSeerAPI.updatePDF = function (documentId, done) {
+  return jQuery.ajax({
+    type: 'POST',
+    contentType: 'application/json; charset=utf-8',
+    headers: {
+      'X-HTTP-Method-Override': 'POST'
+    },
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/updatePDF'),
     data: JSON.stringify({}),
     success: function (data) {
-      return done(false, {
-        url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/pdf/content'),
-        data: data
-      });
+      return done(false, data);
+    },
+    error: function () {
+      return done(true);
+    },
+    dataType: 'json'
+  });
+};
+
+/**
+ * Update XML of the TEI file for a given dataset
+ * @param {string} documentId Id of document
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @returns {undefined} undefined
+ */
+DataSeerAPI.updateTEI = function (documentId, done) {
+  return jQuery.ajax({
+    type: 'POST',
+    contentType: 'application/json; charset=utf-8',
+    headers: {
+      'X-HTTP-Method-Override': 'POST'
+    },
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/updateTEI'),
+    data: JSON.stringify({}),
+    success: function (data) {
+      return done(false, data);
     },
     error: function () {
       return done(true);
@@ -421,7 +452,7 @@ DataSeerAPI.sendMailToAuthors = function (documentId, done) {
  * @returns {undefined} undefined
  */
 DataSeerAPI.getDocument = function (documentId, opts = {}, done) {
-  jQuery.get(DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId, opts), function (data) {
+  return jQuery.get(DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId, opts), function (data) {
     return done(data.err, data.res);
   });
 };
@@ -433,20 +464,61 @@ DataSeerAPI.getDocument = function (documentId, opts = {}, done) {
  * @returns {undefined} undefined
  */
 DataSeerAPI.getPDF = function (documentId, done) {
-  jQuery.get(DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/pdf'), function (data) {
-    return done(data.err, data.res);
+  return $.ajax({
+    cache: false,
+    type: 'GET',
+    contentType: 'application/json',
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/pdf'),
+    success: function (data) {
+      if (typeof data === 'string') data = JSON.parse(data);
+      return done(null, data);
+    },
+    error: function (data) {
+      return done(true, data);
+    }
   });
 };
 
 /**
  * Get file by id
- * @param {string} fileId Id of file
+ * @param {string} documentId Id of document
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
  */
-DataSeerAPI.getTEI = function (fileId, done) {
-  jQuery.get(DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/files/' + fileId + '/string'), function (data) {
-    return done(data.err, data.res);
+DataSeerAPI.getTEI = function (documentId, done) {
+  return $.ajax({
+    cache: false,
+    type: 'GET',
+    contentType: 'application/json',
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/tei'),
+    success: function (data) {
+      if (typeof data === 'string') data = JSON.parse(data);
+      return done(null, data);
+    },
+    error: function (data) {
+      return done(true, data);
+    }
+  });
+};
+
+/**
+ * Get file by id
+ * @param {string} documentId Id of document
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @returns {undefined} undefined
+ */
+DataSeerAPI.getTEIContent = function (documentId, done) {
+  return $.ajax({
+    cache: false,
+    type: 'GET',
+    contentType: 'text/xml',
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/tei/content'),
+    success: function (data) {
+      return done(null, data);
+    },
+    error: function (data) {
+      return done(true, data);
+    }
   });
 };
 
