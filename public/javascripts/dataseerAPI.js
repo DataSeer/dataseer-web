@@ -218,31 +218,6 @@ DataSeerAPI.unlinkSentence = function (opts = {}, done) {
 };
 
 /**
- * Update document
- * @param {string} documentId Id of document
- * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
- * @returns {undefined} undefined
- */
-DataSeerAPI.updateDocument = function (documentId, done) {
-  return jQuery.ajax({
-    type: 'POST',
-    contentType: 'application/json; charset=utf-8',
-    headers: {
-      'X-HTTP-Method-Override': 'POST'
-    },
-    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/documents/' + documentId + '/update'),
-    data: JSON.stringify({}),
-    success: function (data) {
-      return done(false, data);
-    },
-    error: function () {
-      return done(true);
-    },
-    dataType: 'json'
-  });
-};
-
-/**
  * Extract PDF metadata for a given dataset
  * @param {string} documentId Id of document
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)

@@ -66,21 +66,46 @@
             setTextLoop('PDF initialization...');
             return async.reduce(
               [
-                // Test if document must be updated
+                // update TEI file
                 function (acc, next) {
-                  acc.needUpdate = !(
-                    tei.res.metadata.version === XML_METADATA_VERSION &&
-                    pdf.res.metadata.version === PDF_METADATA_VERSION
-                  );
-                  if (acc.needUpdate)
-                    return DataSeerAPI.updateDocument(documentId, function (err, query) {
-                      console.log(err, query);
-                      if (err) return next(err);
-                      if (query.err) return next(query.msg);
-                      acc.query = query;
-                      return next(null, acc);
-                    });
-                  else return next(null, acc);
+                  console.log(acc);
+                  if (!tei.res.metadata || tei.res.metadata.version > XML_METADATA_VERSION)
+                    return next(new Error('Bad version of TEI metadata'));
+                  acc.needUpdate =
+                    acc.needUpdate || !tei.res.metadata || tei.res.metadata.version < XML_METADATA_VERSION;
+                  if (!acc.needUpdate) return next(null, acc);
+                  return DataSeerAPI.updateTEI(doc._id, function (err, res) {
+                    console.log(err, res);
+                    if (err) return next(err, acc);
+                    acc.tei = { updated: true, res: res };
+                    return next(null, acc);
+                  });
+                },
+                // update datasets
+                function (acc, next) {
+                  acc.needUpdate = acc.needUpdate || (acc.tei && acc.tei.updated);
+                  if (!acc.needUpdate) return next(null, acc);
+                  return DataSeerAPI.refreshDatasets(doc._id, function (err, res) {
+                    console.log(err, res);
+                    if (err) return next(err, acc);
+                    acc.datasets = { updated: true, res: res };
+                    return next(null, acc);
+                  });
+                },
+                // update PDF file
+                function (acc, next) {
+                  if (!pdf.res) return next();
+                  if (!pdf.res.metadata || pdf.res.metadata.version > PDF_METADATA_VERSION)
+                    return next(new Error('Bad version of PDF metadata'));
+                  acc.needUpdate =
+                    acc.needUpdate || !pdf.res.metadata || pdf.res.metadata.version < PDF_METADATA_VERSION;
+                  if (!acc.needUpdate) return next(null, acc);
+                  return DataSeerAPI.updatePDF(doc._id, function (err, res) {
+                    console.log(err, res);
+                    if (err) return next(err, acc);
+                    acc.pdf = { updated: true, res: res };
+                    return next(null, acc);
+                  });
                 }
               ],
               { needUpdate: false },

@@ -759,7 +759,7 @@ Self.refreshDatasets = function (user, doc, dataTypes, cb) {
             datasets,
             function (dataset, callback) {
               return Self.updateDataset(
-                { user: user, datasetsId: doc.datasets._id, dataset: dataset, keepDataFromMongo: true },
+                { user: user, datasetsId: doc.datasets._id, dataset: dataset },
                 function (err, res) {
                   return callback(err);
                 }
@@ -917,13 +917,6 @@ Self.updateDataset = function (opts = {}, cb) {
             if (opts.fromAPI) {
               opts.dataset.dataInstanceId = datasets.current[i].dataInstanceId;
               opts.dataset.sentences = datasets.current[i].sentences;
-            }
-            if (opts.keepDataFromMongo) {
-              opts.dataset.notification = datasets.current[i].notification;
-              opts.dataset.highlight = datasets.current[i].highlight;
-              opts.dataset.DOI = datasets.current[i].DOI;
-              opts.dataset.name = datasets.current[i].name;
-              opts.dataset.comments = datasets.current[i].comments;
             }
             datasets.current[i] = DocumentsDatasetsController.createDataset(opts.dataset);
             dataset = datasets.current[i];
