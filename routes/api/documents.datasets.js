@@ -47,11 +47,13 @@ router.post('/:id/dataset', function (req, res, next) {
     return res.status(401).send('Your current role does not grant you access to this part of the website');
   if (!req.body.dataset || typeof req.body.dataset !== 'object')
     return res.json({ 'err': true, 'res': null, 'msg': 'dataset must be defined' });
+  if (!req.body.sentence || typeof req.body.sentence !== 'object')
+    return res.json({ 'err': true, 'res': null, 'msg': 'sentence must be defined' });
   return DocumentsController.newDataset(
-    { user: req.user, datasetsId: req.params.id, dataset: req.body.dataset },
-    function (err, dataset) {
+    { user: req.user, datasetsId: req.params.id, dataset: req.body.dataset, sentence: req.body.sentence },
+    function (err, result) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      else return res.json({ 'err': false, 'res': dataset });
+      else return res.json({ 'err': false, 'res': result.mongo });
     }
   );
 });
@@ -60,11 +62,13 @@ router.post('/:id/dataset', function (req, res, next) {
 router.put('/:id/dataset', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
+  if (!req.body.dataset || typeof req.body.dataset !== 'object')
+    return res.json({ 'err': true, 'res': null, 'msg': 'dataset must be defined' });
   return DocumentsController.updateDataset(
-    { user: req.user, datasetsId: req.params.id, dataset: req.body.dataset },
-    function (err, dataset) {
+    { user: req.user, datasetsId: req.params.id, dataset: req.body.dataset, fromAPI: true },
+    function (err, result) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      else return res.json({ 'err': false, 'res': dataset });
+      else return res.json({ 'err': false, 'res': result.mongo });
     }
   );
 });
@@ -73,33 +77,45 @@ router.put('/:id/dataset', function (req, res, next) {
 router.delete('/:id/dataset', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
+  if (!req.body.dataset || typeof req.body.dataset !== 'object')
+    return res.json({ 'err': true, 'res': null, 'msg': 'dataset must be defined' });
   return DocumentsController.deleteDataset(
     { user: req.user, datasetsId: req.params.id, dataset: req.body.dataset },
-    function (err) {
+    function (err, result) {
       if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      else return res.json({ 'err': false, 'res': true });
+      else return res.json({ 'err': false, 'res': result.mongo });
     }
   );
 });
 
-/* POST corresp of datasets */
-router.post('/:id/corresp', function (req, res, next) {
+/* POST link of datasets */
+router.post('/:id/link', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
-  return DocumentsController.newCorresp({ datasetsId: req.params.id, dataset: req.body.dataset }, function (err) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else return res.json({ 'err': false, 'res': true });
-  });
+  if (!req.body.link || typeof req.body.link !== 'object')
+    return res.json({ 'err': true, 'res': null, 'msg': 'link must be defined' });
+  return DocumentsController.linkSentence(
+    { user: req.user, datasetsId: req.params.id, link: req.body.link },
+    function (err, result) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+      else return res.json({ 'err': false, 'res': result.mongo });
+    }
+  );
 });
 
-/* DELETE corresp of datasets */
-router.delete('/:id/corresp', function (req, res, next) {
+/* DELETE link of datasets */
+router.delete('/:id/unlink', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
-  return DocumentsController.deleteCorresp({ datasetsId: req.params.id, dataset: req.body.dataset }, function (err) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else return res.json({ 'err': false, 'res': true });
-  });
+  if (!req.body.link || typeof req.body.link !== 'object')
+    return res.json({ 'err': true, 'res': null, 'msg': 'link must be defined' });
+  return DocumentsController.unlinkSentence(
+    { user: req.user, datasetsId: req.params.id, link: req.body.link },
+    function (err, result) {
+      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+      else return res.json({ 'err': false, 'res': result.mongo });
+    }
+  );
 });
 
 module.exports = router;
