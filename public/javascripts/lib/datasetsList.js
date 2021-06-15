@@ -231,6 +231,8 @@ DatasetsList.prototype.unload = function (datasets, cb) {
 
 // Add a dataset
 DatasetsList.prototype.add = function (dataset) {
+  if (!Array.isArray(dataset.sentences) || !dataset.sentences.length || typeof dataset.sentences[0] === 'undefined')
+    return;
   let self = this,
     label = dataset.name ? dataset.name : dataset.id,
     elements = {
