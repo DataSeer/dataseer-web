@@ -21,6 +21,10 @@ block content
       else
         a(href='https://docs.google.com/forms/d/e/1FAIpQLSeURLXaNchVJEawPaiBrC--cM2mXc1zMEcaR4hu8MZyv44nHw/viewform?usp=sf_link' id='annotator_feedback_link' target='_blank')
           button.btn.btn-primary.waves-effect.waves-light.bg-primary(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email') Annotator feedback
+      if(current_user.role.label === "curator")
+        div(class='row-margin')
+          a(href=conf.root + "api/documents/" + document._id + "/finish/report" target="_blank")
+            button.blue.btn.btn-primary.waves-effect.waves-light#download_report(type='button' title='Download report') Download Report
 
     div(class='row row-margin')
       div(class='col-12')

@@ -15,7 +15,7 @@
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.4",
     "debug": "~2.6.9",
-    "docxtemplater": "^3.22.1",
+    "docx-templates": "^4.6.3",
     "errorhandler": "^1.5.0",
     "express": "^4.16.4",
     "express-fileupload": "^1.1.9",
@@ -35,7 +35,6 @@
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^6.0.1",
-    "pizzip": "^3.0.6",
     "pug": "^3.0.2",
     "request": "^2.88.0",
     "serve-favicon": "^2.5.0"
