@@ -125,10 +125,7 @@ block content
           h3.report #{item.label}:
           table(class="report")
             if sortedDatasets[item.key].length === 0
-              <tr>
-                td(colspan=item.colspan)
-                  None
-              </tr>
+              <tr class="none"><td>None</td></tr>
             else
               <tr class="header">
                 <th>N°</th>
@@ -185,20 +182,23 @@ block content
         h2.report Sharing best practice:
     div(class='row row-margin')
       div(class='col-12')
-        each item in bestPractices.data
-          div(class="bestPractice")
-            h3.report
-              a(href=item.url) #{item.label}
-            ul
-              li
-                h4 Description:
-              li 
-                | !{item.description}
-              li
-                h4 Best practice for sharing this type of data:
-              li 
-                | !{item.bestDataFormatForSharing}
-              li
-                h4 Most suitable repositories:
-              li 
-                | !{item.mostSuitableRepositories}
+        if sortedDatasets.all.length === 0
+          div(class="bestPractice") None
+        else
+          each item in bestPractices.data
+            div(class="bestPractice")
+              h3.report
+                a(href=item.url) #{item.label}
+              ul
+                li
+                  h4 Description:
+                li 
+                  | !{item.description}
+                li
+                  h4 Best practice for sharing this type of data:
+                li 
+                  | !{item.bestDataFormatForSharing}
+                li
+                  h4 Most suitable repositories:
+                li 
+                  | !{item.mostSuitableRepositories}
