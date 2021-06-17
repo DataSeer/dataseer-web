@@ -650,6 +650,7 @@ DatasetForm.prototype.addTab = function (dataset, opts) {
 DatasetForm.prototype.refreshDataset = function (data = {}, opts = {}, callback) {
   if (!data.dataset) {
     this.setEmptyMessage();
+    this.showMessage();
     return typeof callback === 'function' ? callback(true) : undefined;
   }
   this.dataset.color = data.dataset.color;
