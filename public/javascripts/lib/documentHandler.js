@@ -90,9 +90,8 @@ DocumentHandler.prototype.init = function () {
     dataset = firstId ? this.getDataset(firstId) : undefined,
     sentence = dataset ? dataset.sentences[0] : { id: 'sentence-0' };
   console.log('init');
+  // if (!dataset) this.datasetForm.hide();
   if (sentence) {
-    // if (!dataset) this.datasetForm.hide();
-    if (!dataset) this.datasetForm.setEmptyMessage();
     this.datasetsList.refreshMsg();
     this.selectSentence({ sentence: sentence, noAnim: true }, function () {
       if (typeof self.events.onReady === 'function') return self.events.onReady();

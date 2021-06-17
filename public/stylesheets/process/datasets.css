@@ -279,6 +279,7 @@ body {
 
 #datasetForm\.screen {
   z-index: 10000;
+  height: calc(100% - 28px - 50px);
   /*position: absolute;
   top: 25px;
   width: calc(45%);*/
