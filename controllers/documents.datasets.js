@@ -6,6 +6,8 @@
 
 const DocumentsDatasets = require('../models/documents.datasets.js');
 
+const cheerio = require('cheerio');
+
 let Self = {};
 
 /**
@@ -72,6 +74,90 @@ Self.createDataset = function (opts = {}) {
     comments: opts.comments ? opts.comments : '', // comments
     status: opts.dataType && opts.name && (opts.DOI || opts.comments) ? 'valid' : 'saved' // text of sentence
   };
+};
+
+/**
+ * Get Infos about dataType (or SubType) of datasets
+ * @param {object} dataset - A dataset
+ * @param {object} dataTypes - dataTypes object
+ * @param {object} opts - options
+ * @param {boolean} opts.convertHTML - options
+ * @returns {object} sorted datasets
+ */
+Self.getDataTypeInfos = function (dataset = {}, dataTypes = {}, opts = {}) {
+  let type = dataset.subType ? dataset.subType : dataset.dataType,
+    label = dataset.subType
+      ? `${
+          dataTypes.metadata[dataset.dataType] && dataTypes.metadata[dataset.dataType].label
+            ? dataTypes.metadata[dataset.dataType].label
+            : dataset.dataType
+        }: ${
+          dataTypes.metadata[dataset.subType] && dataTypes.metadata[dataset.subType].label
+            ? dataTypes.metadata[dataset.subType].label
+            : dataset.subType
+        }`
+      : dataTypes.metadata[dataset.dataType] && dataTypes.metadata[dataset.dataType].label
+      ? dataTypes.metadata[dataset.dataType].label
+      : dataset.dataType,
+    description =
+      dataTypes.metadata[type] && dataTypes.metadata[type].description
+        ? dataTypes.metadata[type].description
+        : dataset.description,
+    bestDataFormatForSharing =
+      dataTypes.metadata[type] && dataTypes.metadata[type].bestDataFormatForSharing
+        ? dataTypes.metadata[type].bestDataFormatForSharing
+        : dataset.bestDataFormatForSharing,
+    mostSuitableRepositories =
+      dataTypes.metadata[type] &&
+      dataTypes.metadata[type].mostSuitableRepositories &&
+      dataTypes.metadata[type].mostSuitableRepositories.default &&
+      dataTypes.metadata[type].mostSuitableRepositories.reuse
+        ? dataset.reuse
+          ? dataTypes.metadata[type].mostSuitableRepositories.reuse
+          : dataTypes.metadata[type].mostSuitableRepositories.default
+        : dataset.mostSuitableRepositories,
+    url = dataTypes.metadata[type] && dataTypes.metadata[type].url ? dataTypes.metadata[type].url : '';
+  return {
+    url,
+    label,
+    description: opts.convertHTML ? Self.getTextOfHtml(description) : description,
+    bestDataFormatForSharing: opts.convertHTML
+      ? Self.getTextOfHtml(bestDataFormatForSharing)
+      : bestDataFormatForSharing,
+    mostSuitableRepositories: opts.convertHTML ? Self.getTextOfHtml(mostSuitableRepositories) : mostSuitableRepositories
+  };
+};
+
+/**
+ * Get bestPractices of datasets
+ * @param {array} datasets - Array of datasets
+ * @param {object} dataTypes - dataTypes object
+ * @param {object} opts - options
+ * @param {boolean} opts.convertHTML - options
+ * @returns {object} bestPractices
+ */
+Self.getBestPractices = function (datasets = [], dataTypes = {}, opts = {}) {
+  return datasets.reduce(
+    function (acc, item) {
+      let infos = Self.getDataTypeInfos(item, dataTypes, opts);
+      if (typeof acc.key[infos.label] === 'undefined') {
+        acc.key[infos.label] = true;
+        acc.data.push(infos);
+      }
+      return acc;
+    },
+    { key: {}, data: [] }
+  );
+};
+
+/**
+ * Get text of an HTML string
+ * @param {string} htmlString - HTML string
+ * @returns {string} text
+ */
+Self.getTextOfHtml = function (htmlString) {
+  let $ = cheerio.load(htmlString);
+  return `${$('p').text()}`;
 };
 
 module.exports = Self;
