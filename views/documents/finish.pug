@@ -26,6 +26,19 @@ block content
           a(href=conf.root + "api/documents/" + document._id + "/finish/report" target="_blank")
             button.blue.btn.btn-primary.waves-effect.waves-light#download_report(type='button' title='Download report') Download Report
 
+
+    div(class='row row-margin')
+      div(class='col-12')
+        div(class='key d-inline font-weight-bold') Links: 
+        div(class='value d-inline')
+          a(href=publicURL target="_blank") DataSeer document
+        if (document.tei && document.tei.filename)
+          div(class='value d-inline') 
+            a(href=conf.root + "api/documents/" + document._id + "/tei/content" target="_blank") TEI
+        if (document.pdf && document.pdf.filename)
+          div(class='value d-inline') 
+            a(href=conf.root + "api/documents/" + document._id + "/pdf/content" target="_blank") PDF
+
     div(class='row row-margin')
       div(class='col-12')
         h2.report Metadata:
@@ -36,12 +49,14 @@ block content
           div(class='value d-inline') #{document.metadata.article_title}
         else
           div(class='value d-inline') n/a
+    div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Manuscript #: 
         if (document.metadata.manuscript_id)
           div(class='value d-inline') #{document.metadata.manuscript_id}
         else
           div(class='value d-inline') n/a
+    div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Submitting Author: 
         if (document.metadata.submitting_author)
@@ -56,22 +71,27 @@ block content
           div(class='value d-inline') n/a
 
     div(class='row row-margin')
-      if document.metadata.authors.length > 0
-        div(class='col-12')
-          h3.report Authors:
-        div(class='col-12')
-          div(class='value d-block authors-container')
-            ul
-              each val, index in document.metadata.authors
-                if val.name
-                  if (val.email)
-                    <li> #{val.name} (<strong>#{val.email}</strong>)
-                  else
-                    li #{val.name}
-                  ul
-                    if val.name && val.affiliations
-                      each aff, index in val.affiliations
-                        li #{aff}
+      div(class='col-12')
+        h3.report Authors:
+        if document.metadata.authors.length > 0
+          div(class='row row-margin')
+            div(class='col-12')
+              div(class='value d-block authors-container')
+                ul
+                  each val, index in document.metadata.authors
+                    if val.name
+                      if (val.email)
+                        <li> #{val.name} (<strong>#{val.email}</strong>)
+                      else
+                        li #{val.name}
+                      ul
+                        if val.name && val.affiliations
+                          each aff, index in val.affiliations
+                            li #{aff}
+        else
+          div(class='row row-margin')
+            div(class='col-12')
+              div(class='value d-block authors-container') None
 
     div(class='row row-margin')
       div(class='col-12')
