@@ -34,6 +34,75 @@
   min-width: 125px;
 }
 
+.bestPractice {
+  margin-bottom: 30px;
+}
+
+h2.report {
+  color: #00BDFF;
+  font-weight: bold;
+}
+
+h3.report {
+  color: black;
+  font-weight: bold;
+}
+
+.bestPractice ul {
+  list-style-type:none;
+  padding-left: 0px;
+}
+
+.bestPractice ul li {
+}
+
+table.report {
+  margin-bottom: 25px;
+  width: 100%;
+  font-size: 1em;
+}
+
+
+table.report tr.content:hover {
+  background-color: gainsboro;
+}
+
+table.report td,
+table.report th {
+  max-width: 20%;
+}
+
+table.report tr.title th {
+  font-size: 2em;
+  padding-top: 20px;
+  padding-bottom: 30px;
+}
+
+table.report tr.header {
+  font-size: 1em;
+}
+
+table.report tr.header th,
+table.report tr.header td {
+  border:  1px solid black;
+  font-size: 1em;
+  font-weight: bold;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+table.report tr.content th,
+table.report tr.content td {
+  border:  1px solid black;
+  font-size: 1em;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
 #standard_user_feedback_link,
 #annotator_feedback_link {
   float: right;
