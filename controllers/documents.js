@@ -468,6 +468,7 @@ Self.getSortedDatasets = function (doc, dataTypes = {}) {
         type,
         sentences,
         id: item.id,
+        reuse: item.reuse,
         description: item.description,
         bestDataFormatForSharing: item.bestDataFormatForSharing,
         bestPracticeForIndicatingReUseOfExistingData: item.bestPracticeForIndicatingReUseOfExistingData,

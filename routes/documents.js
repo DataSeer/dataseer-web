@@ -343,7 +343,10 @@ router.get('/:id/finish', function (req, res, next) {
         conf: conf,
         document: doc,
         sortedDatasets: sortedDatasets,
-        bestPractices: DocumentsDatasetsController.getBestPractices(sortedDatasets.all, req.app.get('dataTypes')),
+        bestPractices: DocumentsDatasetsController.getBestPractices(
+          [].concat(sortedDatasets.protocols, sortedDatasets.datasets, sortedDatasets.codes, sortedDatasets.reagents),
+          req.app.get('dataTypes')
+        ),
         current_user: req.user
       });
     }

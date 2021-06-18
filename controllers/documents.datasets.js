@@ -119,7 +119,7 @@ Self.getDataTypeInfos = function (dataset = {}, dataTypes = {}, opts = {}) {
     url = dataTypes.metadata[type] && dataTypes.metadata[type].url ? dataTypes.metadata[type].url : '';
   return {
     url,
-    label,
+    label: dataset.reuse ? `${label} (reuse)` : label,
     description: opts.convertHTML ? Self.getTextOfHtml(description) : description,
     bestDataFormatForSharing: opts.convertHTML
       ? Self.getTextOfHtml(bestDataFormatForSharing)
