@@ -114,9 +114,7 @@ block content
                     a(href=dataset.type.url) #{dataset.type.label}
                   </td>
                 else
-                  <td>
-                    #{dataset.type.label}
-                  </td>
+                  <td>#{dataset.type.label}</td>
                 if dataset.name
                   <td>
                     a(href=`#${dataset.id}`) #{dataset.name}
@@ -177,9 +175,7 @@ block content
                           a(href=dataset.type.url) #{dataset.type.label}
                         </td>
                       else
-                        <td>
-                          #{dataset.type.label}
-                        </td>
+                        <td>#{dataset.type.label}</td>
                     else
                       <td>n/a</td>
                     if dataset.sentences
@@ -212,13 +208,22 @@ block content
               ul
                 li
                   h4 Description:
-                li 
-                  | !{item.description}
+                li
+                  if(item.description)
+                    | !{item.description}
+                  else
+                    <p>n/a</p>
                 li
                   h4 Best practice for sharing this type of data:
-                li 
-                  | !{item.bestDataFormatForSharing}
+                li
+                  if(item.bestDataFormatForSharing)
+                    | !{item.bestDataFormatForSharing}
+                  else
+                    <p>n/a</p>
                 li
                   h4 Most suitable repositories:
-                li 
-                  | !{item.mostSuitableRepositories}
+                li
+                  if(item.mostSuitableRepositories)
+                    | !{item.mostSuitableRepositories}
+                  else
+                    <p>n/a</p>

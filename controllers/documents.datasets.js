@@ -85,38 +85,44 @@ Self.createDataset = function (opts = {}) {
  * @returns {object} sorted datasets
  */
 Self.getDataTypeInfos = function (dataset = {}, dataTypes = {}, opts = {}) {
-  let type = dataset.subType ? dataset.subType : dataset.dataType,
-    label = dataset.subType
-      ? `${
-          dataTypes.metadata[dataset.dataType] && dataTypes.metadata[dataset.dataType].label
-            ? dataTypes.metadata[dataset.dataType].label
-            : dataset.dataType
-        }: ${
-          dataTypes.metadata[dataset.subType] && dataTypes.metadata[dataset.subType].label
-            ? dataTypes.metadata[dataset.subType].label
-            : dataset.subType
-        }`
-      : dataTypes.metadata[dataset.dataType] && dataTypes.metadata[dataset.dataType].label
-      ? dataTypes.metadata[dataset.dataType].label
-      : dataset.dataType,
-    description =
-      dataTypes.metadata[type] && dataTypes.metadata[type].description
-        ? dataTypes.metadata[type].description
-        : dataset.description,
-    bestDataFormatForSharing =
-      dataTypes.metadata[type] && dataTypes.metadata[type].bestDataFormatForSharing
-        ? dataTypes.metadata[type].bestDataFormatForSharing
-        : dataset.bestDataFormatForSharing,
-    mostSuitableRepositories =
-      dataTypes.metadata[type] &&
-      dataTypes.metadata[type].mostSuitableRepositories &&
-      dataTypes.metadata[type].mostSuitableRepositories.default &&
-      dataTypes.metadata[type].mostSuitableRepositories.reuse
-        ? dataset.reuse
-          ? dataTypes.metadata[type].mostSuitableRepositories.reuse
-          : dataTypes.metadata[type].mostSuitableRepositories.default
-        : dataset.mostSuitableRepositories,
-    url = dataTypes.metadata[type] && dataTypes.metadata[type].url ? dataTypes.metadata[type].url : '';
+  let type = dataset.subType ? dataset.subType : dataset.dataType;
+  let label = dataset.subType
+    ? `${
+        dataTypes.metadata[dataset.dataType] && dataTypes.metadata[dataset.dataType].label
+          ? dataTypes.metadata[dataset.dataType].label
+          : dataset.dataType
+      }: ${
+        dataTypes.metadata[dataset.subType] && dataTypes.metadata[dataset.subType].label
+          ? dataTypes.metadata[dataset.subType].label
+          : dataset.subType
+      }`
+    : dataTypes.metadata[dataset.dataType] && dataTypes.metadata[dataset.dataType].label
+    ? dataTypes.metadata[dataset.dataType].label
+    : `${dataset.dataType} (custom)`;
+  let description =
+    dataTypes.metadata[type] && dataTypes.metadata[type].description
+      ? dataTypes.metadata[type].description
+      : dataset.description;
+  let bestDataFormatForSharing =
+    dataTypes.metadata[type] && dataTypes.metadata[type].bestDataFormatForSharing
+      ? dataTypes.metadata[type].bestDataFormatForSharing
+      : dataset.bestDataFormatForSharing;
+  let bestPracticeForIndicatingReUseOfExistingData =
+    dataTypes.metadata[type] && dataTypes.metadata[type].bestPracticeForIndicatingReUseOfExistingData
+      ? dataTypes.metadata[type].bestPracticeForIndicatingReUseOfExistingData
+      : dataset.bestPracticeForIndicatingReUseOfExistingData;
+  // case reuse => pick bestPracticeForIndicatingReUseOfExistingData and not bestDataFormatForSharing
+  bestDataFormatForSharing = dataset.reuse ? bestPracticeForIndicatingReUseOfExistingData : bestDataFormatForSharing;
+  let mostSuitableRepositories =
+    dataTypes.metadata[type] &&
+    dataTypes.metadata[type].mostSuitableRepositories &&
+    dataTypes.metadata[type].mostSuitableRepositories.default &&
+    dataTypes.metadata[type].mostSuitableRepositories.reuse
+      ? dataset.reuse
+        ? dataTypes.metadata[type].mostSuitableRepositories.reuse
+        : dataTypes.metadata[type].mostSuitableRepositories.default
+      : dataset.mostSuitableRepositories;
+  let url = dataTypes.metadata[type] && dataTypes.metadata[type].url ? dataTypes.metadata[type].url : '';
   return {
     url,
     label: dataset.reuse ? `${label} (reuse)` : label,
