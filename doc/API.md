@@ -125,9 +125,13 @@ All these routes return a JSON object:
   - [(GET) /api/organisations](#get-apiorganisations)
   - [(GET) /api/organisations/:id](#get-apiorganisationsid)
 
+### Statistics
+
+  - [(GET) /api/statistics/documents](#get-apistatisticsdocuments)
+  - [(GET) /api/statistics/documents/:id](#get-apistatisticsdocumentsid)
+
 ### Documents
 
-  - [(GET) /api/documents](#get-apidocuments)
   - [(POST) /api/documents](#post-apidocuments)
   - [(GET) /api/documents/:id](#get-apidocumentsid)
   - [(GET) /api/documents/:id/pdf](#get-apidocumentsidpdf)
@@ -485,125 +489,6 @@ curl "http://localhost:3000/api/organisations/5e2f6afe0bb7cd4cdfba9f03?token=MY_
 {
   "err": false,
   "res": {...} // An organisation JSON representation (see models section to get more infos)
-}
-```
-
----
-
-### (GET) /api/documents
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return all documents.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>limit</td>
-      <td>optional</td>
-      <td>Maximum number of returned results (default:20)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>skip</td>
-      <td>optional</td>
-      <td>Number of documents skipped (default:0)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>pdf</td>
-      <td>optional</td>
-      <td>If this parameter is set document.pdf will be filled with data.<br/>Else this property will only contain an id.</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>tei</td>
-      <td>optional</td>
-      <td>If this parameter is set document.tei will be filled with data.<br/>Else this property will only contain an id.</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>files</td>
-      <td>optional</td>
-      <td>If this parameter is set document.files will be filled with data.<br/>Else this property will only contain an id.</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>metadata</td>
-      <td>optional</td>
-      <td>If this parameter is set document.metadata will be filled with data.<br/>Else this property will only contain an id.</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>datasets</td>
-      <td>optional</td>
-      <td>If this parameter is set document.datasets will be filled with data.<br/>Else this property will only contain an id.</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>logs</td>
-      <td>optional</td>
-      <td><strong>Only available for curators:</strong><br/>If this parameter is set document.logs will be filled with data.<br/>Else this property will only contain a list of ids.</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return the 30 first documents
-curl "http://localhost:3000/api/documents?limit=30" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents?limit=30&token=MY_TOKEN"
-# Will return from the 10th to the 40th first documents
-curl "http://localhost:3000/api/documents?limit=30&skip=10" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents?limit=30&skip=10&token=MY_TOKEN"
-# Will return the 20 first documents with data filled for properties: pdf, tei, files, metadata, datasets
-curl "http://localhost:3000/api/documents/?pdf=true&tei=true&files=true&metadata=true&datasets=true" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents/?pdf=true&tei=true&files=true&metadata=true&datasets=true&token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": [{...}, {...}] // Array of documents
 }
 ```
 
