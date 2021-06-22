@@ -85,20 +85,21 @@ Self.createDataset = function (opts = {}) {
  * @returns {object} sorted datasets
  */
 Self.getDataTypeInfos = function (dataset = {}, dataTypes = {}, opts = {}) {
-  let type = dataset.subType ? dataset.subType : dataset.dataType;
-  let label = dataset.subType
-    ? `${
-        dataTypes.metadata[dataset.dataType] && dataTypes.metadata[dataset.dataType].label
-          ? dataTypes.metadata[dataset.dataType].label
-          : dataset.dataType
-      }: ${
-        dataTypes.metadata[dataset.subType] && dataTypes.metadata[dataset.subType].label
-          ? dataTypes.metadata[dataset.subType].label
-          : dataset.subType
-      }`
-    : dataTypes.metadata[dataset.dataType] && dataTypes.metadata[dataset.dataType].label
-    ? dataTypes.metadata[dataset.dataType].label
-    : `${dataset.dataType} (custom)`;
+  let hasDataType = !!dataset.dataType;
+  let hasSubType = !!dataset.subType;
+  let dataTypeIsKnown =
+    hasDataType && dataTypes.metadata[dataset.dataType] && dataTypes.metadata[dataset.dataType].label;
+  let subTypeIsKnown = hasSubType && dataTypes.metadata[dataset.subType] && dataTypes.metadata[dataset.subType].label;
+  let isCustom = !(dataTypeIsKnown || subTypeIsKnown);
+  let type = hasSubType ? dataset.subType : dataset.dataType;
+  let dataType = '';
+  let subType = '';
+  // case there is a dataType
+  if (hasDataType) dataType = dataTypeIsKnown ? dataTypes.metadata[dataset.dataType].label : dataset.dataType;
+  // case there is a subType
+  if (hasSubType) subType = subTypeIsKnown ? dataTypes.metadata[dataset.subType].label : dataset.subType;
+  // build label
+  let label = subType ? `${dataType}: ${subType}` : dataType;
   let description =
     dataTypes.metadata[type] && dataTypes.metadata[type].description
       ? dataTypes.metadata[type].description
@@ -112,7 +113,7 @@ Self.getDataTypeInfos = function (dataset = {}, dataTypes = {}, opts = {}) {
       ? dataTypes.metadata[type].bestPracticeForIndicatingReUseOfExistingData
       : dataset.bestPracticeForIndicatingReUseOfExistingData;
   // case reuse => pick bestPracticeForIndicatingReUseOfExistingData and not bestDataFormatForSharing
-  bestDataFormatForSharing = dataset.reuse ? bestPracticeForIndicatingReUseOfExistingData : bestDataFormatForSharing;
+  // bestDataFormatForSharing = dataset.reuse ? bestPracticeForIndicatingReUseOfExistingData : bestDataFormatForSharing;
   let mostSuitableRepositories =
     dataTypes.metadata[type] &&
     dataTypes.metadata[type].mostSuitableRepositories &&
@@ -124,12 +125,18 @@ Self.getDataTypeInfos = function (dataset = {}, dataTypes = {}, opts = {}) {
       : dataset.mostSuitableRepositories;
   let url = dataTypes.metadata[type] && dataTypes.metadata[type].url ? dataTypes.metadata[type].url : '';
   return {
-    url,
-    label: dataset.reuse ? `${label} (reuse)` : label,
+    isCustom: isCustom,
+    url: url,
+    label: label,
+    dataType: dataType,
+    subType: subType,
     description: opts.convertHTML ? Self.getTextOfHtml(description) : description,
     bestDataFormatForSharing: opts.convertHTML
       ? Self.getTextOfHtml(bestDataFormatForSharing)
       : bestDataFormatForSharing,
+    bestPracticeForIndicatingReUseOfExistingData: opts.convertHTML
+      ? Self.getTextOfHtml(bestPracticeForIndicatingReUseOfExistingData)
+      : bestPracticeForIndicatingReUseOfExistingData,
     mostSuitableRepositories: opts.convertHTML ? Self.getTextOfHtml(mostSuitableRepositories) : mostSuitableRepositories
   };
 };
@@ -154,6 +161,40 @@ Self.getBestPractices = function (datasets = [], dataTypes = {}, opts = {}) {
     },
     { key: {}, data: [] }
   );
+};
+
+/**
+ * Get summary of datasets
+ * @param {array} datasetsInfos - Array of datasetsInfos
+ * @returns {array} summary
+ */
+Self.getDatasetsSummary = function (datasetsInfos = []) {
+  let datatypes = {};
+  let result = [];
+  datasetsInfos.reduce(function (acc, item) {
+    if (typeof acc[item.dataType] === 'undefined')
+      acc[item.dataType] = { key: item.dataType, label: item.type.dataType, count: 0, subTypes: {} };
+    acc[item.dataType].count++;
+    if (item.subType) {
+      if (typeof acc[item.dataType].subTypes[item.subType] === 'undefined')
+        acc[item.dataType].subTypes[item.subType] = { key: item.subType, label: item.type.subType, count: 0 };
+      acc[item.dataType].subTypes[item.subType].count++;
+    }
+    return acc;
+  }, datatypes);
+  for (let key in datatypes) {
+    let item = {
+      key: datatypes[key].key,
+      count: datatypes[key].count,
+      label: datatypes[key].label,
+      subTypes: []
+    };
+    for (let k in datatypes[key].subTypes) {
+      item.subTypes.push(datatypes[key].subTypes[k]);
+    }
+    result.push(item);
+  }
+  return result;
 };
 
 /**

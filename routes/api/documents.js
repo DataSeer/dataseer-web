@@ -26,32 +26,6 @@ const DocumentsFilesController = require('../../controllers/documents.files.js')
 
 const conf = require('../../conf/conf.json');
 
-/* GET ALL Documents */
-router.get('/', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role does not grant you access to this part of the website');
-  let limit = parseInt(req.query.limit),
-    skip = parseInt(req.query.skip),
-    isCurator = AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator),
-    query = {};
-  if (isNaN(limit)) limit = 20;
-  if (isNaN(skip) || skip < 0) skip = 0;
-  // Init transaction
-  let transaction = Documents.find(query).skip(skip).limit(limit);
-  // Populate dependings on the parameters
-  if (req.query.pdf) transaction.populate('pdf');
-  if (req.query.tei) transaction.populate('tei');
-  if (req.query.files) transaction.populate('files');
-  if (req.query.metadata) transaction.populate('metadata');
-  if (req.query.datasets) transaction.populate('datasets');
-  if (isCurator && req.query.logs) transaction.populate('logs');
-  return transaction.exec(function (err, docs) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else if (!docs) return res.json({ 'err': true, 'res': null, 'msg': 'document(s) not found' });
-    return res.json({ 'err': false, 'res': docs });
-  });
-});
-
 /* POST new Document */
 router.post('/', function (req, res, next) {
   let opts = DocumentsController.getUploadParams(Object.assign({ files: req.files }, req.body), req.user),
