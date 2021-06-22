@@ -9,6 +9,7 @@
     - [Accounts](#accounts)
     - [Roles](#roles)
     - [Organisations](#organisations)
+    - [Statistics](#statistics)
     - [Documents](#documents)
     - [Documents Files](#documents-files)
     - [Documents Datasets](#documents-datasets)
