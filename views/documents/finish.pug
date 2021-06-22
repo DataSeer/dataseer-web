@@ -111,7 +111,7 @@ block content
               <tr class="content">
                 if (dataset.type.url)
                   <td>
-                    a(href=dataset.type.url) #{dataset.type.label}
+                    a(href=dataset.type.url) #{`${dataset.type.label}${dataset.type.isCutom ? ' (custom)' : ''}${dataset.reuse ? ' (resuse)' : ''}`}
                   </td>
                 else
                   <td>#{dataset.type.label}</td>
@@ -155,6 +155,7 @@ block content
                   <th>Data Sentence</th>
                 <th>Stable Identifier</th>
                 <th>Comments</th>
+                <th>Re-Use</th>
               </tr>
               each dataset, index in sortedDatasets[item.key]
                 tr(class="content" id=dataset.id)
@@ -192,6 +193,10 @@ block content
                     <td>#{dataset.comments}</td>
                   else
                     <td>n/a</td>
+                  if dataset.reuse
+                    <td>Yes</td>
+                  else
+                    <td>No</td>
 
     div(class='row row-margin')
       div(class='col-12')
@@ -218,6 +223,13 @@ block content
                 li
                   if(item.bestDataFormatForSharing)
                     | !{item.bestDataFormatForSharing}
+                  else
+                    <p>n/a</p>
+                li
+                  h4 Best practice for indicating re-use of existing data:
+                li
+                  if(item.bestPracticeForIndicatingReUseOfExistingData)
+                    | !{item.bestPracticeForIndicatingReUseOfExistingData}
                   else
                     <p>n/a</p>
                 li

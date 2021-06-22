@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  link(rel='stylesheet' href=conf.root + 'stylesheets/process/'+ document.status + '.css')
+  link(rel='stylesheet' href=conf.root + 'stylesheets/style.css')
+  <title>DataSeer Data Discovery Report</title>
+</head>
+<body>
+  <h1>Data Discovery/Status Report</h1>
+  <p>
+    <div>Article Title:</div><div>#{document.metadata.article_title}</div> 
+  </p>
+  <p>
+    <div>DOI:</div><div>#{document.metadata.DOI}</div>
+  </p>
+  <p>
+    <div>Authors:</div><div>#{document.metadata.authors.filter((item)=>!!item.name).map((item)=>item.name).join(",")}</div>
+  </p>
+  <p>
+    <div>Preprint Link:</div><div>unknow</div>
+  </p>
+  <p>
+    <div>DataSeer Link:</div><div>#{document.pdf.filename}<div>
+  </p>
+  <br/>
+  <p>
+    <div>Summary List of datasets associated with article:</div>
+    <ul>
+        each item in [{"key":"protocols","label": "Protocols"},{"key":"datasets","label": "Datasets"},{"key":"codes","label": "Codes"},{"key":"reagents","label": "Reagents/Materials/Lab Resources"}]
+          li #{`${sortedDatasets[item.key].length} ${item.label}`}
+            if (item.key === "datasets")
+              each dataType in datasetsSummary
+                if(dataType.key !== "other")
+                  ul
+                    li #{`${dataType.count} ${dataType.label}`}
+                      ul
+                        if (dataType.subTypes && dataType.subTypes.length)
+                          each subtype in dataType.subTypes
+                            li #{`${subtype.count} ${subtype.label}`}
+  </p>
+              
+  </ul>
+</body>
+</html>
