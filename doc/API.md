@@ -494,6 +494,208 @@ curl "http://localhost:3000/api/organisations/5e2f6afe0bb7cd4cdfba9f03?token=MY_
 
 ---
 
+### (GET) /api/statistics/documents
+
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route return some statistics about documents.
+
+#### Role required
+
+Accessible to users with the following role : **standard_user, annotator, curator**.
+
+#### Parameters
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Request type</th>
+      <th>Response type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>limit</td>
+      <td>optional</td>
+      <td>limit of returned documents statistics (default: 20)</i></td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>sort</td>
+      <td>optional</td>
+      <td>Will sort statistics depending of document creation date (avalable values: asc OR desc, default: asc)</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>skip</td>
+      <td>optional</td>
+      <td>Number of documents statistics skipped (default: 0)</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>upload_range</td>
+      <td>optional</td>
+      <td>Set this parameter to get statistics of documents uploaded in the last given days (will be overwritten by uploaded_before parameter)</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>update_range</td>
+      <td>optional</td>
+      <td>Set this parameter to get statistics of documents updated in the last given days (will be overwritten by updated_before parameter)</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>uploaded_before</td>
+      <td>optional</td>
+      <td>Set this parameter to get statistics of documents uploaded before the given date</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>uploaded_after</td>
+      <td>optional</td>
+      <td>Set this parameter to get statistics of documents uploaded after the given date</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>updated_before</td>
+      <td>optional</td>
+      <td>Set this parameter to get statistics of documents updated before the given date</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>updated_after</td>
+      <td>optional</td>
+      <td>Set this parameter to get statistics of documents updated after the given date</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return the statistics of 20 first uploaded documents
+curl "http://localhost:3000/api/statistics/documents" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/statistics/documents?token=MY_TOKEN"
+
+# Note: You could combine the following parameters (beware of the risk of overwriting)
+# Will return the statistics of documents uploaded in the last 10 days
+curl "http://localhost:3000/api/statistics/documents?upload_range=10"
+# Will return statistics of documents updated in the last 10 days
+curl "http://localhost:3000/api/statistics/documents?update_range=10"
+# Will return statistics of documents uploaded before 2021-01-01
+curl "http://localhost:3000/api/statistics/documents?uploaded_before=2021-01-01"
+# Will return statistics of documents uploaded after 2021-01-01
+curl "http://localhost:3000/api/statistics/documents?uploaded_after=2021-01-01"
+# Will return statistics of documents updated before 2021-01-01
+curl "http://localhost:3000/api/statistics/documents?updated_before=2021-01-01"
+# Will return statistics of documents updated after 2021-01-01
+curl "http://localhost:3000/api/statistics/documents?updated_after=2021-01-01"
+```
+
+#### Result
+
+```js
+{
+  "err": false,
+  "res": [
+    {
+      "_id": "60ca75d9c14419566dfd22b2", // request http://localhost:3000/api/statistics/documents/60ca75d9c14419566dfd22b2 to get more infos about datasets
+      "doi": "DOI of the given article",
+      "title": "Title of the given article",
+      "uploaded_at": "2021-06-17", // date of upload
+      "updated_at": "2021-06-18", // date of the last update
+      "datasets": { // datasets statistics
+        "total": 13, // total of datasets
+        "validated": 10 // number of datasets validated by DataSeer process
+      }
+    },
+    ...
+  ]
+}
+```
+
+---
+
+### (GET) /api/statistics/documents/:id
+
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route return some statistics about the given document.
+
+#### Role required
+
+Accessible to users with the following role : **standard_user, annotator, curator**.
+
+#### Parameters
+
+No parameters available
+
+#### How to request
+
+```bash
+# Will return the organisation (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
+curl "http://localhost:3000/api/statistics/documents/60ca75d9c14419566dfd22b2" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/statistics/documents/60ca75d9c14419566dfd22b2?token=MY_TOKEN"
+```
+
+#### Result
+
+```js
+{
+  "err": false,
+  "res": {
+    "_id": "60ca75d9c14419566dfd22b2",
+    "doi": "DOI of the given article",
+    "title": "Title of the given article",
+    "uploaded_at": "2021-06-17", // date of upload
+    "updated_at": "2021-06-18", // date of the last update
+    "datasets": [
+      {
+        "id": "dataset-1",
+        "name": "The dataset name",
+        "reuse": false, // true or false
+        "type": {
+          "name": "Other: Protocol", // the datatype of this dataset, all datatypes available here: https://wiki.dataseer.ai/doku.php?id=data_type
+          "url": "https://wiki.dataseer.ai/doku.php?id=data_type:other:protocol" // url of this datatype
+        }
+      },
+      ...
+    ]
+  }
+}
+```
+
+---
+
 ### (POST) /api/documents
 
 
