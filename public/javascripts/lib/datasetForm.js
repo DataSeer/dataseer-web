@@ -587,8 +587,8 @@ DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
   let self = this;
   let text = data.dataset.sentences
     .sort(function (a, b) {
-      let c = parseInt(a.id.replace('sentence-', '')),
-        d = parseInt(b.id.replace('sentence-', ''));
+      let c = parseInt(a.id.replace('sentence-', ''), 10),
+        d = parseInt(b.id.replace('sentence-', ''), 10);
       return c - d;
     })
     .map(function (item) {
@@ -650,6 +650,7 @@ DatasetForm.prototype.addTab = function (dataset, opts) {
 DatasetForm.prototype.refreshDataset = function (data = {}, opts = {}, callback) {
   if (!data.dataset) {
     this.setEmptyMessage();
+    this.showMessage();
     return typeof callback === 'function' ? callback(true) : undefined;
   }
   this.dataset.color = data.dataset.color;

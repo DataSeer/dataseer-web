@@ -23,173 +23,219 @@ block content
           button.btn.btn-primary.waves-effect.waves-light.bg-primary(type='button' id='getPublicURL' style='margin-left:10px;' title='Send URL by email') Annotator feedback
       if(current_user.role.label === "curator")
         div(class='row-margin')
-          button.blue.btn.btn-primary.waves-effect.waves-light#refresh_datasets(type='button' title='Refresh datasets informations')
-            <i class="fas fa-sync-alt"></i> Refresh datasets
+          a(href=conf.root + "api/documents/" + document._id + "/finish/report" target="_blank")
+            button.blue.btn.btn-primary.waves-effect.waves-light#download_report(type='button' title='Download report') Download Report
+
 
     div(class='row row-margin')
       div(class='col-12')
-        div(class='key d-inline font-weight-bold') Suggested Data Availability Statement: 
-    
-    div(class='row row-margin')
-      div(class='value d-block statements-container')
-        each dataset, index in document.datasets.current
-          if dataset.DOI
-            div(class='col-12')
-              if dataset.name
-                div(class='value d-block' style="margin-bottom: 4px;") #{dataset.name}: 
-                  a(href=dataset.DOI) #{dataset.DOI}
-              else
-                div(class='value d-block' style="margin-bottom: 4px;") Dataset #{index + 1}: 
-                  a(href=dataset.DOI) #{dataset.DOI}
-          else if dataset.comments
-            div(class='col-12')
-              if dataset.name
-                div(class='value d-block' style="margin-bottom: 4px;") #{dataset.name}: #{dataset.comments}
-              else
-                div(class='value d-block' style="margin-bottom: 4px;") Dataset #{index + 1}: #{dataset.comments}
-          else
-            div(class='col-12')
-              if dataset.name
-                div(class='value d-block' style="margin-bottom: 4px;") #{dataset.name}: .
-              else
-                div(class='value d-block' style="margin-bottom: 4px;") Dataset #{index + 1}: .
+        div(class='key d-inline font-weight-bold') Links: 
+        div(class='value d-inline')
+          a(href=publicURL target="_blank") DataSeer document
+        if (document.tei && document.tei.filename)
+          div(class='value d-inline') 
+            a(href=conf.root + "api/documents/" + document._id + "/tei/content" target="_blank") TEI
+        if (document.pdf && document.pdf.filename)
+          div(class='value d-inline') 
+            a(href=conf.root + "api/documents/" + document._id + "/pdf/content" target="_blank") PDF
 
     div(class='row row-margin')
-      if document.metadata.authors.length > 0
-        div(class='col-12')
-          div(class='key d-inline font-weight-bold') Authors: 
-            div(class='value d-block authors-container')
-              ul
-                each val, index in document.metadata.authors
-                  if val.name
-                    if (val.email)
-                      <li> #{val.name} (<strong>#{val.email}</strong>)
-                    else
-                      li #{val.name}
-                    ul
-                      if val.name && val.affiliations
-                        each aff, index in val.affiliations
-                          li #{aff}
-
+      div(class='col-12')
+        h2.report Metadata:
+    div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Title: 
-        div(class='value d-inline') #{document.metadata.article_title}
+        if (document.metadata.article_title)
+          div(class='value d-inline') #{document.metadata.article_title}
+        else
+          div(class='value d-inline') n/a
+    div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Manuscript #: 
-        div(class='value d-inline') #{document.metadata.manuscript_id}
+        if (document.metadata.manuscript_id)
+          div(class='value d-inline') #{document.metadata.manuscript_id}
+        else
+          div(class='value d-inline') n/a
+    div(class='row row-margin')
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Submitting Author: 
-        div(class='value d-inline') #{document.metadata.submitting_author}
+        if (document.metadata.submitting_author)
+          div(class='value d-inline') #{document.metadata.submitting_author}
+        else
+          div(class='value d-inline') n/a
       div(class='col-12')
         div(class='key d-inline font-weight-bold') Submitting Author email: 
-        div(class='value d-inline') #{document.metadata.submitting_author_email}
+        if (document.metadata.submitting_author_email)
+          div(class='value d-inline') #{document.metadata.submitting_author_email}
+        else
+          div(class='value d-inline') n/a
 
     div(class='row row-margin')
       div(class='col-12')
-        div(class='key d-inline font-weight-bold') Datasets:
+        h3.report Authors:
+        if document.metadata.authors.length > 0
+          div(class='row row-margin')
+            div(class='col-12')
+              div(class='value d-block authors-container')
+                ul
+                  each val, index in document.metadata.authors
+                    if val.name
+                      if (val.email)
+                        <li> #{val.name} (<strong>#{val.email}</strong>)
+                      else
+                        li #{val.name}
+                      ul
+                        if val.name && val.affiliations
+                          each aff, index in val.affiliations
+                            li #{aff}
+        else
+          div(class='row row-margin')
+            div(class='col-12')
+              div(class='value d-block authors-container') None
 
-    if document.datasets.current.length === 0
-      div(class='row')
-        div(class='col-12')
-          div(class='value d-block') None
-    else
-      div(class='row')
-        div(class='col-12')
-          div(class='value d-block datasets-container')
-            table
-              each dataset, index in document.datasets.current
-                <tr>
-                  <th class='font-weight-bold' colspan='2'>Dataset #{index+1} :</th>
-                </tr>
-                <tr>
-                  <td>Dataset Name:</td>
+    div(class='row row-margin')
+      div(class='col-12')
+          h3.report Suggested Data Availability Statement:</td></tr>
+    div(class='row row-margin')
+      div(class='col-12')
+        table(class="report")
+          if sortedDatasets.all.length === 0
+            <tr class="none"><td>None</td></tr>
+          else
+            <tr class="header">
+              <th>Data Type</th>
+              <th>Title</th>
+              <th>Stable Identifier</th>
+            </tr>
+            each dataset, index in sortedDatasets.all
+              <tr class="content">
+                if (dataset.type.url)
+                  <td>
+                    a(href=dataset.type.url) #{`${dataset.type.label}${dataset.type.isCutom ? ' (custom)' : ''}${dataset.reuse ? ' (resuse)' : ''}`}
+                  </td>
+                else
+                  <td>#{dataset.type.label}</td>
+                if dataset.name
+                  <td>
+                    a(href=`#${dataset.id}`) #{dataset.name}
+                  </td>
+                else
+                  <td>
+                    a(href=`#${dataset.id}`) Please provide a name to this dataset
+                  </td>
+                if dataset.DOI
+                  <td>
+                    a(href=dataset.DOI) #{dataset.DOI}
+                  </td>
+                else if dataset.comments
+                  <td>#{dataset.comments}</td>
+                else
+                  <td>.</td>
+              </tr>
+
+    div(class='row row-margin')
+      div(class='col-12')
+        h2.report Datasets:
+
+    div(class='row row-margin')
+      div(class='col-12')
+        each item in [{"key":"protocols","label": "Protocols", "colspan": 5},{"key":"datasets","label": "Datasets", "colspan": 6},{"key":"codes","label": "Codes", "colspan": 5},{"key":"reagents","label": "Reagents", "colspan": 5}]
+          h3.report #{item.label}:
+          table(class="report")
+            if sortedDatasets[item.key].length === 0
+              <tr class="none"><td>None</td></tr>
+            else
+              <tr class="header">
+                <th>N°</th>
+                <th>Title</th>
+                if (item.key !== "datasets")
+                  <th colspan=2>Data Sentence</th>
+                else
+                  <th>Datatype</th>
+                  <th>Data Sentence</th>
+                <th>Stable Identifier</th>
+                <th>Comments</th>
+                <th>Re-Use</th>
+              </tr>
+              each dataset, index in sortedDatasets[item.key]
+                tr(class="content" id=dataset.id)
+                  <td>#{index+1}</td>
                   if dataset.name
                     <td>#{dataset.name}</td>
                   else
                     <td>Please provide a name to this dataset</td>
-                </tr>
-                <tr>
-                  <td>Data Type:</td>
-                  if dataset.subType !== ''
-                    <td>#{dataset.dataType} - #{dataset.subType}</td>
+                  if (item.key !== "datasets")
+                    if dataset.sentences
+                      <td colspan=2>#{dataset.sentences.map((item) => item.text)}</td>
+                    else
+                      <td colspan=2>n/a</td>
                   else
-                    <td>#{dataset.dataType}</td>
-                </tr>
-                <tr>
-                  <td>Data Sentence:</td>
-                  if dataset.sentences
-                    <td>#{dataset.sentences.sort((a, b) => parseInt(a.id.replace('sentence-', '')) - parseInt(b.id.replace('sentence-', ''))).map((item) => item.text)}</td>
-                  else
-                    <td>n/a</td>
-                </tr>
-                <tr>
-                  <td>Stable Identifier:</td>
+                    if (dataset.type)
+                      if (dataset.type.url)
+                        <td>
+                          a(href=dataset.type.url) #{dataset.type.label}
+                        </td>
+                      else
+                        <td>#{dataset.type.label}</td>
+                    else
+                      <td>n/a</td>
+                    if dataset.sentences
+                      <td>#{dataset.sentences.map((item) => item.text)}</td>
+                    else
+                      <td>n/a</td>
                   if dataset.DOI
                     <td>
                       a(href=dataset.DOI) #{dataset.DOI}
                     </td>
                   else
-                    <td>Please provide the DOI (or other stable link) to this dataset</td>
-                </tr>
-                <tr>
-                  <td>Comments:</td>
+                    <td>n/a</td>
                   if dataset.comments
                     <td>#{dataset.comments}</td>
                   else
-                    <td>Please enter any comments (such as a reason why this dataset cannot be shared)</td>
-                </tr>
+                    <td>n/a</td>
+                  if dataset.reuse
+                    <td>Yes</td>
+                  else
+                    <td>No</td>
 
     div(class='row row-margin')
       div(class='col-12')
-        div(class='key d-inline font-weight-bold') Deleted Datasets:
-
-    if document.datasets.deleted.length === 0
-      div(class='row')
-        div(class='col-12')
-          div(class='value d-block') None
-    else
-      div(class='row')
-        div(class='col-12')
-          div(class='value d-block datasets-container')
-            table
-              each dataset, index in document.datasets.deleted
-                <tr>
-                  <th class='font-weight-bold' colspan='2'>Dataset #{index+1} :</th>
-                </tr>
-                <tr>
-                  <td>Dataset Name:</td>
-                  if dataset.name
-                    <td>#{dataset.name}</td>
+        h2.report Sharing best practice:
+    div(class='row row-margin')
+      div(class='col-12')
+        if sortedDatasets.all.length === 0
+          div(class="bestPractice") None
+        else
+          each item in bestPractices.data
+            div(class="bestPractice")
+              h3.report
+                a(href=item.url) #{item.label}
+              ul
+                li
+                  h4 Description:
+                li
+                  if(item.description)
+                    | !{item.description}
                   else
-                    <td>n/a</td>
-                </tr>
-                <tr>
-                  <td>Data Type:</td>
-                  if dataset.subType !== ''
-                    <td>#{dataset.dataType} - #{dataset.subType}</td>
+                    <p>n/a</p>
+                li
+                  h4 Best practice for sharing this type of data:
+                li
+                  if(item.bestDataFormatForSharing)
+                    | !{item.bestDataFormatForSharing}
                   else
-                    <td>#{dataset.dataType}</td>
-                </tr>
-                <tr>
-                  <td>Data Sentence:</td>
-                  if dataset.sentences
-                    <td>#{dataset.sentences.sort((a, b) => parseInt(a.id.replace('sentence-', '')) - parseInt(b.id.replace('sentence-', ''))).map((item) => item.text)}</td>
+                    <p>n/a</p>
+                li
+                  h4 Best practice for indicating re-use of existing data:
+                li
+                  if(item.bestPracticeForIndicatingReUseOfExistingData)
+                    | !{item.bestPracticeForIndicatingReUseOfExistingData}
                   else
-                    <td>n/a</td>
-                </tr>
-                <tr>
-                  <td>Stable Identifier:</td>
-                  if dataset.DOI
-                    <td>
-                      a(href=dataset.DOI) #{dataset.DOI}
-                    </td>
+                    <p>n/a</p>
+                li
+                  h4 Most suitable repositories:
+                li
+                  if(item.mostSuitableRepositories)
+                    | !{item.mostSuitableRepositories}
                   else
-                    <td>n/a</td>
-                </tr>
-                <tr>
-                  <td>Comments:</td>
-                  if dataset.comments
-                    <td>#{dataset.comments}</td>
-                  else
-                    <td>n/a</td>
-                </tr>
+                    <p>n/a</p>

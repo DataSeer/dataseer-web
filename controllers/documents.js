@@ -439,6 +439,68 @@ Self.upload = function (opts = {}, events, cb) {
 };
 
 /**
+ * Sort datasets of the given document (useful to create reports)
+ * @param {object} doc - Document mongodb object
+ * @param {object} dataTypes - dataTypes object
+ * @returns {object} sorted datasets
+ */
+Self.getSortedDatasets = function (doc, dataTypes = {}) {
+  let mapping =
+    doc.pdf && doc.pdf.metadata && doc.pdf.metadata.mapping
+      ? doc.pdf.metadata.mapping.object
+      : doc.tei && doc.tei.metadata && doc.tei.metadata.mapping
+      ? doc.tei.metadata.mapping.object
+      : {};
+  let sortSentences = function (a, b) {
+    let c = mapping[a.id] ? mapping[a.id] : null,
+      d = mapping[b.id] ? mapping[b.id] : null;
+    if (c === null && d === null) return 0;
+    if (c === null) return 1;
+    if (d === null) return -1;
+    return c - d;
+  };
+  let orderedDatasets = doc.datasets.current
+    .map(function (item) {
+      // sort sentences
+      let sentences = item.sentences.sort(sortSentences);
+      let type = DocumentsDatasetsController.getDataTypeInfos(item, dataTypes);
+      return {
+        type,
+        sentences,
+        id: item.id,
+        reuse: item.reuse,
+        description: item.description,
+        bestDataFormatForSharing: item.bestDataFormatForSharing,
+        bestPracticeForIndicatingReUseOfExistingData: item.bestPracticeForIndicatingReUseOfExistingData,
+        mostSuitableRepositories: item.mostSuitableRepositories,
+        dataType: item.dataType,
+        subType: item.subType,
+        name: item.name,
+        DOI: item.DOI,
+        comments: item.comments
+      };
+    })
+    .sort(function (a, b) {
+      let c = a.sentences && a.sentences[0] && a.sentences[0].id ? mapping[a.sentences[0].id] : Infinity;
+      let d = b.sentences && b.sentences[0] && b.sentences[0].id ? mapping[b.sentences[0].id] : Infinity;
+      return c === d ? 0 : c < d ? -1 : 1;
+    });
+  let protocols = orderedDatasets.filter(function (item) {
+    return item.dataType === 'other' && item.subType === 'protocol';
+  });
+  let codes = orderedDatasets.filter(function (item) {
+    return item.dataType === 'other' && item.subType === 'code';
+  });
+  let reagents = orderedDatasets.filter(function (item) {
+    return item.dataType === 'other' && item.subType === 'reagent';
+  });
+  let datasets = orderedDatasets.filter(function (item) {
+    return item.dataType !== 'other';
+  });
+  return { all: orderedDatasets, protocols, codes, reagents, datasets };
+};
+
+/**
  * Write file on FileSystem and store attached data in MongoDB
  * @param {string} documentId - Document Id
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: Document instance OR undefined)

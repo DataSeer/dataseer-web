@@ -17,6 +17,7 @@ const Accounts = require('../../models/accounts.js'),
   Documents = require('../../models/documents.js');
 
 const AccountsManager = require('../../lib/accounts.js'),
+  DocX = require('../../lib/docx.js'),
   Mailer = require('../../lib/mailer.js');
 
 const DocumentsFilesController = require('../../controllers/documents.files.js'),
@@ -24,32 +25,6 @@ const DocumentsFilesController = require('../../controllers/documents.files.js')
   DocumentsDatasetsController = require('../../controllers/documents.datasets.js');
 
 const conf = require('../../conf/conf.json');
-
-/* GET ALL Documents */
-router.get('/', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role does not grant you access to this part of the website');
-  let limit = parseInt(req.query.limit),
-    skip = parseInt(req.query.skip),
-    isCurator = AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator),
-    query = {};
-  if (isNaN(limit)) limit = 20;
-  if (isNaN(skip) || skip < 0) skip = 0;
-  // Init transaction
-  let transaction = Documents.find(query).skip(skip).limit(limit);
-  // Populate dependings on the parameters
-  if (req.query.pdf) transaction.populate('pdf');
-  if (req.query.tei) transaction.populate('tei');
-  if (req.query.files) transaction.populate('files');
-  if (req.query.metadata) transaction.populate('metadata');
-  if (req.query.datasets) transaction.populate('datasets');
-  if (isCurator && req.query.logs) transaction.populate('logs');
-  return transaction.exec(function (err, docs) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else if (!docs) return res.json({ 'err': true, 'res': null, 'msg': 'document(s) not found' });
-    return res.json({ 'err': false, 'res': docs });
-  });
-});
 
 /* POST new Document */
 router.post('/', function (req, res, next) {
@@ -495,6 +470,37 @@ router.post('/:id/finish/reopen', function (req, res, next) {
           }
         );
     });
+  });
+});
+
+/* GET report document */
+router.get('/:id/finish/report', function (req, res, next) {
+  if (
+    typeof req.user === 'undefined' ||
+    !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.annotator, AccountsManager.match.weight)
+  )
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
+  // Init transaction
+  let dataTypes = req.app.get('dataTypes');
+  let transaction = Documents.findOne({ _id: req.params.id })
+    .populate('metadata')
+    .populate('datasets')
+    .populate('tei')
+    .populate('pdf');
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
+    else {
+      return DocX.create(DocX.getData(doc, dataTypes), function (err, buffer) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+        res.writeHead(200, [
+          ['Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+          ['Content-Disposition', 'attachment; filename=' + `${doc._id.toString()}-report.docx`]
+        ]);
+        res.end(buffer);
+      });
+    }
   });
 });
 

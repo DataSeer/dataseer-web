@@ -16,7 +16,8 @@ const Organisations = require('../models/organisations.js'),
   Accounts = require('../models/accounts.js'),
   Documents = require('../models/documents.js');
 
-const DocumentsController = require('../controllers/documents.js');
+const DocumentsController = require('../controllers/documents.js'),
+  DocumentsDatasetsController = require('../controllers/documents.datasets.js');
 
 const conf = require('../conf/conf.json');
 
@@ -317,9 +318,14 @@ router.get('/:id/finish', function (req, res, next) {
   if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
     return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
-  let transaction = Documents.findOne({ _id: req.params.id }).populate('metadata').populate('datasets');
+  let transaction = Documents.findOne({ _id: req.params.id })
+    .populate('metadata')
+    .populate('datasets')
+    .populate('tei')
+    .populate('pdf');
   // Execute transaction
   return transaction.exec(function (err, doc) {
+    let sortedDatasets = DocumentsController.getSortedDatasets(doc, req.app.get('dataTypes'));
     if (err || !doc) return res.status(404).send('Document not found');
     if (doc.status !== 'finish') return res.redirect(`./${doc.status}` + AccountsManager.addTokenInURL(req.query));
     else {
@@ -336,6 +342,47 @@ router.get('/:id/finish', function (req, res, next) {
         },
         conf: conf,
         document: doc,
+        sortedDatasets: sortedDatasets,
+        datasetsSummary: DocumentsDatasetsController.getDatasetsSummary(sortedDatasets.all),
+        bestPractices: DocumentsDatasetsController.getBestPractices(
+          [].concat(sortedDatasets.protocols, sortedDatasets.datasets, sortedDatasets.codes, sortedDatasets.reagents),
+          req.app.get('dataTypes')
+        ),
+        current_user: req.user
+      });
+    }
+  });
+});
+
+router.get('/:id/finish/report', function (req, res, next) {
+  if (
+    typeof req.user === 'undefined' ||
+    !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.annotator, AccountsManager.match.weight)
+  )
+    return res.status(401).send('Your current role does not grant you access to this part of the website');
+  // Init transaction
+  let transaction = Documents.findOne({ _id: req.params.id })
+    .populate('metadata')
+    .populate('datasets')
+    .populate('tei')
+    .populate('pdf');
+  // Execute transaction
+  return transaction.exec(function (err, doc) {
+    let sortedDatasets = DocumentsController.getSortedDatasets(doc, req.app.get('dataTypes'));
+    if (err || !doc) return res.status(404).send('Document not found');
+    if (doc.status !== 'finish') return res.redirect(`./${doc.status}` + AccountsManager.addTokenInURL(req.query));
+    else {
+      let publicURL = conf.root + 'documents/' + req.params.id + '?documentToken=' + doc.token;
+      return res.render(path.join('reports', 'report-1'), {
+        publicURL: publicURL,
+        conf: conf,
+        document: doc,
+        sortedDatasets: sortedDatasets,
+        datasetsSummary: DocumentsDatasetsController.getDatasetsSummary(sortedDatasets.all),
+        bestPractices: DocumentsDatasetsController.getBestPractices(
+          [].concat(sortedDatasets.protocols, sortedDatasets.datasets, sortedDatasets.codes, sortedDatasets.reagents),
+          req.app.get('dataTypes')
+        ),
         current_user: req.user
       });
     }

@@ -23,6 +23,7 @@ const express = require('express'),
   flash = require('connect-flash');
 
 const indexRouter = require('./routes/index.js'),
+  statisticsRouter = require('./routes/api/statistics.js'),
   documentsRouter = require('./routes/api/documents.js'),
   accountsRouter = require('./routes/api/accounts.js'),
   organisationsRouter = require('./routes/api/organisations.js'),
@@ -142,6 +143,7 @@ db.once('open', function () {
           app.use(express.static('public'));
 
           app.use('/', indexRouter);
+          app.use('/api/statistics', statisticsRouter);
           app.use('/api/documents', documentsRouter);
           app.use('/api/accounts', accountsRouter);
           app.use('/api/organisations', organisationsRouter);
