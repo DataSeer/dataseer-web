@@ -168,29 +168,37 @@ Self.getBestPractices = function (datasets = [], dataTypes = {}, opts = {}) {
  * @param {array} datasetsInfos - Array of datasetsInfos
  * @returns {array} summary
  */
-Self.getDatasetsSummary = function (datasetsInfos = []) {
-  let datatypes = {};
+Self.getDatasetsSummary = function (datasetsInfos = [], dataTypes = {}) {
+  let data = {};
   let result = [];
   datasetsInfos.reduce(function (acc, item) {
     if (typeof acc[item.dataType] === 'undefined')
-      acc[item.dataType] = { key: item.dataType, label: item.type.dataType, count: 0, subTypes: {} };
+      acc[item.dataType] = {
+        key: item.dataType,
+        count: 0,
+        list: [],
+        type: Self.getDataTypeInfos({ dataType: item.dataType }, dataTypes),
+        subTypes: {}
+      };
     acc[item.dataType].count++;
+    acc[item.dataType].list.push(item);
     if (item.subType) {
       if (typeof acc[item.dataType].subTypes[item.subType] === 'undefined')
-        acc[item.dataType].subTypes[item.subType] = { key: item.subType, label: item.type.subType, count: 0 };
+        acc[item.dataType].subTypes[item.subType] = { key: item.subType, type: item.type, count: 0 };
       acc[item.dataType].subTypes[item.subType].count++;
     }
     return acc;
-  }, datatypes);
-  for (let key in datatypes) {
+  }, data);
+  for (let key in data) {
     let item = {
-      key: datatypes[key].key,
-      count: datatypes[key].count,
-      label: datatypes[key].label,
-      subTypes: []
+      key: data[key].key,
+      count: data[key].count,
+      type: data[key].type,
+      subTypes: [],
+      list: data[key].list
     };
-    for (let k in datatypes[key].subTypes) {
-      item.subTypes.push(datatypes[key].subTypes[k]);
+    for (let k in data[key].subTypes) {
+      item.subTypes.push(data[key].subTypes[k]);
     }
     result.push(item);
   }
