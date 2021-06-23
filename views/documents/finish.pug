@@ -24,7 +24,9 @@ block content
       if(current_user.role.label === "curator")
         div(class='row-margin')
           a(href=conf.root + "api/documents/" + document._id + "/finish/report" target="_blank")
-            button.blue.btn.btn-primary.waves-effect.waves-light#download_report(type='button' title='Download report') Download Report
+            button.blue.btn.btn-primary.waves-effect.waves-light#download_report(type='button' title='Download report') Download .docx Report
+          a(href=conf.root + "documents/" + document._id + "/finish/report" target="_blank" style="margin-left: 20px;")
+            button.blue.btn.btn-primary.waves-effect.waves-light#download_report(type='button' title='Download report') HTML Report
 
 
     div(class='row row-margin')

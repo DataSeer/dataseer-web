@@ -343,7 +343,7 @@ router.get('/:id/finish', function (req, res, next) {
         conf: conf,
         document: doc,
         sortedDatasets: sortedDatasets,
-        datasetsSummary: DocumentsDatasetsController.getDatasetsSummary(sortedDatasets.all),
+        datasetsSummary: DocumentsDatasetsController.getDatasetsSummary(sortedDatasets.all, req.app.get('dataTypes')),
         bestPractices: DocumentsDatasetsController.getBestPractices(
           [].concat(sortedDatasets.protocols, sortedDatasets.datasets, sortedDatasets.codes, sortedDatasets.reagents),
           req.app.get('dataTypes')
@@ -378,7 +378,7 @@ router.get('/:id/finish/report', function (req, res, next) {
         conf: conf,
         document: doc,
         sortedDatasets: sortedDatasets,
-        datasetsSummary: DocumentsDatasetsController.getDatasetsSummary(sortedDatasets.all),
+        datasetsSummary: DocumentsDatasetsController.getDatasetsSummary(sortedDatasets.all, req.app.get('dataTypes')),
         bestPractices: DocumentsDatasetsController.getBestPractices(
           [].concat(sortedDatasets.protocols, sortedDatasets.datasets, sortedDatasets.codes, sortedDatasets.reagents),
           req.app.get('dataTypes')
