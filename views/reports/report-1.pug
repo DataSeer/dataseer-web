@@ -71,14 +71,19 @@ include ../functions/format.pug
         <th>Depo to Repo</th>
         <th>Re-Use</th>
       </tr>
-      each item, index in sortedDatasets.protocols
+      if (sortedDatasets.protocols.codes === 0)
         <tr>
-          <td>#{index+1}</td>
-          <td>#{item.name}</td>
-          <td>#{item.doi}</td>
-          <td>#{item.doi ? "Yes" : "No"}</td>
-          <td>#{item.reuse ? "Yes" : "No"}</td>
+          <td colspan=9 style="text-align: center;">None</td>
         </tr>
+      else
+        each item, index in sortedDatasets.protocols
+          <tr>
+            <td>#{index+1}</td>
+            <td>#{item.name}</td>
+            <td>#{item.doi}</td>
+            <td>#{item.doi ? "Yes" : "No"}</td>
+            <td>#{item.reuse ? "Yes" : "No"}</td>
+          </tr>
     </table>
   </section>
 
@@ -109,7 +114,7 @@ include ../functions/format.pug
           </tr>
           each item, index in dataType.list
             <tr>
-              <td></td>
+              <td style="text-align: center;"><input type="checkbox"></td>
               <td>#{item.reuse ? "Yes" : "No"}</td>
               <td>#{index+1}</td>
               <td>#{item.name}</td>
@@ -141,23 +146,28 @@ include ../functions/format.pug
         <th>Data Sentence from Method</th>
         <th>Dataset Permanent Link</th>
       </tr>
-      each item, index in sortedDatasets.codes
+      if (sortedDatasets.codes.length === 0)
         <tr>
-          <td></td>
-          <td>#{item.reuse ? "Yes" : "No"}</td>
-          <td>#{index+1}</td>
-          <td>#{item.name}</td>
-          <td></td>
-          <td>
-            a(href=item.type.url) #{item.type.label}
-          </td>
-          <td></td>
-          <td>
-            each sentence in item.sentences
-             p #{sentence.text}
-          </td>
-          <td>#{item.DOI}</td>
+          <td colspan=9 style="text-align: center;">None</td>
         </tr>
+      else
+        each item, index in sortedDatasets.codes
+          <tr>
+            <td style="text-align: center;"><input type="checkbox"></td>
+            <td>#{item.reuse ? "Yes" : "No"}</td>
+            <td>#{index+1}</td>
+            <td>#{item.name}</td>
+            <td></td>
+            <td>
+              a(href=item.type.url) #{item.type.label}
+            </td>
+            <td></td>
+            <td>
+              each sentence in item.sentences
+               p #{sentence.text}
+            </td>
+            <td>#{item.DOI}</td>
+          </tr>
     </table>
   </section>
 
@@ -175,23 +185,28 @@ include ../functions/format.pug
         <th>Data Sentence from Method</th>
         <th>Dataset Permanent Link</th>
       </tr>
-      each item, index in sortedDatasets.reagents
+      if (sortedDatasets.reagents.length === 0)
         <tr>
-          <td></td>
-          <td>#{item.reuse ? "Yes" : "No"}</td>
-          <td>#{index+1}</td>
-          <td>#{item.name}</td>
-          <td></td>
-          <td>
-            a(href=item.type.url) #{item.type.label}
-          </td>
-          <td></td>
-          <td>
-            each sentence in item.sentences
-             p #{sentence.text}
-          </td>
-          <td>#{item.DOI}</td>
+          <td colspan=9 style="text-align: center;">None</td>
         </tr>
+      else
+        each item, index in sortedDatasets.reagents
+          <tr>
+            <td style="text-align: center;"><input type="checkbox"></td>
+            <td>#{item.reuse ? "Yes" : "No"}</td>
+            <td>#{index+1}</td>
+            <td>#{item.name}</td>
+            <td></td>
+            <td>
+              a(href=item.type.url) #{item.type.label}
+            </td>
+            <td></td>
+            <td>
+              each sentence in item.sentences
+               p #{sentence.text}
+            </td>
+            <td>#{item.DOI}</td>
+          </tr>
     </table>
   </section>
 
