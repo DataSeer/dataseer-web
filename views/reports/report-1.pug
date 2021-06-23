@@ -71,9 +71,9 @@ include ../functions/format.pug
         <th>Depo to Repo</th>
         <th>Re-Use</th>
       </tr>
-      if (sortedDatasets.protocols.codes === 0)
+      if (sortedDatasets.protocols.length === 0)
         <tr>
-          <td colspan=9 style="text-align: center;">None</td>
+          <td colspan=5 style="text-align: center;">None</td>
         </tr>
       else
         each item, index in sortedDatasets.protocols
