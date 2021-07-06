@@ -30,7 +30,7 @@ router.get('/documents', function (req, res, next) {
           : undefined
         : undefined,
     skip = parseInt(req.query.skip),
-    organisation = req.query.organisation,
+    organisations = req.query.organisations ? req.query.organisations.split(',') : undefined,
     now = new Date(),
     upload_range = parseInt(req.query.upload_range),
     update_range = parseInt(req.query.update_range),
@@ -79,9 +79,9 @@ router.get('/documents', function (req, res, next) {
     if (typeof query['updated_at'] === 'undefined') query['updated_at'] = {};
     query['updated_at']['$gte'] = updated_after.toISOString();
   }
-  if (organisation) query['organisation'] = organisation;
+  if (organisations) query['organisation'] = { $in: organisations };
   // Annotators access is restricted
-  if (!isCuractor) query['organisation'] = req.user.organisation._id;
+  if (!isCuractor) query['organisation'] = { $in: [req.user.organisation._id] };
   // Init transaction
   let transaction = Documents.find(query)
     .sort(typeof sort !== undefined ? { _id: sort } : {})
@@ -100,12 +100,7 @@ router.get('/documents', function (req, res, next) {
         title: doc.metadata.article_title,
         uploaded_at: date.format(doc.uploaded_at),
         updated_at: date.format(doc.updated_at),
-        datasets: {
-          total: doc.datasets.current.length,
-          validated: doc.datasets.current.filter(function (item) {
-            return item.status === 'valid';
-          }).length
-        }
+        status: doc.status === 'finish' ? 'processed' : 'processing'
       };
     });
     return res.json({ 'err': false, 'res': stats });
