@@ -509,7 +509,7 @@ router.get('/:id/finish/report', function (req, res, next) {
 router.get('/:id/report', function (req, res, next) {
   if (
     typeof req.user === 'undefined' ||
-    !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.annotator, AccountsManager.match.weight)
+    !AccountsManager.checkAccessRight(req.user, AccountsManager.roles.standard_user, AccountsManager.match.weight)
   )
     return res.status(401).send('Your current role does not grant you access to this part of the website');
   // Init transaction
