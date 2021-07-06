@@ -594,6 +594,14 @@ Accessible to users with the following role : **standard_user, annotator, curato
       <td>optional</td>
       <td>Set this parameter to get statistics of documents updated after the given date</td>
     </tr>
+    <tr>
+      <td>GET</td>
+      <td>application/x-www-form-urlencoded</td>
+      <td>application/json</td>
+      <td>organisations</td>
+      <td>optional</td>
+      <td>Set this parameter to get statistics of documents of given organsisations (only for curators) </td>
+    </tr>
   </tbody>
 </table>
 
@@ -617,6 +625,8 @@ curl "http://localhost:3000/api/statistics/documents?uploaded_after=2021-01-01"
 curl "http://localhost:3000/api/statistics/documents?updated_before=2021-01-01"
 # Will return statistics of documents updated after 2021-01-01
 curl "http://localhost:3000/api/statistics/documents?updated_after=2021-01-01"
+# Will return statistics of documents owned by organisation 60886f6e6a24cc3c8cb3bb28
+curl "http://localhost:3000/api/statistics/documents?organisations=60886f6e6a24cc3c8cb3bb28"
 ```
 
 #### Result
@@ -631,11 +641,8 @@ curl "http://localhost:3000/api/statistics/documents?updated_after=2021-01-01"
       "title": "Title of the given article",
       "uploaded_at": "2021-06-17", // date of upload
       "updated_at": "2021-06-18", // date of the last update
-      "datasets": { // datasets statistics
-        "total": 13, // total of datasets
-        "validated": 10 // number of datasets validated by DataSeer process
-      }
-    },
+      "status": "processing" // available values : "processing" (document process in progress) & "processed" (document process done)
+    }
     ...
   ]
 }
