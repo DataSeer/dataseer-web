@@ -14,8 +14,9 @@ const URLMANAGER = {
     return result;
   },
   buildURL: function (url, params = {}, opts = {}) {
-    let currentUrl = new URL(window.location.href), // get the current URL
-      result = new URL(url, currentUrl.origin); // will contain the new URL
+    let currentUrl = new URL(window.location.href); // get the current URL
+    let fullUrl = urljoin(CONF.root, url);
+    let result = new URL(fullUrl); // get the current URL
     // Add params into the new URL
     for (let key in params) {
       if (typeof params[key] !== `undefined`) {

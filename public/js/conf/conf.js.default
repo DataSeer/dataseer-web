@@ -5,6 +5,7 @@
 'use strict';
 
 const CONF = {
+  root: "http://localhost:3000",
   reCAPTCHA_site_key: `reCAPTCHA_site_key`,
   default: {
     role: `6034497eaae2c62a0769d446`,
