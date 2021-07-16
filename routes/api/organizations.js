@@ -11,7 +11,6 @@ const OrganizationsController = require(`../../controllers/api/organizations.js`
 const OrganizationsLogsController = require(`../../controllers/api/organizations.logs.js`);
 
 const AccountsManager = require(`../../lib/accounts.js`);
-const Url = require(`../../lib/url.js`);
 const Params = require(`../../lib/params.js`);
 
 const conf = require(`../../conf/conf.json`);

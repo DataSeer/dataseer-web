@@ -16,11 +16,11 @@ router.get(`/`, function (req, res, next) {
   // User must be logged to reach this route
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
   if (!accessRights.authenticated)
-    return res.redirect(Url.build(`../../signin`, { unauthorized: true, redirect: `/backoffice/accounts` }));
+    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: `/backoffice/accounts` }));
   // Visitor must not access to this view so display unauthorized message
-  if (accessRights.isVisitor) return res.redirect(`../../unauthorized`);
+  if (accessRights.isVisitor) return res.redirect(Url.build(`/`));
   // Standard user is redirect to /:id
-  if (accessRights.isStandardUser) return res.redirect(Url.build(`./backoffice/accounts/${req.user._id.toString()}`));
+  if (accessRights.isStandardUser) return res.redirect(Url.build(`/backoffice/accounts/${req.user._id.toString()}`));
   // Render template
   return res.render(`root/backoffice/accounts/layout.pug`, {
     currentRoute: `/backoffice/accounts`,
@@ -34,13 +34,13 @@ router.get(`/:id`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
   if (!accessRights.authenticated)
     return res.redirect(
-      Url.build(`../../../signin`, { unauthorized: true, redirect: `/backoffice/accounts/${req.params.id}` })
+      Url.build(`/signin`, { unauthorized: true, redirect: `/backoffice/accounts/${req.params.id}` })
     );
   // Visitor must not access to this view so display unauthorized message
-  if (accessRights.isVisitor) return res.redirect(`../../unauthorized`);
+  if (accessRights.isVisitor) return res.redirect(Url.build(`/redirect`));
   // Standard user is redirect to /:id
   if (accessRights.isStandardUser && req.user._id.toString() !== req.params.id)
-    return res.redirect(Url.build(`./backoffice/accounts/${req.user._id.toString()}`));
+    return res.redirect(Url.build(`/backoffice/accounts/${req.user._id.toString()}`));
   // Render template
   return res.render(`root/backoffice/accounts/:id/layout.pug`, {
     currentRoute: `/backoffice/accounts/:id`,

@@ -18,10 +18,10 @@ const recaptcha = require(`../conf/recaptcha.json`);
 
 router.get(`/`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
-  if (!accessRights.authenticated) return res.redirect(`/signin`);
-  if (accessRights.isVisitor) return res.redirect(`/unauthorized`);
-  if (accessRights.isStandardUser) return res.redirect(`/documents`);
-  if (accessRights.isModerator) return res.redirect(`/backoffice/documents`);
+  if (!accessRights.authenticated) return res.redirect(Url.build(`/signin`));
+  if (accessRights.isVisitor) return res.redirect(Url.build(`/unauthorized`));
+  if (accessRights.isStandardUser) return res.redirect(Url.build(`/documents`));
+  if (accessRights.isModerator) return res.redirect(Url.build(`/backoffice/documents`));
   return res.render(`root/layout.pug`, {
     currentRoute: `/`,
     currentUser: req.user,
@@ -31,7 +31,7 @@ router.get(`/`, function (req, res) {
 
 router.get(`/signout`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
-  if (!accessRights.authenticated) return res.redirect(`/signin`);
+  if (!accessRights.authenticated) return res.redirect(Url.build(`/signin`));
   return AccountsController.signout({ user: req.user }, function (err, data) {
     if (err) {
       console.log(err);
@@ -39,13 +39,13 @@ router.get(`/signout`, function (req, res, next) {
     }
     let isError = data instanceof Error,
       result = isError ? data.toString() : data;
-    return res.redirect(`/`);
+    return res.redirect(Url.build(`/`));
   });
 });
 
 router.get(`/signin`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
-  if (accessRights.authenticated && !accessRights.isVisitor) return res.redirect(`/`);
+  if (accessRights.authenticated && !accessRights.isVisitor) return res.redirect(Url.build(`/`));
   return res.render(`root/signin/layout.pug`, {
     currentRoute: `/signin`,
     currentUser: req.user,
@@ -55,7 +55,7 @@ router.get(`/signin`, function (req, res) {
 
 router.get(`/signup`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
-  if (accessRights.authenticated) return res.redirect(`/`);
+  if (accessRights.authenticated) return res.redirect(Url.build(`/`));
   return res.render(`root/signup/layout.pug`, {
     currentRoute: `/signup`,
     currentUser: req.user,
@@ -66,7 +66,7 @@ router.get(`/signup`, function (req, res) {
 
 router.get(`/forgotPassword`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
-  if (accessRights.authenticated) return res.redirect(`/resetPassword`);
+  if (accessRights.authenticated) return res.redirect(Url.build(`/resetPassword`));
   return res.render(`root/forgotPassword/layout.pug`, {
     currentRoute: `/forgotPassword`,
     currentUser: req.user,
