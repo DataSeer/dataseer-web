@@ -1,12 +1,12 @@
 {
-  "name": "tdm-plateform",
-  "version": "0.0.0",
+  "name": "dataseer-web",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "eslint": "./node_modules/.bin/eslint --fix controllers/api/*.js lib/*.js models/*.js models/schemas/*.js public/js/conf/*.js public/js/lib/*.js routes/api/*.js routes/gui/*.js views/**/*.js views/**/**/*.js views/**/**/**/*.js",
     "start-dev": "export DEV='true';node ./bin/www",
-    "start": "forever start --append --uid tdm-plateform ./bin/www",
-    "stop": "forever stop tdm-plateform",
+    "start": "forever start --append --uid dataseer-web ./bin/www",
+    "stop": "forever stop dataseer-web",
     "list": "forever list"
   },
   "dependencies": {
@@ -41,11 +41,11 @@
     "pug": "^3.0.2",
     "serve-favicon": "^2.5.0"
   },
-  "description": "Repository of the tdm-plateform",
+  "description": "Repository of the dataseer-web app",
   "main": "./bin/www",
   "repository": {
     "type": "git",
-    "url": "https://github.com/NicolasKieffer/tdm-plateform.git"
+    "url": "https://github.com/NicolasKieffer/dataseer-web.git"
   },
   "author": "Nicolas Kieffer <kieffer.nicolas.pro@gmail.com> (https://github.com/NicolasKieffer)",
   "contributors": [
