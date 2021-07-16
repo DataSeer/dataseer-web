@@ -2,9 +2,9 @@ extends ../../shared/layout.pug
 
 block head
   if(currentUser)
-    <link rel="stylesheet" type="text/css" href="/views/resetPassword/logged.css">
+    link(rel="stylesheet" type="text/css" href=conf.root + "/views/resetPassword/logged.css")
   else 
-    <link rel="stylesheet" type="text/css" href="/views/resetPassword/unlogged.css">
+    link(rel="stylesheet" type="text/css" href=conf.root + "/views/resetPassword/unlogged.css")
 
 block app
   if(currentUser)
@@ -14,6 +14,6 @@ block app
 
 block scripts
   if(currentUser)
-    <script src="/views/resetPassword/logged.js"></script>
+    script(src=conf.root + "/views/resetPassword/logged.js")
   else
-    <script src="/views/resetPassword/unlogged.js"></script>
+    script(src=conf.root + "/views/resetPassword/unlogged.js")

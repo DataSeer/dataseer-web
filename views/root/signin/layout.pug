@@ -1,10 +1,10 @@
 extends ../../shared/layout.pug
 
 block head
-  <link rel="stylesheet" type="text/css" href="/views/signin/app.css">
+  link(rel="stylesheet" type="text/css" href=conf.root + "/views/signin/app.css")
 
 block app
   include ./app.pug
 
 block scripts
-  <script src="/views/signin/app.js"></script>
+  script(src=conf.root + "/views/signin/app.js")
