@@ -117,6 +117,10 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
       value = option.attr('value');
     if (typeof self.properties[target] === 'function') {
       self.properties[target](value);
+      if (target === 'dataType' || target === 'subType')
+        return self.setRepos(function () {
+          return self.events.onPropertyChange(target, self.properties[target]());
+        });
       if (typeof self.events.onPropertyChange === 'function')
         self.events.onPropertyChange(target, self.properties[target]());
     }
@@ -268,6 +272,22 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
       // ----------------------
       return self.dataset.notification;
     },
+    repoRecommenderUrls: function (values, inputs = false) {
+      if (typeof values === 'undefined') return self.dataset.repoRecommenderUrls;
+      let data = !Array.isArray(values) ? [{ label: 'n/a' }] : values;
+      let element = self.container.find('div[key="dataset\\.repoRecommenderUrls"]');
+      element.attr('value', JSON.stringify(values));
+      element.empty();
+      let list = $('<ol>');
+      data.map(function (item) {
+        if (item.url) list.append(`<li><a href="${item.url}">${item.label}</a></li>`);
+        else list.append(`<li>${item.label}</li>`);
+      });
+      element.append(list);
+      self.dataset.repoRecommenderUrls = data;
+      // ----------------------
+      return self.dataset.repoRecommenderUrls;
+    },
     name: function (value, inputs = false) {
       if (typeof value === 'undefined') return self.dataset.name;
       self.container.find('div[key="dataset\\.name"]').attr('value', value);
@@ -295,6 +315,21 @@ const DatasetForm = function (id = 'datasetForm', events = {}) {
   };
   this.setInitialazingMessage();
   return this;
+};
+
+// Set RepoRecommender result
+DatasetForm.prototype.setRepos = function (cb) {
+  let self = this;
+  let dataType = this.dataset.dataType ? this.getDatatypeInfos(this.dataset.dataType) : undefined;
+  let subType = this.dataset.subType ? this.getDatatypeInfos(this.dataset.dataType, this.dataset.subType) : undefined;
+  return DataSeerAPI.findRepo(
+    { dataType: dataType ? dataType.label : undefined, subType: subType ? subType.label : undefined },
+    function (err, query) {
+      console.log(err, query);
+      if (!query.err) self.properties.repoRecommenderUrls(query.res);
+      return cb();
+    }
+  );
 };
 
 // update label of dataset
@@ -425,6 +460,7 @@ DatasetForm.prototype.getDatatypeInfos = function (dataType, subType) {
   let self = this,
     result = {},
     properties = [
+      'label',
       'description',
       'bestDataFormatForSharing',
       'bestPracticeForIndicatingReUseOfExistingData',
@@ -600,7 +636,9 @@ DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
     if (datasets && datasets.length > 0) {
       self.refreshDatasetsList(datasets);
     }
-    return callback(err, res);
+    return self.setRepos(function () {
+      return callback(err, res);
+    });
   });
 };
 

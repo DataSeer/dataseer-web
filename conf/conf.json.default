@@ -13,6 +13,7 @@
     },
     "mongodb": "mongodb://localhost:27017/app",
     "dataseer-ml": "http://localhost/dataseer-ml/service",
+    "repoRecommender": "http://localhost/repoRecommender/findRepo",
     "curator-email": "curator@mydomain.ai"
   },
   "upload": {

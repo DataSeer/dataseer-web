@@ -404,6 +404,10 @@ body {
   position: relative;
 }
 
+#datasetForm .custom-row div[key="dataset\.repoRecommenderUrls"] {
+  display: block !important;
+}
+
 #datasetForm\.message div {
   display: block;
   text-align: center;

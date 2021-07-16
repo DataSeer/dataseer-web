@@ -628,6 +628,31 @@ DataSeerAPI.getdataType = function (sentence, done) {
 };
 
 /**
+ * Get findRepo of given dataset
+ * @param {object} opts Sentence HTML element
+ * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+ * @returns {undefined} undefined
+ */
+DataSeerAPI.findRepo = function (opts, done) {
+  return jQuery.ajax({
+    type: 'POST',
+    contentType: 'application/json; charset=utf-8',
+    headers: {
+      'X-HTTP-Method-Override': 'POST'
+    },
+    url: DataSeerAPI.buildURL(DataSeerAPI.rootURL() + 'api/repoRecommender/findRepo'),
+    data: JSON.stringify(opts),
+    success: function (data) {
+      return done(null, JSON.parse(data));
+    },
+    error: function (data) {
+      return done(data);
+    },
+    dataType: 'json'
+  });
+};
+
+/**
  * Get jsonDataTypes
  * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
  * @returns {undefined} undefined
