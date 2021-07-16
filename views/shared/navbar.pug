@@ -2,7 +2,7 @@
 
 if(currentUser && currentUser.role.key !== "visitor")
   <nav>
-    img(class="navbar-logo" src=conf.root + "/public/img/logo.png")
+    img(class="navbar-logo" src=conf.pathname + "/public/img/logo.png")
     <ul class="navbar-links">
       if (currentUser.role.key === "administrator")
         <li>
@@ -76,7 +76,7 @@ if(currentUser && currentUser.role.key !== "visitor")
   </nav>
 else
   <nav>
-    img(class="navbar-logo" src=conf.root + "/public/img/logo.png")
+    img(class="navbar-logo" src=conf.pathname + "/public/img/logo.png")
     <ul class="navbar-links">
       <li>
         a(href=`${conf.root}/signup` class=`${currentRoute === '/signup' ? 'active' : '' }`) Signup

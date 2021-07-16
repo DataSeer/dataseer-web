@@ -1,10 +1,10 @@
 extends ../../../shared/layout.pug
 
 block head
-  link(rel="stylesheet" type="text/css" href=conf.root + "/views/backoffice/documents/app.css")
+  link(rel="stylesheet" type="text/css" href=conf.pathname + "/views/backoffice/documents/app.css")
 
 block app
   include ./app.pug
 
 block scripts
-  script(src=conf.root + "/views/backoffice/documents/app.js")
+  script(src=conf.pathname + "/views/backoffice/documents/app.js")

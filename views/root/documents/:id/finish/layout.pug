@@ -5,11 +5,11 @@
   <head>
     <title>#{conf.title}</title>
     <!-- include of global css dependencies -->
-    link(rel="stylesheet" type="text/css" href=conf.root + "/public/css/dependencies/font-awesome.min.css")
-    link(rel="stylesheet" type="text/css" href=conf.root + "/public/css/dependencies/bootstrap.min.css")
-    link(rel="stylesheet" type="text/css" href=conf.root + "/public/css/style.css")
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/css/dependencies/font-awesome.min.css")
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/css/dependencies/bootstrap.min.css")
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/css/style.css")
     <!-- include of app component css dependencies -->
-    link(rel="stylesheet" type="text/css" href=conf.root + "/views/documents/:id/finish/app.css")
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/views/documents/:id/finish/app.css")
   </head>
   <body>
     include ../../../../shared/navbar.pug
@@ -17,21 +17,21 @@
     include ./app.pug
     include ../../../../shared/footer.pug
     <!-- include of global js dependencies -->
-    script(src=conf.root + "/public/js/dependencies/vue.min.js")
-    script(src=conf.root + "/public/js/dependencies/font-awesome.min.js")
-    script(src=conf.root + "/public/js/dependencies/jquery.min.js")
-    script(src=conf.root + "/public/js/dependencies/lodash.min.js")
-    script(src=conf.root + "/public/js/dependencies/async.min.js")
-    script(src=conf.root + "/public/js/dependencies/bootstrap.min.js")
-    script(src=conf.root + "/public/js/conf/conf.js")
-    script(src=conf.root + "/public/js/lib/url.js")
-    script(src=conf.root + "/public/js/lib/api.js")
-    script(src=conf.root + "/public/js/lib/accounts.js")
-    script(src=conf.root + "/public/js/lib/notifications.js")
-    script(src=conf.root + "/public/js/lib/dataHandler.js")
-    script(src=conf.root + "/public/js/lib/params.js")
-    script(src=conf.root + "/public/js/lib/clipboard.js")
+    script(src=conf.pathname + "/public/js/dependencies/vue.min.js")
+    script(src=conf.pathname + "/public/js/dependencies/font-awesome.min.js")
+    script(src=conf.pathname + "/public/js/dependencies/jquery.min.js")
+    script(src=conf.pathname + "/public/js/dependencies/lodash.min.js")
+    script(src=conf.pathname + "/public/js/dependencies/async.min.js")
+    script(src=conf.pathname + "/public/js/dependencies/bootstrap.min.js")
+    script(src=conf.pathname + "/public/js/conf/conf.js")
+    script(src=conf.pathname + "/public/js/lib/url.js")
+    script(src=conf.pathname + "/public/js/lib/api.js")
+    script(src=conf.pathname + "/public/js/lib/accounts.js")
+    script(src=conf.pathname + "/public/js/lib/notifications.js")
+    script(src=conf.pathname + "/public/js/lib/dataHandler.js")
+    script(src=conf.pathname + "/public/js/lib/params.js")
+    script(src=conf.pathname + "/public/js/lib/clipboard.js")
     <!-- include of app component js dependencies -->
-    script(src=conf.root + "/views/documents/:id/finish/app.js")
+    script(src=conf.pathname + "/views/documents/:id/finish/app.js")
   </body>
 </html>

@@ -17,6 +17,7 @@
     "root": "./data"
   },
   "root": "http://localhost:3000",
+  "pathname": "",
   "title": "Localhost",
   "errors": {
     "unauthorized": "Your current role does not grant you access to this part of the website",

@@ -20,9 +20,6 @@ const URLMANAGER = {
     // Add params into the new URL
     for (let key in params) {
       if (typeof params[key] !== `undefined`) {
-        // if (typeof params[key] === `object`) result.searchParams.append(key, JSON.stringify(params[key]));
-        // else if (Array.isArray(params[key])) result.searchParams.append(key, params[key].join(`,`));
-        // else result.searchParams.append(key, params[key]);
         result.searchParams.append(key, params[key]);
       }
     }
@@ -31,7 +28,10 @@ const URLMANAGER = {
       let currentToken = currentUrl.searchParams.get(`token`);
       if (currentToken) result.searchParams.append(`token`, currentToken);
     }
-    return result.href;
+    // if specified, keep origin in the URL
+    if (opts.origin) return result.href;
+    // else, use the pathname (to disable "bad origin" bugs)
+    else return result.pathname;
   },
   buildParams: function (params = {}) {
     let currentUrl = new URL(window.location.href); // get the current URL
