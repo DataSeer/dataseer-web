@@ -1,149 +1,77 @@
-# DataSeer-Web
 
-![Logo DataSeer](public/img/DataSeer-logo-75.png "Logo")
+
+# TDM-Plateform
 
 ## Purposes
-
-This repository corresponds to the DataSeer web application, which aims at driving the authors of scientific article/manuscripts to the best research data sharing practices, i.e. to ensure that the datasets coming with an article are associated with data availability statement, permanent identifiers and in general requirements regarding Open Science and reproducibility. 
-
-Machine learning techniques are used to extract and structure the information of the scientific article, to identify contexts introducting datasets and finally to classify these context into predicted data types and subtypes. These ML predictions are used by the web application to help the authors to described in an efficient and assisted manner the datasets used in the article and how these data are shared with the scientific community. 
-
-See the [dataseer-ml](https://github.com/dataseer/dataseer-ml) repository for the machine learning services used by DataSeer web.
-
-Supported article formats are PDF, docx, TEI, JATS/NLM, ScholarOne, and a large variety of additional publisher native XML formats: BMJ, Elsevier staging format, OUP, PNAS, RSC, Sage, Wiley, etc (see [Pub2TEI](https://github.com/kermitt2/Pub2TEI) for the list of native publisher XML format covered).
-
-## Contact and License
-
-Main authors and contact: [Nicolas Kieffer](https://github.com/NicolasKieffer), Patrice Lopez (<patrice.lopez@science-miner.com>).
-
-The development of dataseer-ml is supported by a [Sloan Foundation](https://sloan.org/) grant, see [here](https://coko.foundation/coko-receives-sloan-foundation-grant-to-build-dataseer-a-missing-piece-in-the-data-sharing-puzzle/).
-
-dataseer-Web is distributed under [Apache2 license](https://www.apache.org/licenses/LICENSE-2.0).
-
+This repository corresponds ...
+## Contacts and licences
+Main authors and contact: 
 ## Description
+This appliaction is composed of :
+ - a GUI to manage your account & documents (localhost:3000/)
+ - a REST API to interact with your data stored in MongoDB (localhost:3000/api)
 
-This application is composed of: 
-
-  - a GUI to manage your account & documents (`localhost:3000/`)
-  - a Back Office to manage all documents, users and organisations (`localhost:3000/backoffice/`)
-  - a REST API to interact with data stored in MongoDB (`localhost:3000/api`)
-
-Documents, Organisations & Users data are stored in MongoDB. Files (PDF, XML, etc) uploaded on dataseer-web are stored on the server FileSystem.
+Documents, Organizations and Accounts data are stored in MongoDB. Files (PDF, XML and TEI) uploaded on tdm-plateform are stored in the server FileSystem
 
 ## Documentations
-
-  - [Install](#install)
-  - [Run](#run)
-  - [Save & Restore MongoDB](#save--restore-mongodb)
-  - [Dependencies](#dependencies)
-  - [Configuration](#configuration)
+- [Install](#install)
+- [Run](#run)
+- [Dependencies](#dependencies)
+- [Configurations](#configurations)
     - [Web Application configuration](#web-application-configuration)
-    - [SMTP configuration](#smtp-configuration)
     - [JWT Configuration](#jwt-configuration)
-  - [Models documentation](doc/MODELS.md#models-documentation)
-    - [Accounts](doc/MODELS.md#accounts)
-    - [Organisations](doc/MODELS.md#organisations)
-    - [Roles](doc/MODELS.md#roles)
-    - [Documents](doc/MODELS.md#documents)
-      - [Documents Metadata](doc/MODELS.md#documents-metadata)
-      - [Documents Datasets](doc/MODELS.md#documents-datasets)
+- [Models documentations](doc/MODELS.md#models-documentation)
+  - [Accounts](doc/MODELS.md#accounts)
+  - [Organizations](doc/MODELS.md#organizations)
+  - [Roles](doc/MODELS.md#roles)
+  - [Documents](doc/MODELS.md#documents)
       - [Documents Files](doc/MODELS.md#documents-files)
+      - [Documents Uploads](doc/MODELS.md#documents-uploads)
       - [Documents Logs](doc/MODELS.md#documents-logs)
-  - [Web Application documentation](doc/WEBAPP.md#web-application-documentation)
-    - [Responses Status Codes](doc/WEBAPP.md#response-status-codes)
-    - [Credentials](doc/WEBAPP.md#credentials)
-    - [Results](doc/WEBAPP.md#results)
-    - [Available Routes](doc/WEBAPP.md#available-routes)
-  - [API documentation](doc/API.md#api-documentation)
-    - [Responses Status Codes](doc/API.md#response-status-codes)
-    - [Credentials](doc/API.md#credentials)
-    - [Results](doc/API.md#results)
-    - [Available Routes](doc/API.md#available-routes)
-
-
+      - [Documents Files Uploads](doc/MODELS.md#documents-files-uploads)
+- [API Documentation](doc/API.md)
+  - [Responses Status Codes](doc/API.md#response-status-codes)
+  - [Credentials](doc/API.md#credentials)
+  - [Results](doc/API.md#results)
+  - [Available Routes](doc/API.md#available-routes)
 ## Install
-
 *[Table of contents](#documentations)*
 
-Run this command to install dataseer-web app.
-
-``npm i``
 
 ## Run
-
 *[Table of contents](#documentations)*
 
-**Important: NodeJS version 10 (or greater) needed**
-
-Run this command to start dataseer-web app instance (that will be restarted in case of crash).
-
-``npm start``
-
-Run this command to stop dataseer-web app instance.
-
-``npm stop``
-
-Run this command to list forever app.
-
-``npm run list``
-
-Note: [forever](https://www.npmjs.com/package/forever) is used to handle restart of the app.
-
 ## Dependencies
-
 *[Table of contents](#documentations)*
 
 Application requires:
+- an instance of mongoDB (by default: running on port <code>27017</code> with an <code>app</code> database)
 
-  - an instance of mongoDB (by default: running on port `27017`, with an `app` database).
-  - an instance of dataseer-ml application (by default: running on `http://localhost/dataseer-ml/service`).
-
-## Save & Restore MongoDB
-
-MongoDB database can be save with script ./db-save/save.sh (using cron):
-
-```bash
-crontab -e
-# this one will enable email notification
-0 0 * * * /path/to/dataseer-web/db-save/save.sh
-# this one will disable email notification
-0 0 * * * /path/to/dataseer-web/db-save/save.sh > /dev/null 2>&1
-```
-
-It will run ``mongodump`` every day (at 00:00). To restore data, go to the desired save directory & run ``mongorestore``. Files will be available in data.tar archive.
-
-Note: There is one directory per day (1/ is used for monday, 2/ is used for tuesday, etc). If you want to restore data from the last friday, you must use the directory **./db-save/5/**.
-
-## Configuration
-
+## Configurations
 ### Web Application Configuration
-
 *[Table of contents](#documentations)*
 
-You must create file `conf/conf.json` (based on *[default configuration file](/conf/conf.default.json)*) and fill it with with your data:
-
-```js
+You must create file <code>conf/conf.json</code> and fill it with your data :
+````json
 {
-  "services": {
-    "dataseer-wiki": {
-      "limit": 5, // number of URLs processed in parallel 
-      "root": "https://wiki.dataseer.ai",
-      "dataTypes": "/doku.php?id=data_type"
-    },
-    "crisp": {
-      "id": "YOUR_CRISP_ID"
-    },
-    "userflow": {
-      "token": "YOUR_USERFLOW_TOKEN"
-    },
-    "mongodb": "mongodb://localhost:27017/app",
-    "dataseer-ml": "http://localhost/dataseer-ml/service",
-    "curator-email": "curator@mydomain.ai"
+  "services": {},
+  "mongodb": {
+    "url": "mongodb://localhost:27017/tdm-plateform",
+    "default": {
+      "roles": {
+        "id": "6034497eaae2c62a0769d446"
+      },
+      "organizations": {
+        "id": "60344b69aae2c62a0769d449"
+      },
+      "accounts": {
+        "id": "60993ddb0d520b7b28d6a362"
+      }
+    }
   },
-  "emails": {
-    "upload": "info@dataseer.ai"
+  "fs": {
+    "root": "./data"
   },
-  "FileSystemRoot": "./data",
   "root": "http://localhost:3000/",
   "_reCAPTCHA_site_key_": {
     "public": "publicKey",
@@ -155,46 +83,24 @@ You must create file `conf/conf.json` (based on *[default configuration file](/c
   },
   "tokens": {
     "api": {
-      "expiresIn": 2592000 // 60 days
+      "expiresIn": 2592000
     },
     "documents": {
-      "expiresIn": 2592000, // 60 days
-      "accountId": "Account ID that will be used for logs"
+      "expiresIn": 2592000
     },
     "resetPassword": {
-      "expiresIn": 3600 // 1 hour
+      "expiresIn": 3600
     },
     "automaticAccountCreation": {
-      "expiresIn": 604800 // 7 days
+      "expiresIn": 604800
     }
   }
 }
-```
-
-### SMTP Configuration
-
-*[Table of contents](#documentations)*
-
-Application requires a SMTP server to send some emails (resest password, API token, automatique account creation)
-
-You must create file `conf/smtp.conf.json` (based on *[default configuration file](/conf/smtp.conf.default.json)*) and fill it with your data:
-
-```js
-{
-  "host": "smtp.default.com",
-  "port": 587,
-  "auth": {
-    "user": "user@default.com",
-    "pass": "pass"
-  },
-  "from": "\"Fred Foo\" <foo@example.com>"
-}
-```
-
+````
 ### JWT Configuration
-
 *[Table of contents](#documentations)*
 
-Application requires a private key to create JSON Web Token.
+This application require a private key to create JSON Web Token
+You must create file conf/private.key and fill it with a random string (a long random string is strongly recommended)
 
-You must create file `conf/private.key` (based on *[default private key file](/conf/private.key.default)*) and fill it with a random string.
+

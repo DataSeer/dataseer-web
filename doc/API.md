@@ -1,24 +1,22 @@
+
+
 # API documentation
+*[Main Documentation](#../README.md#documentations)*
+- [Responses Status Codes](#responses-status-code)
+- [Credentials](#credentials)
+- [Results](#results)
+- [Available Routes](#available-routes)
+  - [Accounts](#accounts)
+  - [Roles](#roles)
+  - [Organizations](#organizations)
+  - [Documents ](#documents)
+  - [/signin](#signin)
+  - [/signup](#signup)
+  - [/signout](#signout)
+  - [/upload](#upload)
 
-*[Main Documentation](../README.md#documentations)*
-
-  - [Responses Status Codes](#response-status-codes)
-  - [Credentials](#credentials)
-  - [Results](#results)
-  - [Available Routes](#available-routes)
-    - [Accounts](#accounts)
-    - [Roles](#roles)
-    - [Organisations](#organisations)
-    - [Statistics](#statistics)
-    - [Documents](#documents)
-    - [Documents Files](#documents-files)
-    - [Documents Datasets](#documents-datasets)
-    - [DataSeerML Service](#dataseerml-service)
-
-## Response status codes:
-
+## Responses Status Code
 *[Table of contents](#api-documentation)*
-
 <table>
   <thead>
     <tr>
@@ -50,40 +48,35 @@
 
 *[Table of contents](#api-documentation)*
 
-You must use your API token to access all of the following routes.
+You must use your API token to access all of the following routes
 
-Set your token into HTTP headers (Authorization: Bearer my).
-
-```bash
-# Replace MY_TOKEN by your dataseer-web API token
-#  use -H "Authorization: Bearer MY_TOKEN" to set headers with curl
-$ curl "http://localhost:3000/api/documents/5ffa06e61c157616a5c6bae7" -H "Authorization: Bearer MY_TOKEN"
-# Or use token parameter
-$ curl "http://localhost:3000/api/documents/5ffa06e61c157616a5c6bae7?token=MY_TOKEN"
-```
-
-__If you try to access an unauthorized route, the app will return an HTTP 401 error__
+Set your own token into HTTP headers (Authorization: Bearer MY_TOKEN)
 
 ```bash
-# HTTP 401 will be returned
-$ curl "http://localhost:3000/documents/5ffa06e61c157616a5c6bae7" -H "Authorization: Bearer WRONG_TOKEN"
-# > Your current role does not grant you access to this part of the website
-#  This error is caused by: a wrong token, an expired token, a blacklisted token 
+# You have to replace MY_TOKEN by your tdm-plateform API token
+# Use -H "Authorization: Bearer MY_TOKEN" to set headers with curl
+$ curl "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
+# Or you can use token parameter
+$ curl "http://localhost:3000/api/accounts?token=MY_TOKEN"
+
+If you try to access an unauthorized route, the application will return an HTTP 401 error
+```bash
+$ curl "http://localhost:3000/api/accounts" -H "Authorization: Bearer WRONG_TOKEN"
+# HTTP 401 will return :
+# Your current role does not grant you access to this part of the website
+# This error is caused by: a wrong token, expired token, blacklisted token
 ```
 
 ## Results
 
 *[Table of contents](#api-documentation)*
 
-API will return JSON object response with HTTP 200.
+API will return JSON object response with HTTP 200
 
 ### Success
 
-*[Table of contents](#api-documentation)*
-
 In case of success, API will return this kind of object:
-
-```js
+````json
 {
   "err": false,
   "res": {...}
@@ -93,106 +86,73 @@ In case of success, API will return this kind of object:
   "err": false,
   "res": [{...}]
 }
-```
+````
 
 ### Error
 
-```js
+````json
 {
   "err": true,
   "res": null, // or false or undefined
   "msg": "A human-readable message describing the error that occurred"
 }
-```
- 
+````
+
 ## Available Routes
 
 *[Table of contents](#api-documentation)*
 
-All these routes return a JSON object:
+All of these routes return a JSON object:
 
 ### Accounts
+- [(GET) /api/accounts](#get-apiaccounts)
+- [(GET) /api/accounts/:id](#get-apiaccountsid)
+- [(POST) /api/accounts](#post-apiaccounts)
+- [(PUT) /api/accounts/:id](#put-apiaccountsid)
+- [(PUT) /api/accounts](#put-apiaccounts)
+- [(DELETE) /api/accounts/:id](#delete-apiaccountsid)
+- [(DELETE) /api/accounts](#delete-apiaccounts)
 
-  - [(GET) /api/accounts](#get-apiaccounts)
-  - [(GET) /api/accounts/:id](#get-apiaccountsid)
 
 ### Roles
+- [(GET) /api/roles](#get-apiroles)
+- [(GET) /api/roles/:id](#get-apirolesid)
+- [(POST) /api/roles](#post-apiroles)
+- [(PUT) /api/roles/:id](#put-apirolesid)
+- [(PUT) /api/roles](#put-apiroles)
+- [(DELETE) /api/roles/:id](#delete-apirolesid)
+- [(DELETE) /api/roles](#delete-apiroles)
 
-  - [(GET) /api/roles](#get-apiroles)
-  - [(GET) /api/roles/:id](#get-apirolesid)
-
-### Oganisations
-
-  - [(GET) /api/organisations](#get-apiorganisations)
-  - [(GET) /api/organisations/:id](#get-apiorganisationsid)
-
-### Statistics
-
-  - [(GET) /api/statistics/documents](#get-apistatisticsdocuments)
-  - [(GET) /api/statistics/documents/:id](#get-apistatisticsdocumentsid)
+### Organizations
+- [(GET) /api/organizations](#get-apiorganizations)
+- [(GET) /api/organizations/:id](#get-apiorganizationsid)
+- [(POST) /api/organizations](#post-apiorganizations)
+- [(PUT) /api/organizations/:id](#put-apiorganizationsid)
+- [(PUT) /api/organizations](#put-apiorganizations)
+- [(DELETE) /api/organizations/:id](#delete-apiorganizationsid)
+- [(DELETE) /api/organizations](#delete-apiorganizations)
 
 ### Documents
 
+  - [(GET) /api/documents](#get-apidocuments)
   - [(POST) /api/documents](#post-apidocuments)
-  - [(GET) /api/documents/:id](#get-apidocumentsid)
-  - [(GET) /api/documents/:id/pdf](#get-apidocumentsidpdf)
-  - [(GET) /api/documents/:id/pdf/content](#get-apidocumentsidpdfcontent)
-  - [(GET) /api/documents/:id/tei/](#get-apidocumentsidtei)
-  - [(GET) /api/documents/:id/tei/content](#get-apidocumentsidteicontent)
-  - [(GET) /api/documents/:id/metadata](#get-apidocumentsidmetadata)
-  - [(POST) /api/documents/:id/metadata/validate](#post-apidocumentsidmetadatavalidate)
-  - [(GET) /api/documents/:id/datasets](#get-apidocumentsiddatasets)
-  - [(POST) /api/documents/:id/datasets/validate](#post-apidocumentsiddatasetsvalidate)
-  - [(POST) /api/documents/:id/datasets/backToMetadata](#post-apidocumentsiddatasetsbacktometadata)
-  - [(POST) /api/documents/:id/finish/reopen](#post-apidocumentsidfinishreopen)
-  - [(GET) /api/documents/:id/files](#get-apidocumentsidfiles)
-
-### Documents Files
-
-  - [(GET) /api/files/:id](#get-apifilesid)
-  - [(GET) /api/files/:id/buffer](#get-apifilesidbuffer)
-  - [(GET) /api/files/:id/string](#get-apifilesidstring)
-
-### Documents Datasets
-
-  - [(PUT) /api/datasets/:id](#put-apidatasetsid)
-  - [(POST) /api/datasets/:id/checkValidation](#post-apidatasetsidcheckvalidation)
-  - [(POST) /api/datasets/:id/dataset](#post-apidatasetsiddataset)
-  - [(PUT) /api/datasets/:id/dataset](#put-apidatasetsiddataset)
-  - [(DELETE) /api/datasets/:id/dataset](#delete-apidatasetsiddataset)
-  - [(POST) /api/datasets/:id/link](#post-apidatasetsidlink)
-  - [(DELETE) /api/datasets/:id/link](#delete-apidatasetsidlink)
-
-### DataSeerML Service
-
-  - [(POST) /api/dataseer-ml/processDataseerSentence](#post-apidataseer-mlprocessdataseersentence)
-  - [(GET) /api/dataseer-ml/jsonDataTypes](#get-apidataseer-mljsondatatypes)
-  - [(GET) /api/dataseer-ml/resyncJsonDataTypes](#get-apidataseer-mlresyncjsondatatypes)
-
----
-
-### (GET) /api/accounts/
-
-
+ 
+ ---
+ ### (GET) /api/accounts/
+ 
 *[Available Routes](#available-routes)*
 
 #### Description
-
-This route return all accounts (JSON formated).
+This route return all accounts (JSON formated)
 
 #### Role required
-
-Accessible to users with the following role : **curator**.
+Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
 
 #### Parameters
-
-
 <table>
   <thead>
     <tr>
       <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
       <th>Parameters</th>
       <th>Requirement</th>
       <th>Description</th>
@@ -201,35 +161,39 @@ Accessible to users with the following role : **curator**.
   <tbody>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
       <td>limit</td>
       <td>optional</td>
       <td>Maximum number of returned results (default:20)</td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
       <td>skip</td>
       <td>optional</td>
       <td>Number of documents skipped (default:0)</td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>organisation</td>
+      <td>roles</td>
       <td>optional</td>
-      <td>Use this parameter (set it with an organisation id) to filter results by organisation</td>
+      <td>Use this parameter (set it with an array of roles id) to filter results by roles</td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>role</td>
+      <td>organizations</td>
       <td>optional</td>
-      <td>Use this parameter (set it with a role id) to filter results by role</td>
+      <td>Use this parameter (set it with an array of organizations id) to filter results by organizations</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>visible</td>
+      <td>optional</td>
+      <td>Use this parameter to filter results by visible states (true or false)</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>Use this parameter to filter results by protected states (true or false)</td>
     </tr>
   </tbody>
 </table>
@@ -241,13 +205,12 @@ Accessible to users with the following role : **curator**.
 curl "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/accounts?token=MY_TOKEN"
 ```
-
 #### Result
 
-```js
+```json
 {
   "err": false,
-  "res": [{...}] // Array of accounts JSON representation (see models section to get more infos)
+  "res": [{...}] // Array of account JSON representation
 }
 ```
 
@@ -264,7 +227,7 @@ This route return an account (JSON formated).
 
 #### Role required
 
-Accessible to users with the following role : **curator**.
+Accessible to users with the following role:  **standardUser**, **moderator**, **administrator**.
 
 #### Parameters
 
@@ -277,41 +240,331 @@ No parameters available
 curl "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
 curl "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
 ```
-
 #### Result
 
-```js
+```json
 {
   "err": false,
-  "res": {...} // An account JSON representation (see models section to get more infos)
+  "res": {...} // Account JSON representation
 }
 ```
 
 ---
 
-
-### (GET) /api/roles/
-
+### (POST) /api/accounts/
 
 *[Available Routes](#available-routes)*
 
 #### Description
 
-This route return all roles (JSON formated).
+This route add a new account in database and return this account (JSON formated).
 
 #### Role required
 
-Accessible to users with the following role : **curator**.
+Accessible to user with the following role: **administrator**
 
 #### Parameters
-
 
 <table>
   <thead>
     <tr>
       <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <td>POST</td>
+      <td>fullname</td>
+      <td>required</td>
+      <td>Name of the account</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>username</td>
+      <td>required</td>
+      <td>Email adress of the account</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>password</td>
+      <td>required</td>
+      <td>Password of the account</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>confirm_password</td>
+      <td>required</td>
+      <td>To secure your password</td>
+    </tr>
+        <tr>
+      <td>POST</td>
+      <td>organizations</td>
+      <td>optional</td>
+      <td>Array of organizations of the account</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>role</td>
+      <td>optional</td>
+      <td>Role of the account</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>visible</td>
+      <td>optional</td>
+      <td>To set the visiblity of the account (true or false)</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>To set the protection of the account (true or false)</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return the new account (JSON formated)
+curl -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "password=MY_PASSWORD" -F "confirm_password=MY_PASSWORD" -F "organization=ID_ORGANISATION" -F "role=ID_ROLE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
+curl -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "password=MY_PASSWORD" -F "confirm_password=MY_PASSWORD" -F "organization=ID_ORGANISATION" -F "role=ID_ROLE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // new account JSON representation
+}
+```
+
+---
+### (PUT) /api/accounts/:id
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route update an account by his ID.
+
+#### Role required
+
+Accessible to users with the following role: **administrator**.
+
+#### Parameters
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <td>PUT</td>
+      <td>fullname</td>
+      <td>optional</td>
+      <td>Name of the account</td>
+    </tr>
+    <tr>
+      <td>PUT</td>
+      <td>role</td>
+      <td>optional</td>
+      <td>Role id of the account</td>
+    </tr>
+    <tr>
+      <td>PUT</td>
+      <td>organizations</td>
+      <td>optional</td>
+      <td>Array of organizations ID of the account</td>
+    </tr>
+    <tr>
+      <td>PUT</td>
+      <td>visible</td>
+      <td>optional</td>
+      <td>To set the visibility of the account (true or false)</td>
+    </tr>
+        <tr>
+      <td>PUT</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>To set the protection of the account (true or false)</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return the updated account (JSON formated)
+curl -X PUT -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME"-F "organizations=ID_ORGANISATIONS" -F "role=ID_ROLE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
+curl -X PUT -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "organizations=ID_ORGANISATIONS" -F "role=ID_ROLE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // updated account JSON representation
+}
+```
+---
+### (PUT) /api/accounts/
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route updates multiple accounts by their ID.
+
+#### Role required
+
+Accessible to users with the following role: **administrator**.
+
+#### Parameters
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <td>PUT</td>
+      <td>fullname</td>
+      <td>optional</td>
+      <td>Name of the account</td>
+    </tr>
+    <tr>
+      <td>PUT</td>
+      <td>role</td>
+      <td>optional</td>
+      <td>Role id of the account</td>
+    </tr>
+    <tr>
+      <td>PUT</td>
+      <td>organizations</td>
+      <td>optional</td>
+      <td>Array of organizations ID of the account</td>
+    </tr>
+    <tr>
+      <td>PUT</td>
+      <td>visible</td>
+      <td>optional</td>
+      <td>To set the visibility of the account (true or false)</td>
+    </tr>
+        <tr>
+      <td>PUT</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>To set the protection of the account (true or false)</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return the numbers of accounts updated (JSON formated)
+curl -X PUT -F "accounts= [{accountId1 : xxxxx}, {accountId2 : xxxxx}]]" -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME"-F "organizations=ID_ORGANISATIONS" -F "role=ID_ROLE" "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
+curl -X PUT -F "accounts= [{accountId1 : xxxxx}, {accountId2 : xxxxx}]]" -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "organizations=ID_ORGANISATIONS" -F "role=ID_ROLE" "http://localhost:3000/api/accounts?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // nb of accounts updated
+}
+```
+---
+### (DELETE) /api/accounts/:id
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route delete account by his ID.
+
+#### Role required
+
+Accessible to users with the following role: **administrator**.
+
+#### Parameters
+
+No parameters available
+
+#### How to request
+
+```bash
+# Will return the account (with 123456789 id) deleted (JSON formated)
+curl -X DELETE "http://localhost:3000/api/accounts/123456789" -H "Authorization: Bearer MY_TOKEN"
+curl -X DELETE "http://localhost:3000/api/accounts/123456789?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // return the account delete (JSON formated)
+}
+```
+---
+### (DELETE) /api/accounts/
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route deletes an array of accounts ID.
+
+#### Role required
+
+Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
+
+#### Parameters
+
+No parameters available
+
+#### How to request
+
+```bash
+# Will return number of deleted accounts
+curl -X DELETE -F "accounts:[{accountId1, accountId2, accountId3}]" "http://localhost:3000/api/accounts/123456789" -H "Authorization: Bearer MY_TOKEN"
+curl -X DELETE -F "accounts:[{accountId1, accountId2, accountId3}]" "http://localhost:3000/api/accounts/123456789?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // return the number of deleted accounts (JSON formated)
+}
+```
+ ---
+ ### (GET) /api/roles/
+ 
+*[Available Routes](#available-routes)*
+
+#### Description
+This route return all roles (JSON formated)
+
+#### Role required
+Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
+
+#### Parameters
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
       <th>Parameters</th>
       <th>Requirement</th>
       <th>Description</th>
@@ -320,19 +573,21 @@ Accessible to users with the following role : **curator**.
   <tbody>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
       <td>limit</td>
       <td>optional</td>
       <td>Maximum number of returned results (default:20)</td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
       <td>skip</td>
       <td>optional</td>
       <td>Number of documents skipped (default:0)</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>Use this parameter to filter results by protected states (true or false)</td>
     </tr>
   </tbody>
 </table>
@@ -347,10 +602,10 @@ curl "http://localhost:3000/api/roles?token=MY_TOKEN"
 
 #### Result
 
-```js
+```json
 {
   "err": false,
-  "res": [{...}] // Array of roles JSON representation (see models section to get more infos)
+  "res": [{...}] // Array of roles JSON representation
 }
 ```
 
@@ -363,11 +618,11 @@ curl "http://localhost:3000/api/roles?token=MY_TOKEN"
 
 #### Description
 
-This route return a role (JSON formated).
+This route return an role (JSON formated).
 
 #### Role required
 
-Accessible to users with the following role : **curator**.
+Accessible to users with the following role: **administrator**.
 
 #### Parameters
 
@@ -376,45 +631,286 @@ No parameters available
 #### How to request
 
 ```bash
-# Will return role (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
-curl "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+# Will return the role (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
+curl "http://localhost:3000/api/roles/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/roles/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
 ```
-
 #### Result
 
-```js
+```json
 {
   "err": false,
-  "res": {...} // A role JSON representation (see models section to get more infos)
+  "res": {...} // Roles JSON representation
 }
 ```
-
 ---
 
-
-### (GET) /api/organisations/
-
+### (POST) /api/roles/
 
 *[Available Routes](#available-routes)*
 
 #### Description
 
-This route return all organisations (JSON formated).
+This route add a new role in database and return this role (JSON formated).
 
 #### Role required
 
-Accessible to users with the following role : **curator**.
+Accessible to user with the following role: **administrator**
 
 #### Parameters
-
 
 <table>
   <thead>
     <tr>
       <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <td>POST</td>
+      <td>label</td>
+      <td>required</td>
+      <td>Label of the role</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>key</td>
+      <td>required</td>
+      <td>Key adress of the role</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>weight</td>
+      <td>required</td>
+      <td>Weight of the role</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>To protect the role</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return the new account (JSON formated)
+curl -F "label=MY_LABEL" -F "key=MY_KEY" -F "weight=MY_WEIGHT" -F "protected=TRUE OR FALSE" "http://localhost:3000/api/roles" -H "Authorization: Bearer MY_TOKEN"
+curl -F "label=MY_LABEL" -F "key=MY_KEY" -F "weight=MY_WEIGHT" -F "protected=TRUE OR FALSE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // new role JSON representation
+}
+```
+---
+### (PUT) /api/roles/:id
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route update an role by his ID.
+
+#### Role required
+
+Accessible to users with the following role: **administrator**.
+
+#### Parameters
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <td>PUT</td>
+      <td>label</td>
+      <td>optional</td>
+      <td>Label of the role</td>
+    </tr>
+    <tr>
+      <td>PUT</td>
+      <td>key</td>
+      <td>optional</td>
+      <td>Key id of the role</td>
+    </tr>
+    <tr>
+      <td>PUT</td>
+      <td>weight</td>
+      <td>optional</td>
+      <td>Weight of the role</td>
+    </tr>
+     <tr>
+      <td>PUT</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>To set the protection of the role (true or false)</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return the updated account (JSON formated)
+curl -X PUT -F "label=MY_LABEL" -F "key=MY_KEY"-F "weight=MY_WEIGHT" -F "protected=TRUE OF FALSE" "http://localhost:3000/api/roles/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
+curl -X PUT -F "label=MY_LABEL" -F "key=MY_KEY"-F "weight=MY_WEIGHT" -F "protected=TRUE OF FALSE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // updated role JSON representation
+}
+```
+---
+### (PUT) /api/roles/
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route updates multiple roles by their ID.
+
+#### Role required
+
+Accessible to users with the following role: **administrator**.
+
+#### Parameters
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PUT</td>
+      <td>weight</td>
+      <td>optional</td>
+      <td>Weight of the role</td>
+    </tr>
+     <tr>
+      <td>PUT</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>To set the protection of the role (true or false)</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return the numbers of accounts updated (JSON formated)
+curl -X PUT -F "roles= [{roleId : xxxxx}, {roleId : xxxxx}]]" -F "protected=TRUE" "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
+curl -X PUT -F "roles= [{roleId : xxxxx}, {roleId : xxxxx}]]" -F "protected=TRUE" "http://localhost:3000/api/accounts?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // nb of roles updated
+}
+```
+---
+### (DELETE) /api/roles/:id
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route delete role by his ID.
+
+#### Role required
+
+Accessible to users with the following role: **administrator**.
+
+#### Parameters
+
+No parameters available
+
+#### How to request
+
+```bash
+# Will return the roles (with 123456789 id) deleted (JSON formated)
+curl -X DELETE "http://localhost:3000/api/roles/123456789" -H "Authorization: Bearer MY_TOKEN"
+curl -X DELETE "http://localhost:3000/api/roles/123456789?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // return the role delete (JSON formated)
+}
+```
+---
+### (DELETE) /api/roles/
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route deletes an array of accounts ID.
+
+#### Role required
+
+Accessible to users with the following role: **administrator**.
+
+#### Parameters
+
+No parameters available
+
+#### How to request
+
+```bash
+# Will return number of deleted accounts
+curl -X DELETE -F "roles:[{roleId, roleId, roleId}]" "http://localhost:3000/api/accounts/123456789" -H "Authorization: Bearer MY_TOKEN"
+curl -X DELETE -F "roles:[{roleId, roleId, roleId}]" "http://localhost:3000/api/accounts/123456789?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // return the number of deleted roles (JSON formated)
+}
+```
+ ---
+  ### (GET) /api/organizations/
+ 
+*[Available Routes](#available-routes)*
+
+#### Description
+This route return all organizations (JSON formated)
+
+#### Role required
+Accessible to users with the following role : **standardUser**, **moderator**, **administrator**.
+
+#### Parameters
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
       <th>Parameters</th>
       <th>Requirement</th>
       <th>Description</th>
@@ -423,54 +919,62 @@ Accessible to users with the following role : **curator**.
   <tbody>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
       <td>limit</td>
       <td>optional</td>
       <td>Maximum number of returned results (default:20)</td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
       <td>skip</td>
       <td>optional</td>
       <td>Number of documents skipped (default:0)</td>
     </tr>
+    <tr>
+      <td>GET</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>Use this parameter to filter results by protected states (true or false)</td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>visible</td>
+      <td>optional</td>
+      <td>Use this parameter to filter results by visible states (true or false)</td>
+    </tr>
   </tbody>
 </table>
 
 #### How to request
 
 ```bash
-# Will return all organisations (JSON formated)
-curl "http://localhost:3000/api/organisations" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/organisations?token=MY_TOKEN"
+# Will return all organizations (JSON formated)
+curl "http://localhost:3000/api/organizations" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/organizations?token=MY_TOKEN"
 ```
 
 #### Result
 
-```js
+```json
 {
   "err": false,
-  "res": [{...}] // Array of organisations JSON representation (see models section to get more infos)
+  "res": [{...}] // Array of organizations JSON representation
 }
 ```
 
 ---
 
-### (GET) /api/organisations/:id
+### (GET) /api/organizations/:id
 
 
 *[Available Routes](#available-routes)*
 
 #### Description
 
-This route return an organisation (JSON formated).
+This route return an organization (JSON formated).
 
 #### Role required
 
-Accessible to users with the following role : **curator**.
+Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
 
 #### Parameters
 
@@ -479,34 +983,31 @@ No parameters available
 #### How to request
 
 ```bash
-# Will return the organisation (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
-curl "http://localhost:3000/api/organisations/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/organisations/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+# Will return the role (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
+curl "http://localhost:3000/api/organizations/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/organizations/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
 ```
-
 #### Result
 
-```js
+```json
 {
   "err": false,
-  "res": {...} // An organisation JSON representation (see models section to get more infos)
+  "res": {...} // organization JSON representation
 }
 ```
-
 ---
 
-### (GET) /api/statistics/documents
-
+### (POST) /api/organizations/
 
 *[Available Routes](#available-routes)*
 
 #### Description
 
-This route return some statistics about documents.
+This route add a new organization in database and return this organization (JSON formated).
 
 #### Role required
 
-Accessible to users with the following role : **standard_user, annotator, curator**.
+Accessible to user with the following role: **administrator**
 
 #### Parameters
 
@@ -514,8 +1015,242 @@ Accessible to users with the following role : **standard_user, annotator, curato
   <thead>
     <tr>
       <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <td>POST</td>
+      <td>name</td>
+      <td>required</td>
+      <td>Name of the organization</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>visible</td>
+      <td>required</td>
+      <td>Visbility of the organization</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>To protect the organization</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return the new account (JSON formated)
+curl -F "name=MY_NAME" -F "visible=TRUE OR FALSE" -F "protected=TRUE OR FALSE" "http://localhost:3000/api/roles" -H "Authorization: Bearer MY_TOKEN"
+curl -F "name=MY_NAME" -F "visible=TRUE OR FALSE" -F "protected=TRUE OR FALSE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // new organization JSON representation
+}
+```
+---
+### (PUT) /api/organizations/:id
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route update an organization by his ID.
+
+#### Role required
+
+Accessible to users with the following role: **administrator**.
+
+#### Parameters
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <td>PUT</td>
+      <td>name</td>
+      <td>optional</td>
+      <td>Name of the organization</td>
+    </tr>
+    <tr>
+      <td>PUT</td>
+      <td>visible</td>
+      <td>optional</td>
+      <td>Visibility of the organization (true or false)</td>
+    </tr>
+     <tr>
+      <td>PUT</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>To set the protection of the organization (true or false)</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return the updated account (JSON formated)
+curl -X PUT -F "name=MY_LABEL" -F "visible=TRUE OF FALSE" -F "protected=TRUE OF FALSE" "http://localhost:3000/api/roles/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
+curl -X PUT -F "name=MY_LABEL" -F "visible=TRUE OF FALSE" -F "protected=TRUE OF FALSE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // updated organization JSON representation
+}
+```
+---
+### (PUT) /api/organizations/
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route updates multiple roles by their ID.
+
+#### Role required
+
+Accessible to users with the following role: **administrator**.
+
+#### Parameters
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PUT</td>
+      <td>visible</td>
+      <td>optional</td>
+      <td>Visibility of the organizations (true or false)</td>
+    </tr>
+     <tr>
+      <td>PUT</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>To set the protection of the organizations (true or false)</td>
+    </tr>
+  </tbody>
+</table>
+
+#### How to request
+
+```bash
+# Will return the numbers of accounts updated (JSON formated)
+curl -X PUT -F "organizations= [{organizationId : xxxxx}, {organizationId : xxxxx}]]" -F "protected=TRUE" -F "visible=TRUE OR FALSE" "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
+curl -X PUT -F "organizations= [{organizationId : xxxxx}, {organizationId : xxxxx}]]" -F "protected=TRUE" -F "visible=TRUE OR FALSE" "http://localhost:3000/api/accounts?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // nb of roles updated
+}
+```
+---
+### (DELETE) /api/organizations/:id
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route delete organization by his ID.
+
+#### Role required
+
+Accessible to users with the following role: **administrator**.
+
+#### Parameters
+
+No parameters available
+
+#### How to request
+
+```bash
+# Will return the organizations (with 123456789 id) deleted (JSON formated)
+curl -X DELETE "http://localhost:3000/api/organizations/123456789" -H "Authorization: Bearer MY_TOKEN"
+curl -X DELETE "http://localhost:3000/api/organizations/123456789?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // return the organization delete (JSON formated)
+}
+```
+---
+### (DELETE) /api/organizations/
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route deletes an array of organizations ID.
+
+#### Role required
+
+Accessible to users with the following role: **administrator**.
+
+#### Parameters
+
+No parameters available
+
+#### How to request
+
+```bash
+# Will return number of deleted accounts
+curl -X DELETE -F "organizations:[{organizationId, organizationId, organizationId}]" "http://localhost:3000/api/accounts/123456789" -H "Authorization: Bearer MY_TOKEN"
+curl -X DELETE -F "organizations:[{organizationId, organizationId, organizationId}]" "http://localhost:3000/api/accounts/123456789?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // return the number of deleted organizations (JSON formated)
+}
+```
+ ---
+   ### (GET) /api/documents/
+ 
+*[Available Routes](#available-routes)*
+
+#### Description
+This route return all documents (JSON formated)
+
+#### Role required
+Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
+
+#### Parameters
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
       <th>Parameters</th>
       <th>Requirement</th>
       <th>Description</th>
@@ -524,83 +1259,63 @@ Accessible to users with the following role : **standard_user, annotator, curato
   <tbody>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
       <td>limit</td>
       <td>optional</td>
-      <td>limit of returned documents statistics (default: 20)</i></td>
+      <td>Maximum number of returned results (default:20)</td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>sort</td>
-      <td>optional</td>
-      <td>Will sort statistics depending of document creation date (avalable values: asc OR desc, default: asc)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
       <td>skip</td>
       <td>optional</td>
-      <td>Number of documents statistics skipped (default: 0)</td>
+      <td>Number of documents skipped (default:0)</td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>upload_range</td>
+      <td>owners</td>
       <td>optional</td>
-      <td>Set this parameter to get statistics of documents uploaded in the last given days (will be overwritten by uploaded_before parameter)</td>
+      <td>Use this parameter to filter results by owners</td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>update_range</td>
+      <td>organizations</td>
       <td>optional</td>
-      <td>Set this parameter to get statistics of documents updated in the last given days (will be overwritten by updated_before parameter)</td>
+      <td>Use this parameter to filter results by organizations</td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>uploaded_before</td>
+      <td>visible</td>
       <td>optional</td>
-      <td>Set this parameter to get statistics of documents uploaded before the given date</td>
+      <td>Use this parameter to filter results by visible states (true or false)</td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>uploaded_after</td>
+      <td>protected</td>
       <td>optional</td>
-      <td>Set this parameter to get statistics of documents uploaded after the given date</td>
+      <td>Use this parameter to filter results by protected states (true or false)</td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>updated_before</td>
+      <td>updatedBefore</td>
       <td>optional</td>
-      <td>Set this parameter to get statistics of documents updated before the given date</td>
+      <td>Use this parameter to filter results by date of updates before a date </td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>updated_after</td>
+      <td>updateAfter</td>
       <td>optional</td>
-      <td>Set this parameter to get statistics of documents updated after the given date</td>
+      <td>Use this parameter to filter results by date of updates after a date </td>
     </tr>
     <tr>
       <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>organisations</td>
+      <td>uploadBefore</td>
       <td>optional</td>
-      <td>Set this parameter to get statistics of documents of given organsisations (only for curators) </td>
+      <td>Use this parameter to filter results by date of upload before a date </td>
+    </tr>
+    <tr>
+      <td>GET</td>
+      <td>uploadAfter</td>
+      <td>optional</td>
+      <td>Use this parameter to filter results by date of upload after a date </td>
     </tr>
   </tbody>
 </table>
@@ -608,226 +1323,17 @@ Accessible to users with the following role : **standard_user, annotator, curato
 #### How to request
 
 ```bash
-# Will return the statistics of 20 first uploaded documents
-curl "http://localhost:3000/api/statistics/documents" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/statistics/documents?token=MY_TOKEN"
-
-# Note: You could combine the following parameters (beware of the risk of overwriting)
-# Will return the statistics of documents uploaded in the last 10 days
-curl "http://localhost:3000/api/statistics/documents?upload_range=10"
-# Will return statistics of documents updated in the last 10 days
-curl "http://localhost:3000/api/statistics/documents?update_range=10"
-# Will return statistics of documents uploaded before 2021-01-01
-curl "http://localhost:3000/api/statistics/documents?uploaded_before=2021-01-01"
-# Will return statistics of documents uploaded after 2021-01-01
-curl "http://localhost:3000/api/statistics/documents?uploaded_after=2021-01-01"
-# Will return statistics of documents updated before 2021-01-01
-curl "http://localhost:3000/api/statistics/documents?updated_before=2021-01-01"
-# Will return statistics of documents updated after 2021-01-01
-curl "http://localhost:3000/api/statistics/documents?updated_after=2021-01-01"
-# Will return statistics of documents owned by organisation 60886f6e6a24cc3c8cb3bb28
-curl "http://localhost:3000/api/statistics/documents?organisations=60886f6e6a24cc3c8cb3bb28"
+# Will return all documents (JSON formated)
+curl "http://localhost:3000/api/documents" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/documents?token=MY_TOKEN"
 ```
 
 #### Result
 
-```js
+```json
 {
   "err": false,
-  "res": [
-    {
-      "_id": "60ca75d9c14419566dfd22b2", // request http://localhost:3000/api/statistics/documents/60ca75d9c14419566dfd22b2 to get more infos about datasets
-      "doi": "DOI of the given article",
-      "title": "Title of the given article",
-      "uploaded_at": "2021-06-17", // date of upload
-      "updated_at": "2021-06-18", // date of the last update
-      "status": "processing" // available values : "processing" (document process in progress) & "processed" (document process done)
-    }
-    ...
-  ]
-}
-```
-
----
-
-### (GET) /api/statistics/documents/:id
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return some statistics about the given document.
-
-#### Role required
-
-Accessible to users with the following role : **standard_user, annotator, curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the organisation (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
-curl "http://localhost:3000/api/statistics/documents/60ca75d9c14419566dfd22b2" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/statistics/documents/60ca75d9c14419566dfd22b2?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": {
-    "_id": "60ca75d9c14419566dfd22b2",
-    "doi": "DOI of the given article",
-    "title": "Title of the given article",
-    "uploaded_at": "2021-06-17", // date of upload
-    "updated_at": "2021-06-18", // date of the last update
-    "datasets": [
-      {
-        "id": "dataset-1",
-        "name": "The dataset name",
-        "reuse": false, // true or false
-        "type": {
-          "name": "Other: Protocol", // the datatype of this dataset, all datatypes available here: https://wiki.dataseer.ai/doku.php?id=data_type
-          "url": "https://wiki.dataseer.ai/doku.php?id=data_type:other:protocol" // url of this datatype
-        }
-      },
-      ...
-    ]
-  }
-}
-```
-
----
-
-### (POST) /api/documents
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route add new a document (should be used to upload document).
-
-#### Role required
-
-Public access
-
-__Note: If your are not authenticated as curator, you cannot set "mute" or "dataseerML" parameters value.__
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>file</td>
-      <td>required</td>
-      <td>File of document<br/><i>Supported formats are PDF, JATS/NLM, TEI XML, publisher XML formats for ScholarOne, BMJ, Elsevier (staging format), NPG (Nature), OUP, PNAS, RSC, Sage, Springer and Wiley</i></td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>attachedFiles</td>
-      <td>optional</td>
-      <td>Files attached to document<br/><i>All formats are supported</i></td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>journal</td>
-      <td>required</td>
-      <td>Which journal this document will be sent to</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>email</td>
-      <td>required</td>
-      <td>Email of document owner</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>fullname</td>
-      <td>required</td>
-      <td>Fullname of document owner</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>dataseerML</td>
-      <td>optional</td>
-      <td>Specify if dataseer-ml will process this document (default: false, but should be set to true)</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>already_assessed</td>
-      <td>optional</td>
-      <td>Specify if this document has been already assessed (default: false)</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>isDataseer</td>
-      <td>optional</td>
-      <td>Specify if this document is from DataSeer.<br/>Only available if you are authenticated as curator (otherwise the value will be forced to true)</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>mute</td>
-      <td>optional</td>
-      <td>Specify if notifications will be muted.<br/>Only available if you are authenticated as curator (otherwise the value will be forced to false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Upload a document with attached files
-curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" "http://localhost:3000/api/documents"
-
-# Upload a document without attached files
-curl -X "POST" -F "file=@/path/to/file.pdf" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" "http://localhost:3000/api/documents"
-
-# Upload a document with attached files but do not send email notification
-
-curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.xml" -F "attached_files[]=@/path/to/file.png" -F "journal=journal" -F "email=email@email.com" -F "fullname=Full Name" -F "dataseerML=true" -F "mute=true" "http://localhost:3000/api/documents"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": {...} // uploaded document
+  "res": [{...}] // Array of organizations JSON representation
 }
 ```
 
@@ -840,11 +1346,43 @@ curl -X "POST" -F "file=@/path/to/file.pdf" -F "attached_files[]=@/path/to/file.
 
 #### Description
 
-This route return the document with the given id.
+This route return an document (JSON formated).
 
 #### Role required
 
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
+Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
+
+#### Parameters
+
+No parameters available
+
+#### How to request
+
+```bash
+# Will return the role (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
+curl "http://localhost:3000/api/documents/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
+curl "http://localhost:3000/api/documents/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
+```
+#### Result
+
+```json
+{
+  "err": false,
+  "res": {...} // document JSON representation
+}
+```
+---
+### (POST) /api/documents/
+
+*[Available Routes](#available-routes)*
+
+#### Description
+
+This route add a new account in database and return this account (JSON formated).
+
+#### Role required
+
+Accessible to user with the following role: **standardUser**, **moderator**, **administrator**
 
 #### Parameters
 
@@ -852,1167 +1390,46 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
   <thead>
     <tr>
       <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
       <th>Parameters</th>
       <th>Requirement</th>
       <th>Description</th>
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>limit</td>
-      <td>optional</td>
-      <td>Maximum number of returned results (default:20)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>skip</td>
-      <td>optional</td>
-      <td>Number of documents skipped (default:0)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>pdf</td>
-      <td>optional</td>
-      <td>If this parameter is set document.pdf will be filled with data.<br/>Else this property will only contain an id.</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>tei</td>
-      <td>optional</td>
-      <td>If this parameter is set document.tei will be filled with data.<br/>Else this property will only contain an id.</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>files</td>
-      <td>optional</td>
-      <td>If this parameter is set document.files will be filled with data.<br/>Else this property will only contain an id.</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>metadata</td>
-      <td>optional</td>
-      <td>If this parameter is set document.metadata will be filled with data.<br/>Else this property will only contain an id.</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>datasets</td>
-      <td>optional</td>
-      <td>If this parameter is set document.datasets will be filled with data.<br/>Else this property will only contain an id.</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-##### Get "light version" of a given document
-
-```bash
-# Will return document (with id 60479f995e905b3e479e02e1) without data for: pdf, tei, files, metadata, datasets
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1?token=MY_TOKEN"
-```
-
-```js
-{
-  "err": false,
-  "res": {
-    "logs": [
-      "60479fa55e905b3e479e02e6",
-      "60479fe25e905b3e479e02e7",
-      "6047a07c5e905b3e479e02e8",
-      "6047a1cd5e905b3e479e02e9",
-      "6047a1d25e905b3e479e02ea",
-      "6047bb7a5e905b3e479e02eb"
-    ],
-    "files": [
-      "60479f995e905b3e479e02e2",
-      "60479fa55e905b3e479e02e3"
-    ],
-    "status": "metadata",
-    "isDataSeer": false,
-    "already_assessed": false,
-    "watchers": [
-      "5e2f6afe0bb7cd4cdfba9f03",
-      "5e2f6b4c0bb7cd4cdfba9f05",
-      "603fd834d56f3907b75dcbe0"
-    ],
-    "token": "eyJhbGciOi...VtcnaB4eTQ",
-    "_id": "60479f995e905b3e479e02e1",
-    "uploaded_by": "5e2f6afe0bb7cd4cdfba9f03",
-    "updated_at": "2021-03-09T16:17:29.556Z",
-    "uploaded_at": "2021-03-09T16:17:29.556Z",
-    "__v": 9,
-    "metadata": "60479fa55e905b3e479e02e4",
-    "organisation": "60344b86aae2c62a0769d44a",
-    "owner": "5e2f6afe0bb7cd4cdfba9f03",
-    "pdf": "60479f995e905b3e479e02e2",
-    "tei": "60479fa55e905b3e479e02e3",
-    "upload_journal": "60344b86aae2c62a0769d44a",
-    "datasets": "60479fa55e905b3e479e02e5"
-  }
-}
-```
-
-
-##### Get "full version" of a given document
-
-```bash
-# Will return document (with id 60479f995e905b3e479e02e1) with data filled for properties: pdf, tei, files, metadata, datasets
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1?pdf=true&tei=true&files=true&metadata=true&datasets=true" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1?pdf=true&tei=true&files=true&metadata=true&datasets=true&token=MY_TOKEN"
-```
-
-```js
-{
-  "err": false,
-  "res": {
-    "logs": [
-      "60479fa55e905b3e479e02e6",
-      "60479fe25e905b3e479e02e7",
-      "6047a07c5e905b3e479e02e8",
-      "6047a1cd5e905b3e479e02e9",
-      "6047a1d25e905b3e479e02ea",
-      "6047bb7a5e905b3e479e02eb"
-    ],
-    "files": [{...},{...}],
-    "status": "metadata",
-    "isDataSeer": false,
-    "already_assessed": false,
-    "watchers": [
-      "5e2f6afe0bb7cd4cdfba9f03",
-      "5e2f6b4c0bb7cd4cdfba9f05",
-      "603fd834d56f3907b75dcbe0"
-    ],
-    "token": "eyJhbGciOi...VtcnaB4eTQ",
-    "_id": "60479f995e905b3e479e02e1",
-    "uploaded_by": "5e2f6afe0bb7cd4cdfba9f03",
-    "updated_at": "2021-03-09T16:17:29.556Z",
-    "uploaded_at": "2021-03-09T16:17:29.556Z",
-    "__v": 9,
-    "metadata": {...},
-    "organisation": "60344b86aae2c62a0769d44a",
-    "owner": "5e2f6afe0bb7cd4cdfba9f03",
-    "pdf": {...},
-    "tei": {...},
-    "upload_journal": "60344b86aae2c62a0769d44a",
-    "datasets": {
-      "_id": "60479fa55e905b3e479e02e5",
-      "document": "60479f995e905b3e479e02e1",
-      "extracted": [{...}],
-      "current": [{...}],
-      "deleted":  [{...}],
-      "__v": 0
-    }
-  }
-}
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": {...} // given document
-}
-```
-
----
-
-### (GET) /api/documents/:id/pdf
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return the pdf (JSON format) of given documents.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the pdf (JSON format) of the document (with id 60479f995e905b3e479e02e1)
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/pdf" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/pdf?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": {...} // pdf data of the document (see models section to get more infos)
-}
-```
-
----
-
-### (GET) /api/documents/:id/pdf/content
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return the pdf (binary file) of given documents.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the pdf (binary file) of the document (with id 60479f995e905b3e479e02e1)
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/pdf/content" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/pdf/content?token=MY_TOKEN"
-```
-
-#### Result
-
-```
-Binary file
-
-```
-
----
-
-### (GET) /api/documents/:id/tei
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return the tei (JSON format) of given documents.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the tei (JSON format) of the document (with id 60479f995e905b3e479e02e1)
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/tei" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/tei?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": {...} // tei data of the document (see models section to get more infos)
-}
-```
-
----
-
-### (GET) /api/documents/:id/tei/content
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return the tei (binary file) of given documents.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the tei (binary file) of the document (with id 60479f995e905b3e479e02e1)
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/tei/content" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/tei/content?token=MY_TOKEN"
-```
-
-#### Result
-
-```
-Binary file
-
-```
-
----
-
-### (GET) /api/documents/:id/metadata
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return the metadata (JSON formated) of given documents.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the metadata (JSON formated) of the document (with id 60479f995e905b3e479e02e1)
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/metadata" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/metadata?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": {...} // metadata of the document (see models section to get more infos)
-}
-```
-
----
-
-### (POST) /api/documents/:id/metadata/validate
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route validate the "metadata" step of the given documents.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will validate the "metadata" step of the document (with id 60479f995e905b3e479e02e1)
-curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/metadata/validate" -H "Authorization: Bearer MY_TOKEN"
-curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/metadata/validate?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": true
-}
-```
-
----
-
-### (GET) /api/documents/:id/datasets
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return the datasets (JSON formated) of given documents.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the datasets (JSON formated) of the document (with id 60479f995e905b3e479e02e1)
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": {...} // datasets of the document (see models section to get more infos)
-}
-```
-
----
-
-### (POST) /api/documents/:id/datasets/validate
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route validate the "datasets" step of the given documents.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will validate the "datasets" step of the document (with id 60479f995e905b3e479e02e1)
-curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets/validate" -H "Authorization: Bearer MY_TOKEN"
-curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets/validate?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": true
-}
-```
-
----
-
-### (POST) /api/documents/:id/datasets/backToMetadata
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return the given document to the "metadata" step.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the given document (with id 60479f995e905b3e479e02e1) to the "metadata" step
-curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets/validate" -H "Authorization: Bearer MY_TOKEN"
-curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/datasets/validate?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": true
-}
-```
-
----
-
-### (POST) /api/documents/:id/finish/reopen
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return the given document to the "metadata" step.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the given document (with id 60479f995e905b3e479e02e1) to the "metadata" step
-curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/finish/reopen" -H "Authorization: Bearer MY_TOKEN"
-curl -X "POST" "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/finish/reopen?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": true
-}
-```
-
----
-
-### (GET) /api/documents/:id/files
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return all files (JSON formated) of given documents.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return all files (JSON formated) of the document (with id 60479f995e905b3e479e02e1)
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/files" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents/60479f995e905b3e479e02e1/files?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": [{...}] // Array of file JSON representation (see models section to get more infos)
-}
-```
-
----
-
-### (GET) /api/files/:id
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return a given file (JSON formated).
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the files (JSON formated) with id 60479f995e905b3e479e02e1
-curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": {...} // file JSON representation (see models section to get more infos)
-}
-```
-
----
-
-### (GET) /api/files/:id/buffer
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return a given file (Buffer formated).
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the files (Buffer formated) with id 60479f995e905b3e479e02e1
-curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files/buffer" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files/buffer?token=MY_TOKEN"
-```
-
-#### Result
-
-```
-Buffer
-```
-
----
-
-### (GET) /api/files/:id/string
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return a given file (String formated).
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the files (String formated) with id 60479f995e905b3e479e02e1
-curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files/string" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/files/60479f995e905b3e479e02e1/files/string?token=MY_TOKEN"
-```
-
-#### Result
-
-```
-UTF-8 String
-```
-
----
-
-### (PUT) /api/datasets/:id
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route update diven datasets.
-
-#### Role required
-
-Accessible to users with the following role : **curator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
       <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>current</td>
-      <td>optional</td>
-      <td>current datasets infos (see Models to get mores infos)</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>deleted</td>
-      <td>optional</td>
-      <td>deleted datasets infos (see Models to get mores infos)</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>extracted</td>
-      <td>optional</td>
-      <td>extracted datasets infos (see Models to get mores infos)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will update extracted property of datasets with id 60479f995e905b3e479e02e1
-curl -X "PUT" -F "extracted=[{...}]" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1" -H "Authorization: Bearer MY_TOKEN"
-curl -X "PUT" -F "extracted=[{...}]" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": true
-}
-```
-
----
-
-### (POST) /api/datasets/:id/checkValidation
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-Check validation of all current datasets.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will check validation of all current datasets with id 60479f995e905b3e479e02e1
-curl -X "POST" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/checkValidation" -H "Authorization: Bearer MY_TOKEN"
-curl -X "POST" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/checkValidation?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": true // or false if validation failed
-}
-```
-
----
-
-### (POST) /api/datasets/:id/dataset
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-Add a new dataset and link it to a sentence (You cannot just add a dataset without linking it to a sentence).
-
-Notes: You don't have to call the route [(POST) /api/datasets/:id/link](#post-apidatasetsidlink)).
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>dataset</td>
-      <td>optional</td>
-      <td>the dataset infos</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>sentence</td>
-      <td>optional</td>
-      <td>the sentence infos</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will add new dataset to datasets with id 60479f995e905b3e479e02e1
-curl -X "POST" -F "dataset={...}" -F "sentence={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset" -H "Authorization: Bearer MY_TOKEN"
-curl -X "POST" -F "dataset={...}" -F "sentence={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset?token=MY_TOKEN"
-```
-
-```js
-// dataset params structure (sent to the API) (more informations about available properties in the "models" documentation)
-// "dataset.id" & "dataset.dataInstanceId" & "dataset.sentences" cannot be updated, so they will be ignored
-let dataset = {...};
-// sentence params structure is like:
-let sentence = {"id":"sentence-1"};
-```
-
-#### Result
-
-```js
-// the "res" property will contain the complete dataset (more informations about it in the "models" documentation)
-{
-  "err": false,
-  "res": {...}
-}
-```
-
----
-
-### (PUT) /api/datasets/:id/dataset
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-Update given dataset of datasets with given id.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>PUT</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>dataset</td>
-      <td>optional</td>
-      <td>the dataset infos</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will add update given dataset of datasets with id 60479f995e905b3e479e02e1
-curl -X "PUT" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset" -H "Authorization: Bearer MY_TOKEN"
-curl -X "PUT" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset?token=MY_TOKEN"
-```
-
-```js
-// dataset params structure (sent to the API) must have all properties set (more informations about available properties in the "models" documentation)
-// Note: "dataset.dataInstanceId" & "dataset.sentences" cannot be updated, so they will be ignored.
-let dataset = {...}
-```
-
-#### Result
-
-```js
-// the "res" property will contain the complete dataset (more informations about it in the "models" documentation)
-{
-  "err": false,
-  "res": {...}
-}
-```
-
----
-
-### (DELETE) /api/datasets/:id/dataset
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-Delete the given dataset (of the datasets list) with given id.
-
-Note: It will delete all dataset links (both in TEI & mongoDB).
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>DELETE</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>dataset</td>
-      <td>optional</td>
-      <td>the dataset infos</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will update given dataset of datasets with id 60479f995e905b3e479e02e1
-curl -X "DELETE" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset" -H "Authorization: Bearer MY_TOKEN"
-curl -X "DELETE" -F "dataset={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/dataset?token=MY_TOKEN"
-```
-
-```js
-// dataset params structure (sent to the API)
-let dataset = {"id":"dataset-1"}
-```
-
-#### Result
-
-```js
-// the "res" property will contain the complete dataset (more informations about it in the "models" documentation)
-{
-  "err": false,
-  "res": {...}
-}
-```
-
----
-
-### (POST) /api/datasets/:id/link
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-Add new link to datasets with given id.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>link</td>
+      <td>file</td>
       <td>required</td>
-      <td>new link</td>
+      <td>File of the document</td>
     </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-opts.dataset.id
-opts.sentence.id
-opts.sentence.text
-
-```bash
-# Will add new link to datasets with id 60479f995e905b3e479e02e1
-curl -X "POST" -F "link={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/link" -H "Authorization: Bearer MY_TOKEN"
-curl -X "POST" -F "link={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/link?token=MY_TOKEN"
-```
-
-```js
-// Link data structure
-let link = {
-  "sentence":{"id":"sentence-1"},
-  "dataset":{"id":"dataset-1"}
-}
-```
-
-#### Result
-
-```js
-// the "res" property will contain the complete dataset (more informations about it in the "models" documentation)
-{
-  "err": false,
-  "res": {...}
-}
-```
-
----
-
-### (DELETE) /api/datasets/:id/link
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-Delete given link of datasets with given id.
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>DELETE</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>link</td>
-      <td>required</td>
-      <td>deleted link</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will update given link of datasets with id 60479f995e905b3e479e02e1
-curl -X "DELETE" -F "link={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/link" -H "Authorization: Bearer MY_TOKEN"
-curl -X "DELETE" -F "link={...}" "http://localhost:3000/api/datasets/60479f995e905b3e479e02e1/link?token=MY_TOKEN"
-```
-
-```js
-// Link data structure
-let link = {
-  "sentence":{"id":"sentence-1"},
-  "dataset":{ "id":"dataset-1" }
-}
-```
-
-#### Result
-
-```js
-// the "res" property will contain the complete dataset (more informations about it in the "models" documentation)
-{
-  "err": false,
-  "res": {...}
-}
-```
-
----
-
-### (POST) /api/dataseer-ml/processDataseerSentence
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-Process sentence (send data to dataseer-ml service).
-
-#### Role required
-
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Request type</th>
-      <th>Response type</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
     <tr>
       <td>POST</td>
-      <td>application/x-www-form-urlencoded</td>
-      <td>application/json</td>
-      <td>text</td>
-      <td>required</td>
-      <td>Sentence (String)</td>
+      <td>attached_files</td>
+      <td>optional</td>
+      <td>Attached files of the document</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>email</td>
+      <td>optional</td>
+      <td>Email of the uploader</td>
+    </tr>
+        <tr>
+      <td>POST</td>
+      <td>organization</td>
+      <td>optional</td>
+      <td>Organization who upload the document</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>visible</td>
+      <td>optional</td>
+      <td>To set the visiblity of the account (true or false)</td>
+    </tr>
+    <tr>
+      <td>POST</td>
+      <td>protected</td>
+      <td>optional</td>
+      <td>To set the protection of the account (true or false)</td>
     </tr>
   </tbody>
 </table>
@@ -2020,89 +1437,63 @@ Accessible to users with the following role : **santard_user**, **annotator**, *
 #### How to request
 
 ```bash
-# Will process sentence (send data to dataseer-ml service)
-curl -X "POST" -F "text=my sentence" "http://localhost:3000/api/dataseer-ml/processDataseerSentence" -H "Authorization: Bearer MY_TOKEN"
-curl -X "POST" -F "text=my sentence" "http://localhost:3000/api/dataseer-ml/processDataseerSentence?token=MY_TOKEN"
+# Will return the new account (JSON formated)
+curl -X POST -F "file=@/path/to/document" -F "attached_files[]=@/path/to/attached_files" -F "attached_files[]=@/path/to/attached_files" -F "attached_files[]=@/path/to/attached_files" "http://localhost:3000/api/documents" -H "Authorization: Bearer MY_TOKEN"
+curl -X POST -F "file=@/path/to/document" -F "attached_files[]=@/path/to/attached_files" -F "attached_files[]=@/path/to/attached_files" -F "attached_files[]=@/path/to/attached_files" "http://localhost:3000/api/documents?token=MY_TOKEN"
 ```
-
 #### Result
 
-```js
+```json
 {
   "err": false,
-  "res": {} // result returned by dataseer-ml service
+  "res": {...} // new document JSON representation
 }
 ```
-
 ---
+### /Signin
 
-### (GET) /api/dataseer-ml/jsonDataTypes
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return dataTypes used by the app (JSON formatted).
+*[Available Routes](#api-documentation)*
 
 #### Role required
 
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
+This route is public.
 
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return dataTypes used by the app (JSON formatted)
-curl "http://localhost:3000/api/dataseer-ml/jsonDataTypes" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/dataseer-ml/jsonDataTypes?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": {} // result returned by dataseer-ml service (reformatted for dataseer-web)
-}
-```
+#### Purpose
+Use this route to sign in to TDM-Plateform.
 
 ---
+### /Signup
 
-### (GET) /api/dataseer-ml/resyncJsonDataTypes
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route resync dataTypes used by the app (JSON formatted).
+*[Available Routes](#api-documentation)*
 
 #### Role required
 
-Accessible to users with the following role : **santard_user**, **annotator**, **curator**.
+This route is public.
 
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will resync dataTypes used by the app (JSON formatted)
-curl "http://localhost:3000/api/dataseer-ml/jsonDataTypes" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/dataseer-ml/jsonDataTypes?token=MY_TOKEN"
-```
-
-#### Result
-
-```js
-{
-  "err": false,
-  "res": {} // result returned by dataseer-ml service (reformatted for dataseer-web)
-}
-```
+#### Purpose
+Use this route to sign up to TDM-Plateform.
 
 ---
+### /Signout
+
+*[Available Routes](#api-documentation)*
+
+#### Role required
+
+Accessible to user with the following role: **standardUser**, **moderator**, **administrator**
+
+#### Purpose
+Use this route to sign out to TDM-Plateform.
+
+---
+### /Upload
+
+*[Available Routes](#api-documentation)*
+
+#### Role required
+
+Accessible to user with the following role: **standardUser**, **moderator**, **administrator**
+
+#### Purpose
+Use this to upload document to TDM-Plateform.
+

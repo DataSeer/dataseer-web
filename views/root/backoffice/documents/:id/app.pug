@@ -1,0 +1,85 @@
+<!-- @format -->
+
+<div id="app">
+  <div class="notifications">
+    <div v-for="notification in notifications" :class="notification.class" role="alert">
+      <span v-html="notification.html"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="contour">
+    <div class="center container-fluid item">
+      <div class="row">
+        <div class="col">
+          <h1>Manage document</h1>
+          <div class="form">
+            <div class="container-fluid">
+              <div class="row align-items-center">
+                <div class="col">
+                  <div>
+                    <label for="name" class="bold">Name</label>
+                    <input id="name" class="form-control input" type="text" v-model="item.properties.name">
+                  </div>
+                  <div>
+                    <label for="owner" class="bold" label>Owner</label>
+                    <select id="owner" class="custom-select form-select select" v-model="item.properties.owner._id">
+                      <option v-for="owner in item.dependencies.accounts" :value="owner._id" >{{ owner.username }}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col">
+                  <div>
+                    <label for="name" class="bold">Files</label>
+                    <div>
+                      <div v-for="file in item.properties.files" >
+                        <a :href="buildFilesLink(file._id.toString())">{{file.filename}}</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <label class="bold">Organizations</label>
+                  <div class="select-scrollable">
+                    <div class="center">
+                      <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(item.properties.organizations, true)">
+                        <i class="far fa-check-square"></i>
+                      </button>
+                      <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(item.properties.organizations, false)">
+                        <i class="far fa-square"></i>
+                      </button>  
+                    </div>
+                    <div class="center">
+                      <ul class="list">
+                        <li v-for="organization in item.properties.organizations">
+                          <label><input type="checkbox" v-model="organization.selected" />{{ organization.name }}</label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="form-check form-switch">
+                    <label for="visible" class="property bold">Visible</label>
+                    <input id="visible" class="form-check-input" type="checkbox" v-model="item.properties.visible" />
+                  </div>
+                  <div class="form-check form-switch">
+                    <label for="locked" class="property bold">Locked</label>
+                    <input id="locked" class="form-check-input" type="checkbox" v-model="item.properties.locked" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <button class="btn btn-lg btn-primary" v-on:click.stop="updateItem(event)">Save
+                  <span class="loader-lg" ref="signin"><i class="fas fa-circle-notch fa-spin"></i></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
+

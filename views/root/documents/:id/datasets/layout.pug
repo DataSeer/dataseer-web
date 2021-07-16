@@ -1,0 +1,74 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>#{conf.title}</title>
+    <!-- include of global css dependencies -->
+    <link rel="stylesheet" type="text/css" href="/public/css/style.css"/>
+    <!-- include of app component css dependencies -->
+    <link rel="stylesheet" type="text/css" href="/views/documents/:id/datasets/app.css">
+    <!-- include old dependencies -->
+    <link rel="stylesheet" type="text/css" href="/public/css/datasets/font-awesome.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/public/css/datasets/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/public/css/datasets/style.css"/>
+    <link rel="stylesheet" type="text/css" href="/public/css/datasets/tei.css">
+    <link rel="stylesheet" type="text/css" href="/public/css/datasets/datasets.css">
+    <link rel="stylesheet" type="text/css" href="/public/js/datasets/pdf.js/build/components/pdf_viewer.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css"/>
+    <!--  -->
+  </head>
+  <body>
+    include ../../../../shared/navbar.pug
+    <!-- include of app component -->
+    include ./app.pug
+    include ../../../../shared/footer.pug
+
+    <!-- include old HTML elements -->
+
+    if currentUser
+      div(id='user_id' class='data' value=(currentUser._id))
+      div(id='user_username' class='data' value=(currentUser.username))
+      div(id='user_role' class='data' value=(currentUser.role.key))
+    div(id='document.id' class='data' value=(document._id))
+    include ./lib/modal.pug
+    div#loading-loop
+      div.loader
+      div.infos
+        div.top
+        div.sub
+    <!--  -->
+    <!-- include of global js dependencies -->
+    <script src="/public/js/dependencies/vue.min.js"></script>
+    <script src="/public/js/dependencies/font-awesome.min.js"></script>
+    <script src="/public/js/dependencies/jquery.min.js"></script>
+    <script src="/public/js/dependencies/lodash.min.js"></script>
+    <script src="/public/js/dependencies/async.min.js"></script>
+    <script src="/public/js/conf/conf.js"></script>
+    <script src="/public/js/lib/url.js"></script>
+    <script src="/public/js/lib/api.js"></script>
+    <script src="/public/js/lib/accounts.js"></script>
+    <script src="/public/js/lib/notifications.js"></script>
+    <script src="/public/js/lib/dataHandler.js"></script>
+    <script src="/public/js/lib/params.js"></script>
+    <script src="/public/js/lib/clipboard.js"></script>
+    <!-- include old dependencies -->
+    <script src="/public/js/datasets/bootstrap.min.js"></script>
+    <script href="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="/public/js/datasets/randomColor.min.js"></script>
+    <script src="/public/js/datasets/colors.js"></script>
+    <script src="/public/js/datasets/documentView.js"></script>
+    <script src="/public/js/datasets/datasetForm.js"></script>
+    <script src="/public/js/datasets/datasetsList.js"></script>
+    <script src="/public/js/datasets/documentHandler.js"></script>
+    <script src="/public/js/datasets/pdf.js/build/generic/build/pdf.js"></script>
+    <script src="/public/js/datasets/pdf.js/build/generic/build/pdf.worker.js"></script>
+    <script src="/public/js/datasets/pdfViewer.js"></script>
+    <script src="/public/js/datasets/xmlViewer.js"></script>
+    <script src="/public/js/datasets/datasets.js"></script>
+    <!--  -->
+    <!-- include of app component js dependencies -->
+    <script src="/views/documents/:id/datasets/app.js"></script>
+  </body>
+</html>

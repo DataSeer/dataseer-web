@@ -4,142 +4,112 @@
 
 'use strict';
 
-const express = require('express'),
-  router = express.Router();
+const express = require(`express`);
+const router = express.Router();
+const fs = require(`fs`);
+const path = require(`path`);
 
-const Documents = require('../../models/documents.js');
+const AccountsManager = require(`../../lib/accounts.js`);
+const Params = require(`../../lib/params.js`);
+const DataTypes = require(`../../lib/dataTypes.js`);
 
-const AccountsManager = require('../../lib/accounts.js'),
-  date = require('../../lib/date.js');
+const DocumentsController = require(`../../controllers/api/documents.js`);
 
-const DocumentsDatasetsController = require('../../controllers/documents.datasets.js');
+const conf = require(`../../conf/conf.json`);
 
-const conf = require('../../conf/conf.json');
-
-/* GET ALL Documents */
-router.get('/documents', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role does not grant you access to this part of the website');
-  let limit = parseInt(req.query.limit),
-    sort =
-      typeof req.query.sort === 'string'
-        ? req.query.sort === 'asc'
-          ? 1
-          : req.query.sort === 'desc'
-          ? -1
-          : undefined
-        : undefined,
-    skip = parseInt(req.query.skip),
-    organisations = req.query.organisations ? req.query.organisations.split(',') : undefined,
-    now = new Date(),
-    upload_range = parseInt(req.query.upload_range),
-    update_range = parseInt(req.query.update_range),
-    uploaded_before = req.query.uploaded_before ? new Date(req.query.uploaded_before) : null,
-    uploaded_after = req.query.uploaded_after ? new Date(req.query.uploaded_after) : null,
-    updated_before = req.query.updated_before ? new Date(req.query.updated_before) : null,
-    updated_after = req.query.updated_after ? new Date(req.query.updated_after) : null,
-    query = {},
-    isCuractor = AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator);
-  if (isNaN(skip) || skip < 0) skip = 0;
-  if (isNaN(limit) || limit < 0) limit = 20;
-  let upload_range_date, update_range_date;
-  if (Number.isInteger(upload_range) && upload_range > 0) {
-    upload_range_date = new Date(now);
-    upload_range_date.setDate(now.getDate() - upload_range);
-  }
-  if (Number.isInteger(update_range) && update_range > 0) {
-    update_range_date = new Date(now);
-    update_range_date.setDate(now.getDate() - update_range);
-  }
-  // Check update_range_date
-  if (update_range_date instanceof Date) {
-    if (typeof query['uploaded_at'] === 'undefined') query['uploaded_at'] = {};
-    query['uploaded_at']['$gte'] = update_range_date.toISOString();
-  }
-  // Check upload_range_date
-  if (upload_range_date instanceof Date) {
-    if (typeof query['updated_at'] === 'undefined') query['updated_at'] = {};
-    query['updated_at']['$gte'] = upload_range_date.toISOString();
-  }
-  // Check uploaded dates
-  if (uploaded_before instanceof Date) {
-    if (typeof query['uploaded_at'] === 'undefined') query['uploaded_at'] = {};
-    query['uploaded_at']['$lte'] = uploaded_before.toISOString();
-  }
-  if (uploaded_after instanceof Date) {
-    if (typeof query['uploaded_at'] === 'undefined') query['uploaded_at'] = {};
-    query['uploaded_at']['$gte'] = uploaded_after.toISOString();
-  }
-  // Check updated dates
-  if (updated_before instanceof Date) {
-    if (typeof query['updated_at'] === 'undefined') query['updated_at'] = {};
-    query['updated_at']['$lte'] = updated_before.toISOString();
-  }
-  if (updated_after instanceof Date) {
-    if (typeof query['updated_at'] === 'undefined') query['updated_at'] = {};
-    query['updated_at']['$gte'] = updated_after.toISOString();
-  }
-  if (organisations) query['organisation'] = { $in: organisations };
-  // Annotators access is restricted
-  if (!isCuractor) query['organisation'] = { $in: [req.user.organisation._id] };
-  // Init transaction
-  let transaction = Documents.find(query)
-    .sort(typeof sort !== undefined ? { _id: sort } : {})
-    .limit(limit)
-    .skip(skip)
-    .populate('metadata')
-    .populate('datasets');
-  // Execute transaction
-  return transaction.exec(function (err, docs) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else if (!docs) return res.json({ 'err': true, 'res': null, 'msg': 'document(s) not found' });
-    let stats = docs.map(function (doc) {
-      return {
-        _id: doc._id.toString(),
-        doi: doc.metadata.doi,
-        title: doc.metadata.article_title,
-        uploaded_at: date.format(doc.uploaded_at),
-        updated_at: date.format(doc.updated_at),
-        status: doc.status === 'finish' ? 'processed' : 'processing'
-      };
+/* GET Documents */
+router.get(`/documents`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    data: {
+      ids: Params.convertToArray(req.query.ids, `string`),
+      limit: Params.convertToInteger(req.query.limit),
+      skip: Params.convertToInteger(req.query.skip),
+      roles: Params.convertToArray(req.query.roles, `string`),
+      owners: Params.convertToArray(req.query.owners, `string`),
+      organizations: Params.convertToArray(req.query.organizations, `string`),
+      visibleStates: Params.convertToArray(req.query.visibleStates, `boolean`),
+      lockedStates: Params.convertToArray(req.query.lockedStates, `boolean`),
+      uploadRange: Params.convertToInteger(req.query.uploadRange),
+      updateRange: Params.convertToInteger(req.query.updateRange),
+      updatedBefore: Params.convertToDate(req.query.updatedBefore),
+      updatedAfter: Params.convertToDate(req.query.updatedAfter),
+      uploadedBefore: Params.convertToDate(req.query.uploadedBefore),
+      uploadedAfter: Params.convertToDate(req.query.uploadedAfter),
+      sort: Params.convertToString(req.query.sort),
+      metadata: true
+    },
+    user: req.user
+  };
+  return DocumentsController.all(opts, function (err, result) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    return res.json({
+      err: false,
+      res: result.data.map(function (item) {
+        return {
+          _id: item._id.toString(),
+          doi: item.metadata.doi,
+          title: item.metadata.article_title,
+          uploaded_at: item.upload.date.toLocaleDateString(),
+          updated_at: item.updatedAt.toLocaleDateString(),
+          status: item.status === `finish` ? `processed` : `processing`
+        };
+      }),
+      params: result.params
     });
-    return res.json({ 'err': false, 'res': stats });
   });
 });
 
 /* GET SINGLE Document BY ID */
-router.get('/documents/:id', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role does not grant you access to this part of the website');
-  let query = {},
-    isCuractor = AccountsManager.checkAccessRight(req.user, AccountsManager.roles.curator);
-  if (!isCuractor) query['organisation'] = req.user.organisation._id;
-  query['_id'] = req.params.id;
+router.get(`/documents/:id`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
-  let transaction = Documents.findOne(query).populate('metadata').populate('datasets');
-  // Execute transaction
-  return transaction.exec(function (err, doc) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else if (!doc) return res.json({ 'err': true, 'res': null, 'msg': 'document not found' });
-    let datasets = doc.datasets.current.map(function (dataset) {
-      let infos = DocumentsDatasetsController.getDataTypeInfos(dataset, req.app.get('dataTypes'));
+  let opts = {
+    data: {
+      id: req.params.id,
+      metadata: true,
+      datasets: true
+    },
+    user: req.user,
+    logs: false
+  };
+  return DocumentsController.get(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    if (typeof data.datasets === `undefined` || !Array.isArray(data.datasets.current))
+      return res.json({
+        err: true,
+        res: `Datasets not found`
+      });
+    let datasets = data.datasets.current.map(function (dataset) {
+      let infos = DataTypes.getDataTypeInfos(dataset, req.app.get(`dataTypes`));
       return {
         id: dataset.id,
         name: dataset.name,
         reuse: dataset.reuse,
         type: { name: infos.label, url: infos.url },
-        validated: dataset.status === 'valid'
+        validated: dataset.status === `valid`
       };
     });
     return res.json({
-      'err': false,
-      'res': {
-        _id: doc._id.toString(),
-        doi: doc.metadata.doi,
-        title: doc.metadata.article_title,
-        uploaded_at: date.format(doc.uploaded_at),
-        updated_at: date.format(doc.updated_at),
-        datasets: datasets
+      err: isError,
+      res: {
+        _id: data._id.toString(),
+        doi: data.metadata.doi,
+        title: data.metadata.article_title,
+        uploaded_at: data.upload.date.toLocaleDateString(),
+        updated_at: data.updatedAt.toLocaleDateString(),
+        datasets: datasets,
+        status: data.status === `finish` ? `processed` : `processing`
       }
     });
   });

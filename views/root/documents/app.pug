@@ -1,0 +1,148 @@
+<!-- @format -->
+
+<div id="app">
+  <div class="notifications">
+    <div v-for="notification in notifications" :class="notification.class" role="alert">
+      <span v-html="notification.html"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="contour">
+    <div class="center collection container-fluid">
+      <div class="collection-row row align-items-center">
+        <div class="col text-truncate">
+          <h2>Documents</h2>
+        </div>
+      </div>
+      <div class="filter-row row align-items-center">
+        <div class="col text-truncate">
+          <div class="input-group mb-3">
+            <div class="input-group-text" :title="filter.strict ? 'Will return items that match with all keywords' : 'Will return items that match with at least one keyword'">
+              <input type="checkbox" class="btn-check" id="strict-mode" name="filter.strict" v-model="filter.strict" autocomplete="off">
+              <label class="btn btn-sm btn-outline-secondary" for="strict-mode">" "</label>
+            </div>
+            <div class="input-group-text" :title="filter.caseSensitive ? 'Case sensitive' : 'Case insensitive'">
+              <input type="checkbox" class="btn-check" id="case-sensitive" name="filter.caseSensitive" v-model="filter.caseSensitive" autocomplete="off">
+              <label class="btn btn-sm btn-outline-secondary" for="case-sensitive">Aa</label>
+            </div>
+            <input type="text" class="form-control" title="Too much results ? Enter some keywords to filter this list!" name="filter.value" v-model="filter.value" placeholder="Enter some keywords here to filter results" />
+          </div>
+        </div>
+      </div>
+      <div class="collection-row row align-items-center">
+        <div class="center full-width bold">
+          <span>
+          | {{ filteredItems.length }} document(s)
+          </span>
+          <button v-if="filteredItems.length > 0" title="Click here to share your results" v-on:click.stop="copyURL(event)" class="btn btn-sm btn-primary">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+      </div>
+      <div class="collection-row header row align-items-center">
+        <div class="col text-truncate">Url(s)</div>
+        <div class="col sorting" v-on:click.stop="sort($event)" property="upload.date">Upload at</div>
+        <div class="col sorting" v-on:click.stop="sort($event)" property="status">Status</div>
+        <div class="col sorting" v-on:click.stop="sort($event)" property="name">Name</div>
+        <div class="col">Organizations</div>
+        <div class="col">Journal</div>
+        <div class="col"><label class="text-lg">Title<label></div>
+        <div class="col">Action</div>
+      </div>
+      <div class="collection-row row align-items-center" v-if="!loading && filteredItems.length === 0">
+        <div class="col text-truncate">
+          <span class="no-data">No data</span>
+        </div>
+      </div>
+      <div class="collection-row row align-items-center" v-if="loading">
+        <div class="col text-truncate">
+          <span class="no-data">Loading data...</span>
+        </div>
+      </div>
+      <div :value="item.properties._id" class="collection-row item row align-items-center" v-for="item in filteredItems" :class="[item.status.modified ? 'modified' : '', item.status.error ? 'hasError' : '']">
+        <div class="hidden">
+          | {{ item.raw }}
+        </div>
+        <div class="col text-truncate">
+          <a :href="buildIdLink(item.properties._id)" target="_blank">
+            <i class="fas fa-external-link-alt"></i>
+            | Private
+          </a>
+          <a :href="buildIdLink(item.properties._id, { token: item.properties.token })" target="_blank">
+            <i class="fas fa-external-link-alt"></i>
+            | Public
+          </a>
+          <a :href="buildBackofficeIdLink(item.properties._id)" target="_blank">
+            <i class="fas fa-external-link-alt"></i>
+            | Backoffice
+          </a>
+        </div>
+        <div class="col text-truncate">
+          <label class="text">
+          | {{ new Date(item.properties.upload.date).toLocaleDateString() }}
+          </label>
+        </div>
+        <div class="col text-truncate">
+          <label class="text" v-if="item.properties.status === 'metadata'">Metadata validation</label>
+          <label class="text" v-if="item.properties.status === 'datasets'">Datasets validation</label>
+          <label class="text" v-if="item.properties.status === 'finish'">Process Finished</label>
+        </div>
+        <div class="col text-truncate">
+          <label class="text">
+          | {{ item.properties.name }}
+          </label>
+        </div>
+        <div class="col text-truncate">
+          <ul class="list">
+            <li v-for="organization in item.properties.organizations">
+              <label class="text">
+                | {{ organization.name }}
+              </label>
+            </li>
+          </ul>
+        </div>
+        <div class="col">
+          <label class="text">
+          | {{ item.properties.metadata.journal }}
+          </label>
+        </div>
+        <div class="col">
+          <label class="text-lg">
+          | {{ item.properties.metadata.article_title }}
+          </label>
+        </div>
+        <div class="col">
+          <button class="btn btn-sm btn-primary" v-on:click.stop="showLogs(item.properties._id)" data-bs-toggle="modal" data-bs-target="#showLogs">Show logs</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal to display logs -->
+  <div class="modal fade" id="showLogs" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Logs</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" v-on:click.stop="hideLogs(event)"></button>
+        </div>
+        <div class="modal-body">
+          <div v-for="log in collection.logs">
+            <span>
+              <b>
+              | {{ log.account.username }}
+              </b> 
+              | - {{ log.key }} - 
+              <i>
+              | {{ log.dates[log.dates.length-1] }}
+              </i>
+            </span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-lg btn-primary" data-bs-dismiss="modal" v-on:click.stop="hideLogs(event)">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

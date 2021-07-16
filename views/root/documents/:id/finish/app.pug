@@ -1,0 +1,55 @@
+<div id="app">
+  <div class="notifications">
+    <div v-for="notification in notifications" :class="notification.class" role="alert">
+      <span v-html="notification.html"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="contour">
+    <div class="container-fluid">
+      <div class="row buttons">
+        <div class="col left">
+          <button class="btn btn-md btn-primary" v-on:click.stop="reopen(event)">
+            <i class="fas fa-undo-alt"></i>
+            | Reopen document
+          </button>
+          <button class="btn btn-md btn-primary" v-on:click.stop="buildPublicUrl(event)">
+            <i class="fas fa-link"></i>
+            | Get public URL of this document
+          </button>
+        </div>
+        <div class="col right">
+          <a target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLScRVw-GPA-15VVrYFADXJUKByA7SV5oDwv6ynAjOxt2W5QT7A/viewform?usp=sf_link" v-if="user.role && (user.role.key === 'standardUser' || user.role.key === 'visitor')">
+            <button class="btn btn-md btn-primary">Give feedback about your DataSeer experience</button>
+          </a>
+          <a target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSeURLXaNchVJEawPaiBrC--cM2mXc1zMEcaR4hu8MZyv44nHw/viewform?usp=sf_link" v-if="user.role && (user.role.key === 'moderator' || user.role.key === 'administrator')">
+            <button class="btn btn-md btn-primary">Annotator feedback</button>
+          </a>
+        </div>
+      </div>
+      <div class="row buttons">
+        <div class="col">
+          <a target="_blank" :href="docxDefaultReportLink">
+            <button class="btn btn-md btn-primary">DataSeer .docx report</button>
+          </a>
+          <a target="_blank" :href="htmlDefaultReportLink">
+            <button class="btn btn-md btn-primary">DataSeer HTML report</button>
+          </a>
+          <a target="_blank" :href="htmlBioRxivReportLink">
+            <button class="btn btn-md btn-primary">bioRxiv HTML report</button>
+          </a>
+        </div>
+      </div>
+      <div class="row align-items-center" v-if="loading">
+        <div class="col">
+          <label>Loading report...</label>
+        </div>
+      </div>
+      <div class="row align-items-center">
+        <div class="col">
+          <iframe ref="report" v-on:load="resizeReport"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

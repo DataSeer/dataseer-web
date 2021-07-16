@@ -1,0 +1,11 @@
+extends ../../shared/layout.pug
+
+block head
+  <link rel="stylesheet" type="text/css" href="/views/signup/app.css">
+
+block app
+  include ./app.pug
+
+block scripts
+  <script src="/views/signup/app.js"></script>
+  script(src="https://www.google.com/recaptcha/api.js?render=" + _reCAPTCHA_site_key_)

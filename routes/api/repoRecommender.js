@@ -4,15 +4,15 @@
 
 'use strict';
 
-const express = require('express'),
-  router = express.Router();
+const express = require(`express`);
+const router = express.Router();
 
-const AccountsManager = require('../../lib/accounts.js'),
-  RepoRecommender = require('../../lib/repoRecommender.js');
+const AccountsManager = require(`../../lib/accounts.js`);
+const RepoRecommender = require(`../../lib/repoRecommender.js`);
 
-router.post('/findRepo', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role does not grant you access to this part of the website');
+router.post(`/findRepo`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
   return RepoRecommender.findRepo({ dataType: req.body.dataType, subType: req.body.subType }, function (err, body) {
     if (err) return res.json(err);
     else return res.json(body);

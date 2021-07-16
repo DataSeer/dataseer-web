@@ -1,0 +1,7 @@
+{
+  "processSentence": "https://cloud.science-miner.com/dataseer-ml/service/processSentence",
+  "processFile": {
+    "xml": "https://cloud.science-miner.com/dataseer-ml/service/processDataseerJATS",
+    "pdf": "https://cloud.science-miner.com/dataseer-ml/service/processDataseerPDF"
+  }
+}

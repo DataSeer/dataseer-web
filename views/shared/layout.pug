@@ -1,0 +1,46 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>#{conf.title}</title>
+    <!-- include of global css dependencies -->
+    <link rel="stylesheet" type="text/css" href="/public/css/dependencies/font-awesome.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/public/css/dependencies/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/public/css/style.css"/>
+    <!-- other services -->
+    <link rel="stylesheet" type="text/css" href="/public/css/dependencies/cookieconsent.min.css"/>
+    <!-- include of app component css dependencies -->
+    block head
+  </head>
+  <body>
+
+    include ./navbar.pug
+    <!-- include of app component -->
+    block app
+    include ./footer.pug
+    <!-- include of global js dependencies -->
+    <script src="/public/js/dependencies/vue.min.js"></script>
+    <script src="/public/js/dependencies/font-awesome.min.js"></script>
+    <script src="/public/js/dependencies/jquery.min.js"></script>
+    <script src="/public/js/dependencies/lodash.min.js"></script>
+    <script src="/public/js/dependencies/async.min.js"></script>
+    <script src="/public/js/dependencies/bootstrap.min.js"></script>
+    <script src="/public/js/conf/conf.js"></script>
+    <script src="/public/js/lib/url.js"></script>
+    <script src="/public/js/lib/api.js"></script>
+    <script src="/public/js/lib/accounts.js"></script>
+    <script src="/public/js/lib/notifications.js"></script>
+    <script src="/public/js/lib/dataHandler.js"></script>
+    <script src="/public/js/lib/params.js"></script>
+    <script src="/public/js/lib/clipboard.js"></script>
+    <!-- other services -->
+    <script src="/public/js/dependencies/cookieconsent.min.js" data-cfasync="false"></script>
+    <script src="/public/js/dependencies/crisp.js"></script>
+    <script src="/public/js/dependencies/cookies.js"></script>
+    <script src="/public/js/dependencies/userflow.js"></script>
+    <script src="/public/js/dependencies/userflow.init.js"></script>
+    <!-- include of app component js dependencies -->
+    block scripts
+  </body>
+</html>

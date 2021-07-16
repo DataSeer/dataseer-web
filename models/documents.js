@@ -4,34 +4,63 @@
 
 'use strict';
 
-const mongoose = require('mongoose');
+const mongoose = require(`mongoose`);
 
-let Schema = new mongoose.Schema(
+const uploadSchema = require(`./schemas/upload.js`);
+
+const Schema = new mongoose.Schema(
   {
-    logs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DocumentsLogs' }], // refers to documents.logs collection items
-    pdf: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentsFiles' }, // refers to documents.files collection item (pdf)
-    tei: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentsFiles' }, // refers to documents.files collection item (tei)
-    files: [{ type: mongoose.Schema.Types.ObjectId, ref: 'DocumentsFiles' }], // refers to documents.files collection items (all kind of files)
-    metadata: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentsMetadata' }, // refers to documents.metadata collection item
-    organisation: { type: mongoose.Schema.Types.ObjectId, ref: 'Organisations' }, // refers to organisations collection item
-    datasets: { type: mongoose.Schema.Types.ObjectId, ref: 'DocumentsDatasets' }, // refers to documents.datasets collection item
-    status: { type: String, default: '' }, // status of given document
-    isDataSeer: { type: Boolean, default: false }, // specify if it's a dataseer document
-    updated_at: { type: Date, default: Date.now }, // date of last update
-    uploaded_at: { type: Date, default: Date.now }, // date of upload
-    uploaded_by: { type: mongoose.Schema.Types.ObjectId, ref: 'Accounts' }, // refers to documents.datasets collection item
-    upload_journal: { type: mongoose.Schema.Types.ObjectId, ref: 'Organisations' }, // Which journal will be sent to
-    already_assessed: { type: Boolean, default: false }, // This is a new version of an article DataSeer has already assessed
-    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'Accounts' }, // refers to documents.datasets collection item
-    watchers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Accounts' }], // refers to documents.accounts collection item
-    token: { type: String, default: '' } // refers to documents.datasets collection item
+    // identifiers of file
+    identifiers: new mongoose.Schema(
+      {
+        doi: { type: String, default: `` }, // DOI
+        pmid: { type: String, default: `` }, // PMID
+        manuscript_id: { type: String, default: `` } // manuscript id
+      },
+      { minimize: false, _id: false }
+    ),
+    name: { type: String, default: `` }, // document name
+    status: { type: String, default: `` }, // document status
+    pdf: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (pdf)
+    tei: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (tei)
+    datasets: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDatasets` }, // refers to documents.datasets collection item
+    metadata: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsMetadata` }, // refers to documents.metadata collection item
+    files: [{ type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles` }], // refers to documents.files collection items (all kind of files)
+    organizations: [{ type: mongoose.Schema.Types.ObjectId, ref: `Organizations` }], // refers to organizations collection item
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: `Accounts` }, // refers to documents.datasets collection item
+    watchers: [{ type: mongoose.Schema.Types.ObjectId, ref: `Accounts` }], // refers to documents.accounts collection item
+    token: { type: String, default: `` }, // refers to documents.datasets collection item
+    visible: { type: Boolean, default: true, required: true }, // document visibility
+    locked: { type: Boolean, default: false, required: true }, // document lock
+    upload: uploadSchema
   },
-  { minimize: false }
+  { minimize: false, timestamps: { createdAt: `createdAt`, updatedAt: `updatedAt` } }
 );
 
-Schema.pre('save', function (next) {
-  this.set({ updated_at: new Date().toISOString() });
+const versionHook = function () {
+  const update = this.getUpdate();
+  if (update.__v != null) {
+    delete update.__v;
+  }
+  const keys = [`$set`, `$setOnInsert`];
+  for (const key of keys) {
+    if (update[key] != null && update[key].__v != null) {
+      delete update[key].__v;
+      if (Object.keys(update[key]).length === 0) {
+        delete update[key];
+      }
+    }
+  }
+  update.$inc = update.$inc || {};
+  update.$inc.__v = 1;
+};
+
+Schema.pre(`save`, function (next) {
+  this.increment();
   return next();
 });
 
-module.exports = mongoose.model('Documents', Schema, 'documents');
+Schema.pre(`findOneAndUpdate`, versionHook);
+Schema.pre(`update`, versionHook);
+
+module.exports = mongoose.model(`Documents`, Schema, `documents`);

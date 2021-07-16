@@ -1,0 +1,25 @@
+<!-- @format -->
+
+<div id="app">
+  <div class="contour container-fluid">
+    <div class="row">
+      <div class="col">
+        include ./lib/datasetsList.pug
+      </div>
+    </div>
+  </div>
+  <div class="contour container-fluid">
+    <div class="row" style="height:calc(75vh - 60px);flex:1 0 auto;">
+      <div class="col-8" style="height:100%; margin-top: 15px;">
+        include ./lib/documentView.pug
+      </div>
+      <div class="col-4" style="height:100%; margin-top: 15px;">
+        include ./lib/datasetForm.pug
+        <div id="process-buttons">
+          button(id='back_to_metadata' class='btn btn-primary') Back to Metadata
+          button(id='datasets_validation' class='btn btn-primary') Finish all Datasets
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
