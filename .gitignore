@@ -7,6 +7,11 @@ conf/private.key
 #data
 data/*
 
+# mongodb save
+db-save/[1-7]/dump
+# FS save
+db-save/[1-7]/data.tar
+
 # Logs
 logs
 *.log
