@@ -697,7 +697,7 @@ const API = {
         data: {},
         url: URLMANAGER.buildURL(`${this.url}/${opts.id}/datasets/backToMetadata`, {}, { setToken: true }),
         success: function (query) {
-          console.log(`documents.reopen`, backToMetadata);
+          console.log(`documents.backToMetadata`, query);
           return done(false, query);
         },
         error: function (query) {
