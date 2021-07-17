@@ -129,7 +129,6 @@ router.get(`/:id/reports/html/bioRxiv`, function (req, res, next) {
     let isError = data instanceof Error;
     let result = isError ? data.toString() : data;
     if (isError) return res.status(404).send(conf.errors.notFound);
-    res.setHeader(`Content-Type`, `application/html`);
     return res.render(`reports/html/bioRxiv.pug`, {
       currentRoute: `/backoffice/upload`,
       reportData: data,
@@ -156,7 +155,6 @@ router.get(`/:id/reports/html/default`, function (req, res, next) {
     let isError = data instanceof Error;
     let result = isError ? data.toString() : data;
     if (isError) return res.status(404).send(conf.errors.notFound);
-    res.setHeader(`Content-Type`, `application/html`);
     return res.render(`reports/html/default.pug`, {
       currentRoute: `/backoffice/upload`,
       links: {
