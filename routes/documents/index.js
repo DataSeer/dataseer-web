@@ -18,7 +18,7 @@ const conf = require(`../../conf/conf.json`);
 router.get(`/`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isStandardUser)
-    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: `/documents` }));
+    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: req.originalUrl }));
   return res.render(`root/documents/layout.pug`, {
     currentRoute: `/documents`,
     currentUser: req.user,
@@ -30,7 +30,7 @@ router.get(`/`, function (req, res) {
 router.get(`/:id`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
   if (!accessRights.authenticated)
-    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: `/documents/${req.params.id}` }));
+    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: req.originalUrl }));
   return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
     if (err) {
       console.log(err);
@@ -45,12 +45,7 @@ router.get(`/:id`, function (req, res) {
 router.get(`/:id/metadata`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated)
-    return res.redirect(
-      Url.build(`/signin`, {
-        unauthorized: true,
-        redirect: `/backoffice/documents/${req.params.id}/metadata`
-      })
-    );
+    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: req.originalUrl }));
   return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
     if (err) {
       console.log(err);
@@ -72,12 +67,7 @@ router.get(`/:id/metadata`, function (req, res) {
 router.get(`/:id/datasets`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated)
-    return res.redirect(
-      Url.build(`/signin`, {
-        unauthorized: true,
-        redirect: `/backoffice/documents/${req.params.id}/datasets`
-      })
-    );
+    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: req.originalUrl }));
   return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
     if (err) {
       console.log(err);
@@ -99,9 +89,7 @@ router.get(`/:id/datasets`, function (req, res) {
 router.get(`/:id/finish`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated)
-    return res.redirect(
-      Url.build(`/signin`, { unauthorized: true, redirect: `/backoffice/documents/${req.params.id}/finish` })
-    );
+    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: req.originalUrl }));
   return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
     if (err) {
       console.log(err);

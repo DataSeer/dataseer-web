@@ -1818,6 +1818,8 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
  * @param {boolean} opts.data.[pdf] - Populate pdf property (default: false)
  * @param {boolean} opts.data.[tei] - Populate tei property (default: false)
  * @param {boolean} opts.data.[files] - Populate files property (default: false)
+ * @param {boolean} opts.data.[metadata] - Populate metadata property (default: false)
+ * @param {boolean} opts.data.[datasets] - Populate datasets property (default: false)
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: false)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
  * @returns {undefined} undefined

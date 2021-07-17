@@ -16,7 +16,7 @@ router.get(`/`, function (req, res, next) {
   // User must be logged to reach this route
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
   if (!accessRights.authenticated)
-    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: `/backoffice/accounts` }));
+    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: req.originalUrl }));
   // Visitor must not access to this view so display unauthorized message
   if (accessRights.isVisitor) return res.redirect(Url.build(`/`));
   // Standard user is redirect to /:id
@@ -33,9 +33,7 @@ router.get(`/:id`, function (req, res, next) {
   // User must be logged to reach this route
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
   if (!accessRights.authenticated)
-    return res.redirect(
-      Url.build(`/signin`, { unauthorized: true, redirect: `/backoffice/accounts/${req.params.id}` })
-    );
+    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: req.originalUrl }));
   // Visitor must not access to this view so display unauthorized message
   if (accessRights.isVisitor) return res.redirect(Url.build(`/redirect`));
   // Standard user is redirect to /:id

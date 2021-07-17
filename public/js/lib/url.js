@@ -31,7 +31,10 @@ const URLMANAGER = {
     // if specified, keep origin in the URL
     if (opts.origin) return result.href;
     // else, use the pathname (to disable "bad origin" bugs)
-    else return result.pathname;
+    else {
+      let p = result.searchParams.toString();
+      return `${result.pathname}${p ? `?${p}` : ``}`;
+    }
   },
   buildParams: function (params = {}) {
     let currentUrl = new URL(window.location.href); // get the current URL

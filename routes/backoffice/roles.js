@@ -14,7 +14,7 @@ const conf = require(`../../conf/conf.json`);
 
 router.get(`/`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
-  if (!accessRights.isAdministrator) return res.redirect(`/unauthorized`);
+  if (!accessRights.isAdministrator) return res.redirect(Url.build(`/unauthorized`));
   return res.render(`root/backoffice/roles/layout.pug`, {
     currentRoute: `/backoffice/roles`,
     currentUser: req.user,
