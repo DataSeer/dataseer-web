@@ -1,7 +1,7 @@
 {
-  "processSentence": "https://cloud.science-miner.com/dataseer-ml/service/processSentence",
+  "processDataseerSentence": "http://localhost:8060/service/processDataseerSentence",
   "processFile": {
-    "xml": "https://cloud.science-miner.com/dataseer-ml/service/processDataseerJATS",
-    "pdf": "https://cloud.science-miner.com/dataseer-ml/service/processDataseerPDF"
+    "xml": "http://localhost:8060/service/processDataseerJATS",
+    "pdf": "http://localhost:8060/service/processDataseerPDF"
   }
 }
