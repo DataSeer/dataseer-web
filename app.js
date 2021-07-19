@@ -12,6 +12,7 @@ const url = require(`url`);
 const fs = require(`fs`);
 const fileUpload = require(`express-fileupload`);
 const cookieParser = require(`cookie-parser`);
+const favicon = require(`serve-favicon`);
 const logger = require(`morgan`);
 const methodOverride = require(`method-override`);
 const bodyParser = require(`body-parser`);
@@ -148,7 +149,7 @@ db.once(`open`, function () {
       app.use(cookieParser());
       app.use(bodyParser.json({ limit: `50mb`, extended: true }));
       app.use(bodyParser.urlencoded({ limit: `10mb`, extended: true }));
-
+      app.use(favicon(path.join(__dirname, `public`, `favicon.ico`)));
       app.use(express.static(`public`));
 
       // Configure passport middleware
