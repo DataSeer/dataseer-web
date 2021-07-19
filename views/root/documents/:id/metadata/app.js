@@ -114,9 +114,9 @@
       validateMetadata: function () {
         let self = this;
         // Get the button Jquery element
-        let button = $(this.$refs.reloadMetadata);
+        let button = $(this.$refs.validateMetadata);
         // Get the loader of the button
-        let loader = $(this.$refs.reloadMetadataLoader);
+        let loader = $(this.$refs.validateMetadataLoader);
         // Display the loader
         loader.show();
         // Disable the button
