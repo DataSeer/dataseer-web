@@ -225,7 +225,7 @@ Self.update = function (opts = {}, cb) {
  * Update organizations
  * @param {object} opts - Option available
  * @param {object} opts.data - Data available
- * @param {array} opts.data.organizations - Array of organizations id
+ * @param {array} opts.data.ids - Array of organizations id
  * @param {boolean} opts.data.visible - Visible of the organization
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: organizations instance process OR undefined)
@@ -235,19 +235,18 @@ Self.updateMany = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.organizations`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.data.organizations`));
+  if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
   if (typeof _.get(opts, `data.visible`) === `undefined`)
     return cb(new Error(`Missing required data: opts.data.visible`));
   let accessRights = AccountsManager.getAccessRights(opts.user);
   if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
   // Check all optionnal data
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
-  let organizations = Params.convertToArray(opts.data.organizations, `string`);
-  if (!Params.checkArray(organizations)) return cb(null, new Error(`You must select at least one organization`));
+  let ids = Params.convertToArray(opts.data.ids, `string`);
+  if (!Params.checkArray(ids)) return cb(null, new Error(`You must select at least one organization`));
   if (!Params.checkBoolean(opts.data.visible)) return cb(null, new Error(`You must specify a visible value!`));
   return async.reduce(
-    organizations,
+    ids,
     [],
     function (acc, item, next) {
       return Self.update(
@@ -316,7 +315,7 @@ Self.delete = function (opts = {}, cb) {
  * Delete multiples organizations (c.f delete function get more informations)
  * @param {object} opts - Options available
  * @param {object} opts.data - Data available
- * @param {array} opts.data.organizations - Array of accounts id
+ * @param {array} opts.data.ids - Array of accounts id
  * @param {object} opts.user - User using this functionality (must be similar to req.user)
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: Array of process logs OR undefined)
@@ -326,15 +325,14 @@ Self.deleteMany = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.organizations`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.data.organizations`));
+  if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
   // Check all optionnal data
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
-  let organizations = Params.convertToArray(opts.data.organizations, `string`);
-  if (!Params.checkArray(organizations)) return cb(null, new Error(`You must select at least one organization`));
+  let ids = Params.convertToArray(opts.data.ids, `string`);
+  if (!Params.checkArray(ids)) return cb(null, new Error(`You must select at least one organization`));
   return async.reduce(
-    organizations,
+    ids,
     [],
     function (acc, item, next) {
       return Self.delete({ user: opts.user, data: { id: item }, logs: opts.logs }, function (err, res) {

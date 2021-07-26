@@ -38,29 +38,6 @@ router.get(`/`, function (req, res, next) {
   });
 });
 
-/* GET Role BY ID */
-router.get(`/:id`, function (req, res, next) {
-  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
-  let opts = {
-    data: { id: req.params.id },
-    user: req.user,
-    logs: true
-  };
-  return RolesController.get(opts, function (err, data) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    let isError = data instanceof Error;
-    let result = isError ? data.toString() : data;
-    return res.json({
-      err: isError,
-      res: result
-    });
-  });
-});
-
 /* ADD Role */
 router.post(`/`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
@@ -89,6 +66,87 @@ router.post(`/`, function (req, res, next) {
     user: req.user
   };
   return RolesController.add(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* UPDATE Roles */
+router.put(`/`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  if (!Params.checkArray(req.body.ids))
+    return res.json({
+      err: true,
+      res: `You must select at least one role!`
+    });
+  let opts = {
+    data: {
+      ids: Params.convertToArray(req.body.ids, `string`)
+    },
+    user: req.user
+  };
+  return RolesController.updateMany(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* DELETE roles */
+router.delete(`/`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  if (!Params.checkArray(req.body.ids))
+    return res.json({
+      err: true,
+      res: `You must select at least one role!`
+    });
+  let opts = {
+    data: {
+      ids: req.body.ids
+    },
+    user: req.user
+  };
+  return RolesController.deleteMany(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* GET Role BY ID */
+router.get(`/:id`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    data: { id: req.params.id },
+    user: req.user,
+    logs: true
+  };
+  return RolesController.get(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
@@ -138,35 +196,6 @@ router.put(`/:id`, function (req, res, next) {
   });
 });
 
-/* UPDATE Roles */
-router.put(`/`, function (req, res, next) {
-  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
-  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
-  if (!Params.checkArray(req.body.roles))
-    return res.json({
-      err: true,
-      res: `You must select at least one role!`
-    });
-  let opts = {
-    data: {
-      roles: Params.convertToArray(req.body.roles, `string`)
-    },
-    user: req.user
-  };
-  return RolesController.updateMany(opts, function (err, data) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    let isError = data instanceof Error;
-    let result = isError ? data.toString() : data;
-    return res.json({
-      err: isError,
-      res: result
-    });
-  });
-});
-
 /* DELETE role BY ID */
 router.delete(`/:id`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
@@ -178,35 +207,6 @@ router.delete(`/:id`, function (req, res, next) {
     user: req.user
   };
   return RolesController.delete(opts, function (err, data) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    let isError = data instanceof Error;
-    let result = isError ? data.toString() : data;
-    return res.json({
-      err: isError,
-      res: result
-    });
-  });
-});
-
-/* DELETE roles */
-router.delete(`/`, function (req, res, next) {
-  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
-  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
-  if (!Params.checkArray(req.body.roles))
-    return res.json({
-      err: true,
-      res: `You must select at least one role!`
-    });
-  let opts = {
-    data: {
-      roles: req.body.roles
-    },
-    user: req.user
-  };
-  return RolesController.deleteMany(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);

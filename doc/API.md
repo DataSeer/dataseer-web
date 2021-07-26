@@ -1,22 +1,30 @@
-
-
 # API documentation
-*[Main Documentation](#../README.md#documentations)*
-- [Responses Status Codes](#responses-status-code)
-- [Credentials](#credentials)
-- [Results](#results)
-- [Available Routes](#available-routes)
-  - [Accounts](#accounts)
-  - [Roles](#roles)
-  - [Organizations](#organizations)
-  - [Documents ](#documents)
-  - [/signin](#signin)
-  - [/signup](#signup)
-  - [/signout](#signout)
-  - [/upload](#upload)
+
+*[Main Documentation](../README.md#documentations)*
+
+  - [Responses Status Codes](#responses-status-code)
+  - [Credentials](#credentials)
+  - [Results](#results)
+  - [Available Routes](#available-routes)
+    - [Index](#index)
+    - [Accounts](#accounts)
+    - [Roles](#roles)
+    - [Organizations](#organizations)
+    - [Documents](#documents)
+    - [Documents Datasets](#documents-datasets)
+    - [Documents Files](#documents-files)
+    - [Statistics](#statistics)
+    - [Dataseer-ml](#dataseer-ml)
+    - [Software](#software)
+    - [RepoRecommender](#reporecommender)
 
 ## Responses Status Code
+
 *[Table of contents](#api-documentation)*
+
+If there is no blocking errors, API will return an HTTP 200 status code (and the given resource).
+Else it will return a raw HTTP error (HTTP status code & an human readable message)
+
 <table>
   <thead>
     <tr>
@@ -58,14 +66,18 @@ Set your own token into HTTP headers (Authorization: Bearer MY_TOKEN)
 $ curl "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
 # Or you can use token parameter
 $ curl "http://localhost:3000/api/accounts?token=MY_TOKEN"
+```
 
 If you try to access an unauthorized route, the application will return an HTTP 401 error
+
 ```bash
 $ curl "http://localhost:3000/api/accounts" -H "Authorization: Bearer WRONG_TOKEN"
 # HTTP 401 will return :
 # Your current role does not grant you access to this part of the website
-# This error is caused by: a wrong token, expired token, blacklisted token
+# This error is caused by: a wrong token or expired token
 ```
+
+Note: once authenticated, the server sends you a cookie (httpOnly). They will therefore be automatically managed by your browser
 
 ## Results
 
@@ -90,11 +102,13 @@ In case of success, API will return this kind of object:
 
 ### Error
 
+In case of no-blocking error, API will return this kind of object:
+
 ````json
 {
   "err": true,
   "res": null, // or false or undefined
-  "msg": "A human-readable message describing the error that occurred"
+  "msg": "A human-readable message describing the error that occurred",
 }
 ````
 
@@ -104,1396 +118,103 @@ In case of success, API will return this kind of object:
 
 All of these routes return a JSON object:
 
-### Accounts
-- [(GET) /api/accounts](#get-apiaccounts)
-- [(GET) /api/accounts/:id](#get-apiaccountsid)
-- [(POST) /api/accounts](#post-apiaccounts)
-- [(PUT) /api/accounts/:id](#put-apiaccountsid)
-- [(PUT) /api/accounts](#put-apiaccounts)
-- [(DELETE) /api/accounts/:id](#delete-apiaccountsid)
-- [(DELETE) /api/accounts](#delete-apiaccounts)
-
-
-### Roles
-- [(GET) /api/roles](#get-apiroles)
-- [(GET) /api/roles/:id](#get-apirolesid)
-- [(POST) /api/roles](#post-apiroles)
-- [(PUT) /api/roles/:id](#put-apirolesid)
-- [(PUT) /api/roles](#put-apiroles)
-- [(DELETE) /api/roles/:id](#delete-apirolesid)
-- [(DELETE) /api/roles](#delete-apiroles)
-
-### Organizations
-- [(GET) /api/organizations](#get-apiorganizations)
-- [(GET) /api/organizations/:id](#get-apiorganizationsid)
-- [(POST) /api/organizations](#post-apiorganizations)
-- [(PUT) /api/organizations/:id](#put-apiorganizationsid)
-- [(PUT) /api/organizations](#put-apiorganizations)
-- [(DELETE) /api/organizations/:id](#delete-apiorganizationsid)
-- [(DELETE) /api/organizations](#delete-apiorganizations)
-
-### Documents
-
-  - [(GET) /api/documents](#get-apidocuments)
-  - [(POST) /api/documents](#post-apidocuments)
- 
- ---
- ### (GET) /api/accounts/
- 
-*[Available Routes](#available-routes)*
-
-#### Description
-This route return all accounts (JSON formated)
-
-#### Role required
-Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
-
-#### Parameters
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>GET</td>
-      <td>limit</td>
-      <td>optional</td>
-      <td>Maximum number of returned results (default:20)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>skip</td>
-      <td>optional</td>
-      <td>Number of documents skipped (default:0)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>roles</td>
-      <td>optional</td>
-      <td>Use this parameter (set it with an array of roles id) to filter results by roles</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>organizations</td>
-      <td>optional</td>
-      <td>Use this parameter (set it with an array of organizations id) to filter results by organizations</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>visible</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by visible states (true or false)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by protected states (true or false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return all accounts (JSON formated)
-curl "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/accounts?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": [{...}] // Array of account JSON representation
-}
-```
-
----
-
-### (GET) /api/accounts/:id
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return an account (JSON formated).
-
-#### Role required
-
-Accessible to users with the following role:  **standardUser**, **moderator**, **administrator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the account (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
-curl "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // Account JSON representation
-}
-```
-
----
-
-### (POST) /api/accounts/
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route add a new account in database and return this account (JSON formated).
-
-#### Role required
-
-Accessible to user with the following role: **administrator**
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <td>POST</td>
-      <td>fullname</td>
-      <td>required</td>
-      <td>Name of the account</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>username</td>
-      <td>required</td>
-      <td>Email adress of the account</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>password</td>
-      <td>required</td>
-      <td>Password of the account</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>confirm_password</td>
-      <td>required</td>
-      <td>To secure your password</td>
-    </tr>
-        <tr>
-      <td>POST</td>
-      <td>organizations</td>
-      <td>optional</td>
-      <td>Array of organizations of the account</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>role</td>
-      <td>optional</td>
-      <td>Role of the account</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>visible</td>
-      <td>optional</td>
-      <td>To set the visiblity of the account (true or false)</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>To set the protection of the account (true or false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return the new account (JSON formated)
-curl -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "password=MY_PASSWORD" -F "confirm_password=MY_PASSWORD" -F "organization=ID_ORGANISATION" -F "role=ID_ROLE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
-curl -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "password=MY_PASSWORD" -F "confirm_password=MY_PASSWORD" -F "organization=ID_ORGANISATION" -F "role=ID_ROLE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // new account JSON representation
-}
-```
-
----
-### (PUT) /api/accounts/:id
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route update an account by his ID.
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <td>PUT</td>
-      <td>fullname</td>
-      <td>optional</td>
-      <td>Name of the account</td>
-    </tr>
-    <tr>
-      <td>PUT</td>
-      <td>role</td>
-      <td>optional</td>
-      <td>Role id of the account</td>
-    </tr>
-    <tr>
-      <td>PUT</td>
-      <td>organizations</td>
-      <td>optional</td>
-      <td>Array of organizations ID of the account</td>
-    </tr>
-    <tr>
-      <td>PUT</td>
-      <td>visible</td>
-      <td>optional</td>
-      <td>To set the visibility of the account (true or false)</td>
-    </tr>
-        <tr>
-      <td>PUT</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>To set the protection of the account (true or false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return the updated account (JSON formated)
-curl -X PUT -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME"-F "organizations=ID_ORGANISATIONS" -F "role=ID_ROLE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
-curl -X PUT -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "organizations=ID_ORGANISATIONS" -F "role=ID_ROLE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // updated account JSON representation
-}
-```
----
-### (PUT) /api/accounts/
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route updates multiple accounts by their ID.
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <td>PUT</td>
-      <td>fullname</td>
-      <td>optional</td>
-      <td>Name of the account</td>
-    </tr>
-    <tr>
-      <td>PUT</td>
-      <td>role</td>
-      <td>optional</td>
-      <td>Role id of the account</td>
-    </tr>
-    <tr>
-      <td>PUT</td>
-      <td>organizations</td>
-      <td>optional</td>
-      <td>Array of organizations ID of the account</td>
-    </tr>
-    <tr>
-      <td>PUT</td>
-      <td>visible</td>
-      <td>optional</td>
-      <td>To set the visibility of the account (true or false)</td>
-    </tr>
-        <tr>
-      <td>PUT</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>To set the protection of the account (true or false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return the numbers of accounts updated (JSON formated)
-curl -X PUT -F "accounts= [{accountId1 : xxxxx}, {accountId2 : xxxxx}]]" -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME"-F "organizations=ID_ORGANISATIONS" -F "role=ID_ROLE" "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
-curl -X PUT -F "accounts= [{accountId1 : xxxxx}, {accountId2 : xxxxx}]]" -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "organizations=ID_ORGANISATIONS" -F "role=ID_ROLE" "http://localhost:3000/api/accounts?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // nb of accounts updated
-}
-```
----
-### (DELETE) /api/accounts/:id
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route delete account by his ID.
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the account (with 123456789 id) deleted (JSON formated)
-curl -X DELETE "http://localhost:3000/api/accounts/123456789" -H "Authorization: Bearer MY_TOKEN"
-curl -X DELETE "http://localhost:3000/api/accounts/123456789?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // return the account delete (JSON formated)
-}
-```
----
-### (DELETE) /api/accounts/
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route deletes an array of accounts ID.
-
-#### Role required
-
-Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return number of deleted accounts
-curl -X DELETE -F "accounts:[{accountId1, accountId2, accountId3}]" "http://localhost:3000/api/accounts/123456789" -H "Authorization: Bearer MY_TOKEN"
-curl -X DELETE -F "accounts:[{accountId1, accountId2, accountId3}]" "http://localhost:3000/api/accounts/123456789?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // return the number of deleted accounts (JSON formated)
-}
-```
- ---
- ### (GET) /api/roles/
- 
-*[Available Routes](#available-routes)*
-
-#### Description
-This route return all roles (JSON formated)
-
-#### Role required
-Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
-
-#### Parameters
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>GET</td>
-      <td>limit</td>
-      <td>optional</td>
-      <td>Maximum number of returned results (default:20)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>skip</td>
-      <td>optional</td>
-      <td>Number of documents skipped (default:0)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by protected states (true or false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return all roles (JSON formated)
-curl "http://localhost:3000/api/roles" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/roles?token=MY_TOKEN"
-```
-
-#### Result
-
-```json
-{
-  "err": false,
-  "res": [{...}] // Array of roles JSON representation
-}
-```
-
----
-
-### (GET) /api/roles/:id
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return an role (JSON formated).
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the role (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
-curl "http://localhost:3000/api/roles/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/roles/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // Roles JSON representation
-}
-```
----
-
-### (POST) /api/roles/
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route add a new role in database and return this role (JSON formated).
-
-#### Role required
-
-Accessible to user with the following role: **administrator**
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <td>POST</td>
-      <td>label</td>
-      <td>required</td>
-      <td>Label of the role</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>key</td>
-      <td>required</td>
-      <td>Key adress of the role</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>weight</td>
-      <td>required</td>
-      <td>Weight of the role</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>To protect the role</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return the new account (JSON formated)
-curl -F "label=MY_LABEL" -F "key=MY_KEY" -F "weight=MY_WEIGHT" -F "protected=TRUE OR FALSE" "http://localhost:3000/api/roles" -H "Authorization: Bearer MY_TOKEN"
-curl -F "label=MY_LABEL" -F "key=MY_KEY" -F "weight=MY_WEIGHT" -F "protected=TRUE OR FALSE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // new role JSON representation
-}
-```
----
-### (PUT) /api/roles/:id
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route update an role by his ID.
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <td>PUT</td>
-      <td>label</td>
-      <td>optional</td>
-      <td>Label of the role</td>
-    </tr>
-    <tr>
-      <td>PUT</td>
-      <td>key</td>
-      <td>optional</td>
-      <td>Key id of the role</td>
-    </tr>
-    <tr>
-      <td>PUT</td>
-      <td>weight</td>
-      <td>optional</td>
-      <td>Weight of the role</td>
-    </tr>
-     <tr>
-      <td>PUT</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>To set the protection of the role (true or false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return the updated account (JSON formated)
-curl -X PUT -F "label=MY_LABEL" -F "key=MY_KEY"-F "weight=MY_WEIGHT" -F "protected=TRUE OF FALSE" "http://localhost:3000/api/roles/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
-curl -X PUT -F "label=MY_LABEL" -F "key=MY_KEY"-F "weight=MY_WEIGHT" -F "protected=TRUE OF FALSE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // updated role JSON representation
-}
-```
----
-### (PUT) /api/roles/
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route updates multiple roles by their ID.
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>PUT</td>
-      <td>weight</td>
-      <td>optional</td>
-      <td>Weight of the role</td>
-    </tr>
-     <tr>
-      <td>PUT</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>To set the protection of the role (true or false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return the numbers of accounts updated (JSON formated)
-curl -X PUT -F "roles= [{roleId : xxxxx}, {roleId : xxxxx}]]" -F "protected=TRUE" "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
-curl -X PUT -F "roles= [{roleId : xxxxx}, {roleId : xxxxx}]]" -F "protected=TRUE" "http://localhost:3000/api/accounts?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // nb of roles updated
-}
-```
----
-### (DELETE) /api/roles/:id
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route delete role by his ID.
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the roles (with 123456789 id) deleted (JSON formated)
-curl -X DELETE "http://localhost:3000/api/roles/123456789" -H "Authorization: Bearer MY_TOKEN"
-curl -X DELETE "http://localhost:3000/api/roles/123456789?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // return the role delete (JSON formated)
-}
-```
----
-### (DELETE) /api/roles/
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route deletes an array of accounts ID.
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return number of deleted accounts
-curl -X DELETE -F "roles:[{roleId, roleId, roleId}]" "http://localhost:3000/api/accounts/123456789" -H "Authorization: Bearer MY_TOKEN"
-curl -X DELETE -F "roles:[{roleId, roleId, roleId}]" "http://localhost:3000/api/accounts/123456789?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // return the number of deleted roles (JSON formated)
-}
-```
- ---
-  ### (GET) /api/organizations/
- 
-*[Available Routes](#available-routes)*
-
-#### Description
-This route return all organizations (JSON formated)
-
-#### Role required
-Accessible to users with the following role : **standardUser**, **moderator**, **administrator**.
-
-#### Parameters
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>GET</td>
-      <td>limit</td>
-      <td>optional</td>
-      <td>Maximum number of returned results (default:20)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>skip</td>
-      <td>optional</td>
-      <td>Number of documents skipped (default:0)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by protected states (true or false)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>visible</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by visible states (true or false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return all organizations (JSON formated)
-curl "http://localhost:3000/api/organizations" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/organizations?token=MY_TOKEN"
-```
-
-#### Result
-
-```json
-{
-  "err": false,
-  "res": [{...}] // Array of organizations JSON representation
-}
-```
-
----
-
-### (GET) /api/organizations/:id
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return an organization (JSON formated).
-
-#### Role required
-
-Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the role (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
-curl "http://localhost:3000/api/organizations/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/organizations/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // organization JSON representation
-}
-```
----
-
-### (POST) /api/organizations/
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route add a new organization in database and return this organization (JSON formated).
-
-#### Role required
-
-Accessible to user with the following role: **administrator**
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <td>POST</td>
-      <td>name</td>
-      <td>required</td>
-      <td>Name of the organization</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>visible</td>
-      <td>required</td>
-      <td>Visbility of the organization</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>To protect the organization</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return the new account (JSON formated)
-curl -F "name=MY_NAME" -F "visible=TRUE OR FALSE" -F "protected=TRUE OR FALSE" "http://localhost:3000/api/roles" -H "Authorization: Bearer MY_TOKEN"
-curl -F "name=MY_NAME" -F "visible=TRUE OR FALSE" -F "protected=TRUE OR FALSE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // new organization JSON representation
-}
-```
----
-### (PUT) /api/organizations/:id
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route update an organization by his ID.
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <td>PUT</td>
-      <td>name</td>
-      <td>optional</td>
-      <td>Name of the organization</td>
-    </tr>
-    <tr>
-      <td>PUT</td>
-      <td>visible</td>
-      <td>optional</td>
-      <td>Visibility of the organization (true or false)</td>
-    </tr>
-     <tr>
-      <td>PUT</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>To set the protection of the organization (true or false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return the updated account (JSON formated)
-curl -X PUT -F "name=MY_LABEL" -F "visible=TRUE OF FALSE" -F "protected=TRUE OF FALSE" "http://localhost:3000/api/roles/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
-curl -X PUT -F "name=MY_LABEL" -F "visible=TRUE OF FALSE" -F "protected=TRUE OF FALSE" "http://localhost:3000/api/accounts/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // updated organization JSON representation
-}
-```
----
-### (PUT) /api/organizations/
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route updates multiple roles by their ID.
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>PUT</td>
-      <td>visible</td>
-      <td>optional</td>
-      <td>Visibility of the organizations (true or false)</td>
-    </tr>
-     <tr>
-      <td>PUT</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>To set the protection of the organizations (true or false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return the numbers of accounts updated (JSON formated)
-curl -X PUT -F "organizations= [{organizationId : xxxxx}, {organizationId : xxxxx}]]" -F "protected=TRUE" -F "visible=TRUE OR FALSE" "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
-curl -X PUT -F "organizations= [{organizationId : xxxxx}, {organizationId : xxxxx}]]" -F "protected=TRUE" -F "visible=TRUE OR FALSE" "http://localhost:3000/api/accounts?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // nb of roles updated
-}
-```
----
-### (DELETE) /api/organizations/:id
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route delete organization by his ID.
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the organizations (with 123456789 id) deleted (JSON formated)
-curl -X DELETE "http://localhost:3000/api/organizations/123456789" -H "Authorization: Bearer MY_TOKEN"
-curl -X DELETE "http://localhost:3000/api/organizations/123456789?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // return the organization delete (JSON formated)
-}
-```
----
-### (DELETE) /api/organizations/
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route deletes an array of organizations ID.
-
-#### Role required
-
-Accessible to users with the following role: **administrator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return number of deleted accounts
-curl -X DELETE -F "organizations:[{organizationId, organizationId, organizationId}]" "http://localhost:3000/api/accounts/123456789" -H "Authorization: Bearer MY_TOKEN"
-curl -X DELETE -F "organizations:[{organizationId, organizationId, organizationId}]" "http://localhost:3000/api/accounts/123456789?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // return the number of deleted organizations (JSON formated)
-}
-```
- ---
-   ### (GET) /api/documents/
- 
-*[Available Routes](#available-routes)*
-
-#### Description
-This route return all documents (JSON formated)
-
-#### Role required
-Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
-
-#### Parameters
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>GET</td>
-      <td>limit</td>
-      <td>optional</td>
-      <td>Maximum number of returned results (default:20)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>skip</td>
-      <td>optional</td>
-      <td>Number of documents skipped (default:0)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>owners</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by owners</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>organizations</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by organizations</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>visible</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by visible states (true or false)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by protected states (true or false)</td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>updatedBefore</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by date of updates before a date </td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>updateAfter</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by date of updates after a date </td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>uploadBefore</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by date of upload before a date </td>
-    </tr>
-    <tr>
-      <td>GET</td>
-      <td>uploadAfter</td>
-      <td>optional</td>
-      <td>Use this parameter to filter results by date of upload after a date </td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return all documents (JSON formated)
-curl "http://localhost:3000/api/documents" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents?token=MY_TOKEN"
-```
-
-#### Result
-
-```json
-{
-  "err": false,
-  "res": [{...}] // Array of organizations JSON representation
-}
-```
-
----
-
-### (GET) /api/documents/:id
-
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route return an document (JSON formated).
-
-#### Role required
-
-Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
-
-#### Parameters
-
-No parameters available
-
-#### How to request
-
-```bash
-# Will return the role (JSON formated) with id 5e2f6afe0bb7cd4cdfba9f03
-curl "http://localhost:3000/api/documents/5e2f6afe0bb7cd4cdfba9f03" -H "Authorization: Bearer MY_TOKEN"
-curl "http://localhost:3000/api/documents/5e2f6afe0bb7cd4cdfba9f03?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // document JSON representation
-}
-```
----
-### (POST) /api/documents/
-
-*[Available Routes](#available-routes)*
-
-#### Description
-
-This route add a new account in database and return this account (JSON formated).
-
-#### Role required
-
-Accessible to user with the following role: **standardUser**, **moderator**, **administrator**
-
-#### Parameters
-
-<table>
-  <thead>
-    <tr>
-      <th>Method</th>
-      <th>Parameters</th>
-      <th>Requirement</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-      <td>POST</td>
-      <td>file</td>
-      <td>required</td>
-      <td>File of the document</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>attached_files</td>
-      <td>optional</td>
-      <td>Attached files of the document</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>email</td>
-      <td>optional</td>
-      <td>Email of the uploader</td>
-    </tr>
-        <tr>
-      <td>POST</td>
-      <td>organization</td>
-      <td>optional</td>
-      <td>Organization who upload the document</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>visible</td>
-      <td>optional</td>
-      <td>To set the visiblity of the account (true or false)</td>
-    </tr>
-    <tr>
-      <td>POST</td>
-      <td>protected</td>
-      <td>optional</td>
-      <td>To set the protection of the account (true or false)</td>
-    </tr>
-  </tbody>
-</table>
-
-#### How to request
-
-```bash
-# Will return the new account (JSON formated)
-curl -X POST -F "file=@/path/to/document" -F "attached_files[]=@/path/to/attached_files" -F "attached_files[]=@/path/to/attached_files" -F "attached_files[]=@/path/to/attached_files" "http://localhost:3000/api/documents" -H "Authorization: Bearer MY_TOKEN"
-curl -X POST -F "file=@/path/to/document" -F "attached_files[]=@/path/to/attached_files" -F "attached_files[]=@/path/to/attached_files" -F "attached_files[]=@/path/to/attached_files" "http://localhost:3000/api/documents?token=MY_TOKEN"
-```
-#### Result
-
-```json
-{
-  "err": false,
-  "res": {...} // new document JSON representation
-}
-```
----
-### /Signin
-
-*[Available Routes](#api-documentation)*
-
-#### Role required
-
-This route is public.
-
-#### Purpose
-Use this route to sign in to TDM-Plateform.
-
----
-### /Signup
-
-*[Available Routes](#api-documentation)*
-
-#### Role required
-
-This route is public.
-
-#### Purpose
-Use this route to sign up to TDM-Plateform.
-
----
-### /Signout
-
-*[Available Routes](#api-documentation)*
-
-#### Role required
-
-Accessible to user with the following role: **standardUser**, **moderator**, **administrator**
-
-#### Purpose
-Use this route to sign out to TDM-Plateform.
-
----
-### /Upload
-
-*[Available Routes](#api-documentation)*
-
-#### Role required
-
-Accessible to user with the following role: **standardUser**, **moderator**, **administrator**
-
-#### Purpose
-Use this to upload document to TDM-Plateform.
-
+### [Index](./API/INDEX.md#index)
+
+  - [(POST) /api/signup](./API/INDEX.md#post-apisignup)
+  - [(POST) /api/signin](./API/INDEX.md#post-apisignin)
+  - [(GET) /api/signout](./API/INDEX.md#get-apisignout)
+  - [(GET) /api/currentUser](./API/INDEX.md#get-apicurrentuser)
+  - [(GET) /api/getCrispId](./API/INDEX.md#get-apigetcrispid)
+  - [(GET) /api/getUserflowToken](./API/INDEX.md#get-apigetuserflowtoken)
+  - [(POST) /api/forgotPassword](./API/INDEX.md#post-apiforgotpassword)
+  - [(POST) /api/resetPassword](./API/INDEX.md#post-apiresetpassword)
+
+### [Accounts](./API/ACCOUNTS.md#index)
+
+  - [(GET) /api/accounts](./API/ACCOUNTS.md#get-apiaccounts)
+  - [(POST) /api/accounts](./API/ACCOUNTS.md#post-apiaccounts)
+  - [(PUT) /api/accounts](./API/ACCOUNTS.md#put-apiaccounts)
+  - [(DELETE) /api/accounts](./API/ACCOUNTS.md#delete-apiaccounts)
+  - [(GET) /api/accounts/:id](./API/ACCOUNTS.md#get-apiaccountsid)
+  - [(PUT) /api/accounts/:id](./API/ACCOUNTS.md#put-apiaccountsid)
+  - [(DELETE) /api/accounts/:id](./API/ACCOUNTS.md#delete-apiaccountsid)
+
+### [Roles](./API/ROLES.md#index)
+
+  - [(GET) /api/roles](./API/ROLES.md#get-apiroles)
+  - [(GET) /api/roles/:id](./API/ROLES.md#get-apirolesid)
+  - [(POST) /api/roles](./API/ROLES.md#post-apiroles)
+  - [(PUT) /api/roles/:id](./API/ROLES.md#put-apirolesid)
+  - [(PUT) /api/roles](./API/ROLES.md#put-apiroles)
+  - [(DELETE) /api/roles/:id](./API/ROLES.md#delete-apirolesid)
+  - [(DELETE) /api/roles](./API/ROLES.md#delete-apiroles)
+
+### [Organizations](./API/ORGANIZATIONS.md#index)
+
+  - [(GET) /api/organizations](./API/ORGANIZATIONS.md#get-apiorganizations)
+  - [(GET) /api/organizations/:id](./API/ORGANIZATIONS.md#get-apiorganizationsid)
+  - [(POST) /api/organizations](./API/ORGANIZATIONS.md#post-apiorganizations)
+  - [(PUT) /api/organizations/:id](./API/ORGANIZATIONS.md#put-apiorganizationsid)
+  - [(PUT) /api/organizations](./API/ORGANIZATIONS.md#put-apiorganizations)
+  - [(DELETE) /api/organizations/:id](./API/ORGANIZATIONS.md#delete-apiorganizationsid)
+  - [(DELETE) /api/organizations](./API/ORGANIZATIONS.md#delete-apiorganizations)
+
+### [Documents](./API/DOCUMENTS.md#index)
+
+  - [(GET) /api/documents](./API/DOCUMENTS.md#get-apidocuments)
+  - [(POST) /api/documents](./API/DOCUMENTS.md#post-apidocuments)
+  - [(PUT) /api/documents/](./API/DOCUMENTS.md#put-apidocuments)
+  - [(DELETE) /api/documents/](./API/DOCUMENTS.md#delete-apidocuments)
+  - [(GET) /api/documents/:id](./API/DOCUMENTS.md#get-apidocumentsid)
+  - [(PUT) /api/documents/:id](./API/DOCUMENTS.md#put-apidocumentsid)
+  - [(DELETE) /api/documents/:id](./API/DOCUMENTS.md#delete-apidocumentsid)
+  - [(GET) /api/documents/:id/logs](./API/DOCUMENTS.md#get-apidocumentsidlogs)
+  - [(GET) /api/documents/:id/reports/html/bioRxiv](./API/DOCUMENTS.md#get-apidocumentsidreportshtmlbiorxiv)
+  - [(GET) /api/documents/:id/reports/html/default](./API/DOCUMENTS.md#get-apidocumentsidreportshtmldefault)
+  - [(GET) /api/documents/:id/reports/docx/default](./API/DOCUMENTS.md#get-apidocumentsidreportsdocxdefault)
+  - [(GET) /api/documents/:id/pdf](./API/DOCUMENTS.md#get-apidocumentsidpdf)
+  - [(GET) /api/documents/:id/pdf/content](./API/DOCUMENTS.md#get-apidocumentsidpdfcontent)
+  - [(GET) /api/documents/:id/tei](./API/DOCUMENTS.md#get-apidocumentsidtei)
+  - [(GET) /api/documents/:id/tei/content](./API/DOCUMENTS.md#get-apidocumentsidteicontent)
+  - [(GET) /api/documents/:id/files](./API/DOCUMENTS.md#get-apidocumentsidfiles)
+  - [(POST) /api/documents/:id/refreshToken](./API/DOCUMENTS.md#post-apidocumentsidrefreshtoken)
+  - [(POST) /api/documents/:id/metadata/reload](./API/DOCUMENTS.md#post-apidocumentsidmetadatareload)
+  - [(POST) /api/documents/:id/metadata/validate](./API/DOCUMENTS.md#post-apidocumentsidmetadatavalidate)
+  - [(POST) /api/documents/:id/datasets/validate](./API/DOCUMENTS.md#post-apidocumentsiddatasetsvalidate)
+  - [(POST) /api/documents/:id/datasets/backToMetadata](./API/DOCUMENTS.md#post-apidocumentsiddatasetsbacktometadata)
+  - [(POST) /api/documents/:id/finish/reopen](./API/DOCUMENTS.md#post-apidocumentsidfinishreopen)
+  - [(PUT) /api/documents/:id/datasets](./API/DOCUMENTS.md#put-apidocumentsiddatasets)
+
+### [Documents datasets](./API/DOCUMENTS.DATASETS.md#index)
+
+  - [(POST) /api/datasets/:id/dataset](./API/DOCUMENTS.DATASETS.md#post-apidatasetsiddataset)
+  - [(PUT) /api/datasets/:id/dataset](./API/DOCUMENTS.DATASETS.md#put-apidatasetsiddataset)
+  - [(DELETE) /api/datasets/:id/dataset](./API/DOCUMENTS.DATASETS.md#delete-apidatasetsiddataset)
+  - [(POST) /api/datasets/:id/link](./API/DOCUMENTS.DATASETS.md#post-apidatasetsidlink)
+  - [(POST) /api/datasets/:id/unlink](./API/DOCUMENTS.DATASETS.md#post-apidatasetsidunlink)
+
+### [Documents files](./API/DOCUMENTS.FILES.md#index)
+
+  - [(GET) /api/files/:id/](./API/DOCUMENTS.FILES.md#get-apifilesid)
+  - [(PUT) /api/files/:id](./API/DOCUMENTS.FILES.md#put-apifilesid)
+  - [(POST) /api/files/:id](./API/DOCUMENTS.FILES.md#post-apifilesid)
+  - [(DELETE) /api/files/:id](./API/DOCUMENTS.FILES.md#delete-apifilesid)
+
+### [Dataseer-ml](./API/DATASEERML.md#index)
+
+  - [(POST) /api/dataseer-ml/processDataseerSentence](./API/DATASEERML.md#post-apidataseermlprocessdataseersentence)
+  - [(GET) /api/dataseer-ml/jsonDataTypes](./API/DATASEERML.md#get-apidataseermljsonDataTypes)
+  - [(GET) /api/dataseer-ml/resyncJsonDataTypes](./API/DATASEERML.md#get-apidataseermlresyncJsonDataTypes)
+
+### [RepoRecommender](./API/REPORECOMMENDER.md#index)
+
+  - [(POST) /api/repoRecommender/findRepo/](./API/REPORECOMMENDER.md#post-apireporecommenderfindrepo)
+
+### [Software](./API/SOFTWARE.md#index)
+
+  - [(POST) /api/software/processSoftwareText/](./API/SOFTWARE.md#post-apisoftwareprocesssoftwaretext)
+
+### [Statistics](./API/STATISTICS.md#index)
+
+  - [(GET) /api/statistics/documents/](./API/STATISTICS.md#get-apistatisticsdocuments)
+  - [(GET) /api/statistics/documents/:id](./API/STATISTICS.md#get-apistatisticsdocumentsid)

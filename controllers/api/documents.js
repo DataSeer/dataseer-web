@@ -29,6 +29,7 @@ const Params = require(`../../lib/params.js`);
 const Mailer = require(`../../lib/mailer.js`);
 const Url = require(`../../lib/url.js`);
 const DataseerML = require(`../../lib/dataseer-ml.js`);
+const Software = require(`../../lib/software.js`);
 const DataTypes = require(`../../lib/dataTypes.js`);
 const DocX = require(`../../lib/docx.js`);
 
@@ -153,7 +154,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
         organizations: account.organizations.map(function (item) {
           return item._id.toString();
         }),
-        name: params.name,
+        name: Params.convertToString(params.name),
         uploaded_by: account._id.toString(),
         owner: account._id.toString(),
         visible: false,
@@ -169,7 +170,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
       organizations: user.organizations.map(function (item) {
         return item._id.toString();
       }),
-      name: params.name,
+      name: Params.convertToString(params.name),
       uploaded_by: user._id.toString(),
       owner: user._id.toString(),
       visible: true,
@@ -190,11 +191,11 @@ Self.getUploadParams = function (params = {}, user, cb) {
         : AccountsManager.getOwnOrganizations(params.organizations, account);
       return cb(null, {
         organizations: ownOrganizations,
-        name: params.name,
+        name: Params.convertToString(params.name),
         uploaded_by: user._id,
         owner: account._id,
-        visible: params.visible,
-        locked: params.locked,
+        visible: Params.convertToBoolean(params.visible),
+        locked: Params.convertToBoolean(params.locked),
         file: file,
         attached_files: attachedFiles,
         emails: `${account.username},${user.username}`
@@ -233,6 +234,9 @@ Self.upload = function (opts = {}, cb) {
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (typeof _.get(opts, `dataseerML`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
     opts.dataseerML = true;
+  if (typeof _.get(opts, `software`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
+    opts.software = true;
+  if (typeof _.get(opts, `mute`) === `undefined` || !accessRights.isAdministrator) opts.mute = false;
   return Self.getUploadParams(opts.data, opts.user, function (err, params) {
     if (err) return cb(err);
     if (params instanceof Error) return cb(null, params);
@@ -277,7 +281,7 @@ Self.upload = function (opts = {}, cb) {
             };
             return next(null, acc);
           },
-          // Upload file (and process dataseer-ml if necessary)
+          // Upload file
           function (acc, next) {
             if (
               !DocumentsFilesController.isPDF(params.file.mimetype) &&
@@ -307,7 +311,7 @@ Self.upload = function (opts = {}, cb) {
                 }
                 if (DocumentsFilesController.isXML(res.mimetype)) {
                   // Set XML only when dataseer-ml do not need to be requested
-                  if (!opts.dataseerML) acc.tei = res._id;
+                  acc.tei = res._id;
                 }
                 return next(null, acc);
               }
@@ -347,6 +351,47 @@ Self.upload = function (opts = {}, cb) {
                       acc.files.push(res._id);
                       // Set XML
                       acc.tei = res._id;
+                      return next(null, acc);
+                    }
+                  );
+                });
+              }
+            );
+          },
+          // Process software
+          function (acc, next) {
+            // Process software
+            const isPDF = !!acc.pdf;
+            if (!isPDF || !opts.software) return next(null, acc);
+            // Get buffer
+            return DocumentsFilesController.readFile(
+              { data: { id: acc.files[0].toString() } },
+              function (err, content) {
+                if (err) return next(err, acc);
+                // Guess which kind of file it is to call the great function
+                return Software.annotateSoftwarePDF({ disambiguate: true, buffer: content.data }, function (err, json) {
+                  if (err) return next(err, acc);
+                  return DocumentsFilesController.upload(
+                    {
+                      data: {
+                        accountId: params.uploaded_by.toString(),
+                        documentId: acc._id.toString(),
+                        file: {
+                          name: `${params.file.name}.software.json`,
+                          data: json.toString(DocumentsFilesController.encoding),
+                          mimetype: `application/json`,
+                          encoding: DocumentsFilesController.encoding
+                        },
+                        organizations: acc.upload.organizations
+                      },
+                      user: opts.user
+                    },
+                    function (err, res) {
+                      if (err) return next(err, acc);
+                      // Set software
+                      acc.software = res._id;
+                      // Add file to files
+                      acc.files.push(res._id);
                       return next(null, acc);
                     }
                   );
@@ -455,7 +500,7 @@ Self.upload = function (opts = {}, cb) {
             if (err) {
               return Self.delete({ data: { id: res._id.toString() }, user: opts.user }, function (_err) {
                 if (_err) return cb(_err);
-                return cb(err);
+                return cb(null, err);
               });
             }
             // Create logs
@@ -472,6 +517,8 @@ Self.upload = function (opts = {}, cb) {
                   function (err, res) {
                     if (err) return cb(err);
                     let url = Url.build(`documents/${res._id.toString()}`);
+                    let mute = Params.convertToBoolean(opts.mute);
+                    if (mute) return cb(null, res);
                     return Mailer.sendMail(
                       {
                         to: params.emails ? params.emails : Mailer.default.bcc,
@@ -918,7 +965,7 @@ Self.updateOrCreateTEIMetadata = function (opts = {}, cb) {
 /**
  * Create new dataset
  * @param {object} opts - JSON containing all data
- * @param {string} opts.user - User
+ * @param {object} opts.user - User
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.sentence - Sentence
  * @param {string} opts.sentence.id - Sentence id
@@ -1008,8 +1055,69 @@ Self.newDataset = function (opts = {}, cb) {
 /**
  * Update dataset
  * @param {object} opts - JSON containing all data
- * @param {string} opts.user - User
- * @param {string} opts.fromAPI - update dataset without sentences & dataInstanceId properties
+ * @param {object} opts.user - User
+ * @param {object} opts.data - Available data
+ * @param {string} opts.data.id - Document id
+ * @param {string} opts.data.datasets - Document datasets
+ * @param {boolean} opts.[merge] - Merge new current datasets with old current datasets (default: false)
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.updateDatasets = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  if (typeof _.get(opts, `data.datasets`) === `undefined`) opts.data.datasets = {};
+  if (typeof _.get(opts, `merge`) === `undefined`) opts.merge = false;
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  return DocumentsDatasets.findOne({ document: opts.data.id }, function (err, datasets) {
+    if (err) return cb(err);
+    if (!datasets) return cb(null, new Error(`Datasets not found`));
+    if (Params.checkArray(opts.data.datasets.current)) {
+      if (opts.merge)
+        datasets.current = DocumentsDatasetsController.mergeDatasets(datasets.current, opts.data.datasets.current);
+      else datasets.current = opts.data.datasets.current;
+      // Reset dataInstanceIds
+      datasets.current = datasets.current.map(function (item, i) {
+        item.dataInstanceId = `dataInstance-${i + 1}`;
+        item.id = `dataset-${i + 1}`;
+        return item;
+      });
+    }
+    if (Params.checkArray(opts.data.datasets.deleted)) datasets.deleted = opts.data.datasets.deleted;
+    if (Params.checkArray(opts.data.datasets.extracted)) datasets.extracted = opts.data.datasets.extracted;
+    return datasets.save(function (err) {
+      if (err) return cb(err);
+      Self.refreshDatasetsInTEI(
+        { user: opts.user, documentId: opts.data.id, datasets: datasets.current },
+        function (err) {
+          if (err) return cb(err);
+          // Create logs
+          return DocumentsLogsController.create(
+            {
+              target: datasets.document,
+              account: opts.user._id,
+              kind: CrudManager.actions.update._id,
+              key: `datasets`
+            },
+            function (err, log) {
+              if (err) return cb(err);
+              return cb(null, datasets);
+            }
+          );
+        }
+      );
+    });
+  });
+};
+
+/**
+ * Update dataset
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {string} opts.fromAPI - Update dataset without sentences & dataInstanceId properties
+ * @param {string} opts.keepDataFromMongo - Will keep data from mongodb
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
  * @param {string} opts.dataset.dataInstanceId - Dataset dataInstanceId
@@ -1108,7 +1216,7 @@ Self.updateDataset = function (opts = {}, cb) {
 /**
  * Delete dataset
  * @param {object} opts - JSON containing all data
- * @param {string} opts.user - User
+ * @param {object} opts.user - User
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
  * @returns {undefined} undefined
@@ -1179,7 +1287,7 @@ Self.deleteDataset = function (opts = {}, cb) {
 /**
  * Create new link
  * @param {object} opts - JSON containing all data
- * @param {string} opts.user - Account
+ * @param {object} opts.user - Account
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.link - Link
  * @param {string} opts.link.dataset - Dataset
@@ -1261,7 +1369,7 @@ Self.linkSentence = function (opts = {}, cb) {
 /**
  * Delete link
  * @param {object} opts - JSON containing all data
- * @param {string} opts.user - Account
+ * @param {object} opts.user - Account
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.link - Link
  * @param {string} opts.link.dataset - Dataset
@@ -1338,6 +1446,37 @@ Self.unlinkSentence = function (opts = {}, cb) {
           });
         }
       );
+    });
+  });
+};
+
+/**
+ * Refresh datasets in TEI
+ * @param {object} opts JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {array} opts.datasets - datasets
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.refreshDatasetsInTEI = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  if (typeof _.get(opts, `datasets`) === `undefined`) return cb(new Error(`Missing required data: opts.datasets`));
+  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
+      if (err) return cb(err);
+      let teiInfos = XML.refreshDatasets(XML.load(content.data.toString(DocumentsFilesController.encoding)), {
+        datasets: opts.datasets
+      });
+      if (teiInfos.err) return cb(null, new Error(`Dataset not linked in TEI`));
+      return DocumentsFilesController.rewriteFile(doc.tei.toString(), teiInfos.res.xml, function (err) {
+        if (err) return cb(err);
+        else return cb(null);
+      });
     });
   });
 };
@@ -1999,7 +2138,7 @@ Self.update = function (opts = {}, cb) {
 /**
  * update documents
  * @param {object} opts - Options available
- * @param {array} opts.data.documents - array of documents id
+ * @param {array} opts.data.ids - array of documents id
  * @param {string} opts.data.visible - Visibility of the document
  * @param {array} opts.data.organizations - Array of organizations id
  * @param {string} opts.data.owner - Owner of the document
@@ -2011,14 +2150,13 @@ Self.updateMany = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.documents`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.data.documents`));
+  if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
   // Check all optionnal data
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
-  let documents = Params.convertToArray(opts.data.documents, `string`);
-  if (!Params.checkArray(documents)) return cb(null, new Error(`You must select at least one document!`));
+  let ids = Params.convertToArray(opts.data.ids, `string`);
+  if (!Params.checkArray(ids)) return cb(null, new Error(`You must select at least one document!`));
   let owner = Params.convertToString(opts.data.owner);
   if (!Params.checkString(owner)) return cb(null, new Error(`You must select an owner!`));
   let organizations = Params.convertToArray(opts.data.organizations, `string`);
@@ -2027,7 +2165,7 @@ Self.updateMany = function (opts = {}, cb) {
   let locked = Params.convertToBoolean(opts.data.locked);
   let name = Params.convertToString(opts.data.name);
   return async.reduce(
-    documents,
+    ids,
     [],
     function (acc, item, next) {
       return Self.update(
@@ -2090,6 +2228,7 @@ Self.delete = function (opts, cb) {
                 return callback(err);
               }
             );
+          return callback();
         });
       },
       function (callback) {
@@ -2140,7 +2279,7 @@ Self.delete = function (opts, cb) {
  * Delete multiples documents (c.f delete function get more informations)
  * @param {object} opts - Options available
  * @param {object} opts.data - Data available
- * @param {array} opts.data.documents - Array of accounts id
+ * @param {array} opts.data.ids - Array of accounts id
  * @param {object} opts.user - User using this functionality (must be similar to req.user)
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: Array of process logs OR undefined)
@@ -2150,15 +2289,14 @@ Self.deleteMany = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.documents`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.data.documents`));
+  if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
   // Check all optionnal data
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
-  let documents = Params.convertToArray(opts.data.documents, `string`);
-  if (!Params.checkArray(documents)) return cb(null, new Error(`You must select at least one document`));
+  let ids = Params.convertToArray(opts.data.ids, `string`);
+  if (!Params.checkArray(ids)) return cb(null, new Error(`You must select at least one document`));
   return async.reduce(
-    documents,
+    ids,
     [],
     function (acc, item, next) {
       return Self.delete({ user: opts.user, data: { id: item }, logs: opts.logs }, function (err, res) {

@@ -158,7 +158,7 @@
       </div>
       <div class="collection-row header row align-items-center">
         <div class="col col-checkbox">
-          <input type="checkbox" @change="setSelectedStateOfAllItems($event)" />
+          <input ref="multipleSelectionsCheckbox" type="checkbox" @change="setSelectedStateOfAllItems($event)" />
         </div>
         <div class="col sorting" v-on:click.stop="sort($event)" property="username">Username</div>
         <div class="col sorting" v-on:click.stop="sort($event)" property="fullname">Fullname</div>

@@ -20,6 +20,7 @@
   "pathname": "",
   "title": "Localhost",
   "errors": {
+    "notFound": "404 Not Found",
     "unauthorized": "Your current role does not grant you access to this part of the website",
     "internalServerError": "The server encountered an internal error or misconfiguration and was unable to complete your request"
   },

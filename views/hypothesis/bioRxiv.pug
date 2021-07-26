@@ -1,0 +1,24 @@
+| ### Data Discovery/Status Report
+|
+| Click [Here](#{publicURL}) for full report
+|
+| **Summary of datasets and Open Science materials associated with article:**
+|
+each item in [{"key":"protocols","label":"Protocols"},{"key":"datasets","label":"Datasets"},{"key":"codes","label":"Code"},{"key":"reagents","label":"Reagents/Materials/Lab Resources"}]
+  if(reportData.sortedDatasetsInfos[item.key].length > 0)
+    | - #{`${reportData.sortedDatasetsInfos[item.key].length} ${item.label}`}
+    |
+each item in [{"key":"protocols","label":"Protocols"},{"key":"datasets","label":"Datasets"},{"key":"codes","label":"Code"},{"key":"reagents","label":"Reagents/Materials/Lab Resources"}]
+  if(reportData.sortedDatasetsInfos[item.key].length > 0)
+    |
+    | **#{`${reportData.sortedDatasetsInfos[item.key].length} ${item.label}`}**
+    |
+    if (item.key === "datasets")
+      each dataType in reportData.datasetsSummary
+        if(dataType.key !== "other")
+          | - #{dataType.count} #{dataType.type.label}
+          |
+          if (dataType.subTypes && dataType.subTypes.length)
+            each subtype in dataType.subTypes
+              | - #{subtype.count} #{subtype.type.label.replace(`${dataType.type.label}: `, '')}
+              |

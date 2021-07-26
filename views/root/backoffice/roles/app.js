@@ -69,7 +69,6 @@
         }
       },
       multipleSelections: {
-        ids: `roles`,
         schema: {
           label: {},
           key: {},
@@ -106,12 +105,15 @@
       'collection.selectedItemsCount'() {
         let multipleSelectionsTitle = $(this.$refs.multipleSelectionsTitle);
         let multiplesUpdatesRow = $(this.$refs.multipleSelectionsRow);
+        let multipleSelectionsCheckbox = $(this.$refs.multipleSelectionsCheckbox);
         if (this.collection.selectedItemsCount === 0) {
           multipleSelectionsTitle.fadeOut();
           multiplesUpdatesRow.fadeOut();
+          multipleSelectionsCheckbox.prop(`checked`, false);
         } else {
           multipleSelectionsTitle.fadeIn();
           multiplesUpdatesRow.fadeIn();
+          multipleSelectionsCheckbox.prop(`checked`, true);
         }
       },
       // Count selected items count (used to fade In/Out form)
@@ -371,7 +373,7 @@
         // Build the opts data that will be sent to the API
         let opts = {
           data: {
-            accounts: self.collection.items
+            ids: self.collection.items
               .filter(function (item) {
                 return item.selected;
               })
@@ -825,7 +827,7 @@
       getMultipleSelectionsParams: function () {
         let self = this;
         let result = {
-          [this.multipleSelections.ids]: this.collection.items
+          ids: this.collection.items
             .filter(function (item) {
               return item.selected;
             })

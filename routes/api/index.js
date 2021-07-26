@@ -47,7 +47,6 @@ router.post(`/signup`, function (req, res, next) {
     fullname: Params.convertToString(req.body.fullname),
     password: Params.convertToString(req.body.password),
     visible: Params.convertToBoolean(req.body.visible),
-    protected: Params.convertToBoolean(req.body.protected),
     organizations: Params.convertToArray(req.body.organizations, `string`)
   };
   return Captcha.check(req, function (err, data) {

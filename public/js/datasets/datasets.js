@@ -78,12 +78,13 @@
                 datasets: doc.datasets,
                 metadata: doc.metadata,
                 tei: { data: new XMLSerializer().serializeToString(xml), metadata: tei.res.metadata },
-                pdf: pdf.res
-                  ? {
-                    url: pdfUrl,
-                    metadata: pdf.res.metadata
-                  }
-                  : undefined
+                pdf:
+                  pdf && pdf.res
+                    ? {
+                      url: pdfUrl,
+                      metadata: pdf.res.metadata
+                    }
+                    : undefined
               },
               {
                 onReady: function () {

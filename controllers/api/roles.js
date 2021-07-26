@@ -214,7 +214,7 @@ Self.update = function (opts = {}, cb) {
  * Update roles
  * @param {object} opts - Option available
  * @param {object} opts.data - Data available
- * @param {array} opts.data.roles - Array of roles id
+ * @param {array} opts.data.ids - Array of roles id
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: roles instance process OR undefined)
  * @returns {undefined} undefined
@@ -223,17 +223,17 @@ Self.updateMany = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.roles`) === `undefined`) return cb(new Error(`Missing required data: opts.data.roles`));
+  if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
   let accessRights = AccountsManager.getAccessRights(opts.user);
   if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
-  let roles = Params.convertToArray(opts.data.roles, `string`);
-  if (!Params.checkArray(roles)) return cb(null, new Error(`You must select at least one role!`));
+  let ids = Params.convertToArray(opts.data.ids, `string`);
+  if (!Params.checkArray(ids)) return cb(null, new Error(`You must select at least one role!`));
   // Check all optionnal data
   let label = Params.convertToString(opts.data.label);
   let weight = Params.convertToInteger(opts.data.weight);
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
   return async.reduce(
-    roles,
+    ids,
     [],
     function (acc, item, next) {
       return Self.update(
@@ -292,7 +292,7 @@ Self.delete = function (opts = {}, cb) {
  * deletes multiples roles (c.f delete function get more informations)
  * @param {object} opts - Options available
  * @param {object} opts.data - Data available
- * @param {array} opts.data.roles - Array of accounts id
+ * @param {array} opts.data.ids - Array of accounts id
  * @param {object} opts.user - User using this functionality (must be similar to req.user)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: account instance OR undefined)
  * @returns {undefined} undefined
@@ -301,12 +301,12 @@ Self.deleteMany = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.roles`) === `undefined`) return cb(new Error(`Missing required data: opts.data.roles`));
+  if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
-  let roles = Params.convertToArray(opts.data.roles, `string`);
-  if (!Params.checkArray(roles)) return cb(null, new Error(`You must select at least one role`));
+  let ids = Params.convertToArray(opts.data.ids, `string`);
+  if (!Params.checkArray(ids)) return cb(null, new Error(`You must select at least one role`));
   return async.reduce(
-    roles,
+    ids,
     [],
     function (acc, item, next) {
       return Self.delete({ data: { id: item }, user: opts.user }, function (err, res) {

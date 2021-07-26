@@ -111,7 +111,6 @@
         }
       },
       multipleSelections: {
-        ids: `documents`,
         schema: {
           name: {},
           owner: { key: `_id` },
@@ -156,12 +155,15 @@
       'collection.selectedItemsCount'() {
         let multipleSelectionsTitle = $(this.$refs.multipleSelectionsTitle);
         let multiplesUpdatesRow = $(this.$refs.multipleSelectionsRow);
+        let multipleSelectionsCheckbox = $(this.$refs.multipleSelectionsCheckbox);
         if (this.collection.selectedItemsCount === 0) {
           multipleSelectionsTitle.fadeOut();
           multiplesUpdatesRow.fadeOut();
+          multipleSelectionsCheckbox.prop(`checked`, false);
         } else {
           multipleSelectionsTitle.fadeIn();
           multiplesUpdatesRow.fadeIn();
+          multipleSelectionsCheckbox.prop(`checked`, true);
         }
       },
       // Count selected items count (used to fade In/Out form)
@@ -485,7 +487,7 @@
         // Build the opts data that will be sent to the API
         let opts = {
           data: {
-            documents: self.collection.items
+            ids: self.collection.items
               .filter(function (item) {
                 return item.selected;
               })
@@ -957,7 +959,7 @@
       getMultipleSelectionsParams: function () {
         let self = this;
         let result = {
-          [this.multipleSelections.ids]: this.collection.items
+          ids: this.collection.items
             .filter(function (item) {
               return item.selected;
             })
@@ -1218,7 +1220,7 @@
             },
             // Get all accounts
             function (next) {
-              return API.all(ROUTES.dependencies.accounts, {}, function (err, query) {
+              return API.all(ROUTES.dependencies.accounts, { params: { limit: 200 } }, function (err, query) {
                 if (err) return next(err);
                 if (query.err) return next(query);
                 self.collection.dependencies.accounts = [];
@@ -1244,7 +1246,7 @@
             },
             // Get all organizations
             function (next) {
-              return API.all(ROUTES.dependencies.organizations, {}, function (err, query) {
+              return API.all(ROUTES.dependencies.organizations, { params: { limit: 200 } }, function (err, query) {
                 if (err) return next(err);
                 if (query.err) return next(query);
                 self.collection.dependencies.organizations = [];

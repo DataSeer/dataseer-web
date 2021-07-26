@@ -166,7 +166,8 @@ Self.signup = function (opts = {}, cb) {
               username: account.username,
               fullname: account.fullname,
               organizations: account.organizations,
-              role: account.role
+              role: account.role,
+              _id: account._id
             });
           }
         );
@@ -356,7 +357,8 @@ Self.resetPassword = function (opts = {}, cb) {
           username: acc.username,
           fullname: acc.fullname,
           organizations: acc.organizations,
-          role: acc.role
+          role: acc.role,
+          _id: acc._id
         });
       return Mailer.sendMail(
         {
@@ -370,7 +372,8 @@ Self.resetPassword = function (opts = {}, cb) {
             username: acc.username,
             fullname: acc.fullname,
             organizations: acc.organizations,
-            role: acc.role
+            role: acc.role,
+            _id: acc._id
           });
         }
       );
@@ -738,7 +741,7 @@ Self.update = function (opts = {}, cb) {
 /**
  * Updates accounts
  * @param {object} opts - Options available
- * @param {array} opts.accounts - Array of accounts ID
+ * @param {array} opts.ids - Array of accounts ID
  * @param {string} opts.fullname - fullname of the account
  * @param {string} opts.role - role of the account
  * @param {array} opts.organizations - Array of organizations ids
@@ -751,12 +754,11 @@ Self.updateMany = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.accounts`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.data.accounts`));
+  if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
   // Check all optionnal data
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
-  let accounts = Params.convertToArray(opts.data.accounts, `string`);
-  if (!Params.checkArray(accounts)) return cb(null, new Error(`You must select at least one account!`));
+  let ids = Params.convertToArray(opts.data.ids, `string`);
+  if (!Params.checkArray(ids)) return cb(null, new Error(`You must select at least one account!`));
   let fullname = Params.convertToString(opts.data.fullname);
   let role = Params.convertToString(opts.data.role);
   let organizations = Params.convertToArray(opts.data.organizations, `string`);
@@ -764,7 +766,7 @@ Self.updateMany = function (opts = {}, cb) {
   let visible = Params.convertToBoolean(opts.data.visible);
   let disabled = Params.convertToBoolean(opts.data.disabled);
   return async.reduce(
-    accounts,
+    ids,
     [],
     function (acc, item, next) {
       return Self.update(
@@ -845,7 +847,7 @@ Self.delete = function (opts = {}, cb) {
  * deletes multiples accounts (c.f delete function get more informations)
  * @param {object} opts - Options available
  * @param {object} opts.data - Data available
- * @param {array} opts.data.accounts - Array of accounts id
+ * @param {array} opts.data.ids - Array of accounts id
  * @param {object} opts.user - User using this functionality (must be similar to req.user)
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: account instance OR undefined)
@@ -855,15 +857,14 @@ Self.deleteMany = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.accounts`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.data.accounts`));
+  if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
   // Check all optionnal data
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
-  let accounts = Params.convertToArray(opts.data.accounts, `string`);
-  if (!Params.checkArray(accounts)) return cb(null, new Error(`You must select at least one account`));
+  let ids = Params.convertToArray(opts.data.ids, `string`);
+  if (!Params.checkArray(ids)) return cb(null, new Error(`You must select at least one account`));
   return async.reduce(
-    accounts,
+    ids,
     [],
     function (acc, item, next) {
       return Self.delete({ user: opts.user, data: { id: item }, logs: opts.logs }, function (err, res) {

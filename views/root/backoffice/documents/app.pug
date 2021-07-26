@@ -200,7 +200,7 @@
       </div>
       <div class="collection-row header row align-items-center">
         <div class="col col-checkbox">
-          <input type="checkbox" @change="setSelectedStateOfAllItems($event)" />
+          <input ref="multipleSelectionsCheckbox" type="checkbox" @change="setSelectedStateOfAllItems($event)" />
         </div>
         <div class="col text-truncate">Url(s)</div>
         <div class="col sorting" v-on:click.stop="sort($event)" property="upload.date">Upload at</div>
@@ -224,6 +224,12 @@
       <div ref="multipleSelectionsRow" class="collection-row row align-items-center">
         <div class="col col-checkbox">
           <input type="checkbox" disabled>
+        </div>
+        <div class="col text-truncate">
+          <span>n/a</span>
+        </div>
+        <div class="col text-truncate">
+          <input class="form-control" type="date" disabled>
         </div>
         <div class="col text-truncate">
           <span>n/a</span>
@@ -259,9 +265,6 @@
               </ul>
             </div>
           </div>  
-        </div>
-        <div class="col text-truncate">
-          <input class="form-control" type="date" disabled>
         </div>
         <div class="col">
           <div class="form-check form-switch" :title="multipleSelections.properties.visible ? 'Visible' : 'Invisible'">

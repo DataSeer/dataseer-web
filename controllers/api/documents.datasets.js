@@ -44,6 +44,32 @@ Self.checkValidation = function (opts = {}, cb) {
 };
 
 /**
+ * Merge datasetse
+ * @param {object} opts - JSON containing all data
+ * @param {string} opts.current - Current datasets
+ * @param {string} opts.datasets - Datasets that should be merged
+ * @returns {object} JSON containing all data
+ */
+Self.mergeDatasets = function (currents = [], datasets = []) {
+  let result = [].concat(currents);
+  for (let i = 0; i < datasets.length; i++) {
+    let shouldMerge = currents.filter(function (item) {
+      return item.sentences.filter(function (sentence) {
+        return (
+          datasets[i].filter(function (s) {
+            return s.text === sentence.text;
+          }).length > 0
+        );
+      });
+    });
+    if (shouldMerge) {
+    } else {
+      result.push(currents[i]);
+    }
+  }
+};
+
+/**
  * Create new dataset JSON object
  * @param {object} opts - JSON containing all data
  * @param {string} opts.id - Dataset id
@@ -59,7 +85,7 @@ Self.checkValidation = function (opts = {}, cb) {
  * @param {string} opts.DOI - Dataset DOI
  * @param {string} opts.name - Dataset name
  * @param {string} opts.comments - Dataset comments
- * @returns {object} opts - JSON containing all data
+ * @returns {object} JSON containing all data
  */
 Self.createDataset = function (opts = {}) {
   return {

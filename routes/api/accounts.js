@@ -40,29 +40,6 @@ router.get(`/`, function (req, res, next) {
   });
 });
 
-/* GET SINGLE Account BY ID */
-router.get(`/:id`, function (req, res, next) {
-  let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
-  let opts = {
-    data: { id: req.params.id },
-    user: req.user,
-    logs: true
-  };
-  return AccountsController.get(opts, function (err, data) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    let isError = data instanceof Error;
-    let result = isError ? data.toString() : data;
-    return res.json({
-      err: isError,
-      res: result
-    });
-  });
-});
-
 /* ADD new Account */
 router.post(`/`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
@@ -104,6 +81,80 @@ router.post(`/`, function (req, res, next) {
     user: req.user
   };
   return AccountsController.add(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* UPDATE Accounts */
+router.put(`/`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  if (!Params.checkArray(req.body.ids)) return res.json({ err: true, res: `You must select at least one account!` });
+  if (!Params.checkArray(req.body.organizations))
+    return res.json({ err: true, res: `You must select at least one organization!` });
+  let opts = {
+    data: {
+      ids: Params.convertToArray(req.body.ids),
+      role: Params.convertToString(req.body.role),
+      fullname: Params.convertToString(req.body.fullname),
+      organizations: Params.convertToArray(req.body.organizations),
+      visible: Params.convertToBoolean(req.body.visible),
+      disabled: Params.convertToBoolean(req.body.disabled)
+    },
+    user: req.user
+  };
+  return AccountsController.updateMany(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({ err: isError, res: result });
+  });
+});
+
+/* DELETE Accounts */
+router.delete(`/`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  if (!Params.checkArray(req.body.ids)) return res.json({ err: true, res: `You must select at least one account!` });
+  let opts = {
+    data: {
+      ids: Params.convertToArray(req.body.ids, `string`)
+    },
+    user: req.user
+  };
+  return AccountsController.deleteMany(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({ err: isError, res: result });
+  });
+});
+
+/* GET SINGLE Account BY ID */
+router.get(`/:id`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    data: { id: req.params.id },
+    user: req.user,
+    logs: true
+  };
+  return AccountsController.get(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
@@ -162,36 +213,6 @@ router.put(`/:id`, function (req, res, next) {
   });
 });
 
-/* UPDATE Accounts */
-router.put(`/`, function (req, res, next) {
-  let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
-  if (!Params.checkArray(req.body.accounts))
-    return res.json({ err: true, res: `You must select at least one account!` });
-  if (!Params.checkArray(req.body.organizations))
-    return res.json({ err: true, res: `You must select at least one organization!` });
-  let opts = {
-    data: {
-      role: Params.convertToString(req.body.role),
-      fullname: Params.convertToString(req.body.fullname),
-      accounts: Params.convertToArray(req.body.accounts),
-      organizations: Params.convertToArray(req.body.organizations),
-      visible: Params.convertToBoolean(req.body.visible),
-      disabled: Params.convertToBoolean(req.body.disabled)
-    },
-    user: req.user
-  };
-  return AccountsController.updateMany(opts, function (err, data) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    let isError = data instanceof Error;
-    let result = isError ? data.toString() : data;
-    return res.json({ err: isError, res: result });
-  });
-});
-
 /* DELETE Account BY ID */
 router.delete(`/:id`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
@@ -213,29 +234,6 @@ router.delete(`/:id`, function (req, res, next) {
       err: isError,
       res: result
     });
-  });
-});
-
-/* DELETE Accounts */
-router.delete(`/`, function (req, res, next) {
-  let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
-  if (!Params.checkArray(req.body.accounts))
-    return res.json({ err: true, res: `You must select at least one account!` });
-  let opts = {
-    data: {
-      accounts: Params.convertToArray(req.body.accounts, `string`)
-    },
-    user: req.user
-  };
-  return AccountsController.deleteMany(opts, function (err, data) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    let isError = data instanceof Error;
-    let result = isError ? data.toString() : data;
-    return res.json({ err: isError, res: result });
   });
 });
 

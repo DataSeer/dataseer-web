@@ -24,11 +24,11 @@ const DocumentView = function (id, events = {}) {
         if (selectedSentences.length) {
           let sentencesIds = self.getSentences(selectedSentences, sentence);
           for (let i = 0; i < sentencesIds.length; i++) {
-            if (typeof sentencesIds[i] === 'string') {
+            if (typeof sentencesIds[i] === `string`) {
               self.selectSentence(self.getSentence({ id: sentencesIds[i] }));
             }
           }
-        } else console.log('At least one sentence must be selected');
+        } else console.log(`At least one sentence must be selected`);
       } else {
         if (self.isSelected(sentence)) {
           self.unselectSentences(self.getSelectedSentences());
@@ -38,23 +38,23 @@ const DocumentView = function (id, events = {}) {
           self.selectSentence(sentence);
         }
       }
-      if (typeof self.events.onSentenceClick === 'function') self.events.onSentenceClick(self.getSentence(sentence));
+      if (typeof self.events.onSentenceClick === `function`) self.events.onSentenceClick(self.getSentence(sentence));
     },
     onHover: function (element) {
       let sentence = self.getSentence({ id: element.id });
       self.hoverSentence(sentence);
-      if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(self.getSentence(sentence));
+      if (typeof self.events.onSentenceHover === `function`) self.events.onSentenceHover(self.getSentence(sentence));
     },
     onEndHover: function (element) {
       let sentence = self.getSentence({ id: element.id });
       self.endHoverSentence(sentence);
-      if (typeof self.events.onSentenceHover === 'function') self.events.onSentenceHover(self.getSentence(sentence));
+      if (typeof self.events.onSentenceHover === `function`) self.events.onSentenceHover(self.getSentence(sentence));
     }
   };
   // documentView elements
-  this.screen = $('#documentView\\.screen');
-  this.pdf = $('#pdf');
-  this.xml = $('#xml');
+  this.screen = $(`#documentView\\.screen`);
+  this.pdf = $(`#pdf`);
+  this.xml = $(`#xml`);
   // Listen scroll
   this.currentScroll = 0;
   this.screen.scroll(
@@ -63,7 +63,7 @@ const DocumentView = function (id, events = {}) {
         direction = scrollTop > self.currentScroll ? +1 : -1;
       self.currentScroll = scrollTop;
       if (self.pdfVisible)
-        self.pdfViewer.onScroll({ position: scrollTop, height: self.screen.prop('scrollHeight') }, direction);
+        self.pdfViewer.onScroll({ position: scrollTop, height: self.screen.prop(`scrollHeight`) }, direction);
     }, 200)
   );
   // Element initialization
@@ -71,68 +71,68 @@ const DocumentView = function (id, events = {}) {
   this.pdfVisible = true;
   // Key events listeners
   $(document).keydown(function (event) {
-    if (event.key === 'Control') self.ctrlPressed = true;
-    else if (event.key === 'Shift') self.shiftPressed = true;
+    if (event.key === `Control`) self.ctrlPressed = true;
+    else if (event.key === `Shift`) self.shiftPressed = true;
   });
   $(document).keyup(function (event) {
-    if (event.key === 'Control') self.ctrlPressed = false;
-    else if (event.key === 'Shift') self.shiftPressed = false;
+    if (event.key === `Control`) self.ctrlPressed = false;
+    else if (event.key === `Shift`) self.shiftPressed = false;
   });
   // On button click
-  $('#documentView\\.viewSelection\\.tei\\.all')
+  $(`#documentView\\.viewSelection\\.tei\\.all`)
     .parent()
     .click(function () {
-      console.log('TEI all');
+      console.log(`TEI all`);
       self.pdfVisible = false;
       self.pdf.hide();
       if (self.pdfViewer) self.pdfViewer.hideMarkers();
       self.xml.show();
-      self.xml.find('*.hidden').removeClass('hidden');
+      self.xml.find(`*.hidden`).removeClass(`hidden`);
       self.scrollToSentence({ sentence: self.lastSelectedSentence, noAnim: true });
-      return typeof self.events.onFulltextView === 'function' ? self.events.onFulltextView() : undefined;
+      return typeof self.events.onFulltextView === `function` ? self.events.onFulltextView() : undefined;
     });
-  $('#documentView\\.viewSelection\\.tei\\.dataseer')
+  $(`#documentView\\.viewSelection\\.tei\\.dataseer`)
     .parent()
     .click(function () {
-      console.log('TEI dataseer');
+      console.log(`TEI dataseer`);
       self.pdfVisible = false;
       self.pdf.hide();
       if (self.pdfViewer) self.pdfViewer.hideMarkers();
       self.xml.show();
-      self.xml.find('*.hidden').removeClass('hidden');
-      self.xml.find('text > div > div, text > div > *:not(div)').map(function (i, el) {
+      self.xml.find(`*.hidden`).removeClass(`hidden`);
+      self.xml.find(`text > div > div, text > div > *:not(div)`).map(function (i, el) {
         let element = $(el);
-        if (element.find('s[corresp]').length === 0) return element.addClass('hidden');
+        if (element.find(`s[corresp]`).length === 0) return element.addClass(`hidden`);
       });
       self.scrollToSentence({ sentence: self.lastSelectedSentence, noAnim: true });
-      return typeof self.events.onSectionView === 'function' ? self.events.onSectionView() : undefined;
+      return typeof self.events.onSectionView === `function` ? self.events.onSectionView() : undefined;
     });
-  $('#documentView\\.viewSelection\\.tei\\.dataset')
+  $(`#documentView\\.viewSelection\\.tei\\.dataset`)
     .parent()
     .click(function () {
-      console.log('TEI dataset');
+      console.log(`TEI dataset`);
       self.pdfVisible = false;
       self.pdf.hide();
       if (self.pdfViewer) self.pdfViewer.hideMarkers();
       self.xml.show();
-      self.xml.find('*.hidden').removeClass('hidden');
-      self.xml.find('text > div, text > *:not(div)').map(function (i, el) {
+      self.xml.find(`*.hidden`).removeClass(`hidden`);
+      self.xml.find(`text > div, text > *:not(div)`).map(function (i, el) {
         let element = $(el);
-        if (element.find('s[corresp]').length === 0) return element.addClass('hidden');
+        if (element.find(`s[corresp]`).length === 0) return element.addClass(`hidden`);
       });
       self.scrollToSentence({ sentence: self.lastSelectedSentence, noAnim: true });
-      return typeof self.events.onParagraphView === 'function' ? self.events.onParagraphView() : undefined;
+      return typeof self.events.onParagraphView === `function` ? self.events.onParagraphView() : undefined;
     });
-  $('#documentView\\.viewSelection\\.pdf')
+  $(`#documentView\\.viewSelection\\.pdf`)
     .parent()
     .click(function () {
-      console.log('PDF');
+      console.log(`PDF`);
       self.pdfVisible = true;
       self.pdf.show();
       if (self.pdfViewer) self.pdfViewer.showMarkers();
       self.xml.hide();
       self.scrollToSentence({ sentence: self.lastSelectedSentence, noAnim: true });
-      return typeof self.events.onPdfView === 'function' ? self.events.onPdfView() : undefined;
+      return typeof self.events.onPdfView === `function` ? self.events.onPdfView() : undefined;
     });
   // Events
   this.events = events;
@@ -142,8 +142,8 @@ const DocumentView = function (id, events = {}) {
 // Check if the given sentence is selected
 DocumentView.prototype.isSelected = function (sentence) {
   return (
-    typeof this.selectedSentences[sentence.id] === 'object' &&
-    typeof this.selectedSentences[sentence.id].id !== 'undefined'
+    typeof this.selectedSentences[sentence.id] === `object` &&
+    typeof this.selectedSentences[sentence.id].id !== `undefined`
   );
 };
 
@@ -175,11 +175,11 @@ DocumentView.prototype.getSentence = function (sentence) {
 // Init documentView
 DocumentView.prototype.init = function (opts, cb) {
   let self = this,
-    xml = opts.xml.data.toString('utf8').replace(/\s/gm, ' ');
-  this.xmlViewer = new XmlViewer('xml', 'documentView\\.screen', this.viewersEvents);
+    xml = opts.xml.data.toString(`utf8`).replace(/\s/gm, ` `);
+  this.xmlViewer = new XmlViewer(`xml`, `documentView\\.screen`, this.viewersEvents);
   if (opts.pdf) {
     this.pdfVisible = true;
-    this.pdfViewer = new PdfViewer('pdf', 'documentView\\.screen', this.viewersEvents);
+    this.pdfViewer = new PdfViewer(`pdf`, `documentView\\.screen`, this.viewersEvents);
   }
   return this.xmlViewer.load(
     { xmlString: xml, colors: opts.colors, mapping: opts.xml.metadata.mapping },
@@ -190,8 +190,8 @@ DocumentView.prototype.init = function (opts, cb) {
           return cb();
         });
       else {
-        $('#documentView\\.viewSelection\\.tei\\.all').click();
-        $('#documentView\\.viewSelection\\.pdf').parent().remove();
+        $(`#documentView\\.viewSelection\\.tei\\.all`).click();
+        $(`#documentView\\.viewSelection\\.pdf`).parent().remove();
         return cb();
       }
     }
@@ -250,16 +250,16 @@ DocumentView.prototype.scrollToSentence = function (opts, cb) {
       if (position) {
         if (opts.noAnim) self.screen.scrollTop(position);
         else self.screen.animate({ scrollTop: position });
-      } else console.log('dataset not selected');
-      return typeof cb === 'function' ? cb() : undefined;
+      } else console.log(`dataset not selected`);
+      return typeof cb === `function` ? cb() : undefined;
     });
   else
     return this.xmlViewer.scrollToSentence(opts.sentence, function (position) {
       if (position) {
         if (opts.noAnim) self.screen.scrollTop(position + self.screen.scrollTop() - self.screen.height() / 1.8);
         else self.screen.animate({ scrollTop: position + self.screen.scrollTop() - self.screen.height() / 1.8 });
-      } else console.log('dataset not selected');
-      return typeof cb === 'function' ? cb() : undefined;
+      } else console.log(`dataset not selected`);
+      return typeof cb === `function` ? cb() : undefined;
     });
 };
 
