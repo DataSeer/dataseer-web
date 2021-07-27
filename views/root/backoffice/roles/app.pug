@@ -108,11 +108,16 @@
         <div class="col">Action</div>
       </div>
       <div class="collection-row row align-items-center">
-        <div class="col" v-if="filteredItems.length === 0">
+        <div class="col" v-if="filteredItems.length === 0 && !loading">
           <span class="no-data">No data</span>
         </div>
       </div>
-      <div ref="multipleSelectionsTitle" class="collection-row row align-items-center">
+      <div class="collection-row row align-items-center" v-if="loading">
+        <div class="col text-truncate">
+          <span class="no-data">Loading data...</span>
+        </div>
+      </div>
+      <div ref="multipleSelectionsTitle" class="collection-row row align-items-center hidden">
         <div class="col">
           <span class="multiple-selections-title">Update (or delete) multiples roles</span>
         </div>

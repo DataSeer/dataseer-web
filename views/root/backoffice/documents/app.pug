@@ -212,11 +212,16 @@
         <div class="col text-truncate">Action</div>
       </div>
       <div class="collection-row row align-items-center">
-        <div class="col text-truncate" v-if="filteredItems.length === 0">
+        <div class="col text-truncate" v-if="filteredItems.length === 0 && !loading">
           <span class="no-data">No data</span>
         </div>
       </div>
-      <div ref="multipleSelectionsTitle" class="collection-row row align-items-center">
+      <div class="collection-row row align-items-center" v-if="loading">
+        <div class="col text-truncate">
+          <span class="no-data">Loading data...</span>
+        </div>
+      </div>
+      <div ref="multipleSelectionsTitle" class="collection-row row align-items-center hidden">
         <div class="col text-truncate">
           <span class="multiple-selections-title">Update (or delete) multiples documents</span>
         </div>

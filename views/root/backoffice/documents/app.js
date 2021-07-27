@@ -69,6 +69,7 @@
         caseSensitive: false,
         strict: false
       },
+      loading: false,
       collection: {
         schema: {
           _id: {},
@@ -154,16 +155,15 @@
       // Count selected items count (used to fade In/Out form)
       'collection.selectedItemsCount'() {
         let multipleSelectionsTitle = $(this.$refs.multipleSelectionsTitle);
-        let multiplesUpdatesRow = $(this.$refs.multipleSelectionsRow);
+        let multipleSelectionsRow = $(this.$refs.multipleSelectionsRow);
         let multipleSelectionsCheckbox = $(this.$refs.multipleSelectionsCheckbox);
         if (this.collection.selectedItemsCount === 0) {
           multipleSelectionsTitle.fadeOut();
-          multiplesUpdatesRow.fadeOut();
+          multipleSelectionsRow.fadeOut();
           multipleSelectionsCheckbox.prop(`checked`, false);
         } else {
           multipleSelectionsTitle.fadeIn();
-          multiplesUpdatesRow.fadeIn();
-          multipleSelectionsCheckbox.prop(`checked`, true);
+          multipleSelectionsRow.fadeIn();
         }
       },
       // Count selected items count (used to fade In/Out form)
@@ -1202,6 +1202,7 @@
       // Refresh the app
       refresh: function (cb) {
         let self = this;
+        this.loading = true;
         // Get Params from URL
         let currentParams = this.getCurrentURLParams();
         // Refresh search properties
@@ -1290,6 +1291,7 @@
           function (err) {
             // Get all documents
             return API.all(ROUTES.main, { params: self.getSearchParams(currentParams.token) }, function (err, query) {
+              self.loading = false;
               if (err) return cb(err);
               if (query.err) return cb(err, query);
               // Refresh search properties
@@ -1302,6 +1304,19 @@
           }
         );
       }
+    },
+    mounted: function () {
+      let self = this;
+      this.$nextTick(function () {
+        // Code that will run only after the
+        // entire view has been rendered
+        // Hide "multiple selection" section
+        $(self.$refs.multipleSelectionsTitle).hide();
+        $(self.$refs.multipleSelectionsRow).hide();
+        // Hide "new item" section
+        $(self.$refs.newItemTitle).hide();
+        $(self.$refs.newItemRow).hide();
+      });
     }
   });
   // Refresh the app
@@ -1326,11 +1341,5 @@
         })
       );
     }
-    // Hide "multiple selection" section
-    $(app.$refs.multipleSelectionsTitle).hide();
-    $(app.$refs.multipleSelectionsRow).hide();
-    // Hide "new item" section
-    $(app.$refs.newItemTitle).hide();
-    $(app.$refs.newItemRow).hide();
   });
 })(jQuery, _, async);
