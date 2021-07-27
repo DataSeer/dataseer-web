@@ -48,7 +48,7 @@ Self.all = function (opts = {}, cb) {
   let query = {};
   // Set default value
   if (typeof ids === `undefined`) ids = [];
-  if (typeof limit === `undefined` || limit <= 0) limit = 20;
+  if (typeof limit === `undefined` || limit < 0) limit = 0;
   if (typeof skip === `undefined` || skip < 0) skip = 0;
   if (typeof sort === `undefined` || sort !== `asc`) sort = `desc`;
   // Restrict access

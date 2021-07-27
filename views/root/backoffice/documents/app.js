@@ -1220,7 +1220,7 @@
             },
             // Get all accounts
             function (next) {
-              return API.all(ROUTES.dependencies.accounts, { params: { limit: 200 } }, function (err, query) {
+              return API.all(ROUTES.dependencies.accounts, {}, function (err, query) {
                 if (err) return next(err);
                 if (query.err) return next(query);
                 self.collection.dependencies.accounts = [];
@@ -1246,7 +1246,7 @@
             },
             // Get all organizations
             function (next) {
-              return API.all(ROUTES.dependencies.organizations, { params: { limit: 200 } }, function (err, query) {
+              return API.all(ROUTES.dependencies.organizations, {}, function (err, query) {
                 if (err) return next(err);
                 if (query.err) return next(query);
                 self.collection.dependencies.organizations = [];

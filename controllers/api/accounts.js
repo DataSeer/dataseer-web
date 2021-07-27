@@ -478,7 +478,7 @@ Self.all = function (opts = {}, cb) {
   let sort = Params.convertToString(opts.data.sort);
   let query = {};
   // Set default value
-  if (typeof limit === `undefined` || limit <= 0) limit = 20;
+  if (typeof limit === `undefined` || limit < 0) limit = 0;
   if (typeof skip === `undefined` || skip < 0) skip = 0;
   if (typeof sort === `undefined` || sort !== `asc`) sort = `desc`;
   if (typeof organizations === `undefined` && !accessRights.isAdministrator)
