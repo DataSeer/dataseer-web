@@ -24,7 +24,7 @@ This appliaction is composed of :
  - a REST API to interact with your data stored in MongoDB (localhost:3000/api)
  - a default Front-End app requesting the REST API
 
-Documents, Organizations and Accounts data are stored in MongoDB. Files (PDF, XML and TEI) uploaded on tdm-plateform are stored in the server FileSystem
+Documents, Organizations and Accounts data are stored in MongoDB. Files (PDF, XML and TEI) uploaded on dataseer-web are stored in the server FileSystem
 
 ## Documentations
 

@@ -5,7 +5,7 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('tdm-plateform:server');
+var debug = require('debug')('dataseer-web:server');
 var http = require('http');
 
 /**

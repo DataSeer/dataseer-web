@@ -61,7 +61,7 @@ You must use your API token to access all of the following routes
 Set your own token into HTTP headers (Authorization: Bearer MY_TOKEN)
 
 ```bash
-# You have to replace MY_TOKEN by your tdm-plateform API token
+# You have to replace MY_TOKEN by your dataseer-web API token
 # Use -H "Authorization: Bearer MY_TOKEN" to set headers with curl
 $ curl "http://localhost:3000/api/accounts" -H "Authorization: Bearer MY_TOKEN"
 # Or you can use token parameter
