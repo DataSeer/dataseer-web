@@ -549,6 +549,14 @@ router.put(`/:id/tei/content`, function (req, res, next) {
             console.log(err);
             return res.status(500).send(conf.errors.internalServerError);
           }
+          if (!doc.pdf) {
+            let isError = file instanceof Error;
+            let result = isError ? file.toString() : file;
+            return res.json({
+              err: isError,
+              res: result
+            });
+          }
           return DocumentsController.updateOrCreatePDFMetadata(
             { data: { id: doc._id.toString() }, user: req.user },
             function (err, ok) {
