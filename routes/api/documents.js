@@ -499,6 +499,77 @@ router.get(`/:id/tei/content`, function (req, res, next) {
   });
 });
 
+/* Update file content BY ID */
+router.put(`/:id/tei/content`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  if (!Params.checkObject(req.files) || !Params.checkObject(req.files.file))
+    return res.json({
+      err: true,
+      res: `You must select a file`
+    });
+  if (!Buffer.isBuffer(req.files.file.data))
+    return res.json({
+      err: true,
+      res: `Bad file content`
+    });
+  let opts = {
+    data: {
+      id: req.params.id
+    },
+    user: req.user
+  };
+  return DocumentsController.get(opts, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    let id = doc.tei ? doc.tei.toString() : undefined;
+    if (typeof id === `undefined`)
+      return res.json({
+        err: true,
+        res: `TEI file not found`
+      });
+    let data = req.files.file.data.toString(DocumentsFilesController.encoding); // Convert buffer to string (do not use Params.convertToString())
+    return DocumentsFilesController.rewriteFile(id, data, function (err, file) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send(conf.errors.internalServerError);
+      }
+      if (file instanceof Error || !file)
+        return res.json({
+          err: true,
+          res: `TEI file not updated`
+        });
+      return DocumentsController.updateOrCreateTEIMetadata(
+        { data: { id: doc._id.toString() }, user: req.user },
+        function (err, ok) {
+          if (err || ok instanceof Error) {
+            console.log(err);
+            return res.status(500).send(conf.errors.internalServerError);
+          }
+          return DocumentsController.updateOrCreatePDFMetadata(
+            { data: { id: doc._id.toString() }, user: req.user },
+            function (err, ok) {
+              if (err || ok instanceof Error) {
+                console.log(err);
+                return res.status(500).send(conf.errors.internalServerError);
+              }
+              let isError = file instanceof Error;
+              let result = isError ? file.toString() : file;
+              return res.json({
+                err: isError,
+                res: result
+              });
+            }
+          );
+        }
+      );
+    });
+  });
+});
+
 /* GET SINGLE Document hypothesis/bioRxiv BY ID */
 router.get(`/:id/hypothesis/bioRxiv`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);

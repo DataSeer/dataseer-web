@@ -189,7 +189,7 @@ Self.rewriteFile = function (id, data, cb) {
             file.size = str.length;
             return file.save(function (err) {
               if (err) return cb(err);
-              return cb();
+              return cb(null, true);
             });
           }
         });
