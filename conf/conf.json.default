@@ -9,7 +9,7 @@
         "id": "60344b69aae2c62a0769d449"
       },
       "accounts": {
-        "id": "60993ddb0d520b7b28d6a362"
+        "id": "6043e4087c8848496dde3708"
       }
     }
   },
@@ -23,14 +23,6 @@
     "notFound": "404 Not Found",
     "unauthorized": "Your current role does not grant you access to this part of the website",
     "internalServerError": "The server encountered an internal error or misconfiguration and was unable to complete your request"
-  },
-  "_reCAPTCHA_site_key_": {
-    "public": "publicKey",
-    "private": "privateKey"
-  },
-  "_reCAPTCHA_score_": {
-    "limit": 0.75,
-    "error": "Authentication failed (captcha score too low)"
   },
   "tokens": {
     "api": {
