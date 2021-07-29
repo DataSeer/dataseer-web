@@ -344,6 +344,7 @@ router.get(`/:id/softcite`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.softcite) return res.json({ err: true, res: null, msg: `softcite file not found` });
     return DocumentsFilesController.get(
       { data: { id: doc.softcite ? doc.softcite.toString() : undefined } },
       function (err, file) {
@@ -374,6 +375,7 @@ router.get(`/:id/softcite/content`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.softcite) return res.json({ err: true, res: null, msg: `softcite file content not found` });
     return DocumentsFilesController.readFile(
       { data: { id: doc.softcite ? doc.softcite.toString() : undefined } },
       function (err, file) {
@@ -402,6 +404,7 @@ router.get(`/:id/pdf`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.pdf) return res.json({ err: true, res: null, msg: `PDF file not found` });
     return DocumentsFilesController.get(
       { data: { id: doc.pdf ? doc.pdf.toString() : undefined } },
       function (err, file) {
@@ -432,6 +435,7 @@ router.get(`/:id/pdf/content`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.pdf) return res.json({ err: true, res: null, msg: `PDF file content not found` });
     return DocumentsFilesController.readFile(
       { data: { id: doc.pdf ? doc.pdf.toString() : undefined } },
       function (err, file) {
@@ -460,6 +464,7 @@ router.get(`/:id/tei/`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.pdf) return res.json({ err: true, res: null, msg: `TEI file not found` });
     return DocumentsFilesController.get(
       { data: { id: doc.tei ? doc.tei.toString() : undefined } },
       function (err, file) {
@@ -490,6 +495,7 @@ router.get(`/:id/tei/content`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.pdf) return res.json({ err: true, res: null, msg: `TEI file content not found` });
     return DocumentsFilesController.readFile(
       { data: { id: doc.tei ? doc.tei.toString() : undefined } },
       function (err, file) {
