@@ -344,14 +344,17 @@ router.get(`/:id/softcite`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
-    return DocumentsFilesController.get({ data: { id: doc.softcite.toString() } }, function (err, file) {
-      if (err) {
-        console.log(err);
-        return res.status(500).send(conf.errors.internalServerError);
+    return DocumentsFilesController.get(
+      { data: { id: doc.softcite ? doc.softcite.toString() : undefined } },
+      function (err, file) {
+        if (err) {
+          console.log(err);
+          return res.status(500).send(conf.errors.internalServerError);
+        }
+        if (!file) return res.json({ err: true, res: null, msg: `file not found` });
+        return res.json({ err: false, res: file });
       }
-      if (!file) return res.json({ err: true, res: null, msg: `file not found` });
-      return res.json({ err: false, res: file });
-    });
+    );
   });
 });
 
