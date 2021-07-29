@@ -32,6 +32,7 @@ const documentsFilesApiRouter = require(`./routes/api/documents.files.js`);
 const documentsDatasetsApiRouter = require(`./routes/api/documents.datasets.js`);
 const dataseerMLRouter = require(`./routes/api/dataseer-ml.js`);
 const repoRecommenderRouter = require(`./routes/api/repoRecommender.js`);
+const softciteRouter = require(`./routes/api/softcite.js`);
 const statisticsRouter = require(`./routes/api/statistics.js`);
 
 const indexRouter = require(`./routes/index.js`);

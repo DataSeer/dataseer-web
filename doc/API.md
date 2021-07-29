@@ -116,7 +116,7 @@ In case of no-blocking error, API will return this kind of object:
 
 *[Table of contents](#api-documentation)*
 
-All of these routes return a JSON object:
+List of available API routes:
 
 ### [Index](./API/INDEX.md#index)
 
@@ -129,7 +129,7 @@ All of these routes return a JSON object:
   - [(POST) /api/forgotPassword](./API/INDEX.md#post-apiforgotpassword)
   - [(POST) /api/resetPassword](./API/INDEX.md#post-apiresetpassword)
 
-### [Accounts](./API/ACCOUNTS.md#index)
+### [Accounts](./API/ACCOUNTS.md#accounts)
 
   - [(GET) /api/accounts](./API/ACCOUNTS.md#get-apiaccounts)
   - [(POST) /api/accounts](./API/ACCOUNTS.md#post-apiaccounts)
@@ -139,7 +139,7 @@ All of these routes return a JSON object:
   - [(PUT) /api/accounts/:id](./API/ACCOUNTS.md#put-apiaccountsid)
   - [(DELETE) /api/accounts/:id](./API/ACCOUNTS.md#delete-apiaccountsid)
 
-### [Roles](./API/ROLES.md#index)
+### [Roles](./API/ROLES.md#roles)
 
   - [(GET) /api/roles](./API/ROLES.md#get-apiroles)
   - [(GET) /api/roles/:id](./API/ROLES.md#get-apirolesid)
@@ -149,7 +149,7 @@ All of these routes return a JSON object:
   - [(DELETE) /api/roles/:id](./API/ROLES.md#delete-apirolesid)
   - [(DELETE) /api/roles](./API/ROLES.md#delete-apiroles)
 
-### [Organizations](./API/ORGANIZATIONS.md#index)
+### [Organizations](./API/ORGANIZATIONS.md#organizations)
 
   - [(GET) /api/organizations](./API/ORGANIZATIONS.md#get-apiorganizations)
   - [(GET) /api/organizations/:id](./API/ORGANIZATIONS.md#get-apiorganizationsid)
@@ -159,7 +159,7 @@ All of these routes return a JSON object:
   - [(DELETE) /api/organizations/:id](./API/ORGANIZATIONS.md#delete-apiorganizationsid)
   - [(DELETE) /api/organizations](./API/ORGANIZATIONS.md#delete-apiorganizations)
 
-### [Documents](./API/DOCUMENTS.md#index)
+### [Documents](./API/DOCUMENTS.md#documents)
 
   - [(GET) /api/documents](./API/DOCUMENTS.md#get-apidocuments)
   - [(POST) /api/documents](./API/DOCUMENTS.md#post-apidocuments)
@@ -176,6 +176,7 @@ All of these routes return a JSON object:
   - [(GET) /api/documents/:id/pdf/content](./API/DOCUMENTS.md#get-apidocumentsidpdfcontent)
   - [(GET) /api/documents/:id/tei](./API/DOCUMENTS.md#get-apidocumentsidtei)
   - [(GET) /api/documents/:id/tei/content](./API/DOCUMENTS.md#get-apidocumentsidteicontent)
+  - [(PUT) /api/documents/:id/tei/content](./API/DOCUMENTS.md#put-apidocumentsidteicontent)
   - [(GET) /api/documents/:id/files](./API/DOCUMENTS.md#get-apidocumentsidfiles)
   - [(POST) /api/documents/:id/refreshToken](./API/DOCUMENTS.md#post-apidocumentsidrefreshtoken)
   - [(POST) /api/documents/:id/metadata/reload](./API/DOCUMENTS.md#post-apidocumentsidmetadatareload)
@@ -185,7 +186,7 @@ All of these routes return a JSON object:
   - [(POST) /api/documents/:id/finish/reopen](./API/DOCUMENTS.md#post-apidocumentsidfinishreopen)
   - [(PUT) /api/documents/:id/datasets](./API/DOCUMENTS.md#put-apidocumentsiddatasets)
 
-### [Documents datasets](./API/DOCUMENTS.DATASETS.md#index)
+### [Documents datasets](./API/DOCUMENTS.DATASETS.md#documents-datasets)
 
   - [(POST) /api/datasets/:id/dataset](./API/DOCUMENTS.DATASETS.md#post-apidatasetsiddataset)
   - [(PUT) /api/datasets/:id/dataset](./API/DOCUMENTS.DATASETS.md#put-apidatasetsiddataset)
@@ -193,28 +194,28 @@ All of these routes return a JSON object:
   - [(POST) /api/datasets/:id/link](./API/DOCUMENTS.DATASETS.md#post-apidatasetsidlink)
   - [(POST) /api/datasets/:id/unlink](./API/DOCUMENTS.DATASETS.md#post-apidatasetsidunlink)
 
-### [Documents files](./API/DOCUMENTS.FILES.md#index)
+### [Documents files](./API/DOCUMENTS.FILES.md#documents-files)
 
   - [(GET) /api/files/:id/](./API/DOCUMENTS.FILES.md#get-apifilesid)
   - [(PUT) /api/files/:id](./API/DOCUMENTS.FILES.md#put-apifilesid)
   - [(POST) /api/files/:id](./API/DOCUMENTS.FILES.md#post-apifilesid)
   - [(DELETE) /api/files/:id](./API/DOCUMENTS.FILES.md#delete-apifilesid)
 
-### [Dataseer-ml](./API/DATASEERML.md#index)
+### [Dataseer ML](./API/DATASEERML.md#dataseer-ml)
 
   - [(POST) /api/dataseer-ml/processDataseerSentence](./API/DATASEERML.md#post-apidataseermlprocessdataseersentence)
   - [(GET) /api/dataseer-ml/jsonDataTypes](./API/DATASEERML.md#get-apidataseermljsonDataTypes)
   - [(GET) /api/dataseer-ml/resyncJsonDataTypes](./API/DATASEERML.md#get-apidataseermlresyncJsonDataTypes)
 
-### [RepoRecommender](./API/REPORECOMMENDER.md#index)
+### [RepoRecommender](./API/REPORECOMMENDER.md#reporecommender)
 
   - [(POST) /api/repoRecommender/findRepo/](./API/REPORECOMMENDER.md#post-apireporecommenderfindrepo)
 
-### [Software](./API/SOFTWARE.md#index)
+### [Software](./API/SOFTWARE.md#software)
 
   - [(POST) /api/software/processSoftwareText/](./API/SOFTWARE.md#post-apisoftwareprocesssoftwaretext)
 
-### [Statistics](./API/STATISTICS.md#index)
+### [Statistics](./API/STATISTICS.md#statistics)
 
   - [(GET) /api/statistics/documents/](./API/STATISTICS.md#get-apistatisticsdocuments)
   - [(GET) /api/statistics/documents/:id](./API/STATISTICS.md#get-apistatisticsdocumentsid)

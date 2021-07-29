@@ -29,7 +29,7 @@ const Params = require(`../../lib/params.js`);
 const Mailer = require(`../../lib/mailer.js`);
 const Url = require(`../../lib/url.js`);
 const DataseerML = require(`../../lib/dataseer-ml.js`);
-const Software = require(`../../lib/software.js`);
+const Softcite = require(`../../lib/softcite.js`);
 const DataTypes = require(`../../lib/dataTypes.js`);
 const DocX = require(`../../lib/docx.js`);
 
@@ -234,8 +234,8 @@ Self.upload = function (opts = {}, cb) {
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (typeof _.get(opts, `dataseerML`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
     opts.dataseerML = true;
-  if (typeof _.get(opts, `software`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
-    opts.software = true;
+  if (typeof _.get(opts, `softcite`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
+    opts.softcite = true;
   if (typeof _.get(opts, `mute`) === `undefined` || !accessRights.isAdministrator) opts.mute = false;
   return Self.getUploadParams(opts.data, opts.user, function (err, params) {
     if (err) return cb(err);
@@ -358,18 +358,18 @@ Self.upload = function (opts = {}, cb) {
               }
             );
           },
-          // Process software
+          // Process softcite
           function (acc, next) {
-            // Process software
+            // Process softcite
             const isPDF = !!acc.pdf;
-            if (!isPDF || !opts.software) return next(null, acc);
+            if (!isPDF || !opts.softcite) return next(null, acc);
             // Get buffer
             return DocumentsFilesController.readFile(
               { data: { id: acc.files[0].toString() } },
               function (err, content) {
                 if (err) return next(err, acc);
                 // Guess which kind of file it is to call the great function
-                return Software.annotateSoftwarePDF({ disambiguate: true, buffer: content.data }, function (err, json) {
+                return Softcite.annotateSoftwarePDF({ disambiguate: true, buffer: content.data }, function (err, json) {
                   if (err) return next(err, acc);
                   return DocumentsFilesController.upload(
                     {
@@ -377,7 +377,7 @@ Self.upload = function (opts = {}, cb) {
                         accountId: params.uploaded_by.toString(),
                         documentId: acc._id.toString(),
                         file: {
-                          name: `${params.file.name}.software.json`,
+                          name: `${params.file.name}.softcite.json`,
                           data: json.toString(DocumentsFilesController.encoding),
                           mimetype: `application/json`,
                           encoding: DocumentsFilesController.encoding
@@ -388,8 +388,8 @@ Self.upload = function (opts = {}, cb) {
                     },
                     function (err, res) {
                       if (err) return next(err, acc);
-                      // Set software
-                      acc.software = res._id;
+                      // Set softcite
+                      acc.softcite = res._id;
                       // Add file to files
                       acc.files.push(res._id);
                       return next(null, acc);

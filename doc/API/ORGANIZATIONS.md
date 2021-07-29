@@ -1,5 +1,4 @@
-
-### Organizations
+# Organizations
 
   - [(GET) /api/organizations](#get-apiorganizations)
   - [(POST) /api/organizations](#post-apiorganizations)
@@ -11,19 +10,19 @@
 
 ---
 
-### (GET) /api/organizations/
+# (GET) /api/organizations/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route return all organizations (JSON formated)
 
-#### Role required
+## Role required
 
 Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -39,7 +38,7 @@ Accessible to users with the following role :  **standardUser**, **moderator**, 
       <td>Integer</td>
       <td>limit</td>
       <td>optional</td>
-      <td>Maximum number of returned results (default:20)</td>
+      <td>Maximum number of returned results (default:0)</td>
     </tr>
     <tr>
       <td>Integer</td>
@@ -68,7 +67,7 @@ Accessible to users with the following role :  **standardUser**, **moderator**, 
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return all organizations (JSON formated)
@@ -77,7 +76,7 @@ curl -F "visible=true,false" "http://localhost:3000/api/organizations"
 curl -F "visible=true,false" -F "ids=000000000000000000000000,000000000000000000000001" "http://localhost:3000/api/organizations"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -88,19 +87,19 @@ curl -F "visible=true,false" -F "ids=000000000000000000000000,000000000000000000
 
 ---
 
-### (POST) /api/organizations/
+# (POST) /api/organizations/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route add a new organization and return this organization (JSON formated).
 
-#### Role required
+## Role required
 
 Accessible to user with the following role: **administrator**
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -127,14 +126,14 @@ Accessible to user with the following role: **administrator**
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the new organization (JSON formated)
 curl -X POST -F "name=NAME" -F "visible=true" "http://localhost:3000/api/organizations"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -145,19 +144,19 @@ curl -X POST -F "name=NAME" -F "visible=true" "http://localhost:3000/api/organiz
 
 ---
 
-### (PUT) /api/organizations/
+# (PUT) /api/organizations/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route updates multiple organizations and return all actions results (JSON formatted).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -184,14 +183,14 @@ Accessible to users with the following role: **administrator**.
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return all infos about updates (JSON formated)
 curl -X PUT -F "ids=000000000000000000000000,000000000000000000000001" -F "visible=true" "http://localhost:3000/api/organizations"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -205,19 +204,19 @@ curl -X PUT -F "ids=000000000000000000000000,000000000000000000000001" -F "visib
 
 ---
 
-### (DELETE) /api/organizations/
+# (DELETE) /api/organizations/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route deletes multiple organizations and return all actions results (JSON formatted).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -238,14 +237,14 @@ Accessible to users with the following role: **standardUser**, **moderator**, **
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return all infos about deletes (JSON formated)
 curl -X DELETE -F "ids=000000000000000000000000,000000000000000000000001" "http://localhost:3000/api/organizations"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -259,30 +258,30 @@ curl -X DELETE -F "ids=000000000000000000000000,000000000000000000000001" "http:
 
 ---
 
-### (GET) /api/organizations/:id
+# (GET) /api/organizations/:id
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route return an organization (JSON formated).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role:  **standardUser**, **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 No parameters available
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the organization (JSON formated) with id 000000000000000000000000
 curl "http://localhost:3000/api/organizations/000000000000000000000000"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -293,19 +292,19 @@ curl "http://localhost:3000/api/organizations/000000000000000000000000"
 
 ---
 
-### (PUT) /api/organizations/:id
+# (PUT) /api/organizations/:id
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route update an organization and return updated organization (JSON formated).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -332,14 +331,14 @@ Accessible to users with the following role: **moderator**, **administrator**.
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the updated organization (JSON formated)
 curl -X PUT -F "name=NAME" "http://localhost:3000/api/organizations/000000000000000000000000"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -350,31 +349,31 @@ curl -X PUT -F "name=NAME" "http://localhost:3000/api/organizations/000000000000
 
 ---
 
-### (DELETE) /api/organizations/:id
+# (DELETE) /api/organizations/:id
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route delete an organization and return deleted organization (JSON formated).
 Note: all data related to this organization will be moved "moved" to the default organization.
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **administrator**.
 
-#### Parameters
+## Parameters
 
 No parameters available
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the deleted organization (JSON formated)
 curl -X DELETE "http://localhost:3000/api/organizations/000000000000000000000000"
 ```
 
-#### Result
+## Result
 
 ```json
 {

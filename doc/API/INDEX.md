@@ -17,8 +17,10 @@
 
 ### Description
 
-Use this route to sign in to dataseer-web. It will return a JWT that must be used to interact with the API.
+Use this route to sign in to dataseer-web. It will return the JWT that must be used to interact with the API.
 (The response header will contain a "Set-Cookie" instruction to set an httpOnly cookie "token" containing the JWT)
+
+Note: use newToken params to generate a new token.
 
 ### Role required
 
@@ -47,6 +49,12 @@ This route is public.
       <td>password</td>
       <td>required</td>
       <td>Password of the account</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>newToken</td>
+      <td>optional</td>
+      <td>Will generate a new token</td>
     </tr>
   </tbody>
 </table>

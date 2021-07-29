@@ -1,5 +1,4 @@
-
-### Accounts
+# Accounts
 
   - [(GET) /api/accounts](#get-apiaccounts)
   - [(POST) /api/accounts](#post-apiaccounts)
@@ -11,19 +10,19 @@
 
 ---
 
-### (GET) /api/accounts/
+# (GET) /api/accounts/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route return all accounts (JSON formated)
 
-#### Role required
+## Role required
 
 Accessible to users with the following role :  **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -39,7 +38,7 @@ Accessible to users with the following role :  **moderator**, **administrator**.
       <td>Integer</td>
       <td>limit</td>
       <td>optional</td>
-      <td>Maximum number of returned results (default:20)</td>
+      <td>Maximum number of returned results (default:0)</td>
     </tr>
     <tr>
       <td>Integer</td>
@@ -86,7 +85,7 @@ Accessible to users with the following role :  **moderator**, **administrator**.
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return all accounts (JSON formated)
@@ -96,7 +95,7 @@ curl -F "visible=true,false" -F "disabled=true,false" -F "organizations=..." -F 
 curl -F "visible=true,false" -F "disabled=true,false" -F "organizations=..." -F "roles=..." -F "ids=000000000000000000000000,000000000000000000000001" "http://localhost:3000/api/accounts"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -107,19 +106,19 @@ curl -F "visible=true,false" -F "disabled=true,false" -F "organizations=..." -F 
 
 ---
 
-### (POST) /api/accounts/
+# (POST) /api/accounts/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route add a new account and return this account (JSON formated).
 
-#### Role required
+## Role required
 
 Accessible to user with the following role: **administrator**
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -182,7 +181,7 @@ Accessible to user with the following role: **administrator**
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the new account (JSON formated)
@@ -190,7 +189,7 @@ Accessible to user with the following role: **administrator**
 curl -X POST -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "password=MY_PASSWORD" -F "confirm_password=MY_PASSWORD" -F "organizations=..." -F "role=..." "http://localhost:3000/api/accounts"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -201,19 +200,19 @@ curl -X POST -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "password=MY
 
 ---
 
-### (PUT) /api/accounts/
+# (PUT) /api/accounts/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route updates multiple accounts and return all actions results (JSON formatted).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -264,7 +263,7 @@ Accessible to users with the following role: **moderator**, **administrator**.
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return all infos about updates (JSON formated)
@@ -272,7 +271,7 @@ Accessible to users with the following role: **moderator**, **administrator**.
 curl -X PUT -F "ids=000000000000000000000000,000000000000000000000001" -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME"-F "organizations=..." -F "role=..." "http://localhost:3000/api/accounts"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -286,19 +285,19 @@ curl -X PUT -F "ids=000000000000000000000000,000000000000000000000001" -F "fulln
 
 ---
 
-### (DELETE) /api/accounts/
+# (DELETE) /api/accounts/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route deletes multiple accounts and return all actions results (JSON formatted).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -319,14 +318,14 @@ Accessible to users with the following role: **standardUser**, **moderator**, **
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return all infos about deletes (JSON formated)
 curl -X DELETE -F "ids=000000000000000000000000,000000000000000000000001" "http://localhost:3000/api/accounts"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -340,30 +339,30 @@ curl -X DELETE -F "ids=000000000000000000000000,000000000000000000000001" "http:
 
 ---
 
-### (GET) /api/accounts/:id
+# (GET) /api/accounts/:id
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route return an account (JSON formated).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role:  **standardUser**, **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 No parameters available
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the account (JSON formated) with id 000000000000000000000000
 curl "http://localhost:3000/api/accounts/000000000000000000000000"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -374,19 +373,19 @@ curl "http://localhost:3000/api/accounts/000000000000000000000000"
 
 ---
 
-### (PUT) /api/accounts/:id
+# (PUT) /api/accounts/:id
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route update an account and return updated account (JSON formated).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -431,7 +430,7 @@ Accessible to users with the following role: **standardUser**, **moderator**, **
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the updated account (JSON formated)
@@ -439,7 +438,7 @@ Accessible to users with the following role: **standardUser**, **moderator**, **
 curl -X PUT -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME"-F "organizations=..." -F "role=..." "http://localhost:3000/api/accounts/000000000000000000000000"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -450,31 +449,31 @@ curl -X PUT -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME"-F "organizations
 
 ---
 
-### (DELETE) /api/accounts/:id
+# (DELETE) /api/accounts/:id
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route delete an account and return deleted account (JSON formated).
 Note: data won't be deleted but all private infos will be hashed.
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 No parameters available
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the deleted account (JSON formated)
 curl -X DELETE "http://localhost:3000/api/accounts/000000000000000000000000"
 ```
 
-#### Result
+## Result
 
 ```json
 {

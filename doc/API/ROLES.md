@@ -1,5 +1,4 @@
-
-### Roles
+# Roles
 
   - [(GET) /api/roles](#get-apiroles)
   - [(POST) /api/roles](#post-apiroles)
@@ -11,19 +10,19 @@
 
 ---
 
-### (GET) /api/roles/
+# (GET) /api/roles/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route return all roles (JSON formated)
 
-#### Role required
+## Role required
 
 Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -62,7 +61,7 @@ Accessible to users with the following role :  **standardUser**, **moderator**, 
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return all roles (JSON formated)
@@ -71,7 +70,7 @@ curl -F "visible=true,false" "http://localhost:3000/api/roles"
 curl -F "visible=true,false" -F "ids=000000000000000000000000,000000000000000000000001" "http://localhost:3000/api/roles"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -82,19 +81,19 @@ curl -F "visible=true,false" -F "ids=000000000000000000000000,000000000000000000
 
 ---
 
-### (POST) /api/roles/
+# (POST) /api/roles/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route add a new role and return this role (JSON formated).
 
-#### Role required
+## Role required
 
 Accessible to user with the following role: **administrator**
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -127,14 +126,14 @@ Accessible to user with the following role: **administrator**
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the new role (JSON formated)
 curl -X POST -F "label=My Custom Role" -F "key=myCustomRole" -F "weight=150" "http://localhost:3000/api/roles"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -145,19 +144,19 @@ curl -X POST -F "label=My Custom Role" -F "key=myCustomRole" -F "weight=150" "ht
 
 ---
 
-### (PUT) /api/roles/
+# (PUT) /api/roles/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route updates multiple roles and return all actions results (JSON formatted).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -178,14 +177,14 @@ Accessible to users with the following role: **administrator**.
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return all infos about updates (JSON formated)
 curl -X PUT -F "ids=000000000000000000000000,000000000000000000000001" "http://localhost:3000/api/roles"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -199,19 +198,19 @@ curl -X PUT -F "ids=000000000000000000000000,000000000000000000000001" "http://l
 
 ---
 
-### (DELETE) /api/roles/
+# (DELETE) /api/roles/
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route deletes multiple roles and return all actions results (JSON formatted).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -232,14 +231,14 @@ Accessible to users with the following role: **standardUser**, **moderator**, **
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return all infos about deletes (JSON formated)
 curl -X DELETE -F "ids=000000000000000000000000,000000000000000000000001" "http://localhost:3000/api/roles"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -253,30 +252,30 @@ curl -X DELETE -F "ids=000000000000000000000000,000000000000000000000001" "http:
 
 ---
 
-### (GET) /api/roles/:id
+# (GET) /api/roles/:id
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route return an role (JSON formated).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role:  **standardUser**, **moderator**, **administrator**.
 
-#### Parameters
+## Parameters
 
 No parameters available
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the role (JSON formated) with id 000000000000000000000000
 curl "http://localhost:3000/api/roles/000000000000000000000000"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -287,19 +286,19 @@ curl "http://localhost:3000/api/roles/000000000000000000000000"
 
 ---
 
-### (PUT) /api/roles/:id
+# (PUT) /api/roles/:id
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route update an role and return updated role (JSON formated).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **administrator**.
 
-#### Parameters
+## Parameters
 
 <table>
   <thead>
@@ -326,14 +325,14 @@ Accessible to users with the following role: **administrator**.
   </tbody>
 </table>
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the updated role (JSON formated)
 curl -X PUT -F "name=NAME" "http://localhost:3000/api/roles/000000000000000000000000"
 ```
 
-#### Result
+## Result
 
 ```json
 {
@@ -344,30 +343,30 @@ curl -X PUT -F "name=NAME" "http://localhost:3000/api/roles/00000000000000000000
 
 ---
 
-### (DELETE) /api/roles/:id
+# (DELETE) /api/roles/:id
 
 *[Available Routes](../API.md#available-routes)*
 
-#### Description
+## Description
 
 This route delete an role and return deleted role (JSON formated).
 
-#### Role required
+## Role required
 
 Accessible to users with the following role: **administrator**.
 
-#### Parameters
+## Parameters
 
 No parameters available
 
-#### How to request
+## How to request
 
 ```bash
 # Will return the deleted role (JSON formated)
 curl -X DELETE "http://localhost:3000/api/roles/000000000000000000000000"
 ```
 
-#### Result
+## Result
 
 ```json
 {

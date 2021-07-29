@@ -21,7 +21,7 @@ const Schema = new mongoose.Schema(
     ),
     name: { type: String, default: `` }, // document name
     status: { type: String, default: `` }, // document status
-    software: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (software)
+    softcite: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (softcite)
     pdf: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (pdf)
     tei: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (tei)
     datasets: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDatasets` }, // refers to documents.datasets collection item

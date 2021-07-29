@@ -35,6 +35,7 @@ Documents, Organizations and Accounts data are stored in MongoDB. Files (PDF, XM
     - [Web Application configuration](#web-application-configuration)
     - [JWT Configuration](#jwt-configuration)
     - [Mails](#mails)
+- [Data Access](#data-access)
 - [Models documentations](doc/MODELS.md#models-documentation)
   - [Accounts](doc/MODELS.md#accounts)
   - [Organizations](doc/MODELS.md#organizations)
@@ -92,6 +93,7 @@ You must create some configurations files (based on `*.default` files) and fill 
 - <code>conf/services/dataseer-ml.json</code> : dataseer-ml configuration
 - <code>conf/services/dataseer-wiki.json</code> : dataseer-wiki configuration
 - <code>conf/services/repoRecommender.json</code> : repoRecommender configuration
+- <code>conf/services/softcite.json</code> : softcite configuration
 
 ### JWT Configuration
 
@@ -105,6 +107,20 @@ You must create file conf/private.key and fill it with a random string (a long r
 *[Table of contents](#documentations)*
 
 All the files concerning the mails are in the `conf/mails` directory.
+
+### Data Access
+
+*[Table of contents](#documentations)*
+
+Your role defines which data you can access.
+
+  - An **unauthenticated user** can only access a **public URL**.
+  - A **Standard User** can only access his own data: document(s), organization(s) & account.
+  - An **Annotator** (also called **Moderator** in source code) can access all the data of his organizations: document(s), organization(s) and account(s).
+  - A **Curator** (also called **Administrator** in source code) can access all the data of all organizations: document(s), organization(s) and account(s).
+
+
+
 
 
 
