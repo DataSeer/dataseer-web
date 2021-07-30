@@ -1,0 +1,11 @@
+{
+  "user": "acct:username@hypothes.is",
+  "token": "user token",
+  "root": "https://api.hypothes.is/",
+  "routes": {
+    "search": "api/search",
+    "create": "api/annotations",
+    "update": "api/annotations/{id}",
+    "delete": "api/annotations/{id}"
+  }
+}

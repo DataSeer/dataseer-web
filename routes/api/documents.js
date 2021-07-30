@@ -6,7 +6,6 @@
 
 const express = require(`express`);
 const router = express.Router();
-const fs = require(`fs`);
 const path = require(`path`);
 
 const AccountsManager = require(`../../lib/accounts.js`);
@@ -583,32 +582,6 @@ router.put(`/:id/tei/content`, function (req, res, next) {
           );
         }
       );
-    });
-  });
-});
-
-/* GET SINGLE Document hypothesis/bioRxiv BY ID */
-router.get(`/:id/hypothesis/bioRxiv`, function (req, res, next) {
-  let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
-  // Init transaction
-  let opts = {
-    data: { id: req.params.id, kind: `html`, organization: `bioRxiv`, dataTypes: req.app.get(`dataTypes`) },
-    user: req.user
-  };
-  return DocumentsController.getReportData(opts, function (err, data) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    let isError = data instanceof Error;
-    let result = isError ? data.toString() : data;
-    if (isError) return res.status(404).send(conf.errors.notFound);
-    return res.render(`hypothesis/bioRxiv.pug`, {
-      publicURL: `${Url.build(`/documents/${req.params.id}`, { token: data.doc.token })}`,
-      reportData: data,
-      currentUser: req.user,
-      conf: conf
     });
   });
 });
