@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/css/reports/bioRxiv.css")
+    <title>DataSeer Data Discovery Report</title>
+    -
+      function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+        if (Number.isNaN(month) || Number.isNaN(day) || Number.isNaN(year))
+          return '';
+
+        if (month.length < 2) 
+            month = '0' + month;
+        if (day.length < 2) 
+            day = '0' + day;
+
+        return [year, month, day].join('-');
+      }
+
+      function formatUrl(url) {
+        return url.substring(0,5) + "..." + url.substring(url.length - 5);
+      }
+  </head>
+  <body>
+    <h1>Data Discovery/Status Report</h1>
+    <section>
+      div.property
+        div.key Article Title:
+        div.value #{reportData.doc.metadata.article_title}
+      div.property
+        div.key DOI:
+        div.value #{reportData.doc.metadata.doi}
+      div.property
+        div.key Authors:
+        div.value #{reportData.doc.metadata.authors.filter((item)=>!!item.name).map((item)=>item.name).join(",")}
+      div.property
+        div.key Preprint Link:
+        div.value unknow
+      div.property
+        div.key DataSeer Link:
+        div.value #{reportData.doc.pdf.filename}
+    </section>
+    <section>
+        div.subtitle Summary List of datasets associated with article:
+        <ul>
+            each item in [{"key":"protocols","label": "Protocols"},{"key":"datasets","label": "Datasets"},{"key":"codes","label": "Codes"},{"key":"reagents","label": "Reagents/Materials/Lab Resources"}]
+              li #{`${reportData.sortedDatasetsInfos[item.key].length} ${item.label}`}
+                if (item.key === "datasets")
+                  each dataType in reportData.datasetsSummary
+                    if(dataType.key !== "other")
+                      ul
+                        li #{dataType.count} #{dataType.type.label}
+                          ul
+                            if (dataType.subTypes && dataType.subTypes.length)
+                              each subtype in dataType.subTypes
+                                li #{subtype.count} #{subtype.type.label.replace(`${dataType.type.label}: `, '')}
+        </ul>
+        div.property
+          div.key #{`Total datasets in DataSeer ${reportData.doc.datasets.__v}th (${formatDate(new Date())}) Version of Report:`}
+          div.value #{reportData.sortedDatasetsInfos.all.length}
+    </section>
+    <h1>ASAP Funding Acknowledgement & Affiliation</h1>
+    <h2>(Not available for the moment)</h2>
+    <!-- <section> -->
+      <!-- <table> -->
+        <!-- <tr> -->
+          <!-- <th>Correct?</th> -->
+          <!-- <th>Language Used</th> -->
+          <!-- <th>Language Required</th> -->
+        <!-- </tr> -->
+        <!-- <tr> -->
+          <!-- <td>Not available</td> -->
+          <!-- <td>Not available</td> -->
+          <!-- <td>Not available</td> -->
+        <!-- </tr> -->
+      <!-- </table> -->
+    <!-- </section> -->
+    <h1>Protocols</h1>
+    <section>
+      <table>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>URL</th>
+          <th>Depo to Repo</th>
+          <th>Re-Use</th>
+        </tr>
+        if (reportData.sortedDatasetsInfos.protocols.length === 0)
+          <tr>
+            <td colspan=5 style="text-align: center;">None</td>
+          </tr>
+        else
+          each item, index in reportData.sortedDatasetsInfos.protocols
+            <tr>
+              <td>#{index+1}</td>
+              <td>#{item.name}</td>
+              <td>#{item.doi}</td>
+              <td>#{item.doi ? "Yes" : "No"}</td>
+              <td>#{item.reuse ? "Yes" : "No"}</td>
+            </tr>
+      </table>
+    </section>
+
+    each dataType in reportData.datasetsSummary
+      if (dataType.key !== "other")
+        <h1>#{dataType.type.label}</h1>
+        <h2>Reference for DS DataType link to Wiki:</h2>
+        <section>
+          <ul>
+            li
+              a(href=dataType.type.url) #{dataType.type.label}
+            each item in dataType.subTypes
+              li
+                a(href=item.type.url) #{item.type.label}
+        </section>
+        <section>
+          <table>
+            <tr>
+              <th>Deposited in a Repo</th>
+              <th>Re-Use</th>
+              <th>#</th>
+              <th>Dataset Name</th>
+              <th>Figure Ref</th>
+              <th>DS DataType</th>
+              <th>Figure Legend Sentence</th>
+              <th>Data Sentence from Method</th>
+              <th>Dataset Permanent Link</th>
+            </tr>
+            each item, index in dataType.list
+              <tr>
+                <td style="text-align: center;"><input type="checkbox"></td>
+                <td>#{item.reuse ? "Yes" : "No"}</td>
+                <td>#{index+1}</td>
+                <td>#{item.name}</td>
+                <td></td>
+                <td>
+                  a(href=item.type.url) #{item.type.label}
+                </td>
+                <td></td>
+                <td>
+                  each sentence in item.sentences
+                   p #{sentence.text}
+                </td>
+                <td>#{item.DOI}</td>
+              </tr>
+          </table>
+        </section>
+
+    <h1>Codes</h1>
+    <section>
+      <table>
+        <tr>
+          <th>Deposited in a Repo</th>
+          <th>Re-Use</th>
+          <th>#</th>
+          <th>Dataset Name</th>
+          <th>Figure Ref</th>
+          <th>DS DataType</th>
+          <th>Figure Legend Sentence</th>
+          <th>Data Sentence from Method</th>
+          <th>Dataset Permanent Link</th>
+        </tr>
+        if (reportData.sortedDatasetsInfos.codes.length === 0)
+          <tr>
+            <td colspan=9 style="text-align: center;">None</td>
+          </tr>
+        else
+          each item, index in reportData.sortedDatasetsInfos.codes
+            <tr>
+              <td style="text-align: center;"><input type="checkbox"></td>
+              <td>#{item.reuse ? "Yes" : "No"}</td>
+              <td>#{index+1}</td>
+              <td>#{item.name}</td>
+              <td></td>
+              <td>
+                a(href=item.type.url) #{item.type.label}
+              </td>
+              <td></td>
+              <td>
+                each sentence in item.sentences
+                 p #{sentence.text}
+              </td>
+              <td>#{item.DOI}</td>
+            </tr>
+      </table>
+    </section>
+
+    <h1>Reagents/Materials/Lab Resources</h1>
+    <section>
+      <table>
+        <tr>
+          <th>Deposited in a Repo</th>
+          <th>Re-Use</th>
+          <th>#</th>
+          <th>Dataset Name</th>
+          <th>Figure Ref</th>
+          <th>DS DataType</th>
+          <th>Figure Legend Sentence</th>
+          <th>Data Sentence from Method</th>
+          <th>Dataset Permanent Link</th>
+        </tr>
+        if (reportData.sortedDatasetsInfos.reagents.length === 0)
+          <tr>
+            <td colspan=9 style="text-align: center;">None</td>
+          </tr>
+        else
+          each item, index in reportData.sortedDatasetsInfos.reagents
+            <tr>
+              <td style="text-align: center;"><input type="checkbox"></td>
+              <td>#{item.reuse ? "Yes" : "No"}</td>
+              <td>#{index+1}</td>
+              <td>#{item.name}</td>
+              <td></td>
+              <td>
+                a(href=item.type.url) #{item.type.label}
+              </td>
+              <td></td>
+              <td>
+                each sentence in item.sentences
+                 p #{sentence.text}
+              </td>
+              <td>#{item.DOI}</td>
+            </tr>
+      </table>
+    </section>
+  </body>
+</html>

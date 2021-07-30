@@ -1,0 +1,106 @@
+<!-- @format -->
+
+<div id="app">
+  <div class="notifications">
+    <div v-for="notification in notifications" :class="notification.class" role="alert">
+      <span v-html="notification.html"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="contour">
+    <div class="metadata container-fluid">
+      <div class="row">
+        <div class="col">
+          <div v-if="item.properties.metadata.publisher">
+            <label class="property">Publisher:</label>
+            <label class="value">{{ item.properties.metadata.publisher }}</label>
+          </div>
+          <div v-if="item.properties.metadata.date_published">
+            <label class="property">Publication date:</label>
+            <label class="value">{{ item.properties.metadata.date_published }}</label>
+          </div>
+          <div v-if="item.properties.metadata.doi">
+            <label class="property">DOI:</label>
+            <label class="value">{{ item.properties.metadata.doi }}</label>
+          </div>
+          <div v-if="item.properties.metadata.pmid">
+            <label class="property">PMID:</label>
+            <label class="value">{{ item.properties.metadata.pmid }}</label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div v-if="item.properties.metadata.submittingAuthor">
+            <label class="property">Submiting Author:</label>
+            <label class="value">{{ item.properties.metadata.submittingAuthor }}</label>
+          </div>
+          <div v-if="item.properties.metadata.submittingAuthorEmail">
+            <label class="property">Submiting Author Email:</label>
+            <label class="value">{{ item.properties.metadata.submittingAuthorEmail }}</label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div v-if="item.properties.metadata.articleTitle">
+            <label class="property">Article Title:</label>
+            <label class="value">{{ item.properties.metadata.articleTitle }}</label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div v-if="item.properties.metadata.authors">
+            <label class="property">Authors:</label>
+            <ul>
+              <li v-for="author in item.properties.metadata.authors" v-if="author.name">
+                <label class="value">{{ author.name }}</label>
+                <label v-if="author.email" class="bold">({{ author.email}})</label>
+                <ul>
+                  <li v-for="affiliation in author.affiliations">
+                    <label class="value">{{ affiliation }}</label>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="row buttons" v-if="user.role && user.role.key === 'administrator'">
+        <div class="col">
+          <button class="btn btn-primary" v-on:click.stop="reloadMetadata()" title="Validate metadata" ref="reloadMetadata">
+            | Reload Metadata
+          </button>
+          <span class="loader-md" ref="reloadMetadataLoader">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+        </div>
+      </div>
+      <div class="row buttons">
+        <div class="col">
+          <button class="btn btn-primary" v-on:click.stop="copy(buildDocumentURL({token: item.properties.token}))" title="Copy public URL to clipboard">
+            <i class="fas fa-link"></i>
+            | Get public URL of this document
+          </button>
+        </div>
+      </div>
+      <div class="row buttons">
+        <div class="col center">
+          <button class="btn btn-primary" v-on:click.stop="validateMetadata()" title="Validate metadata" ref="validateMetadata">
+            | This info is correct: Continue
+          </button>
+          <span class="loader-md" ref="validateMetadataLoader">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+      </div>
+        <div class="col center">
+          <a href="mailto:tim@dataseer.ai">
+            <button class="btn btn-primary" title="Send an email to DataSeer curator">
+              | Something went wrong: Contact the DataSeer curator
+            </button>
+          </a>
+      </div>
+    </div>
+  </div>
+</div>

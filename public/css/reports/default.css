@@ -1,0 +1,55 @@
+/*
+ * @prettier
+ */
+
+h2 {
+  color: #00BDFF;
+  font-weight: bold;
+}
+
+h3 {
+  color: black;
+  font-weight: bold;
+}
+
+label.key {
+  font-weight: bold;
+}
+
+section {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.bestPractice ul {
+  list-style-type:none;
+  padding-left: 0px;
+}
+
+.bestPractice ul li {
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 1em;
+  border:  1px solid black;
+  border-spacing: 0px;
+}
+
+table tr th,
+table tr td {
+  padding: 5px;
+  border:  1px solid black;
+  border-spacing: 0px;
+}
+
+table tr.none th,
+table tr.none td {
+  border:  1px solid transparent;
+  border-spacing: 0px;
+}
+
+table tr:hover td {
+  background-color: lightgray;
+}

@@ -1,45 +1,35 @@
 {
-  "services": {
-    "dataseer-wiki": {
-      "limit": 5,
-      "root": "https://wiki.dataseer.ai",
-      "dataTypes": "/doku.php?id=data_type"
-    },
-    "crisp": {
-      "id": "YOUR_CRISP_ID"
-    },
-    "userflow": {
-      "token": "YOUR_USERFLOW_TOKEN"
-    },
-    "mongodb": "mongodb://localhost:27017/app",
-    "dataseer-ml": "http://localhost/dataseer-ml/service",
-    "curator-email": "curator@mydomain.ai"
-  },
-  "upload": {
+  "mongodb": {
+    "url": "mongodb://localhost:27017/app",
     "default": {
-      "journal": "Organisation ID that will be used for upload from visitor"
+      "roles": {
+        "id": "6034497eaae2c62a0769d446"
+      },
+      "organizations": {
+        "id": "60344b69aae2c62a0769d449"
+      },
+      "accounts": {
+        "id": "6043e4087c8848496dde3708"
+      }
     }
   },
-  "emails": {
-    "upload": "info@dataseer.ai"
+  "fs": {
+    "root": "./data"
   },
-  "FileSystemRoot": "./data",
-  "root": "http://localhost:3000/",
-  "_reCAPTCHA_site_key_": {
-    "public": "publicKey",
-    "private": "privateKey"
-  },
-  "_reCAPTCHA_score_": {
-    "limit": 0.75,
-    "error": "Authentication failed (captcha score too low)"
+  "root": "http://localhost:3000",
+  "pathname": "",
+  "title": "Localhost",
+  "errors": {
+    "notFound": "404 Not Found",
+    "unauthorized": "Your current role does not grant you access to this part of the website",
+    "internalServerError": "The server encountered an internal error or misconfiguration and was unable to complete your request"
   },
   "tokens": {
     "api": {
       "expiresIn": 2592000
     },
     "documents": {
-      "expiresIn": 2592000,
-      "accountId": "Account ID that will be used for logs"
+      "expiresIn": 2592000
     },
     "resetPassword": {
       "expiresIn": 3600

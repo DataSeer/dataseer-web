@@ -1,191 +1,110 @@
-# Models documentation
+# Models documentations
 
 *[Main Documentation](../README.md#documentations)*
 
   - [Accounts](#accounts)
-  - [Organisations](#organisations)
+    - [Accounts Logs](#accounts-logs) 
+  - [Organizations](#organizations)
+    - [Organizations Logs](#organizations-logs)
   - [Roles](#roles)
+    - [Roles Logs](#roles-logs)
   - [Documents](#documents)
-    - [Documents Metadata](#documents-metadata)
-    - [Documents Datasets](#documents-datasets)
-    - [Documents Files](#documents-files)
     - [Documents Logs](#documents-logs)
+    - [Documents Files](#documents-files)
+    - [Documents Datasets](#documents-datasets)
+    - [Documents Metadata](#documents-metadata)
+  - [CRUD](#crud)
+  - [UPLOAD](#upload)
 
-Data in this app are structured like below:
-
-Note: all models have additionnal parmaters: `_id` and `__v`.
+   Note : all models have additionnal parameters: `_id` and `__v`
 
 ## Accounts
 
-*[Table of contents](#models-documentation)*
+*[Table of contents](#models-documentations)*
 
-Structure of data:
+Structure of data: [Accounts](../models/accountsjs)
 
-```js
-{
-  "username": { "type": String, "default": "" },
-  "hash": { "type": String, "default": "" }, // hidden property, you cannot get it with API
-  "salt": { "type": String, "default": "" }, // hidden property, you cannot get it with API
-  "fullname": { "type": String, "default": "" },
-  "role": { "type": mongoose.Schema.Types.ObjectId, "ref": "Roles", "required": true }, // refers to roles collection item
-  "organisation": { "type": mongoose.Schema.Types.ObjectId, "ref": "Organisations", "required": true }, // refers to organisations collection item
-  "tokens": { "api": { "type": String, "default": "" }, "resetPassword": { "type": String, "default": "" } } // tokens of user
-}
-```
+### Accounts Logs
 
-## Organisations
+*[Table of contents](#models-documentations)*
 
-*[Table of contents](#models-documentation)*
+This data represents the accounts logs
 
-Structure of data:
+Structure of data: [Accounts logs](../models/accounts.logs.js)
 
-```js
-{
-  "name": { "type": String, "default": "None", "index": true } // name of organisation
-}
-```
+## Organizations
+
+*[Table of contents](#models-documentations)*
+
+Structure of data: [Organizations](../models/organizations.js)
+
+### Organizations Logs
+
+*[Table of contents](#models-documentations)*
+
+This data represents the organizations logs
+
+Structure of data: [Organizations logs](../models/organizations.logs.js)
 
 ## Roles
 
-*[Table of contents](#models-documentation)*
+*[Table of contents](#models-documentations)*
 
-Structure of data:
+Structure of data: [Roles](../models/roles.js)
 
-```js
-{
-  "label": { "type": String, "default": "", "index": true }, // label of role
-  "weight": { "type": Number, "default": 0 } // weight of role
-}
-```
+### Roles Logs
+
+*[Table of contents](#models-documentations)*
+
+This data represents the roles logs
+
+Structure of data: [Roles logs](../models/roles.logs.js)
 
 ## Documents
 
-*[Table of contents](#models-documentation)*
+*[Table of contents](#models-documentations)*
 
-Structure of data:
+Structure of data: [Documents](../models/documents.js)
 
-```js
-{
-  "logs": [{ "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsLogs", "select": false }], // refers to documents.logs collection items
-  "pdf": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsFiles" }, // refers to documents.files collection item (pdf)
-  "tei": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsFiles" }, // refers to documents.files collection item (tei)
-  "files": [{ "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsFiles" }], // refers to documents.files collection items (all kind of files)
-  "metadata": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsMetadata" }, // refers to documents.metadata collection item
-  "organisation": { "type": mongoose.Schema.Types.ObjectId, "ref": "Organisations" }, // refers to organisations collection item
-  "datasets": { "type": mongoose.Schema.Types.ObjectId, "ref": "DocumentsDatasets" }, // refers to documents.datasets collection item
-  "status": { "type": String, "default": "" }, // status of given document
-  "isDataSeer": { "type": Boolean, "default": false }, // specify if it"s a dataseer document
-  "updated_at": { "type": Date, "default": Date.now }, // date of last update
-  "uploaded_at": { "type": Date, "default": Date.now }, // date of upload
-  "uploaded_by": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }, // refers to documents.datasets collection item
-  "upload_journal": { "type": mongoose.Schema.Types.ObjectId, "ref": "Organisations" }, // Which journal will be sent to
-  "already_assessed": { "type": Boolean, "default": false }, // This is a new version of an article DataSeer has already assessed
-  "owner": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }, // refers to documents.datasets collection item
-  "watchers": [{ "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }], // refers to documents.accounts collection item
-  "token": { "type": String, "default": "" } // refers to documents.datasets collection item
-}
-```
-
-### Documents Metadata
-
-*[Table of contents](#models-documentation)*
-
-Structure of data:
-
-```js
-// Authors
-{ name: String, email: String, affiliations: [String] }, { _id: false }
-
-// Metadata
-{
-  "document": { "type": mongoose.Schema.Types.ObjectId, ref: "Documents" }, // refers to documents collection (id of a given document)
-  "article_title": { "type": String, "default": "" }, // articleTitle
-  "journal": { "type": String, "default": "" }, // journal
-  "publisher": { "type": String, "default": "" }, // publisher
-  "date_published": { "type": String, "default": "" }, // date_published
-  "manuscript_id": { "type": String, "default": "" }, // manuscriptId
-  "submitting_author": { "type": String, "default": "" }, // submittingAuthor
-  "submitting_author_email": { "type": String, "default": "" }, // submittingAuthorEmail
-  "authors": [Author], // authors. Array(Object) => {"name": String, "affiliations": Array(String) }
-  "doi": { "type": String, "default": "" }, // doi
-  "pmid": { "type": String, "default": "" } // pmid
-}
-```
-
-### Documents Datasets
-
-*[Table of contents](#models-documentation)*
-
-Structure of data:
-
-```js
-// Sentence
-{
-  "id": { "type": String, "default": "" }, // Id of sentence
-  "text": { "type": String, "default": "" } // Text of sentence
-}
-
-// Dataset
-{
-  "id": { "type": String, "default": "" }, // id
-  "sentences": [Sentence], // sentence id
-  "cert": { "type": String, "default": "" }, // cert value (between 0 and 1)
-  "reuse": { "type": Boolean, "default": false }, // reuse property
-  "highlight": { "type": Boolean, "default": false }, // highlight property
-  "notification": { "type": String, "default": '' }, // notification property
-  "dataType": { "type": String, "default": "" }, // dataType
-  "subType": { "type": String, "default": "" }, //  subType
-  "description": { "type": String, "default": "" }, // description
-  "bestDataFormatForSharing": { "type": String, "default": "" }, // best data format for sharing
-  "mostSuitableRepositories": { "type": String, "default": "" }, // most suitable repositories
-  "DOI": { "type": String, "default": "" }, // DOI
-  "name": { "type": String, "default": "" }, // name
-  "comments": { "type": String, "default": "" }, // comments
-  "status": { "type": String, "default": "saved" } // text of sentence
-}
-
-// Datasets
-{
-  "document": { "type": mongoose.Schema.Types.ObjectId, "ref": "Documents" }, // refers to documents collection (id of a given document)
-  "deleted": [Dataset], // deleted datasets (Array of datasets)
-  "extracted": [Dataset], // extracted datasets (Array of datasets)
-  "current": [Dataset] // current datasets (Array of datasets)
-}
-```
-
-### Documents Files
-
-*[Table of contents](#models-documentation)*
-
-Structure of data:
-
-```js
-{
-  "document": { "type": mongoose.Schema.Types.ObjectId, "ref": "Documents" }, // refers to documents collection (id of a given document)
-  "updated_at": { "type": Date, "default": Date.now }, // date of last update
-  "uploaded_at": { "type": Date, "default": Date.now }, // date of upload
-  "uploaded_by": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts" }, // refers to documents.datasets collection item
-  "metadata": { "type": Object, "default": {} }, // metadata of file (could be whatever you want, you have to handle it by yourself). Usefull for PDF processed by dataseer-ml
-  "filename": { "type": String, "default": "" }, // filename of file
-  "path": { "type": String, "default": "", select: false }, // path of file
-  "encoding": { "type": String, "default": "" }, // encoding of file
-  "md5": { "type": String, "default": "" }, // md5 of file
-  "mimetype": { "type": String, "default": "" }, // mimetype of file
-  "size": { "type": Number, "default": 0 } // size of file
-}
-```
 
 ### Documents Logs
 
-*[Table of contents](#models-documentation)*
+*[Table of contents](#models-documentations)*
 
-Structure of data:
+This data represents the documents logs
 
-```js
-{
-  "document": { "type": mongoose.Schema.Types.ObjectId, "ref": "Documents", "required": true }, // refers to documents collection (id of a given document)
-  "user": { "type": mongoose.Schema.Types.ObjectId, "ref": "Accounts", "required": true }, // refers to accounts collection
-  "action": { "type": String, "required": true }, // description of modification that has been made to the document
-  "date": { "type": Date, "default": Date.now } // date of creation
-}
-```
+Structure of data: [Documents logs](../models/documents.logs.js)
+
+
+### Documents Files
+
+*[Table of contents](#models-documentations)*
+
+Structure of data: [Documents files](../models/documents.files.js)
+
+### Documents Datasets
+
+*[Table of contents](#models-documentations)*
+
+Structure of data: [Documents datasets](../models/documents.datasets.js)
+
+### Documents Metadata
+
+*[Table of contents](#models-documentations)*
+
+Structure of data: [Documents metadata](../models/documents.metadata.js)
+
+## CRUD
+
+*[Table of contents](#models-documentations)*
+
+Structure of data: [CRUD](../models/crud.js)
+
+## Upload
+
+*[Table of contents](#models-documentations)*
+
+This data represents the information concerning the upload
+
+Structure of data: [Upload](../models/schema/upload.js)
+

@@ -1,0 +1,58 @@
+/*
+ * @prettier
+ */
+
+html {
+  padding: 5px;
+}
+
+h1 {
+  color: #0c8dc3
+}
+
+h2 {
+  color: #34a270
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 1em;
+  border:  1px solid black;
+  border-spacing: 0px;
+}
+
+table tr th,
+table tr td {
+  padding: 5px;
+  border:  1px solid black;
+  border-spacing: 0px;
+}
+
+table tr:hover td {
+  background-color: lightgray;
+}
+
+section {
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  font-weight: bold;
+}
+
+.property {
+
+}
+
+.property > * {
+  display: inline-block;
+}
+
+.property > .key {
+  font-weight: bold;
+}
+
+.property > .value {
+  margin-left: 5px;
+}

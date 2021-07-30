@@ -1,0 +1,29 @@
+<!-- @format -->
+<div id="app">
+  <div class="notifications">
+    <div v-for="notification in notifications" :class="notification.class" role="alert">
+      <span v-html="notification.html"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="contour">
+    <div class="center reset-password">
+      <div><h1>Reset your password</h1></div>
+      <div>
+        <label>Current password</label><input class="form-control" type="password" name="current_password" v-model="current_password" placeholder="Enter your current password here"/>
+      </div>
+      <div>
+        <label>New password</label><input class="form-control" type="password" name="new_password" v-model="new_password" placeholder="Enter your new password here"/>
+      </div>
+      <div>
+        <label>Confirm new password</label><input class="form-control" type="password" name="confirm_new_password" v-model="confirm_new_password" placeholder="Confirm your new password here"/>
+      </div>
+      <div>
+        <button class="btn btn-lg btn-primary" v-on:click.stop="resetPassword($event)">Reset password</button>
+        <span class="loader-lg" ref="resetPassword">
+          <i class="fas fa-circle-notch fa-spin"></i>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

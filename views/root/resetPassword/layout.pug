@@ -1,0 +1,19 @@
+extends ../../shared/layout.pug
+
+block head
+  if(currentUser)
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/views/resetPassword/logged.css")
+  else 
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/views/resetPassword/unlogged.css")
+
+block app
+  if(currentUser)
+    include ./logged.pug
+  else 
+    include ./unlogged.pug
+
+block scripts
+  if(currentUser)
+    script(src=conf.pathname + "/views/resetPassword/logged.js")
+  else
+    script(src=conf.pathname + "/views/resetPassword/unlogged.js")

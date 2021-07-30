@@ -1,0 +1,99 @@
+<!-- @format -->
+
+if(currentUser && currentUser.role.key !== "visitor")
+  <nav>
+    img(class="navbar-logo" src=conf.pathname + "/public/img/logo.png")
+    <ul class="navbar-links">
+      if (currentUser.role.key === "administrator")
+        <li>
+          a(href=`${conf.root}/` class=`${currentRoute === '/' ? 'active' : '' }`) Home
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/accounts` class=`${currentRoute === '/backoffice/accounts' || (currentRoute === '/backoffice/accounts/:id' && !myAccount) ? 'active' : '' }`) Account(s)
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/documents` class=`${currentRoute === '/backoffice/documents' || currentRoute === '/backoffice/documents/:id' ? 'active' : '' }`) Document(s)
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/roles` class=`${currentRoute === '/backoffice/roles' || currentRoute === '/backoffice/roles/:id' ? 'active' : '' }`) Role(s)
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/organizations` class=`${currentRoute === '/backoffice/organizations' || currentRoute === '/backoffice/organizations/:id' ? 'active' : '' }`) Organization(s)
+        </li>
+        <li>
+          a(href=`${conf.root}/documents` class=`${currentRoute === '/documents' ? 'active' : '' }`) My Document(s)
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/accounts/${currentUser._id.toString()}` class=`${myAccount ? 'active' : '' }`) My account
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/upload` class=`${currentRoute === '/backoffice/upload' ? 'active' : '' }`) Upload
+        </li>
+        <li>
+          a(href=`${conf.root}/signout` class=``) Signout
+        </li>
+      else if (currentUser.role.key === "moderator")
+        <li>
+          a(href=`${conf.root}/backoffice/accounts` class=`${currentRoute === '/backoffice/accounts' || (currentRoute === '/backoffice/accounts/:id' && !myAccount) ? 'active' : '' }`) Account(s)
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/documents` class=`${currentRoute === '/backoffice/documents' || currentRoute === '/backoffice/documents/:id' ? 'active' : '' }`) Document(s)
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/organizations` class=`${currentRoute === '/backoffice/organizations' ? 'active' : '' }`) Organization(s)
+        </li>
+        <li>
+          a(href=`${conf.root}/documents` class=`${currentRoute === '/documents' ? 'active' : '' }`) My Document(s)
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/accounts/${currentUser._id.toString()}` class=`${myAccount ? 'active' : '' }`) My account
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/upload` class=`${currentRoute === '/backoffice/upload' ? 'active' : '' }`) Upload
+        </li>
+        <li>
+          a(href=`${conf.root}/signout` class=``) Signout
+        </li>
+      else if (currentUser.role.key === "standardUser")
+        <li>
+          a(href=`${conf.root}/documents` class=`${currentRoute === '/documents' ? 'active' : '' }`) My Document(s)
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/accounts/${currentUser._id.toString()}` class=`${myAccount ? 'active' : '' }`) My account
+        </li>
+        <li>
+          a(href=`${conf.root}/backoffice/upload` class=`${currentRoute === '/backoffice/upload' ? 'active' : '' }`) Upload
+        </li>
+        <li>
+          a(href=`${conf.root}/signout` class=``) Signout
+        </li>
+    </ul>
+    <span class="navbar-user">
+      <div>Connected as 
+          a(target="_blank" title=currentUser.organizations.map(function(item){return item.name;}).join(', '), href=`${conf.root}/backoffice/accounts/${currentUser._id}`) #{currentUser.username} (#{currentUser.role.label})
+      </div>
+    </span>
+  </nav>
+else
+  <nav>
+    img(class="navbar-logo" src=conf.pathname + "/public/img/logo.png")
+    <ul class="navbar-links">
+      <li>
+        a(href=`${conf.root}/signup` class=`${currentRoute === '/signup' ? 'active' : '' }`) Signup
+      </li>
+      <li>
+        a(href=`${conf.root}/signin` class=`${currentRoute === '/signin' ? 'active' : '' }`) Signin
+      </li>
+      <li>
+        a(href=`${conf.root}/forgotPassword` class=`${currentRoute === '/forgotPassword' ? 'active' : '' }`) Forgot Password
+      </li>
+    </ul>
+    <span class="navbar-user">
+      <div>
+        a(href=`${conf.root}/signup` class=`${currentRoute === '/signup' ? 'active' : '' }`) Signup
+        |  or 
+        a(href=`${conf.root}/signin` class=`${currentRoute === '/signin' ? 'active' : '' }`) Signin
+        |  to access DataSeer
+      </div>
+    </span>
+  </nav>

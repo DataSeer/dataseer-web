@@ -1,6 +1,4 @@
-# DataSeer-Web
-
-![Logo DataSeer](public/img/DataSeer-logo-75.png "Logo")
+# datasser-web
 
 ## Purposes
 
@@ -12,7 +10,7 @@ See the [dataseer-ml](https://github.com/dataseer/dataseer-ml) repository for th
 
 Supported article formats are PDF, docx, TEI, JATS/NLM, ScholarOne, and a large variety of additional publisher native XML formats: BMJ, Elsevier staging format, OUP, PNAS, RSC, Sage, Wiley, etc (see [Pub2TEI](https://github.com/kermitt2/Pub2TEI) for the list of native publisher XML format covered).
 
-## Contact and License
+## Contacts and licences
 
 Main authors and contact: [Nicolas Kieffer](https://github.com/NicolasKieffer), Patrice Lopez (<patrice.lopez@science-miner.com>).
 
@@ -22,179 +20,107 @@ dataseer-Web is distributed under [Apache2 license](https://www.apache.org/licen
 
 ## Description
 
-This application is composed of: 
+This appliaction is composed of :
+ - a REST API to interact with your data stored in MongoDB (localhost:3000/api)
+ - a default Front-End app requesting the REST API
 
-  - a GUI to manage your account & documents (`localhost:3000/`)
-  - a Back Office to manage all documents, users and organisations (`localhost:3000/backoffice/`)
-  - a REST API to interact with data stored in MongoDB (`localhost:3000/api`)
-
-Documents, Organisations & Users data are stored in MongoDB. Files (PDF, XML, etc) uploaded on dataseer-web are stored on the server FileSystem.
+Documents, Organizations and Accounts data are stored in MongoDB. Files (PDF, XML and TEI) uploaded on dataseer-web are stored in the server FileSystem
 
 ## Documentations
 
-  - [Install](#install)
-  - [Run](#run)
-  - [Save & Restore MongoDB](#save--restore-mongodb)
-  - [Dependencies](#dependencies)
-  - [Configuration](#configuration)
+- [Install](#install)
+- [Run](#run)
+- [Dependencies](#dependencies)
+- [Configurations](#configurations)
     - [Web Application configuration](#web-application-configuration)
-    - [SMTP configuration](#smtp-configuration)
     - [JWT Configuration](#jwt-configuration)
-  - [Models documentation](doc/MODELS.md#models-documentation)
-    - [Accounts](doc/MODELS.md#accounts)
-    - [Organisations](doc/MODELS.md#organisations)
-    - [Roles](doc/MODELS.md#roles)
-    - [Documents](doc/MODELS.md#documents)
-      - [Documents Metadata](doc/MODELS.md#documents-metadata)
-      - [Documents Datasets](doc/MODELS.md#documents-datasets)
+    - [Mails](#mails)
+- [Data Access](#data-access)
+- [Models documentations](doc/MODELS.md#models-documentation)
+  - [Accounts](doc/MODELS.md#accounts)
+  - [Organizations](doc/MODELS.md#organizations)
+  - [Roles](doc/MODELS.md#roles)
+  - [Documents](doc/MODELS.md#documents)
       - [Documents Files](doc/MODELS.md#documents-files)
+      - [Documents Uploads](doc/MODELS.md#documents-uploads)
       - [Documents Logs](doc/MODELS.md#documents-logs)
-  - [Web Application documentation](doc/WEBAPP.md#web-application-documentation)
-    - [Responses Status Codes](doc/WEBAPP.md#response-status-codes)
-    - [Credentials](doc/WEBAPP.md#credentials)
-    - [Results](doc/WEBAPP.md#results)
-    - [Available Routes](doc/WEBAPP.md#available-routes)
-  - [API documentation](doc/API.md#api-documentation)
-    - [Responses Status Codes](doc/API.md#response-status-codes)
-    - [Credentials](doc/API.md#credentials)
-    - [Results](doc/API.md#results)
-    - [Available Routes](doc/API.md#available-routes)
-
+      - [Documents Files Uploads](doc/MODELS.md#documents-files-uploads)
+- [API Documentation](doc/API.md)
+  - [Responses Status Codes](doc/API.md#response-status-codes)
+  - [Credentials](doc/API.md#credentials)
+  - [Results](doc/API.md#results)
+  - [Available Routes](doc/API.md#available-routes)
 
 ## Install
 
 *[Table of contents](#documentations)*
 
-Run this command to install dataseer-web app.
-
-``npm i``
+```js
+npm i
+// NodeJS V16.0
+```
 
 ## Run
-
 *[Table of contents](#documentations)*
 
-**Important: NodeJS version 10 (or greater) needed**
-
-Run this command to start dataseer-web app instance (that will be restarted in case of crash).
-
-``npm start``
-
-Run this command to stop dataseer-web app instance.
-
-``npm stop``
-
-Run this command to list forever app.
-
-``npm run list``
-
-Note: [forever](https://www.npmjs.com/package/forever) is used to handle restart of the app.
+```js
+npm run // Display list of available options
+npm start // Start headless process with forever (production)
+npm start-dev // Start process (development)
+npm stop // Stop headless process
+```
 
 ## Dependencies
 
 *[Table of contents](#documentations)*
 
 Application requires:
+- an instance of mongoDB (by default: running on port <code>27017</code> with an <code>app</code> database)
 
-  - an instance of mongoDB (by default: running on port `27017`, with an `app` database).
-  - an instance of dataseer-ml application (by default: running on `http://localhost/dataseer-ml/service`).
-
-## Save & Restore MongoDB
-
-MongoDB database can be save with script ./db-save/save.sh (using cron):
-
-```bash
-crontab -e
-# this one will enable email notification
-0 0 * * * /path/to/dataseer-web/db-save/save.sh
-# this one will disable email notification
-0 0 * * * /path/to/dataseer-web/db-save/save.sh > /dev/null 2>&1
-```
-
-It will run ``mongodump`` every day (at 00:00). To restore data, go to the desired save directory & run ``mongorestore``. Files will be available in data.tar archive.
-
-Note: There is one directory per day (1/ is used for monday, 2/ is used for tuesday, etc). If you want to restore data from the last friday, you must use the directory **./db-save/5/**.
-
-## Configuration
+## Configurations
 
 ### Web Application Configuration
 
 *[Table of contents](#documentations)*
 
-You must create file `conf/conf.json` (based on *[default configuration file](/conf/conf.default.json)*) and fill it with with your data:
+You must create some configurations files (based on `*.default` files) and fill them with your data :
 
-```js
-{
-  "services": {
-    "dataseer-wiki": {
-      "limit": 5, // number of URLs processed in parallel 
-      "root": "https://wiki.dataseer.ai",
-      "dataTypes": "/doku.php?id=data_type"
-    },
-    "crisp": {
-      "id": "YOUR_CRISP_ID"
-    },
-    "userflow": {
-      "token": "YOUR_USERFLOW_TOKEN"
-    },
-    "mongodb": "mongodb://localhost:27017/app",
-    "dataseer-ml": "http://localhost/dataseer-ml/service",
-    "curator-email": "curator@mydomain.ai"
-  },
-  "emails": {
-    "upload": "info@dataseer.ai"
-  },
-  "FileSystemRoot": "./data",
-  "root": "http://localhost:3000/",
-  "_reCAPTCHA_site_key_": {
-    "public": "publicKey",
-    "private": "privateKey"
-  },
-  "_reCAPTCHA_score_": {
-    "limit": 0.75,
-    "error": "Authentication failed (captcha score too low)"
-  },
-  "tokens": {
-    "api": {
-      "expiresIn": 2592000 // 60 days
-    },
-    "documents": {
-      "expiresIn": 2592000, // 60 days
-      "accountId": "Account ID that will be used for logs"
-    },
-    "resetPassword": {
-      "expiresIn": 3600 // 1 hour
-    },
-    "automaticAccountCreation": {
-      "expiresIn": 604800 // 7 days
-    }
-  }
-}
-```
-
-### SMTP Configuration
-
-*[Table of contents](#documentations)*
-
-Application requires a SMTP server to send some emails (resest password, API token, automatique account creation)
-
-You must create file `conf/smtp.conf.json` (based on *[default configuration file](/conf/smtp.conf.default.json)*) and fill it with your data:
-
-```js
-{
-  "host": "smtp.default.com",
-  "port": 587,
-  "auth": {
-    "user": "user@default.com",
-    "pass": "pass"
-  },
-  "from": "\"Fred Foo\" <foo@example.com>"
-}
-```
+- <code>conf/conf.json</code> : global app configuration
+- <code>conf/crisp.json</code> : crisp configuration
+- <code>conf/recaptcha.json</code> : recaptcha configuration
+- <code>conf/smtp.json</code> : smtp configuration
+- <code>conf/userflow.json</code> : userflow configuration
+- <code>conf/services/dataseer-ml.json</code> : dataseer-ml configuration
+- <code>conf/services/dataseer-wiki.json</code> : dataseer-wiki configuration
+- <code>conf/services/repoRecommender.json</code> : repoRecommender configuration
+- <code>conf/services/softcite.json</code> : softcite configuration
 
 ### JWT Configuration
 
 *[Table of contents](#documentations)*
 
-Application requires a private key to create JSON Web Token.
+This application require a private key to create JSON Web Token
+You must create file conf/private.key and fill it with a random string (a long random string is strongly recommended)
 
-You must create file `conf/private.key` (based on *[default private key file](/conf/private.key.default)*) and fill it with a random string.
+### Mails
+
+*[Table of contents](#documentations)*
+
+All the files concerning the mails are in the `conf/mails` directory.
+
+### Data Access
+
+*[Table of contents](#documentations)*
+
+Your role defines which data you can access.
+
+  - An **unauthenticated user** can only access a **public URL**.
+  - A **Standard User** can only access his own data: document(s), organization(s) & account.
+  - An **Annotator** (also called **Moderator** in source code) can access all the data of his organizations: document(s), organization(s) and account(s).
+  - A **Curator** (also called **Administrator** in source code) can access all the data of all organizations: document(s), organization(s) and account(s).
+
+
+
+
+
+

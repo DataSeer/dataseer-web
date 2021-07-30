@@ -1,0 +1,23 @@
+/*
+ * @prettier
+ */
+
+.metadata {
+  width: 100%;
+  max-width: 100%;
+  margin: 15px;
+  padding: 15px;
+}
+
+.metadata label.property {
+  font-weight: bold;
+}
+
+.buttons {
+  margin-top: 15px;
+}
+
+.metadata button > svg,
+.metadata button > i {
+  margin-right: 5px;
+}

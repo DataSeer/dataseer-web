@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-# current directory
+# current directory
 DIRNAME=$(dirname "$0")
-# current day
+# current day
 DAY=$(date +%u)
 
 # go to save directory
 cd $DIRNAME
 cd $DAY;
 
-# erase previous save
+# erase previous save
 rm -rf dump/
 
-# save mongodb
+# save mongodb
 mongodump;
 
-# save File System
+# save File System
 tar -cvf data.tar ../../data/

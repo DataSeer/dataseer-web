@@ -1,0 +1,11 @@
+extends ../../shared/layout.pug
+
+block head
+  link(rel="stylesheet" type="text/css" href=conf.pathname + "/views/signup/app.css")
+
+block app
+  include ./app.pug
+
+block scripts
+  script(src=conf.pathname + "/views/signup/app.js")
+  script(src="https://www.google.com/recaptcha/api.js?render=" + _reCAPTCHA_site_key_)

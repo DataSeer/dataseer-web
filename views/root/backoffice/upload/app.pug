@@ -1,0 +1,131 @@
+<!-- @format -->
+
+<div id="app">
+  <div class="notifications">
+    <div v-for="notification in notifications" :class="notification.class" role="alert">
+      <span v-html="notification.html"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="contour">
+    <div class="upload container-fluid">
+      <div class="row">
+        <div class="col">
+            <span class="sub">Supported formats are PDF, JATS/NLM, TEI XML, publisher XML formats for ScholarOne, BMJ, Elsevier (staging format), NPG (Nature), OUP, PNAS, RSC, Sage, Springer and Wiley.</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="file">Upload your file here:</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <input id="file" class="form-control" type="file" ref="file" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="attached_files">Upload any additional files (you can select more than one):</label>
+          <span class="sub">All formats are supported</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <input id="attached_files" class="form-control" type="file" ref="attached_files" multiple="true" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label>Which journal(s) is this file from:</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="select-scrollable">
+            <div class="center">
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(organizations, true)">
+                <i class="far fa-check-square"></i>
+              </button>
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(organizations, false)">
+                <i class="far fa-square"></i>
+              </button>
+            </div>
+            <div class="center">
+              <ul class="list">
+                <li v-for="organization in organizations">
+                  <label><input type="checkbox" v-model="organization.selected" />
+                  | {{ organization.name }}
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-if="user.role && user.role.key !== 'standardUser'" class="row">
+        <div class="col">
+          <label>Owner:</label>
+          <select class="custom-select form-select" name="accounts" v-model="owner" @change="selectOrganizations()">
+            <option v-for="account in accounts" :value="account._id">
+            | {{ account.username }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div v-if="user.role && user.role.key !== 'standardUser'" class="row">
+        <div class="col">
+          <div title="Select the document visibility">
+            <label for="dataseerML">
+              <input id="dataseerML" type="checkbox" v-model="dataseerML" />
+              | Identify datasets automatically
+            </label>
+            <span v-if="dataseerML" class="sub">DataSeer ML will processed this document</span>
+            <span v-if="!dataseerML" class="sub">DataSeer ML will not processed this document</span>
+          </div>
+        </div>
+      </div>
+      <div v-if="user.role && user.role.key !== 'standardUser'" class="row">
+        <div class="col">
+          <div title="Select the document visibility">
+            <label for="visible">
+              <input id="visible" type="checkbox" v-model="visible" />
+              | Visible
+            </label>
+            <span v-if="visible" class="sub">Only Owner, Annotator(s) and Curator(s) will be able to see this document</span>
+            <span v-if="!visible" class="sub">All users will be able to see this document</span>
+          </div>
+        </div>
+      </div>
+      <div v-if="user.role && user.role.key === 'administrator'" class="row">
+        <div class="col">
+          <div title="Select the document lock">
+            <label for="locked">
+              <input id="locked" type="checkbox" v-model="locked" />
+              | Locked
+            </label>
+            <span v-if="locked" class="sub">Only Annotator(s) and Curator(s) will be able to update this document</span>
+            <span v-if="!locked" class="sub">All users will be able to update this document</span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <button class="btn btn-lg btn-primary" v-on:click.stop="uploadFiles" ref="upload">Upload document</button>
+          <span class="loader-lg" ref="uploadLoader">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="contour disclaimer">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col">
+          <div>DataSeer is powered by Machine Learning, which means it’s always learning and improving.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

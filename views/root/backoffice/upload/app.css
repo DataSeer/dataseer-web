@@ -1,0 +1,45 @@
+/*
+ * @prettier
+ */
+
+.upload {
+  max-width: 100%;
+}
+
+.upload .select-scrollable {
+  max-width: 400px;
+  text-align: left;
+}
+
+.upload select,
+.upload input {
+  width: auto;
+  display: inline-block;
+}
+
+.upload input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+.upload label {
+  cursor: pointer;
+}
+
+.upload span.sub {
+  display: block;
+  font-style: italic;
+}
+
+.upload .row > .col > label,
+.upload .row > .col > div > label {
+  font-weight: bold;
+}
+
+.disclaimer {
+  margin-top: 15px;
+  font-style: italic;
+}
+
+.disclaimer > .container-fluid {
+  max-width: 100%;
+}

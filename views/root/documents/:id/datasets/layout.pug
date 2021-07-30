@@ -1,0 +1,75 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>#{conf.title}</title>
+    link(rel="icon" type="image/png" href=conf.pathname + "/public/favicon.ico")
+    <!-- include of global css dependencies -->
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/css/style.css")
+    <!-- include of app component css dependencies -->
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/views/documents/:id/datasets/app.css")
+    <!-- other services -->
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/css/dependencies/cookieconsent.min.css")
+    <!-- include old dependencies -->
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/css/datasets/font-awesome.min.css")
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/css/datasets/bootstrap.min.css")
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/css/datasets/style.css")
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/css/datasets/tei.css")
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/css/datasets/datasets.css")
+    link(rel="stylesheet" type="text/css" href=conf.pathname + "/public/js/datasets/pdf.js/build/components/pdf_viewer.css")
+    <!--  -->
+  </head>
+  <body>
+    include ../../../../shared/navbar.pug
+    <!-- include of app component -->
+    include ./app.pug
+    include ../../../../shared/footer.pug
+    <!-- include old HTML elements -->
+    if currentUser
+      div(id='user_id' class='data' value=(currentUser._id))
+      div(id='user_username' class='data' value=(currentUser.username))
+      div(id='user_role' class='data' value=(currentUser.role.key))
+    div(id='document.id' class='data' value=(document._id))
+    include ./lib/modal.pug
+    div#loading-loop
+      div.loader
+      div.infos
+        div.top
+        div.sub
+    <!--  -->
+    <!-- include of global js dependencies -->
+    script(src=conf.pathname + "/public/js/dependencies/vue.min.js")
+    script(src=conf.pathname + "/public/js/dependencies/font-awesome.min.js")
+    script(src=conf.pathname + "/public/js/dependencies/jquery.min.js")
+    script(src=conf.pathname + "/public/js/dependencies/lodash.min.js")
+    script(src=conf.pathname + "/public/js/dependencies/async.min.js")
+    script(src=conf.pathname + "/public/js/conf/conf.js")
+    script(src=conf.pathname + "/public/js/lib/url.js")
+    script(src=conf.pathname + "/public/js/lib/api.js")
+    script(src=conf.pathname + "/public/js/lib/accounts.js")
+    script(src=conf.pathname + "/public/js/lib/notifications.js")
+    script(src=conf.pathname + "/public/js/lib/dataHandler.js")
+    script(src=conf.pathname + "/public/js/lib/params.js")
+    script(src=conf.pathname + "/public/js/lib/clipboard.js")
+    script(src=conf.pathname + "/public/js/dependencies/url-join.js")
+    <!-- include old dependencies -->
+    script(src=conf.pathname + "/public/js/datasets/bootstrap.min.js")
+    <script href="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    script(src=conf.pathname + "/public/js/datasets/randomColor.min.js")
+    script(src=conf.pathname + "/public/js/datasets/colors.js")
+    script(src=conf.pathname + "/public/js/datasets/documentView.js")
+    script(src=conf.pathname + "/public/js/datasets/datasetForm.js")
+    script(src=conf.pathname + "/public/js/datasets/datasetsList.js")
+    script(src=conf.pathname + "/public/js/datasets/documentHandler.js")
+    script(src=conf.pathname + "/public/js/datasets/pdf.js/build/generic/build/pdf.js")
+    script(src=conf.pathname + "/public/js/datasets/pdf.js/build/generic/build/pdf.worker.js")
+    script(src=conf.pathname + "/public/js/datasets/pdfViewer.js")
+    script(src=conf.pathname + "/public/js/datasets/xmlViewer.js")
+    script(src=conf.pathname + "/public/js/datasets/datasets.js")
+    <!--  -->
+    <!-- include of app component js dependencies -->
+    script(src=conf.pathname + "/views/documents/:id/datasets/app.js")
+  </body>
+</html>

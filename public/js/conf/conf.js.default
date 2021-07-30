@@ -1,0 +1,52 @@
+/*
+ * @prettier
+ */
+
+'use strict';
+
+const CONF = {
+  root: "http://localhost:3000",
+  reCAPTCHA_site_key: `reCAPTCHA_site_key`,
+  default: {
+    role: `6034497eaae2c62a0769d446`,
+    organizations: [`60344b69aae2c62a0769d449`],
+    properties: {
+      accounts: {
+        visible: true,
+        disabled: false
+      },
+      documents: {
+        visible: true,
+        locked: false
+      },
+      organizations: {
+        visible: true
+      },
+      roles: {}
+    },
+    params: {
+      search: {
+        accounts: {
+          skip: 0,
+          limit: 100,
+          sort: `desc`
+        },
+        documents: {
+          skip: 0,
+          limit: 50,
+          sort: `asc`
+        },
+        organizations: {
+          skip: 0,
+          limit: 20,
+          sort: `desc`
+        },
+        roles: {
+          skip: 0,
+          limit: 10,
+          sort: `desc`
+        }
+      }
+    }
+  }
+};

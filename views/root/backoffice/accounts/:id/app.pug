@@ -1,0 +1,100 @@
+<!-- @format -->
+
+<div id="app">
+  <div class="notifications">
+    <div v-for="notification in notifications" :class="notification.class" role="alert">
+      <span v-html="notification.html"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="contour">
+    <div class="center container-fluid item">
+      <div class="row">
+        <div class="col">
+          <h1>Manage my account</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="form container-fluid">
+            <div class="row align-items-center">
+              <div class="col">
+                <div>
+                  <label for="username" class="bold">Username</label>
+                  <input id="username" class="form-control input" type="text" :value="item.properties.username" disabled>
+                </div>
+                <div>
+                  <label for="fullname" class="bold">Fullname</label>
+                  <input id="fullname" class="form-control input" type="text" v-model="item.properties.fullname">
+                </div>
+              </div>
+              <div class="col">
+                <label for="role" class="bold" label>Role</label>
+                <select id="role" class="custom-select form-select select" v-model="item.properties.role._id">
+                  <option v-for="role in item.dependencies.roles" :value="role._id" v-if="user.role && role.weight <= user.role.weight" >
+                  | {{ role.label }}
+                  </option>
+                </select>
+              </div>
+              <div class="col">
+                <label class="bold">Organizations</label>
+                <div class="select-scrollable">
+                  <div class="center">
+                    <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(item.properties.organizations, true)">
+                      <i class="far fa-check-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(item.properties.organizations, false)">
+                      <i class="far fa-square"></i>
+                    </button>  
+                  </div>
+                  <div class="center">
+                    <ul class="list">
+                      <li v-for="organization in item.properties.organizations">
+                        <label><input type="checkbox" v-model="organization.selected" />
+                        | {{ organization.name }}
+                        </label>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="form-check form-switch">
+                  <label for="visible" class="property bold">Visible</label>
+                  <input id="visible" class="form-check-input" type="checkbox" v-model="item.properties.visible" />
+                </div>
+                <div v-if="user.role && user.role.key !== 'standardUser' && user.role.key !== 'visitor'" class="form-check form-switch">
+                  <label for="disabled" class="property bold">Disabled</label>
+                  <input id="disabled" class="form-check-input" type="checkbox" v-model="item.properties.disabled" />
+                </div>
+              </div>
+              <div class="col">
+                <button v-if="typeof item.properties.tokens.api !== 'undefined'" v-on:click.stop="copyToken(item.properties.tokens.api)" class="btn btn-md btn-primary" title="Copy the token to clipboard">
+                | Copy token to clipboard
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <button class="btn btn-lg btn-primary" v-on:click.stop="updateItem(event)" ref="save">
+              | Save
+              </button>
+              <span class="loader-lg" ref="signin" ref="saveLoader">
+                <i class="fas fa-circle-notch fa-spin"></i>
+              </span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <span>
+                | Forgot your password? 
+                a(href=`${conf.root}/forgotPassword`) Reset it here
+              </span>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
+

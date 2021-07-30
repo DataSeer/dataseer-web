@@ -1,0 +1,35 @@
+<!-- @format -->
+
+<div id="app">
+  <div class="notifications">
+    <div v-for="notification in notifications" :class="notification.class" role="alert">
+      <span v-html="notification.html"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="contour">
+    <div class="center forgot-password">
+      <div><h1>Forgot password</h1></div>
+      <div>
+        <label>Forgot password ? Reset it now.</label>
+        <input class="form-control" type="text" name="username" v-model="username" placeholder="Enter your eamil address here" />
+      </div>
+      <div>
+        <button class="btn btn-lg btn-primary" v-on:click.stop="forgotPassword($event)">Send mail</button>
+        <span class="loader-lg" ref="forgotPassword">
+          <i class="fas fa-circle-notch fa-spin"></i>
+        </span>
+      </div>
+      <div class="bottom-links">
+        <span>
+          | Already have an account? 
+          a(href=`${conf.root}/signin`) Sign in here
+        </span>
+        <span>
+          | No account yet? 
+          a(href=`${conf.root}/signup`) Open one here
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

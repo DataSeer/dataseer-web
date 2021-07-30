@@ -1,0 +1,109 @@
+<!-- @format -->
+
+<div id="app">
+  <div class="notifications">
+    <div v-for="notification in notifications" :class="notification.class" role="alert">
+      <span v-html="notification.html"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="contour">
+    <div class="center signup container-fluid">
+      <div class="row">
+        <div class="col">
+          <h1>Sign up</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="fullname">Fullname</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <input id="fullname" class="form-control" type="text" name="fullname" v-model="fullname" placeholder="Fullname" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="username">Email address</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <input id="username" class="form-control" type="text" name="username" v-model="username" placeholder="Email address" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="password">Password</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <input id="password" class="form-control" type="password" name="password" v-model="password" placeholder="Password" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="confirm_password">Confirm password</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <input id="confirm_password" class="form-control" type="password" name="confirm_password" v-model="confirm_password" placeholder="Confirm password" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label>Select your organization(s):</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="select-scrollable">
+            <div class="center">
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(organizations, true)">
+                <i class="far fa-check-square"></i>
+              </button>
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(organizations, false)">
+                <i class="far fa-square"></i>
+              </button>
+            </div>
+            <div class="center">
+              <ul class="list">
+                <li  v-for="organization in organizations">
+                  <label>
+                    <input type="checkbox" v-model="organization.selected" />
+                    | {{ organization.name }}
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row action">
+        <div class="col">
+          <button class="btn btn-lg btn-primary" v-on:click.stop="submit($event)">Sign up to DataSeer</button>
+          <span class="loader-lg" ref="signup">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+        </div>
+      </div>
+      <div class="row bottom-links">
+        <div class="col">
+          <span>
+            | Already have an account? 
+            a(href=`${conf.root}/signin`) Sign in here
+          </span>
+          <span>
+            | Forgot your password? 
+            a(href=`${conf.root}/forgotPassword`) Reset it here
+          </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
