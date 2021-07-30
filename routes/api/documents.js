@@ -631,8 +631,8 @@ router.get(`/:id/reports/html/default`, function (req, res, next) {
     return res.render(`reports/html/default.pug`, {
       links: {
         publicURL: `${Url.build(`/documents/${req.params.id}`, { token: data.doc.token })}`,
-        TEI: `${Url.build(`/documents/${req.params.id}/tei/content`, { token: data.doc.token })}`,
-        PDF: `${Url.build(`/documents/${req.params.id}/pdf/content`, { token: data.doc.token })}`
+        TEI: `${Url.build(`api/documents/${req.params.id}/tei/content`, { token: data.doc.token })}`,
+        PDF: `${Url.build(`api/documents/${req.params.id}/pdf/content`, { token: data.doc.token })}`
       },
       reportData: data,
       currentUser: req.user,
