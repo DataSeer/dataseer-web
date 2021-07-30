@@ -4,23 +4,57 @@
 
 'use strict';
 
-const mongoose = require('mongoose');
+const mongoose = require(`mongoose`);
 
-let Schema = new mongoose.Schema(
+const uploadSchema = require(`./schemas/upload.js`);
+
+const Schema = new mongoose.Schema(
   {
-    document: { type: mongoose.Schema.Types.ObjectId, ref: 'Documents' }, // refers to documents collection (id of a given document)
-    updated_at: { type: Date, default: Date.now }, // date of last update
-    uploaded_at: { type: Date, default: Date.now }, // date of upload
-    uploaded_by: { type: mongoose.Schema.Types.ObjectId, ref: 'Accounts' }, // refers to documents.datasets collection item
+    document: { type: mongoose.Schema.Types.ObjectId, ref: `Documents` }, // refers to documents collection (id of a given document)
     metadata: { type: Object, default: {} }, // metadata of file (could be whatever you want, you have to handle it by yourself). Usefull for PDF processed by dataseer-ml
-    filename: { type: String, default: '' }, // filename of file
-    path: { type: String, default: '', select: false }, // path of file
-    encoding: { type: String, default: '' }, // encoding of file
-    md5: { type: String, default: '' }, // md5 of file
-    mimetype: { type: String, default: '' }, // mimetype of file
-    size: { type: Number, default: 0 } // size of file
+    filename: { type: String, default: `` }, // filename (on the FileSystem)
+    name: { type: String, default: `` },
+    path: { type: String, default: ``, select: false }, // path of file (on the FileSystem)
+    encoding: { type: String, default: `` }, // encoding of file
+    md5: { type: String, default: `` }, // md5 of file
+    mimetype: { type: String, default: `` }, // mimetype of file
+    size: { type: Number, default: 0 }, // size of file
+    upload: uploadSchema
   },
-  { minimize: false }
+  { minimize: false, timestamps: { createdAt: `createdAt`, updatedAt: `updatedAt` } }
 );
 
-module.exports = mongoose.model('DocumentsFiles', Schema, 'documents.files');
+Schema.pre(/^find/, function (next) {
+  this.populate(`organizations`);
+  this.populate(`upload.account`, `-tokens -hash -salt`);
+  this.populate(`upload.organization`);
+  return next();
+});
+
+const versionHook = function () {
+  const update = this.getUpdate();
+  if (update.__v != null) {
+    delete update.__v;
+  }
+  const keys = [`$set`, `$setOnInsert`];
+  for (const key of keys) {
+    if (update[key] != null && update[key].__v != null) {
+      delete update[key].__v;
+      if (Object.keys(update[key]).length === 0) {
+        delete update[key];
+      }
+    }
+  }
+  update.$inc = update.$inc || {};
+  update.$inc.__v = 1;
+};
+
+Schema.pre(`save`, function (next) {
+  this.increment();
+  return next();
+});
+
+Schema.pre(`findOneAndUpdate`, versionHook);
+Schema.pre(`update`, versionHook);
+
+module.exports = mongoose.model(`DocumentsFiles`, Schema, `documents.files`);

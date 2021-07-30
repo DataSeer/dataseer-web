@@ -1,0 +1,31 @@
+/*
+ * @prettier
+ */
+
+.signup > .row > .col > label {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#username,
+#password,
+#fullname,
+#confirm_password {
+  display: inline-block;
+  width: 40%;
+}
+
+.action {
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
+.bottom-links {
+  margin-top: 25px;
+  margin-bottom: 15px;
+}
+
+.bottom-links span {
+  display: block;
+  margin-bottom: 5px;
+}

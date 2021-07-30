@@ -1,0 +1,28 @@
+/*
+ * @prettier
+ */
+
+iframe {
+  width: 100%;
+}
+
+button > i,
+button > svg {
+  margin-right: 5px;
+}
+
+.buttons {
+  margin-bottom: 20px;
+}
+
+.buttons button {
+  margin-right: 15px;
+}
+
+.buttons .left {
+  text-align: left;  
+}
+
+.buttons .right {
+  text-align: right;
+}

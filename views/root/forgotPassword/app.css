@@ -1,0 +1,14 @@
+/*
+ * @prettier
+ */
+
+.bottom-links > span {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.reset-password input[type='text'],
+.reset-password input[type='password'] {
+  width: 18.75rem;
+  margin-bottom: 20px;
+}

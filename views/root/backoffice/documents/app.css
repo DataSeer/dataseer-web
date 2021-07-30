@@ -1,0 +1,11 @@
+/*
+ * @prettier
+ */
+.add-item {
+  max-width: 16rem !important;
+}
+
+.input-file,
+.input-select {
+  width: 350px;
+}

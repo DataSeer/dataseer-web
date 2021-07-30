@@ -1,0 +1,22 @@
+/*
+ * @prettier
+ */
+
+#app .contour {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  background-color: transparent;
+}
+
+#publicUrl {
+  position: absolute;
+  left: 230px;
+  top: 12px;
+}
+
+#pdfUrl {
+  position: absolute;
+  left: 350px;
+  top: 12px;
+}

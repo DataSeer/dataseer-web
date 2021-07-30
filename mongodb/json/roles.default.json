@@ -1,0 +1,38 @@
+[
+  {
+    "_id": { "$oid": "6034497eaae2c62a0769d445" },
+    "key": "visitor",
+    "label": "Visitor",
+    "weight": 1,
+    "createdAt": "2021-07-15T12:03:38.467+00:00",
+    "updatedAt": "2021-07-15T12:03:38.467+00:00",
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "6034497eaae2c62a0769d446" },
+    "key": "standardUser",
+    "label": "Standard User",
+    "weight": 10,
+    "createdAt": "2021-07-15T12:03:38.467+00:00",
+    "updatedAt": "2021-07-15T12:03:38.467+00:00",
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "60344996aae2c62a0769d447" },
+    "key": "moderator",
+    "label": "Annotator",
+    "weight": 100,
+    "createdAt": "2021-07-15T12:03:38.467+00:00",
+    "updatedAt": "2021-07-15T12:03:38.467+00:00",
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "603449a9aae2c62a0769d448" },
+    "key": "administrator",
+    "label": "Curator",
+    "weight": 1000,
+    "createdAt": "2021-07-15T12:03:38.467+00:00",
+    "updatedAt": "2021-07-15T12:03:38.467+00:00",
+    "__v": 0
+  }
+]

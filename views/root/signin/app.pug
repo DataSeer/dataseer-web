@@ -1,0 +1,60 @@
+<!-- @format -->
+<!-- @format -->
+
+<div id="app">
+  <div class="notifications">
+    <div v-for="notification in notifications" :class="notification.class" role="alert">
+      <span v-html="notification.html"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="contour">
+    <div class="center signin container-fluid">
+      <div class="row">
+        <div class="col">
+          <h1>Sign in</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="username">Email address</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <input id="username" class="form-control" type="text" name="username" v-model="username" placeholder="Email address" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <label for="password">Password</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <input id="password" class="form-control" type="password" name="password" v-model="password" placeholder="Password" />
+        </div>
+      </div>
+      <div class="row action">
+        <div class="col">
+          <button class="btn btn-lg btn-primary" v-on:click.stop="submit($event)" @keyup.enter="submit(event)">Sign in to DataSeer</button>
+          <span class="loader-lg" ref="signin">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+        </div>
+      </div>
+      <div class="row bottom-links">
+        <div class="col">
+          <span>
+            | No account yet? 
+            a(href=`${conf.root}/signup`) Open one here
+          </span>
+          <span>
+            | Forgot your password? 
+            a(href=`${conf.root}/forgotPassword`) Reset it here
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

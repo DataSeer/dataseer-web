@@ -4,69 +4,126 @@
 
 'use strict';
 
-const express = require('express'),
-  router = express.Router(),
-  fs = require('fs');
+const express = require(`express`);
+const router = express.Router();
 
-const DocumentsFiles = require('../../models/documents.files.js');
+const AccountsManager = require(`../../lib/accounts.js`);
+const Params = require(`../../lib/params.js`);
 
-const JWT = require('../../lib/jwt.js'),
-  AccountsManager = require('../../lib/accounts.js');
+const DocumentsFilesController = require(`../../controllers/api/documents.files.js`);
 
-const DocumentsFilesController = require('../../controllers/documents.files.js');
+const conf = require(`../../conf/conf.json`);
 
-const conf = require('../../conf/conf.json');
-
-/* GET file of document */
-router.get('/:id', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role does not grant you access to this part of the website');
-  // Init transaction
-  let transaction = DocumentsFiles.findOne({ _id: req.params.id }).select('+path'); // path is not returned by default;
-  // Execute transaction
-  return transaction.exec(function (err, file) {
+/* GET file by ID */
+router.get(`/:id`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    data: {
+      id: req.params.id
+    },
+    user: req.user
+  };
+  return DocumentsFilesController.readFile(opts, function (err, file) {
     if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else if (!file) return res.json({ 'err': true, 'res': null, 'msg': 'file not found' });
-    let stream = fs.createReadStream(file.path),
-      stat = fs.statSync(file.path);
-    res.setHeader('Content-Length', stat.size);
-    res.setHeader('Content-Type', file.mimetype);
-    return stream.pipe(res);
+    if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
+    res.setHeader(`Content-Type`, file.mimetype);
+    return res.send(file.data);
   });
 });
 
-/* GET file of document with data (buffer) */
-router.get('/:id/buffer', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role does not grant you access to this part of the website');
-  // Init transaction
-  let transaction = DocumentsFiles.findOne({ _id: req.params.id }).lean(); // path is not returned by default;
-  // Execute transaction
-  return transaction.exec(function (err, file) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else if (!file) return res.json({ 'err': true, 'res': null, 'msg': 'file not found' });
-    return DocumentsFilesController.readFile(req.params.id, function (err, data) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      let result = Object.assign({}, file, { data: Buffer.from(data, file.encoding) });
-      return res.json({ 'err': false, 'res': result });
+/* Update file BY ID */
+router.put(`/:id`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    data: {
+      _id: req.params.id,
+      name: Params.convertToString(req.body.name)
+    },
+    user: req.user
+  };
+  return DocumentsFilesController.update(opts, function (err, file) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = file instanceof Error;
+    let result = isError ? file.toString() : file;
+    return res.json({
+      err: isError,
+      res: result
     });
   });
 });
 
-/* GET file of document with data (string) */
-router.get('/:id/string', function (req, res, next) {
-  if (typeof req.user === 'undefined' || !AccountsManager.checkAccessRight(req.user))
-    return res.status(401).send('Your current role does not grant you access to this part of the website');
-  // Init transaction
-  let transaction = DocumentsFiles.findOne({ _id: req.params.id }).lean(); // path is not returned by default;
-  // Execute transaction
-  return transaction.exec(function (err, file) {
-    if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-    else if (!file) return res.json({ 'err': true, 'res': null, 'msg': 'file not found' });
-    return DocumentsFilesController.readFile(req.params.id, function (err, data) {
-      if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-      let result = Object.assign({}, file, { data: data.toString('utf8') });
-      return res.json({ 'err': false, 'res': result });
+/* Add file */
+router.post(`/`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
+  if (!Params.checkString(req.body.account))
+    return res.json({
+      err: true,
+      res: `You must select an account`
+    });
+  if (!Params.checkString(req.body.organization))
+    return res.json({
+      err: true,
+      res: `You must select an organization`
+    });
+  if (!Params.checkString(req.body.document))
+    return res.json({
+      err: true,
+      res: `You must select an document`
+    });
+  if (!Params.checkObject(req.files) || !Params.checkObject(req.files.file))
+    return res.json({
+      err: true,
+      res: `You must select a file`
+    });
+  let opts = {
+    data: {
+      accountId: Params.convertToString(req.body.account),
+      organizationId: Params.convertToString(req.body.organization),
+      documentId: Params.convertToString(req.body.document),
+      file: req.files.file
+    },
+    user: req.user
+  };
+  return DocumentsFilesController.upload(opts, function (err, file) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = file instanceof Error;
+    let result = isError ? file.toString() : file;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* Delete file */
+router.delete(`/:id`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    data: {
+      id: req.params.id
+    },
+    user: req.user
+  };
+  return DocumentsFilesController.delete(opts, function (err, file) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = file instanceof Error;
+    let result = isError ? file.toString() : file;
+    return res.json({
+      err: isError,
+      res: result
     });
   });
 });

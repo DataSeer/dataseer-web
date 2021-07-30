@@ -1,0 +1,407 @@
+<!-- @format -->
+
+<div id="app">
+  <div class="notifications">
+    <div v-for="notification in notifications" :class="notification.class" role="alert">
+      <span v-html="notification.html"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  </div>
+  <div class="contour">
+    <div class="center search container-fluid">
+      <div class="search-row row align-items-center">
+        <div class="col text-truncate">
+          <h2>Custom search</h2>
+        </div>
+      </div>
+      <div class="search-row row align-items-center">
+        <div class="col skip-limit-sort">
+          <div>
+            <div class="title">Skip</div>
+            <input class="form-control" type="text" name="skip" placeholder="Skip" v-model="search.properties.skip" />
+          </div>
+          <div>
+            <div class="title">Limit</div>
+            <input class="form-control" type="text" name="limit" placeholder="Limit" v-model="search.properties.limit" />
+          </div>
+          <div>
+            <div class="title">Sort</div>
+            <select class="custom-select form-select" v-model="search.properties.sort">
+              <option value="asc">Ascending</option>
+              <option value="desc" selected>Descending</option>
+            </select>
+          </div>
+        </div>
+        <div class="col text-truncate">
+          <div class="title">Owner(s)</div>
+          <div class="select-scrollable">
+            <div class="center">
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(search.properties.owners, true)">
+                <i class="far fa-check-square"></i>
+              </button>
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(search.properties.owners, false)">
+                <i class="far fa-square"></i>
+              </button>
+            </div>
+            <div class="center">
+              <ul class="list">
+                <li v-for="owner in search.properties.owners" :title="owner.username">
+                  <label>
+                    <input type="checkbox" v-model="owner.selected" />
+                    | {{ owner.username }}
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col text-truncate">
+          <div class="title">Organization(s)</div>
+          <div class="select-scrollable">
+            <div class="center">
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(search.properties.organizations, true)">
+                <i class="far fa-check-square"></i>
+              </button>
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(search.properties.organizations, false)">
+                <i class="far fa-square"></i>
+              </button>
+            </div>
+            <div class="center">
+              <ul class="list">
+                <li v-for="organization in search.properties.organizations" :title="organization.name">
+                  <label>
+                    <input type="checkbox" v-model="organization.selected" />
+                    | {{ organization.name }}
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col text-truncate">
+          <div class="title">Visible</div>
+          <div v-for="state in search.properties.visibleStates" class="custom-checkbox">
+            <label>
+              <input type="checkbox" v-model="state.selected" />
+              | {{ state.value ? "Yes" : "No" }}
+            </label>
+          </div>
+        </div>
+        <div class="col text-truncate">
+          <div class="title">Locked</div>
+          <div v-for="state in search.properties.lockedStates" class="custom-checkbox">
+            <label>
+              <input type="checkbox" v-model="state.selected" />
+              | {{ state.value ? "Yes" : "No" }}
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="search-row row align-items-center">
+        <div class="col text-truncate">
+          <div class="title">Uploaded after</div>
+          <div>
+            <input type="date" class="form-control" v-model="search.properties.uploadedAfter">
+          </div>
+        </div>
+        <div class="col text-truncate">
+          <div class="title">Uploaded before</div>
+          <div>
+            <input type="date" class="form-control" v-model="search.properties.uploadedBefore">
+          </div>
+        </div>
+        <div class="col text-truncate">
+          <div class="title">Updated after</div>
+          <div>
+            <input type="date" class="form-control" v-model="search.properties.updatedAfter">
+          </div>
+        </div>
+        <div class="col text-truncate">
+          <div class="title">Updated before</div>
+          <div>
+            <input type="date" class="form-control" v-model="search.properties.updatedBefore">
+          </div>
+        </div>
+        <div class="col text-truncate">
+          <div class="title">Uploaded since</div>
+          <div>
+            <input type="text" class="form-control" placeholder="Nb days" v-model="search.properties.uploadRange">
+          </div>
+        </div>
+        <div class="col text-truncate">
+          <div class="title">Updated since</div>
+          <div>
+            <input type="text" class="form-control" placeholder="Nb days" v-model="search.properties.updateRange">
+          </div>
+        </div>
+      </div>
+      <div class="search-row row align-items-center">
+        <div class="col text-truncate">
+          <div class="search-buttons">
+            <button ref="previous" class="btn btn-sm btn-primary previous-page" name="previous" v-on:click.stop="previousPage(event)" >
+              <span>
+              | {{ search.properties.limit }} previous result(s)
+              </span>
+            </button>
+            <span class="loader-sm" ref="previousPageLoader">
+              <i class="fas fa-circle-notch fa-spin"></i>
+            </span>
+            <button class="btn btn-sm btn-primary btn-search" ref="search" v-on:click.stop="searchItems(event)">
+              <span>Search</span>
+            </button>
+            <span class="loader-md" ref="searchLoader">
+              <i class="fas fa-circle-notch fa-spin"></i>
+            </span>
+            <button ref="next" class="btn btn-sm btn-primary next-page" name="next" v-on:click.stop="nextPage(event)" >
+              <span>
+              | {{ search.properties.limit }} next result(s)
+              </span>
+            </button >
+            <span class="loader-sm" ref="nextPageLoader">
+              <i class="fas fa-circle-notch fa-spin"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="center collection container-fluid">
+      <div class="collection-row row align-items-center">
+        <div class="col text-truncate">
+          <h2>Documents</h2>
+        </div>
+      </div>
+      <div class="filter-row row align-items-center">
+        <div class="col text-truncate">
+          <div class="input-group mb-3">
+            <div class="input-group-text" :title="filter.strict ? 'Will return items that match with all keywords' : 'Will return items that match with at least one keyword'">
+              <input type="checkbox" class="btn-check" id="strict-mode" name="filter.strict" v-model="filter.strict" autocomplete="off">
+              <label class="btn btn-sm btn-outline-secondary" for="strict-mode">" "</label>
+            </div>
+            <div class="input-group-text" :title="filter.caseSensitive ? 'Case sensitive' : 'Case insensitive'">
+              <input type="checkbox" class="btn-check" id="case-sensitive" name="filter.caseSensitive" v-model="filter.caseSensitive" autocomplete="off">
+              <label class="btn btn-sm btn-outline-secondary" for="case-sensitive">Aa</label>
+            </div>
+            <input type="text" class="form-control" title="Too much results ? Enter some keywords to filter this list!" name="filter.value" v-model="filter.value" placeholder="Enter some keywords here to filter results" />
+          </div>
+        </div>
+      </div>
+      <div class="collection-row row align-items-center">
+        <div class="center full-width bold">
+          <span>
+          | {{ filteredItems.length }} result(s)
+          </span>
+          <span v-if="collection.selectedItemsCount > 0">
+          | ({{ collection.selectedItemsCount }} selected)
+          </span>
+          <button v-if="filteredItems.length > 0" title="Click here to share your results" v-on:click.stop="copyURL(event)" class="btn btn-sm btn-primary">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+      </div>
+      <div class="collection-row header row align-items-center">
+        <div class="col col-checkbox">
+          <input ref="multipleSelectionsCheckbox" type="checkbox" @change="setSelectedStateOfAllItems($event)" />
+        </div>
+        <div class="col text-truncate">Url(s)</div>
+        <div class="col sorting" v-on:click.stop="sort($event)" property="upload.date">Upload at</div>
+        <div class="col sorting" v-on:click.stop="sort($event)" property="status">Status</div>
+        <div class="col sorting" v-on:click.stop="sort($event)" property="name">Name</div>
+        <div class="col sorting" v-on:click.stop="sort($event)" property="owner">Owner</div>
+        <div class="col">Organizations</div>
+        <div class="col">Properties</div>
+        <div class="col text-truncate">Action</div>
+      </div>
+      <div class="collection-row row align-items-center">
+        <div class="col text-truncate" v-if="filteredItems.length === 0 && !loading">
+          <span class="no-data">No data</span>
+        </div>
+      </div>
+      <div class="collection-row row align-items-center" v-if="loading">
+        <div class="col text-truncate">
+          <span class="no-data">Loading data...</span>
+        </div>
+      </div>
+      <div ref="multipleSelectionsTitle" class="collection-row row align-items-center hidden">
+        <div class="col text-truncate">
+          <span class="multiple-selections-title">Update (or delete) multiples documents</span>
+        </div>
+      </div>
+      <div ref="multipleSelectionsRow" class="collection-row row align-items-center">
+        <div class="col col-checkbox">
+          <input type="checkbox" disabled>
+        </div>
+        <div class="col text-truncate">
+          <span>n/a</span>
+        </div>
+        <div class="col text-truncate">
+          <input class="form-control" type="date" disabled>
+        </div>
+        <div class="col text-truncate">
+          <span>n/a</span>
+        </div>
+        <div class="col text-truncate">
+          <input type="text" class="form-control" name="name" v-model="multipleSelections.properties.name" placeholder="Name" />
+        </div>
+        <div class="col text-truncate">
+          <select class="custom-select form-select" name="accounts" v-model="multipleSelections.properties.owner">
+            <option v-for="account in collection.dependencies.accounts" :value="account._id">
+            | {{ account.username }}
+            </option>
+          </select>
+        </div>
+        <div class="col text-truncate">
+          <div class="select-scrollable">
+            <div class="center">
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(item.properties.organizations, true); modified(item.properties._id)">
+                <i class="far fa-check-square"></i>
+              </button>
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(item.properties.organizations, false); modified(item.properties._id)">
+                <i class="far fa-square"></i>
+              </button>  
+            </div>
+            <div class="center">
+              <ul class="list">
+                <li v-for="organization in multipleSelections.properties.organizations" :title="organization.name">
+                  <label>
+                    <input v-on:change="modified(item.properties._id)" type="checkbox" v-model="organization.selected" />
+                    | {{ organization.name }}
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </div>  
+        </div>
+        <div class="col">
+          <div class="form-check form-switch" :title="multipleSelections.properties.visible ? 'Visible' : 'Invisible'">
+            <label>
+              <input class="form-check-input" type="checkbox" v-model="multipleSelections.properties.visible" />
+              | Visible
+            </label>
+          </div>
+          <div class="form-check form-switch" :title="multipleSelections.properties.locked ? 'Enabled' : 'Locked'">
+            <label>
+              <input class="form-check-input" type="checkbox" v-model="multipleSelections.properties.locked" />
+              | Locked
+            </label>
+          </div>
+        </div>
+        <div class="col text-truncate">
+          <button class="btn btn-md btn-primary" v-on:click.stop="updateMultipleItems(event)">
+            <i class="far fa-save"></i>
+          </button>
+          <span class="loader-sm" ref="multipleSelectionsUpdateLoader">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+          <button class="btn btn-md btn-danger" v-on:click.stop="deleteMultipleItems(event)">
+            <i class="far fa-trash-alt"></i>
+          </button>
+          <span class="loader-sm" ref="multipleSelectionsDeleteLoader">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+        </div>
+      </div>
+      <div :value="item.properties._id" class="collection-row item row align-items-center" v-for="item in filteredItems" :class="[item.status.modified ? 'modified' : '', item.status.error ? 'hasError' : '']">
+        <div class="hidden">
+          | {{ item.raw }}
+        </div>
+        <div class="col col-checkbox">
+          <input type="checkbox" v-model="item.selected" :value="item.selected" @change="itemSelectedChange($event)" />
+        </div>
+        <div class="col text-truncate">
+          <a :href="buildIdLink(item.properties._id)" target="_blank">
+            <i class="fas fa-external-link-alt"></i>
+            | Private
+          </a>
+          <a :href="buildIdLink(item.properties._id, { token: item.properties.token })" target="_blank">
+            <i class="fas fa-external-link-alt"></i>
+            | Public
+          </a>
+          <a :href="buildBackofficeIdLink(item.properties._id)" target="_blank">
+            <i class="fas fa-external-link-alt"></i>
+            | Backoffice
+          </a>
+          <a :href="buildReportLink({id: item.properties._id, report: 'default'})" target="_blank">
+            <i class="fas fa-external-link-alt"></i>
+            | DataSeer report
+          </a>
+        </div>
+        <div class="col text-truncate">
+          <label>
+          | {{ new Date(item.properties.upload.date).toLocaleDateString() }}
+          </label>
+        </div>
+        <div class="col text-truncate">
+          <label class="text" v-if="item.properties.status === 'metadata'">Metadata validation</label>
+          <label class="text" v-if="item.properties.status === 'datasets'">Datasets validation</label>
+          <label class="text" v-if="item.properties.status === 'finish'">Process Finished</label>
+        </div>
+        <div class="col text-truncate">
+          <input type="text" class="form-control" v-on:change="modified(item.properties._id)" name="name" v-model="item.properties.name" />
+        </div>
+        <div class="col text-truncate">
+          <select class="custom-select form-select" name="accounts" v-model="item.properties.owner._id">
+            <option v-for="account in collection.dependencies.accounts" :value="account._id">
+            | {{ account.username }}
+            </option>
+          </select>
+        </div>
+        <div class="col text-truncate">
+          <div class="select-scrollable">
+            <div class="center">
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(item.properties.organizations, true); modified(item.properties._id)">
+                <i class="far fa-check-square"></i>
+              </button>
+              <button class="btn btn-sm btn-primary" v-on:click.stop="changeSelectedStateOf(item.properties.organizations, false); modified(item.properties._id)">
+                <i class="far fa-square"></i>
+              </button>  
+            </div>
+            <div class="center">
+              <ul class="list">
+                <li v-for="organization in item.properties.organizations" :title="organization.name">
+                  <label>
+                    <input v-on:change="modified(item.properties._id)" type="checkbox" v-model="organization.selected" />
+                    | {{ organization.name }}
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </div>        
+        </div>
+        <div class="col">
+          <div class="form-check form-switch" :title="multipleSelections.properties.visible ? 'Visible' : 'Invisible'">
+            <label>
+              <input class="form-check-input" v-on:change="modified(item.properties._id)" type="checkbox" v-model="item.properties.visible" />
+              | Visible
+            </label>
+          </div>
+          <div class="form-check form-switch" :title="multipleSelections.properties.locked ? 'Enabled' : 'Locked'">
+            <label>
+              <input class="form-check-input" v-on:change="modified(item.properties._id)" type="checkbox" v-model="item.properties.locked" />
+              | Locked
+            </label>
+          </div>
+        </div>
+        <div class="col text-truncate">
+          <button v-on:click.stop="updateItem($event)" class="btn btn-md btn-primary" :value="item.properties._id" title="Update this item">
+            <i class="far fa-save"></i>
+          </button>
+          <span class="loader-sm" value="update">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+          <button v-on:click.stop="refreshToken($event)" class="btn btn-md btn-primary" :value="item.properties._id" title="Get a new public URL (older will no longer work)">
+            <i class="fas fa-redo"></i>
+          </button>
+          <span class="loader-sm" value="refreshToken">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+          <button v-on:click.stop="deleteItem($event)" class="btn btn-md btn-danger" title="Delete this item">
+            <i class="far fa-trash-alt"></i>
+          </button>
+          <span class="loader-sm" value="delete">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
