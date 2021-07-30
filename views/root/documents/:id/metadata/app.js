@@ -146,7 +146,7 @@
       },
       // Build URL of document
       buildDocumentURL: function (params = {}) {
-        return URLMANAGER.buildURL(`documents/${this.item.properties._id}`, params);
+        return URLMANAGER.buildURL(`documents/${this.item.properties._id}`, params, { origin: true });
       },
       copy: function (text) {
         let self = this;

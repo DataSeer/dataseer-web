@@ -114,9 +114,13 @@
                   `api/documents/${self.document._id.toString()}/reports/html/bioRxiv`,
                   {}
                 );
-                self.publicUrl = URLMANAGER.buildURL(`documents/${self.document._id.toString()}`, {
-                  token: self.document.token
-                });
+                self.publicUrl = URLMANAGER.buildURL(
+                  `documents/${self.document._id.toString()}`,
+                  {
+                    token: self.document.token
+                  },
+                  { origin: true }
+                );
                 return next();
               });
             },
