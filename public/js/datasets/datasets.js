@@ -93,7 +93,7 @@
                 }
               }
             );
-            let publicUrl = URLMANAGER.buildURL(`documents/${documentId}`, { token: doc.token });
+            let publicUrl = URLMANAGER.buildURL(`documents/${documentId}`, { token: doc.token }, { origin: true });
             let publicUrlBtn = $(
               `<button class="btn btn-primary btn-md" id="publicUrl" onclick="copyUrl('${publicUrl}')">Public URL</button>`
             );
