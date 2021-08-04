@@ -24,7 +24,7 @@ router.get(`/jsonDataTypes`, function (req, res, next) {
   return res.json(req.app.get(`dataTypes`));
 });
 
-router.get(`/resyncJsonDataTypes`, function (req, res, next) {
+router.post(`/resyncJsonDataTypes`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   return Wiki.getDataTypes(function (err, dataTypes) {

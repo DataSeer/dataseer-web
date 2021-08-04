@@ -71,9 +71,9 @@ Accessible to users with the following role :  **standardUser**, **moderator**, 
 
 ```bash
 # Will return all organizations (JSON formated)
-curl -F "visible=true,false" "http://localhost:3000/api/organizations"
+curl "http://localhost:3000/api/organizations"
 # Will return organizations with ids 000000000000000000000000 & 000000000000000000000001 (JSON formated)
-curl -F "visible=true,false" -F "ids=000000000000000000000000,000000000000000000000001" "http://localhost:3000/api/organizations"
+curl "http://localhost:3000/api/organizations?ids=000000000000000000000000,000000000000000000000001"
 ```
 
 ## Result

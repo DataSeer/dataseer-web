@@ -65,9 +65,9 @@ Accessible to users with the following role :  **standardUser**, **moderator**, 
 
 ```bash
 # Will return all roles (JSON formated)
-curl -F "visible=true,false" "http://localhost:3000/api/roles"
+curl "http://localhost:3000/api/roles"
 # Will return roles with ids 000000000000000000000000 & 000000000000000000000001 (JSON formated)
-curl -F "visible=true,false" -F "ids=000000000000000000000000,000000000000000000000001" "http://localhost:3000/api/roles"
+curl "http://localhost:3000/api/roles?ids=000000000000000000000000,000000000000000000000001"
 ```
 
 ## Result

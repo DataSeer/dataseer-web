@@ -90,9 +90,9 @@ Accessible to users with the following role :  **moderator**, **administrator**.
 ```bash
 # Will return all accounts (JSON formated)
 # You must get list of available organizations & roles ids  before calling this API route
-curl -F "visible=true,false" -F "disabled=true,false" -F "organizations=..." -F "roles=..." "http://localhost:3000/api/accounts"
+curl "http://localhost:3000/api/accounts"
 # Will return accounts with ids 000000000000000000000000 & 000000000000000000000001 (JSON formated)
-curl -F "visible=true,false" -F "disabled=true,false" -F "organizations=..." -F "roles=..." -F "ids=000000000000000000000000,000000000000000000000001" "http://localhost:3000/api/accounts"
+curl "" "http://localhost:3000/api/accounts?ids=000000000000000000000000,000000000000000000000001"
 ```
 
 ## Result

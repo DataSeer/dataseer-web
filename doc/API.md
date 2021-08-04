@@ -205,7 +205,7 @@ List of available API routes:
 
   - [(POST) /api/dataseer-ml/processDataseerSentence](./API/DATASEERML.md#post-apidataseermlprocessdataseersentence)
   - [(GET) /api/dataseer-ml/jsonDataTypes](./API/DATASEERML.md#get-apidataseermljsonDataTypes)
-  - [(GET) /api/dataseer-ml/resyncJsonDataTypes](./API/DATASEERML.md#get-apidataseermlresyncJsonDataTypes)
+  - [(POST) /api/dataseer-ml/resyncJsonDataTypes](./API/DATASEERML.md#post-apidataseermlresyncJsonDataTypes)
 
 ### [RepoRecommender](./API/REPORECOMMENDER.md#reporecommender)
 

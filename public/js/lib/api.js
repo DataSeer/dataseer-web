@@ -339,7 +339,7 @@ const API = {
      */
     resyncJsonDataTypes: function (done) {
       return $.ajax({
-        type: `GET`,
+        type: `POST`,
         url: URLMANAGER.buildURL(`${this.url}/resyncJsonDataTypes`, {}, { setToken: true }),
         success: function (query) {
           console.log(`dataseerML.resyncJsonDataTypes`, query);
