@@ -6,6 +6,11 @@
 
 const API = {
   url: `/api`,
+  /**
+   * Get the Crisp id
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   getCrispId: function (done) {
     return $.ajax({
       type: `GET`,
@@ -19,6 +24,11 @@ const API = {
       }
     });
   },
+  /**
+   * Get the userflow token
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   getUserflowToken: function (done) {
     return $.ajax({
       type: `GET`,
@@ -32,6 +42,12 @@ const API = {
       }
     });
   },
+  /**
+   * Signin a given user
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   signin: function (opts = {}, done) {
     return $.ajax({
       type: `POST`,
@@ -46,6 +62,12 @@ const API = {
       }
     });
   },
+  /**
+   * Signup a given user
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   signup: function (opts = {}, done) {
     return $.ajax({
       type: `POST`,
@@ -60,6 +82,12 @@ const API = {
       }
     });
   },
+  /**
+   * Process "forget password" for a given user
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   forgotPassword: function (opts, done) {
     return $.ajax({
       type: `POST`,
@@ -74,6 +102,12 @@ const API = {
       }
     });
   },
+  /**
+   * Reset password of a given user
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   resetPassword: function (opts, done) {
     return $.ajax({
       type: `POST`,
@@ -88,6 +122,12 @@ const API = {
       }
     });
   },
+  /**
+   * Get the current user
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   currentUser: function (opts = {}, done) {
     return $.ajax({
       type: `GET`,
@@ -101,6 +141,13 @@ const API = {
       }
     });
   },
+  /**
+   * Get logs of "model"
+   * @param {string} model Which model of data will be used (accounts, organizations, documents, etc)
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   getLogs: function (model, opts, done) {
     return $.ajax({
       type: `GET`,
@@ -114,6 +161,13 @@ const API = {
       }
     });
   },
+  /**
+   * Get a given "model"
+   * @param {string} model Which model of data will be used (accounts, organizations, documents, etc)
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   get: function (model, opts, done) {
     return $.ajax({
       type: `GET`,
@@ -127,6 +181,13 @@ const API = {
       }
     });
   },
+  /**
+   * Get all "things"
+   * @param {string} model Which model of data will be used (accounts, organizations, documents, etc)
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   all: function (model, opts, done) {
     return $.ajax({
       type: `GET`,
@@ -140,6 +201,13 @@ const API = {
       }
     });
   },
+  /**
+   * Add a given "model"
+   * @param {string} model Which model of data will be used (accounts, organizations, documents, etc)
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   add: function (model, opts, done) {
     return $.ajax({
       type: `POST`,
@@ -154,6 +222,13 @@ const API = {
       }
     });
   },
+  /**
+   * Update a given "model"
+   * @param {string} model Which model of data will be used (accounts, organizations, documents, etc)
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   update: function (model, opts, done) {
     return $.ajax({
       type: `PUT`,
@@ -168,6 +243,13 @@ const API = {
       }
     });
   },
+  /**
+   * Update many "things"
+   * @param {string} model Which model of data will be used (accounts, organizations, documents, etc)
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   updateMany: function (model, opts, done) {
     return $.ajax({
       type: `PUT`,
@@ -182,6 +264,13 @@ const API = {
       }
     });
   },
+  /**
+   * Delete a given "model"
+   * @param {string} model Which model of data will be used (accounts, organizations, documents, etc)
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   delete: function (model, opts, done) {
     return $.ajax({
       type: `DELETE`,
@@ -196,6 +285,13 @@ const API = {
       }
     });
   },
+  /**
+   * Delete many "things"
+   * @param {string} model Which model of data will be used (accounts, organizations, documents, etc)
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   deleteMany: function (model, opts, done) {
     return $.ajax({
       type: `DELETE`,
@@ -210,6 +306,13 @@ const API = {
       }
     });
   },
+  /**
+   * Upload some files
+   * @param {string} model Which model of data will be used (accounts, organizations, documents, etc)
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
   upload: function (model, opts, done) {
     return $.ajax({
       type: `POST`,
@@ -236,7 +339,7 @@ const API = {
      */
     resyncJsonDataTypes: function (done) {
       return $.ajax({
-        type: `GET`,
+        type: `POST`,
         url: URLMANAGER.buildURL(`${this.url}/resyncJsonDataTypes`, {}, { setToken: true }),
         success: function (query) {
           console.log(`dataseerML.resyncJsonDataTypes`, query);

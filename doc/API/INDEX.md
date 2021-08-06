@@ -1,5 +1,7 @@
 # Index
 
+*[Available Routes](../API.md#available-routes)*
+
   - [(POST) /api/signup](#post-apisignup)
   - [(POST) /api/signin](#post-apisignin)
   - [(GET) /api/signout](#get-apisignout)
@@ -13,7 +15,7 @@
 
 ## (POST) /api/signin
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Index routes](#index)*
 
 ### Description
 
@@ -86,7 +88,7 @@ curl -X POST -F "username=address@email.com" -F "password=myPassword" "http://lo
 
 ## (POST) /api/signup
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Index routes](#index)*
 
 ### Description
 
@@ -179,7 +181,7 @@ curl -X POST -F "username=address@email.com" -F "fullname=My Fullname" -F "passw
 
 ## (GET) /api/signout
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Index routes](#index)*
 
 ### Description
 
@@ -213,7 +215,7 @@ curl "http://localhost:3000/signout"
 
 ## (GET) /api/currentUser
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Index routes](#index)*
 
 ### Description
 
@@ -247,7 +249,7 @@ curl "http://localhost:3000/currentUser"
 
 ## (GET) /api/getCrispId
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Index routes](#index)*
 
 ### Description
 
@@ -281,7 +283,7 @@ curl "http://localhost:3000/getCrispId"
 
 ## (GET) /api/getUserflowToken
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Index routes](#index)*
 
 ### Description
 
@@ -315,7 +317,7 @@ curl "http://localhost:3000/getUserflowToken"
 
 ## (POST) /api/forgotPassword
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Index routes](#index)*
 
 ### Description
 
@@ -367,7 +369,7 @@ curl -X POST -F "username=address@email.com" "http://localhost:3000/forgotPasswo
 
 ## (POST) /api/resetPassword
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Index routes](#index)*
 
 ### Description
 
