@@ -1,5 +1,7 @@
 # Accounts
 
+*[Available Routes](../API.md#available-routes)*
+
   - [(GET) /api/accounts](#get-apiaccounts)
   - [(POST) /api/accounts](#post-apiaccounts)
   - [(PUT) /api/accounts](#put-apiaccounts)
@@ -12,7 +14,7 @@
 
 # (GET) /api/accounts/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Accounts routes](#accounts)*
 
 ## Description
 
@@ -20,7 +22,9 @@ This route return all accounts (JSON formated)
 
 ## Role required
 
-Accessible to users with the following role :  **moderator**, **administrator**.
+Accessible to users with the following role: **moderator**, **administrator**.
+
+Note: [more info about data access restrictions here](../README.md#data-access)
 
 ## Parameters
 
@@ -61,26 +65,26 @@ Accessible to users with the following role :  **moderator**, **administrator**.
     <tr>
       <td>Array</td>
       <td>roles</td>
-      <td>required</td>
-      <td>Add filter on roles ids (default: undefined).<br/>If not defined, empty list will be returned.</td>
+      <td>optionnal</td>
+      <td>Add filter on roles ids (default: undefined)</td>
     </tr>
     <tr>
       <td>Array</td>
       <td>organizations</td>
-      <td>required</td>
-      <td>Add filter on organizations ids (default: undefined).<br/>If not defined, empty list will be returned.</td>
+      <td>optionnal</td>
+      <td>Add filter on organizations ids (default: undefined)</td>
     </tr>
     <tr>
-      <td>Boolean</td>
-      <td>visible</td>
-      <td>required</td>
-      <td>Add filter on visible values (default: undefined, available: [true, false]).<br/>If not defined, empty list will be returned.</td>
+      <td>Array</td>
+      <td>visibleStates</td>
+      <td>optionnal</td>
+      <td>Add filter on visible values (default: undefined, available: [true, false])</td>
     </tr>
     <tr>
-      <td>Boolean</td>
-      <td>disabled</td>
-      <td>required</td>
-      <td>Add filter on disabled values (default: undefined, available: [true, false]).<br/>If not defined, empty list will be returned.</td>
+      <td>Array</td>
+      <td>disabledStates</td>
+      <td>optionnal</td>
+      <td>Add filter on disabled values (default: undefined, available: [true, false])</td>
     </tr>
   </tbody>
 </table>
@@ -88,11 +92,11 @@ Accessible to users with the following role :  **moderator**, **administrator**.
 ## How to request
 
 ```bash
+# Each filter add an OR condition (not and AND condition). So if there are 2 filters, it will return all items matching filter1 OR filter2
 # Will return all accounts (JSON formated)
-# You must get list of available organizations & roles ids  before calling this API route
 curl "http://localhost:3000/api/accounts"
 # Will return accounts with ids 000000000000000000000000 & 000000000000000000000001 (JSON formated)
-curl "" "http://localhost:3000/api/accounts?ids=000000000000000000000000,000000000000000000000001"
+curl "http://localhost:3000/api/accounts?ids=000000000000000000000000,000000000000000000000001"
 ```
 
 ## Result
@@ -108,7 +112,7 @@ curl "" "http://localhost:3000/api/accounts?ids=000000000000000000000000,0000000
 
 # (POST) /api/accounts/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Accounts routes](#accounts)*
 
 ## Description
 
@@ -185,7 +189,6 @@ Accessible to user with the following role: **administrator**
 
 ```bash
 # Will return the new account (JSON formated)
-# You must get list of available organizations & roles ids  before calling this API route
 curl -X POST -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "password=MY_PASSWORD" -F "confirm_password=MY_PASSWORD" -F "organizations=..." -F "role=..." "http://localhost:3000/api/accounts"
 ```
 
@@ -202,7 +205,7 @@ curl -X POST -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME" -F "password=MY
 
 # (PUT) /api/accounts/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Accounts routes](#accounts)*
 
 ## Description
 
@@ -266,8 +269,8 @@ Accessible to users with the following role: **moderator**, **administrator**.
 ## How to request
 
 ```bash
+# You should get list of available organizations & roles ids before calling this API route
 # Will return all infos about updates (JSON formated)
-# You must get list of available organizations & roles ids  before calling this API route
 curl -X PUT -F "ids=000000000000000000000000,000000000000000000000001" -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME"-F "organizations=..." -F "role=..." "http://localhost:3000/api/accounts"
 ```
 
@@ -287,7 +290,7 @@ curl -X PUT -F "ids=000000000000000000000000,000000000000000000000001" -F "fulln
 
 # (DELETE) /api/accounts/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Accounts routes](#accounts)*
 
 ## Description
 
@@ -341,7 +344,7 @@ curl -X DELETE -F "ids=000000000000000000000000,000000000000000000000001" "http:
 
 # (GET) /api/accounts/:id
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Accounts routes](#accounts)*
 
 ## Description
 
@@ -375,7 +378,7 @@ curl "http://localhost:3000/api/accounts/000000000000000000000000"
 
 # (PUT) /api/accounts/:id
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Accounts routes](#accounts)*
 
 ## Description
 
@@ -433,8 +436,8 @@ Accessible to users with the following role: **standardUser**, **moderator**, **
 ## How to request
 
 ```bash
+# You should get list of available organizations & roles ids before calling this API route
 # Will return the updated account (JSON formated)
-# You must get list of available organizations & roles ids  before calling this API route
 curl -X PUT -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME"-F "organizations=..." -F "role=..." "http://localhost:3000/api/accounts/000000000000000000000000"
 ```
 
@@ -451,7 +454,7 @@ curl -X PUT -F "fullname=MY_FULLNAME" -F "username=MY_USERNAME"-F "organizations
 
 # (DELETE) /api/accounts/:id
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Accounts routes](#accounts)*
 
 ## Description
 

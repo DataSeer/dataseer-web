@@ -163,8 +163,8 @@ List of available API routes:
 
   - [(GET) /api/documents](./API/DOCUMENTS.md#get-apidocuments)
   - [(POST) /api/documents](./API/DOCUMENTS.md#post-apidocuments)
-  - [(PUT) /api/documents/](./API/DOCUMENTS.md#put-apidocuments)
-  - [(DELETE) /api/documents/](./API/DOCUMENTS.md#delete-apidocuments)
+  - [(PUT) /api/documents](./API/DOCUMENTS.md#put-apidocuments)
+  - [(DELETE) /api/documents](./API/DOCUMENTS.md#delete-apidocuments)
   - [(GET) /api/documents/:id](./API/DOCUMENTS.md#get-apidocumentsid)
   - [(PUT) /api/documents/:id](./API/DOCUMENTS.md#put-apidocumentsid)
   - [(DELETE) /api/documents/:id](./API/DOCUMENTS.md#delete-apidocumentsid)
@@ -181,7 +181,6 @@ List of available API routes:
   - [(POST) /api/documents/:id/refreshToken](./API/DOCUMENTS.md#post-apidocumentsidrefreshtoken)
   - [(POST) /api/documents/:id/metadata/reload](./API/DOCUMENTS.md#post-apidocumentsidmetadatareload)
   - [(POST) /api/documents/:id/metadata/validate](./API/DOCUMENTS.md#post-apidocumentsidmetadatavalidate)
-  - [(POST) /api/documents/:id/datasets/validate](./API/DOCUMENTS.md#post-apidocumentsiddatasetsvalidate)
   - [(POST) /api/documents/:id/datasets/backToMetadata](./API/DOCUMENTS.md#post-apidocumentsiddatasetsbacktometadata)
   - [(POST) /api/documents/:id/finish/reopen](./API/DOCUMENTS.md#post-apidocumentsidfinishreopen)
   - [(PUT) /api/documents/:id/datasets](./API/DOCUMENTS.md#put-apidocumentsiddatasets)
@@ -196,10 +195,9 @@ List of available API routes:
 
 ### [Documents files](./API/DOCUMENTS.FILES.md#documents-files)
 
-  - [(GET) /api/files/:id/](./API/DOCUMENTS.FILES.md#get-apifilesid)
+  - [(GET) /api/files/:id](./API/DOCUMENTS.FILES.md#get-apifilesid)
   - [(PUT) /api/files/:id](./API/DOCUMENTS.FILES.md#put-apifilesid)
-  - [(POST) /api/files/:id](./API/DOCUMENTS.FILES.md#post-apifilesid)
-  - [(DELETE) /api/files/:id](./API/DOCUMENTS.FILES.md#delete-apifilesid)
+  - [(POST) /api/files](./API/DOCUMENTS.FILES.md#post-apifiles)
 
 ### [Dataseer ML](./API/DATASEERML.md#dataseer-ml)
 
@@ -209,13 +207,13 @@ List of available API routes:
 
 ### [RepoRecommender](./API/REPORECOMMENDER.md#reporecommender)
 
-  - [(POST) /api/repoRecommender/findRepo/](./API/REPORECOMMENDER.md#post-apireporecommenderfindrepo)
+  - [(POST) /api/repoRecommender/findRepo](./API/REPORECOMMENDER.md#post-apireporecommenderfindrepo)
 
 ### [Software](./API/SOFTWARE.md#software)
 
-  - [(POST) /api/software/processSoftwareText/](./API/SOFTWARE.md#post-apisoftwareprocesssoftwaretext)
+  - [(POST) /api/software/processSoftwareText](./API/SOFTWARE.md#post-apisoftwareprocesssoftwaretext)
 
 ### [Statistics](./API/STATISTICS.md#statistics)
 
-  - [(GET) /api/statistics/documents/](./API/STATISTICS.md#get-apistatisticsdocuments)
+  - [(GET) /api/statistics/documents](./API/STATISTICS.md#get-apistatisticsdocuments)
   - [(GET) /api/statistics/documents/:id](./API/STATISTICS.md#get-apistatisticsdocumentsid)

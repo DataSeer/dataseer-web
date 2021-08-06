@@ -1,5 +1,7 @@
 # Roles
 
+*[Available Routes](../API.md#available-routes)*
+
   - [(GET) /api/roles](#get-apiroles)
   - [(POST) /api/roles](#post-apiroles)
   - [(PUT) /api/roles](#put-apiroles)
@@ -12,7 +14,7 @@
 
 # (GET) /api/roles/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Roles routes](#roles)*
 
 ## Description
 
@@ -20,7 +22,7 @@ This route return all roles (JSON formated)
 
 ## Role required
 
-Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
+Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
 
 ## Parameters
 
@@ -64,6 +66,7 @@ Accessible to users with the following role :  **standardUser**, **moderator**, 
 ## How to request
 
 ```bash
+# Each filter add an OR condition (not and AND condition). So if there are 2 filters, it will return all items matching filter1 OR filter2
 # Will return all roles (JSON formated)
 curl "http://localhost:3000/api/roles"
 # Will return roles with ids 000000000000000000000000 & 000000000000000000000001 (JSON formated)
@@ -83,7 +86,7 @@ curl "http://localhost:3000/api/roles?ids=000000000000000000000000,0000000000000
 
 # (POST) /api/roles/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Roles routes](#roles)*
 
 ## Description
 
@@ -146,7 +149,7 @@ curl -X POST -F "label=My Custom Role" -F "key=myCustomRole" -F "weight=150" "ht
 
 # (PUT) /api/roles/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Roles routes](#roles)*
 
 ## Description
 
@@ -200,7 +203,7 @@ curl -X PUT -F "ids=000000000000000000000000,000000000000000000000001" "http://l
 
 # (DELETE) /api/roles/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Roles routes](#roles)*
 
 ## Description
 
@@ -254,7 +257,7 @@ curl -X DELETE -F "ids=000000000000000000000000,000000000000000000000001" "http:
 
 # (GET) /api/roles/:id
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Roles routes](#roles)*
 
 ## Description
 
@@ -288,7 +291,7 @@ curl "http://localhost:3000/api/roles/000000000000000000000000"
 
 # (PUT) /api/roles/:id
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Roles routes](#roles)*
 
 ## Description
 
@@ -345,7 +348,7 @@ curl -X PUT -F "name=NAME" "http://localhost:3000/api/roles/00000000000000000000
 
 # (DELETE) /api/roles/:id
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Roles routes](#roles)*
 
 ## Description
 

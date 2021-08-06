@@ -102,7 +102,7 @@
         let ids = this.filteredItems.map(function (item) {
           return item.properties._id.toString();
         });
-        let url = URLMANAGER.buildURL(`${ROUTES.main}`, { ids: ids });
+        let url = URLMANAGER.buildURL(`${ROUTES.main}`, { ids: ids }, { origin: true });
         return CLIPBOARD.copy(url, function (err) {
           if (err)
             // Push an error notification

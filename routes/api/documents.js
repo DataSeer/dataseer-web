@@ -28,7 +28,6 @@ router.get(`/`, function (req, res, next) {
       ids: Params.convertToArray(req.query.ids, `string`),
       limit: Params.convertToInteger(req.query.limit),
       skip: Params.convertToInteger(req.query.skip),
-      roles: Params.convertToArray(req.query.roles, `string`),
       owners: Params.convertToArray(req.query.owners, `string`),
       organizations: Params.convertToArray(req.query.organizations, `string`),
       visibleStates: Params.convertToArray(req.query.visibleStates, `boolean`),
@@ -201,12 +200,7 @@ router.put(`/:id`, function (req, res, next) {
       owner: Params.convertToString(req.body.owner),
       organizations: Params.convertToArray(req.body.organizations, `string`),
       visible: Params.convertToBoolean(req.body.visible),
-      locked: Params.convertToBoolean(req.body.locked),
-      metadata: Params.convertToBoolean(req.body.metadata),
-      datasets: Params.convertToBoolean(req.body.datasets),
-      pdf: Params.convertToBoolean(req.body.pdf),
-      tei: Params.convertToBoolean(req.body.tei),
-      files: Params.convertToBoolean(req.body.files)
+      locked: Params.convertToBoolean(req.body.locked)
     },
     user: req.user
   };

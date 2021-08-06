@@ -1,5 +1,7 @@
 # Dataseer ML
 
+*[Available Routes](../API.md#available-routes)*
+
   - [(POST) /api/dataseer-ml/processDataseerSentence](#post-apidataseermlprocessdataseersentence)
   - [(GET) /api/dataseer-ml/jsonDataTypes](#get-apidataseermljsonDataTypes)
   - [(POST) /api/dataseer-ml/resyncJsonDataTypes](#post-apidataseermlresyncJsonDataTypes)
@@ -8,7 +10,7 @@
 
 # (POST) /api/dataseer-ml/processDataseerSentence
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Dataseer ML routes](dataseer-ml)*
 
 ## Description
 
@@ -16,7 +18,7 @@ This route process a DataSeer sentence
 
 ## Role required
 
-Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
+Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
 
 ## Parameters
 
@@ -61,7 +63,7 @@ curl -X POST -F "text=my text that will be processed" "http://localhost:3000/api
 
 # (GET) /api/dataseer-ml/jsonDataTypes
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Dataseer ML routes](dataseer-ml)*
 
 ## Description
 
@@ -69,7 +71,7 @@ This route return dataTypes (JSON formatted)
 
 ## Role required
 
-Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
+Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
 
 ## Parameters
 
@@ -96,7 +98,7 @@ curl "http://localhost:3000/api/dataseer-ml/jsonDataTypes"
 
 # (POST) /api/dataseer-ml/resyncJsonDataTypes
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Dataseer ML routes](dataseer-ml)*
 
 ## Description
 
@@ -104,7 +106,7 @@ This route resync datatypes (from wiki)
 
 ## Role required
 
-Accessible to users with the following role :  **moderator**, **administrator**.
+Accessible to users with the following role: **moderator**, **administrator**.
 
 ## Parameters
 
