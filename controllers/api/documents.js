@@ -224,6 +224,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
  * @param {string} opts.dataTypes - dataTypes to create datasets (stored in app.get('dataTypes'))
  * @param {object} opts.user - Current user (must come from req.user)
  * @param {boolean} opts.[dataseerML] - Process dataseer-ml (default: true)
+ * @param {boolean} opts.[mute] - Mute email notification (default: false)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: Document instance OR undefined)
  * @returns {undefined} undefined
  */
@@ -1761,7 +1762,7 @@ Self.all = function (opts = {}, cb) {
   if (!accessRights.isAdministrator)
     query.organizations = { $in: AccountsManager.getOwnOrganizations(organizations, opts.user) };
   // Delete organizations restriction for visitor (because its token can be used for only one document)
-  if (accessRights.isVisitor) delete query.organizations;
+  if (!accessRights.isStandardUser) delete query.organizations;
   if (!accessRights.isModerator) {
     query.owner = { $in: [opts.user._id.toString()] };
   }
@@ -2047,12 +2048,7 @@ Self.update = function (opts = {}, cb) {
   return Self.get(
     {
       data: {
-        id: opts.data.id,
-        metadata: opts.data.metadata,
-        datasets: opts.data.datasets,
-        pdf: opts.data.pdf,
-        tei: opts.data.tei,
-        files: opts.data.files
+        id: opts.data.id
       },
       user: opts.user
     },
