@@ -73,9 +73,11 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     if (el.attr(`loading`).toString() === `false` && typeof self.events.onRefreshDatatypesClick === `function`) {
       el.attr(`loading`, true);
       el.find(`i`).addClass(`fa-spin`);
+      el.find(`i`).addClass(`fa-pulse`);
       return self.events.onRefreshDatatypesClick(function () {
         el.attr(`loading`, false);
         el.find(`i`).removeClass(`fa-spin`);
+        el.find(`i`).removeClass(`fa-pulse`);
       });
     }
   });
