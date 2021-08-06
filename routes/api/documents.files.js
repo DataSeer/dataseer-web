@@ -104,28 +104,4 @@ router.post(`/`, function (req, res, next) {
   });
 });
 
-/* Delete file */
-router.delete(`/:id`, function (req, res, next) {
-  let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
-  let opts = {
-    data: {
-      id: req.params.id
-    },
-    user: req.user
-  };
-  return DocumentsFilesController.delete(opts, function (err, file) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    let isError = file instanceof Error;
-    let result = isError ? file.toString() : file;
-    return res.json({
-      err: isError,
-      res: result
-    });
-  });
-});
-
 module.exports = router;

@@ -72,10 +72,12 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     let el = $(this);
     if (el.attr(`loading`).toString() === `false` && typeof self.events.onRefreshDatatypesClick === `function`) {
       el.attr(`loading`, true);
-      el.find(`i`).addClass(`fa-spin`);
+      el.find(`.fa-sync-alt`).addClass(`fa-spin`);
+      el.find(`.fa-sync-alt`).addClass(`fa-pulse`);
       return self.events.onRefreshDatatypesClick(function () {
         el.attr(`loading`, false);
-        el.find(`i`).removeClass(`fa-spin`);
+        el.find(`.fa-sync-alt`).removeClass(`fa-spin`);
+        el.find(`.fa-sync-alt`).removeClass(`fa-pulse`);
       });
     }
   });

@@ -1,5 +1,7 @@
 # Organizations
 
+*[Available Routes](../API.md#available-routes)*
+
   - [(GET) /api/organizations](#get-apiorganizations)
   - [(POST) /api/organizations](#post-apiorganizations)
   - [(PUT) /api/organizations](#put-apiorganizations)
@@ -12,7 +14,7 @@
 
 # (GET) /api/organizations/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Organizations routes](#organizations)*
 
 ## Description
 
@@ -20,7 +22,9 @@ This route return all organizations (JSON formated)
 
 ## Role required
 
-Accessible to users with the following role :  **standardUser**, **moderator**, **administrator**.
+Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
+
+Note: [more info about data access restrictions here](../README.md#data-access)
 
 ## Parameters
 
@@ -59,10 +63,10 @@ Accessible to users with the following role :  **standardUser**, **moderator**, 
       <td>Add filter on organizations ids (default: undefined)</td>
     </tr>
     <tr>
-      <td>Boolean</td>
-      <td>visible</td>
-      <td>required</td>
-      <td>Add filter on visible values (default: undefined, available: [true, false]).<br/>If not defined, empty list will be returned.</td>
+      <td>Array</td>
+      <td>visibleStates</td>
+      <td>optionnal</td>
+      <td>Add filter on visible values (default: undefined, available: [true, false])</td>
     </tr>
   </tbody>
 </table>
@@ -70,10 +74,11 @@ Accessible to users with the following role :  **standardUser**, **moderator**, 
 ## How to request
 
 ```bash
+# Each filter add an OR condition (not and AND condition). So if there are 2 filters, it will return all items matching filter1 OR filter2
 # Will return all organizations (JSON formated)
-curl -F "visible=true,false" "http://localhost:3000/api/organizations"
+curl "http://localhost:3000/api/organizations"
 # Will return organizations with ids 000000000000000000000000 & 000000000000000000000001 (JSON formated)
-curl -F "visible=true,false" -F "ids=000000000000000000000000,000000000000000000000001" "http://localhost:3000/api/organizations"
+curl "http://localhost:3000/api/organizations?ids=000000000000000000000000,000000000000000000000001"
 ```
 
 ## Result
@@ -89,7 +94,7 @@ curl -F "visible=true,false" -F "ids=000000000000000000000000,000000000000000000
 
 # (POST) /api/organizations/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Organizations routes](#organizations)*
 
 ## Description
 
@@ -146,7 +151,7 @@ curl -X POST -F "name=NAME" -F "visible=true" "http://localhost:3000/api/organiz
 
 # (PUT) /api/organizations/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Organizations routes](#organizations)*
 
 ## Description
 
@@ -206,7 +211,7 @@ curl -X PUT -F "ids=000000000000000000000000,000000000000000000000001" -F "visib
 
 # (DELETE) /api/organizations/
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Organizations routes](#organizations)*
 
 ## Description
 
@@ -260,7 +265,7 @@ curl -X DELETE -F "ids=000000000000000000000000,000000000000000000000001" "http:
 
 # (GET) /api/organizations/:id
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Organizations routes](#organizations)*
 
 ## Description
 
@@ -294,7 +299,7 @@ curl "http://localhost:3000/api/organizations/000000000000000000000000"
 
 # (PUT) /api/organizations/:id
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Organizations routes](#organizations)*
 
 ## Description
 
@@ -351,7 +356,7 @@ curl -X PUT -F "name=NAME" "http://localhost:3000/api/organizations/000000000000
 
 # (DELETE) /api/organizations/:id
 
-*[Available Routes](../API.md#available-routes)*
+*[List of Organizations routes](#organizations)*
 
 ## Description
 
