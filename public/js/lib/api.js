@@ -7,6 +7,26 @@
 const API = {
   url: `/api`,
   /**
+   * Update or Create the Hypothes.is annotation
+   * @param {object} opts JSON object containing all data
+   * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+   * @returns {undefined} undefined
+   */
+  updateOrCreateAnnotation: function (opts = {}, done) {
+    return $.ajax({
+      type: `PUT`,
+      data: _.get(opts, `data`, {}),
+      url: URLMANAGER.buildURL(`${this.url}/hypothesis/bioRxiv`, {}, { setToken: true }),
+      success: function (query) {
+        console.log(`updateOrCreateAnnotation`, query);
+        return done(false, query);
+      },
+      error: function (query) {
+        return done(query);
+      }
+    });
+  },
+  /**
    * Get the Crisp id
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
@@ -52,7 +72,7 @@ const API = {
     return $.ajax({
       type: `POST`,
       url: URLMANAGER.buildURL(`${this.url}/signin`, {}, { setToken: true }),
-      data: opts.data,
+      data: _.get(opts, `data`, {}),
       success: function (query) {
         console.log(`signin`, query);
         return done(false, query);
@@ -72,7 +92,7 @@ const API = {
     return $.ajax({
       type: `POST`,
       url: URLMANAGER.buildURL(`${this.url}/signup`, {}, { setToken: true }),
-      data: opts.data,
+      data: _.get(opts, `data`, {}),
       success: function (query) {
         console.log(`signup`, query);
         return done(false, query);
@@ -88,11 +108,11 @@ const API = {
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
    */
-  forgotPassword: function (opts, done) {
+  forgotPassword: function (opts = {}, done) {
     return $.ajax({
       type: `POST`,
       url: URLMANAGER.buildURL(`${this.url}/forgotPassword`, {}, { setToken: true }),
-      data: opts.data,
+      data: _.get(opts, `data`, {}),
       success: function (query) {
         console.log(`forgotPassword`, query);
         return done(false, query);
@@ -108,11 +128,11 @@ const API = {
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
    */
-  resetPassword: function (opts, done) {
+  resetPassword: function (opts = {}, done) {
     return $.ajax({
       type: `POST`,
       url: URLMANAGER.buildURL(`${this.url}/resetPassword`, {}, { setToken: true }),
-      data: opts.data,
+      data: _.get(opts, `data`, {}),
       success: function (query) {
         console.log(`resetPassword`, query);
         return done(false, query);
@@ -148,10 +168,12 @@ const API = {
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
    */
-  getLogs: function (model, opts, done) {
+  getLogs: function (model, opts = {}, done) {
     return $.ajax({
       type: `GET`,
-      url: URLMANAGER.buildURL(`${this.url}/${model}/${opts.id}/logs`, _.get(opts, `params`, {}), { setToken: true }),
+      url: URLMANAGER.buildURL(`${this.url}/${model}/${opts.id}/logs`, _.get(opts, `params`, {}), {
+        setToken: true
+      }),
       success: function (query) {
         console.log(`getLogs`, query);
         return done(false, query);
@@ -168,7 +190,7 @@ const API = {
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
    */
-  get: function (model, opts, done) {
+  get: function (model, opts = {}, done) {
     return $.ajax({
       type: `GET`,
       url: URLMANAGER.buildURL(`${this.url}/${model}/${opts.id}`, _.get(opts, `params`, {}), { setToken: true }),
@@ -188,7 +210,7 @@ const API = {
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
    */
-  all: function (model, opts, done) {
+  all: function (model, opts = {}, done) {
     return $.ajax({
       type: `GET`,
       url: URLMANAGER.buildURL(`${this.url}/${model}`, opts.params, { setToken: true }),
@@ -208,10 +230,10 @@ const API = {
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
    */
-  add: function (model, opts, done) {
+  add: function (model, opts = {}, done) {
     return $.ajax({
       type: `POST`,
-      data: opts.data,
+      data: _.get(opts, `data`, {}),
       url: URLMANAGER.buildURL(`${this.url}/${model}`, {}, { setToken: true }),
       success: function (query) {
         console.log(`add`, model, query);
@@ -229,10 +251,10 @@ const API = {
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
    */
-  update: function (model, opts, done) {
+  update: function (model, opts = {}, done) {
     return $.ajax({
       type: `PUT`,
-      data: opts.data,
+      data: _.get(opts, `data`, {}),
       url: URLMANAGER.buildURL(`${this.url}/${model}/${opts.data._id}`, {}, { setToken: true }),
       success: function (query) {
         console.log(`update`, model, query);
@@ -250,10 +272,10 @@ const API = {
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
    */
-  updateMany: function (model, opts, done) {
+  updateMany: function (model, opts = {}, done) {
     return $.ajax({
       type: `PUT`,
-      data: opts.data,
+      data: _.get(opts, `data`, {}),
       url: URLMANAGER.buildURL(`${this.url}/${model}`, {}, { setToken: true }),
       success: function (query) {
         console.log(`updateMany`, model, query);
@@ -271,10 +293,10 @@ const API = {
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
    */
-  delete: function (model, opts, done) {
+  delete: function (model, opts = {}, done) {
     return $.ajax({
       type: `DELETE`,
-      data: opts.data,
+      data: _.get(opts, `data`, {}),
       url: URLMANAGER.buildURL(`${this.url}/${model}/${opts.data._id}`, {}, { setToken: true }),
       success: function (query) {
         console.log(`delete`, model, query);
@@ -292,10 +314,10 @@ const API = {
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
    */
-  deleteMany: function (model, opts, done) {
+  deleteMany: function (model, opts = {}, done) {
     return $.ajax({
       type: `DELETE`,
-      data: opts.data,
+      data: _.get(opts, `data`, {}),
       url: URLMANAGER.buildURL(`${this.url}/${model}`, {}, { setToken: true }),
       success: function (query) {
         console.log(`deleteMany`, model, query);
@@ -313,10 +335,10 @@ const API = {
    * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
    * @returns {undefined} undefined
    */
-  upload: function (model, opts, done) {
+  upload: function (model, opts = {}, done) {
     return $.ajax({
       type: `POST`,
-      data: opts.data,
+      data: _.get(opts, `data`, {}),
       processData: false,
       contentType: false,
       enctype: `multipart/form-data`,
@@ -432,7 +454,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    findRepo: function (opts, done) {
+    findRepo: function (opts = {}, done) {
       return $.ajax({
         type: `POST`,
         data: opts,
@@ -507,7 +529,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    updateDataset: function (opts, done) {
+    updateDataset: function (opts = {}, done) {
       return $.ajax({
         type: `PUT`,
         data: { dataset: opts.dataset },
@@ -605,7 +627,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    getReport: function (opts, done) {
+    getReport: function (opts = {}, done) {
       return $.ajax({
         type: `GET`,
         url: URLMANAGER.buildURL(
@@ -629,7 +651,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    getPDF: function (opts, done) {
+    getPDF: function (opts = {}, done) {
       return $.ajax({
         type: `GET`,
         url: URLMANAGER.buildURL(`${this.url}/${opts.id}/pdf`, {}, { setToken: true }),
@@ -649,7 +671,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    getTEI: function (opts, done) {
+    getTEI: function (opts = {}, done) {
       return $.ajax({
         type: `GET`,
         url: URLMANAGER.buildURL(`${this.url}/${opts.id}/tei`, {}, { setToken: true }),
@@ -669,7 +691,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    getTEIContent: function (opts, done) {
+    getTEIContent: function (opts = {}, done) {
       return $.ajax({
         type: `GET`,
         url: URLMANAGER.buildURL(`${this.url}/${opts.id}/tei/content`, {}, { setToken: true }),
@@ -689,7 +711,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    refreshToken: function (opts, done) {
+    refreshToken: function (opts = {}, done) {
       return $.ajax({
         type: `POST`,
         data: {},
@@ -710,7 +732,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    reloadMetadata: function (opts, done) {
+    reloadMetadata: function (opts = {}, done) {
       return $.ajax({
         type: `POST`,
         data: {},
@@ -731,7 +753,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    validateMetadata: function (opts, done) {
+    validateMetadata: function (opts = {}, done) {
       return $.ajax({
         type: `POST`,
         data: {},
@@ -752,7 +774,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    validateDatasets: function (opts, done) {
+    validateDatasets: function (opts = {}, done) {
       return $.ajax({
         type: `POST`,
         data: {},
@@ -773,7 +795,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    reopen: function (opts, done) {
+    reopen: function (opts = {}, done) {
       return $.ajax({
         type: `POST`,
         data: {},
@@ -794,7 +816,7 @@ const API = {
      * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
      * @returns {undefined} undefined
      */
-    backToMetadata: function (opts, done) {
+    backToMetadata: function (opts = {}, done) {
       return $.ajax({
         type: `POST`,
         data: {},

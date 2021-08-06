@@ -39,6 +39,69 @@
           else return (window.location.href = window.location.href.replace(/(\/?finish\/?)$/, ``));
         });
       },
+      updateOrCreateAnnotation: function (event) {
+        let self = this;
+        let input = $(this.$refs.annotationUrl);
+        // Get the button Jquery element
+        let button = $(this.$refs.updateOrCreateAnnotation);
+        // Get the loader of the button
+        let loader = $(this.$refs.updateOrCreateAnnotationLoader);
+        // Display the loader
+        loader.show();
+        // Disable the button
+        button.prop(`disabled`, true);
+        let url = input.val();
+        if (!url || url.length <= 0) {
+          // Hide the loader
+          loader.hide();
+          // Enable the button
+          button.prop(`disabled`, false);
+          return alert(`Plese provide a valid URL`);
+        }
+        let opts = {
+          data: {
+            id: documentId,
+            url: url
+          }
+        };
+        return API.updateOrCreateAnnotation(opts, function (err, query) {
+          // Hide the loader
+          loader.hide();
+          // Enable the button
+          button.prop(`disabled`, false);
+          // Case API did not respond
+          if (err) {
+            console.log(err);
+            // Push an error notification
+            return self.notifications.push(
+              NOTIFICATIONS.create(self.notifications, {
+                kind: NOTIFICATIONS.kinds.error,
+                message: `[${err.statusText}] ${err.responseText} (HTTP ${err.status})`,
+                autoclose: false
+              })
+            );
+          }
+          // Case API did respond
+          if (query.err) {
+            // Case there is an error
+            // Push an error notification
+            return self.notifications.push(
+              NOTIFICATIONS.create(self.notifications, {
+                kind: NOTIFICATIONS.kinds.error,
+                message: query.res,
+                autoclose: false
+              })
+            );
+          }
+          return self.notifications.push(
+            NOTIFICATIONS.create(self.notifications, {
+              kind: NOTIFICATIONS.kinds.success,
+              message: `<a href="${url}" target="_blank">Hypothes.is annotation</a> has been updated!`,
+              autoclose: true
+            })
+          );
+        });
+      },
       buildPublicUrl: function (event) {
         const self = this;
         let opts = {
