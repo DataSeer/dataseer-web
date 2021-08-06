@@ -15,7 +15,7 @@
     - [Documents Files](#documents-files)
     - [Statistics](#statistics)
     - [Dataseer-ml](#dataseer-ml)
-    - [Software](#software)
+    - [Softcite](#softcite)
     - [RepoRecommender](#reporecommender)
 
 ## Responses Status Code
@@ -209,11 +209,17 @@ List of available API routes:
 
   - [(POST) /api/repoRecommender/findRepo](./API/REPORECOMMENDER.md#post-apireporecommenderfindrepo)
 
-### [Software](./API/SOFTWARE.md#software)
+### [Softcite](./API/SOFTWARE.md#softcite)
 
-  - [(POST) /api/software/processSoftwareText](./API/SOFTWARE.md#post-apisoftwareprocesssoftwaretext)
+  - [(POST) /api/softcite/processSoftwareText](./API/SOFTWARE.md#post-apisoftciteprocesssoftwaretext)
 
 ### [Statistics](./API/STATISTICS.md#statistics)
 
   - [(GET) /api/statistics/documents](./API/STATISTICS.md#get-apistatisticsdocuments)
   - [(GET) /api/statistics/documents/:id](./API/STATISTICS.md#get-apistatisticsdocumentsid)
+
+### [Hypothesis](./API/HYPOTHESIS.md#hypothesis)
+
+  - [(GET) /api/hypothesis/bioRxiv](./API/HYPOTHESIS.md#get-hypothesisbioRxiv)
+  - [(PUT) /api/hypothesis/bioRxiv](./API/HYPOTHESIS.md#put-hypothesisbioRxiv)
+  - [(GET) /api/hypothesis/bioRxiv/:id](./API/HYPOTHESIS.md#get-hypothesisbioRxivid)
