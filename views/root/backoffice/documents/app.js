@@ -113,7 +113,6 @@
       },
       multipleSelections: {
         schema: {
-          name: {},
           owner: { key: `_id` },
           organizations: { key: `_id` },
           visible: { key: `value` },
@@ -125,7 +124,6 @@
           locked: CONF.default.properties.documents.locked
         },
         properties: {
-          name: ``,
           owner: ``,
           organizations: [], /// Will be initialized with API
           visible: CONF.default.properties.documents.visible,
@@ -578,67 +576,7 @@
         });
       },
       // Add an item in app.collections.items
-      add: function (event) {
-        const self = this;
-        // Get the button Jquery element
-        let button = $(event.currentTarget);
-        // Get the row element of the item
-        let row = button.parent().parent();
-        // Get the loader of the button
-        let loader = $(self.$refs.addLoader);
-        // Build the opts data that will be sent to the API
-        let opts = {
-          data: this.getNewItemParams()
-        };
-        // Display the loader
-        loader.show();
-        // Disable the button
-        button.prop(`disabled`, true);
-        // Call add API route
-        API.add(ROUTES.main, opts, function (err, query) {
-          // Hide the loader
-          loader.hide();
-          // Enable the button
-          button.prop(`disabled`, false);
-          // Case API did not respond
-          if (err) {
-            console.log(err);
-            // Push an error notification
-            return self.notifications.push(
-              NOTIFICATIONS.create(self.notifications, {
-                kind: NOTIFICATIONS.kinds.error,
-                message: `[${err.statusText}] ${err.responseText} (HTTP ${err.status})`,
-                autoclose: false
-              })
-            );
-          }
-          // Case API did respond
-          // Case there is an error
-          if (query.err) {
-            return self.notifications.push(
-              NOTIFICATIONS.create(self.notifications, {
-                kind: NOTIFICATIONS.kinds.error,
-                message: query.res
-              })
-            );
-          }
-          // Case there is a success
-          self.collection.items.push(self.createItem(query.res));
-          // Reset fileds
-          self.newItem.properties.username = ``;
-          self.newItem.properties.fullname = ``;
-          self.newItem.properties.password = ``;
-          let url = URLMANAGER.buildURL(`/backoffice/${ROUTES.main}/${query.res._id.toString()}`);
-          return self.notifications.push(
-            // Push a success notification
-            NOTIFICATIONS.create(self.notifications, {
-              kind: NOTIFICATIONS.kinds.success,
-              message: `<a href="${url}" target="_blank">${query.res.name}</a> has been created!`,
-              autoclose: true
-            })
-          );
-        });
-      },
+      add: function (event) {},
       // Set selected state (true/false) for all items of this.collection.items
       setSelectedStateOfAllItems: function (event) {
         this.collection.selectedItemsCount = this.collection.items
@@ -1017,7 +955,7 @@
       // Get "search" params representation ("well formated" representation of app.search.properties used to request API or build an URL)
       getSearchParams: function (token) {
         let self = this;
-        let result = { token: token };
+        let result = { token: token, metadata: true };
         // Build data properties
         for (let property in this.search.schema) {
           // If it's an array so filter & map it
