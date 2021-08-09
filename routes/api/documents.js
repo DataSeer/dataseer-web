@@ -442,7 +442,7 @@ router.get(`/:id/pdf/content`, function (req, res, next) {
 });
 
 /* GET TEI of document */
-router.get(`/:id/tei/`, function (req, res, next) {
+router.get(`/:id/tei`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
   let opts = {

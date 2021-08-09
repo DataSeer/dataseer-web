@@ -9,3 +9,9 @@
 .input-select {
   width: 350px;
 }
+
+.article_title {
+  max-height: 125px;
+  text-overflow: ellipsis;
+  overflow: auto;
+}

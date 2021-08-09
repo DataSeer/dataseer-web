@@ -6,7 +6,7 @@
 
 const mongoose = require(`mongoose`);
 
-let Schema = new mongoose.Schema(
+const Schema = new mongoose.Schema(
   {
     target: { type: mongoose.Schema.Types.ObjectId, ref: `Roles`, required: true }, // refers to accounts collection
     account: { type: mongoose.Schema.Types.ObjectId, ref: `Accounts`, required: true }, // refers to accounts collection

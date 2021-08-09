@@ -26,3 +26,9 @@ button > svg {
 .buttons .right {
   text-align: right;
 }
+
+input[type="text"][name="annotationUrl"] {
+  max-width: 250px;
+  display: inline-block;
+  margin-right: 10px;
+}

@@ -30,7 +30,7 @@
 
 ---
 
-# (GET) /api/documents/
+# (GET) /api/documents
 
 *[List of Documents routes](#documents)*
 
@@ -301,7 +301,7 @@ curl -X POST -F "file=@/path/to/my/file.pdf" -F "mute=true" -F "dataseerML=false
 
 ---
 
-# (PUT) /api/documents/
+# (PUT) /api/documents
 
 *[List of Documents routes](#documents)*
 
@@ -386,7 +386,7 @@ curl -X PUT -F "ids=000000000000000000000000,000000000000000000000001" -F "name=
 
 ---
 
-# (DELETE) /api/documents/
+# (DELETE) /api/documents
 
 *[List of Documents routes](#documents)*
 

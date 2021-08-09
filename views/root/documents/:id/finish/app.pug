@@ -28,7 +28,7 @@
         </div>
       </div>
       <div class="row buttons">
-        <div class="col">
+        <div class="col left">
           <a target="_blank" :href="docxDefaultReportLink">
             <button class="btn btn-md btn-primary">DataSeer .docx report</button>
           </a>
@@ -38,6 +38,13 @@
           <a target="_blank" :href="htmlBioRxivReportLink">
             <button class="btn btn-md btn-primary">bioRxiv HTML report</button>
           </a>
+        </div>
+        <div class="col right" v-if="user.role && user.role.key === 'administrator'">
+          <input class="form-control" type="text" ref="annotationUrl" name="annotationUrl" placeholder="URL of the document" />
+          <button class="btn btn-md btn-primary" v-on:click.stop="updateOrCreateAnnotation()" ref="updateOrCreateAnnotation">Update hypothes.is Annotation</button>
+          <span class="loader-md" ref="updateOrCreateAnnotationLoader">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
         </div>
       </div>
       <div class="row align-items-center" v-if="loading">

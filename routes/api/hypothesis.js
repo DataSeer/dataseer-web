@@ -41,7 +41,7 @@ router.get(`/bioRxiv`, function (req, res, next) {
 });
 
 /* PUT bioRxiv annotation */
-router.put(`/bioRxiv/`, function (req, res, next) {
+router.put(`/bioRxiv`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
   if (!Params.checkString(req.body.url))

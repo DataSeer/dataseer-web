@@ -723,7 +723,9 @@
         // Get the loader of the button
         let loader = $(self.$refs.searchLoader);
         // Refresh search properties
-        self.refreshSearchProperties(self.getSearchParams(self.getCurrentURLParams().token));
+        let params = self.getSearchParams(self.getCurrentURLParams().token);
+        params.ids = []; // Reset list of ids
+        self.refreshSearchProperties(params);
         // Display the loader
         loader.show();
         // Refresh interface (keep, search, multipleSelections, newItem)

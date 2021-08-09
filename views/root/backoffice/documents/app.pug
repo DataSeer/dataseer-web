@@ -203,11 +203,11 @@
           <input ref="multipleSelectionsCheckbox" type="checkbox" @change="setSelectedStateOfAllItems($event)" />
         </div>
         <div class="col text-truncate">Url(s)</div>
-        <div class="col sorting" v-on:click.stop="sort($event)" property="upload.date">Upload at</div>
-        <div class="col sorting" v-on:click.stop="sort($event)" property="status">Status</div>
-        <div class="col sorting" v-on:click.stop="sort($event)" property="name">Name</div>
-        <div class="col sorting" v-on:click.stop="sort($event)" property="owner">Owner</div>
-        <div class="col">Organizations</div>
+        <div class="col text-truncate sorting" v-on:click.stop="sort($event)" property="upload.date">Upload at</div>
+        <div class="col text-truncate sorting" v-on:click.stop="sort($event)" property="status">Status</div>
+        <div class="col sorting" v-on:click.stop="sort($event)" property="metadata.article_title">Article Title</div>
+        <div class="col text-truncate sorting" v-on:click.stop="sort($event)" property="owner">Owner</div>
+        <div class="col text-truncate">Organizations</div>
         <div class="col">Properties</div>
         <div class="col text-truncate">Action</div>
       </div>
@@ -239,8 +239,8 @@
         <div class="col text-truncate">
           <span>n/a</span>
         </div>
-        <div class="col text-truncate">
-          <input type="text" class="form-control" name="name" v-model="multipleSelections.properties.name" placeholder="Name" />
+        <div class="col">
+          <span>n/a</span>
         </div>
         <div class="col text-truncate">
           <select class="custom-select form-select" name="accounts" v-model="multipleSelections.properties.owner">
@@ -278,7 +278,7 @@
               | Visible
             </label>
           </div>
-          <div class="form-check form-switch" :title="multipleSelections.properties.locked ? 'Enabled' : 'Locked'">
+          <div class="form-check form-switch" :title="multipleSelections.properties.locked ? 'Locked' : 'Unlocked'">
             <label>
               <input class="form-check-input" type="checkbox" v-model="multipleSelections.properties.locked" />
               | Locked
@@ -335,8 +335,8 @@
           <label class="text" v-if="item.properties.status === 'datasets'">Datasets validation</label>
           <label class="text" v-if="item.properties.status === 'finish'">Process Finished</label>
         </div>
-        <div class="col text-truncate">
-          <input type="text" class="form-control" v-on:change="modified(item.properties._id)" name="name" v-model="item.properties.name" />
+        <div class="col article_title">
+          | {{ item.properties.metadata.article_title }}
         </div>
         <div class="col text-truncate">
           <select class="custom-select form-select" name="accounts" v-model="item.properties.owner._id">
@@ -368,13 +368,13 @@
           </div>        
         </div>
         <div class="col">
-          <div class="form-check form-switch" :title="multipleSelections.properties.visible ? 'Visible' : 'Invisible'">
+          <div class="form-check form-switch" :title="item.properties.visible ? 'Visible' : 'Invisible'">
             <label>
               <input class="form-check-input" v-on:change="modified(item.properties._id)" type="checkbox" v-model="item.properties.visible" />
               | Visible
             </label>
           </div>
-          <div class="form-check form-switch" :title="multipleSelections.properties.locked ? 'Enabled' : 'Locked'">
+          <div class="form-check form-switch" :title="item.properties.locked ? 'Locked' : 'Unlocked'">
             <label>
               <input class="form-check-input" v-on:change="modified(item.properties._id)" type="checkbox" v-model="item.properties.locked" />
               | Locked
