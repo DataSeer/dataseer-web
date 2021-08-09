@@ -34,7 +34,7 @@ const CONF = {
         documents: {
           skip: 0,
           limit: 50,
-          sort: `asc`
+          sort: `desc`
         },
         organizations: {
           skip: 0,
