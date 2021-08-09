@@ -37,7 +37,7 @@ const URLMANAGER = {
     }
   },
   buildParams: function (params = {}) {
-    let currentUrl = new URL(window.location.href); // get the current URL
+    let currentUrl = new URL(window.location.href.split(`?`)[0]); // get the current URL (without params)
     // Add params into the new URL
     for (let key in params) {
       if (typeof params[key] !== `undefined`) {
