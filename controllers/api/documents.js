@@ -1794,6 +1794,7 @@ Self.all = function (opts = {}, cb) {
   if (pdf) transaction.populate(`pdf`);
   if (tei) transaction.populate(`tei`);
   if (files) transaction.populate(`files`);
+  transaction.sort(sort === `asc` ? { _id: 1 } : { _id: -1 });
   return transaction.exec(function (err, docs) {
     if (err) return cb(err);
     let result = {
