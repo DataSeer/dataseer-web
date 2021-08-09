@@ -1688,7 +1688,7 @@ Self.all = function (opts = {}, cb) {
   // Check if user is visitor
   if (!accessRights.isStandardUser) return cb(null, []);
   // Build query data from opts
-  let ids = Params.convertToInteger(opts.data.ids);
+  let ids = Params.convertToArray(opts.data.ids, `string`);
   let limit = Params.convertToInteger(opts.data.limit);
   let skip = Params.convertToInteger(opts.data.skip);
   let owners = Params.convertToArray(opts.data.owners, `string`);
@@ -1770,6 +1770,7 @@ Self.all = function (opts = {}, cb) {
     query.visible = [true];
   }
   let params = {
+    ids,
     limit,
     skip,
     owners,
