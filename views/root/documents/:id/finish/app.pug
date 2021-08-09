@@ -39,7 +39,7 @@
             <button class="btn btn-md btn-primary">bioRxiv HTML report</button>
           </a>
         </div>
-        <div class="col right">
+        <div class="col right" v-if="user.role && user.role.key === 'administrator'">
           <input class="form-control" type="text" ref="annotationUrl" name="annotationUrl" placeholder="URL of the document" />
           <button class="btn btn-md btn-primary" v-on:click.stop="updateOrCreateAnnotation()" ref="updateOrCreateAnnotation">Update hypothes.is Annotation</button>
           <span class="loader-md" ref="updateOrCreateAnnotationLoader">
