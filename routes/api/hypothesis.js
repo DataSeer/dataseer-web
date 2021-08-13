@@ -55,45 +55,25 @@ router.put(`/bioRxiv`, function (req, res, next) {
       res: `Missing required data: id`
     });
   let id = Params.convertToString(req.body.id);
+  let url = Params.convertToString(req.body.url);
   let opts = {
     data: {
       id: id,
-      kind: `html`,
-      organization: `bioRxiv`,
-      dataTypes: req.app.get(`dataTypes`)
+      url: url
     },
+    dataTypes: req.app.get(`dataTypes`),
     user: req.user
   };
-  return DocumentsController.getReportData(opts, function (err, data) {
+  return DocumentsController.updateOrCreateHypothesisAnnotation(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
     let isError = data instanceof Error;
     let result = isError ? data.toString() : data;
-    if (isError) return res.status(404).send(conf.errors.notFound);
-    let url = Params.convertToString(req.body.url);
-    let content = Hypothesis.buildAnnotationContent({
-      data: {
-        publicURL: `${Url.build(`/documents/${id}`, { token: data.doc.token })}`,
-        reportData: data
-      }
-    });
-    if (content instanceof Error) {
-      console.log(content);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    return Hypothesis.updateOrCreateAnnotation({ url: url, text: content }, function (err, annotation) {
-      if (err) {
-        console.log(err);
-        return res.status(500).send(conf.errors.internalServerError);
-      }
-      let isError = annotation instanceof Error;
-      let result = isError ? annotation.toString() : annotation;
-      return res.json({
-        err: isError,
-        res: result
-      });
+    return res.json({
+      err: isError,
+      res: result
     });
   });
 });

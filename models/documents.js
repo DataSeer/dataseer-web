@@ -21,6 +21,10 @@ const Schema = new mongoose.Schema(
     ),
     name: { type: String, default: `` }, // document name
     status: { type: String, default: `` }, // document status
+    urls: {
+      bioRxiv: { type: String, default: `` }, // bioRxiv
+      hypothesis: { type: String, default: `` } // hypothesis annotation
+    },
     softcite: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (softcite)
     pdf: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (pdf)
     tei: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (tei)
@@ -28,9 +32,9 @@ const Schema = new mongoose.Schema(
     metadata: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsMetadata` }, // refers to documents.metadata collection item
     files: [{ type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles` }], // refers to documents.files collection items (all kind of files)
     organizations: [{ type: mongoose.Schema.Types.ObjectId, ref: `Organizations` }], // refers to organizations collection item
-    owner: { type: mongoose.Schema.Types.ObjectId, ref: `Accounts` }, // refers to documents.datasets collection item
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: `Accounts` }, // refers to accounts collection item
     watchers: [{ type: mongoose.Schema.Types.ObjectId, ref: `Accounts` }], // refers to documents.accounts collection item
-    token: { type: String, default: `` }, // refers to documents.datasets collection item
+    token: { type: String, default: `` }, // document token
     visible: { type: Boolean, default: true, required: true }, // document visibility
     locked: { type: Boolean, default: false, required: true }, // document lock
     upload: uploadSchema
