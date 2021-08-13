@@ -1,0 +1,23 @@
+/*
+ * @prettier
+ */
+
+body {
+  padding: 10px;
+}
+
+img {
+  text-align: center;
+  margin: auto;
+  display: flex;
+}
+
+div#graphic {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+label {
+  text-align: center;
+  display: block;
+}

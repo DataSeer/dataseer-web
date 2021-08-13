@@ -16,6 +16,7 @@
       docxDefaultReportLink: ``,
       htmlDefaultReportLink: ``,
       htmlBioRxivReportLink: ``,
+      asapGraphicLink: ``,
       publicUrl: ``,
       loading: true
     },
@@ -93,6 +94,7 @@
               })
             );
           }
+          self.document.urls.hypothesis = url;
           return self.notifications.push(
             NOTIFICATIONS.create(self.notifications, {
               kind: NOTIFICATIONS.kinds.success,
@@ -177,6 +179,10 @@
                   `api/documents/${self.document._id.toString()}/reports/html/bioRxiv`,
                   {}
                 );
+                self.asapGraphicLink = URLMANAGER.buildURL(
+                  `api/documents/${self.document._id.toString()}/graphics/asap`,
+                  {}
+                );
                 self.publicUrl = URLMANAGER.buildURL(
                   `documents/${self.document._id.toString()}`,
                   {
@@ -203,7 +209,6 @@
                     return next();
                   }
                   let iframe = $(self.$refs.report);
-                  console.log(iframe);
                   let doc = iframe.get(0).contentWindow.document;
                   doc.open();
                   doc.write(query);

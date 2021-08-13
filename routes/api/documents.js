@@ -13,6 +13,7 @@ const Mailer = require(`../../lib/mailer.js`);
 const Params = require(`../../lib/params.js`);
 const DocX = require(`../../lib/docx.js`);
 const Url = require(`../../lib/url.js`);
+const Graphics = require(`../../lib/graphics.js`);
 
 const DocumentsFilesController = require(`../../controllers/api/documents.files.js`);
 const DocumentsController = require(`../../controllers/api/documents.js`);
@@ -812,6 +813,38 @@ router.post(`/:id/finish/reopen`, function (req, res, next) {
       err: isError,
       res: result
     });
+  });
+});
+
+/* Document graphics for ASAP */
+router.get(`/:id/graphics/asap`, function (req, res) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    data: {
+      id: req.params.id
+    },
+    user: req.user
+  };
+  return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc) return res.status(404).send(conf.errors.notFound);
+    return Graphics.buildASAPPie(
+      {
+        data: {
+          urls: {
+            bioRxiv: doc.urls.bioRxiv,
+            document: `${Url.build(`/documents/${req.params.id}`)}`
+          }
+        }
+      },
+      function (err, html) {
+        return res.send(html);
+      }
+    );
   });
 });
 
