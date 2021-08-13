@@ -209,7 +209,6 @@
                     return next();
                   }
                   let iframe = $(self.$refs.report);
-                  console.log(iframe);
                   let doc = iframe.get(0).contentWindow.document;
                   doc.open();
                   doc.write(query);
