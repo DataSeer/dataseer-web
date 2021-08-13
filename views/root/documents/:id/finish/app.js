@@ -180,7 +180,7 @@
                   {}
                 );
                 self.asapGraphicLink = URLMANAGER.buildURL(
-                  `documents/${self.document._id.toString()}/graphics/asap`,
+                  `api/documents/${self.document._id.toString()}/graphics/asap`,
                   {}
                 );
                 self.publicUrl = URLMANAGER.buildURL(
