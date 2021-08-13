@@ -41,7 +41,7 @@
       .call((g) =>
         g
           .selectAll(`g`)
-          .data(y.ticks().reverse())
+          .data(y.ticks(20).reverse())
           .join(`g`)
           .attr(`fill`, `none`)
           /*.call(g => g.append("circle")
@@ -56,7 +56,7 @@
               .attr(`dx`, `-1em`)
               .attr(`stroke`, `#fff`)
               .attr(`stroke-width`, 5)
-              .text((d) => (d > 0 && d < 100 ? `-` : ``)) // Hide first & last "scale"
+              .text((d) => (d > 0 && d < 100 && d % 25 === 0 ? `-` : ``)) // Hide first & last "scale"
               .clone(true)
               .attr(`fill`, `currentColor`)
               .attr(`stroke`, `none`)
@@ -69,7 +69,7 @@
               .attr(`dx`, `-2em`)
               .attr(`stroke`, `#fff`)
               .attr(`stroke-width`, 5)
-              .text((x, i) => (x ? `${x.toFixed(0)}%` : ``))
+              .text((x, i) => (x > 0 && x < 100 && x % 25 === 0 ? `${x.toFixed(0)}%` : ``))
               .clone(true)
               .attr(`fill`, `currentColor`)
               .attr(`stroke`, `none`)
@@ -184,7 +184,7 @@
       .append(`g`)
       .append(`circle`)
       .attr(`fill`, `white`)
-      .attr(`stroke`, `white`)
+      .attr(`stroke`, `black`)
       .attr(`r`, y(0) + 5);
 
     // Labels

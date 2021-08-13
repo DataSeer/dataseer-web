@@ -1,6 +1,7 @@
 /*
  * @prettier
  */
+
 .add-item {
   max-width: 16rem !important;
 }
@@ -14,4 +15,13 @@
   max-height: 125px;
   text-overflow: ellipsis;
   overflow: auto;
+}
+
+.item label {
+  text-align: center;
+  width: 100%;
+}
+
+.item button[name="showLogs"] {
+  margin-top: 5px;
 }

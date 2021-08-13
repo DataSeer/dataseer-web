@@ -272,7 +272,7 @@
               <option v-for="role in collection.dependencies.roles" :value="role._id" v-if="user.role && role.weight <= user.role.weight" >
                 | {{ role.label }}
               </option>
-            </select v-if="user.role && item.properties.role.weight > user.role.weight">
+            </select>
             <!-- Case you dont have right on this user -->
             <select class="custom-select form-select" v-if="user.role && item.properties.role.weight > user.role.weight" v-model="item.properties.role._id">
               <option :value="item.properties.role._id">
