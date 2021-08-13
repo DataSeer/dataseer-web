@@ -203,12 +203,12 @@
           <input ref="multipleSelectionsCheckbox" type="checkbox" @change="setSelectedStateOfAllItems($event)" />
         </div>
         <div class="col text-truncate">Url(s)</div>
+        <div class="col sorting" v-on:click.stop="sort($event)" property="name">Name</div>
         <div class="col text-truncate sorting" v-on:click.stop="sort($event)" property="upload.date">Upload at</div>
         <div class="col text-truncate sorting" v-on:click.stop="sort($event)" property="status">Status</div>
         <div class="col sorting" v-on:click.stop="sort($event)" property="metadata.article_title">Article Title</div>
         <div class="col text-truncate sorting" v-on:click.stop="sort($event)" property="owner">Owner</div>
         <div class="col text-truncate">Organizations</div>
-        <div class="col">Properties</div>
         <div class="col text-truncate">Action</div>
       </div>
       <div class="collection-row row align-items-center">
@@ -234,12 +234,15 @@
           <span>n/a</span>
         </div>
         <div class="col text-truncate">
+          <input type="text" class="form-control" name="name" v-model="multipleSelections.properties.name" placeholder="Name" disabled />
+        </div>
+        <div class="col text-truncate">
           <input class="form-control" type="date" disabled>
         </div>
         <div class="col text-truncate">
           <span>n/a</span>
         </div>
-        <div class="col">
+        <div class="col text-truncate">
           <span>n/a</span>
         </div>
         <div class="col text-truncate">
@@ -270,20 +273,6 @@
               </ul>
             </div>
           </div>  
-        </div>
-        <div class="col">
-          <div class="form-check form-switch" :title="multipleSelections.properties.visible ? 'Visible' : 'Invisible'">
-            <label>
-              <input class="form-check-input" type="checkbox" v-model="multipleSelections.properties.visible" />
-              | Visible
-            </label>
-          </div>
-          <div class="form-check form-switch" :title="multipleSelections.properties.locked ? 'Locked' : 'Unlocked'">
-            <label>
-              <input class="form-check-input" type="checkbox" v-model="multipleSelections.properties.locked" />
-              | Locked
-            </label>
-          </div>
         </div>
         <div class="col text-truncate">
           <button class="btn btn-md btn-primary" v-on:click.stop="updateMultipleItems(event)">
@@ -324,6 +313,11 @@
             <i class="fas fa-external-link-alt"></i>
             | DataSeer report
           </a>
+        </div>
+        <div class="col text-truncate">
+          <label class="text-truncate" :title="item.properties.name">
+          | {{ item.properties.name }}
+          </label>
         </div>
         <div class="col text-truncate">
           <label>
@@ -368,20 +362,6 @@
           </div>        
         </div>
         <div class="col">
-          <div class="form-check form-switch" :title="item.properties.visible ? 'Visible' : 'Invisible'">
-            <label>
-              <input class="form-check-input" v-on:change="modified(item.properties._id)" type="checkbox" v-model="item.properties.visible" />
-              | Visible
-            </label>
-          </div>
-          <div class="form-check form-switch" :title="item.properties.locked ? 'Locked' : 'Unlocked'">
-            <label>
-              <input class="form-check-input" v-on:change="modified(item.properties._id)" type="checkbox" v-model="item.properties.locked" />
-              | Locked
-            </label>
-          </div>
-        </div>
-        <div class="col text-truncate">
           <button v-on:click.stop="updateItem($event)" class="btn btn-md btn-primary" :value="item.properties._id" title="Update this item">
             <i class="far fa-save"></i>
           </button>
@@ -400,6 +380,34 @@
           <span class="loader-sm" value="delete">
             <i class="fas fa-circle-notch fa-spin"></i>
           </span>
+          <button class="btn btn-sm btn-primary" v-on:click.stop="showLogs(item.properties._id)" data-bs-toggle="modal" data-bs-target="#showLogs" name="showLogs">Show logs</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal to display logs -->
+  <div class="modal fade" id="showLogs" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Logs</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" v-on:click.stop="hideLogs(event)"></button>
+        </div>
+        <div class="modal-body">
+          <div v-for="log in collection.logs">
+            <span>
+              <b>
+              | {{ log.account.username }}
+              </b> 
+              | - {{ log.key }} - 
+              <i>
+              | {{ log.dates[log.dates.length-1] }}
+              </i>
+            </span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-lg btn-primary" data-bs-dismiss="modal" v-on:click.stop="hideLogs(event)">Close</button>
         </div>
       </div>
     </div>

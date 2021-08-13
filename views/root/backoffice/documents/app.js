@@ -82,6 +82,7 @@
           locked: {}
         },
         items: [], // Will be initialized with API
+        logs: [],
         selectedItemsCount: 0,
         dependencies: {
           visible: [{ value: true }, { value: false }],
@@ -178,6 +179,40 @@
       }
     },
     methods: {
+      showLogs: function (id) {
+        const self = this;
+        // Get logs from an document ID
+        return API.getLogs(ROUTES.main, { id: id }, function (err, res) {
+          if (err)
+            // Push an error notification
+            return self.notifications.push(
+              NOTIFICATIONS.create(self.notifications, {
+                kind: NOTIFICATIONS.kinds.error,
+                message: `${err.toString()}`,
+                autoclose: false
+              })
+            );
+          // Map all log and reformat them and push them to collection.logs
+          res.res.map(function (item) {
+            // Reformat date
+            item.dates.map(function (item) {
+              return `${new Date(item).toLocaleDateString()} ${new Date(item).toLocaleTimeString()}`;
+            });
+            self.collection.logs.push({
+              key: item.key !== `` ? `${item.kind.key} ${item.key}` : item.kind.key,
+              dates: item.dates.map(function (item) {
+                return `${new Date(item).toLocaleDateString()} ${new Date(item).toLocaleTimeString()}`;
+              }),
+              target: item.target,
+              account: item.account
+            });
+          });
+        });
+      },
+      hideLogs: function (event) {
+        // Just clear the logs array
+        this.collection.logs = [];
+      },
       // Refresh a document token
       refreshToken: function (event) {
         const self = this;
