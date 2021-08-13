@@ -21,6 +21,10 @@ const Schema = new mongoose.Schema(
     ),
     name: { type: String, default: `` }, // document name
     status: { type: String, default: `` }, // document status
+    urls: {
+      bioRxiv: { type: String, default: `` }, // bioRxiv
+      hypothesis: { type: String, default: `` } // hypothesis annotation
+    },
     softcite: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (softcite)
     pdf: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (pdf)
     tei: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (tei)

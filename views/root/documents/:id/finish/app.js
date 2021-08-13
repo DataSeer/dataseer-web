@@ -16,6 +16,7 @@
       docxDefaultReportLink: ``,
       htmlDefaultReportLink: ``,
       htmlBioRxivReportLink: ``,
+      asapGraphicLink: ``,
       publicUrl: ``,
       loading: true
     },
@@ -93,6 +94,7 @@
               })
             );
           }
+          self.document.urls.hypothesis = url;
           return self.notifications.push(
             NOTIFICATIONS.create(self.notifications, {
               kind: NOTIFICATIONS.kinds.success,
@@ -175,6 +177,10 @@
                 );
                 self.htmlBioRxivReportLink = URLMANAGER.buildURL(
                   `api/documents/${self.document._id.toString()}/reports/html/bioRxiv`,
+                  {}
+                );
+                self.asapGraphicLink = URLMANAGER.buildURL(
+                  `documents/${self.document._id.toString()}/graphics/asap`,
                   {}
                 );
                 self.publicUrl = URLMANAGER.buildURL(

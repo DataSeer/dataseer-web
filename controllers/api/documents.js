@@ -32,6 +32,7 @@ const DataseerML = require(`../../lib/dataseer-ml.js`);
 const Softcite = require(`../../lib/softcite.js`);
 const DataTypes = require(`../../lib/dataTypes.js`);
 const DocX = require(`../../lib/docx.js`);
+const Hypothesis = require(`../../lib/hypothesis.js`);
 
 const conf = require(`../../conf/conf.json`);
 
@@ -1952,6 +1953,71 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
 };
 
 /**
+ * Update or create n hypothesis annotation
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.dataTypes - dataTypes object
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.id - Id of the document
+ * @param {string} opts.data.url - Url of the document
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.updateOrCreateHypothesisAnnotation = function (opts, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `dataTypes`) === `undefined`) return cb(new Error(`Missing required data: opts.dataTypes`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  if (typeof _.get(opts, `data.url`) === `undefined`) return cb(new Error(`Missing required data: opts.data.url`));
+  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  let id = Params.convertToString(opts.data.id);
+  return Self.getReportData(
+    {
+      data: {
+        id: id,
+        kind: `html`,
+        organization: `bioRxiv`,
+        dataTypes: opts.dataTypes
+      },
+      user: opts.user
+    },
+    function (err, data) {
+      if (err) return cb(err);
+      if (data instanceof Error) return cb(null, data);
+      let url = Params.convertToString(opts.data.url);
+      let content = Hypothesis.buildAnnotationContent({
+        data: {
+          publicURL: `${Url.build(`/documents/${id}`, { token: data.doc.token })}`,
+          reportData: data
+        }
+      });
+      if (content instanceof Error) return cb(content);
+      return Hypothesis.updateOrCreateAnnotation({ url: url, text: content }, function (err, annotation) {
+        if (err) return cb(err);
+        return Self.update(
+          {
+            user: opts.user,
+            data: {
+              id: id,
+              urls: { hypothesis: url }
+            },
+            logs: false
+          },
+          function (err, res) {
+            if (err) return cb(err);
+            if (res instanceof Error) return cb(null, res);
+            return cb(null, annotation);
+          }
+        );
+      });
+    }
+  );
+};
+
+/**
  * Get document by id
  * @param {object} opts - Options available
  * @param {object} opts.user - Current user
@@ -2033,6 +2099,7 @@ Self.get = function (opts = {}, cb) {
  * @param {string} opts.data.name - Name of the document
  * @param {array} opts.data.organizations - Array of organizations id
  * @param {string} opts.data.owner - Owner of the document
+ * @param {object} opts.data.urls - Urls of the document
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
  * @returns {undefined} undefined
@@ -2105,6 +2172,14 @@ Self.update = function (opts = {}, cb) {
               }
               return next();
             });
+          },
+          // Update urls property
+          function (next) {
+            if (typeof _.get(opts, `data.urls`) !== `object`) return next();
+            if (Params.checkString(opts.data.urls.bioRxiv)) doc.urls.bioRxiv = opts.data.urls.bioRxiv;
+            if (Params.checkString(opts.data.urls.hypothesis) && accessRights.isAdministrator)
+              doc.urls.hypothesis = opts.data.urls.hypothesis;
+            return next();
           }
         ],
         function (action, next) {

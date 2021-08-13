@@ -38,9 +38,12 @@
           <a target="_blank" :href="htmlBioRxivReportLink">
             <button class="btn btn-md btn-primary">bioRxiv HTML report</button>
           </a>
+          <a target="_blank" :href="asapGraphicLink">
+            <button class="btn btn-md btn-primary">ASAP Graphic</button>
+          </a>
         </div>
         <div class="col right" v-if="user.role && user.role.key === 'administrator'">
-          <input class="form-control" type="text" ref="annotationUrl" name="annotationUrl" placeholder="URL of the document" />
+          <input class="form-control" type="text" ref="annotationUrl" name="annotationUrl" placeholder="URL of the document" :value="document.urls && document.urls.hypothesis ? document.urls.hypothesis : ''" />
           <button class="btn btn-md btn-primary" v-on:click.stop="updateOrCreateAnnotation()" ref="updateOrCreateAnnotation">Update hypothes.is Annotation</button>
           <span class="loader-md" ref="updateOrCreateAnnotationLoader">
             <i class="fas fa-circle-notch fa-spin"></i>
