@@ -339,7 +339,7 @@ Self.upload = function (opts = {}, cb) {
                         documentId: acc._id.toString(),
                         file: {
                           name: `${params.file.name}.ds-ml.tei.xml`,
-                          data: XML.addSentencesId(tei.toString(DocumentsFilesController.encoding)),
+                          data: XML.addSentencesId(tei.toString(`utf8`)).toString(DocumentsFilesController.encoding),
                           mimetype: `application/xml`,
                           encoding: DocumentsFilesController.encoding
                         },
@@ -380,7 +380,7 @@ Self.upload = function (opts = {}, cb) {
                         documentId: acc._id.toString(),
                         file: {
                           name: `${params.file.name}.softcite.json`,
-                          data: json.toString(DocumentsFilesController.encoding),
+                          data: json.toString(`utf8`).toString(DocumentsFilesController.encoding),
                           mimetype: `application/json`,
                           encoding: DocumentsFilesController.encoding
                         },
