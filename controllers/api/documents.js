@@ -2068,7 +2068,7 @@ Self.fixEncoding = function (opts = {}, cb) {
                 if (content instanceof Error) return next(content);
                 return DocumentsFilesController.rewriteFile(
                   doc.softcite.toString(),
-                  Encoding.fix(content.data.toString(), true),
+                  Encoding.fix(content.data.toString()),
                   function (err) {
                     if (err) return next(err);
                     else return next();
