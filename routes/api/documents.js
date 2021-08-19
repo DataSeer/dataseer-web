@@ -277,6 +277,29 @@ router.put(`/:id/datasets`, function (req, res, next) {
   });
 });
 
+/* PUT fixEncoding */
+router.put(`/:id/fixEncoding`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: { id: req.params.id },
+    user: req.user
+  };
+  return DocumentsController.fixEncoding(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
 /* GET SINGLE Document logs BY ID */
 router.get(`/:id/logs`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
