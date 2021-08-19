@@ -2043,13 +2043,13 @@ Self.fixEncoding = function (opts = {}, cb) {
       [
         // Fix TEI
         function (next) {
-          if (typeof _.get(doc, `tei`) !== `undefined`)
+          if (_.get(doc, `tei`))
             return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
               if (err) return next(err);
               if (content instanceof Error) return next(content);
               return DocumentsFilesController.rewriteFile(
                 doc.tei.toString(),
-                Encoding.fix(content.data.toString()),
+                Encoding.fix(content.data.toString(), true),
                 function (err) {
                   if (err) return next(err);
                   else return next();
@@ -2060,7 +2060,7 @@ Self.fixEncoding = function (opts = {}, cb) {
         },
         // Fix Softcite
         function (next) {
-          if (typeof _.get(doc, `softcite`) !== `undefined`)
+          if (_.get(doc, `softcite`))
             return DocumentsFilesController.readFile(
               { data: { id: doc.softcite.toString() } },
               function (err, content) {
@@ -2068,7 +2068,7 @@ Self.fixEncoding = function (opts = {}, cb) {
                 if (content instanceof Error) return next(content);
                 return DocumentsFilesController.rewriteFile(
                   doc.softcite.toString(),
-                  Encoding.fix(content.data.toString()),
+                  Encoding.fix(content.data.toString(), true),
                   function (err) {
                     if (err) return next(err);
                     else return next();
@@ -2080,7 +2080,7 @@ Self.fixEncoding = function (opts = {}, cb) {
         },
         // Refresh Datasets
         function (next) {
-          if (typeof _.get(doc, `datasets`) !== `undefined`)
+          if (_.get(doc, `datasets`))
             return DocumentsDatasets.findOne({ _id: doc.datasets.toString() }).exec(function (err, datasets) {
               if (err) return next(err);
               if (!datasets) return next(new Error(`Datasets not found`));
