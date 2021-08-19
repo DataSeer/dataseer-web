@@ -33,6 +33,7 @@ const Softcite = require(`../../lib/softcite.js`);
 const DataTypes = require(`../../lib/dataTypes.js`);
 const DocX = require(`../../lib/docx.js`);
 const Hypothesis = require(`../../lib/hypothesis.js`);
+const Encoding = require(`../../lib/encoding.js`);
 
 const conf = require(`../../conf/conf.json`);
 
@@ -2015,6 +2016,123 @@ Self.updateOrCreateHypothesisAnnotation = function (opts, cb) {
       });
     }
   );
+};
+
+/**
+ * Fix document encoding by id
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.id - Id of the document
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.fixEncoding = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  let id = Params.convertToString(opts.data.id);
+  return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    return async.mapSeries(
+      [
+        // Fix TEI
+        function (next) {
+          if (_.get(doc, `tei`))
+            return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
+              if (err) return next(err);
+              if (content instanceof Error) return next(content);
+              return DocumentsFilesController.rewriteFile(
+                doc.tei.toString(),
+                Encoding.fix(content.data.toString(), true),
+                function (err) {
+                  if (err) return next(err);
+                  else return next();
+                }
+              );
+            });
+          return next();
+        },
+        // Fix Softcite
+        function (next) {
+          if (_.get(doc, `softcite`))
+            return DocumentsFilesController.readFile(
+              { data: { id: doc.softcite.toString() } },
+              function (err, content) {
+                if (err) return next(err);
+                if (content instanceof Error) return next(content);
+                return DocumentsFilesController.rewriteFile(
+                  doc.softcite.toString(),
+                  Encoding.fix(content.data.toString(), true),
+                  function (err) {
+                    if (err) return next(err);
+                    else return next();
+                  }
+                );
+              }
+            );
+          return next();
+        },
+        // Refresh Datasets
+        function (next) {
+          if (_.get(doc, `datasets`))
+            return DocumentsDatasets.findOne({ _id: doc.datasets.toString() }).exec(function (err, datasets) {
+              if (err) return next(err);
+              if (!datasets) return next(new Error(`Datasets not found`));
+              for (let i = 0; i < datasets.current.length; i++) {
+                if (
+                  datasets.current[i] &&
+                  Array.isArray(datasets.current[i].sentences) &&
+                  datasets.current[i].sentences.length > 0
+                ) {
+                  for (let j = 0; j < datasets.current[i].sentences.length; j++) {
+                    if (datasets.current[i].sentences[j].text && datasets.current[i].sentences[j].text.length) {
+                      datasets.current[i].sentences[j].text = Encoding.fix(datasets.current[i].sentences[j].text);
+                    }
+                  }
+                }
+              }
+              return datasets.save(function (err) {
+                if (err) return next(err);
+                return next();
+              });
+            });
+          return next();
+        },
+        // Refresh Metadata
+        function (next) {
+          return Self.updateOrCreateMetadata(
+            { data: { id: doc._id.toString() }, user: opts.user },
+            function (err, metadata) {
+              if (err) return next(err);
+              if (metadata instanceof Error) return next(metadata);
+              doc.identifiers = {
+                doi: metadata.doi,
+                pmid: metadata.pmid,
+                manuscript_id: metadata.manuscript_id
+              };
+              return next();
+            }
+          );
+        }
+      ],
+      function (item, next) {
+        return item(next);
+      },
+      function (err) {
+        if (err) return cb(err);
+        return doc.save(function (err) {
+          if (err) return cb(err);
+          return cb(null, doc);
+        });
+      }
+    );
+  });
 };
 
 /**
