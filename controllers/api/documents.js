@@ -340,7 +340,7 @@ Self.upload = function (opts = {}, cb) {
                         documentId: acc._id.toString(),
                         file: {
                           name: `${params.file.name}.ds-ml.tei.xml`,
-                          data: tei.toString(`utf8`).toString(DocumentsFilesController.encoding),
+                          data: XML.sanitize(tei.toString(`utf8`)).toString(DocumentsFilesController.encoding),
                           mimetype: `application/xml`,
                           encoding: DocumentsFilesController.encoding
                         },
