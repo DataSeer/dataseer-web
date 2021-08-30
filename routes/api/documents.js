@@ -300,6 +300,58 @@ router.put(`/:id/fixEncoding`, function (req, res, next) {
   });
 });
 
+/* POST checkSentencesContent */
+router.post(`/:id/checkSentencesContent`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: {
+      id: req.params.id,
+      xml: { source: req.body.source, content: req.files.xml.data.toString() }
+    },
+    user: req.user
+  };
+  return DocumentsController.checkSentencesContent(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* POST checkSentencesBoundingBoxes */
+router.post(`/:id/checkSentencesBoundingBoxes`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: {
+      id: req.params.id,
+      xml: { source: req.body.source, content: req.files.xml.data.toString() }
+    },
+    user: req.user
+  };
+  return DocumentsController.checkSentencesBoundingBoxes(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
 /* GET SINGLE Document logs BY ID */
 router.get(`/:id/logs`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
@@ -481,7 +533,7 @@ router.get(`/:id/tei`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
-    if (!doc.pdf) return res.json({ err: true, res: null, msg: `TEI file not found` });
+    if (!doc.tei) return res.json({ err: true, res: null, msg: `TEI file not found` });
     return DocumentsFilesController.get(
       { data: { id: doc.tei ? doc.tei.toString() : undefined } },
       function (err, file) {
@@ -512,7 +564,7 @@ router.get(`/:id/tei/content`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
-    if (!doc.pdf) return res.json({ err: true, res: null, msg: `TEI file content not found` });
+    if (!doc.tei) return res.json({ err: true, res: null, msg: `TEI file content not found` });
     return DocumentsFilesController.readFile(
       { data: { id: doc.tei ? doc.tei.toString() : undefined } },
       function (err, file) {

@@ -29,6 +29,9 @@
     },
     hideLoop = function () {
       $(`#loading-loop`).hide();
+    },
+    hideLoader = function () {
+      $(`#loading-loop .loader`).hide();
     };
 
   // window.addEventListener('unhandledrejection', function (event) {
@@ -45,7 +48,12 @@
   setTextLoop(`Downloading datasets...`);
   // Get data of current document with datasets informations
   return API.get(`documents`, { id: documentId, params: { datasets: true, metadata: true } }, function (err, query) {
-    if (err || query.err) return alert(`Error : Document unavailable`);
+    if (err || query.err) {
+      setHeaderLoop(`Document unavailable`);
+      setTextLoop(`Please contact a curator`);
+      hideLoader();
+      return alert(`Error : Document unavailable`);
+    }
     let doc = query.res;
     setTextLoop(`Downloading PDF...`);
     // Get PDF file
@@ -56,10 +64,20 @@
       // Get TEI file
       return API.documents.getTEI({ id: documentId }, function (err, tei) {
         console.log(err, tei);
-        if (err || tei.err) return alert(`Error : TEI unavailable`);
+        if (err || tei.err) {
+          setHeaderLoop(`TEI unavailable`);
+          setTextLoop(`Please contact a curator`);
+          hideLoader();
+          return alert(`Error : TEI unavailable`);
+        }
         setTextLoop(`Downloading TEI content...`);
         return API.documents.getTEIContent({ id: documentId }, function (err, xml) {
-          if (err) return alert(`Error : TEI content unavailable`);
+          if (err) {
+            setHeaderLoop(`TEI content unavailable`);
+            setTextLoop(`Please contact a curator`);
+            hideLoader();
+            return alert(`Error : TEI content unavailable`);
+          }
           setTextLoop(`Downloading datatypes...`);
           // Get datatypes
           return API.dataseerML.jsonDataTypes(function (err, datatypes) {
