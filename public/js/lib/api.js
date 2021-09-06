@@ -71,7 +71,7 @@ const API = {
   signin: function (opts = {}, done) {
     return $.ajax({
       type: `POST`,
-      url: URLMANAGER.buildURL(`${this.url}/signin`, {}, { setToken: true }),
+      url: URLMANAGER.buildURL(`${this.url}/signin`, {}),
       data: _.get(opts, `data`, {}),
       success: function (query) {
         console.log(`signin`, query);
