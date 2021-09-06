@@ -128,7 +128,7 @@ router.get(`/signout`, function (req, res, next) {
     let result = isError ? data.toString() : data;
     // Unset cookie (useful for navigator)
     if (!isError)
-      res.setHeader(`Set-Cookie`, cookie.serialize(`token`, ``, { httpOnly: true, path: `/`, expires: Date.now() }));
+      res.setHeader(`Set-Cookie`, cookie.serialize(`token`, ``, { httpOnly: true, path: `/`, expires: new Date() }));
     return res.json({ err: null, res: true });
   });
 });
