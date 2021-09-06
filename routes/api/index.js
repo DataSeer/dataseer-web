@@ -129,7 +129,7 @@ router.get(`/signout`, function (req, res, next) {
     // Unset cookie (useful for navigator)
     if (!isError)
       res.setHeader(`Set-Cookie`, cookie.serialize(`token`, ``, { httpOnly: true, path: `/`, expires: new Date() }));
-    return res.json({ err: null, res: true });
+    return res.json({ err: isError, res: result });
   });
 });
 
