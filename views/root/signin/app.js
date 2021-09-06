@@ -27,7 +27,8 @@
         let opts = {
           data: {
             username: username.value,
-            password: password.value
+            password: password.value,
+            newToken: true
           }
         };
         loader.show();
