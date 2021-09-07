@@ -34,6 +34,7 @@ const DataTypes = require(`../../lib/dataTypes.js`);
 const DocX = require(`../../lib/docx.js`);
 const Hypothesis = require(`../../lib/hypothesis.js`);
 const Encoding = require(`../../lib/encoding.js`);
+const Analyzer = require(`../../lib/analyzer.js`);
 
 const conf = require(`../../conf/conf.json`);
 
@@ -1942,13 +1943,13 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
     return item.dataType === `other` && item.subType === `protocol`;
   });
   let codes = orderedDatasets.filter(function (item) {
-    return item.dataType === `other` && item.subType === `code`;
+    return (item.dataType === `other` && item.subType === `code`) || item.dataType === `code software`;
   });
   let reagents = orderedDatasets.filter(function (item) {
-    return item.dataType === `other` && item.subType === `reagent`;
+    return (item.dataType === `other` && item.subType === `reagent`) || item.dataType === `lab materials`;
   });
   let datasets = orderedDatasets.filter(function (item) {
-    return item.dataType !== `other`;
+    return item.dataType !== `other` && item.dataType !== `code software` && item.dataType !== `lab materials`;
   });
   return { all: orderedDatasets, protocols, codes, reagents, datasets };
 };

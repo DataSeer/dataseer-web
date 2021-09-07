@@ -901,7 +901,7 @@ router.get(`/:id/graphics/asap`, function (req, res) {
     },
     user: req.user
   };
-  return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
+  return DocumentsController.get(opts, function (err, doc) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
