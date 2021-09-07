@@ -34,7 +34,6 @@ const DataTypes = require(`../../lib/dataTypes.js`);
 const DocX = require(`../../lib/docx.js`);
 const Hypothesis = require(`../../lib/hypothesis.js`);
 const Encoding = require(`../../lib/encoding.js`);
-const Analyzer = require(`../../lib/analyzer.js`);
 
 const conf = require(`../../conf/conf.json`);
 
