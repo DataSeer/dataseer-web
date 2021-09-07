@@ -239,10 +239,10 @@
     data[0].total = datasets.filter(function (item) {
       return !item.reuse;
     }).length;
-    data[1].done = datasets.filter(function (item) {
+    data[1].done = codes.filter(function (item) {
       return !item.reuse && item.status === `valid`;
     }).length;
-    data[1].total = datasets.filter(function (item) {
+    data[1].total = codes.filter(function (item) {
       return !item.reuse;
     }).length;
     data[2].done = reagents.filter(function (item) {
@@ -269,10 +269,10 @@
     data[5].total = reagents.filter(function (item) {
       return item.reuse;
     }).length;
-    data[6].done = datasets.filter(function (item) {
+    data[6].done = codes.filter(function (item) {
       return item.reuse && item.status === `valid`;
     }).length;
-    data[6].total = datasets.filter(function (item) {
+    data[6].total = codes.filter(function (item) {
       return item.reuse;
     }).length;
     data[7].done = datasets.filter(function (item) {
