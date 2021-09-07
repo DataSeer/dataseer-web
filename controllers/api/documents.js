@@ -1942,13 +1942,13 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
     return item.dataType === `other` && item.subType === `protocol`;
   });
   let codes = orderedDatasets.filter(function (item) {
-    return item.dataType === `other` && item.subType === `code`;
+    return (item.dataType === `other` && item.subType === `code`) || item.dataType === `code software`;
   });
   let reagents = orderedDatasets.filter(function (item) {
-    return item.dataType === `other` && item.subType === `reagent`;
+    return (item.dataType === `other` && item.subType === `reagent`) || item.dataType === `lab materials`;
   });
   let datasets = orderedDatasets.filter(function (item) {
-    return item.dataType !== `other`;
+    return item.dataType !== `other` && item.dataType !== `code software` && item.dataType !== `lab materials`;
   });
   return { all: orderedDatasets, protocols, codes, reagents, datasets };
 };

@@ -224,13 +224,13 @@
       return item.dataType === `other` && item.subType === `protocol`;
     });
     let codes = query.res.datasets.current.filter(function (item) {
-      return item.dataType === `other` && item.subType === `code`;
+      return (item.dataType === `other` && item.subType === `code`) || item.dataType === `code software`;
     });
     let reagents = query.res.datasets.current.filter(function (item) {
-      return item.dataType === `other` && item.subType === `reagent`;
+      return (item.dataType === `other` && item.subType === `reagent`) || item.dataType === `lab materials`;
     });
     let datasets = query.res.datasets.current.filter(function (item) {
-      return item.dataType !== `other`;
+      return item.dataType !== `other` && item.dataType !== `code software` && item.dataType !== `lab materials`;
     });
     console.log(protocols, codes, reagents, datasets);
     data[0].done = datasets.filter(function (item) {
@@ -239,10 +239,10 @@
     data[0].total = datasets.filter(function (item) {
       return !item.reuse;
     }).length;
-    data[1].done = datasets.filter(function (item) {
+    data[1].done = codes.filter(function (item) {
       return !item.reuse && item.status === `valid`;
     }).length;
-    data[1].total = datasets.filter(function (item) {
+    data[1].total = codes.filter(function (item) {
       return !item.reuse;
     }).length;
     data[2].done = reagents.filter(function (item) {
@@ -269,10 +269,10 @@
     data[5].total = reagents.filter(function (item) {
       return item.reuse;
     }).length;
-    data[6].done = datasets.filter(function (item) {
+    data[6].done = codes.filter(function (item) {
       return item.reuse && item.status === `valid`;
     }).length;
-    data[6].total = datasets.filter(function (item) {
+    data[6].total = codes.filter(function (item) {
       return item.reuse;
     }).length;
     data[7].done = datasets.filter(function (item) {
