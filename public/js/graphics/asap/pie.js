@@ -224,13 +224,13 @@
       return item.dataType === `other` && item.subType === `protocol`;
     });
     let codes = query.res.datasets.current.filter(function (item) {
-      return item.dataType === `other` && item.subType === `code`;
+      return (item.dataType === `other` && item.subType === `code`) || item.dataType === `code software`;
     });
     let reagents = query.res.datasets.current.filter(function (item) {
-      return item.dataType === `other` && item.subType === `reagent`;
+      return (item.dataType === `other` && item.subType === `reagent`) || item.dataType === `lab materials`;
     });
     let datasets = query.res.datasets.current.filter(function (item) {
-      return item.dataType !== `other`;
+      return item.dataType !== `other` && item.dataType !== `code software` && item.dataType !== `lab materials`;
     });
     console.log(protocols, codes, reagents, datasets);
     data[0].done = datasets.filter(function (item) {
