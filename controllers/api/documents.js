@@ -1858,37 +1858,40 @@ Self.getReportData = function (opts = {}, cb) {
     return cb(new Error(`Bad value: opts.data.organization`));
   if (opts.data.kind === `docx` && opts.data.organization !== `default`)
     return cb(new Error(`Bad value: opts.data.organization`));
-  return Self.get({ data: { id: opts.data.id, datasets: true, metadata: true }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    if (opts.data.kind === `html`) {
-      if (opts.data.organization === `default` || opts.data.organization === `bioRxiv`) {
-        let sortedDatasetsInfos = Self.getSortedDatasetsInfos(doc, opts.data.dataTypes);
-        let datasetsSummary = DataTypes.getDatasetsSummary(sortedDatasetsInfos.all, opts.data.dataTypes);
-        let bestPractices = DataTypes.getBestPractices(
-          [].concat(
-            sortedDatasetsInfos.protocols,
-            sortedDatasetsInfos.datasets,
-            sortedDatasetsInfos.codes,
-            sortedDatasetsInfos.reagents
-          ),
-          opts.data.dataTypes
-        );
-        return cb(null, {
-          doc,
-          sortedDatasetsInfos,
-          datasetsSummary,
-          bestPractices
-        });
+  return Self.get(
+    { data: { id: opts.data.id, datasets: true, metadata: true, pdf: true, tei: true }, user: opts.user },
+    function (err, doc) {
+      if (err) return cb(err);
+      if (doc instanceof Error) return cb(null, doc);
+      if (opts.data.kind === `html`) {
+        if (opts.data.organization === `default` || opts.data.organization === `bioRxiv`) {
+          let sortedDatasetsInfos = Self.getSortedDatasetsInfos(doc, opts.data.dataTypes);
+          let datasetsSummary = DataTypes.getDatasetsSummary(sortedDatasetsInfos.all, opts.data.dataTypes);
+          let bestPractices = DataTypes.getBestPractices(
+            [].concat(
+              sortedDatasetsInfos.protocols,
+              sortedDatasetsInfos.datasets,
+              sortedDatasetsInfos.codes,
+              sortedDatasetsInfos.reagents
+            ),
+            opts.data.dataTypes
+          );
+          return cb(null, {
+            doc,
+            sortedDatasetsInfos,
+            datasetsSummary,
+            bestPractices
+          });
+        }
       }
-    }
-    if (opts.data.kind === `docx`) {
-      if (opts.data.organization === `default`) {
-        return cb(null, DocX.getData(doc, opts.data.dataTypes));
+      if (opts.data.kind === `docx`) {
+        if (opts.data.organization === `default`) {
+          return cb(null, DocX.getData(doc, opts.data.dataTypes));
+        }
       }
+      return cb(null, new Error(`Case not handled`));
     }
-    return cb(null, new Error(`Case not handled`));
-  });
+  );
 };
 
 /**
