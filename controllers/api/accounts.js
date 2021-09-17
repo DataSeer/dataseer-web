@@ -321,7 +321,7 @@ Self.resetPassword = function (opts = {}, cb) {
           {
             token: opts.resetPasswordToken,
             key: `tokens.resetPassword`,
-            opts: { maxAge: conf.tokens.api.expiresIn }
+            opts: { maxAge: conf.tokens.resetPassword.expiresIn }
           },
           { privateKey: opts.privateKey },
           function (err, account) {
