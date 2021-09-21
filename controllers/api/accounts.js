@@ -106,6 +106,47 @@ Self.authenticateToken = function (tokenInfos = {}, opts = {}, cb) {
 };
 
 /**
+ * Check token validity
+ * @param {object} tokenInfos - Infos about the token
+ * @param {string} tokenInfos.token - Content of the token
+ * @param {string} tokenInfos.key - Key of the token that must be used to find the account in mongodb
+ * @param {object} tokenInfos.[opts] - Options sent to jwt.vertify function (default: {})
+ * @param {object} opts - Options data
+ * @param {string} opts.privateKey - Private key that must be used
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: decoded token OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.checkTokenValidity = function (tokenInfos = {}, opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(tokenInfos, `token`) === `undefined`)
+    return cb(new Error(`Missing required data: tokenInfos.token`));
+  if (typeof _.get(tokenInfos, `key`) === `undefined`) return cb(new Error(`Missing required data: tokenInfos.key`));
+  if (typeof _.get(opts, `privateKey`) === `undefined`) return cb(new Error(`Missing required data: opts.privateKey`));
+  // Check all optionnal data
+  if (typeof _.get(tokenInfos, `opts`) === `undefined`) tokenInfos.opts = {};
+  // Start process
+  // Just try to authenticate. If it fail, just go next
+  return JWT.check(tokenInfos.token, opts.privateKey, tokenInfos.opts, function (err, decoded) {
+    let token = { valid: false };
+    if (err && err.name !== `TokenExpiredError`) return cb(null, token);
+    token.valid = true;
+    token.revoked = true;
+    if (err && err.name === `TokenExpiredError`) {
+      token.expired = true;
+      token.expiredAt = new Date(err.expiredAt).getTime() / 1000;
+      return cb(null, token);
+    } else token.expired = false;
+    if (!decoded.accountId) return cb(null, new Error(`Bad token : does not contain enough data`));
+    return Accounts.findOne({ _id: decoded.accountId, [tokenInfos.key]: tokenInfos.token }, function (err, account) {
+      if (err) return cb(err);
+      token.revoked = false;
+      token.expiredAt = decoded.exp;
+      return cb(null, token);
+    });
+  });
+};
+
+/**
  * Sign up an account
  * @param {object} opts - Options available
  * @param {string} opts.username - Account username
@@ -320,8 +361,7 @@ Self.resetPassword = function (opts = {}, cb) {
         return Self.authenticateToken(
           {
             token: opts.resetPasswordToken,
-            key: `tokens.resetPassword`,
-            opts: { maxAge: conf.tokens.resetPassword.expiresIn }
+            key: `tokens.resetPassword`
           },
           { privateKey: opts.privateKey },
           function (err, account) {
