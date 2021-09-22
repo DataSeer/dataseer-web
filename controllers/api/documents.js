@@ -136,6 +136,47 @@ Self.authenticate = function (req, res, next) {
 };
 
 /**
+ * Check token validity
+ * @param {object} tokenInfos - Infos about the token
+ * @param {string} tokenInfos.token - Content of the token
+ * @param {string} tokenInfos.key - Key of the token that must be used to find the account in mongodb
+ * @param {object} tokenInfos.[opts] - Options sent to jwt.vertify function (default: {})
+ * @param {object} opts - Options data
+ * @param {string} opts.privateKey - Private key that must be used
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: decoded token OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.checkTokenValidity = function (tokenInfos = {}, opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(tokenInfos, `token`) === `undefined`)
+    return cb(new Error(`Missing required data: tokenInfos.token`));
+  if (typeof _.get(tokenInfos, `key`) === `undefined`) return cb(new Error(`Missing required data: tokenInfos.key`));
+  if (typeof _.get(opts, `privateKey`) === `undefined`) return cb(new Error(`Missing required data: opts.privateKey`));
+  // Check all optionnal data
+  if (typeof _.get(tokenInfos, `opts`) === `undefined`) tokenInfos.opts = {};
+  // Start process
+  // Just try to authenticate. If it fail, just go next
+  return JWT.check(tokenInfos.token, opts.privateKey, tokenInfos.opts, function (err, decoded) {
+    let token = { valid: false };
+    if (err && err.name !== `TokenExpiredError`) return cb(null, token);
+    token.valid = true;
+    token.revoked = true;
+    if (err && err.name === `TokenExpiredError`) {
+      token.expired = true;
+      token.expiredAt = new Date(err.expiredAt).getTime() / 1000;
+      return cb(null, token);
+    } else token.expired = false;
+    if (!decoded.documentId) return cb(null, new Error(`Bad token : does not contain enough data`));
+    return Documents.findOne({ _id: decoded.documentId, [tokenInfos.key]: tokenInfos.token }, function (err, doc) {
+      if (err) return cb(err);
+      token.revoked = false;
+      token.expiredAt = decoded.exp;
+      return cb(null, token);
+    });
+  });
+};
+
+/**
  * Check params & build params for Self.upload() function
  * @returns {object} Options for Self.upload() function or new Error(msg)
  */
@@ -251,6 +292,16 @@ Self.upload = function (opts = {}, cb) {
       function (err, doc) {
         if (err) return cb(err);
         let actions = [
+          // Set opts.user if necessary
+          function (acc, next) {
+            if (!opts.user) {
+              return Accounts.findOne({ _id: conf.mongodb.default.accounts.id }, function (err, account) {
+                if (err) return next(err);
+                opts.user = account;
+                return next(null, acc);
+              });
+            } else return next(null, acc);
+          },
           // Get organization
           // Set organization & upload_journal properties
           function (acc, next) {
@@ -501,7 +552,8 @@ Self.upload = function (opts = {}, cb) {
           },
           function (err, res) {
             if (err) {
-              return Self.delete({ data: { id: res._id.toString() }, user: opts.user }, function (_err) {
+              console.log(err);
+              return Self.delete({ data: { id: res._id.toString() }, user: opts.user, force: true }, function (_err) {
                 if (_err) return cb(_err);
                 return cb(null, err);
               });
@@ -2343,6 +2395,7 @@ Self.update = function (opts = {}, cb) {
 Self.updateMany = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
   if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
   // Check all optionnal data
@@ -2390,16 +2443,21 @@ Self.updateMany = function (opts = {}, cb) {
 
 /**
  * Delete a document
- * @param {string} documentId - Id of the deleted document
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {string} opts.data.id - Id of the update document
+ * @param {boolean} opts.[force] - Specify if action must be forced (default: false)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
  * @returns {undefined} undefined
  */
-Self.delete = function (opts, cb) {
+Self.delete = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
   if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
-  if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
+  if (!accessRights.authenticated && !opts.force) return cb(null, new Error(`Unauthorized functionnality`));
   return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
     if (err) return cb(err);
     if (doc instanceof Error) return cb(null, doc);
@@ -2482,6 +2540,7 @@ Self.delete = function (opts, cb) {
 Self.deleteMany = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
   if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
   // Check all optionnal data
