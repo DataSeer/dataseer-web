@@ -1127,7 +1127,9 @@
         let result = {
           status: { modified: false, error: false },
           selected: false,
-          properties: {},
+          properties: {
+            metadata: {}
+          },
           raw: DATAHANDLER.object.getRaw(data)
         };
         for (let property in data) {
