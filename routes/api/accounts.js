@@ -40,6 +40,37 @@ router.get(`/`, function (req, res, next) {
   });
 });
 
+/* GET check accounts token */
+router.get(`/checkTokenValidity`, function (req, res, next) {
+  let privateKey = req.app.get(`private.key`);
+  if (!privateKey) return res.status(500).send(conf.errors.internalServerError);
+  let token = Params.convertToString(req.query.token);
+  if (!token)
+    return res.json({
+      err: true,
+      res: `Missing required data : token`
+    });
+  return AccountsController.checkTokenValidity(
+    {
+      token: token,
+      key: `tokens.api`
+    },
+    { privateKey: privateKey },
+    function (err, data) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send(conf.errors.internalServerError);
+      }
+      let isError = data instanceof Error;
+      let result = isError ? data.toString() : data;
+      return res.json({
+        err: isError,
+        res: result
+      });
+    }
+  );
+});
+
 /* ADD new Account */
 router.post(`/`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
