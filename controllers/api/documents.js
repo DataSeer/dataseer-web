@@ -34,6 +34,8 @@ const DataTypes = require(`../../lib/dataTypes.js`);
 const DocX = require(`../../lib/docx.js`);
 const Hypothesis = require(`../../lib/hypothesis.js`);
 const Encoding = require(`../../lib/encoding.js`);
+const Analyzer = require(`../../lib/analyzer.js`);
+const CSV = require(`../../lib/csv.js`);
 
 const conf = require(`../../conf/conf.json`);
 
@@ -44,6 +46,156 @@ Self.status = {
   metadata: `metadata`,
   datasets: `datasets`,
   finish: `finish`
+};
+
+/**
+ * Build CSV of all datasets of given documents
+ * @param {object} documents - List of documents
+ * @returns {buffer} buffer
+ */
+Self.buildDatasetsCSV = function (documents) {
+  return CSV.buildDatasets(documents);
+};
+
+/**
+ * Check sentences content of a document by id
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.source - Id of the source document
+ * @param {string} opts.data.target - Id of the target document
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.merge = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.source`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.data.source`));
+  if (typeof _.get(opts, `data.target`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.data.target`));
+  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  let id = Params.convertToString(opts.data.source);
+  return async.reduce(
+    [
+      { kind: `source`, id: opts.data.source },
+      { kind: `target`, id: opts.data.target }
+    ],
+    {},
+    function (acc, item, next) {
+      return Self.get({ data: { id: item.id, pdf: true, tei: true }, user: opts.user }, function (err, doc) {
+        if (err) return next(err, acc);
+        if (doc instanceof Error) return next(doc, acc);
+        return DocumentsFilesController.readFileContent(
+          { data: { id: doc.tei._id.toString() } },
+          function (err, content) {
+            if (err) return next(err, acc);
+            if (content instanceof Error) return next(content, acc);
+            acc[item.kind] = {};
+            acc[item.kind].content = content.data;
+            acc[item.kind].metadata = doc.pdf && doc.pdf.metadata ? doc.pdf.metadata : doc.tei.metadata;
+            return next(null, acc);
+          }
+        );
+      });
+    },
+    function (err, res) {
+      return Analyzer.checkSentencesContent(
+        {
+          source: {
+            name: `dataseer`,
+            content: res.source.content,
+            metadata: res.source.metadata
+          },
+          target: {
+            name: `dataseer`,
+            content: res.target.content,
+            metadata: res.target.metadata
+          }
+        },
+        function (err, res) {
+          return cb(err, res);
+        }
+      );
+    }
+  );
+};
+
+/**
+ * Check sentences content of a document by id
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.id - Id of the document
+ * @param {object} opts.data.xml - XML file
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.checkSentencesContent = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  if (typeof _.get(opts, `data.xml`) === `undefined`) return cb(new Error(`Missing required data: opts.data.xml`));
+  if (typeof _.get(opts, `data.xml.source`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.data.xml.source`));
+  if (typeof _.get(opts, `data.xml.content`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.data.xml.content`));
+  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  let id = Params.convertToString(opts.data.id);
+  return Self.get({ data: { id: opts.data.id, pdf: true, tei: true }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    return DocumentsFilesController.readFileContent({ data: { id: doc.tei._id.toString() } }, function (err, content) {
+      if (err) return next(err);
+      if (content instanceof Error) return next(content);
+      return Analyzer.checkSentencesContent(
+        {
+          source: {
+            source: `dataseer`,
+            content: content.data,
+            metadata: doc.pdf && doc.pdf.metadata ? doc.pdf.metadata : doc.tei.metadata
+          },
+          target: { source: opts.data.xml.source, content: opts.data.xml.content }
+        },
+        function (err, res) {
+          return cb(err, res);
+        }
+      );
+    });
+  });
+};
+
+/**
+ * Check sentences content of a document by id
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.id - Id of the document
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.checkSentencesBoundingBoxes = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  let id = Params.convertToString(opts.data.id);
+  return Self.get({ data: { id: opts.data.id, pdf: true }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    return Analyzer.checkSentencesBoundingBoxes({ metadata: doc.pdf.metadata }, function (err, res) {
+      return cb(err, res);
+    });
+  });
 };
 
 /**

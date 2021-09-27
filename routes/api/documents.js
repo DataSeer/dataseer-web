@@ -57,6 +57,43 @@ router.get(`/`, function (req, res, next) {
   });
 });
 
+/* GET Documents */
+router.get(`/csv`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    data: {
+      limit: Params.convertToInteger(req.query.limit),
+      ids: Params.convertToArray(req.query.ids, `string`),
+      skip: Params.convertToInteger(req.query.skip),
+      owners: Params.convertToArray(req.query.owners, `string`),
+      organizations: Params.convertToArray(req.query.organizations, `string`),
+      visibleStates: Params.convertToArray(req.query.visibleStates, `boolean`),
+      lockedStates: Params.convertToArray(req.query.lockedStates, `boolean`),
+      uploadRange: Params.convertToInteger(req.query.uploadRange),
+      updateRange: Params.convertToInteger(req.query.updateRange),
+      updatedBefore: Params.convertToDate(req.query.updatedBefore),
+      updatedAfter: Params.convertToDate(req.query.updatedAfter),
+      uploadedBefore: Params.convertToDate(req.query.uploadedBefore),
+      uploadedAfter: Params.convertToDate(req.query.uploadedAfter),
+      sort: Params.convertToString(req.query.sort),
+      datasets: true
+    },
+    user: req.user
+  };
+  return DocumentsController.all(opts, function (err, result) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    res.writeHead(200, [
+      [`Content-Type`, `text/csv`],
+      [`Content-Disposition`, `attachment; filename=datasets.csv`]
+    ]);
+    res.end(DocumentsController.buildDatasetsCSV(result.data));
+  });
+});
+
 /* ADD Document */
 router.post(`/`, function (req, res, next) {
   return DocumentsController.upload(
@@ -147,6 +184,37 @@ router.delete(`/`, function (req, res, next) {
       res: result
     });
   });
+});
+
+/* GET check documents token */
+router.get(`/checkTokenValidity`, function (req, res, next) {
+  let privateKey = req.app.get(`private.key`);
+  if (!privateKey) return res.status(500).send(conf.errors.internalServerError);
+  let token = Params.convertToString(req.query.token);
+  if (!token)
+    return res.json({
+      err: true,
+      res: `Missing required data : token`
+    });
+  return DocumentsController.checkTokenValidity(
+    {
+      token: token,
+      key: `token`
+    },
+    { privateKey: privateKey },
+    function (err, data) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send(conf.errors.internalServerError);
+      }
+      let isError = data instanceof Error;
+      let result = isError ? data.toString() : data;
+      return res.json({
+        err: isError,
+        res: result
+      });
+    }
+  );
 });
 
 /* GET SINGLE Document BY ID */
@@ -301,18 +369,18 @@ router.put(`/:id/fixEncoding`, function (req, res, next) {
 });
 
 /* POST checkSentencesContent */
-router.post(`/:id/checkSentencesContent`, function (req, res, next) {
+router.post(`/:id/merge/:target`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
     data: {
-      id: req.params.id,
-      xml: { source: req.body.source, content: req.files.xml.data.toString() }
+      source: req.params.id,
+      target: req.params.target
     },
     user: req.user
   };
-  return DocumentsController.checkSentencesContent(opts, function (err, data) {
+  return DocumentsController.merge(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
