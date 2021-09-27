@@ -60,7 +60,7 @@ router.get(`/`, function (req, res, next) {
 /* GET Documents */
 router.get(`/csv`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     data: {
       limit: Params.convertToInteger(req.query.limit),
