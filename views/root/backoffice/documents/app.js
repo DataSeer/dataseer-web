@@ -900,6 +900,13 @@
           return item;
         });
       },
+      buildDatasetsCSVLink: function () {
+        let self = this;
+        let currentParams = self.getCurrentURLParams();
+        let params = self.getSearchParams(currentParams.token);
+        params.limit = self.collection.count;
+        return URLMANAGER.buildURL(`api/${ROUTES.main}/csv/`, params);
+      },
       // Build link to a single resource
       buildIdLink: function (id, params = {}) {
         return URLMANAGER.buildURL(`${ROUTES.main}/${id}/`, params);
