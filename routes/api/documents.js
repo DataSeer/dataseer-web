@@ -26,6 +26,7 @@ router.get(`/`, function (req, res, next) {
   if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     data: {
+      count: Params.convertToBoolean(req.query.count),
       ids: Params.convertToArray(req.query.ids, `string`),
       limit: Params.convertToInteger(req.query.limit),
       skip: Params.convertToInteger(req.query.skip),
@@ -53,7 +54,7 @@ router.get(`/`, function (req, res, next) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
-    return res.json({ err: false, res: result.data, params: result.params });
+    return res.json({ err: false, res: result.data, params: result.params, count: result.count });
   });
 });
 
