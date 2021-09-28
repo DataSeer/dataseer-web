@@ -1,6 +1,4 @@
 /*
-
-const JWT = require(`../../lib/jwt.js`);
  * @prettier
  */
 
