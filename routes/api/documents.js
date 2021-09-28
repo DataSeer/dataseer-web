@@ -939,7 +939,7 @@ router.post(`/:id/datasets/backToMetadata`, function (req, res, next) {
 /* Validate datasets of a given document */
 router.post(`/:id/finish/reopen`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     data: {
       id: req.params.id
