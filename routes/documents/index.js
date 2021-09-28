@@ -36,7 +36,7 @@ router.get(`/:id`, function (req, res) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
-    if (!doc) return res.status(404).send(conf.errors.notFound);
+    if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
     return res.redirect(Url.build(`documents/${req.params.id}/${doc.status}`, { token: req.query.token }));
   });
 });
@@ -51,7 +51,7 @@ router.get(`/:id/metadata`, function (req, res) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
-    if (!doc) return res.status(404).send(conf.errors.notFound);
+    if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
     if ((accessRights.isVisitor || accessRights.isStandardUser) && doc.status !== `metadata`)
       return res.redirect(Url.build(`/documents/${req.params.id}/${doc.status}`, { token: req.query.token }));
     return res.render(`root/documents/:id/metadata/layout.pug`, {
@@ -73,7 +73,7 @@ router.get(`/:id/datasets`, function (req, res) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
-    if (!doc) return res.status(404).send(conf.errors.notFound);
+    if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
     if ((accessRights.isVisitor || accessRights.isStandardUser) && doc.status !== `datasets`)
       return res.redirect(Url.build(`documents/${req.params.id}/${doc.status}`, { token: req.query.token }));
     return res.render(`root/documents/:id/datasets/layout.pug`, {
@@ -95,7 +95,7 @@ router.get(`/:id/finish`, function (req, res) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
-    if (!doc) return res.status(404).send(conf.errors.notFound);
+    if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
     if ((accessRights.isVisitor || accessRights.isStandardUser) && doc.status !== `finish`)
       return res.redirect(Url.build(`documents/${req.params.id}/${doc.status}`, { token: req.query.token }));
     return res.render(`root/documents/:id/finish/layout.pug`, {

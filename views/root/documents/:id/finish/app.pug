@@ -9,7 +9,7 @@
     <div class="container-fluid">
       <div class="row buttons">
         <div class="col left">
-          <button class="btn btn-md btn-primary" v-on:click.stop="reopen(event)">
+          <button v-if="user.role && (user.role.key === 'moderator' || user.role.key === 'administrator')" class="btn btn-md btn-primary" v-on:click.stop="reopen(event)">
             <i class="fas fa-undo-alt"></i>
             | Reopen document
           </button>
@@ -27,7 +27,7 @@
           </a>
         </div>
       </div>
-      <div class="row buttons">
+      <div v-if="user.role && (user.role.key === 'moderator' || user.role.key === 'administrator')" class="row buttons">
         <div class="col left">
           <a target="_blank" :href="docxDefaultReportLink">
             <button class="btn btn-md btn-primary">DataSeer .docx report</button>
