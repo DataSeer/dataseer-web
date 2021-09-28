@@ -163,6 +163,27 @@
           </div>
         </div>
       </div>
+      <div v-if="typeof collection.count !== 'undefined'" class="search-row row align-items-center">
+        <div class="col text-truncate">
+          | {{ collection.count }} result(s) match these criteria
+        </div>
+      </div>
+      <div v-if="typeof collection.count !== 'undefined'" class="search-row row align-items-center">
+        <div class="col text-truncate">
+          <a :href="buildDatasetsCSVLink()" target="_blank">
+            <button class="btn btn-sm btn-primary">
+              <span>
+              | download datasets of {{ collection.count }} documents (.csv)
+              </span>
+            </button>
+          </a>
+        </div>
+      </div>
+      <div v-if="collection.items.length > 0" class="search-row row align-items-center">
+        <div class="col text-truncate">
+          | Only {{ collection.items.length }} of them will be displayed below (from the {{ collection.begin }} to {{ collection.end }})
+        </div>
+      </div>
     </div>
     <div class="center collection container-fluid">
       <div class="collection-row row align-items-center">

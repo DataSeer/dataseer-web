@@ -21,6 +21,8 @@
       notifications: [],
       search: {
         schema: {
+          count: {},
+          metadata: {},
           limit: {},
           skip: {},
           ids: { typeof: `string`, optionnal: true }, // optionnal must be used to ignore this params when emtpy
@@ -42,6 +44,8 @@
           sort: CONF.default.params.search.documents.sort
         },
         properties: {
+          count: true,
+          metadata: true,
           limit: undefined,
           skip: undefined,
           ids: [],
@@ -81,6 +85,7 @@
           visible: {},
           locked: {}
         },
+        count: undefined,
         items: [], // Will be initialized with API
         logs: [],
         selectedItemsCount: 0,
@@ -714,6 +719,7 @@
           // Case query result is an Array (of items), so just process all of them
           // Refresh the collection of items
           self.refreshCollection(query.res);
+          self.refreshCount(query.count);
           // Refresh the previous/next buttons
           self.refreshPreviousNext();
         });
@@ -783,6 +789,7 @@
           // Case query result is an Array (of items), so just process all of them
           // Refresh the collection of items
           self.refreshCollection(query.res);
+          self.refreshCount(query.count);
           // Refresh the previous/next buttons
           self.refreshPreviousNext();
         });
@@ -893,6 +900,13 @@
           return item;
         });
       },
+      buildDatasetsCSVLink: function () {
+        let self = this;
+        let currentParams = self.getCurrentURLParams();
+        let params = self.getSearchParams(currentParams.token);
+        params.limit = self.collection.count;
+        return URLMANAGER.buildURL(`api/${ROUTES.main}/csv/`, params);
+      },
       // Build link to a single resource
       buildIdLink: function (id, params = {}) {
         return URLMANAGER.buildURL(`${ROUTES.main}/${id}/`, params);
@@ -992,7 +1006,7 @@
       // Get "search" params representation ("well formated" representation of app.search.properties used to request API or build an URL)
       getSearchParams: function (token) {
         let self = this;
-        let result = { token: token, metadata: true };
+        let result = { token: token };
         // Build data properties
         for (let property in this.search.schema) {
           // If it's an array so filter & map it
@@ -1091,6 +1105,15 @@
           null,
           URLMANAGER.buildParams(this.getSearchParams(self.getCurrentURLParams().token))
         );
+      },
+      // Refresh count infos
+      refreshCount: function (count) {
+        const self = this;
+        let begin = self.search.properties.skip + 1;
+        let end = begin + self.collection.items.length - 1;
+        self.collection.count = count;
+        self.collection.begin = NUMBER.ordinal_suffix_of(begin);
+        self.collection.end = NUMBER.ordinal_suffix_of(end);
       },
       // Refresh all items of app.collection.items
       refreshCollection: function (collection = []) {
@@ -1274,6 +1297,7 @@
               // Refresh search properties
               self.refreshSearchProperties(query.params);
               self.refreshCollection(query.res);
+              self.refreshCount(query.count);
               // Refresh the previous/next buttons
               app.refreshPreviousNext();
               return cb(err, query);

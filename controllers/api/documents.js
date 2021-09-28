@@ -1860,6 +1860,7 @@ Self.unlinkSentenceInTEI = function (opts = {}, cb) {
  * Get all documents
  * @param {object} opts - Options available (You must call getUploadParams)
  * @param {object} opts.data - Data available
+ * @param {boolean} opts.data.[count] - Count results (default: false)
  * @param {string} opts.data.[ids] - list of ids
  * @param {limit} opts.data.[limit] - Limit of the results
  * @param {limit} opts.data.[skip] - Skip of the results
@@ -1894,6 +1895,7 @@ Self.all = function (opts = {}, cb) {
   // Check if user is visitor
   if (!accessRights.isStandardUser) return cb(null, []);
   // Build query data from opts
+  let count = Params.convertToBoolean(opts.data.count);
   let ids = Params.convertToArray(opts.data.ids, `string`);
   let limit = Params.convertToInteger(opts.data.limit);
   let skip = Params.convertToInteger(opts.data.skip);
@@ -2003,6 +2005,16 @@ Self.all = function (opts = {}, cb) {
   transaction.sort(sort === `asc` ? { _id: 1 } : { _id: -1 });
   return transaction.exec(function (err, docs) {
     if (err) return cb(err);
+    if (count)
+      return Documents.find(query).countDocuments(function (err, count) {
+        if (err) return cb(err);
+        let result = {
+          count: count,
+          data: docs,
+          params: params
+        };
+        return cb(null, result);
+      });
     let result = {
       data: docs,
       params: params
