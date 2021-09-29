@@ -51,7 +51,7 @@
               li #{`${reportData.sortedDatasetsInfos[item.key].length} ${item.label}`}
                 if (item.key === "datasets")
                   each dataType in reportData.datasetsSummary
-                    if(dataType.key !== "other")
+                    if(dataType.key !== "other" && dataType.key !== "code software" && dataType.key !== "lab materials")
                       ul
                         li #{dataType.count} #{dataType.type.label}
                           ul
@@ -106,7 +106,7 @@
     </section>
 
     each dataType in reportData.datasetsSummary
-      if (dataType.key !== "other")
+      if (dataType.key !== "other" && dataType.key !== "code software" && dataType.key !== "lab materials")
         <h1>#{dataType.type.label}</h1>
         <h2>Reference for DS DataType link to Wiki:</h2>
         <section>
