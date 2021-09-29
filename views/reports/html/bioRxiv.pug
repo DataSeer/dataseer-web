@@ -47,7 +47,7 @@
     <section>
         div.subtitle Summary List of datasets associated with article:
         <ul>
-            each item in [{"key":"protocols","label": "Protocols"},{"key":"datasets","label": "Datasets"},{"key":"codes","label": "Codes"},{"key":"reagents","label": "Reagents/Materials/Lab Resources"}]
+            each item in [{"key":"protocols","label": "Protocol(s)"},{"key":"datasets","label": "Dataset(s)"},{"key":"codes","label": "Code(s)"},{"key":"reagents","label": "Reagents/Materials/Lab Resources"}]
               li #{`${reportData.sortedDatasetsInfos[item.key].length} ${item.label}`}
                 if (item.key === "datasets")
                   each dataType in reportData.datasetsSummary
