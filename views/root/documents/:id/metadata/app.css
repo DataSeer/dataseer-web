@@ -21,3 +21,13 @@
 .metadata button > i {
   margin-right: 5px;
 }
+
+.metadata input.form-control {
+  display: inline-block;
+  width: auto;
+}
+
+.metadata input.form-control.article_title {
+  display: inline-block;
+  width: 80%;
+}

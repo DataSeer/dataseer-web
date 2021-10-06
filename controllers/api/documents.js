@@ -62,6 +62,141 @@ Self.buildDatasetsCSV = function (documents) {
  * @param {object} opts - Options available
  * @param {object} opts.user - Current user
  * @param {object} opts.data - Data available
+ * @param {string} opts.data.source - Id of the source document (that contain datasets you want to import)
+ * @param {string} opts.data.target - Id of the target document (that will receiving imported datasets)
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.importDatasets = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.source`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.data.source`));
+  if (typeof _.get(opts, `data.target`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.data.target`));
+  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
+  if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
+  let source = Params.convertToString(opts.data.source);
+  let target = Params.convertToString(opts.data.target);
+  return async.reduce(
+    [
+      { kind: `source`, id: source },
+      { kind: `target`, id: target }
+    ],
+    {},
+    function (acc, item, next) {
+      return Self.get(
+        { data: { id: item.id, datasets: true, pdf: true, tei: true }, user: opts.user },
+        function (err, doc) {
+          if (err) return next(err, acc);
+          if (doc instanceof Error) {
+            acc[item.kind] = doc;
+            return next(null, acc);
+          }
+          return DocumentsFilesController.readFileContent(
+            { data: { id: doc.tei._id.toString() } },
+            function (err, content) {
+              if (err) return next(err, acc);
+              if (content instanceof Error) {
+                acc[item.kind] = content;
+                return next(null, acc);
+              }
+              let datasets = _.get(doc, `datasets.current`);
+              acc[item.kind] = { doc: doc };
+              acc[item.kind].datasets = typeof datasets === `undefined` ? [] : datasets.toObject();
+              acc[item.kind].metadata = doc.pdf && doc.pdf.metadata ? doc.pdf.metadata : doc.tei.metadata;
+              acc[item.kind].tei = { id: doc.tei._id.toString(), content: content.data };
+              return next(null, acc);
+            }
+          );
+        }
+      );
+    },
+    function (err, res) {
+      if (err) return cb(err);
+      if (res.source instanceof Error) return cb(err, res.source);
+      if (res.target instanceof Error) return cb(err, res.target);
+      return Analyzer.checkDatasetsInTEI(
+        {
+          datasets: res.source.datasets,
+          tei: {
+            name: `dataseer`,
+            content: res.target.tei.content,
+            metadata: res.target.metadata
+          }
+        },
+        function (err, datasets) {
+          if (err) return cb(err);
+          let result = { merged: [], existing: [], rejected: datasets.rejected };
+          return async.mapSeries(
+            datasets.mergeable,
+            function (item, next) {
+              let dataset = Object.assign({}, item);
+              let cp = Object.assign({}, dataset);
+              let sentences = dataset.sentences.filter(function (item) {
+                return true;
+              });
+              let alreadyExist = DocumentsDatasetsController.datasetAlreadyExist(
+                res.target.datasets,
+                dataset,
+                Analyzer.softMatch
+              );
+              if (alreadyExist) {
+                result.existing.push(cp);
+                return next();
+              }
+              result.merged.push(cp);
+              return Self.newDataset(
+                {
+                  datasetsId: res.target.doc.datasets._id.toString(),
+                  dataset: dataset,
+                  sentence: sentences[0],
+                  user: opts.user,
+                  logs: true
+                },
+                function (err, newDataset) {
+                  if (err) return next(err);
+                  if (sentences.length <= 1) return next();
+                  return async.mapSeries(
+                    sentences.slice(1),
+                    function (sentence, _next) {
+                      return Self.linkSentence(
+                        {
+                          datasetsId: res.target.doc.datasets._id.toString(),
+                          link: { dataset: { id: newDataset.id }, sentence: { id: sentence.id } },
+                          user: opts.user
+                        },
+                        function (err, s) {
+                          return _next(err);
+                        }
+                      );
+                    },
+                    function (err) {
+                      return next(err);
+                    }
+                  );
+                }
+              );
+            },
+            function (err) {
+              console.log(err);
+              if (err) return cb(null, err);
+              return cb(null, result);
+            }
+          );
+        }
+      );
+    }
+  );
+};
+
+/**
+ * Check sentences content of a document by id
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.data - Data available
  * @param {string} opts.data.source - Id of the source document
  * @param {string} opts.data.target - Id of the target document
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
@@ -78,11 +213,12 @@ Self.merge = function (opts = {}, cb) {
     return cb(new Error(`Missing required data: opts.data.target`));
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
-  let id = Params.convertToString(opts.data.source);
+  let source = Params.convertToString(opts.data.source);
+  let target = Params.convertToString(opts.data.target);
   return async.reduce(
     [
-      { kind: `source`, id: opts.data.source },
-      { kind: `target`, id: opts.data.target }
+      { kind: `source`, id: source },
+      { kind: `target`, id: target }
     ],
     {},
     function (acc, item, next) {
@@ -960,6 +1096,13 @@ Self.reopen = function (opts = {}, cb) {
  * @param {object} opts - Options available (You must call getUploadParams)
  * @param {object} opts.data - Data available
  * @param {string} opts.data.id - Document id
+ * @param {object} opts.data.metadata - Document metadata
+ * @param {string} opts.data.metadata.article_title - Document metadata article_title
+ * @param {string} opts.data.metadata.journal - Document metadata journal
+ * @param {string} opts.data.metadata.publisher - Document metadata publisher
+ * @param {string} opts.data.metadata.manuscript_id - Document metadata manuscript_id
+ * @param {string} opts.data.metadata.doi - Document metadata doi
+ * @param {string} opts.data.metadata.pmid - Document metadata pmid
  * @param {object} opts.user - Current user
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: ObjectId OR new Error)
  * @returns {undefined} undefined
@@ -969,6 +1112,8 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
   if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
   return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
     if (err) return cb(err);
     if (doc instanceof Error) return cb(null, doc);
@@ -976,31 +1121,60 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
     // Read TEI file (containing PDF metadata)
     return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
       if (err) return cb(err);
-      // Extract metadata
-      let metadata = XML.extractMetadata(XML.load(content.data.toString(DocumentsFilesController.encoding)));
-      // Update them
-      return DocumentsMetadata.findOneAndUpdate({ document: doc._id }, metadata, {
-        new: true,
-        upsert: true, // Make this update into an upsert
-        rawResult: true
-      }).exec(function (err, res) {
-        if (err) return cb(err);
-        if (typeof _.get(res, `value._id`) === `undefined`) return cb(null, new Error(`ObjectId not found`));
-        let created = !_.get(res, `lastErrorObject.updatedExisting`, true);
-        // Create logs
-        return DocumentsLogsController.create(
-          {
-            target: doc._id,
-            account: opts.user._id,
-            kind: created ? CrudManager.actions.create._id : CrudManager.actions.update._id,
-            key: `metadata`
+      let metadata = _.get(opts, `data.metadata`);
+      let xmlString = content.data.toString(DocumentsFilesController.encoding);
+      return async.mapSeries(
+        [
+          function (next) {
+            if (typeof metadata !== `undefined` && accessRights.isModerator) {
+              // Update Metadata
+              xmlString = XML.updateMetadata(
+                XML.load(content.data.toString(DocumentsFilesController.encoding)),
+                metadata
+              );
+              return DocumentsFilesController.rewriteFile(doc.tei.toString(), xmlString, function (err) {
+                if (err) return next(err);
+                return next(null);
+              });
+            } else return next();
           },
-          function (err, log) {
-            if (err) return cb(err);
-            return cb(null, Object.assign({ _id: res.value._id }, metadata));
+          function (next) {
+            // Extract metadata
+            metadata = XML.extractMetadata(XML.load(xmlString));
+            return next();
           }
-        );
-      });
+        ],
+        function (action, next) {
+          return action(function (err) {
+            return next(err);
+          });
+        },
+        function (err) {
+          // Update them
+          return DocumentsMetadata.findOneAndUpdate({ document: doc._id }, metadata, {
+            new: true,
+            upsert: true, // Make this update into an upsert
+            rawResult: true
+          }).exec(function (err, res) {
+            if (err) return cb(err);
+            if (typeof _.get(res, `value._id`) === `undefined`) return cb(null, new Error(`ObjectId not found`));
+            let created = !_.get(res, `lastErrorObject.updatedExisting`, true);
+            // Create logs
+            return DocumentsLogsController.create(
+              {
+                target: doc._id,
+                account: opts.user._id,
+                kind: created ? CrudManager.actions.create._id : CrudManager.actions.update._id,
+                key: `metadata`
+              },
+              function (err, log) {
+                if (err) return cb(err);
+                return cb(null, Object.assign({ _id: res.value._id }, metadata));
+              }
+            );
+          });
+        }
+      );
     });
   });
 };

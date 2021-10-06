@@ -39,6 +39,8 @@
   //   hideLoop();
   // });
 
+  if (!user.isCurator && !user.isAnnotator) $(`#datasetsList\\.container\\.bulkActions\\.importDatasets`).hide();
+
   showLoop();
   setHeaderLoop(`Initializing DataSeer UI`);
   const documentView = new DocumentView(`documentView`),
