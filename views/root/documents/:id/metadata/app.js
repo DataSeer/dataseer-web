@@ -93,22 +93,25 @@
         loader.show();
         // Disable the button
         button.prop(`disabled`, true);
-        return API.documents.reloadMetadata({ id: this.item.properties._id }, function (err, res) {
-          // Hide the loader
-          loader.hide();
-          // Enable the button
-          button.prop(`disabled`, false);
-          if (err)
-            // Push an error notification
-            return self.notifications.push(
-              NOTIFICATIONS.create(self.notifications, {
-                kind: NOTIFICATIONS.kinds.error,
-                message: `${err.toString()}`,
-                autoclose: false
-              })
-            );
-          return refresh();
-        });
+        return API.documents.reloadMetadata(
+          { id: this.item.properties._id, data: self.item.properties.metadata },
+          function (err, res) {
+            // Hide the loader
+            loader.hide();
+            // Enable the button
+            button.prop(`disabled`, false);
+            if (err)
+              // Push an error notification
+              return self.notifications.push(
+                NOTIFICATIONS.create(self.notifications, {
+                  kind: NOTIFICATIONS.kinds.error,
+                  message: `${err.toString()}`,
+                  autoclose: false
+                })
+              );
+            return refresh();
+          }
+        );
       },
       // Validate metadata
       validateMetadata: function () {

@@ -70,6 +70,31 @@ Self.mergeDatasets = function (currents = [], datasets = []) {
 };
 
 /**
+ * Check if a given dataset already exist in the collection
+ * @param {object} opts - JSON containing all data
+ * @param {string} opts.current - Current datasets
+ * @param {string} opts.dataset - Dataset that should checked
+ * @returns {object} JSON containing all data
+ */
+Self.datasetAlreadyExist = function (currents = [], dataset = {}, match) {
+  return (
+    currents.filter(function (item) {
+      if (dataset.dataType === item.dataType && dataset.subType === item.subType) {
+        return (
+          item.sentences.filter(function (sentence) {
+            return (
+              dataset.sentences.filter(function (s) {
+                return match(s.text, sentence.text);
+              }).length > 0
+            );
+          }).length > 0
+        );
+      } else return false;
+    }).length > 0
+  );
+};
+
+/**
  * Create new dataset JSON object
  * @param {object} opts - JSON containing all data
  * @param {string} opts.id - Dataset id

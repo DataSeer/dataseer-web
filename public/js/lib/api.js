@@ -621,6 +621,28 @@ const API = {
   documents: {
     url: `api/documents`,
     /**
+     * Check sentences content of a document by id
+     * @param {object} opts - Options available
+     * @param {string} opts.source - Id of the source document (that contain datasets you want to import)
+     * @param {string} opts.target - Id of the target document (that will receiving imported datasets)
+     * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+     * @returns {undefined} undefined
+     */
+    importDatasets: function (opts = {}, done) {
+      return $.ajax({
+        type: `POST`,
+        data: {},
+        url: URLMANAGER.buildURL(`${this.url}/${opts.target}/importDatasets/${opts.source}`, {}, { setToken: true }),
+        success: function (query) {
+          console.log(`documents.importDatasets`, query);
+          return done(false, query);
+        },
+        error: function (query) {
+          return done(query);
+        }
+      });
+    },
+    /**
      * Get PDF of given document
      * @param {object} opts Options
      * @param {string} documentId Id of document
@@ -735,7 +757,7 @@ const API = {
     reloadMetadata: function (opts = {}, done) {
       return $.ajax({
         type: `POST`,
-        data: {},
+        data: _.get(opts, `data`, {}),
         url: URLMANAGER.buildURL(`${this.url}/${opts.id}/metadata/reload`, {}, { setToken: true }),
         success: function (query) {
           console.log(`documents.reloadMetadata`, query);

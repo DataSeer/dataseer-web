@@ -369,19 +369,19 @@ router.put(`/:id/fixEncoding`, function (req, res, next) {
   });
 });
 
-/* POST checkSentencesContent */
-router.post(`/:id/merge/:target`, function (req, res, next) {
+/* POST importDatasets */
+router.post(`/:target/importDatasets/:source`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
     data: {
-      source: req.params.id,
-      target: req.params.target
+      target: req.params.target,
+      source: req.params.source
     },
     user: req.user
   };
-  return DocumentsController.merge(opts, function (err, data) {
+  return DocumentsController.importDatasets(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
@@ -846,7 +846,15 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     data: {
-      id: req.params.id
+      id: req.params.id,
+      metadata: {
+        article_title: Params.convertToString(req.body.article_title),
+        journal: Params.convertToString(req.body.journal),
+        publisher: Params.convertToString(req.body.publisher),
+        manuscript_id: Params.convertToString(req.body.manuscript_id),
+        doi: Params.convertToString(req.body.doi),
+        pmid: Params.convertToString(req.body.pmid)
+      }
     },
     user: req.user
   };
