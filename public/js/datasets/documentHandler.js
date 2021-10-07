@@ -626,6 +626,24 @@ DocumentHandler.prototype.synchronize = function () {
     this.datasetsList.attach(`onDatasetLoaded`, function (dataset) {
       // console.log(dataset);
     });
+    this.datasetsList.attach(`onImportDatasetsClick`, function () {
+      let source = prompt(
+        `Enter the ID of the document containing the datasets you want to import (it will take a few seconds)`
+      );
+      if (typeof source === null) return;
+      let match = source.match(/[a-f0-9]{24}/gm);
+      console.log(source, !Array.isArray(match), match);
+      if (source === `` || !Array.isArray(match) || match.length !== 1) return alert(`Bad document ID`);
+      $(`body`).css(`cursor`, `progress`);
+      return API.documents.importDatasets({ source: source, target: self.ids.document }, function (err, query) {
+        console.log(err, query);
+        $(`body`).css(`cursor`, `default`);
+        if (err || query.err) return alert(`An error has occured`);
+        let infos = `${query.res.existing.length} already existing dataset(s)\n${query.res.merged.length} dataset(s) merged\n${query.res.rejected.length} dataset(s) rejected`;
+        alert(infos);
+        window.location.reload();
+      });
+    });
     this.datasetsList.attach(`onDatasetClick`, function (dataset) {
       self.selectSentence({
         sentence: dataset.sentence, // this data contain the current selected sentence

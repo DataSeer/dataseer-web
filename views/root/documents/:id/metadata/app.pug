@@ -9,7 +9,7 @@
   </div>
   <div class="contour">
     <div class="metadata container-fluid">
-      <div class="row">
+      <div v-if="user.role && (user.role.key ==='visitor' || user.role.key ==='standardUser')"  class="row">
         <div class="col">
           <div v-if="item.properties.metadata.publisher">
             <label class="property">Publisher:</label>
@@ -29,6 +29,26 @@
           </div>
         </div>
       </div>
+      <div v-if="user.role && (user.role.key ==='moderator' || user.role.key ==='administrator')"  class="row">
+        <div class="col">
+          <div>
+            <label class="property">Publisher:</label>
+            <input type="text" class="form-control" name="item.properties.metadata.publisher" v-model="item.properties.metadata.publisher" placeholder="Enter the publisher here" />
+          </div>
+          <div>
+            <label class="property">Publication date:</label>
+            <label class="value">{{ item.properties.metadata.date_published }}</label>
+          </div>
+          <div>
+            <label class="property">DOI:</label>
+            <input type="text" class="form-control" name="item.properties.metadata.doi" v-model="item.properties.metadata.doi" placeholder="Enter the doi here" />
+          </div>
+          <div>
+            <label class="property">PMID:</label>
+            <input type="text" class="form-control" name="item.properties.metadata.pmid" v-model="item.properties.metadata.pmid" placeholder="Enter the pmid here" />
+          </div>
+        </div>
+      </div>
       <div class="row">
         <div class="col">
           <div v-if="item.properties.metadata.submitting_author">
@@ -41,11 +61,19 @@
           </div>
         </div>
       </div>
-      <div class="row">
+      <div v-if="user.role && (user.role.key ==='visitor' || user.role.key ==='standardUser')"  class="row">
         <div class="col">
           <div v-if="item.properties.metadata.article_title">
             <label class="property">Article Title:</label>
             <label class="value">{{ item.properties.metadata.article_title }}</label>
+          </div>
+        </div>
+      </div>
+      <div v-if="user.role && (user.role.key ==='moderator' || user.role.key ==='administrator')"  class="row">
+        <div class="col">
+          <div>
+            <label class="property">Article Title:</label>
+            <input type="text" class="form-control article_title" name="item.properties.metadata.article_title" v-model="item.properties.metadata.article_title" placeholder="Enter the article title here" />
           </div>
         </div>
       </div>
@@ -69,7 +97,7 @@
       </div>
       <div class="row buttons" v-if="user.role && user.role.key === 'administrator'">
         <div class="col">
-          <button class="btn btn-primary" v-on:click.stop="reloadMetadata()" title="Validate metadata" ref="reloadMetadata">
+          <button class="btn btn-primary" v-on:click.stop="reloadMetadata()" title="Reload metadata" ref="reloadMetadata">
             | Reload Metadata
           </button>
           <span class="loader-md" ref="reloadMetadataLoader">
