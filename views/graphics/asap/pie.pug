@@ -5,25 +5,25 @@
   <head>
     <title>#{conf.title}</title>
     <!-- include of global css dependencies -->
-    link(rel="icon" type="image/png" href=conf.root + "public/favicon.ico")
-    link(rel="stylesheet" type="text/css" href=conf.root + "public/css/graphics/asap/pie.css")
+    link(rel="icon" type="image/png" href=conf.root + "/public/favicon.ico")
+    link(rel="stylesheet" type="text/css" href=conf.root + "/public/css/graphics/asap/pie.css")
   </head>
   <body>
-    img(src=conf.root + "public/img/cropped-ASAP_Logo_FullColor.png" alt="Aligning Science Across Parkinson's" height="55" width="295")
+    img(src=conf.root + "/public/img/cropped-ASAP_Logo_FullColor.png" alt="Aligning Science Across Parkinson's" height="55" width="295")
     div(id="graphic")
     label Document URL: #{document_url}
     label Assessed at: #{assessed_at}
     label Dataseer report: #{report_url}
     <!-- include of global js dependencies -->
-    script(src=conf.root + "public/js/dependencies/d3.min.js")
-    script(src=conf.root + "public/js/dependencies/jquery.min.js")
-    script(src=conf.root + "public/js/dependencies/lodash.min.js")
-    script(src=conf.root + "public/js/dependencies/async.min.js")
-    script(src=conf.root + "public/js/dependencies/bootstrap.min.js")
-    script(src=conf.root + "public/js/dependencies/url-join.js")
-    script(src=conf.root + "public/js/conf/conf.js")
-    script(src=conf.root + "public/js/lib/url.js")
-    script(src=conf.root + "public/js/lib/api.js")
-    script(src=conf.root + "public/js/graphics/asap/pie.js")
+    script(src=conf.root + "/public/js/dependencies/d3.min.js")
+    script(src=conf.root + "/public/js/dependencies/jquery.min.js")
+    script(src=conf.root + "/public/js/dependencies/lodash.min.js")
+    script(src=conf.root + "/public/js/dependencies/async.min.js")
+    script(src=conf.root + "/public/js/dependencies/bootstrap.min.js")
+    script(src=conf.root + "/public/js/dependencies/url-join.js")
+    script(src=conf.root + "/public/js/conf/conf.js")
+    script(src=conf.root + "/public/js/lib/url.js")
+    script(src=conf.root + "/public/js/lib/api.js")
+    script(src=conf.root + "/public/js/graphics/asap/pie.js")
   </body>
 </html>
