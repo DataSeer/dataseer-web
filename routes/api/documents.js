@@ -987,13 +987,19 @@ router.get(`/:id/graphics/asap`, function (req, res) {
     return Graphics.buildASAPPie(
       {
         data: {
+          render: Params.convertToBoolean(req.query.render),
           urls: {
+            current: `${Url.build(`/documents/${req.params.id}/graphics/asap?token=${req.user.tokens.api}`)}`,
             bioRxiv: doc.urls.bioRxiv,
             document: `${Url.build(`/documents/${req.params.id}`)}`
           }
         }
       },
       function (err, html) {
+        if (err) {
+          console.log(err);
+          return res.status(500).send(conf.errors.internalServerError);
+        }
         return res.send(html);
       }
     );
