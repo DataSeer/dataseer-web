@@ -641,6 +641,22 @@ DocumentHandler.prototype.synchronize = function () {
         if (err || query.err) return alert(`An error has occured`);
         let infos = `${query.res.existing.length} already existing dataset(s)\n${query.res.merged.length} dataset(s) merged\n${query.res.rejected.length} dataset(s) rejected`;
         alert(infos);
+        if (query.res.rejected.length) {
+          alert(`More infos about rejected dataset(s)`);
+          for (var i = 0; i < query.res.rejected.length; i++) {
+            let dataset = query.res.rejected[i];
+            let lines = [
+              `${i + 1}/${query.res.rejected.length}`,
+              `(${dataset.id}) ${dataset.name} : ${dataset.dataType} ${dataset.subType}`,
+              `${dataset.sentences
+                .map(function (s) {
+                  return s.text;
+                })
+                .join(`\n`)}`
+            ];
+            alert(lines.join(`\n`));
+          }
+        }
         window.location.reload();
       });
     });
