@@ -9,6 +9,7 @@
   - [(GET) /api/documents/:id](#get-apidocumentsid)
   - [(PUT) /api/documents/:id](#put-apidocumentsid)
   - [(DELETE) /api/documents/:id](#delete-apidocumentsid)
+  - [(POST) /api/documents/:target/importDatasets/:source](#post-apidocumentstargetimportdatasetssource)
   - [(PUT) /api/documents/:id/datasets](#put-apidocumentsiddatasets)
   - [(GET) /api/documents/:id/logs](#get-apidocumentsidlogs)
   - [(GET) /api/documents/:id/files](#get-apidocumentsidfiles)
@@ -22,6 +23,7 @@
   - [(GET) /api/documents/:id/reports/html/bioRxiv](#get-apidocumentsidreportshtmlbiorxiv)
   - [(GET) /api/documents/:id/reports/html/default](#get-apidocumentsidreportshtmldefault)
   - [(GET) /api/documents/:id/reports/docx/default](#get-apidocumentsidreportsdocxdefault)
+  - [(GET) /api/documents/:id/graphics/asap](#get-apidocumentsidgraphicsasap)
   - [(POST) /api/documents/:id/refreshToken](#post-apidocumentsidrefreshtoken)
   - [(POST) /api/documents/:id/metadata/reload](#post-apidocumentsidmetadatareload)
   - [(POST) /api/documents/:id/metadata/validate](#post-apidocumentsidmetadatavalidate)
@@ -631,6 +633,44 @@ curl -X DELETE "http://localhost:3000/api/documents/000000000000000000000001"
 
 ---
 
+# (POST) /api/documents/:target/importDatasets/:source
+
+*[List of Documents routes](#documents)*
+
+## Description
+
+This route imports dataset from a given document (:source) to another document (:target) and return the result of this process (JSON formatted).
+
+## Role required
+
+Accessible to users with the following role: **moderator**, **administrator**.
+
+## Parameters
+
+No parameter avaialble.
+
+## How to request
+
+```bash
+# Will import datasets from document 000000000000000000000002 to document 000000000000000000000001
+curl -X POST "http://localhost:3000/api/documents/000000000000000000000001/importDatasets/000000000000000000000002"
+```
+
+## Result
+
+```json
+{
+  "err": false,
+  "res": {
+    "rejected": [], // list of rejected dataset(s) (that not match with sentences of this document)
+    "merged": [], // list of merged dataset(s) (automatically merged)
+    "mergeable": [] // list of mergeable dataset(s) (that match with some sentences of this document, but with a "insufficient" score. It won't be automatically merged)
+  }
+}
+```
+
+---
+
 # (PUT) /api/documents/:id/datasets
 
 *[List of Documents routes](#documents)*
@@ -1055,6 +1095,56 @@ curl "http://localhost:3000/api/documents/000000000000000000000001/reports/docx/
 ## Result
 
 The .docx report
+
+---
+
+# (GET) /api/documents/:id/graphics/asap
+
+*[List of Documents routes](#documents)*
+
+## Description
+
+This route get the ASAP Graphics (HTML format).
+
+## Role required
+
+Accessible to users with the following role: **visitor**, **standardUser**, **moderator**, **administrator**.
+
+## Parameters
+
+
+
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Boolean</td>
+      <td>render</td>
+      <td>optional</td>
+      <td>Graphic will be server-side rendered (default value: false)</td>
+    </tr>
+  </tbody>
+</table>
+
+## How to request
+
+```bash
+# Using this URL will just return the HTML source that must interpreted by your navigator (graphics won't be rendered)
+curl "http://localhost:3000/api/documents/000000000000000000000001/graphics/asap"
+# Using this URL will just return the HTML source containing all graphics
+curl "http://localhost:3000/api/documents/000000000000000000000001/graphics/asap?render=true"
+```
+
+## Result
+
+The ASAP Graphics (HTML format)
 
 ---
 

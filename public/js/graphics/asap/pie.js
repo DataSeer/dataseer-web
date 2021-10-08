@@ -3,7 +3,6 @@
  */
 
 'use strict';
-
 (function (d3) {
   const width = 700;
   const height = 700;
@@ -232,7 +231,6 @@
     let datasets = query.res.datasets.current.filter(function (item) {
       return item.dataType !== `other` && item.dataType !== `code software` && item.dataType !== `lab materials`;
     });
-    console.log(protocols, codes, reagents, datasets);
     data[0].done = datasets.filter(function (item) {
       return !item.reuse && item.status === `valid`;
     }).length;
@@ -282,5 +280,7 @@
       return item.reuse;
     }).length;
     init(data);
+    // Dispatch the event.
+    window.document.dispatchEvent(new Event(`build`));
   });
 })(d3);
