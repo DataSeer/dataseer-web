@@ -107,4 +107,27 @@ router.get(`/:id/finish`, function (req, res) {
   });
 });
 
+/* Document process finish */
+router.get(`/:id/reports/gSpreadsheets`, function (req, res) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated)
+    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: req.originalUrl }));
+  if (!accessRights.isAdministrator && !accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
+    return DocumentsController.getGSpreadsheets({ data: { id: req.params.id }, user: req.user }, function (err, data) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send(conf.errors.internalServerError);
+      }
+      if (!data || data instanceof Error) return res.status(404).send(conf.errors.notFound);
+      return res.redirect(Url.build(`spreadsheets/d/${data}`, {}, `https://docs.google.com/`));
+    });
+  });
+});
+
 module.exports = router;

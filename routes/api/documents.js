@@ -751,6 +751,54 @@ router.get(`/:id/reports/html/bioRxiv`, function (req, res, next) {
 });
 
 /* GET SINGLE Document reports/ BY ID */
+router.post(`/:id/reports/gSpreadsheets`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator && !accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: { id: req.params.id, dataTypes: req.app.get(`dataTypes`) },
+    user: req.user
+  };
+  return DocumentsController.buildGSpreadsheets(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    if (isError) return res.status(404).send(conf.errors.notFound);
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* GET SINGLE Document reports/ BY ID */
+router.get(`/:id/reports/gSpreadsheets`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator && !accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: { id: req.params.id },
+    user: req.user
+  };
+  return DocumentsController.getGSpreadsheets(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    if (isError) return res.status(404).send(conf.errors.notFound);
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* GET SINGLE Document reports/ BY ID */
 router.get(`/:id/reports/html/default`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
