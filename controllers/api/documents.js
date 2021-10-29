@@ -36,6 +36,7 @@ const Hypothesis = require(`../../lib/hypothesis.js`);
 const Encoding = require(`../../lib/encoding.js`);
 const Analyzer = require(`../../lib/analyzer.js`);
 const CSV = require(`../../lib/csv.js`);
+const GoogleSheets = require(`../../lib/googleSheets.js`);
 
 const conf = require(`../../conf/conf.json`);
 
@@ -332,6 +333,89 @@ Self.checkSentencesBoundingBoxes = function (opts = {}, cb) {
       return cb(err, res);
     });
   });
+};
+
+/**
+ * build the gSpeadsheets of the given document
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.id - Id of the document
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.getGSpreadsheets = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  let id = Params.convertToString(opts.data.id);
+  return GoogleSheets.getReportFileId({ data: { name: id } }, function (err, res) {
+    return cb(err, res);
+  });
+};
+
+/**
+ * build the gSpeadsheets of the given document
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.data - Data available
+ * @param {object} opts.data.dataTypes - datatypes
+ * @param {string} opts.data.id - Id of the document
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.buildGSpreadsheets = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  if (typeof _.get(opts, `data.dataTypes`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.dataTypes`));
+  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  let id = Params.convertToString(opts.data.id);
+  return Self.getReportData(
+    {
+      data: { id: opts.data.id, kind: `html`, organization: `default`, dataTypes: opts.data.dataTypes },
+      user: opts.user
+    },
+    function (err, data) {
+      if (err) return cb(err);
+      if (data instanceof Error) return cb(null, data);
+      return GoogleSheets.buildReport(
+        {
+          data: {
+            filename: opts.data.id,
+            dataTypesInfos: opts.data.dataTypes,
+            metadata: {
+              articleTitle: data.doc.metadata.article_title,
+              doi: data.doc.metadata.doi,
+              authors: data.doc.metadata.authors
+                .map(function (item) {
+                  return item.name;
+                })
+                .join(`, `),
+              dataSeerLink: `${Url.build(`/documents/${opts.data.id}`, { token: data.doc.token })}`
+            },
+            summary: data.datasetsSummary,
+            datasets: data.sortedDatasetsInfos.datasets,
+            protocols: data.sortedDatasetsInfos.protocols,
+            reagents: data.sortedDatasetsInfos.reagents,
+            codes: data.sortedDatasetsInfos.codes
+          }
+        },
+        function (err, spreadsheetId) {
+          if (err) return cb(err);
+          return cb(null, spreadsheetId);
+        }
+      );
+    }
+  );
 };
 
 /**
