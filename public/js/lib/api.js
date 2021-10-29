@@ -851,6 +851,26 @@ const API = {
           return done(query);
         }
       });
+    },
+    /**
+     * Build report (google spreadsheet)
+     * @param {object} opts JSON object containing all data
+     * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+     * @returns {undefined} undefined
+     */
+    buildGSpreadSheetReport: function (opts = {}, done) {
+      return $.ajax({
+        type: `POST`,
+        data: _.get(opts, `data`, {}),
+        url: URLMANAGER.buildURL(`${this.url}/${opts.id}/reports/gSpreadsheets`, {}, { setToken: true }),
+        success: function (query) {
+          console.log(`buildGSpreadSheetReport`, query);
+          return done(false, query);
+        },
+        error: function (query) {
+          return done(query);
+        }
+      });
     }
   }
 };

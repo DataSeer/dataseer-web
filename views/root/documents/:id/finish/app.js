@@ -17,6 +17,7 @@
       htmlDefaultReportLink: ``,
       htmlBioRxivReportLink: ``,
       asapGraphicLink: ``,
+      gSpreadSheetReportLink: ``,
       publicUrl: ``,
       loading: true
     },
@@ -104,6 +105,57 @@
           );
         });
       },
+      buildGSpreadSheetReport: function (event) {
+        let self = this;
+        // Get the button Jquery element
+        let button = $(this.$refs.buildGSpreadSheetReport);
+        // Get the loader of the button
+        let loader = $(this.$refs.buildGSpreadSheetReportLoader);
+        // Display the loader
+        loader.show();
+        // Disable the button
+        button.prop(`disabled`, true);
+        let opts = {
+          id: documentId
+        };
+        return API.documents.buildGSpreadSheetReport(opts, function (err, query) {
+          // Hide the loader
+          loader.hide();
+          // Enable the button
+          button.prop(`disabled`, false);
+          // Case API did not respond
+          if (err) {
+            console.log(err);
+            // Push an error notification
+            return self.notifications.push(
+              NOTIFICATIONS.create(self.notifications, {
+                kind: NOTIFICATIONS.kinds.error,
+                message: `[${err.statusText}] ${err.responseText} (HTTP ${err.status})`,
+                autoclose: false
+              })
+            );
+          }
+          // Case API did respond
+          if (query.err) {
+            // Case there is an error
+            // Push an error notification
+            return self.notifications.push(
+              NOTIFICATIONS.create(self.notifications, {
+                kind: NOTIFICATIONS.kinds.error,
+                message: query.res,
+                autoclose: false
+              })
+            );
+          }
+          return self.notifications.push(
+            NOTIFICATIONS.create(self.notifications, {
+              kind: NOTIFICATIONS.kinds.success,
+              message: `<a href="${self.gSpreadSheetReportLink}" target="_blank">Report</a> has been generated!`,
+              autoclose: true
+            })
+          );
+        });
+      },
       buildPublicUrl: function (event) {
         const self = this;
         let opts = {
@@ -181,6 +233,10 @@
                 );
                 self.asapGraphicLink = URLMANAGER.buildURL(
                   `api/documents/${self.document._id.toString()}/graphics/asap`,
+                  {}
+                );
+                self.gSpreadSheetReportLink = URLMANAGER.buildURL(
+                  `documents/${self.document._id.toString()}/reports/gSpreadsheets`,
                   {}
                 );
                 self.publicUrl = URLMANAGER.buildURL(
