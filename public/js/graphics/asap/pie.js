@@ -10,14 +10,14 @@
   const height = window.innerHeight > minHeight ? window.innerHeight : minHeight;
 
   const data = [
-    { name: `New Datasets publicly shared`, done: 0, total: 0, opacity: 0.9, background: `#EBEBEB` }, // Top right slice
-    { name: `Original Code publicly shared`, done: 0, total: 0, opacity: 0.9, background: `#EBEBEB` },
+    { name: `New Data shared`, done: 0, total: 0, opacity: 0.9, background: `#EBEBEB` }, // Top right slice
+    { name: `New Code shared`, done: 0, total: 0, opacity: 0.9, background: `#EBEBEB` },
     { name: `New Materials available`, done: 0, total: 0, opacity: 0.9, background: `#EBEBEB` },
-    { name: `Protocols publicly shared`, done: 0, total: 0, opacity: 0.9, background: `#EBEBEB` },
-    { name: `Existing Protocol re-use`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` },
-    { name: `Existing Materials identified`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` },
-    { name: `Code re-use correctly cited`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` },
-    { name: `Data re-use correctly cited`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` } // Top left slice
+    { name: `Protocols shared`, done: 0, total: 0, opacity: 0.9, background: `#EBEBEB` },
+    { name: `Protocols re-used`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` },
+    { name: `Materials identified`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` },
+    { name: `Code re-use cited`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` },
+    { name: `Data re-use cited`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` } // Top left slice
   ];
 
   const radius = Math.min(width, height) * 0.75;
