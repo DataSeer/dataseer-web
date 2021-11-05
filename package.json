@@ -46,6 +46,7 @@
     "passport-local-mongoose": "^6.1.0",
     "pdfjs-dist": "^2.9.359",
     "pug": "^3.0.2",
+    "puppeteer": "^11.0.0",
     "sbd": "^1.0.19",
     "serve-favicon": "^2.5.0",
     "url-join": "^4.0.1"
