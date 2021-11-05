@@ -1,0 +1,8 @@
+{
+  "render": {
+    "type": "html",
+    "quality": 95,
+    "width": 1600,
+    "height": 900
+  }
+}

@@ -4,25 +4,31 @@
 
 'use strict';
 (function (d3) {
-  const width = 700;
-  const height = 700;
+  const minWidth = 800;
+  const minHeight = 600;
+  const width = window.innerWidth > minWidth ? window.innerWidth : minWidth;
+  const height = window.innerHeight > minHeight ? window.innerHeight : minHeight;
 
   const data = [
     { name: `New Datasets publicly shared`, done: 0, total: 0, opacity: 0.9, background: `#EBEBEB` }, // Top right slice
     { name: `Original Code publicly shared`, done: 0, total: 0, opacity: 0.9, background: `#EBEBEB` },
     { name: `New Materials available`, done: 0, total: 0, opacity: 0.9, background: `#EBEBEB` },
     { name: `Protocols publicly shared`, done: 0, total: 0, opacity: 0.9, background: `#EBEBEB` },
-    { name: `Existing Protocol re-use`, done: 0, total: 0, opacity: 0.35, background: `#FFFFFF` },
-    { name: `Existing Materials identified`, done: 0, total: 0, opacity: 0.35, background: `#FFFFFF` },
-    { name: `Code re-use correctly cited`, done: 0, total: 0, opacity: 0.35, background: `#FFFFFF` },
-    { name: `Data re-use correctly cited`, done: 0, total: 0, opacity: 0.35, background: `#FFFFFF` } // Top left slice
+    { name: `Existing Protocol re-use`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` },
+    { name: `Existing Materials identified`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` },
+    { name: `Code re-use correctly cited`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` },
+    { name: `Data re-use correctly cited`, done: 0, total: 0, opacity: 0.6, background: `#FFFFFF` } // Top left slice
   ];
 
-  const innerRadius = height / 10;
+  const radius = Math.min(width, height) * 0.75;
 
-  const outerRadius = height / 2;
+  const maxNumberOfSubSlices = 2; // Maximum number of "sub-slices" rendered. If this number is higher, they will not be rendered.
 
-  const radius = Math.min(width, height) / 2;
+  const innerRadius = radius / 5;
+
+  const fontSize = radius / 15;
+
+  const outerRadius = radius;
 
   const colorScale = d3.scaleLinear().domain(d3.range(Math.PI)).range([`#8c4e9f`, `#0c8dc3`, `#34a270`]);
 
@@ -34,9 +40,9 @@
 
   const yAxis = (g) =>
     g
+      .attr(`font-family`, `sans-serif`)
+      .attr(`font-size`, fontSize)
       .attr(`text-anchor`, `middle`)
-      .attr(`font-family`, `roboto`)
-      .attr(`font-size`, 12)
       .call((g) =>
         g
           .selectAll(`g`)
@@ -100,12 +106,16 @@
   const pie = d3.pie().sort(null).value(1);
 
   const init = (data) => {
+    // Remove existing nodes
+    d3.select(`div#graphic`).selectAll(`*`).remove();
+
     const arcs = pie(data);
 
     const svg = d3
       .select(`div#graphic`)
       .append(`svg`)
-      .attr(`viewBox`, [-width, -(height / 1.8) + 25, width * 2, height + 25]);
+      .attr(`preserveAspectRatio`, `xMinYMin meet`)
+      .attr(`viewBox`, [-width, -radius - 25, width * 2, radius * 2 + 50]);
 
     let radialGradient = svg
       .append(`defs`)
@@ -121,20 +131,22 @@
     radialGradient.append(`stop`).attr(`offset`, `50%`).attr(`stop-color`, `white`).attr(`stop-opacity`, 0.15);
     radialGradient.append(`stop`).attr(`offset`, `100%`).attr(`stop-color`, `white`).attr(`stop-opacity`, 0);
 
-    // let linearGradient = svg.append("defs")
-    //   .append("linearGradient")
-    //     .attr("id","linearGradient")
-    //     .attr('gradientUnits', 'userSpaceOnUse')
-    //     .attr("x1", "0%").attr("y1", "0%")
-    //     .attr("x2", "0%").attr("y2", "100%");
-    // linearGradient.append("stop")
-    //   .attr("offset", "0%")
-    //   .attr("stop-color", "white")
-    //   .attr("stop-opacity", 1);
-    // linearGradient.append("stop")
-    //   .attr("offset", "100%")
-    //   .attr("stop-color", "white")
-    //   .attr("stop-opacity", 0);
+    /**
+  let linearGradient = svg.append("defs")
+    .append("linearGradient")
+      .attr("id","linearGradient")
+      .attr('gradientUnits', 'userSpaceOnUse')
+      .attr("x1", "0%").attr("y1", "0%")
+      .attr("x2", "0%").attr("y2", "100%");
+  linearGradient.append("stop")
+    .attr("offset", "0%")
+    .attr("stop-color", "white")
+    .attr("stop-opacity", 1);
+  linearGradient.append("stop")
+    .attr("offset", "100%")
+    .attr("stop-color", "white")
+    .attr("stop-opacity", 0);
+  */
 
     // Pie slices
     svg
@@ -164,7 +176,7 @@
         data.reduce(
           (acc, item, i) =>
             acc.concat(
-              Array.from(Array(item.total).keys()).map(function (index) {
+              Array.from(Array(item.total <= maxNumberOfSubSlices ? item.total : 0).keys()).map(function (index) {
                 return { index: i, value: index / item.total, opacity: item.opacity };
               })
             ),
@@ -190,21 +202,25 @@
     svg
       .append(`g`)
       .attr(`font-family`, `sans-serif`)
-      .attr(`font-size`, 16)
+      .attr(`font-size`, fontSize)
       .attr(`text-anchor`, `middle`)
       .selectAll(`text`)
       .data(arcs)
       .join(`text`)
-      .attr(`transform`, (d, i) => {
-        let c = arcLabel.centroid(d);
-        return `translate(${c[0] * (i === 1 || i === 2 || i === 5 || i === 6 ? 1.5 : 2.5)},${c[1] * 1})`;
-      })
       .attr(`dy`, (d) => `1em`)
       .attr(`y`, `-0.5em`)
       .attr(`font-weight`, `bold`)
       .attr(`stroke`, `#fff`)
       .attr(`stroke-width`, 5)
       .text((d) => `${d.data.name} (${d.data.done}/${d.data.total})`)
+      .attr(`transform`, function (d, i) {
+        let elem = d3.select(this);
+        let c = arcLabel.centroid(d);
+        let offset = elem.node().getBBox().width / 2;
+        let coeff = i === 1 || i === 2 || i === 5 || i === 6 ? 3 : 1.5;
+        let pos = c[0] + (i < 4 ? +offset + innerRadius / coeff : -offset - innerRadius / coeff);
+        return `translate(${pos},${c[1]})`;
+      })
       .clone(true)
       .attr(`fill`, (d) => d3.rgb(getColor(d.index)).darker(1))
       .attr(`stroke`, `none`);

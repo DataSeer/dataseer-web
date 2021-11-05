@@ -1032,23 +1032,40 @@ router.get(`/:id/graphics/asap`, function (req, res) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc) return res.status(404).send(conf.errors.notFound);
-    return Graphics.buildASAPPie(
-      {
-        data: {
-          render: Params.convertToBoolean(req.query.render),
-          urls: {
-            current: `${Url.build(`/documents/${req.params.id}/graphics/asap?token=${req.user.tokens.api}`)}`,
-            bioRxiv: doc.urls.bioRxiv,
-            document: `${Url.build(`/documents/${req.params.id}`)}`
+    let render = Params.convertToString(req.query.render);
+    let width = Params.convertToInteger(req.query.width);
+    let height = Params.convertToInteger(req.query.height);
+    let quality = Params.convertToInteger(req.query.quality);
+    if (!render)
+      return Graphics.buildASAPPie(
+        {
+          data: {
+            urls: {
+              current: `${Url.build(`/documents/${req.params.id}/graphics/asap?token=${req.user.tokens.api}`)}`,
+              bioRxiv: doc.urls.bioRxiv,
+              document: `${Url.build(`/documents/${req.params.id}`)}`
+            }
           }
+        },
+        function (err, data) {
+          if (err) {
+            console.log(err);
+            return res.status(500).send(conf.errors.internalServerError);
+          }
+          return res.send(data);
         }
+      );
+    return Graphics.buildRenderedASAPPie(
+      {
+        url: `${Url.build(`api/documents/${req.params.id}/graphics/asap?token=${req.user.tokens.api}`)}`,
+        render: { type: render, width: width, height: height, quality: quality }
       },
-      function (err, html) {
+      function (err, data) {
         if (err) {
           console.log(err);
           return res.status(500).send(conf.errors.internalServerError);
         }
-        return res.send(html);
+        return res.send(data);
       }
     );
   });
