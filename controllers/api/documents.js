@@ -2399,6 +2399,8 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
         sentences,
         id: item.id,
         reuse: item.reuse,
+        isValid: item.status === DocumentsDatasetsController.status.valid ? true : false,
+        notes: item.notification,
         description: item.description,
         bestDataFormatForSharing: item.bestDataFormatForSharing,
         bestPracticeForIndicatingReUseOfExistingData: item.bestPracticeForIndicatingReUseOfExistingData,
