@@ -402,6 +402,11 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
                 .join(`, `),
               dataSeerLink: `${Url.build(`/documents/${opts.data.id}`, { token: data.doc.token })}`
             },
+            urls: {
+              ASAPPieImage: `${Url.build(
+                `/api/documents/${opts.data.id}/graphics/asap?render=jpeg&token=${data.doc.token}`
+              )}`
+            },
             summary: data.datasetsSummary,
             datasets: data.sortedDatasetsInfos.datasets,
             protocols: data.sortedDatasetsInfos.protocols,
