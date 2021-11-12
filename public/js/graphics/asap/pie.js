@@ -22,7 +22,7 @@
 
   const radius = Math.min(width, height) * 0.75;
 
-  const maxNumberOfSubSlices = 2; // Maximum number of "sub-slices" rendered. If this number is higher, they will not be rendered.
+  const maxNumberOfSubSlices = 20; // Maximum number of "sub-slices" rendered. If this number is higher, they will not be rendered.
 
   const innerRadius = radius / 5;
 
