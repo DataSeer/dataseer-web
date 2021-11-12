@@ -1041,7 +1041,7 @@ router.get(`/:id/graphics/asap`, function (req, res) {
         {
           data: {
             urls: {
-              current: `${Url.build(`/documents/${req.params.id}/graphics/asap?token=${req.user.tokens.api}`)}`,
+              current: `${Url.build(`/documents/${req.params.id}/graphics/asap?token=${doc.token}`)}`,
               bioRxiv: doc.urls.bioRxiv,
               document: `${Url.build(`/documents/${req.params.id}`)}`
             }
@@ -1057,7 +1057,7 @@ router.get(`/:id/graphics/asap`, function (req, res) {
       );
     return Graphics.buildRenderedASAPPie(
       {
-        url: `${Url.build(`api/documents/${req.params.id}/graphics/asap?token=${req.user.tokens.api}`)}`,
+        url: `${Url.build(`api/documents/${req.params.id}/graphics/asap?token=${doc.token}`)}`,
         render: { type: render, width: width, height: height, quality: quality }
       },
       function (err, data) {
