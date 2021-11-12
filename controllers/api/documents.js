@@ -404,7 +404,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
             },
             urls: {
               ASAPPieImage: `${Url.build(
-                `/documents/${opts.data.id}/graphics/asap?render=jpeg&token=${data.doc.token}`
+                `/api/documents/${opts.data.id}/graphics/asap?render=jpeg&token=${data.doc.token}`
               )}`
             },
             summary: data.datasetsSummary,
