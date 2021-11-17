@@ -41,6 +41,7 @@
           role: {},
           owner: {},
           organizations: [],
+          files: [],
           tokens: {},
           visible: undefined,
           locked: undefined

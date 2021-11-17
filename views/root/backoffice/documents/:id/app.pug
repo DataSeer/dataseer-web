@@ -32,7 +32,7 @@
                     <label for="name" class="bold">Files</label>
                     <div>
                       <div v-for="file in item.properties.files" >
-                        <a :href="buildFilesLink(file._id.toString())">{{file.filename}}</a>
+                        <a :href="buildFilesLink(file._id)">{{file.filename}}</a>
                       </div>
                     </div>
                   </div>
