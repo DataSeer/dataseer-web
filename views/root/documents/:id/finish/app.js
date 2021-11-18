@@ -232,7 +232,7 @@
                   {}
                 );
                 self.asapGraphicLink = URLMANAGER.buildURL(
-                  `api/documents/${self.document._id.toString()}/graphics/asap`,
+                  `api/documents/${self.document._id.toString()}/charts/asap`,
                   {}
                 );
                 self.gSpreadSheetReportLink = URLMANAGER.buildURL(

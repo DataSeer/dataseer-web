@@ -13,7 +13,7 @@ const Mailer = require(`../../lib/mailer.js`);
 const Params = require(`../../lib/params.js`);
 const DocX = require(`../../lib/docx.js`);
 const Url = require(`../../lib/url.js`);
-const Graphics = require(`../../lib/graphics.js`);
+const Charts = require(`../../lib/charts.js`);
 
 const DocumentsFilesController = require(`../../controllers/api/documents.files.js`);
 const DocumentsController = require(`../../controllers/api/documents.js`);
@@ -1016,8 +1016,8 @@ router.post(`/:id/finish/reopen`, function (req, res, next) {
   });
 });
 
-/* Document graphics for ASAP */
-router.get(`/:id/graphics/asap`, function (req, res) {
+/* Document charts for ASAP */
+router.get(`/:id/charts/asap`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
   let opts = {
@@ -1037,11 +1037,11 @@ router.get(`/:id/graphics/asap`, function (req, res) {
     let height = Params.convertToInteger(req.query.height);
     let quality = Params.convertToInteger(req.query.quality);
     if (!render)
-      return Graphics.buildASAPPie(
+      return Charts.buildASAPPie(
         {
           data: {
             urls: {
-              current: `${Url.build(`/documents/${req.params.id}/graphics/asap?token=${doc.token}`)}`,
+              current: `${Url.build(`/documents/${req.params.id}/charts/asap?token=${doc.token}`)}`,
               bioRxiv: doc.urls.bioRxiv,
               document: `${Url.build(`/documents/${req.params.id}`)}`
             }
@@ -1055,9 +1055,12 @@ router.get(`/:id/graphics/asap`, function (req, res) {
           return res.send(data);
         }
       );
-    return Graphics.buildRenderedASAPPie(
+    return Charts.buildRenderedASAPPie(
       {
-        url: `${Url.build(`api/documents/${req.params.id}/graphics/asap?token=${doc.token}`)}`,
+        url: `${Url.build(
+          `api/documents/${req.params.id}/charts/asap`,
+          Object.assign({ token: doc.token }, req.query, { render: `` }) // disable render & add token if not in the URL
+        )}`,
         render: { type: render, width: width, height: height, quality: quality }
       },
       function (err, data) {
