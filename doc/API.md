@@ -173,7 +173,7 @@ List of available API routes:
   - [(GET) /api/documents/:id/reports/html/bioRxiv](./API/DOCUMENTS.md#get-apidocumentsidreportshtmlbiorxiv)
   - [(GET) /api/documents/:id/reports/html/default](./API/DOCUMENTS.md#get-apidocumentsidreportshtmldefault)
   - [(GET) /api/documents/:id/reports/docx/default](./API/DOCUMENTS.md#get-apidocumentsidreportsdocxdefault)
-  - [(GET) /api/documents/:id/graphics/asap](./API/DOCUMENTS.md#get-apidocumentsidgraphicsasap)
+  - [(GET) /api/documents/:id/charts/asap](./API/DOCUMENTS.md#get-apidocumentsidchartsasap)
   - [(GET) /api/documents/:id/pdf](./API/DOCUMENTS.md#get-apidocumentsidpdf)
   - [(GET) /api/documents/:id/pdf/content](./API/DOCUMENTS.md#get-apidocumentsidpdfcontent)
   - [(GET) /api/documents/:id/tei](./API/DOCUMENTS.md#get-apidocumentsidtei)

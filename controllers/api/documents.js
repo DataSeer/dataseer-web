@@ -389,8 +389,9 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
       if (data instanceof Error) return cb(null, data);
       return GoogleSheets.buildReport(
         {
+          filename: opts.data.id,
           data: {
-            filename: opts.data.id,
+            doc: { id: data.doc._id.toString(), token: data.doc.token },
             dataTypesInfos: opts.data.dataTypes,
             metadata: {
               articleTitle: data.doc.metadata.article_title,
@@ -400,12 +401,10 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
                   return item.name;
                 })
                 .join(`, `),
-              dataSeerLink: `${Url.build(`/documents/${opts.data.id}`, { token: data.doc.token })}`
-            },
-            urls: {
-              ASAPPieImage: `${Url.build(
-                `/api/documents/${opts.data.id}/graphics/asap?render=jpeg&token=${data.doc.token}`
-              )}`
+              dataSeerLink: {
+                url: `${Url.build(`/documents/${opts.data.id}`, { token: data.doc.token })}`,
+                label: data.doc.name ? data.doc.name : data.doc._id.toString()
+              }
             },
             summary: data.datasetsSummary,
             datasets: data.sortedDatasetsInfos.datasets,
