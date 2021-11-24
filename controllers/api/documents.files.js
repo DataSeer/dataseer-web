@@ -95,6 +95,27 @@ Self.get = function (opts, cb) {
 };
 
 /**
+ * Get file path
+ * @param {object} opts - Options available
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.id - File id
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: file path (string) OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.getFilePath = function (opts, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  if (!Params.checkString(opts.data.id)) return cb(new Error(`Bad value: opts.data.id`));
+  return DocumentsFiles.findById(opts.data.id)
+    .select(`+path`) // path is not returned by default
+    .exec(function (err, file) {
+      if (err) return cb(err);
+      return cb(err, file.path);
+    });
+};
+
+/**
  * Read file
  * @param {object} opts - Options available
  * @param {object} opts.data - Data available

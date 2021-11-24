@@ -37,6 +37,7 @@ const Encoding = require(`../../lib/encoding.js`);
 const Analyzer = require(`../../lib/analyzer.js`);
 const CSV = require(`../../lib/csv.js`);
 const GoogleSheets = require(`../../lib/googleSheets.js`);
+const OCR = require(`../../lib/ocr.js`);
 
 const conf = require(`../../conf/conf.json`);
 
@@ -1945,6 +1946,103 @@ Self.refreshDatasetsInTEI = function (opts = {}, cb) {
       return DocumentsFilesController.rewriteFile(doc.tei.toString(), teiInfos.res.xml, function (err) {
         if (err) return cb(err);
         else return cb(null);
+      });
+    });
+  });
+};
+
+/**
+ * Process OCR on the PDF file
+ * @param {object} opts JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {string} opts.pagesNumber - Pages number
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.processOCR = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  let pagesNumber = Array.isArray(opts.pagesNumber) ? opts.pagesNumber : undefined;
+  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    return DocumentsFilesController.getFilePath({ data: { id: doc.pdf.toString() } }, function (err, pdfFilePath) {
+      if (err) return cb(err);
+      return OCR.processPDF(pdfFilePath, pagesNumber, function (err, res) {
+        if (err) return cb(err);
+        else return cb(null, res);
+      });
+    });
+  });
+};
+
+/**
+ * Try to detect new sentences in the PDF file (using OCR)
+ * @param {object} opts JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {string} opts.pagesNumber - Pages number
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.detectNewSentences = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  return Self.get({ data: { id: opts.documentId.toString(), pdf: true }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    if (!doc.pdf) return cb(null, new Error(`PDF file not found`));
+    if (!doc.pdf.metadata) return cb(null, new Error(`PDF file metadata not found`));
+    let results = { errors: [], newSentences: [] };
+    return Self.processOCR(opts, function (err, pages) {
+      if (err) return cb(err);
+      for (let i = 0; i < pages.length; i++) {
+        let page = pages[i];
+        console.log(page);
+        if (page instanceof Error) {
+          results.errors.push(page.toString());
+        } else {
+          let numPage = page.page;
+          let sentences = Analyzer.getNewSentencesOfPage(numPage, page.words, doc.pdf.metadata);
+          for (let j = 0; j < sentences.length; j++) {
+            let sentence = sentences[j];
+            results.newSentences.push({
+              p: numPage,
+              x: sentence.bbox.x0,
+              y: sentence.bbox.y0,
+              h: sentence.bbox.y1 - sentence.bbox.y0,
+              w: sentence.bbox.x1 - sentence.bbox.x0,
+              text: sentence.text
+            });
+          }
+        }
+      }
+      if (results.newSentences.length <= 0) return cb(null, results);
+      return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
+        if (err) return cb(err);
+        let xmlString = content.data.toString(DocumentsFilesController.encoding);
+        let outpout = XML.addSentences(xmlString, results.newSentences);
+        return DocumentsFilesController.rewriteFile(doc.tei.toString(), outpout, function (err) {
+          if (err) return cb(err);
+          return Self.updateOrCreatePDFMetadata(
+            { data: { id: doc._id.toString() }, user: opts.user },
+            function (err, ok) {
+              if (err) return cb(err);
+              if (ok instanceof Error) return cb(ok);
+              return Self.updateOrCreateTEIMetadata(
+                { data: { id: doc._id.toString() }, user: opts.user },
+                function (err, ok) {
+                  if (err) return cb(err);
+                  if (ok instanceof Error) return cb(ok);
+                  return cb(null, results);
+                }
+              );
+            }
+          );
+        });
       });
     });
   });
