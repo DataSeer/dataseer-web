@@ -630,7 +630,7 @@ DocumentHandler.prototype.synchronize = function () {
       let source = prompt(
         `Enter the ID of the document containing the datasets you want to import (it will take a few seconds)`
       );
-      if (typeof source === null) return;
+      if (source === null) return;
       let match = source.match(/[a-f0-9]{24}/gm);
       console.log(source, !Array.isArray(match), match);
       if (source === `` || !Array.isArray(match) || match.length !== 1) return alert(`Bad document ID`);
