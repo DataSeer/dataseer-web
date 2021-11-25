@@ -3,6 +3,8 @@
     "density": 70
   },
   "tesseract": {
+    "workers": 6,
+    "scale": 2.0,
     "mapLimit": {
       "images": 3,
       "pages": 3

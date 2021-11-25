@@ -2001,14 +2001,27 @@ Self.detectNewSentences = function (opts = {}, cb) {
       if (err) return cb(err);
       for (let i = 0; i < pages.length; i++) {
         let page = pages[i];
-        console.log(page);
         if (page instanceof Error) {
           results.errors.push(page.toString());
         } else {
           let numPage = page.page;
-          let sentences = Analyzer.getNewSentencesOfPage(numPage, page.words, doc.pdf.metadata);
-          for (let j = 0; j < sentences.length; j++) {
-            let sentence = sentences[j];
+          let words = page.words.map(function (word) {
+            return {
+              text: word.text,
+              bbox: {
+                x0: word.bbox.x0 / word.scale,
+                x1: word.bbox.x1 / word.scale,
+                y0: word.bbox.y0 / word.scale,
+                y1: word.bbox.y1 / word.scale
+              },
+              confidence: word.confidence,
+              scale: 1.0,
+              page: word.page
+            };
+          });
+          let newSentences = Analyzer.getNewSentencesOfPage(numPage, words, doc.pdf.metadata);
+          for (let j = 0; j < newSentences.length; j++) {
+            let sentence = newSentences[j];
             results.newSentences.push({
               p: numPage,
               x: sentence.bbox.x0,
@@ -2027,12 +2040,12 @@ Self.detectNewSentences = function (opts = {}, cb) {
         let outpout = XML.addSentences(xmlString, results.newSentences);
         return DocumentsFilesController.rewriteFile(doc.tei.toString(), outpout, function (err) {
           if (err) return cb(err);
-          return Self.updateOrCreatePDFMetadata(
+          return Self.updateOrCreateTEIMetadata(
             { data: { id: doc._id.toString() }, user: opts.user },
             function (err, ok) {
               if (err) return cb(err);
               if (ok instanceof Error) return cb(ok);
-              return Self.updateOrCreateTEIMetadata(
+              return Self.updateOrCreatePDFMetadata(
                 { data: { id: doc._id.toString() }, user: opts.user },
                 function (err, ok) {
                   if (err) return cb(err);
