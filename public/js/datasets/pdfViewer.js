@@ -4,16 +4,16 @@
 
 'use strict';
 
-const workerSrcPath = '../javascripts/pdf.js/build/pdf.worker.js';
+const workerSrcPath = `../javascripts/pdf.js/build/pdf.worker.js`;
 
-if (typeof pdfjsLib === 'undefined' || (!pdfjsLib && !pdfjsLib.getDocument)) {
-  console.error('Please build the pdfjs-dist library using\n' + '  `gulp dist-install`');
+if (typeof pdfjsLib === `undefined` || (!pdfjsLib && !pdfjsLib.getDocument)) {
+  console.error(`Please build the pdfjs-dist library using\n` + `  \`gulp dist-install\``);
 }
 // The workerSrc property shall be specified.
 //
 else pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrcPath;
 
-const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
+const CMAP_URL = `../javascripts/pdf.js/build/generic/web/cmaps/`,
   MARGIN_CHUNK = {
     top: 2,
     left: 2,
@@ -29,8 +29,8 @@ const CMAP_URL = '../javascripts/pdf.js/build/generic/web/cmaps/',
   CMAP_PACKED = true,
   BORDER_WIDTH = 6, // Need to be an even number
   REMOVED_BORDER_COLOR = false,
-  HOVER_BORDER_COLOR = 'rgba(24, 77, 126, 1)',
-  SELECTED_BORDER_COLOR = 'rgba(24, 77, 126, 1)';
+  HOVER_BORDER_COLOR = `rgba(24, 77, 126, 1)`,
+  SELECTED_BORDER_COLOR = `rgba(24, 77, 126, 1)`;
 
 // Representation of a chunk in PDF
 const Chunk = function (data, scale) {
@@ -51,7 +51,7 @@ const Line = function (first) {
   this.min = { x: Infinity, y: Infinity };
   this.max = { x: -Infinity, y: -Infinity };
   this.p = undefined;
-  if (typeof first !== 'undefined') this.addChunk(first);
+  if (typeof first !== `undefined`) this.addChunk(first);
   return this;
 };
 
@@ -76,7 +76,7 @@ Line.prototype.addChunk = function (input) {
   this.yMid.avg = this.yMid.sum / this.yMid.coeff;
   this.w = this.max.x - this.min.x;
   this.h = this.max.y - this.min.y;
-  if (typeof this.p === 'undefined') this.p = chunk.p;
+  if (typeof this.p === `undefined`) this.p = chunk.p;
   this.chunks.push(chunk);
 };
 
@@ -136,7 +136,7 @@ const Area = function (opts, first) {
   this.min = { x: Infinity, y: Infinity };
   this.max = { x: -Infinity, y: -Infinity };
   this.p = undefined;
-  if (typeof first !== 'undefined') this.addLine(first);
+  if (typeof first !== `undefined`) this.addLine(first);
   return this;
 };
 
@@ -157,7 +157,7 @@ Area.prototype.addLine = function (line) {
   if (this.max.y < yMax) this.max.y = yMax;
   this.w = this.max.x - this.min.x;
   this.h = this.max.y - this.min.y;
-  if (typeof this.p === 'undefined') this.p = line.p;
+  if (typeof this.p === `undefined`) this.p = line.p;
   this.lines.push(line);
 };
 
@@ -165,7 +165,7 @@ Area.prototype.addLine = function (line) {
 Area.prototype.isNext = function (line, margin) {
   if (this.lines.length === 0) return true; // If there is no lines, it will be "next" by default
   let middle = line.min.y + line.h / 2,
-    delta = typeof margin !== 'undefined' ? margin : line.h,
+    delta = typeof margin !== `undefined` ? margin : line.h / 2,
     samePage = this.p === line.p,
     isTooUnder = middle - delta > this.max.y,
     isTooUpper = middle + delta < this.min.y;
@@ -214,7 +214,7 @@ const PdfViewer = function (id, screenId, events = {}) {
   // HTML elements
   this.screen = $(`#${this.screenId}`);
   this.screenElement = this.screen.get(0);
-  this.viewerId = id + 'Viewer';
+  this.viewerId = id + `Viewer`;
   this.container = $(`#${this.containerId}`);
   this.containerElement = this.container.get(0);
   this.viewer = $(`<div id="${this.viewerId}" class="pdfViewer"></div>`);
@@ -226,7 +226,7 @@ const PdfViewer = function (id, screenId, events = {}) {
   this.scrollMarkers = $(`<div id="${this.viewerId}ScrollMarkers" class="display-left"></div>`);
   this.scrollMarkersElement = this.scrollMarkers.get(0);
   this.container.append(this.infos).append(this.message).append(this.viewer);
-  this.scrollMarkersCursor = $('<span class="cursor"></span>');
+  this.scrollMarkersCursor = $(`<span class="cursor"></span>`);
   this.scrollMarkersCursorElement = this.scrollMarkersCursor.get(0);
   this.scrollMarkers.append(this.scrollMarkersCursor); // Add cursor in scroll Markers
   this.screen.append(this.scrollMarkers);
@@ -261,7 +261,7 @@ PdfViewer.prototype.getSentences = function (selectedSentences, lastSentence) {
 
 // Get order of appearance of sentences
 PdfViewer.prototype.getSentencesMapping = function () {
-  if (typeof this.sentencesMapping.object !== 'undefined') return this.sentencesMapping.object;
+  if (typeof this.sentencesMapping.object !== `undefined`) return this.sentencesMapping.object;
   let result = {},
     sentences = {};
   // Get useful infos about sentences
@@ -298,13 +298,13 @@ PdfViewer.prototype.getSentencesMapping = function () {
 
 // Render the PDF
 PdfViewer.prototype.load = function (pdf, xmlMetadata, cb) {
-  console.log('Loading PDF...');
+  console.log(`Loading PDF...`);
   let self = this;
   this.sentencesMapping = pdf.metadata.mapping;
   this.viewer.empty();
   return this.loadPDF(pdf.url, function (err, pdfDocument) {
     if (err) return console.log(err);
-    console.log('Load of PDF done.');
+    console.log(`Load of PDF done.`);
     self.pdfLoaded = true;
     self.pdfDocument = pdfDocument;
     let metadata = {
@@ -324,14 +324,14 @@ PdfViewer.prototype.load = function (pdf, xmlMetadata, cb) {
 // show message
 PdfViewer.prototype.showMessage = function (text, cb) {
   if (text) this.message.text(text);
-  this.message.show('fast', function () {
+  this.message.show(`fast`, function () {
     return cb();
   });
 };
 
 // Hide message
 PdfViewer.prototype.hideMessage = function () {
-  this.message.hide('fast');
+  this.message.hide(`fast`);
 };
 
 // Get Pages of a given dataset
@@ -340,7 +340,7 @@ PdfViewer.prototype.getPagesOfDataset = function (dataset) {
     this.links &&
     Array.isArray(this.links[dataset.id]) &&
     this.links[dataset.id].length &&
-    typeof this.metadata.sentences[this.links[dataset.id][0]].pages === 'object'
+    typeof this.metadata.sentences[this.links[dataset.id][0]].pages === `object`
   )
     return Object.keys(this.metadata.sentences[this.links[dataset.id][0]].pages).map(function (item) {
       return parseInt(item, 10);
@@ -444,10 +444,10 @@ PdfViewer.prototype.showMarkers = function () {
 PdfViewer.prototype.refreshScrollCursor = function (scrollInfos) {
   let spanTop = scrollInfos.position,
     spanBottom = spanTop + this.screen.height(),
-    markerTop = Math.floor((spanTop * this.screen.height()) / this.container.prop('scrollHeight')),
-    markerBottom = Math.floor((spanBottom * this.screen.height()) / this.container.prop('scrollHeight'));
-  this.scrollMarkersCursorElement.style.top = markerTop + 'px';
-  this.scrollMarkersCursorElement.style.height = markerBottom - markerTop + 'px';
+    markerTop = Math.floor((spanTop * this.screen.height()) / this.container.prop(`scrollHeight`)),
+    markerBottom = Math.floor((spanBottom * this.screen.height()) / this.container.prop(`scrollHeight`));
+  this.scrollMarkersCursorElement.style.top = markerTop + `px`;
+  this.scrollMarkersCursorElement.style.height = markerBottom - markerTop + `px`;
 };
 
 // Get PdfPages
@@ -468,7 +468,7 @@ PdfViewer.prototype.onScroll = function (scrollInfos, direction) {
 
 // Get PdfPages
 PdfViewer.prototype.refreshNumPage = function (scrollInfos) {
-  let pages = this.viewer.find('div[class="page"]'),
+  let pages = this.viewer.find(`div[class="page"]`),
     maxHeight = this.viewer.outerHeight(),
     height = 0,
     coeff = scrollInfos.position / scrollInfos.height,
@@ -477,7 +477,7 @@ PdfViewer.prototype.refreshNumPage = function (scrollInfos) {
     let page = pages[i],
       el = $(page);
     height += el.outerHeight();
-    numPage = parseInt(el.attr('data-page-number'), 10);
+    numPage = parseInt(el.attr(`data-page-number`), 10);
     if (height / maxHeight > coeff) break;
   }
   this.infos.empty().append(`Page ${numPage}/${this.pdfDocument.numPages}`);
@@ -498,7 +498,7 @@ PdfViewer.prototype.loadPDF = function (url, cb) {
     })
     .catch(function (err) {
       console.log(err);
-      self.container.empty().append('<div>An error has occurred while processing the document</div>');
+      self.container.empty().append(`<div>An error has occurred while processing the document</div>`);
       return cb(err);
     });
 };
@@ -564,23 +564,23 @@ PdfViewer.prototype.renderPreviousPage = function (cb) {
 // Refresh markers
 PdfViewer.prototype.refreshMarkers = function () {
   let self = this;
-  return this.scrollMarkers.find('span.marker').map(function () {
+  return this.scrollMarkers.find(`span.marker`).map(function () {
     let marker = $(this),
       markerElement = marker.get(0),
-      sentenceId = marker.attr('sentenceId'),
+      sentenceId = marker.attr(`sentenceId`),
       spanTop = self._scrollToSentence({ id: sentenceId }),
-      spanBottom = spanTop + parseInt(marker.attr('contour-height')),
-      spanLeft = parseInt(marker.attr('contour-left')),
-      spanRight = spanLeft + parseInt(marker.attr('contour-width')),
-      markerTop = Math.floor((spanTop * self.screen.height()) / self.container.prop('scrollHeight')),
-      markerBottom = Math.floor((spanBottom * self.screen.height()) / self.container.prop('scrollHeight')),
+      spanBottom = spanTop + parseInt(marker.attr(`contour-height`)),
+      spanLeft = parseInt(marker.attr(`contour-left`)),
+      spanRight = spanLeft + parseInt(marker.attr(`contour-width`)),
+      markerTop = Math.floor((spanTop * self.screen.height()) / self.container.prop(`scrollHeight`)),
+      markerBottom = Math.floor((spanBottom * self.screen.height()) / self.container.prop(`scrollHeight`)),
       markerLeft = Math.floor((spanLeft * self.screen.width()) / self.container.width()),
       markerRight = Math.floor((spanRight * self.screen.width()) / self.container.width()),
       coeff = self.scrollMarkers.outerWidth() / self.container.outerWidth();
-    markerElement.style.top = markerTop + 'px';
-    markerElement.style.left = parseInt(markerLeft * coeff) + 'px';
-    markerElement.style.height = markerBottom - markerTop + 'px';
-    markerElement.style.width = parseInt((markerRight - markerLeft) * coeff) + 'px';
+    markerElement.style.top = markerTop + `px`;
+    markerElement.style.left = parseInt(markerLeft * coeff) + `px`;
+    markerElement.style.height = markerBottom - markerTop + `px`;
+    markerElement.style.width = parseInt((markerRight - markerLeft) * coeff) + `px`;
   });
 };
 
@@ -605,7 +605,7 @@ PdfViewer.prototype.renderPage = function (opts, cb) {
   let self = this,
     force = !!opts.force,
     numPage = opts.numPage;
-  if (!numPage) return cb(new Error('numPage required'));
+  if (!numPage) return cb(new Error(`numPage required`));
   else if (!force && this.viewer.find(`.page[data-page-number="${numPage}"]`).get(0)) return cb();
   else
     return this.showMessage(`Loading Page ${numPage}...`, function () {
@@ -616,10 +616,10 @@ PdfViewer.prototype.renderPage = function (opts, cb) {
           the_scale = desiredWidth / viewport_tmp.width,
           viewport = pdfPage.getViewport({ scale: the_scale }),
           page = self.buildEmptyPage(numPage, viewport.width, viewport.height),
-          canvas = page.querySelector('canvas'),
-          wrapper = page.querySelector('.canvasWrapper'),
-          container = page.querySelector('.textLayer'),
-          canvasContext = canvas.getContext('2d');
+          canvas = page.querySelector(`canvas`),
+          wrapper = page.querySelector(`.canvasWrapper`),
+          container = page.querySelector(`.textLayer`),
+          canvasContext = canvas.getContext(`2d`);
         // Insert page
         self.insertPage(numPage, page);
         return pdfPage
@@ -639,7 +639,7 @@ PdfViewer.prototype.renderPage = function (opts, cb) {
             self.insertDatasets(numPage);
             // refresh markers scroll
             self.refreshMarkers();
-            page.setAttribute('data-loaded', 'true');
+            page.setAttribute(`data-loaded`, `true`);
             self.hideMessage();
             return cb(null, numPage);
           })
@@ -669,7 +669,7 @@ PdfViewer.prototype.refresh = function (cb) {
         return cb(err);
       }
     );
-  } else return cb(new Error('PDF cannot be refreshed'));
+  } else return cb(new Error(`PDF cannot be refreshed`));
 };
 
 // Build all Areas
@@ -721,15 +721,15 @@ PdfViewer.prototype.insertContours = function (areas) {
 
 // Build borders
 PdfViewer.prototype.buildBorders = function (area) {
-  let container = $('<div>'),
+  let container = $(`<div>`),
     borders = this.getCanvas(area);
   container
-    .attr('sentenceId', area.sentence.id)
-    .attr('contour-width', area.w)
-    .attr('contour-height', area.h)
-    .attr('contour-top', area.min.y)
-    .attr('contour-left', area.min.x)
-    .attr('class', 'contour');
+    .attr(`sentenceId`, area.sentence.id)
+    .attr(`contour-width`, area.w)
+    .attr(`contour-height`, area.h)
+    .attr(`contour-top`, area.min.y)
+    .attr(`contour-left`, area.min.x)
+    .attr(`class`, `contour`);
   borders.map(function (item) {
     return container.append(item);
   });
@@ -749,24 +749,24 @@ PdfViewer.prototype.insertSentences = function (scale, numPage) {
         let chunk = chunks[i],
           ch = new Chunk(chunk, scale);
         //make events the area
-        let element = document.createElement('s'),
+        let element = document.createElement(`s`),
           attributes = `width:${ch.w}px; height:${ch.h}px; position:absolute; top:${ch.y}px; left:${ch.x}px;`;
-        element.setAttribute('style', attributes);
-        element.setAttribute('sentenceId', sentenceId);
-        element.setAttribute('isPdf', true);
+        element.setAttribute(`style`, attributes);
+        element.setAttribute(`sentenceId`, sentenceId);
+        element.setAttribute(`isPdf`, true);
         // the link here goes to the bibliographical reference
         element.onclick = function () {
           let el = $(this);
-          if (typeof self.events.onClick === 'function') return self.events.onClick({ id: el.attr('sentenceId') });
+          if (typeof self.events.onClick === `function`) return self.events.onClick({ id: el.attr(`sentenceId`) });
         };
         element.onmouseover = function () {
           let el = $(this);
-          if (typeof self.events.onHover === 'function') return self.events.onHover({ id: el.attr('sentenceId') });
+          if (typeof self.events.onHover === `function`) return self.events.onHover({ id: el.attr(`sentenceId`) });
         };
         element.onmouseout = function () {
           let el = $(this);
-          if (typeof self.events.onEndHover === 'function')
-            return self.events.onEndHover({ id: el.attr('sentenceId') });
+          if (typeof self.events.onEndHover === `function`)
+            return self.events.onEndHover({ id: el.attr(`sentenceId`) });
         };
         annotationsContainer.append(element);
       }
@@ -775,27 +775,27 @@ PdfViewer.prototype.insertSentences = function (scale, numPage) {
 
 // Build an empty page
 PdfViewer.prototype.buildEmptyPage = function (num, width, height) {
-  let page = document.createElement('div'),
-    canvas = document.createElement('canvas'),
-    wrapper = document.createElement('div'),
-    textLayer = document.createElement('div'),
-    annotationsLayer = document.createElement('div'),
-    contoursLayer = document.createElement('div');
+  let page = document.createElement(`div`),
+    canvas = document.createElement(`canvas`),
+    wrapper = document.createElement(`div`),
+    textLayer = document.createElement(`div`),
+    annotationsLayer = document.createElement(`div`),
+    contoursLayer = document.createElement(`div`);
 
-  page.className = 'page';
-  wrapper.className = 'canvasWrapper';
-  textLayer.className = 'textLayer';
-  contoursLayer.className = 'contoursLayer';
-  annotationsLayer.className = 'annotationsLayer';
+  page.className = `page`;
+  wrapper.className = `canvasWrapper`;
+  textLayer.className = `textLayer`;
+  contoursLayer.className = `contoursLayer`;
+  annotationsLayer.className = `annotationsLayer`;
 
-  page.setAttribute('data-loaded', 'false');
-  page.setAttribute('data-page-number', num);
+  page.setAttribute(`data-loaded`, `false`);
+  page.setAttribute(`data-page-number`, num);
 
   canvas.width = width;
   canvas.height = height;
   page.style.width = `${width}px`;
   page.style.height = `${height}px`;
-  page.style.border = '0px';
+  page.style.border = `0px`;
   wrapper.style.width = `${width}px`;
   wrapper.style.height = `${height}px`;
   textLayer.style.width = `${width}px`;
@@ -805,7 +805,7 @@ PdfViewer.prototype.buildEmptyPage = function (num, width, height) {
   annotationsLayer.style.width = `${width}px`;
   annotationsLayer.style.height = `${height}px`;
 
-  canvas.setAttribute('id', `page${num}`);
+  canvas.setAttribute(`id`, `page${num}`);
 
   page.appendChild(wrapper);
   page.appendChild(textLayer);
@@ -825,17 +825,17 @@ PdfViewer.prototype.setEvents = function (items) {
     // the link here goes to the bibliographical reference
     element.onclick = function () {
       let el = $(this);
-      if (typeof self.events.onClick === 'function') return self.events.onClick({ id: el.attr('sentenceId') });
+      if (typeof self.events.onClick === `function`) return self.events.onClick({ id: el.attr(`sentenceId`) });
     };
     element.onmouseover = function () {
       let el = $(this);
-      self.viewer.find(`.contour[sentenceId="${el.attr('sentenceId')}"]`).addClass('hover');
-      if (typeof self.events.onHover === 'function') return self.events.onHover({ id: el.attr('sentenceId') });
+      self.viewer.find(`.contour[sentenceId="${el.attr(`sentenceId`)}"]`).addClass(`hover`);
+      if (typeof self.events.onHover === `function`) return self.events.onHover({ id: el.attr(`sentenceId`) });
     };
     element.onmouseout = function () {
       let el = $(this);
-      self.viewer.find(`.contour[sentenceId="${el.attr('sentenceId')}"]`).removeClass('hover');
-      if (typeof self.events.onEndHover === 'function') return self.events.onEndHover({ id: el.attr('sentenceId') });
+      self.viewer.find(`.contour[sentenceId="${el.attr(`sentenceId`)}"]`).removeClass(`hover`);
+      if (typeof self.events.onEndHover === `function`) return self.events.onEndHover({ id: el.attr(`sentenceId`) });
     };
   }
 };
@@ -846,29 +846,29 @@ PdfViewer.prototype.addMarker = function (dataset, sentence) {
     contours = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
   return contours.map(function () {
     let contour = $(this),
-      canvas = contour.find('canvas').first(),
+      canvas = contour.find(`canvas`).first(),
       spanTop = self._scrollToSentence(sentence),
-      spanBottom = spanTop + parseInt(contour.attr('contour-height')),
-      spanLeft = parseInt(contour.attr('contour-left')),
-      spanRight = spanLeft + parseInt(contour.attr('contour-width')),
-      markerTop = Math.floor((spanTop * self.screen.height()) / self.container.prop('scrollHeight')),
-      markerBottom = Math.floor((spanBottom * self.screen.height()) / self.container.prop('scrollHeight')),
+      spanBottom = spanTop + parseInt(contour.attr(`contour-height`)),
+      spanLeft = parseInt(contour.attr(`contour-left`)),
+      spanRight = spanLeft + parseInt(contour.attr(`contour-width`)),
+      markerTop = Math.floor((spanTop * self.screen.height()) / self.container.prop(`scrollHeight`)),
+      markerBottom = Math.floor((spanBottom * self.screen.height()) / self.container.prop(`scrollHeight`)),
       markerLeft = Math.floor((spanLeft * self.screen.width()) / self.container.width()),
       markerRight = Math.floor((spanRight * self.screen.width()) / self.container.width()),
-      markerElement = document.createElement('span'),
+      markerElement = document.createElement(`span`),
       marker = $(markerElement),
       coeff = self.scrollMarkers.outerWidth() / self.container.outerWidth();
     markerElement.style.backgroundColor = dataset.color.background.rgb;
-    markerElement.style.top = markerTop + 'px';
-    markerElement.style.left = parseInt(markerLeft * coeff) + 'px';
-    markerElement.style.height = markerBottom - markerTop + 'px';
-    markerElement.style.width = parseInt((markerRight - markerLeft) * coeff) + 'px';
+    markerElement.style.top = markerTop + `px`;
+    markerElement.style.left = parseInt(markerLeft * coeff) + `px`;
+    markerElement.style.height = markerBottom - markerTop + `px`;
+    markerElement.style.width = parseInt((markerRight - markerLeft) * coeff) + `px`;
     self.scrollMarkersElement.appendChild(markerElement);
-    marker.addClass('marker');
-    marker.attr('sentenceId', sentence.id);
-    marker.attr('contour-height', contour.attr('contour-height'));
-    marker.attr('contour-left', contour.attr('contour-left'));
-    marker.attr('contour-width', contour.attr('contour-width'));
+    marker.addClass(`marker`);
+    marker.attr(`sentenceId`, sentence.id);
+    marker.attr(`contour-height`, contour.attr(`contour-height`));
+    marker.attr(`contour-left`, contour.attr(`contour-left`));
+    marker.attr(`contour-width`, contour.attr(`contour-width`));
     marker.click(function () {
       return canvas.click();
     });
@@ -882,32 +882,32 @@ PdfViewer.prototype.removeMarker = function (sentence) {
 
 // Update marker in scrollbar
 PdfViewer.prototype.updateMarker = function (dataset, sentence) {
-  this.scrollMarkers.find(`span[sentenceId="${sentence.id}"]`).css('background-color', dataset.color.background.rgb);
+  this.scrollMarkers.find(`span[sentenceId="${sentence.id}"]`).css(`background-color`, dataset.color.background.rgb);
 };
 
 // Add a link
 PdfViewer.prototype.addLink = function (dataset, sentence, isSelected = true) {
   let self = this;
-  if (typeof this.links[dataset.id] === 'undefined') this.links[dataset.id] = [];
+  if (typeof this.links[dataset.id] === `undefined`) this.links[dataset.id] = [];
   this.links[dataset.id].push(sentence.id);
   this.links[dataset.id].sort();
   let contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
-  let colors = contour.attr('colors') ? JSON.parse(contour.attr('colors')) : {};
+  let colors = contour.attr(`colors`) ? JSON.parse(contour.attr(`colors`)) : {};
   colors[dataset.dataInstanceId] = dataset.color;
-  contour.attr('colors', JSON.stringify(colors));
-  if (contour.attr('datasets')) {
+  contour.attr(`colors`, JSON.stringify(colors));
+  if (contour.attr(`datasets`)) {
     contour.attr(
-      'datasets',
-      (contour.attr('datasets').replace(`#${dataset.dataInstanceId}`, '') + ` #${dataset.dataInstanceId}`).trim()
+      `datasets`,
+      (contour.attr(`datasets`).replace(`#${dataset.dataInstanceId}`, ``) + ` #${dataset.dataInstanceId}`).trim()
     );
   } else {
-    contour.attr('datasets', `#${dataset.dataInstanceId}`);
+    contour.attr(`datasets`, `#${dataset.dataInstanceId}`);
   }
   let annotation = this.viewer.find(`.annotationsLayer > s[sentenceId="${sentence.id}"]`);
-  if (annotation.attr('datasets')) {
-    annotation.attr('datasets', annotation.attr('datasets') + ` #${dataset.dataInstanceId}`);
+  if (annotation.attr(`datasets`)) {
+    annotation.attr(`datasets`, annotation.attr(`datasets`) + ` #${dataset.dataInstanceId}`);
   } else {
-    annotation.attr('datasets', `#${dataset.dataInstanceId}`);
+    annotation.attr(`datasets`, `#${dataset.dataInstanceId}`);
   }
   this.colorize(sentence, dataset.color, function () {
     self.setCanvasBorder(sentence, BORDER_WIDTH, isSelected ? SELECTED_BORDER_COLOR : REMOVED_BORDER_COLOR);
@@ -920,27 +920,27 @@ PdfViewer.prototype.removeLink = function (dataset, sentence) {
   let self = this;
   this.links[dataset.id].splice(this.links[dataset.id].indexOf(sentence.id), 1);
   let contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
-  let colors = contour.attr('colors') ? JSON.parse(contour.attr('colors')) : {};
+  let colors = contour.attr(`colors`) ? JSON.parse(contour.attr(`colors`)) : {};
   delete colors[dataset.dataInstanceId];
   let keys = Object.keys(colors);
   if (keys.length > 0) {
     let lastColor = colors[keys[keys.length - 1]];
-    contour.attr('colors', JSON.stringify(colors));
+    contour.attr(`colors`, JSON.stringify(colors));
     this.colorize(sentence, lastColor, function () {
       self.setCanvasBorder(sentence, BORDER_WIDTH, lastColor.background.rgb);
       self.updateMarker({ color: lastColor }, sentence);
     });
   } else {
-    contour.removeAttr('colors');
+    contour.removeAttr(`colors`);
     this.uncolorize(sentence);
     this.setCanvasBorder(sentence, BORDER_WIDTH, REMOVED_BORDER_COLOR);
     this.removeMarker(sentence);
   }
-  contour.attr('datasets', contour.attr('datasets').replace(`#${dataset.dataInstanceId}`, '').trim());
-  if (contour.attr('datasets') === '') contour.removeAttr('corresp');
+  contour.attr(`datasets`, contour.attr(`datasets`).replace(`#${dataset.dataInstanceId}`, ``).trim());
+  if (contour.attr(`datasets`) === ``) contour.removeAttr(`corresp`);
   let annotation = this.viewer.find(`.annotationsLayer > s[sentenceId="${sentence.id}"]`);
-  annotation.attr('datasets', annotation.attr('datasets').replace(`#${dataset.dataInstanceId}`, '').trim());
-  if (annotation.attr('datasets') === '') annotation.removeAttr('corresp');
+  annotation.attr(`datasets`, annotation.attr(`datasets`).replace(`#${dataset.dataInstanceId}`, ``).trim());
+  if (annotation.attr(`datasets`) === ``) annotation.removeAttr(`corresp`);
 };
 
 // Remove some links
@@ -964,13 +964,13 @@ PdfViewer.prototype.removeDataset = function (dataset) {
 // Scroll to a sentence
 PdfViewer.prototype.scrollToDataset = function (dataset) {
   let element = this.viewer.find(`s[datasetId="${dataset.id}"]`).first(),
-    numPage = parseInt(element.parent().parent().attr('data-page-number'), 10),
-    pages = this.viewer.find('div[class="page"]'),
+    numPage = parseInt(element.parent().parent().attr(`data-page-number`), 10),
+    pages = this.viewer.find(`div[class="page"]`),
     height = 0;
   for (let i = 0; i < pages.length; i++) {
     let page = pages[i],
       el = $(page),
-      currentNumPage = parseInt(el.attr('data-page-number'), 10);
+      currentNumPage = parseInt(el.attr(`data-page-number`), 10);
     if (currentNumPage === numPage) break;
     height += el.outerHeight();
   }
@@ -993,19 +993,19 @@ PdfViewer.prototype.scrollToSentence = function (sentence, cb) {
       if (err) return cb(err);
       return cb(self._scrollToSentence(sentence));
     });
-  } else return cb(new Error('invalid sentence id'));
+  } else return cb(new Error(`invalid sentence id`));
 };
 
 // Scroll to a sentence
 PdfViewer.prototype._scrollToSentence = function (sentence) {
   let element = this.viewer.find(`s[sentenceId="${sentence.id}"]`).first(),
-    numPage = parseInt(element.parent().parent().attr('data-page-number'), 10),
-    pages = this.viewer.find('div[class="page"]'),
+    numPage = parseInt(element.parent().parent().attr(`data-page-number`), 10),
+    pages = this.viewer.find(`div[class="page"]`),
     height = 0;
   for (let i = 0; i < pages.length; i++) {
     let page = pages[i],
       el = $(page),
-      currentNumPage = parseInt(el.attr('data-page-number'), 10);
+      currentNumPage = parseInt(el.attr(`data-page-number`), 10);
     if (currentNumPage === numPage) break;
     height += el.outerHeight();
   }
@@ -1017,9 +1017,9 @@ PdfViewer.prototype._scrollToSentence = function (sentence) {
 PdfViewer.prototype.selectSentence = function (sentence) {
   let sentenceElement = this.viewer.find(`s[sentenceId="${sentence.id}"]`),
     contourElement = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
-  if (sentenceElement) sentenceElement.addClass('selected');
+  if (sentenceElement) sentenceElement.addClass(`selected`);
   if (contourElement) {
-    contourElement.addClass('selected');
+    contourElement.addClass(`selected`);
     this.selectCanvas(sentence);
   }
 };
@@ -1028,9 +1028,9 @@ PdfViewer.prototype.selectSentence = function (sentence) {
 PdfViewer.prototype.unselectSentence = function (sentence) {
   let sentenceElement = this.viewer.find(`s[sentenceId="${sentence.id}"]`),
     contourElement = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
-  if (sentenceElement) sentenceElement.removeClass('selected');
+  if (sentenceElement) sentenceElement.removeClass(`selected`);
   if (contourElement) {
-    contourElement.removeClass('selected');
+    contourElement.removeClass(`selected`);
     this.unselectCanvas(sentence);
   }
 };
@@ -1047,16 +1047,16 @@ PdfViewer.prototype.endHoverSentence = function (sentence) {
 
 // displayLeft
 PdfViewer.prototype.displayLeft = function () {
-  this.infos.removeClass().addClass('display-left');
-  this.message.removeClass().addClass('display-left');
-  this.scrollMarkers.removeClass().addClass('display-left');
+  this.infos.removeClass().addClass(`display-left`);
+  this.message.removeClass().addClass(`display-left`);
+  this.scrollMarkers.removeClass().addClass(`display-left`);
 };
 
 // displayRight
 PdfViewer.prototype.displayRight = function () {
-  this.infos.removeClass().addClass('display-right');
-  this.message.removeClass().addClass('display-right');
-  this.scrollMarkers.removeClass().addClass('display-right');
+  this.infos.removeClass().addClass(`display-right`);
+  this.message.removeClass().addClass(`display-right`);
+  this.scrollMarkers.removeClass().addClass(`display-right`);
 };
 
 // Build borders
@@ -1083,18 +1083,18 @@ PdfViewer.prototype.endHoverCanvas = function (sentence) {
 PdfViewer.prototype.getSentenceDataURL = function (sentence) {
   let contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`),
     p = this.getPagesOfSentence(sentence)[0],
-    w = parseInt(contour.attr('contour-width')) + MARGIN_IMAGE.left + MARGIN_IMAGE.right,
-    h = parseInt(contour.attr('contour-height')) + MARGIN_IMAGE.top + MARGIN_IMAGE.bottom,
-    y = parseInt(contour.attr('contour-top')) - MARGIN_IMAGE.top,
-    x = parseInt(contour.attr('contour-left')) - MARGIN_IMAGE.left;
+    w = parseInt(contour.attr(`contour-width`)) + MARGIN_IMAGE.left + MARGIN_IMAGE.right,
+    h = parseInt(contour.attr(`contour-height`)) + MARGIN_IMAGE.top + MARGIN_IMAGE.bottom,
+    y = parseInt(contour.attr(`contour-top`)) - MARGIN_IMAGE.top,
+    x = parseInt(contour.attr(`contour-left`)) - MARGIN_IMAGE.left;
   let mainCanvas = this.container.find(`canvas#page${p}`).get(0),
-    newCanvas = $('<canvas>').attr('style', `width:${w}px; height:${h}px; position:absolute; top:${y}px; left:${x}px;`),
+    newCanvas = $(`<canvas>`).attr(`style`, `width:${w}px; height:${h}px; position:absolute; top:${y}px; left:${x}px;`),
     canvasElement = newCanvas.get(0),
-    ctx = canvasElement.getContext('2d');
+    ctx = canvasElement.getContext(`2d`);
   canvasElement.width = newCanvas.width();
   canvasElement.height = newCanvas.height();
   ctx.drawImage(mainCanvas, x, y, w, h, 0, 0, w, h);
-  return canvasElement.toDataURL('image/jpeg');
+  return canvasElement.toDataURL(`image/jpeg`);
 };
 
 // Colorize image
@@ -1109,14 +1109,14 @@ PdfViewer.prototype.colorize = function (sentence, color, cb) {
       })
       .get(),
     function (canvas, next) {
-      if (canvas.get(0).hasAttribute('colorized-data-url')) return next(); // there is already a background
+      if (canvas.get(0).hasAttribute(`colorized-data-url`)) return next(); // there is already a background
       let img = new Image();
-      img.src = canvas.attr('data-url');
+      img.src = canvas.attr(`data-url`);
       img.onload = function () {
-        let context = canvas.get(0).getContext('2d');
+        let context = canvas.get(0).getContext(`2d`);
         context.drawImage(img, 0, 0);
-        let w = parseInt(canvas.attr('width'));
-        let h = parseInt(canvas.attr('height'));
+        let w = parseInt(canvas.attr(`width`));
+        let h = parseInt(canvas.attr(`height`));
         // pull the entire image into an array of pixel data
         let imageData = context.getImageData(0, 0, w, h);
         let r, g, b;
@@ -1130,7 +1130,7 @@ PdfViewer.prototype.colorize = function (sentence, color, cb) {
             imageData.data[i + 2] = rgb.b;
             imageData.data[i + 3] = 255;
           } else {
-            if (color.foreground === 'white') {
+            if (color.foreground === `white`) {
               imageData.data[i] = 255 - imageData.data[i];
               imageData.data[i + 1] = 255 - imageData.data[i + 1];
               imageData.data[i + 2] = 255 - imageData.data[i + 2];
@@ -1143,13 +1143,13 @@ PdfViewer.prototype.colorize = function (sentence, color, cb) {
         }
         // put the altered data back on the canvas
         context.putImageData(imageData, 0, 0);
-        canvas.attr('colorized-data-url', canvas.get(0).toDataURL('image/jpeg'));
+        canvas.attr(`colorized-data-url`, canvas.get(0).toDataURL(`image/jpeg`));
         return next();
       };
     },
     function () {
-      contour.attr('background-color', color.background.rgb);
-      contour.attr('foreground-color', color.foreground);
+      contour.attr(`background-color`, color.background.rgb);
+      contour.attr(`foreground-color`, color.foreground);
       return cb();
     }
   );
@@ -1160,19 +1160,19 @@ PdfViewer.prototype.uncolorize = function (sentence) {
     contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
   contour.find(`canvas[sentenceId="${sentence.id}"]`).map(function () {
     let canvas = $(this);
-    canvas.removeAttr('colorized-data-url');
+    canvas.removeAttr(`colorized-data-url`);
   });
-  contour.removeAttr('background-color');
-  contour.removeAttr('foreground-color');
+  contour.removeAttr(`background-color`);
+  contour.removeAttr(`foreground-color`);
 };
 
 // Draw borders & colorize text
 PdfViewer.prototype.drawImage = function (canvas, lines, width, borderColor = false, linedash = false) {
-  let ctx = canvas.get(0).getContext('2d');
+  let ctx = canvas.get(0).getContext(`2d`);
   let img = new Image();
-  img.src = canvas.get(0).hasAttribute('colorized-data-url')
-    ? canvas.attr('colorized-data-url')
-    : canvas.attr('data-url');
+  img.src = canvas.get(0).hasAttribute(`colorized-data-url`)
+    ? canvas.attr(`colorized-data-url`)
+    : canvas.attr(`data-url`);
   img.onload = function () {
     ctx.drawImage(img, 0, 0);
     if (borderColor) {
@@ -1197,7 +1197,7 @@ PdfViewer.prototype.setCanvasBorder = function (sentence, width, borderColor, da
     contour = this.viewer.find(`.contoursLayer > .contour[sentenceId="${sentence.id}"]`);
   contour.find(`canvas[sentenceId="${sentence.id}"]`).map(function () {
     let canvas = $(this);
-    self.drawImage(canvas, JSON.parse(canvas.attr('borders')), width, borderColor, dashed);
+    self.drawImage(canvas, JSON.parse(canvas.attr(`borders`)), width, borderColor, dashed);
   });
 };
 
@@ -1208,16 +1208,16 @@ PdfViewer.prototype.buildCanvas = function (_x, _y, _w, _h, p, sentence, borders
     w = Math.floor(_w),
     h = Math.floor(_h);
   let mainCanvas = this.container.find(`canvas#page${p}`).get(0),
-    newCanvas = $('<canvas>')
-      .attr('style', `width:${w}px; height:${h}px; position:absolute; top:${y}px; left:${x}px;`)
-      .attr('sentenceId', sentence.id)
-      .attr('borders', JSON.stringify(borders)),
+    newCanvas = $(`<canvas>`)
+      .attr(`style`, `width:${w}px; height:${h}px; position:absolute; top:${y}px; left:${x}px;`)
+      .attr(`sentenceId`, sentence.id)
+      .attr(`borders`, JSON.stringify(borders)),
     canvasElement = newCanvas.get(0),
-    ctx = canvasElement.getContext('2d');
+    ctx = canvasElement.getContext(`2d`);
   canvasElement.width = newCanvas.width();
   canvasElement.height = newCanvas.height();
   ctx.drawImage(mainCanvas, x, y, w, h, 0, 0, w, h);
-  newCanvas.attr('data-url', canvasElement.toDataURL('image/jpeg'));
+  newCanvas.attr(`data-url`, canvasElement.toDataURL(`image/jpeg`));
   return newCanvas;
 };
 
