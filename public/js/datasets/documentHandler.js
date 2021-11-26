@@ -660,6 +660,23 @@ DocumentHandler.prototype.synchronize = function () {
         window.location.reload();
       });
     });
+    this.datasetsList.attach(`onDetectNewSentencesClick`, function () {
+      let pages = prompt(
+        `Enter the range of page numbers you wish to process (e.g. : 1-5, 8, 11-13)\nIt will take 20-30 seconds per page`
+      );
+      if (pages === null) return;
+      $(`body`).css(`cursor`, `progress`);
+      return API.documents.detectNewSentences(
+        { id: self.ids.document, params: { pages: pages } },
+        function (err, query) {
+          console.log(err, query);
+          $(`body`).css(`cursor`, `default`);
+          if (err || query.err) return alert(`An error has occured`);
+          alert(`Process done. It will automatically refresh this page`);
+          window.location.reload();
+        }
+      );
+    });
     this.datasetsList.attach(`onDatasetClick`, function (dataset) {
       self.selectSentence({
         sentence: dataset.sentence, // this data contain the current selected sentence

@@ -54,7 +54,7 @@ body {
 #datasetsList #datasetsList\.container\.items {
   margin-left: 20px;
   display: inline-block;
-  width: calc(100% - 275px);
+  width: calc(100% - 300px);
   overflow-x: scroll;
   margin-bottom: 10px;
   border-top-right-radius: 20px;
@@ -214,9 +214,17 @@ body {
 #datasetsList\.container\.bulkActions {
   margin-right: 20px;
   display: inline-block;
-  width: 205px;
+  width: 250px;
   float: right;
   text-align: right;
+}
+
+#datasetsList\.container\.bulkActions #datasetsList\.container\.bulkActions\.detectNewSentences {
+  display: inline-block;
+  float: left;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  margin-left: 10px;
 }
 
 #datasetsList\.container\.bulkActions #datasetsList\.container\.bulkActions\.importDatasets {
