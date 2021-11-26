@@ -17,6 +17,7 @@
     - [Dataseer-ml](#dataseer-ml)
     - [Softcite](#softcite)
     - [RepoRecommender](#reporecommender)
+    - [Charts](#charts)
 
 ## Responses Status Code
 
@@ -222,6 +223,10 @@ List of available API routes:
 
 ### [Hypothesis](./API/HYPOTHESIS.md#hypothesis)
 
-  - [(GET) /api/hypothesis/bioRxiv](./API/HYPOTHESIS.md#get-hypothesisbioRxiv)
-  - [(PUT) /api/hypothesis/bioRxiv](./API/HYPOTHESIS.md#put-hypothesisbioRxiv)
-  - [(GET) /api/hypothesis/bioRxiv/:id](./API/HYPOTHESIS.md#get-hypothesisbioRxivid)
+  - [(GET) /api/hypothesis/bioRxiv](./API/HYPOTHESIS.md#get-apihypothesisbioRxiv)
+  - [(PUT) /api/hypothesis/bioRxiv](./API/HYPOTHESIS.md#put-apihypothesisbioRxiv)
+  - [(GET) /api/hypothesis/bioRxiv/:id](./API/HYPOTHESIS.md#get-apihypothesisbioRxivid)
+
+### [Charts](./API/CHARTS.md#charts)
+
+  - [(GET) /api/charts/asap](./API/HYPOTHESIS.md#get-apichartsasap)
