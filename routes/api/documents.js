@@ -1077,7 +1077,7 @@ router.get(`/:id/charts/asap`, function (req, res) {
 /* Process OCR */
 router.post(`/:id/processOCR`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     documentId: req.params.id,
     pagesNumber: Params.convertPages(req.query.pages),
@@ -1096,7 +1096,7 @@ router.post(`/:id/processOCR`, function (req, res) {
 /* Detect new sentences */
 router.post(`/:id/detectNewSentences`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     documentId: req.params.id,
     pagesNumber: Params.convertPages(req.query.pages),
