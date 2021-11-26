@@ -49,10 +49,12 @@ const URLMANAGER = {
   },
   extractIdsFromCurrentURL: function () {
     let matches = window.location.href.toString().match(/(\w+\/[0-9a-f]{24})/gm);
-    return matches.reduce(function (acc, item) {
-      let split = item.split(`/`);
-      if (split.length === 2) acc[split[0]] = split[1];
-      return acc;
-    }, {});
+    return Array.isArray(matches)
+      ? matches.reduce(function (acc, item) {
+        let split = item.split(`/`);
+        if (split.length === 2) acc[split[0]] = split[1];
+        return acc;
+      }, {})
+      : {};
   }
 };
