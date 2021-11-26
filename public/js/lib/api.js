@@ -643,6 +643,31 @@ const API = {
       });
     },
     /**
+     * Detect new sentences
+     * @param {object} opts - Options available
+     * @param {string} opts.id - Id of the document
+     * @param {object} opts.params - Available parameters
+     * @param {object} opts.params.pages - Range of pages
+     * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+     * @returns {undefined} undefined
+     */
+    detectNewSentences: function (opts = {}, done) {
+      return $.ajax({
+        type: `POST`,
+        data: {},
+        url: URLMANAGER.buildURL(`${this.url}/${opts.id}/detectNewSentences`, _.get(opts, `params`, {}), {
+          setToken: true
+        }),
+        success: function (query) {
+          console.log(`documents.importDatasets`, query);
+          return done(false, query);
+        },
+        error: function (query) {
+          return done(query);
+        }
+      });
+    },
+    /**
      * Get PDF of given document
      * @param {object} opts Options
      * @param {string} documentId Id of document

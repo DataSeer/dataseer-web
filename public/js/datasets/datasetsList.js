@@ -56,6 +56,10 @@ const DatasetsList = function (id = `datasetsList`, events = {}) {
   $(`#${this.id} #datasetsList\\.container\\.bulkActions\\.importDatasets`).click(function () {
     if (typeof self.events.onImportDatasetsClick === `function`) return self.events.onImportDatasetsClick();
   });
+  // onDetectNewSentencesClick
+  $(`#${this.id} #datasetsList\\.container\\.bulkActions\\.detectNewSentences`).click(function () {
+    if (typeof self.events.onDetectNewSentencesClick === `function`) return self.events.onDetectNewSentencesClick();
+  });
   this.setInitialazingMessage();
   return this;
 };

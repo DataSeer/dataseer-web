@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "eslint": "./node_modules/.bin/eslint --fix controllers/api/*.js lib/*.js models/*.js models/schemas/*.js public/js/conf/*.js public/js/lib/*.js routes/api/*.js routes/gui/*.js views/**/*.js views/**/**/*.js views/**/**/**/*.js",
-    "start-dev": "export DEV='true';node ./bin/www",
-    "start": "forever start --append --uid dataseer-web ./bin/www",
+    "start-dev": "rm eng.traineddata;export DEV='true';node ./bin/www",
+    "start": "rm eng.traineddata;forever start --append --uid dataseer-web ./bin/www",
     "stop": "forever stop dataseer-web",
     "list": "forever list"
   },
@@ -44,11 +44,13 @@
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^6.1.0",
+    "pdf2pic": "^2.1.4",
     "pdfjs-dist": "^2.9.359",
     "pug": "^3.0.2",
     "puppeteer": "^11.0.0",
     "sbd": "^1.0.19",
     "serve-favicon": "^2.5.0",
+    "tesseract.js": "^2.1.5",
     "url-join": "^4.0.1"
   },
   "description": "Repository of the dataseer-web app",

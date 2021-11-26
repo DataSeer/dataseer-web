@@ -56,6 +56,7 @@ const CrudController = require(`./controllers/api/crud.js`);
 const AccountsManager = require(`./lib/accounts.js`);
 const CrudManager = require(`./lib/crud.js`);
 const Wiki = require(`./lib/wiki.js`);
+const OCR = require(`./lib/ocr.js`);
 // mongoose object
 const mongoose = require(`mongoose`);
 mongoose.set(`useCreateIndex`, true);
@@ -79,6 +80,16 @@ db.once(`open`, function () {
   console.log(`Connection to MongoDB succeeded`);
   return async.map(
     [
+      function (next) {
+        return OCR.init(function (err) {
+          if (err) {
+            console.log(`OCR not initalized`);
+            return next(err);
+          }
+          console.log(`OCR initialized`);
+          return next(err);
+        });
+      },
       function (next) {
         return Wiki.getDataTypes(function (err, dataTypes) {
           if (err) {

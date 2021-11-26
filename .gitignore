@@ -7,6 +7,9 @@ conf/private.key
 #data
 data/*
 
+# OCR
+*.traineddata
+
 db-save/*.log
 # mongodb save
 db-save/[1-7]/dump

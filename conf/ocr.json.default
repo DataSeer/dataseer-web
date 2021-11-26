@@ -1,0 +1,24 @@
+{
+  "pdf2pic": {
+    "density": 70
+  },
+  "tesseract": {
+    "langPath": "resources/tesseract/tessdata/fast",
+    "langPath": "resources/tesseract/tessdata/best",
+    "langPath": "resources/tesseract/tessdata/4.0.0",
+    "workers": 6,
+    "scale": 2.0,
+    "mapLimit": {
+      "images": 3,
+      "pages": 3
+    },
+    "parameters": {
+      "user_defined_dpi": "70",
+      "tessjs_create_hocr": "1",
+      "tessjs_create_tsv": "0",
+      "tessjs_create_box": "0",
+      "tessjs_create_unlv": "0",
+      "tessjs_create_osd": "0"
+    }
+  }
+}

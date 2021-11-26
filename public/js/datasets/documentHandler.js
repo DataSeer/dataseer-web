@@ -630,7 +630,7 @@ DocumentHandler.prototype.synchronize = function () {
       let source = prompt(
         `Enter the ID of the document containing the datasets you want to import (it will take a few seconds)`
       );
-      if (typeof source === null) return;
+      if (source === null) return;
       let match = source.match(/[a-f0-9]{24}/gm);
       console.log(source, !Array.isArray(match), match);
       if (source === `` || !Array.isArray(match) || match.length !== 1) return alert(`Bad document ID`);
@@ -659,6 +659,23 @@ DocumentHandler.prototype.synchronize = function () {
         }
         window.location.reload();
       });
+    });
+    this.datasetsList.attach(`onDetectNewSentencesClick`, function () {
+      let pages = prompt(
+        `Enter the range of page numbers you wish to process (e.g. : 1-5, 8, 11-13)\nIt will take 20-30 seconds per page`
+      );
+      if (pages === null) return;
+      $(`body`).css(`cursor`, `progress`);
+      return API.documents.detectNewSentences(
+        { id: self.ids.document, params: { pages: pages } },
+        function (err, query) {
+          console.log(err, query);
+          $(`body`).css(`cursor`, `default`);
+          if (err || query.err) return alert(`An error has occured`);
+          alert(`Process done. It will automatically refresh this page`);
+          window.location.reload();
+        }
+      );
     });
     this.datasetsList.attach(`onDatasetClick`, function (dataset) {
       self.selectSentence({

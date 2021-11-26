@@ -1074,4 +1074,42 @@ router.get(`/:id/charts/asap`, function (req, res) {
   });
 });
 
+/* Process OCR */
+router.post(`/:id/processOCR`, function (req, res) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    documentId: req.params.id,
+    pagesNumber: Params.convertPages(req.query.pages),
+    user: req.user
+  };
+  return DocumentsController.processOCR(opts, function (err, result) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!result) return res.status(404).send(conf.errors.notFound);
+    return res.json(result);
+  });
+});
+
+/* Detect new sentences */
+router.post(`/:id/detectNewSentences`, function (req, res) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    documentId: req.params.id,
+    pagesNumber: Params.convertPages(req.query.pages),
+    user: req.user
+  };
+  return DocumentsController.detectNewSentences(opts, function (err, result) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!result) return res.status(404).send(conf.errors.notFound);
+    return res.json(result);
+  });
+});
+
 module.exports = router;
