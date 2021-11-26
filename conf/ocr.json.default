@@ -3,6 +3,9 @@
     "density": 70
   },
   "tesseract": {
+    "langPath": "resources/tesseract/tessdata/fast",
+    "langPath": "resources/tesseract/tessdata/best",
+    "langPath": "resources/tesseract/tessdata/4.0.0",
     "workers": 6,
     "scale": 2.0,
     "mapLimit": {

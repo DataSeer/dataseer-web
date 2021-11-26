@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "eslint": "./node_modules/.bin/eslint --fix controllers/api/*.js lib/*.js models/*.js models/schemas/*.js public/js/conf/*.js public/js/lib/*.js routes/api/*.js routes/gui/*.js views/**/*.js views/**/**/*.js views/**/**/**/*.js",
-    "start-dev": "export DEV='true';node ./bin/www",
-    "start": "forever start --append --uid dataseer-web ./bin/www",
+    "start-dev": "rm eng.traineddata;export DEV='true';node ./bin/www",
+    "start": "rm eng.traineddata;forever start --append --uid dataseer-web ./bin/www",
     "stop": "forever stop dataseer-web",
     "list": "forever list"
   },
