@@ -1104,7 +1104,7 @@ The .docx report
 
 ## Description
 
-This route get the ASAP Graphics (HTML format).
+This route get the ASAP Graphics (HTML format or image).
 
 ## Role required
 
@@ -1209,7 +1209,7 @@ Accessible to users with the following role: **visitor**, **standardUser**, **mo
 ## How to request
 
 ```bash
-# Using this URL will return the HTML source that must interpreted by your navigator (charts won't be rendered)
+# Using this URL will return the HTML source which must be interpreted by your browser (graphics will not be rendered)
 curl "http://localhost:3000/api/documents/000000000000000000000001/charts/asap"
 # Using this URL will return the HTML source containing all charts
 curl "http://localhost:3000/api/documents/000000000000000000000001/charts/asap?render=html"
@@ -1221,7 +1221,7 @@ curl "http://localhost:3000/api/documents/000000000000000000000001/charts/asap?r
 
 ## Result
 
-The ASAP Graphics (HTML format)
+The ASAP Graphics (HTML format or image)
 
 ---
 
