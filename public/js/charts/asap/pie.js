@@ -319,7 +319,7 @@
 
   let id = URLMANAGER.extractIdsFromCurrentURL()[`documents`];
 
-  if (params.customData) return init(data);
+  if (params.customData || !id) return init(data);
 
   return API.get(`documents`, { id: id, params: { datasets: true } }, function (err, query) {
     if (err) return;
