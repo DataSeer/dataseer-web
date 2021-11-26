@@ -8,7 +8,7 @@
 
 # (GET) /api/charts/asap
 
-*[List of Documents routes](#documents)*
+*[List of Documents routes](#charts)*
 
 ## Description
 
@@ -111,7 +111,7 @@ Accessible to users with the following role: **visitor**, **standardUser**, **mo
 ## How to request
 
 ```bash
-# Using this URL will return the HTML source that must interpreted by your navigator (charts won't be rendered)
+# Using this URL will return the HTML source which must be interpreted by your browser (graphics will not be rendered)
 curl "http://localhost:3000/api/charts/asap"
 # Using this URL will return the HTML source containing all charts
 curl "http://localhost:3000/api/charts/asap?render=html"
