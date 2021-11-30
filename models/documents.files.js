@@ -26,6 +26,7 @@ const Schema = new mongoose.Schema(
 
 Schema.pre(/^find/, function (next) {
   this.populate(`organizations`);
+  this.populate(`upload.account`, `-tokens -hash -salt`);
   this.populate(`upload.organization`);
   return next();
 });

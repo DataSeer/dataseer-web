@@ -108,7 +108,7 @@ router.get(`/:id/finish`, function (req, res) {
 });
 
 /* Document process finish */
-router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res) {
+router.get(`/:id/reports/gSpreadsheets`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated)
     return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: req.originalUrl }));
@@ -119,13 +119,7 @@ router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
-    let opts = {
-      data: { id: req.params.id },
-      strict: false,
-      kind: req.params.kind,
-      user: req.user
-    };
-    return DocumentsController.getGSpreadsheets(opts, function (err, data) {
+    return DocumentsController.getGSpreadsheets({ data: { id: req.params.id }, user: req.user }, function (err, data) {
       if (err) {
         console.log(err);
         return res.status(500).send(conf.errors.internalServerError);
