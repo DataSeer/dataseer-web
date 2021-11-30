@@ -17,10 +17,7 @@
       htmlDefaultReportLink: ``,
       htmlBioRxivReportLink: ``,
       asapGraphicLink: ``,
-      gSpreadSheetReportLinks: {
-        ASAP: ``,
-        AmNat: ``
-      },
+      gSpreadSheetReportLink: ``,
       publicUrl: ``,
       loading: true
     },
@@ -108,18 +105,17 @@
           );
         });
       },
-      buildGSpreadSheetReport: function (event, kind) {
+      buildGSpreadSheetReport: function (event) {
         let self = this;
         // Get the button Jquery element
-        let button = $(this.$refs[`buildGSpreadSheet${kind}Report`]);
+        let button = $(this.$refs.buildGSpreadSheetReport);
         // Get the loader of the button
-        let loader = $(this.$refs[`buildGSpreadSheet${kind}ReportLoader`]);
+        let loader = $(this.$refs.buildGSpreadSheetReportLoader);
         // Display the loader
         loader.show();
         // Disable the button
         button.prop(`disabled`, true);
         let opts = {
-          kind: kind,
           id: documentId
         };
         return API.documents.buildGSpreadSheetReport(opts, function (err, query) {
@@ -154,7 +150,7 @@
           return self.notifications.push(
             NOTIFICATIONS.create(self.notifications, {
               kind: NOTIFICATIONS.kinds.success,
-              message: `<a href="${self.gSpreadSheetReportLinks[kind]}" target="_blank">Report</a> has been generated!`,
+              message: `<a href="${self.gSpreadSheetReportLink}" target="_blank">Report</a> has been generated!`,
               autoclose: true
             })
           );
@@ -239,12 +235,8 @@
                   `api/documents/${self.document._id.toString()}/charts/asap`,
                   {}
                 );
-                self.gSpreadSheetReportLinks.ASAP = URLMANAGER.buildURL(
-                  `documents/${self.document._id.toString()}/reports/gSpreadsheets/ASAP`,
-                  {}
-                );
-                self.gSpreadSheetReportLinks.AmNat = URLMANAGER.buildURL(
-                  `documents/${self.document._id.toString()}/reports/gSpreadsheets/AmNat`,
+                self.gSpreadSheetReportLink = URLMANAGER.buildURL(
+                  `documents/${self.document._id.toString()}/reports/gSpreadsheets`,
                   {}
                 );
                 self.publicUrl = URLMANAGER.buildURL(
