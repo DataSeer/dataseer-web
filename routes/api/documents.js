@@ -750,13 +750,14 @@ router.get(`/:id/reports/html/bioRxiv`, function (req, res, next) {
   });
 });
 
-/* GET SINGLE Document reports/ BY ID */
-router.post(`/:id/reports/gSpreadsheets`, function (req, res, next) {
+/* POST SINGLE Document reports/ BY ID */
+router.post(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator && !accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
     data: { id: req.params.id, dataTypes: req.app.get(`dataTypes`) },
+    kind: req.params.kind,
     user: req.user
   };
   return DocumentsController.buildGSpreadsheets(opts, function (err, data) {
@@ -775,12 +776,14 @@ router.post(`/:id/reports/gSpreadsheets`, function (req, res, next) {
 });
 
 /* GET SINGLE Document reports/ BY ID */
-router.get(`/:id/reports/gSpreadsheets`, function (req, res, next) {
+router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator && !accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
+    strict: false,
     data: { id: req.params.id },
+    kind: req.params.kind,
     user: req.user
   };
   return DocumentsController.getGSpreadsheets(opts, function (err, data) {

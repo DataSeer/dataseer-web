@@ -1,4 +1,11 @@
 {
-  "folder": "folderID",
-  "template": "fileID"
+  "folders": {
+    "AmNat": "folderID",
+    "ASAP": "folderID"
+  },
+  "templates": {
+    "AmNat": "fileID",
+    "ASAP": "fileID"
+  },
+  "prefix": "prefix of the filename (e.g. 'localhost - ' for localhost, 'dev - ' for development, an empty string for production)"
 }
