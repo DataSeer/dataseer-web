@@ -342,6 +342,8 @@ Self.checkSentencesBoundingBoxes = function (opts = {}, cb) {
  * @param {object} opts.user - Current user
  * @param {object} opts.data - Data available
  * @param {string} opts.data.id - Id of the document
+ * @param {string} opts.kind - Kind of report (available values : ASAP or AmNat)
+ * @param {boolean} opts.strict - Strict mode (default : true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
  * @returns {undefined} undefined
  */
@@ -351,10 +353,14 @@ Self.getGSpreadsheets = function (opts = {}, cb) {
   if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
   if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  if (typeof _.get(opts, `kind`) === `undefined`) return cb(new Error(`Missing required data: opts.kind`));
+  if (typeof _.get(opts, `strict`) === `undefined`) return cb(new Error(`Missing required data: opts.kind`));
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
   let id = Params.convertToString(opts.data.id);
-  return GoogleSheets.getReportFileId({ data: { name: id } }, function (err, res) {
+  let kind = Params.convertToString(opts.kind);
+  let strict = Params.convertToBoolean(opts.strict);
+  return GoogleSheets.getReportFileId({ strict: strict, kind: kind, data: { name: id } }, function (err, res) {
     return cb(err, res);
   });
 };
@@ -366,6 +372,7 @@ Self.getGSpreadsheets = function (opts = {}, cb) {
  * @param {object} opts.data - Data available
  * @param {object} opts.data.dataTypes - datatypes
  * @param {string} opts.data.id - Id of the document
+ * @param {string} opts.kind - Kind of report (available values : ASAP or AmNat)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
  * @returns {undefined} undefined
  */
@@ -375,8 +382,13 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
   if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
   if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
   if (typeof _.get(opts, `data.dataTypes`) === `undefined`)
     return cb(new Error(`Missing required data: opts.dataTypes`));
+  let kind = _.get(opts, `kind`);
+  if (typeof kind === `undefined`) return cb(Error(`Missing required data: opts.kind`));
+  if (kind !== `ASAP` && kind !== `AmNat`)
+    return cb(Error(`Invalid required data: opts.kind must be 'ASAP or 'AmNat'`));
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
   let id = Params.convertToString(opts.data.id);
@@ -390,7 +402,8 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
       if (data instanceof Error) return cb(null, data);
       return GoogleSheets.buildReport(
         {
-          filename: opts.data.id,
+          filename: `${data.doc.name} (${opts.data.id})`,
+          kind: kind,
           data: {
             doc: { id: data.doc._id.toString(), token: data.doc.token },
             dataTypesInfos: opts.data.dataTypes,
