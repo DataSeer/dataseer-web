@@ -887,7 +887,7 @@ const API = {
       return $.ajax({
         type: `POST`,
         data: _.get(opts, `data`, {}),
-        url: URLMANAGER.buildURL(`${this.url}/${opts.id}/reports/gSpreadsheets`, {}, { setToken: true }),
+        url: URLMANAGER.buildURL(`${this.url}/${opts.id}/reports/gSpreadsheets/${opts.kind}`, {}, { setToken: true }),
         success: function (query) {
           console.log(`buildGSpreadSheetReport`, query);
           return done(false, query);

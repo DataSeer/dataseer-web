@@ -49,11 +49,22 @@
       </div>
       <div v-if="user.role && (user.role.key === 'moderator' || user.role.key === 'administrator')" class="row buttons">
         <div class="col left">
-          <a target="_blank" :href="gSpreadSheetReportLink">
-            <button class="btn btn-md btn-primary">Open Google SpreadSheet report</button>
+          <a target="_blank" :href="gSpreadSheetReportLinks.ASAP">
+            <button class="btn btn-md btn-primary">Open ASAP report (Google Drive)</button>
           </a>
-          <button class="btn btn-md btn-primary" v-on:click.stop="buildGSpreadSheetReport(event)">Build Google SpreadSheet report</button>
-          <span class="loader-md" ref="buildGSpreadSheetReportLoader">
+          <button class="btn btn-md btn-primary" v-on:click.stop="buildGSpreadSheetReport(event, 'ASAP')">Build ASAP report (Google Drive)</button>
+          <span class="loader-md" ref="buildGSpreadSheetReportASAPLoader">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+        </div>
+      </div>
+      <div v-if="user.role && (user.role.key === 'moderator' || user.role.key === 'administrator')" class="row buttons">
+        <div class="col left">
+          <a target="_blank" :href="gSpreadSheetReportLinks.AmNat">
+            <button class="btn btn-md btn-primary">Open AmNat report (Google Drive)</button>
+          </a>
+          <button class="btn btn-md btn-primary" v-on:click.stop="buildGSpreadSheetReport(event, 'AmNat')">Build AmNat report (Google Drive)</button>
+          <span class="loader-md" ref="buildGSpreadSheetAmNatReportLoader">
             <i class="fas fa-circle-notch fa-spin"></i>
           </span>
         </div>
