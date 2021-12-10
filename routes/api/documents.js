@@ -778,7 +778,7 @@ router.post(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
 /* GET SINGLE Document reports/ BY ID */
 router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.isAdministrator && !accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
     strict: false,

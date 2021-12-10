@@ -112,7 +112,6 @@ router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated)
     return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: req.originalUrl }));
-  if (!accessRights.isAdministrator && !accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
     if (err) {
       console.log(err);
