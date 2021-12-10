@@ -356,7 +356,7 @@ Self.getGSpreadsheets = function (opts = {}, cb) {
   if (typeof _.get(opts, `kind`) === `undefined`) return cb(new Error(`Missing required data: opts.kind`));
   if (typeof _.get(opts, `strict`) === `undefined`) return cb(new Error(`Missing required data: opts.kind`));
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
-  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
   let id = Params.convertToString(opts.data.id);
   let kind = Params.convertToString(opts.kind);
   let strict = Params.convertToBoolean(opts.strict);
