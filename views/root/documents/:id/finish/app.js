@@ -241,11 +241,17 @@
                 );
                 self.gSpreadSheetReportLinks.ASAP = URLMANAGER.buildURL(
                   `documents/${self.document._id.toString()}/reports/gSpreadsheets/ASAP`,
-                  {}
+                  {
+                    token: self.document.token
+                  },
+                  { origin: true }
                 );
                 self.gSpreadSheetReportLinks.AmNat = URLMANAGER.buildURL(
                   `documents/${self.document._id.toString()}/reports/gSpreadsheets/AmNat`,
-                  {}
+                  {
+                    token: self.document.token
+                  },
+                  { origin: true }
                 );
                 self.publicUrl = URLMANAGER.buildURL(
                   `documents/${self.document._id.toString()}`,
