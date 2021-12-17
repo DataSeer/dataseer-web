@@ -35,6 +35,7 @@ const repoRecommenderRouter = require(`./routes/api/repoRecommender.js`);
 const softciteRouter = require(`./routes/api/softcite.js`);
 const statisticsRouter = require(`./routes/api/statistics.js`);
 const hypothesisRouter = require(`./routes/api/hypothesis.js`);
+const sciscoreRouter = require(`./routes/api/sciscore.js`);
 const chartsRouter = require(`./routes/api/charts.js`);
 
 const indexRouter = require(`./routes/index.js`);
@@ -203,6 +204,7 @@ db.once(`open`, function () {
       app.use(`/api/repoRecommender`, repoRecommenderRouter);
       app.use(`/api/statistics`, statisticsRouter);
       app.use(`/api/hypothesis`, hypothesisRouter);
+      app.use(`/api/sciscore`, sciscoreRouter);
       app.use(`/api/charts`, chartsRouter);
 
       app.use(`/backoffice`, indexBackofficeRouter);
