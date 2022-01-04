@@ -229,4 +229,4 @@ List of available API routes:
 
 ### [Charts](./API/CHARTS.md#charts)
 
-  - [(GET) /api/charts/asap](./API/HYPOTHESIS.md#get-apichartsasap)
+  - [(GET) /api/charts/asap](./API/CHARTS.md#get-apichartsasap)
