@@ -8,7 +8,7 @@
 
 # (GET) /api/charts/asap
 
-*[List of Documents routes](#charts)*
+*[List of Charts routes](#charts)*
 
 ## Description
 
