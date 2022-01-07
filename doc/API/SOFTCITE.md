@@ -8,7 +8,7 @@
 
 # (POST) /api/softcite/processSoftwareText
 
-*[List of Dataseer ML routes](#dataseer-ml)*
+*[List of Softcite routes](#softcite)*
 
 ## Description
 

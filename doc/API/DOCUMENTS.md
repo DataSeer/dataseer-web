@@ -23,12 +23,16 @@
   - [(GET) /api/documents/:id/reports/html/bioRxiv](#get-apidocumentsidreportshtmlbiorxiv)
   - [(GET) /api/documents/:id/reports/html/default](#get-apidocumentsidreportshtmldefault)
   - [(GET) /api/documents/:id/reports/docx/default](#get-apidocumentsidreportsdocxdefault)
+  - [(GET) /api/documents/:id/reports/gSpreadsheets/:kind](#get-apidocumentsidreportsgspreadsheetskind)
+  - [(POST) /api/documents/:id/reports/gSpreadsheets/:kind](#post-apidocumentsidreportsgspreadsheetskind)
   - [(GET) /api/documents/:id/charts/asap](#get-apidocumentsidchartsasap)
   - [(POST) /api/documents/:id/refreshToken](#post-apidocumentsidrefreshtoken)
   - [(POST) /api/documents/:id/metadata/reload](#post-apidocumentsidmetadatareload)
   - [(POST) /api/documents/:id/metadata/validate](#post-apidocumentsidmetadatavalidate)
   - [(POST) /api/documents/:id/datasets/backToMetadata](#post-apidocumentsiddatasetsbacktometadata)
   - [(POST) /api/documents/:id/finish/reopen](#post-apidocumentsidfinishreopen)
+  - [(POST) /api/documents/:id/processOCR](#post-apidocumentsidprocessocr)
+  - [(POST) /api/documents/:id/detectNewSentences](#post-apidocumentsiddetectnewsentences)
 
 ---
 
@@ -1098,6 +1102,74 @@ The .docx report
 
 ---
 
+# (GET) /api/documents/:id/reports/gSpreadsheets/:kind
+
+*[List of Documents routes](#documents)*
+
+## Description
+
+This route get the google report generated with the given "kind". (available values : AmNat or ASAP)
+
+## Role required
+
+Accessible to users with the following role: **visitor**, **standardUser**, **moderator**, **administrator**.
+
+## Parameters
+
+No parameter available.
+
+## How to request
+
+```bash
+curl "http://localhost:3000/api/documents/000000000000000000000001/reports/gSpreadsheets/AmNat"
+curl "http://localhost:3000/api/documents/000000000000000000000001/reports/gSpreadsheets/ASAP"
+```
+
+## Result
+
+```json
+{
+  "err": false,
+  "res": "THE GOOGLE DRIVE FILE ID"
+}
+```
+
+---
+
+# (POST) /api/documents/:id/reports/gSpreadsheets/:kind
+
+*[List of Documents routes](#documents)*
+
+## Description
+
+This route generate the google report with the given "kind". (available values : AmNat or ASAP)
+
+## Role required
+
+Accessible to users with the following role: **moderator**, **administrator**.
+
+## Parameters
+
+No parameter available.
+
+## How to request
+
+```bash
+curl "http://localhost:3000/api/documents/000000000000000000000001/reports/gSpreadsheets/AmNat"
+curl "http://localhost:3000/api/documents/000000000000000000000001/reports/gSpreadsheets/ASAP"
+```
+
+## Result
+
+```json
+{
+  "err": false,
+  "res": "THE GOOGLE DRIVE FILE ID"
+}
+```
+
+---
+
 # (GET) /api/documents/:id/charts/asap
 
 *[List of Documents routes](#documents)*
@@ -1418,6 +1490,72 @@ curl -X POST "http://localhost:3000/api/documents/000000000000000000000001/finis
 {
   "err": false,
   "res": {...} // The JSON representation of the document (see models documentation)
+}
+```
+
+---
+
+# (POST) /api/documents/:id/processOCR
+
+*[List of Documents routes](#documents)*
+
+## Description
+
+This route process OCR on the given document.
+
+## Role required
+
+Accessible to users with the following role: **moderator**, **administrator**.
+
+## Parameters
+
+No parameter available.
+
+## How to request
+
+```bash
+curl -X POST "http://localhost:3000/api/documents/000000000000000000000001/processOCR"
+```
+
+## Result
+
+```json
+{
+  "err": false,
+  "res": {...} // The JSON representation of the OCR
+}
+```
+
+---
+
+# (POST) /api/documents/:id/detectNewSentences
+
+*[List of Documents routes](#documents)*
+
+## Description
+
+This route will detect new sentences on the given document.
+
+## Role required
+
+Accessible to users with the following role: **moderator**, **administrator**.
+
+## Parameters
+
+No parameter available.
+
+## How to request
+
+```bash
+curl -X POST "http://localhost:3000/api/documents/000000000000000000000001/detectNewSentences"
+```
+
+## Result
+
+```json
+{
+  "err": false,
+  "res": [...] // The JSON representation of the list of detected new sentences
 }
 ```
 
