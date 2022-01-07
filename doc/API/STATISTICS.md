@@ -9,7 +9,7 @@
 
 # (GET) /api/statistics/documents
 
-*[List of Documents routes](#statistics)*
+*[List of Statistics routes](#statistics)*
 
 ## Description
 
@@ -158,7 +158,7 @@ curl "http://localhost:3000/statistics/documents?uploadedRange=20"
 
 # (GET) /api/statistics/documents
 
-*[List of Documents routes](#statistics)*
+*[List of Statistics routes](#statistics)*
 
 ## Description
 

@@ -8,7 +8,7 @@
 
 # (POST) /api/repoRecommender/findRepo
 
-*[List of Dataseer ML routes](#reporecommender)*
+*[List of RepoRecommender routes](#reporecommender)*
 
 ## Description
 

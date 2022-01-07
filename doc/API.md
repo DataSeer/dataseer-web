@@ -170,10 +170,13 @@ List of available API routes:
   - [(PUT) /api/documents/:id](./API/DOCUMENTS.md#put-apidocumentsid)
   - [(DELETE) /api/documents/:id](./API/DOCUMENTS.md#delete-apidocumentsid)
   - [(POST) /api/documents/:target/importDatasets/:source](./API/DOCUMENTS.md#post-apidocumentstargetimportdatasetssource)
+  - [(PUT) /api/documents/:id/datasets](./API/DOCUMENTS.md#put-apidocumentsiddatasets)
   - [(GET) /api/documents/:id/logs](./API/DOCUMENTS.md#get-apidocumentsidlogs)
   - [(GET) /api/documents/:id/reports/html/bioRxiv](./API/DOCUMENTS.md#get-apidocumentsidreportshtmlbiorxiv)
   - [(GET) /api/documents/:id/reports/html/default](./API/DOCUMENTS.md#get-apidocumentsidreportshtmldefault)
   - [(GET) /api/documents/:id/reports/docx/default](./API/DOCUMENTS.md#get-apidocumentsidreportsdocxdefault)
+  - [(GET) /api/documents/:id/reports/gSpreadsheets/:kind](./API/DOCUMENTS.md#get-apidocumentsidreportsgspreadsheetskind)
+  - [(POST) /api/documents/:id/reports/gSpreadsheets/:kind](./API/DOCUMENTS.md#post-apidocumentsidreportsgspreadsheetskind)
   - [(GET) /api/documents/:id/charts/asap](./API/DOCUMENTS.md#get-apidocumentsidchartsasap)
   - [(GET) /api/documents/:id/pdf](./API/DOCUMENTS.md#get-apidocumentsidpdf)
   - [(GET) /api/documents/:id/pdf/content](./API/DOCUMENTS.md#get-apidocumentsidpdfcontent)
@@ -186,7 +189,8 @@ List of available API routes:
   - [(POST) /api/documents/:id/metadata/validate](./API/DOCUMENTS.md#post-apidocumentsidmetadatavalidate)
   - [(POST) /api/documents/:id/datasets/backToMetadata](./API/DOCUMENTS.md#post-apidocumentsiddatasetsbacktometadata)
   - [(POST) /api/documents/:id/finish/reopen](./API/DOCUMENTS.md#post-apidocumentsidfinishreopen)
-  - [(PUT) /api/documents/:id/datasets](./API/DOCUMENTS.md#put-apidocumentsiddatasets)
+  - [(POST) /api/documents/:id/processOCR](./API/DOCUMENTS.md#post-apidocumentsidprocessocr)
+  - [(POST) /api/documents/:id/detectNewSentences](./API/DOCUMENTS.md#post-apidocumentsiddetectnewsentences)
 
 ### [Documents datasets](./API/DOCUMENTS.DATASETS.md#documents-datasets)
 
@@ -230,3 +234,7 @@ List of available API routes:
 ### [Charts](./API/CHARTS.md#charts)
 
   - [(GET) /api/charts/asap](./API/CHARTS.md#get-apichartsasap)
+
+### [Sciscore](./API/SCISCORE.md#sciscore)
+
+  - [(POST) /api/sciscore/processFile/:id](./API/SCISCORE.md#post-apisciscoreprocessfileid)
