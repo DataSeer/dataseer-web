@@ -253,7 +253,7 @@ curl "http://localhost:3000/currentUser"
 
 ### Description
 
-Use this route to sign out to dataseer-web. (It will revoke the current JWT)
+Use this route to obtain the dataseer-web "crisp id" (used to authenticate the application to the crisp service).
 
 ### Role required
 
@@ -287,7 +287,7 @@ curl "http://localhost:3000/getCrispId"
 
 ### Description
 
-Use this route to sign out to dataseer-web. (It will revoke the current JWT)
+Use this route to obtain the dataseer-web "userflow token" (used to authenticate the application to the userflow service).
 
 ### Role required
 
