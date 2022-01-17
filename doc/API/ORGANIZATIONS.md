@@ -22,7 +22,7 @@ This route return all organizations (JSON formated)
 
 ## Role required
 
-Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
+Accessible to users with the following role: **public URL** (only visible=true), **visitor**, **standardUser**, **moderator**, **administrator**.
 
 Note: [more info about data access restrictions here](../README.md#data-access)
 
