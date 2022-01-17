@@ -38,6 +38,13 @@
             username: username.value,
             fullname: fullname.value,
             password: password.value,
+            organizations: self.organizations
+              .filter(function (item) {
+                return item.selected;
+              })
+              .map(function (item) {
+                return item._id;
+              }),
             confirm_password: confirm_password.value
           }
         };
