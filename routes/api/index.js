@@ -109,7 +109,11 @@ router.post(
       let isError = data instanceof Error;
       let result = isError ? data.toString() : data;
       // Set cookie (useful for navigator)
-      if (!isError) res.setHeader(`Set-Cookie`, cookie.serialize(`token`, result.token, { httpOnly: true, path: `/` }));
+      if (!isError)
+        res.setHeader(
+          `Set-Cookie`,
+          cookie.serialize(`token`, result.token, { httpOnly: true, path: `/`, secure: true, sameSite: `none` })
+        );
       return res.json({ err: isError, res: result });
     });
   }
@@ -128,7 +132,16 @@ router.get(`/signout`, function (req, res, next) {
     let result = isError ? data.toString() : data;
     // Unset cookie (useful for navigator)
     if (!isError)
-      res.setHeader(`Set-Cookie`, cookie.serialize(`token`, ``, { httpOnly: true, path: `/`, expires: new Date() }));
+      res.setHeader(
+        `Set-Cookie`,
+        cookie.serialize(`token`, ``, {
+          httpOnly: true,
+          path: `/`,
+          expires: new Date(),
+          secure: true,
+          sameSite: `none`
+        })
+      );
     return res.json({ err: isError, res: result });
   });
 });
