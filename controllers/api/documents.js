@@ -814,7 +814,7 @@ Self.upload = function (opts = {}, cb) {
                 if (err) return next(err, acc);
                 // Guess which kind of file it is to call the great function
                 return Softcite.annotateSoftwarePDF({ disambiguate: true, buffer: content.data }, function (err, json) {
-                  if (err) return next(err, acc);
+                  if (err) return next(null, acc);
                   return DocumentsFilesController.upload(
                     {
                       data: {
