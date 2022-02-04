@@ -47,7 +47,8 @@ const rolesBackofficeRouter = require(`./routes/backoffice/roles.js`);
 const documentsBackofficeRouter = require(`./routes/backoffice/documents.js`);
 
 const conf = require(`./conf/conf.json`);
-const allowedDomains = require(`./conf/domains.json`);
+const domainsConf = require(`./conf/domains.json`);
+const allowedDomains = domainsConf.domains || [];
 
 const Accounts = require(`./models/accounts.js`);
 
@@ -182,14 +183,21 @@ db.once(`open`, function () {
 
       /* Set Custom headers */
       app.use(function (req, res, next) {
-        if (!Array.isArray(allowedDomains) || allowedDomains.length > 0) return next();
+        if (!Array.isArray(allowedDomains) || allowedDomains.length <= 0) return next();
         let origin = req.header(`origin`) || req.header(`referer`) || req.header(`host`);
-        origin = origin.replace(`http://`, ``).replace(`https://`, ``).split(`:`)[0];
-        if (
-          allowedDomains.filter(function (item) {
-            return origin === item;
-          }).length > 0
-        ) {
+        let splitedOrigin = origin.split(`://`);
+        let domainSplit = splitedOrigin.length > 1 ? splitedOrigin[1].split(`:`) : splitedOrigin[0].split(`:`);
+        let protocol = splitedOrigin.length > 1 ? splitedOrigin[0] : ``;
+        let domain = domainSplit[0];
+        let port = domainSplit.length > 1 ? domainSplit[1].replace(/\/+/, ``) : ``;
+        let _domain = ``;
+        if (!domainsConf.ignoreProtocol && protocol) _domain += `${protocol}://`;
+        _domain += domain;
+        if (!domainsConf.ignorePort && port) _domain += `:${port}`;
+        let filterDomains = allowedDomains.filter(function (item) {
+          return _domain === item;
+        });
+        if (filterDomains.length > 0) {
           // Website you wish to allow to connect
           res.setHeader(`Access-Control-Allow-Origin`, origin);
           // Request methods you wish to allow
