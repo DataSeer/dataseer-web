@@ -47,6 +47,7 @@ const rolesBackofficeRouter = require(`./routes/backoffice/roles.js`);
 const documentsBackofficeRouter = require(`./routes/backoffice/documents.js`);
 
 const conf = require(`./conf/conf.json`);
+const allowedDomains = require(`./conf/domains.json`);
 
 const Accounts = require(`./models/accounts.js`);
 
@@ -178,6 +179,30 @@ db.once(`open`, function () {
 
       app.set(`view engine`, `html`);
       app.engine(`html`, require(`ejs`).renderFile);
+
+      /* Set Custom headers */
+      app.use(function (req, res, next) {
+        if (!Array.isArray(allowedDomains) || allowedDomains.length > 0) return next();
+        let origin = req.header(`origin`) || req.header(`referer`) || req.header(`host`);
+        origin = origin.replace(`http://`, ``).replace(`https://`, ``).split(`:`)[0];
+        if (
+          allowedDomains.filter(function (item) {
+            return origin === item;
+          }).length > 0
+        ) {
+          // Website you wish to allow to connect
+          res.setHeader(`Access-Control-Allow-Origin`, origin);
+          // Request methods you wish to allow
+          res.setHeader(`Access-Control-Allow-Methods`, `GET, POST, OPTIONS, PUT, PATCH, DELETE`);
+          // Request headers you wish to allow
+          res.setHeader(`Access-Control-Allow-Headers`, `X-Requested-With,content-type`);
+          // Set to true if you need the website to include cookies in the requests sent
+          // to the API (e.g. in case you use sessions)
+          res.setHeader(`Access-Control-Allow-Credentials`, true);
+        }
+        // Pass to next layer of middleware
+        return next();
+      });
 
       app.use(AccountsController.authenticate); // authentication with `token`
       app.use(`/api`, DocumentsController.authenticate); // authentication with  document `token`
