@@ -66,7 +66,7 @@ Note: [more info about data access restrictions here](../README.md#data-access)
       <td>Integer</td>
       <td>limit</td>
       <td>optional</td>
-      <td>Maximum number of returned results (default:0)</td>
+      <td>Maximum number of returned results (default:20)</td>
     </tr>
     <tr>
       <td>Integer</td>
