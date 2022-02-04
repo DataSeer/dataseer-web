@@ -1,0 +1,5 @@
+{
+  "domains": ["localhost"],
+  "ignorePort": true,
+  "ignoreProtocol": true
+}
