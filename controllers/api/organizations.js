@@ -205,7 +205,7 @@ Self.update = function (opts = {}, cb) {
   return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, organization) {
     if (err) return cb(err);
     if (organization instanceof Error) return cb(null, organization);
-    if (typeof name !== `undefined`) organization.label = name;
+    if (typeof name !== `undefined`) organization.name = name;
     if (typeof visible !== `undefined`) organization.visible = visible;
     return organization.save(function (err, organization) {
       if (err) return cb(err);
