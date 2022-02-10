@@ -139,6 +139,8 @@ List of available API routes:
   - [(GET) /api/accounts/:id](./API/ACCOUNTS.md#get-apiaccountsid)
   - [(PUT) /api/accounts/:id](./API/ACCOUNTS.md#put-apiaccountsid)
   - [(DELETE) /api/accounts/:id](./API/ACCOUNTS.md#delete-apiaccountsid)
+  - [(GET) /api/accounts/:id/logs](./API/ACCOUNTS.md#get-apiaccountsidlogs)
+  - [(GET) /api/accounts/:id/activity](./API/ACCOUNTS.md#get-apiaccountsidactivity)
 
 ### [Roles](./API/ROLES.md#roles)
 

@@ -949,7 +949,7 @@ Self.getLogs = function (opts = {}, cb) {
 };
 
 /**
- * Get activities of an account by id
+ * Get activity of an account by id
  * @param {object} opts - Options available
  * @param {object} opts.user - Current user
  * @param {object} opts.data - Data available
@@ -957,7 +957,7 @@ Self.getLogs = function (opts = {}, cb) {
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: logs instance OR undefined)
  * @returns {undefined} undefined
  */
-Self.getActivities = function (opts = {}, cb) {
+Self.getActivity = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
