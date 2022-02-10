@@ -52,7 +52,7 @@ Accessible to users with the following role: **standardUser**, **moderator**, **
       <td>String</td>
       <td>sort</td>
       <td>optional</td>
-      <td>Sort (available values: 'ASC' or 'DESC')</td>
+      <td>Sort (available values: 'asc' or 'desc')</td>
     </tr>
     <tr>
       <td>Array</td>
