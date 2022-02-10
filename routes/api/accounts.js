@@ -291,8 +291,8 @@ router.get(`/:id/logs`, function (req, res, next) {
   });
 });
 
-/* GET SINGLE Account activities BY ID */
-router.get(`/:id/activities`, function (req, res, next) {
+/* GET SINGLE Account activity BY ID */
+router.get(`/:id/activity`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
@@ -305,7 +305,7 @@ router.get(`/:id/activities`, function (req, res, next) {
     },
     user: req.user
   };
-  return AccountsController.getActivities(opts, function (err, result) {
+  return AccountsController.getActivity(opts, function (err, result) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);

@@ -10,7 +10,7 @@
   - [(PUT) /api/accounts/:id](#put-apiaccountsid)
   - [(DELETE) /api/accounts/:id](#delete-apiaccountsid)
   - [(GET) /api/accounts/:id/logs](#get-apiaccountsidlogs)
-  - [(GET) /api/accounts/:id/activities](#get-apiaccountsidactivities)
+  - [(GET) /api/accounts/:id/activity](#get-apiaccountsidactivity)
 
 ---
 
@@ -495,7 +495,7 @@ curl -X DELETE "http://localhost:3000/api/accounts/000000000000000000000000"
 
 ## Description
 
-This route get the logs of the given accounts (JSON formatted).
+This route get the logs of the given account (JSON formatted).
 
 ## Role required
 
@@ -508,7 +508,7 @@ No parameter available.
 ## How to request
 
 ```bash
-# Will return the logs of the given accounts (JSON formated)
+# Will return the logs of the given account (JSON formated)
 curl "http://localhost:3000/api/accounts/000000000000000000000001/logs"
 ```
 
@@ -523,13 +523,13 @@ curl "http://localhost:3000/api/accounts/000000000000000000000001/logs"
 
 ---
 
-# (GET) /api/accounts/:id/activities
+# (GET) /api/accounts/:id/activity
 
 *[List of Documents routes](#accounts)*
 
 ## Description
 
-This route get the (documents) logs of the given accounts (JSON formatted).
+This route get the (documents) logs of the given account (JSON formatted).
 
 ## Role required
 
@@ -571,14 +571,14 @@ Accessible to users with the following role: **standardUser**, **moderator**, **
 ## How to request
 
 ```bash
-# Will return the activities of the given accounts (JSON formated)
-curl "http://localhost:3000/api/accounts/000000000000000000000001/activities"
-# Get the 50 most recent activities
-curl "http://localhost:3000/api/accounts/000000000000000000000001/activities?limit=50"
-# Get the 20 most recent activities, skipping the first 5
-curl "http://localhost:3000/api/accounts/000000000000000000000001/activities?skip=5"
-# Get the 20 least recent activities
-curl "http://localhost:3000/api/accounts/000000000000000000000001/activities?sort=asc"
+# Will return the activity of the given account (JSON formated)
+curl "http://localhost:3000/api/accounts/000000000000000000000001/activity"
+# Get the 50 most recent activity
+curl "http://localhost:3000/api/accounts/000000000000000000000001/activity?limit=50"
+# Get the 20 most recent activity, skipping the first 5
+curl "http://localhost:3000/api/accounts/000000000000000000000001/activity?skip=5"
+# Get the 20 least recent activity
+curl "http://localhost:3000/api/accounts/000000000000000000000001/activity?sort=asc"
 ```
 
 ## Result
