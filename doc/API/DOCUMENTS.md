@@ -78,7 +78,7 @@ Note: [more info about data access restrictions here](../README.md#data-access)
       <td>String</td>
       <td>sort</td>
       <td>optional</td>
-      <td>Sort (available values: 'ASC' or 'DESC')</td>
+      <td>Sort (available values: 'asc' or 'desc', default:'desc')</td>
     </tr>
     <tr>
       <td>Array</td>
