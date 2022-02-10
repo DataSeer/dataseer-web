@@ -977,7 +977,7 @@ Self.getActivities = function (opts = {}, cb) {
   let query = { account: id };
   let params = { limit, skip, sort };
   let transaction = DocumentsLogs.find(query)
-    .sort(sort === `asc` ? { _id: 1 } : { _id: -1 })
+    .sort(sort === `asc` ? { 'updatedAt': 1 } : { 'updatedAt': -1 })
     .limit(limit)
     .skip(skip)
     .populate(`kind`)
