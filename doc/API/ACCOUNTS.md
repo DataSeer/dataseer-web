@@ -9,6 +9,8 @@
   - [(GET) /api/accounts/:id](#get-apiaccountsid)
   - [(PUT) /api/accounts/:id](#put-apiaccountsid)
   - [(DELETE) /api/accounts/:id](#delete-apiaccountsid)
+  - [(GET) /api/accounts/:id/logs](#get-apiaccountsidlogs)
+  - [(GET) /api/accounts/:id/activities](#get-apiaccountsidactivities)
 
 ---
 
@@ -54,7 +56,7 @@ Note: [more info about data access restrictions here](../README.md#data-access)
       <td>String</td>
       <td>sort</td>
       <td>optional</td>
-      <td>Sort (available values: 'ASC' or 'DESC')</td>
+      <td>Sort (available values: 'asc' or 'desc')</td>
     </tr>
     <tr>
       <td>Array</td>
@@ -482,6 +484,109 @@ curl -X DELETE "http://localhost:3000/api/accounts/000000000000000000000000"
 {
   "err": false,
   "res": {...} // deleted account JSON representation
+}
+```
+
+---
+
+# (GET) /api/accounts/:id/logs
+
+*[List of Documents routes](#accounts)*
+
+## Description
+
+This route get the logs of the given accounts (JSON formatted).
+
+## Role required
+
+Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
+
+## Parameters
+
+No parameter available.
+
+## How to request
+
+```bash
+# Will return the logs of the given accounts (JSON formated)
+curl "http://localhost:3000/api/accounts/000000000000000000000001/logs"
+```
+
+## Result
+
+```json
+{
+  "err": false,
+  "res": [{...}] // An array of logs (see models documentation)
+}
+```
+
+---
+
+# (GET) /api/accounts/:id/activities
+
+*[List of Documents routes](#accounts)*
+
+## Description
+
+This route get the (documents) logs of the given accounts (JSON formatted).
+
+## Role required
+
+Accessible to users with the following role: **standardUser**, **moderator**, **administrator**.
+
+## Parameters
+
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Integer</td>
+      <td>limit</td>
+      <td>optional</td>
+      <td>Maximum number of returned results (default:20, maximum:100)</td>
+    </tr>
+    <tr>
+      <td>Integer</td>
+      <td>skip</td>
+      <td>optional</td>
+      <td>Number of documents skipped (default:0)</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>sort</td>
+      <td>optional</td>
+      <td>Sort (available values: 'asc' or 'desc', default:'desc')</td>
+    </tr>
+  </tbody>
+</table>
+
+## How to request
+
+```bash
+# Will return the activities of the given accounts (JSON formated)
+curl "http://localhost:3000/api/accounts/000000000000000000000001/activities"
+# Get the 50 most recent activities
+curl "http://localhost:3000/api/accounts/000000000000000000000001/activities?limit=50"
+# Get the 20 most recent activities, skipping the first 5
+curl "http://localhost:3000/api/accounts/000000000000000000000001/activities?skip=5"
+# Get the 20 least recent activities
+curl "http://localhost:3000/api/accounts/000000000000000000000001/activities?sort=asc"
+```
+
+## Result
+
+```json
+{
+  "err": false,
+  "res": [{...}] // An array of logs (see models documentation)
 }
 ```
 

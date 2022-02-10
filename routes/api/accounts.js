@@ -268,4 +268,50 @@ router.delete(`/:id`, function (req, res, next) {
   });
 });
 
+/* GET SINGLE Account logs BY ID */
+router.get(`/:id/logs`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: { id: req.params.id },
+    user: req.user
+  };
+  return AccountsController.getLogs(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* GET SINGLE Account activities BY ID */
+router.get(`/:id/activities`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: {
+      id: req.params.id,
+      limit: Params.convertToInteger(req.query.limit),
+      skip: Params.convertToInteger(req.query.skip),
+      sort: Params.convertToString(req.query.sort)
+    },
+    user: req.user
+  };
+  return AccountsController.getActivities(opts, function (err, result) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    return res.json({ err: false, res: result.data, params: result.params });
+  });
+});
+
 module.exports = router;

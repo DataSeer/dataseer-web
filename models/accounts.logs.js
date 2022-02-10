@@ -14,7 +14,7 @@ const Schema = new mongoose.Schema(
     key: { type: String, default: `` }, // A given key
     dates: [{ type: Date }] // date of action
   },
-  { minimize: false }
+  { minimize: false, timestamps: { createdAt: `createdAt`, updatedAt: `updatedAt` } }
 );
 
 module.exports = mongoose.model(`AccountsLogs`, Schema, `accounts.logs`);

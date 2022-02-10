@@ -10,8 +10,10 @@ const async = require(`async`);
 const Accounts = require(`../../models/accounts.js`);
 const Roles = require(`../../models/roles.js`);
 const Organizations = require(`../../models/organizations.js`);
+const AccountsLogs = require(`../../models/accounts.logs.js`);
+const DocumentsLogs = require(`../../models/documents.logs.js`);
 
-const AccountsLogsController = require(`../../controllers/api/accounts.logs`);
+const AccountsLogsController = require(`../../controllers/api/accounts.logs.js`);
 
 const AccountsManager = require(`../../lib/accounts.js`);
 const CrudManager = require(`../../lib/crud.js`);
@@ -872,7 +874,7 @@ Self.delete = function (opts = {}, cb) {
         {
           target: account._id,
           account: opts.user._id,
-          kind: CrudManager.actions.create._id
+          kind: CrudManager.actions.delete._id
         },
         function (err) {
           if (err) return cb(err);
@@ -917,6 +919,74 @@ Self.deleteMany = function (opts = {}, cb) {
       return cb(null, result);
     }
   );
+};
+
+/**
+ * Get Logs of an account by id
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.id - Id of the account
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: logs instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.getLogs = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
+  if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
+  let id = Params.convertToString(opts.data.id);
+  let query = { target: id };
+  let transaction = AccountsLogs.find(query).populate(`account`, `-tokens -hash -salt`).populate(`kind`);
+  return transaction.exec(function (err, logs) {
+    if (err) return cb(err);
+    if (!logs) return cb(null, new Error(`Logs not found`));
+    return cb(null, logs);
+  });
+};
+
+/**
+ * Get activities of an account by id
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.id - Id of the account
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: logs instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.getActivities = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
+  if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
+  let id = Params.convertToString(opts.data.id);
+  let limit = Params.convertToInteger(opts.data.limit);
+  let skip = Params.convertToInteger(opts.data.skip);
+  let sort = Params.convertToString(opts.data.sort);
+  // Set default value
+  if (typeof limit === `undefined` || limit <= 0) limit = 20;
+  if (limit > 100) limit = 100;
+  if (typeof skip === `undefined` || skip < 0) skip = 0;
+  if (typeof sort === `undefined` || sort !== `asc`) sort = `desc`;
+  let query = { account: id };
+  let params = { limit, skip, sort };
+  let transaction = DocumentsLogs.find(query)
+    .sort(sort === `asc` ? { _id: 1 } : { _id: -1 })
+    .limit(limit)
+    .skip(skip)
+    .populate(`kind`)
+    .populate(`target`);
+
+  return transaction.exec(function (err, logs) {
+    if (err) return cb(err);
+    return cb(null, { params: params, data: logs });
+  });
 };
 
 module.exports = Self;
