@@ -49,6 +49,7 @@ router.post(`/`, function (req, res, next) {
   let opts = {
     data: {
       name: Params.convertToString(req.body.name),
+      color: Params.convertToString(req.body.color),
       visible: Params.convertToBoolean(req.body.visible)
     },
     user: req.user
@@ -79,6 +80,7 @@ router.put(`/`, function (req, res, next) {
   let opts = {
     data: {
       ids: Params.convertToArray(req.body.ids, `string`),
+      color: Params.convertToString(req.body.color),
       visible: Params.convertToBoolean(req.body.visible)
     },
     user: req.user
@@ -152,15 +154,11 @@ router.get(`/:id`, function (req, res, next) {
 router.put(`/:id`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
-  if (!Params.checkString(req.body.name))
-    return res.json({
-      err: true,
-      res: `Organization name is required!`
-    });
   let opts = {
     data: {
       id: req.params.id,
       name: Params.convertToString(req.body.name),
+      color: Params.convertToString(req.body.color),
       visible: Params.convertToBoolean(req.body.visible)
     },
     user: req.user

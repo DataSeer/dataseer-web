@@ -130,8 +130,6 @@ router.put(`/`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   if (!Params.checkArray(req.body.ids)) return res.json({ err: true, res: `You must select at least one account!` });
-  if (!Params.checkArray(req.body.organizations))
-    return res.json({ err: true, res: `You must select at least one organization!` });
   let opts = {
     data: {
       ids: Params.convertToArray(req.body.ids),
@@ -203,22 +201,6 @@ router.get(`/:id`, function (req, res, next) {
 router.put(`/:id`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
-  if (!Params.checkString(req.body.fullname))
-    return res.json({
-      err: true,
-      res: `Fullname is required!`
-    });
-  if (!Params.checkString(req.body.role))
-    return res.json({
-      err: true,
-      res: `You must select at least one role!`
-    });
-  if (!Params.checkArray(req.body.organizations)) {
-    return res.json({
-      err: true,
-      res: `You must select at least one organization!`
-    });
-  }
   let opts = {
     data: {
       id: req.params.id,

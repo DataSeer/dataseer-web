@@ -131,6 +131,7 @@ Self.add = function (opts = {}, cb) {
   if (typeof key === `undefined`) return cb(null, new Error(`Bad value: key`));
   let weight = Params.convertToInteger(opts.data.weight);
   if (typeof weight === `undefined`) return cb(null, new Error(`Bad value: weight`));
+  let color = Params.convertToString(opts.data.color);
   return Roles.findOne({ $or: [{ label: label }, { key: key }] }, function (err, query) {
     if (err) return cb(err);
     if (query) {
@@ -140,6 +141,7 @@ Self.add = function (opts = {}, cb) {
     let role = new Roles({
       label: label,
       key: key,
+      color: color,
       weight: weight
     });
     return Roles.create(role, function (err, query) {
@@ -169,6 +171,7 @@ Self.add = function (opts = {}, cb) {
  * @param {object} opts.data - Data available
  * @param {string} opts.data.label - label of the role
  * @param {string} opts.data.weight - weight of the role
+ * @param {string} opts.data.color - Color of the role
  * @param {string} opts.data.id - id of the role
  * @param {object} opts.user - Current user
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: true)
@@ -187,12 +190,14 @@ Self.update = function (opts = {}, cb) {
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
   let label = Params.convertToString(opts.data.label);
   let weight = Params.convertToInteger(opts.data.weight);
+  let color = Params.convertToString(opts.data.color);
   return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, role) {
     if (err) return cb(err);
     if (!role) return cb(null, new Error(`Role not found`));
     if (role instanceof Error) return cb(null, role);
     if (typeof label !== `undefined`) role.label = label;
     if (typeof weight !== `undefined`) role.weight = weight;
+    if (typeof color !== `undefined`) role.color = color;
     return role.save(function (err, role) {
       if (err) return cb(err);
       if (!opts.logs) return cb(null, role);
@@ -215,6 +220,9 @@ Self.update = function (opts = {}, cb) {
  * @param {object} opts - Option available
  * @param {object} opts.data - Data available
  * @param {array} opts.data.ids - Array of roles id
+ * @param {string} opts.data.label - label of the role
+ * @param {string} opts.data.weight - weight of the role
+ * @param {string} opts.data.color - Color of the role
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: roles instance process OR undefined)
  * @returns {undefined} undefined
@@ -231,6 +239,7 @@ Self.updateMany = function (opts = {}, cb) {
   // Check all optionnal data
   let label = Params.convertToString(opts.data.label);
   let weight = Params.convertToInteger(opts.data.weight);
+  let color = Params.convertToString(opts.data.color);
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
   return async.reduce(
     ids,
@@ -239,7 +248,7 @@ Self.updateMany = function (opts = {}, cb) {
       return Self.update(
         {
           user: opts.user,
-          data: { id: item, label: opts.data.label, weight: opts.data.weight },
+          data: { id: item, label: label, weight: weight, color: color },
           logs: opts.logs
         },
         function (err, res) {

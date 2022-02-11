@@ -126,6 +126,12 @@ Accessible to user with the following role: **administrator**
       <td>required</td>
       <td>Weight of the role</td>
     </tr>
+    <tr>
+      <td>String</td>
+      <td>color</td>
+      <td>optional</td>
+      <td>Color of the role</td>
+    </tr>
   </tbody>
 </table>
 
@@ -176,6 +182,24 @@ Accessible to users with the following role: **administrator**.
       <td>ids</td>
       <td>required</td>
       <td>Array of roles ids</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>label</td>
+      <td>optional</td>
+      <td>Label of the roles</td>
+    </tr>
+    <tr>
+      <td>Integer</td>
+      <td>weight</td>
+      <td>optional</td>
+      <td>Weight of the role</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>color</td>
+      <td>optional</td>
+      <td>Color of the roles</td>
     </tr>
   </tbody>
 </table>
@@ -315,15 +339,21 @@ Accessible to users with the following role: **administrator**.
   <tbody>
     <tr>
       <td>String</td>
-      <td>name</td>
+      <td>label</td>
       <td>optional</td>
-      <td>Name of the role</td>
+      <td>Label of the role</td>
     </tr>
     <tr>
-      <td>Boolean</td>
-      <td>visible</td>
+      <td>Integer</td>
+      <td>weight</td>
       <td>optional</td>
-      <td>Visibility of the role (true or false)</td>
+      <td>Weight of the role</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>color</td>
+      <td>optional</td>
+      <td>Color of the role</td>
     </tr>
   </tbody>
 </table>
