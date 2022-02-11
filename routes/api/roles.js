@@ -61,6 +61,7 @@ router.post(`/`, function (req, res, next) {
     data: {
       label: Params.convertToString(req.body.label),
       key: Params.convertToString(req.body.key),
+      color: Params.convertToString(req.body.color),
       weight: Params.convertToInteger(req.body.weight)
     },
     user: req.user
@@ -90,7 +91,10 @@ router.put(`/`, function (req, res, next) {
     });
   let opts = {
     data: {
-      ids: Params.convertToArray(req.body.ids, `string`)
+      ids: Params.convertToArray(req.body.ids, `string`),
+      label: Params.convertToString(req.body.label),
+      color: Params.convertToString(req.body.color),
+      weight: Params.convertToInteger(req.body.weight)
     },
     user: req.user
   };
@@ -164,20 +168,11 @@ router.get(`/:id`, function (req, res, next) {
 router.put(`/:id`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
-  if (!Params.checkString(req.body.label))
-    return res.json({
-      err: true,
-      res: `Label is required!`
-    });
-  if (!Params.checkString(req.body.weight))
-    return res.json({
-      err: true,
-      res: `Weight is required!`
-    });
   let opts = {
     data: {
       id: req.params.id,
       label: Params.convertToString(req.body.label),
+      color: Params.convertToString(req.body.color),
       weight: Params.convertToInteger(req.body.weight)
     },
     user: req.user

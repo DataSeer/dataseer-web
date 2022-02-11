@@ -65,7 +65,7 @@ Note: [more info about data access restrictions here](../README.md#data-access)
     <tr>
       <td>Array</td>
       <td>visibleStates</td>
-      <td>optionnal</td>
+      <td>optional</td>
       <td>Add filter on visible values (default: undefined, available: [true, false])</td>
     </tr>
   </tbody>
@@ -128,6 +128,12 @@ Accessible to user with the following role: **administrator**
       <td>optional</td>
       <td>Visibility of the organization (default: true)</td>
     </tr>
+    <tr>
+      <td>String</td>
+      <td>color</td>
+      <td>optional</td>
+      <td>Color of the organization</td>
+    </tr>
   </tbody>
 </table>
 
@@ -183,7 +189,19 @@ Accessible to users with the following role: **administrator**.
       <td>Boolean</td>
       <td>visible</td>
       <td>optional</td>
-      <td>Visibility of the organization (true or false)</td>
+      <td>Visibility of the organizations (true or false)</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>name</td>
+      <td>optional</td>
+      <td>Name of the organizations</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>color</td>
+      <td>optional</td>
+      <td>Color of the organizations</td>
     </tr>
   </tbody>
 </table>
@@ -332,6 +350,12 @@ Accessible to users with the following role: **moderator**, **administrator**.
       <td>visible</td>
       <td>optional</td>
       <td>Visibility of the organization (true or false)</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>color</td>
+      <td>optional</td>
+      <td>Color of the organization</td>
     </tr>
   </tbody>
 </table>
