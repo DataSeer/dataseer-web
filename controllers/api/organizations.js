@@ -152,6 +152,7 @@ Self.add = function (opts = {}, cb) {
   let visible = Params.convertToBoolean(opts.data.visible);
   if (typeof visible === `undefined`) return cb(null, new Error(`Bad value: visible`));
   // Check all optionnal data
+  let color = Params.convertToString(opts.data.color);
   let accessRights = AccountsManager.getAccessRights(opts.user);
   if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
   return Organizations.findOne({ name: name }, function (err, query) {
@@ -159,6 +160,7 @@ Self.add = function (opts = {}, cb) {
     if (query) return cb(null, new Error(`This organization already exist!`));
     let organization = new Organizations({
       name: name,
+      color: color,
       visible: visible
     });
     return Organizations.create(organization, function (err, query) {
@@ -185,6 +187,7 @@ Self.add = function (opts = {}, cb) {
  * @param {object} opts.data - Data available
  * @param {string} opts.data.name - name of the organization
  * @param {boolean} opts.data.visible - Visiblity of the organization
+ * @param {string} opts.data.color - Color of the organization
  * @param {object} opts.user - Current user
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: organizations instance process OR undefined)
@@ -202,11 +205,13 @@ Self.update = function (opts = {}, cb) {
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
   let name = Params.convertToString(opts.data.name);
   let visible = Params.convertToBoolean(opts.data.visible);
+  let color = Params.convertToString(opts.data.color);
   return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, organization) {
     if (err) return cb(err);
     if (organization instanceof Error) return cb(null, organization);
     if (typeof name !== `undefined`) organization.name = name;
     if (typeof visible !== `undefined`) organization.visible = visible;
+    if (typeof color !== `undefined`) organization.color = color;
     return organization.save(function (err, organization) {
       if (err) return cb(err);
       if (!opts.logs) return cb(null, organization);
@@ -227,6 +232,7 @@ Self.update = function (opts = {}, cb) {
  * @param {object} opts.data - Data available
  * @param {array} opts.data.ids - Array of organizations id
  * @param {boolean} opts.data.visible - Visible of the organization
+ * @param {string} opts.data.color - Color of the organization
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: organizations instance process OR undefined)
  * @returns {undefined} undefined
@@ -236,15 +242,15 @@ Self.updateMany = function (opts = {}, cb) {
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
   if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
-  if (typeof _.get(opts, `data.visible`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.data.visible`));
   let accessRights = AccountsManager.getAccessRights(opts.user);
   if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
   // Check all optionnal data
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
   let ids = Params.convertToArray(opts.data.ids, `string`);
   if (!Params.checkArray(ids)) return cb(null, new Error(`You must select at least one organization`));
-  if (!Params.checkBoolean(opts.data.visible)) return cb(null, new Error(`You must specify a visible value!`));
+  let name = Params.convertToString(opts.data.name);
+  let visible = Params.convertToBoolean(opts.data.visible);
+  let color = Params.convertToString(opts.data.color);
   return async.reduce(
     ids,
     [],
@@ -252,7 +258,7 @@ Self.updateMany = function (opts = {}, cb) {
       return Self.update(
         {
           user: opts.user,
-          data: { id: item, visible: opts.data.visible },
+          data: { id: item, name: name, visible: visible, color: color },
           logs: opts.logs
         },
         function (err, res) {

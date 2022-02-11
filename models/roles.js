@@ -10,6 +10,7 @@ const Schema = new mongoose.Schema(
   {
     label: { type: String, default: ``, index: true }, // label of role
     key: { type: String, required: true }, // Key of role
+    color: { type: String, default: `` }, // Color of role
     weight: { type: Number, default: 0 } // weight of role
   },
   { minimize: false, timestamps: { createdAt: `createdAt`, updatedAt: `updatedAt` } }

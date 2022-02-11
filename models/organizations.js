@@ -9,6 +9,7 @@ const mongoose = require(`mongoose`);
 const Schema = new mongoose.Schema(
   {
     name: { type: String, default: `None`, required: true, unique: true }, // name of organization
+    color: { type: String, default: `` }, // Color of organization
     visible: { type: Boolean, default: true, require: true }
   },
   { minimize: false, timestamps: { createdAt: `createdAt`, updatedAt: `updatedAt` } }
