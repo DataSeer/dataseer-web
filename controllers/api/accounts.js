@@ -707,7 +707,7 @@ Self.update = function (opts = {}, cb) {
   // Start process
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (accessRights.isVisitor || (accessRights.isStandardUser && opts.data.id !== opts.user._id.toString()))
-    return cb(new Error(`Unauthorized functionnality`));
+    return cb(null, new Error(`Unauthorized functionnality`));
   return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, account) {
     if (err) return cb(err);
     if (account instanceof Error) return cb(null, account);
@@ -715,11 +715,11 @@ Self.update = function (opts = {}, cb) {
     let role = Params.convertToString(opts.data.role);
     let visible = Params.convertToBoolean(opts.data.visible);
     let organizations = Params.convertToArray(opts.data.organizations, `string`);
-    if (!Params.checkArray(organizations)) return cb(null, new Error(`You must select at least one organization!`));
     let disabled = Params.convertToBoolean(opts.data.disabled);
     return async.reduce(
       [
         function (acc, next) {
+          if (!role) return next(null, acc);
           return Roles.findOne({ _id: role }, function (err, res) {
             if (err) return next(err);
             if (!res) return next(new Error(`This role doesn't exist`));
@@ -728,6 +728,7 @@ Self.update = function (opts = {}, cb) {
           });
         },
         function (acc, next) {
+          if (!organizations) return next(null, acc);
           return Organizations.find({ _id: { $in: organizations } }, function (err, res) {
             if (err) return next(err);
             if (!res) return next(new Error(`You must select at least one organization`));
@@ -745,14 +746,14 @@ Self.update = function (opts = {}, cb) {
         });
       },
       function (err, result) {
-        let hasRightOnGivenRole = AccountsManager.hasRightOnRole(role, opts.user);
+        let hasRightOnGivenRole = !result.role ? true : AccountsManager.hasRightOnRole(result.role, opts.user);
         let hasRightOnCurrentRole = AccountsManager.hasRightOnRole(account.role._id.toString(), opts.user);
         if (hasRightOnGivenRole instanceof Error) return cb(null, hasRightOnGivenRole);
         if (hasRightOnCurrentRole instanceof Error) return cb(null, hasRightOnCurrentRole);
         // Case current role do not allow user to modify data, or given role is not allowed
         if (!hasRightOnCurrentRole || !hasRightOnGivenRole) return cb(null, new Error(`Unauthorized functionnality`));
-        // Case current role do not allow user to modify data
-        account.role = result.role;
+        // Case current role allow user to modify data
+        if (result.role) account.role = result.role;
         if (Params.checkString(fullname)) account.fullname = fullname;
         if (typeof visible !== `undefined`) account.visible = visible;
         if (typeof disabled !== `undefined`) account.disabled = disabled;
@@ -804,7 +805,6 @@ Self.updateMany = function (opts = {}, cb) {
   let fullname = Params.convertToString(opts.data.fullname);
   let role = Params.convertToString(opts.data.role);
   let organizations = Params.convertToArray(opts.data.organizations, `string`);
-  if (!Params.checkArray(organizations)) return cb(null, new Error(`You must select at least one organization!`));
   let visible = Params.convertToBoolean(opts.data.visible);
   let disabled = Params.convertToBoolean(opts.data.disabled);
   return async.reduce(
@@ -825,7 +825,7 @@ Self.updateMany = function (opts = {}, cb) {
           logs: opts.logs
         },
         function (err, res) {
-          acc.push({ err, res });
+          acc.push({ err, res: res instanceof Error ? res.toString() : res });
           return next(null, acc);
         }
       );

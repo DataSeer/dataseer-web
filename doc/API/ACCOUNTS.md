@@ -239,31 +239,31 @@ Accessible to users with the following role: **moderator**, **administrator**.
       <td>String</td>
       <td>fullname</td>
       <td>optional</td>
-      <td>Name of the account</td>
+      <td>Name of the accounts</td>
     </tr>
     <tr>
       <td>String</td>
       <td>role</td>
       <td>optional</td>
-      <td>Role id of the account</td>
+      <td>Role id of the accounts</td>
     </tr>
     <tr>
       <td>Array</td>
       <td>organizations</td>
       <td>optional</td>
-      <td>Array of organizations ids of the account</td>
+      <td>Array of organizations ids of the accounts</td>
     </tr>
     <tr>
       <td>Boolean</td>
       <td>visible</td>
       <td>optional</td>
-      <td>Visibility of the account (true or false)</td>
+      <td>Visibility of the accounts (true or false)</td>
     </tr>
     <tr>
       <td>Boolean</td>
       <td>disabled</td>
       <td>optional</td>
-      <td>Disable state of the account (true or false)</td>
+      <td>Disable state of the accounts (true or false)</td>
     </tr>
   </tbody>
 </table>
