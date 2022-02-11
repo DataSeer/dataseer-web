@@ -194,12 +194,12 @@
           self.refreshItem(query.res);
           item.status.modified = false; // Remove the modified state
           item.status.error = false; // Remove the error state
-          let url = URLMANAGER.buildURL(`/backoffice/${ROUTES.main}/${res._id.toString()}`);
+          let url = URLMANAGER.buildURL(`/backoffice/${ROUTES.main}/${query.res._id.toString()}`);
           // Push a success notification
           return self.notifications.push(
             NOTIFICATIONS.create(self.notifications, {
               kind: NOTIFICATIONS.kinds.success,
-              message: `<a href="${url}" target="_blank">${res.name}</a> has been updated!`,
+              message: `<a href="${url}" target="_blank">${query.res.name}</a> has been updated!`,
               autoclose: true
             })
           );
