@@ -118,6 +118,9 @@ Self.createDataset = function (opts = {}) {
     dataInstanceId: opts.dataInstanceId, // dataInstance id
     sentences: Array.isArray(opts.sentences) ? opts.sentences : [], // sentences
     reuse: opts.reuse ? opts.reuse : false, // dataset reuse
+    qc: opts.qc ? opts.qc : false, // dataset qc
+    representativeImage: opts.representativeImage ? opts.representativeImage : false, // dataset representativeImage
+    issue: opts.issue ? opts.issue : false, // dataset issue
     highlight: opts.highlight ? opts.highlight : false, // dataset highlight
     notification: opts.notification ? opts.notification : ``, // dataset notification
     cert: opts.cert ? opts.cert : 0, // cert value (between 0 and 1)
