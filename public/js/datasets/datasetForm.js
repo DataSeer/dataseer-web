@@ -179,6 +179,39 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       // ----------------------
       return self.dataset.reuse;
     },
+    qc: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.qc;
+      let qc = value === `false` || value === false ? false : !!value;
+      self.container.find(`div[key="dataset\\.qc"]`).attr(`value`, qc);
+      if (inputs) self.container.find(`input[type="checkbox"][name="datasetForm\\.qc"]`).prop(`checked`, qc);
+      self.dataset.qc = qc;
+      // input change behaviors
+      // ----------------------
+      return self.dataset.qc;
+    },
+    representativeImage: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.representativeImage;
+      let representativeImage = value === `false` || value === false ? false : !!value;
+      self.container.find(`div[key="dataset\\.representativeImage"]`).attr(`value`, representativeImage);
+      if (inputs)
+        self.container
+          .find(`input[type="checkbox"][name="datasetForm\\.representativeImage"]`)
+          .prop(`checked`, representativeImage);
+      self.dataset.representativeImage = representativeImage;
+      // input change behaviors
+      // ----------------------
+      return self.dataset.representativeImage;
+    },
+    issue: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.issue;
+      let issue = value === `false` || value === false ? false : !!value;
+      self.container.find(`div[key="dataset\\.issue"]`).attr(`value`, issue);
+      if (inputs) self.container.find(`input[type="checkbox"][name="datasetForm\\.issue"]`).prop(`checked`, issue);
+      self.dataset.issue = issue;
+      // input change behaviors
+      // ----------------------
+      return self.dataset.issue;
+    },
     dataType: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.dataType;
       self.container.find(`div[key="dataset\\.dataType"]`).attr(`value`, value);
@@ -372,6 +405,9 @@ DatasetForm.prototype.getDataset = function () {
     id: this.dataset.id,
     status: this.dataset.status,
     reuse: this.dataset.reuse,
+    qc: this.dataset.qc,
+    representativeImage: this.dataset.representativeImage,
+    issue: this.dataset.issue,
     dataType: this.dataset.dataType ? this.dataset.dataType : this.dataset.customDataType,
     subType: this.dataset.subType,
     description: this.dataset.description,

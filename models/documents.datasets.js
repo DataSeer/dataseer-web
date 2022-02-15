@@ -22,6 +22,9 @@ const Sentence = new mongoose.Schema(
       dataInstanceId: { type: String, default: `` }, // dataInstanceId id
       sentences: [Sentence], // sentences
       reuse: { type: Boolean, default: false }, // reuse property
+      qc: { type: Boolean, default: false }, // qc property
+      representativeImage: { type: Boolean, default: false }, // representativeImage property
+      issue: { type: Boolean, default: false }, // issue property
       notification: { type: String, default: `` }, // notification property
       highlight: { type: Boolean, default: false }, // notification property
       cert: { type: String, default: `` }, // cert value (between 0 and 1)
