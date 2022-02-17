@@ -170,6 +170,12 @@ Note: [more info about data access restrictions here](../README.md#data-access)
       <td>optionnal</td>
       <td>Populate property datasets (default: false)</td>
     </tr>
+    <tr>
+      <td>Boolean</td>
+      <td>count</td>
+      <td>optionnal</td>
+      <td>Get the total number of results. Not affected by the limit parameter (default: false)</td>
+    </tr>
   </tbody>
 </table>
 
