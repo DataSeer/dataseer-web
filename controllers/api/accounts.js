@@ -245,6 +245,7 @@ Self.signin = function (opts = {}, cb) {
     if (accessRights.isVisitor) return cb(null, new Error(`Unauthorized functionnality`));
     // delete reset password token
     account.tokens.resetPassword = ``;
+    account.signedAt = Date.now();
     return JWT.check(account.tokens.api, opts.privateKey, {}, function (err, decoded) {
       if (!(err instanceof Error) && !opts.newToken && account.tokens.api !== ``) {
         return account.save(function (err) {
