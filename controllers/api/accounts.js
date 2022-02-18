@@ -220,7 +220,7 @@ Self.signup = function (opts = {}, cb) {
 };
 
 /**
- * Sign in an account
+ * Sign in an account (Use this function after checking the account authentication)
  * @param {object} opts - Options available
  * @param {object} opts.username - Account email
  * @param {string} opts.privateKey - Private key that must be used
@@ -245,42 +245,44 @@ Self.signin = function (opts = {}, cb) {
     if (accessRights.isVisitor) return cb(null, new Error(`Unauthorized functionnality`));
     // delete reset password token
     account.tokens.resetPassword = ``;
-    if (account.tokens.api !== `` && !opts.newToken) {
-      return account.save(function (err) {
-        if (err) return cb(err);
-        // return existing token
-        return cb(null, {
-          token: account.tokens.api,
-          username: account.username,
-          fullname: account.fullname,
-          organizations: account.organizations,
-          role: account.role,
-          _id: account._id
-        });
-      });
-    }
-    // create new token
-    else
-      return JWT.create(
-        { accountId: account._id.toString() },
-        opts.privateKey,
-        conf.tokens.api.expiresIn,
-        function (err, token) {
+    return JWT.check(account.tokens.api, opts.privateKey, {}, function (err, decoded) {
+      if (!(err instanceof Error) && !opts.newToken && account.tokens.api !== ``) {
+        return account.save(function (err) {
           if (err) return cb(err);
-          account.tokens.api = token;
-          return account.save(function (err) {
-            if (err) return cb(err);
-            return cb(null, {
-              token: account.tokens.api,
-              username: account.username,
-              fullname: account.fullname,
-              organizations: account.organizations,
-              role: account.role,
-              _id: account._id
-            });
+          // return existing token
+          return cb(null, {
+            token: account.tokens.api,
+            username: account.username,
+            fullname: account.fullname,
+            organizations: account.organizations,
+            role: account.role,
+            _id: account._id
           });
-        }
-      );
+        });
+      }
+      // create new token
+      else
+        return JWT.create(
+          { accountId: account._id.toString() },
+          opts.privateKey,
+          conf.tokens.api.expiresIn,
+          function (err, token) {
+            if (err) return cb(err);
+            account.tokens.api = token;
+            return account.save(function (err) {
+              if (err) return cb(err);
+              return cb(null, {
+                token: account.tokens.api,
+                username: account.username,
+                fullname: account.fullname,
+                organizations: account.organizations,
+                role: account.role,
+                _id: account._id
+              });
+            });
+          }
+        );
+    });
   });
 };
 
