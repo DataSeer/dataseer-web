@@ -114,11 +114,16 @@
               }
             );
             let publicUrl = URLMANAGER.buildURL(`documents/${documentId}`, { token: doc.token }, { origin: true });
+            let sciscoreArchiveUrl = URLMANAGER.buildURL(`api/sciscore/results/${documentId}`, { origin: true });
             let publicUrlBtn = $(
               `<button class="btn btn-primary btn-md" id="publicUrl" onclick="copyUrl('${publicUrl}')">Public URL</button>`
             );
             let pdfUrlBtn = $(`<a class="btn btn-primary btn-md" id="pdfUrl" href="${pdfUrl}" target="_blank">PDF</a>`);
+            let sciscoreArchiveBtn = $(
+              `<a class="btn btn-primary btn-md" id="sciscoreArchiveUrl" href="${sciscoreArchiveUrl}" target="_blank">Sciscore</a>`
+            );
             $(`nav`).append(publicUrlBtn).append(pdfUrlBtn);
+            if (user.isCurator) $(`nav`).append(sciscoreArchiveBtn);
 
             currentDocument.link({
               documentView: documentView,

@@ -61,9 +61,9 @@ router.get(`/results/:id`, function (req, res, next) {
       let dirname = path.dirname(filePath);
       let sciscoreDirectory = path.join(dirname, `sciscore`);
       return fs.stat(sciscoreDirectory, function (err, stats) {
-        if (!stats.isDirectory()) return res.status(404).send(`Sciscore results not found`);
+        if (err || !stats.isDirectory()) return res.status(404).send(`Sciscore results not found`);
         res.setHeader(`Content-Type`, `application/zip`);
-        res.setHeader(`Content-disposition`, `attachment; filename=sciscore.zip`);
+        res.setHeader(`Content-disposition`, `attachment; filename=${doc.name}-sciscore.zip`);
         let zip = archiver(`zip`);
         zip.on(`error`, function (err) {
           console.log(err);
