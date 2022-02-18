@@ -69,6 +69,17 @@
           </span>
         </div>
       </div>
+      <div v-if="user.role && (user.role.key === 'administrator')" class="row buttons">
+        <div class="col left">
+          <a target="_blank" :href="sciscoreReportLink">
+            <button class="btn btn-md btn-primary">Open Sciscore reports (.zip)</button>
+          </a>
+          <button class="btn btn-md btn-primary" v-on:click.stop="buildSciscoreReports(event)">Build Sciscore reports ($1 per click)</button>
+          <span class="loader-md" ref="buildSciscoreReportsLoader">
+            <i class="fas fa-circle-notch fa-spin"></i>
+          </span>
+        </div>
+      </div>
       <div class="row align-items-center" v-if="loading">
         <div class="col">
           <label>Loading report...</label>
