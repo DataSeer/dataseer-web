@@ -14,7 +14,8 @@ const Schema = new mongoose.Schema(
     organizations: [{ type: mongoose.Schema.Types.ObjectId, ref: `Organizations`, required: true }], // refers to organizations collection item
     tokens: { api: { type: String, default: `` }, resetPassword: { type: String, default: `` } }, // tokens of user
     visible: { type: Boolean, default: true, required: true },
-    disabled: { type: Boolean, default: false }
+    disabled: { type: Boolean, default: false },
+    signedAt: { type: Date, default: Date.now }
   },
   { minimize: false, timestamps: { createdAt: `createdAt`, updatedAt: `updatedAt` } }
 );
