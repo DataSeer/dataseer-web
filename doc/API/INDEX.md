@@ -65,7 +65,7 @@ This route is public.
 
 ```bash
 # Will return all accounts (JSON formated)
-curl -X POST -F "username=address@email.com" -F "password=myPassword" "http://localhost:3000/signin"
+curl -X POST -F "username=address@email.com" -F "password=myPassword" "http://localhost:3000/api/signin"
 ```
 
 #### Result
@@ -159,7 +159,7 @@ This route is public.
 
 ```bash
 # Will return all accounts (JSON formated)
-curl -X POST -F "username=address@email.com" -F "fullname=My Fullname" -F "password=myPassword" -F "confirm_password=myPassword" "http://localhost:3000/signup"
+curl -X POST -F "username=address@email.com" -F "fullname=My Fullname" -F "password=myPassword" -F "confirm_password=myPassword" "http://localhost:3000/api/signup"
 ```
 
 #### Result
@@ -233,7 +233,7 @@ No parameters available
 
 ```bash
 # Will return all accounts (JSON formated)
-curl "http://localhost:3000/currentUser"
+curl "http://localhost:3000/api/currentUser"
 ```
 
 #### Result
@@ -267,7 +267,7 @@ No parameters available
 
 ```bash
 # Will return all accounts (JSON formated)
-curl "http://localhost:3000/getCrispId"
+curl "http://localhost:3000/api/getCrispId"
 ```
 
 #### Result
@@ -301,7 +301,7 @@ No parameters available
 
 ```bash
 # Will return all accounts (JSON formated)
-curl "http://localhost:3000/getUserflowToken"
+curl "http://localhost:3000/api/getUserflowToken"
 ```
 
 #### Result
@@ -353,7 +353,7 @@ This route is public.
 
 ```bash
 # Will return all accounts (JSON formated)
-curl -X POST -F "username=address@email.com" "http://localhost:3000/forgotPassword"
+curl -X POST -F "username=address@email.com" "http://localhost:3000/api/forgotPassword"
 ```
 
 #### Result
@@ -422,7 +422,7 @@ This route is public (using the resestPasswordToken) and private (using the curr
 
 ```bash
 # Will return all accounts (JSON formated)
-curl -X POST -F "username=address@email.com" -F "current_password=myPassword" -F "new_password=myNewPassword" -F "confirm_new_password=myNewPassword" "http://localhost:3000/resetPassword"
+curl -X POST -F "username=address@email.com" -F "current_password=myPassword" -F "new_password=myNewPassword" -F "confirm_new_password=myNewPassword" "http://localhost:3000/api/resetPassword"
 ```
 
 #### Parameters (public)
@@ -462,7 +462,7 @@ curl -X POST -F "username=address@email.com" -F "current_password=myPassword" -F
 
 ```bash
 # Will return all accounts (JSON formated)
-curl -X POST -F "resetPasswordToken=myResetPasswordToken" -F "new_password=myNewPassword" -F "confirm_new_password=myNewPassword" "http://localhost:3000/resetPassword"
+curl -X POST -F "resetPasswordToken=myResetPasswordToken" -F "new_password=myNewPassword" -F "confirm_new_password=myNewPassword" "http://localhost:3000/api/resetPassword"
 ```
 
 #### Result (private & public)

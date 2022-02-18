@@ -17,6 +17,7 @@
       htmlDefaultReportLink: ``,
       htmlBioRxivReportLink: ``,
       asapGraphicLink: ``,
+      sciscoreReportLink: ``,
       gSpreadSheetReportLinks: {
         ASAP: ``,
         AmNat: ``
@@ -160,6 +161,57 @@
           );
         });
       },
+      buildSciscoreReports: function (event) {
+        let self = this;
+        // Get the button Jquery element
+        let button = $(this.$refs[`buildSciscoreReports`]);
+        // Get the loader of the button
+        let loader = $(this.$refs[`buildSciscoreReportsLoader`]);
+        // Display the loader
+        loader.show();
+        // Disable the button
+        button.prop(`disabled`, true);
+        let opts = {
+          documentId: documentId
+        };
+        return API.sciscore.processFile(opts, function (err, query) {
+          // Hide the loader
+          loader.hide();
+          // Enable the button
+          button.prop(`disabled`, false);
+          // Case API did not respond
+          if (err) {
+            console.log(err);
+            // Push an error notification
+            return self.notifications.push(
+              NOTIFICATIONS.create(self.notifications, {
+                kind: NOTIFICATIONS.kinds.error,
+                message: `[${err.statusText}] ${err.responseText} (HTTP ${err.status})`,
+                autoclose: false
+              })
+            );
+          }
+          // Case API did respond
+          if (query.err) {
+            // Case there is an error
+            // Push an error notification
+            return self.notifications.push(
+              NOTIFICATIONS.create(self.notifications, {
+                kind: NOTIFICATIONS.kinds.error,
+                message: query.res,
+                autoclose: false
+              })
+            );
+          }
+          return self.notifications.push(
+            NOTIFICATIONS.create(self.notifications, {
+              kind: NOTIFICATIONS.kinds.success,
+              message: `<a href="${self.sciscoreReportLink}" target="_blank">Reports</a> have been generated!`,
+              autoclose: true
+            })
+          );
+        });
+      },
       buildPublicUrl: function (event) {
         const self = this;
         let opts = {
@@ -237,6 +289,10 @@
                 );
                 self.asapGraphicLink = URLMANAGER.buildURL(
                   `api/documents/${self.document._id.toString()}/charts/asap`,
+                  {}
+                );
+                self.sciscoreReportLink = URLMANAGER.buildURL(
+                  `api/sciscore/results/${self.document._id.toString()}`,
                   {}
                 );
                 self.gSpreadSheetReportLinks.ASAP = URLMANAGER.buildURL(

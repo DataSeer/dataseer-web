@@ -469,6 +469,29 @@ const API = {
       });
     }
   },
+  sciscore: {
+    url: `api/sciscore`,
+    /**
+     * Process given file with Sciscore API
+     * @param {object} opts opts
+     * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+     * @returns {undefined} undefined
+     */
+    processFile: function (opts = {}, done) {
+      return $.ajax({
+        type: `POST`,
+        data: opts,
+        url: URLMANAGER.buildURL(`${this.url}/processFile/${opts.documentId}`, {}, { setToken: true }),
+        success: function (query) {
+          console.log(`sciscore.processFile`, query);
+          return done(false, query);
+        },
+        error: function (query) {
+          return done(query);
+        }
+      });
+    }
+  },
   datasets: {
     url: `api/datasets`,
     /**
