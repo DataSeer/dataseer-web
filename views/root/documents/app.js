@@ -173,7 +173,9 @@
         let result = {
           status: { modified: false, error: false },
           selected: false,
-          properties: {},
+          properties: {
+            metadata: {}
+          },
           raw: DATAHANDLER.object.getRaw(Object.assign({}, data, { files: null, pdf: null, tei: null, datasets: null }))
         };
         for (let property in data) {
