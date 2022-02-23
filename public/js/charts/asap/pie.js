@@ -31,7 +31,7 @@
         },
         protocols: {
           name: PARAMS.convertToString(urlParams.reUseProtocolsName),
-          color: PARAMS.convertToString(urlParams.reUseProtocolsColor) || `#34a270`,
+          color: PARAMS.convertToString(urlParams.reUseProtocolsColor) || `#cf2fb3`,
           done: PARAMS.convertToInteger(urlParams.reUseProtocolsDone) || 0,
           total: PARAMS.convertToInteger(urlParams.reUseProtocolsTotal) || 0
         }
@@ -57,7 +57,7 @@
         },
         protocols: {
           name: PARAMS.convertToString(urlParams.newProtocolsName),
-          color: PARAMS.convertToString(urlParams.newProtocolsColor) || `#cf2fb3`,
+          color: PARAMS.convertToString(urlParams.newProtocolsColor) || `#34a270`,
           done: PARAMS.convertToInteger(urlParams.newProtocolsDone) || 0,
           total: PARAMS.convertToInteger(urlParams.newProtocolsTotal) || 0
         }
