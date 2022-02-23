@@ -7,51 +7,59 @@
   let urlParams = URLMANAGER.getParamsOfCurrentURL();
 
   const params = {
-    maxNumberOfSubSlices: PARAMS.convertToInteger(urlParams.maxNumberOfSubSlices),
+    maxNumberOfSubSlices: PARAMS.convertToInteger(urlParams.maxNumberOfSubSlices) || 0,
     customData: PARAMS.convertToBoolean(urlParams.customData),
     data: {
       reUse: {
         datasets: {
           name: PARAMS.convertToString(urlParams.reUseDatasetsName),
-          done: PARAMS.convertToInteger(urlParams.reUseDatasetsDone),
-          total: PARAMS.convertToInteger(urlParams.reUseDatasetsTotal)
+          color: PARAMS.convertToString(urlParams.reUseDatasetsColor) || `#8c4e9f`,
+          done: PARAMS.convertToInteger(urlParams.reUseDatasetsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.reUseDatasetsTotal) || 0
         },
         codes: {
           name: PARAMS.convertToString(urlParams.reUseCodesName),
-          done: PARAMS.convertToInteger(urlParams.reUseCodesDone),
-          total: PARAMS.convertToInteger(urlParams.reUseCodesTotal)
+          color: PARAMS.convertToString(urlParams.reUseCodesColor) || `#0c8dc3`,
+          done: PARAMS.convertToInteger(urlParams.reUseCodesDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.reUseCodesTotal) || 0
         },
         materials: {
           name: PARAMS.convertToString(urlParams.reUseMaterialsName),
-          done: PARAMS.convertToInteger(urlParams.reUseMaterialsDone),
-          total: PARAMS.convertToInteger(urlParams.reUseMaterialsTotal)
+          color: PARAMS.convertToString(urlParams.reUseMaterialsColor) || `#307a77`,
+          done: PARAMS.convertToInteger(urlParams.reUseMaterialsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.reUseMaterialsTotal) || 0
         },
         protocols: {
           name: PARAMS.convertToString(urlParams.reUseProtocolsName),
-          done: PARAMS.convertToInteger(urlParams.reUseProtocolsDone),
-          total: PARAMS.convertToInteger(urlParams.reUseProtocolsTotal)
+          color: PARAMS.convertToString(urlParams.reUseProtocolsColor) || `#34a270`,
+          done: PARAMS.convertToInteger(urlParams.reUseProtocolsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.reUseProtocolsTotal) || 0
         }
       },
       new: {
         datasets: {
           name: PARAMS.convertToString(urlParams.newDatasetsName),
-          done: PARAMS.convertToInteger(urlParams.newDatasetsDone),
-          total: PARAMS.convertToInteger(urlParams.newDatasetsTotal)
+          color: PARAMS.convertToString(urlParams.newDatasetsColor) || `#8c4e9f`,
+          done: PARAMS.convertToInteger(urlParams.newDatasetsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.newDatasetsTotal) || 0
         },
         codes: {
           name: PARAMS.convertToString(urlParams.newCodesName),
-          done: PARAMS.convertToInteger(urlParams.newCodesDone),
-          total: PARAMS.convertToInteger(urlParams.newCodesTotal)
+          color: PARAMS.convertToString(urlParams.newCodesColor) || `#0c8dc3`,
+          done: PARAMS.convertToInteger(urlParams.newCodesDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.newCodesTotal) || 0
         },
         materials: {
           name: PARAMS.convertToString(urlParams.newMaterialsName),
-          done: PARAMS.convertToInteger(urlParams.newMaterialsDone),
-          total: PARAMS.convertToInteger(urlParams.newMaterialsTotal)
+          color: PARAMS.convertToString(urlParams.newMaterialsColor) || `#307a77`,
+          done: PARAMS.convertToInteger(urlParams.newMaterialsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.newMaterialsTotal) || 0
         },
         protocols: {
           name: PARAMS.convertToString(urlParams.newProtocolsName),
-          done: PARAMS.convertToInteger(urlParams.newProtocolsDone),
-          total: PARAMS.convertToInteger(urlParams.newProtocolsTotal)
+          color: PARAMS.convertToString(urlParams.newProtocolsColor) || `#cf2fb3`,
+          done: PARAMS.convertToInteger(urlParams.newProtocolsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.newProtocolsTotal) || 0
         }
       }
     }
@@ -62,40 +70,56 @@
   const width = window.innerWidth > minWidth ? window.innerWidth : minWidth;
   const height = window.innerHeight > minHeight ? window.innerHeight : minHeight;
 
+  const slicesColor = [
+    params.data.new.datasets.color,
+    params.data.new.codes.color,
+    params.data.new.materials.color,
+    params.data.new.protocols.color,
+    params.data.reUse.protocols.color,
+    params.data.reUse.materials.color,
+    params.data.reUse.codes.color,
+    params.data.reUse.datasets.color
+  ];
+
   const data = [
     {
       name: params.data.new.datasets.name ? params.data.new.datasets.name : `New Data shared`,
       done: params.data.new.datasets.done,
       total: params.data.new.datasets.total,
       opacity: 0.9,
-      background: `#EBEBEB`
+      color: params.data.new.datasets.color,
+      background: `#FFFFFF`
     }, // Top right slice
     {
       name: params.data.new.codes.name ? params.data.new.codes.name : `New Code shared`,
       done: params.data.new.codes.done,
       total: params.data.new.codes.total,
       opacity: 0.9,
-      background: `#EBEBEB`
+      color: params.data.new.codes.color,
+      background: `#FFFFFF`
     },
     {
       name: params.data.new.materials.name ? params.data.new.materials.name : `New Materials available`,
       done: params.data.new.materials.done,
       total: params.data.new.materials.total,
       opacity: 0.9,
-      background: `#EBEBEB`
+      color: params.data.new.materials.color,
+      background: `#FFFFFF`
     },
     {
       name: params.data.new.protocols.name ? params.data.new.protocols.name : `Protocols shared`,
       done: params.data.new.protocols.done,
       total: params.data.new.protocols.total,
       opacity: 0.9,
-      background: `#EBEBEB`
+      color: params.data.new.protocols.color,
+      background: `#FFFFFF`
     },
     {
       name: params.data.reUse.protocols.name ? params.data.reUse.protocols.name : `Protocols re-used`,
       done: params.data.reUse.protocols.done,
       total: params.data.reUse.protocols.total,
       opacity: 0.6,
+      color: params.data.reUse.protocols.color,
       background: `#FFFFFF`
     },
     {
@@ -103,6 +127,7 @@
       done: params.data.reUse.materials.done,
       total: params.data.reUse.materials.total,
       opacity: 0.6,
+      color: params.data.reUse.materials.color,
       background: `#FFFFFF`
     },
     {
@@ -110,6 +135,7 @@
       done: params.data.reUse.codes.done,
       total: params.data.reUse.codes.total,
       opacity: 0.6,
+      color: params.data.reUse.codes.color,
       background: `#FFFFFF`
     },
     {
@@ -117,8 +143,9 @@
       done: params.data.reUse.datasets.done,
       total: params.data.reUse.datasets.total,
       opacity: 0.6,
+      color: params.data.reUse.datasets.color,
       background: `#FFFFFF`
-    } // Top left slice
+    }
   ];
 
   const radius = Math.min(width, height) * 0.75;
@@ -135,7 +162,7 @@
 
   const colorRange = (n) => (n <= 3 ? n : 7 - n);
 
-  const getColor = (n) => colorScale((Math.PI / 4) * colorRange(n));
+  const getColor = (n) => (slicesColor[n] ? slicesColor[n] : colorScale((Math.PI / 4) * colorRange(n)));
   // colorScale((Math.PI / 4) * colorRange(n))
   // colorScale(((2 * colorRange(n) * Math.PI) + Math.PI) / 8)
 
@@ -241,13 +268,13 @@
       .join(`path`)
       .attr(`fill`, (d) => d.data.background)
       .attr(`stroke`, (d) => d3.rgb(getColor(d.index)).darker(1))
-      .attr(`stroke-width`, 2)
+      .attr(`stroke-width`, (d) => (d.data.done > 0 && d.data.total > 0 ? 2 : 0))
       .attr(`d`, arc)
       .clone(true)
       .attr(`fill`, (d) => getColor(d.index))
       .attr(`fill-opacity`, (d) => d.data.opacity)
       .attr(`stroke`, (d) => d3.rgb(getColor(d.index)).darker(1))
-      .attr(`stroke-width`, 2)
+      .attr(`stroke-width`, (d) => (d.data.done > 0 && d.data.total > 0 ? 2 : 0))
       .attr(`d`, (d, i) => (d.data.done > 0 && d.data.total > 0 ? slice(d.data.done / d.data.total, i) : ``))
       .clone(true)
       .attr(`fill`, `url(#radialGradient)`);
