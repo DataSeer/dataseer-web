@@ -7,7 +7,7 @@
   let urlParams = URLMANAGER.getParamsOfCurrentURL();
 
   const params = {
-    maxNumberOfSubSlices: PARAMS.convertToInteger(urlParams.maxNumberOfSubSlices) || 0,
+    maxNumberOfSubSlices: PARAMS.convertToInteger(urlParams.maxNumberOfSubSlices),
     customData: PARAMS.convertToBoolean(urlParams.customData),
     data: {
       reUse: {
@@ -268,14 +268,14 @@
       .join(`path`)
       .attr(`fill`, (d) => d.data.background)
       .attr(`stroke`, (d) => d3.rgb(getColor(d.index)).darker(1))
-      .attr(`stroke-width`, (d) => (d.data.done > 0 && d.data.total > 0 ? 2 : 0))
+      .attr(`stroke-width`, (d) => (d.data.total > 0 ? 2 : 0))
       .attr(`d`, arc)
       .clone(true)
       .attr(`fill`, (d) => getColor(d.index))
       .attr(`fill-opacity`, (d) => d.data.opacity)
       .attr(`stroke`, (d) => d3.rgb(getColor(d.index)).darker(1))
-      .attr(`stroke-width`, (d) => (d.data.done > 0 && d.data.total > 0 ? 2 : 0))
-      .attr(`d`, (d, i) => (d.data.done > 0 && d.data.total > 0 ? slice(d.data.done / d.data.total, i) : ``))
+      .attr(`stroke-width`, (d) => (d.data.total > 0 ? 2 : 0))
+      .attr(`d`, (d, i) => (d.data.total > 0 ? slice(d.data.done / d.data.total, i) : ``))
       .clone(true)
       .attr(`fill`, `url(#radialGradient)`);
 
