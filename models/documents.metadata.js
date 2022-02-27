@@ -6,7 +6,20 @@
 
 const mongoose = require(`mongoose`);
 
-const Author = new mongoose.Schema({ name: String, email: String, affiliations: [String] }, { _id: false });
+const Orcid = new mongoose.Schema({ fromTEI: [String], fromAPI: [Object] }, { _id: false });
+
+const Author = new mongoose.Schema(
+  {
+    name: String,
+    email: String,
+    'family-name': String,
+    'given-names': String,
+    'other-name': String,
+    affiliations: [String],
+    orcid: Orcid
+  },
+  { _id: false }
+);
 
 const Schema = new mongoose.Schema(
   {
@@ -20,7 +33,8 @@ const Schema = new mongoose.Schema(
     submitting_author_email: { type: String, default: `` }, // submittingAuthorEmail
     authors: [Author], // authors. Array(Object) => {"name": String, "affiliations": Array(String) }
     doi: { type: String, default: `` }, // doi
-    pmid: { type: String, default: `` } // pmid
+    pmid: { type: String, default: `` }, // pmid
+    isbn: { type: String, default: `` } // isbn
   },
   { minimize: false, timestamps: { createdAt: `createdAt`, updatedAt: `updatedAt` } }
 );
