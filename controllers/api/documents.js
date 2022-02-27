@@ -1696,6 +1696,11 @@ Self.updateDataset = function (opts = {}, cb) {
                 opts.dataset.notification = datasets.current[i].notification;
                 opts.dataset.highlight = datasets.current[i].highlight;
                 opts.dataset.DOI = datasets.current[i].DOI;
+                opts.dataset.RRID = datasets.current[i].RRID;
+                opts.dataset.catalog = datasets.current[i].catalog;
+                opts.dataset.entity = datasets.current[i].entity;
+                opts.dataset.citation = datasets.current[i].citation;
+                opts.dataset.version = datasets.current[i].version;
                 opts.dataset.name = datasets.current[i].name;
                 opts.dataset.comments = datasets.current[i].comments;
               }
