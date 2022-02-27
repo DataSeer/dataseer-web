@@ -91,7 +91,7 @@
       background: `#FFFFFF`
     }, // Top right slice
     {
-      name: params.data.new.codes.name ? params.data.new.codes.name : `New Code shared`,
+      name: params.data.new.codes.name ? params.data.new.codes.name : `Codes`,
       done: params.data.new.codes.done,
       total: params.data.new.codes.total,
       opacity: 0.9,
@@ -131,7 +131,7 @@
       background: `#FFFFFF`
     },
     {
-      name: params.data.reUse.codes.name ? params.data.reUse.codes.name : `Code re-use cited`,
+      name: params.data.reUse.codes.name ? params.data.reUse.codes.name : `Softwares`,
       done: params.data.reUse.codes.done,
       total: params.data.reUse.codes.total,
       opacity: 0.6,
@@ -287,9 +287,11 @@
         data.reduce(
           (acc, item, i) =>
             acc.concat(
-              Array.from(Array(item.total <= maxNumberOfSubSlices ? item.total : 0).keys()).map(function (index) {
-                return { index: i, value: index / item.total, opacity: item.opacity };
-              })
+              Array.from(Array(item.total > 0 && item.total <= maxNumberOfSubSlices ? item.total : 0).keys()).map(
+                function (index) {
+                  return { index: i, value: item.total > 0 ? index / item.total : 0, opacity: item.opacity };
+                }
+              )
             ),
           []
         )
@@ -355,7 +357,16 @@
       return item.dataType === `other` && item.subType === `protocol`;
     });
     let codes = query.res.datasets.current.filter(function (item) {
-      return (item.dataType === `other` && item.subType === `code`) || item.dataType === `code software`;
+      return (
+        (item.dataType === `other` && item.subType === `code`) ||
+        (item.dataType === `code software` && item.subType === `custom script` && !item.reuse)
+      );
+    });
+    let softwares = query.res.datasets.current.filter(function (item) {
+      return (
+        (item.dataType === `code software` && item.subType === `custom script` && item.reuse) ||
+        (item.dataType === `code software` && item.subType !== `custom script`)
+      );
     });
     let reagents = query.res.datasets.current.filter(function (item) {
       return (item.dataType === `other` && item.subType === `reagent`) || item.dataType === `lab materials`;
@@ -363,67 +374,61 @@
     let datasets = query.res.datasets.current.filter(function (item) {
       return item.dataType !== `other` && item.dataType !== `code software` && item.dataType !== `lab materials`;
     });
-    if (typeof data[0].done === `undefined`)
+    if (data[0].done < 0)
       data[0].done = datasets.filter(function (item) {
         return !item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[0].total === `undefined`)
+    if (data[0].total < 0)
       data[0].total = datasets.filter(function (item) {
         return !item.reuse;
       }).length;
-    if (typeof data[1].done === `undefined`)
+    if (data[1].done < 0)
       data[1].done = codes.filter(function (item) {
-        return !item.reuse && item.status === `valid`;
+        return item.status === `valid`;
       }).length;
-    if (typeof data[1].total === `undefined`)
-      data[1].total = codes.filter(function (item) {
-        return !item.reuse;
-      }).length;
-    if (typeof data[2].done === `undefined`)
+    if (data[1].total < 0) data[1].total = codes.length;
+    if (data[2].done < 0)
       data[2].done = reagents.filter(function (item) {
         return !item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[2].total === `undefined`)
+    if (data[2].total < 0)
       data[2].total = reagents.filter(function (item) {
         return !item.reuse;
       }).length;
-    if (typeof data[3].done === `undefined`)
+    if (data[3].done < 0)
       data[3].done = protocols.filter(function (item) {
         return !item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[3].total === `undefined`)
+    if (data[3].total < 0)
       data[3].total = protocols.filter(function (item) {
         return !item.reuse;
       }).length;
-    if (typeof data[4].done === `undefined`)
+    if (data[4].done < 0)
       data[4].done = protocols.filter(function (item) {
         return item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[4].total === `undefined`)
+    if (data[4].total < 0)
       data[4].total = protocols.filter(function (item) {
         return item.reuse;
       }).length;
-    if (typeof data[5].done === `undefined`)
+    if (data[5].done < 0)
       data[5].done = reagents.filter(function (item) {
         return item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[5].total === `undefined`)
+    if (data[5].total < 0)
       data[5].total = reagents.filter(function (item) {
         return item.reuse;
       }).length;
-    if (typeof data[6].done === `undefined`)
-      data[6].done = codes.filter(function (item) {
-        return item.reuse && item.status === `valid`;
+    if (data[6].done < 0)
+      data[6].done = softwares.filter(function (item) {
+        return item.status === `valid`;
       }).length;
-    if (typeof data[6].total === `undefined`)
-      data[6].total = codes.filter(function (item) {
-        return item.reuse;
-      }).length;
-    if (typeof data[7].done === `undefined`)
+    if (data[6].total < 0) data[6].total = softwares.length;
+    if (data[7].done < 0)
       data[7].done = datasets.filter(function (item) {
         return item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[7].total === `undefined`)
+    if (data[7].total < 0)
       data[7].total = datasets.filter(function (item) {
         return item.reuse;
       }).length;
