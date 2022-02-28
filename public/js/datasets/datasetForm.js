@@ -340,6 +340,34 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       self.dataset.DOI = value;
       return self.dataset.DOI;
     },
+    RRID: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.RRID;
+      self.container.find(`div[key="dataset\\.RRID"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.RRID"]`).val(value);
+      self.dataset.RRID = value;
+      return self.dataset.RRID;
+    },
+    catalog: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.catalog;
+      self.container.find(`div[key="dataset\\.catalog"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.catalog"]`).val(value);
+      self.dataset.catalog = value;
+      return self.dataset.catalog;
+    },
+    citation: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.citation;
+      self.container.find(`div[key="dataset\\.citation"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.citation"]`).val(value);
+      self.dataset.citation = value;
+      return self.dataset.citation;
+    },
+    entity: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.entity;
+      self.container.find(`div[key="dataset\\.entity"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.entity"]`).val(value);
+      self.dataset.entity = value;
+      return self.dataset.entity;
+    },
     comments: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.comments;
       self.container.find(`div[key="dataset\\.comments"]`).attr(`value`, value);
@@ -418,6 +446,10 @@ DatasetForm.prototype.getDataset = function () {
     notification: this.dataset.notification,
     name: this.dataset.name,
     DOI: this.dataset.DOI,
+    RRID: this.dataset.RRID,
+    catalog: this.dataset.catalog,
+    citation: this.dataset.citation,
+    entity: this.dataset.entity,
     comments: this.dataset.comments
   };
 };

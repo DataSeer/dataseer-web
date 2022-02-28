@@ -1,6 +1,6 @@
 {
   "mongodb": {
-    "url": "mongodb://localhost:27017/app",
+    "url": "mongodb://root:password@127.0.0.1:27017/app?authSource=admin",
     "default": {
       "roles": {
         "id": "6034497eaae2c62a0769d446"

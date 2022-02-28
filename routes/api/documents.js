@@ -898,6 +898,7 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
   let opts = {
     data: {
       id: req.params.id,
+      orcid: Params.convertToBoolean(req.body.orcid),
       metadata: {
         article_title: Params.convertToString(req.body.article_title),
         journal: Params.convertToString(req.body.journal),
