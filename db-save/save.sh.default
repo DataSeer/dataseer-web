@@ -13,7 +13,7 @@ cd $DAY;
 rm -rf dump/
 
 # save mongodb
-mongodump --forceTableScan;
+mongodump -u root -p password --forceTableScan;
 
 # save File System
 tar -cvf data.tar ../../data/
