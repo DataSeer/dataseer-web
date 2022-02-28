@@ -4,6 +4,8 @@ conf/mails/*.json
 public/js/conf/*.js
 conf/private.key
 
+mongodb/*.yml
+
 #data
 data/*
 

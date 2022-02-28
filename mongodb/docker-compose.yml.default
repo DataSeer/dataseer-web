@@ -1,0 +1,10 @@
+mongo-container:
+  image: mongo:4.4.3
+  environment:
+      # provide your credentials here
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+  ports:
+    - "27017:27017"
+  # no --auth is needed here as presence of username and password add this option automatically
+  command: mongod
