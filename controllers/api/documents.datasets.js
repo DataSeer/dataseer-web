@@ -132,6 +132,10 @@ Self.createDataset = function (opts = {}) {
       ? opts.bestPracticeForIndicatingReUseOfExistingData
       : ``, // best practice for indicating re-use of existing data
     mostSuitableRepositories: opts.mostSuitableRepositories ? opts.mostSuitableRepositories : ``, // most suitable repositories
+    protocolSource: opts.protocolSource ? opts.protocolSource : ``, // protocolSource
+    labSource: opts.labSource ? opts.labSource : ``, // labSource
+    version: opts.version ? opts.version : ``, // version
+    PID: opts.PID ? opts.PID : ``, // PID
     DOI: opts.DOI ? opts.DOI : ``, // DOI
     RRID: opts.RRID ? opts.RRID : ``, // RRID
     catalog: opts.catalog ? opts.catalog : ``, // catalog number
