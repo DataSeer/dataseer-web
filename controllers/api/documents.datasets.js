@@ -141,7 +141,6 @@ Self.createDataset = function (opts = {}) {
     catalog: opts.catalog ? opts.catalog : ``, // catalog number
     entity: opts.entity ? opts.entity : ``, // entity name
     citation: opts.citation ? opts.citation : ``, // suggested citation
-    version: opts.version ? opts.version : ``, // software version
     name: opts.name ? opts.name : ``, // name
     comments: opts.comments ? opts.comments : ``, // comments
     status: opts.dataType && opts.name && (opts.DOI || opts.comments) ? Self.status.valid : Self.status.saved // status of the dataset
