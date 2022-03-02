@@ -1695,6 +1695,10 @@ Self.updateDataset = function (opts = {}, cb) {
               if (opts.keepDataFromMongo) {
                 opts.dataset.notification = datasets.current[i].notification;
                 opts.dataset.highlight = datasets.current[i].highlight;
+                opts.dataset.protocolSource = datasets.current[i].protocolSource;
+                opts.dataset.labSource = datasets.current[i].labSource;
+                opts.dataset.version = datasets.current[i].version;
+                opts.dataset.PID = datasets.current[i].PID;
                 opts.dataset.DOI = datasets.current[i].DOI;
                 opts.dataset.RRID = datasets.current[i].RRID;
                 opts.dataset.catalog = datasets.current[i].catalog;

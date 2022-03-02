@@ -34,6 +34,10 @@ const Sentence = new mongoose.Schema(
       bestDataFormatForSharing: { type: String, default: `` }, // best data format for sharing
       bestPracticeForIndicatingReUseOfExistingData: { type: String, default: `` }, // best practice for indicating re-use of existing data
       mostSuitableRepositories: { type: String, default: `` }, // most suitable repositories
+      protocolSource: { type: String, default: `` }, // protocolSource
+      labSource: { type: String, default: `` }, // labSource
+      version: { type: String, default: `` }, // version
+      PID: { type: String, default: `` }, // PID
       DOI: { type: String, default: `` }, // DOI
       RRID: { type: String, default: `` }, // RRID
       catalog: { type: String, default: `` }, // catalog number
