@@ -2563,26 +2563,11 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
       // sort sentences
       let sentences = item.sentences.sort(sortSentences);
       let type = DataTypes.getDataTypeInfos(item, dataTypes);
-      return {
+      return Object.assign({}, item, {
         type,
         sentences,
-        id: item.id,
-        reuse: item.reuse,
-        qc: item.qc,
-        representativeImage: item.representativeImage,
-        issue: item.issue,
-        isValid: item.status === DocumentsDatasetsController.status.valid ? true : false,
-        notes: item.notification,
-        description: item.description,
-        bestDataFormatForSharing: item.bestDataFormatForSharing,
-        bestPracticeForIndicatingReUseOfExistingData: item.bestPracticeForIndicatingReUseOfExistingData,
-        mostSuitableRepositories: item.mostSuitableRepositories,
-        dataType: item.dataType,
-        subType: item.subType,
-        name: item.name,
-        DOI: item.DOI,
-        comments: item.comments
-      };
+        isValid: item.status === DocumentsDatasetsController.status.valid ? true : false
+      });
     })
     .sort(function (a, b) {
       let c = a.sentences && a.sentences[0] && a.sentences[0].id ? mapping[a.sentences[0].id] : Infinity;
