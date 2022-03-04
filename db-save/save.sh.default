@@ -17,3 +17,13 @@ mongodump -u root -p password --forceTableScan;
 
 # save File System
 tar -cvf data.tar ../../data/
+
+# build temporary .tar file of the current save
+cd ../
+tar -cvf $DAY.tar $DAY/
+
+# send temporary .tar file to google drive save folder
+node upload.js $DAY.tar
+
+# delete temporary .tar file
+rm $DAY.tar

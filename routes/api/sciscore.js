@@ -29,7 +29,7 @@ router.post(`/processFile/:id`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
-    let fileId = doc.pdf ? doc.pdf : doc.tei;
+    let fileId = doc.tei;
     return DocumentsFilesController.getFilePath({ data: { id: fileId.toString() } }, function (err, filePath) {
       if (err) {
         console.log(err);
