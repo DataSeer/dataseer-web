@@ -15,15 +15,19 @@ rm -rf dump/
 # save mongodb
 mongodump -u root -p password --forceTableScan;
 
-# save File System
+# save File System on the server
 tar -cvf data.tar ../../data/
 
-# build temporary .tar file of the current save
-cd ../
-tar -cvf $DAY.tar $DAY/
+# save online (e.g. only on Monday and Friday)
+if [[ $DAY == "1" ]] || [[ $DAY == "5" ]]
+then
+  # build temporary .tar file of the current save
+  cd ../
+  tar -cvf $DAY.tar $DAY/
 
-# send temporary .tar file to google drive save folder
-node upload.js $DAY.tar
+  # send temporary .tar file to google drive save folder
+  node upload.js $DAY.tar
 
-# delete temporary .tar file
-rm $DAY.tar
+  # delete temporary .tar file
+  rm $DAY.tar
+fi
