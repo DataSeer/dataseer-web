@@ -2563,7 +2563,7 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
       // sort sentences
       let sentences = item.sentences.sort(sortSentences);
       let type = DataTypes.getDataTypeInfos(item, dataTypes);
-      return Object.assign({}, item, {
+      return Object.assign({}, item.toJSON(), {
         type,
         sentences,
         isValid: item.status === DocumentsDatasetsController.status.valid ? true : false
