@@ -347,6 +347,37 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       self.dataset.RRID = value;
       return self.dataset.RRID;
     },
+    PID: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.PID;
+      self.container.find(`div[key="dataset\\.PID"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.PID"]`).val(value);
+      self.dataset.PID = value;
+      return self.dataset.PID;
+    },
+    version: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.version;
+      self.container.find(`div[key="dataset\\.version"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.version"]`).val(value);
+      self.dataset.version = value;
+      return self.dataset.version;
+    },
+    labSource: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.labSource;
+      self.container.find(`div[key="dataset\\.labSource"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.labSource"]`).val(value);
+      self.dataset.labSource = value;
+      return self.dataset.labSource;
+    },
+    protocolSource: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.protocolSource;
+      self.container.find(`div[key="dataset\\.protocolSource"]`).attr(`value`, value);
+      if (inputs)
+        self.container
+          .find(`select[name="datasetForm\\.protocolSource"] option[value="${value}"]`)
+          .prop(`selected`, true);
+      self.dataset.protocolSource = value;
+      return self.dataset.protocolSource;
+    },
     catalog: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.catalog;
       self.container.find(`div[key="dataset\\.catalog"]`).attr(`value`, value);
@@ -446,6 +477,10 @@ DatasetForm.prototype.getDataset = function () {
     notification: this.dataset.notification,
     name: this.dataset.name,
     DOI: this.dataset.DOI,
+    protocolSource: this.dataset.protocolSource,
+    labSource: this.dataset.labSource,
+    version: this.dataset.version,
+    PID: this.dataset.PID,
     RRID: this.dataset.RRID,
     catalog: this.dataset.catalog,
     citation: this.dataset.citation,
