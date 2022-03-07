@@ -4,7 +4,13 @@ conf/mails/*.json
 public/js/conf/*.js
 conf/private.key
 
-#data
+# mongodb docker container 
+mongodb/*.yml
+
+# save script
+db-save/save.sh
+
+# data
 data/*
 
 # OCR

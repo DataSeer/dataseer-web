@@ -38,6 +38,7 @@ const Analyzer = require(`../../lib/analyzer.js`);
 const CSV = require(`../../lib/csv.js`);
 const GoogleSheets = require(`../../lib/googleSheets.js`);
 const OCR = require(`../../lib/ocr.js`);
+const ORCID = require(`../../lib/orcid.js`);
 
 const conf = require(`../../conf/conf.json`);
 
@@ -410,21 +411,21 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
             metadata: {
               articleTitle: data.doc.metadata.article_title,
               doi: data.doc.metadata.doi,
-              authors: data.doc.metadata.authors
-                .map(function (item) {
-                  return item.name;
-                })
-                .join(`, `),
+              authors: data.doc.metadata.authors.filter(function (item) {
+                return item.name.length > 0;
+              }),
               dataSeerLink: {
                 url: `${Url.build(`/documents/${opts.data.id}`, { token: data.doc.token })}`,
                 label: data.doc.name ? data.doc.name : data.doc._id.toString()
-              }
+              },
+              dataseerDomain: Url.build(`/`, {})
             },
             summary: data.datasetsSummary,
             datasets: data.sortedDatasetsInfos.datasets,
             protocols: data.sortedDatasetsInfos.protocols,
             reagents: data.sortedDatasetsInfos.reagents,
-            codes: data.sortedDatasetsInfos.codes
+            codes: data.sortedDatasetsInfos.codes,
+            softwares: data.sortedDatasetsInfos.softwares
           }
         },
         function (err, spreadsheetId) {
@@ -846,7 +847,7 @@ Self.upload = function (opts = {}, cb) {
           // Process metadata
           function (acc, next) {
             return Self.updateOrCreateMetadata(
-              { data: { id: acc._id.toString() }, user: opts.user },
+              { data: { id: acc._id.toString() }, orcid: true, user: opts.user },
               function (err, metadata) {
                 if (err) return next(err, acc);
                 if (metadata instanceof Error) return next(metadata, acc);
@@ -1196,6 +1197,7 @@ Self.reopen = function (opts = {}, cb) {
 /**
  * Update Or Create Metadata of document
  * @param {object} opts - Options available (You must call getUploadParams)
+ * @param {boolean} opts.orcid - Refresh orcid (request ORCID API)
  * @param {object} opts.data - Data available
  * @param {string} opts.data.id - Document id
  * @param {object} opts.data.metadata - Document metadata
@@ -1244,6 +1246,35 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
             // Extract metadata
             metadata = XML.extractMetadata(XML.load(xmlString));
             return next();
+          },
+          function (next) {
+            // Get ORCIDs from API
+            if (!opts.orcid) return next();
+            if (metadata.authors.length <= 0) return next();
+            return async.mapSeries(
+              metadata.authors,
+              function (item, _next) {
+                return ORCID.findAuthor(
+                  {
+                    'family-name': item[`family-name`],
+                    'given-names': item[`given-names`]
+                    // 'email': item[`email`],
+                    // 'other-name': item[`other-name`]
+                    // 'digital-object-ids': metadata[`doi`],
+                    // 'pmid': metadata[`pmid`],
+                    // 'isbn': metadata[`isbn`]
+                  },
+                  function (err, data) {
+                    if (err) return _next(err);
+                    item.orcid.fromAPI = data[`num-found`] > 0 ? data[`expanded-result`] : [];
+                    return _next(null, data);
+                  }
+                );
+              },
+              function (err, result) {
+                return next();
+              }
+            );
           }
         ],
         function (action, next) {
@@ -1664,7 +1695,16 @@ Self.updateDataset = function (opts = {}, cb) {
               if (opts.keepDataFromMongo) {
                 opts.dataset.notification = datasets.current[i].notification;
                 opts.dataset.highlight = datasets.current[i].highlight;
+                opts.dataset.protocolSource = datasets.current[i].protocolSource;
+                opts.dataset.labSource = datasets.current[i].labSource;
+                opts.dataset.version = datasets.current[i].version;
+                opts.dataset.PID = datasets.current[i].PID;
                 opts.dataset.DOI = datasets.current[i].DOI;
+                opts.dataset.RRID = datasets.current[i].RRID;
+                opts.dataset.catalog = datasets.current[i].catalog;
+                opts.dataset.entity = datasets.current[i].entity;
+                opts.dataset.citation = datasets.current[i].citation;
+                opts.dataset.version = datasets.current[i].version;
                 opts.dataset.name = datasets.current[i].name;
                 opts.dataset.comments = datasets.current[i].comments;
               }
@@ -2474,6 +2514,7 @@ Self.getReportData = function (opts = {}, cb) {
               sortedDatasetsInfos.protocols,
               sortedDatasetsInfos.datasets,
               sortedDatasetsInfos.codes,
+              sortedDatasetsInfos.softwares,
               sortedDatasetsInfos.reagents
             ),
             opts.data.dataTypes
@@ -2522,23 +2563,11 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
       // sort sentences
       let sentences = item.sentences.sort(sortSentences);
       let type = DataTypes.getDataTypeInfos(item, dataTypes);
-      return {
+      return Object.assign({}, item.toJSON(), {
         type,
         sentences,
-        id: item.id,
-        reuse: item.reuse,
-        isValid: item.status === DocumentsDatasetsController.status.valid ? true : false,
-        notes: item.notification,
-        description: item.description,
-        bestDataFormatForSharing: item.bestDataFormatForSharing,
-        bestPracticeForIndicatingReUseOfExistingData: item.bestPracticeForIndicatingReUseOfExistingData,
-        mostSuitableRepositories: item.mostSuitableRepositories,
-        dataType: item.dataType,
-        subType: item.subType,
-        name: item.name,
-        DOI: item.DOI,
-        comments: item.comments
-      };
+        isValid: item.status === DocumentsDatasetsController.status.valid ? true : false
+      });
     })
     .sort(function (a, b) {
       let c = a.sentences && a.sentences[0] && a.sentences[0].id ? mapping[a.sentences[0].id] : Infinity;
@@ -2549,7 +2578,16 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
     return item.dataType === `other` && item.subType === `protocol`;
   });
   let codes = orderedDatasets.filter(function (item) {
-    return (item.dataType === `other` && item.subType === `code`) || item.dataType === `code software`;
+    return (
+      (item.dataType === `other` && item.subType === `code`) ||
+      (item.dataType === `code software` && item.subType === `custom scripts` && !item.reuse)
+    );
+  });
+  let softwares = orderedDatasets.filter(function (item) {
+    return (
+      (item.dataType === `code software` && item.subType === `custom scripts` && item.reuse) ||
+      (item.dataType === `code software` && item.subType !== `custom scripts`)
+    );
   });
   let reagents = orderedDatasets.filter(function (item) {
     return (item.dataType === `other` && item.subType === `reagent`) || item.dataType === `lab materials`;
@@ -2557,7 +2595,7 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
   let datasets = orderedDatasets.filter(function (item) {
     return item.dataType !== `other` && item.dataType !== `code software` && item.dataType !== `lab materials`;
   });
-  return { all: orderedDatasets, protocols, codes, reagents, datasets };
+  return { all: orderedDatasets, protocols, codes, softwares, reagents, datasets };
 };
 
 /**

@@ -13,45 +13,53 @@
       reUse: {
         datasets: {
           name: PARAMS.convertToString(urlParams.reUseDatasetsName),
-          done: PARAMS.convertToInteger(urlParams.reUseDatasetsDone),
-          total: PARAMS.convertToInteger(urlParams.reUseDatasetsTotal)
+          color: PARAMS.convertToString(urlParams.reUseDatasetsColor) || `#8c4e9f`,
+          done: PARAMS.convertToInteger(urlParams.reUseDatasetsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.reUseDatasetsTotal) || 0
         },
         codes: {
           name: PARAMS.convertToString(urlParams.reUseCodesName),
-          done: PARAMS.convertToInteger(urlParams.reUseCodesDone),
-          total: PARAMS.convertToInteger(urlParams.reUseCodesTotal)
+          color: PARAMS.convertToString(urlParams.reUseCodesColor) || `#0c8dc3`,
+          done: PARAMS.convertToInteger(urlParams.reUseCodesDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.reUseCodesTotal) || 0
         },
         materials: {
           name: PARAMS.convertToString(urlParams.reUseMaterialsName),
-          done: PARAMS.convertToInteger(urlParams.reUseMaterialsDone),
-          total: PARAMS.convertToInteger(urlParams.reUseMaterialsTotal)
+          color: PARAMS.convertToString(urlParams.reUseMaterialsColor) || `#307a77`,
+          done: PARAMS.convertToInteger(urlParams.reUseMaterialsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.reUseMaterialsTotal) || 0
         },
         protocols: {
           name: PARAMS.convertToString(urlParams.reUseProtocolsName),
-          done: PARAMS.convertToInteger(urlParams.reUseProtocolsDone),
-          total: PARAMS.convertToInteger(urlParams.reUseProtocolsTotal)
+          color: PARAMS.convertToString(urlParams.reUseProtocolsColor) || `#cf2fb3`,
+          done: PARAMS.convertToInteger(urlParams.reUseProtocolsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.reUseProtocolsTotal) || 0
         }
       },
       new: {
         datasets: {
           name: PARAMS.convertToString(urlParams.newDatasetsName),
-          done: PARAMS.convertToInteger(urlParams.newDatasetsDone),
-          total: PARAMS.convertToInteger(urlParams.newDatasetsTotal)
+          color: PARAMS.convertToString(urlParams.newDatasetsColor) || `#8c4e9f`,
+          done: PARAMS.convertToInteger(urlParams.newDatasetsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.newDatasetsTotal) || 0
         },
         codes: {
           name: PARAMS.convertToString(urlParams.newCodesName),
-          done: PARAMS.convertToInteger(urlParams.newCodesDone),
-          total: PARAMS.convertToInteger(urlParams.newCodesTotal)
+          color: PARAMS.convertToString(urlParams.newCodesColor) || `#0c8dc3`,
+          done: PARAMS.convertToInteger(urlParams.newCodesDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.newCodesTotal) || 0
         },
         materials: {
           name: PARAMS.convertToString(urlParams.newMaterialsName),
-          done: PARAMS.convertToInteger(urlParams.newMaterialsDone),
-          total: PARAMS.convertToInteger(urlParams.newMaterialsTotal)
+          color: PARAMS.convertToString(urlParams.newMaterialsColor) || `#307a77`,
+          done: PARAMS.convertToInteger(urlParams.newMaterialsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.newMaterialsTotal) || 0
         },
         protocols: {
           name: PARAMS.convertToString(urlParams.newProtocolsName),
-          done: PARAMS.convertToInteger(urlParams.newProtocolsDone),
-          total: PARAMS.convertToInteger(urlParams.newProtocolsTotal)
+          color: PARAMS.convertToString(urlParams.newProtocolsColor) || `#34a270`,
+          done: PARAMS.convertToInteger(urlParams.newProtocolsDone) || 0,
+          total: PARAMS.convertToInteger(urlParams.newProtocolsTotal) || 0
         }
       }
     }
@@ -62,40 +70,56 @@
   const width = window.innerWidth > minWidth ? window.innerWidth : minWidth;
   const height = window.innerHeight > minHeight ? window.innerHeight : minHeight;
 
+  const slicesColor = [
+    params.data.new.datasets.color,
+    params.data.new.codes.color,
+    params.data.new.materials.color,
+    params.data.new.protocols.color,
+    params.data.reUse.protocols.color,
+    params.data.reUse.materials.color,
+    params.data.reUse.codes.color,
+    params.data.reUse.datasets.color
+  ];
+
   const data = [
     {
       name: params.data.new.datasets.name ? params.data.new.datasets.name : `New Data shared`,
       done: params.data.new.datasets.done,
       total: params.data.new.datasets.total,
       opacity: 0.9,
-      background: `#EBEBEB`
+      color: params.data.new.datasets.color,
+      background: `#FFFFFF`
     }, // Top right slice
     {
-      name: params.data.new.codes.name ? params.data.new.codes.name : `New Code shared`,
+      name: params.data.new.codes.name ? params.data.new.codes.name : `Codes`,
       done: params.data.new.codes.done,
       total: params.data.new.codes.total,
       opacity: 0.9,
-      background: `#EBEBEB`
+      color: params.data.new.codes.color,
+      background: `#FFFFFF`
     },
     {
       name: params.data.new.materials.name ? params.data.new.materials.name : `New Materials available`,
       done: params.data.new.materials.done,
       total: params.data.new.materials.total,
       opacity: 0.9,
-      background: `#EBEBEB`
+      color: params.data.new.materials.color,
+      background: `#FFFFFF`
     },
     {
       name: params.data.new.protocols.name ? params.data.new.protocols.name : `Protocols shared`,
       done: params.data.new.protocols.done,
       total: params.data.new.protocols.total,
       opacity: 0.9,
-      background: `#EBEBEB`
+      color: params.data.new.protocols.color,
+      background: `#FFFFFF`
     },
     {
       name: params.data.reUse.protocols.name ? params.data.reUse.protocols.name : `Protocols re-used`,
       done: params.data.reUse.protocols.done,
       total: params.data.reUse.protocols.total,
       opacity: 0.6,
+      color: params.data.reUse.protocols.color,
       background: `#FFFFFF`
     },
     {
@@ -103,13 +127,15 @@
       done: params.data.reUse.materials.done,
       total: params.data.reUse.materials.total,
       opacity: 0.6,
+      color: params.data.reUse.materials.color,
       background: `#FFFFFF`
     },
     {
-      name: params.data.reUse.codes.name ? params.data.reUse.codes.name : `Code re-use cited`,
+      name: params.data.reUse.codes.name ? params.data.reUse.codes.name : `Softwares`,
       done: params.data.reUse.codes.done,
       total: params.data.reUse.codes.total,
       opacity: 0.6,
+      color: params.data.reUse.codes.color,
       background: `#FFFFFF`
     },
     {
@@ -117,8 +143,9 @@
       done: params.data.reUse.datasets.done,
       total: params.data.reUse.datasets.total,
       opacity: 0.6,
+      color: params.data.reUse.datasets.color,
       background: `#FFFFFF`
-    } // Top left slice
+    }
   ];
 
   const radius = Math.min(width, height) * 0.75;
@@ -135,7 +162,7 @@
 
   const colorRange = (n) => (n <= 3 ? n : 7 - n);
 
-  const getColor = (n) => colorScale((Math.PI / 4) * colorRange(n));
+  const getColor = (n) => (slicesColor[n] ? slicesColor[n] : colorScale((Math.PI / 4) * colorRange(n)));
   // colorScale((Math.PI / 4) * colorRange(n))
   // colorScale(((2 * colorRange(n) * Math.PI) + Math.PI) / 8)
 
@@ -241,14 +268,14 @@
       .join(`path`)
       .attr(`fill`, (d) => d.data.background)
       .attr(`stroke`, (d) => d3.rgb(getColor(d.index)).darker(1))
-      .attr(`stroke-width`, 2)
+      .attr(`stroke-width`, (d) => (d.data.total > 0 ? 2 : 0))
       .attr(`d`, arc)
       .clone(true)
       .attr(`fill`, (d) => getColor(d.index))
       .attr(`fill-opacity`, (d) => d.data.opacity)
       .attr(`stroke`, (d) => d3.rgb(getColor(d.index)).darker(1))
-      .attr(`stroke-width`, 2)
-      .attr(`d`, (d, i) => (d.data.done > 0 && d.data.total > 0 ? slice(d.data.done / d.data.total, i) : ``))
+      .attr(`stroke-width`, (d) => (d.data.total > 0 ? 2 : 0))
+      .attr(`d`, (d, i) => (d.data.total > 0 ? slice(d.data.done / d.data.total, i) : ``))
       .clone(true)
       .attr(`fill`, `url(#radialGradient)`);
 
@@ -260,9 +287,11 @@
         data.reduce(
           (acc, item, i) =>
             acc.concat(
-              Array.from(Array(item.total <= maxNumberOfSubSlices ? item.total : 0).keys()).map(function (index) {
-                return { index: i, value: index / item.total, opacity: item.opacity };
-              })
+              Array.from(Array(item.total > 0 && item.total <= maxNumberOfSubSlices ? item.total : 0).keys()).map(
+                function (index) {
+                  return { index: i, value: item.total > 0 ? index / item.total : 0, opacity: item.opacity };
+                }
+              )
             ),
           []
         )
@@ -328,7 +357,16 @@
       return item.dataType === `other` && item.subType === `protocol`;
     });
     let codes = query.res.datasets.current.filter(function (item) {
-      return (item.dataType === `other` && item.subType === `code`) || item.dataType === `code software`;
+      return (
+        (item.dataType === `other` && item.subType === `code`) ||
+        (item.dataType === `code software` && item.subType === `custom script` && !item.reuse)
+      );
+    });
+    let softwares = query.res.datasets.current.filter(function (item) {
+      return (
+        (item.dataType === `code software` && item.subType === `custom script` && item.reuse) ||
+        (item.dataType === `code software` && item.subType !== `custom script`)
+      );
     });
     let reagents = query.res.datasets.current.filter(function (item) {
       return (item.dataType === `other` && item.subType === `reagent`) || item.dataType === `lab materials`;
@@ -336,67 +374,61 @@
     let datasets = query.res.datasets.current.filter(function (item) {
       return item.dataType !== `other` && item.dataType !== `code software` && item.dataType !== `lab materials`;
     });
-    if (typeof data[0].done === `undefined`)
+    if (data[0].done < 0)
       data[0].done = datasets.filter(function (item) {
         return !item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[0].total === `undefined`)
+    if (data[0].total < 0)
       data[0].total = datasets.filter(function (item) {
         return !item.reuse;
       }).length;
-    if (typeof data[1].done === `undefined`)
+    if (data[1].done < 0)
       data[1].done = codes.filter(function (item) {
-        return !item.reuse && item.status === `valid`;
+        return item.status === `valid`;
       }).length;
-    if (typeof data[1].total === `undefined`)
-      data[1].total = codes.filter(function (item) {
-        return !item.reuse;
-      }).length;
-    if (typeof data[2].done === `undefined`)
+    if (data[1].total < 0) data[1].total = codes.length;
+    if (data[2].done < 0)
       data[2].done = reagents.filter(function (item) {
         return !item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[2].total === `undefined`)
+    if (data[2].total < 0)
       data[2].total = reagents.filter(function (item) {
         return !item.reuse;
       }).length;
-    if (typeof data[3].done === `undefined`)
+    if (data[3].done < 0)
       data[3].done = protocols.filter(function (item) {
         return !item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[3].total === `undefined`)
+    if (data[3].total < 0)
       data[3].total = protocols.filter(function (item) {
         return !item.reuse;
       }).length;
-    if (typeof data[4].done === `undefined`)
+    if (data[4].done < 0)
       data[4].done = protocols.filter(function (item) {
         return item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[4].total === `undefined`)
+    if (data[4].total < 0)
       data[4].total = protocols.filter(function (item) {
         return item.reuse;
       }).length;
-    if (typeof data[5].done === `undefined`)
+    if (data[5].done < 0)
       data[5].done = reagents.filter(function (item) {
         return item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[5].total === `undefined`)
+    if (data[5].total < 0)
       data[5].total = reagents.filter(function (item) {
         return item.reuse;
       }).length;
-    if (typeof data[6].done === `undefined`)
-      data[6].done = codes.filter(function (item) {
-        return item.reuse && item.status === `valid`;
+    if (data[6].done < 0)
+      data[6].done = softwares.filter(function (item) {
+        return item.status === `valid`;
       }).length;
-    if (typeof data[6].total === `undefined`)
-      data[6].total = codes.filter(function (item) {
-        return item.reuse;
-      }).length;
-    if (typeof data[7].done === `undefined`)
+    if (data[6].total < 0) data[6].total = softwares.length;
+    if (data[7].done < 0)
       data[7].done = datasets.filter(function (item) {
         return item.reuse && item.status === `valid`;
       }).length;
-    if (typeof data[7].total === `undefined`)
+    if (data[7].total < 0)
       data[7].total = datasets.filter(function (item) {
         return item.reuse;
       }).length;
