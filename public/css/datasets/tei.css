@@ -68,10 +68,10 @@ soCalled:before {content:'‘'} soCalled {display:inline;} soCalled:after {conte
 p {text-align: justify;}
 ref {font-style: italic;}
 figure {font-weight: bold; margin-left: 20px; margin-right: 20px; text-align: justify;}
-figure label {visibility: hidden;}
+/*figure label {visibility: hidden;}*/
 figure label:after {content: " ";}
 figure figdesc {text-align: justify; font-weight: normal;}
-figure table {visibility: hidden;}
+/*figure table {visibility: hidden;}*/
 note[place="foot"]:before { content: " \A Note: "; font-weight: bold; display: block;}
 note[place="foot"] { margin-left: 20px; margin-right: 20px; text-align: justify;}
 note[place="foot"]:after { content: " \A "; display: block;}
