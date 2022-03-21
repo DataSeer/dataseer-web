@@ -95,9 +95,9 @@ Accessible to users with the following role: **standardUser**, **moderator**, **
   <tbody>
     <tr>
       <td>Object</td>
-      <td>sentence</td>
-      <td>required</td>
-      <td>Sentence Data</td>
+      <td>datasets</td>
+      <td>optional</td>
+      <td>A datasets JSON representation containing all data (see model for more infos).<br/>Note: it will only update defined keys</td>
     </tr>
   </tbody>
 </table>

@@ -24,9 +24,10 @@ const Sentence = new mongoose.Schema(
       reuse: { type: Boolean, default: false }, // reuse property
       qc: { type: Boolean, default: false }, // qc property
       representativeImage: { type: Boolean, default: false }, // representativeImage property
-      issue: { type: Boolean, default: false }, // issue property
+      issue: { type: String, default: `` }, // issue property
       notification: { type: String, default: `` }, // notification property
-      highlight: { type: Boolean, default: false }, // notification property
+      highlight: { type: Boolean, default: false }, // highlight property
+      flagged: { type: Boolean, default: false }, // flagged property
       cert: { type: String, default: `` }, // cert value (between 0 and 1)
       dataType: { type: String, default: `` }, // dataType
       subType: { type: String, default: `` }, //  subType

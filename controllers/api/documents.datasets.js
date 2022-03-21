@@ -8,6 +8,8 @@ const _ = require(`lodash`);
 
 const DocumentsDatasets = require(`../../models/documents.datasets.js`);
 
+const Params = require(`../../lib/params.js`);
+
 let Self = {};
 
 // Dataset Status
@@ -120,8 +122,9 @@ Self.createDataset = function (opts = {}) {
     reuse: opts.reuse ? opts.reuse : false, // dataset reuse
     qc: opts.qc ? opts.qc : false, // dataset qc
     representativeImage: opts.representativeImage ? opts.representativeImage : false, // dataset representativeImage
-    issue: opts.issue ? opts.issue : false, // dataset issue
+    issue: Params.convertToBoolean(opts.issue) ? opts.issue : ``, // dataset issue
     highlight: opts.highlight ? opts.highlight : false, // dataset highlight
+    flagged: opts.flagged ? opts.flagged : false, // dataset flagged
     notification: opts.notification ? opts.notification : ``, // dataset notification
     cert: opts.cert ? opts.cert : 0, // cert value (between 0 and 1)
     dataType: opts.dataType ? opts.dataType : ``, // dataType
