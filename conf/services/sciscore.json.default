@@ -1,3 +1,4 @@
 {
-  "processFile": "http://localhost:3200/processFile"
+  "processFile": "http://localhost:3200/processFile",
+  "processFile": "http://localhost:3200/processSentences"
 }
