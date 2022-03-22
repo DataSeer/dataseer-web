@@ -174,7 +174,7 @@
         let opts = {
           documentId: documentId
         };
-        return API.sciscore.processFile(opts, function (err, query) {
+        return API.sciscore.processSentences(opts, function (err, query) {
           // Hide the loader
           loader.hide();
           // Enable the button
