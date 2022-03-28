@@ -8,7 +8,7 @@ const _ = require(`lodash`);
 const async = require(`async`);
 const path = require(`path`);
 
-const gDrive = require(`../lib/googleDrive.js`);
+const dbSave = require(`../lib/googleDriveSave.js`);
 
 const conf = require(`../conf/save.json`);
 
@@ -19,7 +19,7 @@ const folder = conf.folder;
 
 console.log(`Sending .tar file ${filePath} to Google Drive folder: ${folder}`);
 
-gDrive.createSaveFile({ folder: folder, erase: true, data: { name: fileName, path: filePath } }, function (err, res) {
+dbSave.createFile({ folder: folder, erase: true, data: { name: fileName, path: filePath } }, function (err, res) {
   if (err) {
     console.log(`An error has occurred:`);
     console.log(err);
