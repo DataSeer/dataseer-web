@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # current directory
 DIRNAME=$(dirname "$0")
