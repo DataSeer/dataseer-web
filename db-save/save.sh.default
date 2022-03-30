@@ -16,14 +16,14 @@ rm -rf dump/
 mongodump -u root -p password --forceTableScan;
 
 # save File System on the server
-tar -cvf data.tar ../../data/
+tar -cf data.tar ../../data/
 
 # save online (e.g. only on Monday and Friday)
 if [[ $DAY == "1" ]] || [[ $DAY == "5" ]]
 then
   # build temporary .tar file of the current save
   cd ../
-  tar -cvf $DAY.tar $DAY/
+  tar -cf $DAY.tar $DAY/
 
   # send temporary .tar file to google drive save folder
   node upload.js $DAY.tar

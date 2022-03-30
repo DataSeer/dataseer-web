@@ -1629,7 +1629,7 @@ PdfViewer.prototype.getCanvas = function (area) {
     }
   }
   // update canvas coordinates values relative to the container
-  canvas = canvas.map(function (item) {
+  let _canvas = canvas.map(function (item) {
     let w = item.max.x - item.min.x,
       h = item.max.y - item.min.y,
       borders = item.borders.map(function (border) {
@@ -1643,6 +1643,6 @@ PdfViewer.prototype.getCanvas = function (area) {
     return self.buildCanvas(item.min.x, item.min.y, w, h, area.p, area.sentence, borders);
   });
   // set events on canvas
-  this.setEvents(canvas);
-  return canvas;
+  this.setEvents(_canvas);
+  return _canvas;
 };

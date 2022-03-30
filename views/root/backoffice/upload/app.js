@@ -17,9 +17,15 @@
         organization: ``,
         visible: true,
         locked: false,
-        dataseerML: true
+        dataseerML: true,
+        removeResponseToViewerSection: true
       },
       methods: {
+        organizationChanged: function (organization) {
+          if (organization._id === UPLOAD_CONF.AmNat.organization.id) {
+            this.removeResponseToViewerSection = organization.selected;
+          }
+        },
         // Change selected state of all item
         changeSelectedStateOf: function (collections, value) {
           collections.map(function (item) {
@@ -52,6 +58,7 @@
           fd.append(`visible`, this.visible);
           fd.append(`locked`, this.locked);
           fd.append(`dataseerML`, this.dataseerML);
+          fd.append(`removeResponseToViewerSection`, this.removeResponseToViewerSection);
           let opts = {
             data: fd
           };
@@ -105,6 +112,7 @@
             });
             this.organizations.map(function (item) {
               item.selected = organizations.indexOf(item._id.toString()) > -1;
+              self.organizationChanged(item);
             });
           }
         }
@@ -163,19 +171,19 @@
           );
         }
         query.res.sort(DATAHANDLER.array.sortOrganizations).map(function (organization) {
-          app.organizations.push(
-            Object.assign(
-              {
-                selected:
-                  currentUser.organizations
-                    .map(function (item) {
-                      return item._id.toString();
-                    })
-                    .indexOf(organization._id) > -1
-              },
-              organization
-            )
+          let org = Object.assign(
+            {
+              selected:
+                currentUser.organizations
+                  .map(function (item) {
+                    return item._id.toString();
+                  })
+                  .indexOf(organization._id) > -1
+            },
+            organization
           );
+          app.organizations.push(org);
+          app.organizationChanged(org);
         });
       });
     });
