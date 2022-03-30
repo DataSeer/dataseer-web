@@ -104,7 +104,8 @@ router.post(`/`, function (req, res, next) {
       privateKey: req.app.get(`private.key`),
       dataTypes: req.app.get(`dataTypes`),
       mute: Params.convertToBoolean(req.body.mute),
-      dataseerML: Params.convertToBoolean(req.body.dataseerML)
+      dataseerML: Params.convertToBoolean(req.body.dataseerML),
+      removeResponseToViewerSection: Params.convertToBoolean(req.body.removeResponseToViewerSection)
     },
     function (err, data) {
       if (err) {

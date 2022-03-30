@@ -1,0 +1,13 @@
+/*
+ * @prettier
+ */
+
+'use strict';
+
+const UPLOAD_CONF = {
+  "AmNat": {
+    "organization": {
+      "id": "6076f672fe13c63fea4127d3"
+    }
+  }
+};

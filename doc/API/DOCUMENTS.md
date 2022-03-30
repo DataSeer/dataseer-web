@@ -289,6 +289,12 @@ The is a public URL, but some parameters coulb be restricted (depending on your 
       <td>optional</td>
       <td>Process dataseer-ml (default: true). Only administrators/moderators can use it).</td>
     </tr>
+    <tr>
+      <td>Boolean</td>
+      <td>removeResponseToViewerSection</td>
+      <td>optional</td>
+      <td>Remove "Response to viewer" section (default: false, use true for AmNat PDFs). Only administrators/moderators can use it).</td>
+    </tr>
   </tbody>
 </table>
 

@@ -39,8 +39,10 @@ const CSV = require(`../../lib/csv.js`);
 const GoogleSheets = require(`../../lib/googleSheets.js`);
 const OCR = require(`../../lib/ocr.js`);
 const ORCID = require(`../../lib/orcid.js`);
+const PdfManager = require(`../../lib/pdfManager.js`);
 
 const conf = require(`../../conf/conf.json`);
+const uploadConf = require(`../../conf/upload.json`);
 
 let Self = {};
 
@@ -601,9 +603,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
   }
   if (accessRights.isStandardUser) {
     return cb(null, {
-      organizations: user.organizations.map(function (item) {
-        return item._id.toString();
-      }),
+      organizations: AccountsManager.getOwnOrganizations(params.organizations, user),
       name: Params.convertToString(params.name),
       uploaded_by: user._id.toString(),
       owner: user._id.toString(),
@@ -658,6 +658,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
  * @param {string} opts.dataTypes - dataTypes to create datasets (stored in app.get('dataTypes'))
  * @param {object} opts.user - Current user (must come from req.user)
  * @param {boolean} opts.[dataseerML] - Process dataseer-ml (default: true)
+ * @param {boolean} opts.[removeResponseToViewerSection] - Remove "Response to viewer" section (default: false)
  * @param {boolean} opts.[mute] - Mute email notification (default: false)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: Document instance OR undefined)
  * @returns {undefined} undefined
@@ -759,6 +760,57 @@ Self.upload = function (opts = {}, cb) {
                   acc.tei = res._id;
                 }
                 return next(null, acc);
+              }
+            );
+          },
+          // Process removeResponseToViewerSection & replace pdf bny the new PDF
+          function (acc, next) {
+            // Only available for PDFs
+            if (!DocumentsFilesController.isPDF(params.file.mimetype)) return next(null, acc);
+            // Default value if user is not (Moderator or Administrator) and one of organizations is AmNat : true
+            if (
+              (accessRights.isVisitor || accessRights.isStandardUser) &&
+              acc.organizations.indexOf(uploadConf.AmNat.organization.id) > -1
+            )
+              opts.removeResponseToViewerSection = true;
+            // If removeResponseToViewerSection option is not defined (for Moderator or Administrator), then it's true by default
+            if (
+              (accessRights.isModerator || accessRights.isAdministrator) &&
+              typeof opts.removeResponseToViewerSection === `undefined` &&
+              acc.organizations.indexOf(uploadConf.AmNat.organization.id) > -1
+            )
+              opts.removeResponseToViewerSection = true;
+            if (!opts.removeResponseToViewerSection) return next(null, acc);
+            return PdfManager.removeResponseToViewerSection(
+              {
+                source: params.file.data
+              },
+              function (err, buffer) {
+                if (err) return next(err, acc);
+                return DocumentsFilesController.upload(
+                  {
+                    data: {
+                      accountId: params.uploaded_by.toString(),
+                      documentId: acc._id.toString(),
+                      file: Object.assign(params.file, {
+                        name: `${params.file.name}.sanitized.pdf`,
+                        data: buffer.toString(DocumentsFilesController.encoding),
+                        encoding: DocumentsFilesController.encoding
+                      }),
+                      organizations: acc.upload.organizations
+                    },
+                    user: opts.user
+                  },
+                  function (err, res) {
+                    if (err) return next(err, acc);
+                    if (!Array.isArray(acc.files)) acc.files = [];
+                    // Add file to files
+                    acc.files.unshift(res._id);
+                    // Set PDF
+                    acc.pdf = res._id;
+                    return next(null, acc);
+                  }
+                );
               }
             );
           },
