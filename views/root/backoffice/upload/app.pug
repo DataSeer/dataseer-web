@@ -54,7 +54,7 @@
             <div class="center">
               <ul class="list">
                 <li v-for="organization in organizations">
-                  <label><input type="checkbox" v-model="organization.selected" />
+                  <label><input type="checkbox" v-model="organization.selected" @change="organizationChanged(organization)" />
                   | {{ organization.name }}
                   </label>
                 </li>
@@ -75,13 +75,25 @@
       </div>
       <div v-if="user.role && user.role.key !== 'standardUser'" class="row">
         <div class="col">
-          <div title="Select the document visibility">
+          <div title="">
             <label for="dataseerML">
               <input id="dataseerML" type="checkbox" v-model="dataseerML" />
               | Identify datasets automatically
             </label>
             <span v-if="dataseerML" class="sub">DataSeer ML will processed this document</span>
             <span v-if="!dataseerML" class="sub">DataSeer ML will not processed this document</span>
+          </div>
+        </div>
+      </div>
+      <div v-if="user.role && user.role.key !== 'standardUser'" class="row">
+        <div class="col">
+          <div title="">
+            <label for="removeResponseToViewerSection">
+              <input id="removeResponseToViewerSection" type="checkbox" v-model="removeResponseToViewerSection" />
+              | Remove "Response To Viewer" section (for AmNat PDFs)
+            </label>
+            <span v-if="removeResponseToViewerSection" class="sub">"Response To Viewer" pages at the begining of the PDF will be removed</span>
+            <span v-if="!removeResponseToViewerSection" class="sub">The PDF won't be modified</span>
           </div>
         </div>
       </div>
