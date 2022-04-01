@@ -32,3 +32,12 @@ input[type="text"][name="annotationUrl"] {
   display: inline-block;
   margin-right: 10px;
 }
+
+.google-reports select {
+  display: inline-block !important;
+  width: 100px !important;
+  margin-right: 15px;
+}
+.google-reports button {
+  display: inline-block !important;
+}
