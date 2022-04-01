@@ -18,6 +18,7 @@
       htmlBioRxivReportLink: ``,
       asapGraphicLink: ``,
       sciscoreReportLink: ``,
+      gSpreadSheetReportName: `ASAP`,
       gSpreadSheetReportLinks: {
         ASAP: ``,
         AmNat: ``
