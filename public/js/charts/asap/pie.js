@@ -14,52 +14,52 @@
         datasets: {
           name: PARAMS.convertToString(urlParams.reUseDatasetsName),
           color: PARAMS.convertToString(urlParams.reUseDatasetsColor) || `#8c4e9f`,
-          done: PARAMS.convertToInteger(urlParams.reUseDatasetsDone) || 0,
-          total: PARAMS.convertToInteger(urlParams.reUseDatasetsTotal) || 0
+          done: PARAMS.convertToInteger(urlParams.reUseDatasetsDone) || -Infinity,
+          total: PARAMS.convertToInteger(urlParams.reUseDatasetsTotal) || -Infinity
         },
         codes: {
           name: PARAMS.convertToString(urlParams.reUseCodesName),
           color: PARAMS.convertToString(urlParams.reUseCodesColor) || `#0c8dc3`,
-          done: PARAMS.convertToInteger(urlParams.reUseCodesDone) || 0,
-          total: PARAMS.convertToInteger(urlParams.reUseCodesTotal) || 0
+          done: PARAMS.convertToInteger(urlParams.reUseCodesDone) || -Infinity,
+          total: PARAMS.convertToInteger(urlParams.reUseCodesTotal) || -Infinity
         },
         materials: {
           name: PARAMS.convertToString(urlParams.reUseMaterialsName),
           color: PARAMS.convertToString(urlParams.reUseMaterialsColor) || `#307a77`,
-          done: PARAMS.convertToInteger(urlParams.reUseMaterialsDone) || 0,
-          total: PARAMS.convertToInteger(urlParams.reUseMaterialsTotal) || 0
+          done: PARAMS.convertToInteger(urlParams.reUseMaterialsDone) || -Infinity,
+          total: PARAMS.convertToInteger(urlParams.reUseMaterialsTotal) || -Infinity
         },
         protocols: {
           name: PARAMS.convertToString(urlParams.reUseProtocolsName),
           color: PARAMS.convertToString(urlParams.reUseProtocolsColor) || `#cf2fb3`,
-          done: PARAMS.convertToInteger(urlParams.reUseProtocolsDone) || 0,
-          total: PARAMS.convertToInteger(urlParams.reUseProtocolsTotal) || 0
+          done: PARAMS.convertToInteger(urlParams.reUseProtocolsDone) || -Infinity,
+          total: PARAMS.convertToInteger(urlParams.reUseProtocolsTotal) || -Infinity
         }
       },
       new: {
         datasets: {
           name: PARAMS.convertToString(urlParams.newDatasetsName),
           color: PARAMS.convertToString(urlParams.newDatasetsColor) || `#8c4e9f`,
-          done: PARAMS.convertToInteger(urlParams.newDatasetsDone) || 0,
-          total: PARAMS.convertToInteger(urlParams.newDatasetsTotal) || 0
+          done: PARAMS.convertToInteger(urlParams.newDatasetsDone) || -Infinity,
+          total: PARAMS.convertToInteger(urlParams.newDatasetsTotal) || -Infinity
         },
         codes: {
           name: PARAMS.convertToString(urlParams.newCodesName),
           color: PARAMS.convertToString(urlParams.newCodesColor) || `#0c8dc3`,
-          done: PARAMS.convertToInteger(urlParams.newCodesDone) || 0,
-          total: PARAMS.convertToInteger(urlParams.newCodesTotal) || 0
+          done: PARAMS.convertToInteger(urlParams.newCodesDone) || -Infinity,
+          total: PARAMS.convertToInteger(urlParams.newCodesTotal) || -Infinity
         },
         materials: {
           name: PARAMS.convertToString(urlParams.newMaterialsName),
           color: PARAMS.convertToString(urlParams.newMaterialsColor) || `#307a77`,
-          done: PARAMS.convertToInteger(urlParams.newMaterialsDone) || 0,
-          total: PARAMS.convertToInteger(urlParams.newMaterialsTotal) || 0
+          done: PARAMS.convertToInteger(urlParams.newMaterialsDone) || -Infinity,
+          total: PARAMS.convertToInteger(urlParams.newMaterialsTotal) || -Infinity
         },
         protocols: {
           name: PARAMS.convertToString(urlParams.newProtocolsName),
           color: PARAMS.convertToString(urlParams.newProtocolsColor) || `#34a270`,
-          done: PARAMS.convertToInteger(urlParams.newProtocolsDone) || 0,
-          total: PARAMS.convertToInteger(urlParams.newProtocolsTotal) || 0
+          done: PARAMS.convertToInteger(urlParams.newProtocolsDone) || -Infinity,
+          total: PARAMS.convertToInteger(urlParams.newProtocolsTotal) || -Infinity
         }
       }
     }
@@ -91,7 +91,7 @@
       background: `#FFFFFF`
     }, // Top right slice
     {
-      name: params.data.new.codes.name ? params.data.new.codes.name : `Codes`,
+      name: params.data.new.codes.name ? params.data.new.codes.name : `New Code/Software\\Shared`,
       done: params.data.new.codes.done,
       total: params.data.new.codes.total,
       opacity: 0.9,
@@ -99,7 +99,7 @@
       background: `#FFFFFF`
     },
     {
-      name: params.data.new.materials.name ? params.data.new.materials.name : `New Materials available`,
+      name: params.data.new.materials.name ? params.data.new.materials.name : `New Lab Materials\\given IDs`,
       done: params.data.new.materials.done,
       total: params.data.new.materials.total,
       opacity: 0.9,
@@ -115,7 +115,7 @@
       background: `#FFFFFF`
     },
     {
-      name: params.data.reUse.protocols.name ? params.data.reUse.protocols.name : `Protocols re-used`,
+      name: params.data.reUse.protocols.name ? params.data.reUse.protocols.name : `ORCIDs`,
       done: params.data.reUse.protocols.done,
       total: params.data.reUse.protocols.total,
       opacity: 0.6,
@@ -123,7 +123,7 @@
       background: `#FFFFFF`
     },
     {
-      name: params.data.reUse.materials.name ? params.data.reUse.materials.name : `Materials identified`,
+      name: params.data.reUse.materials.name ? params.data.reUse.materials.name : `IDs for existing\\Lab Materials`,
       done: params.data.reUse.materials.done,
       total: params.data.reUse.materials.total,
       opacity: 0.6,
@@ -131,7 +131,7 @@
       background: `#FFFFFF`
     },
     {
-      name: params.data.reUse.codes.name ? params.data.reUse.codes.name : `Softwares`,
+      name: params.data.reUse.codes.name ? params.data.reUse.codes.name : `Code/Software\\Cited`,
       done: params.data.reUse.codes.done,
       total: params.data.reUse.codes.total,
       opacity: 0.6,
@@ -318,21 +318,33 @@
       .attr(`font-size`, fontSize)
       .attr(`text-anchor`, `middle`)
       .selectAll(`text`)
-      .data(arcs)
+      .data(
+        arcs
+          .map(function (arc, index) {
+            arc.data.name = `${arc.data.name} (${arc.data.done < 0 ? `?` : arc.data.done}/${
+              arc.data.total < 0 ? `?` : arc.data.total
+            })`;
+            let chunks = arc.data.name.split(`\\`);
+            return chunks.map(function (txt, i) {
+              let copy = _.cloneDeep(arc);
+              copy.data.name = txt;
+              copy.data.coeff = index;
+              copy.data.line = { number: i, max: chunks.length };
+              return copy;
+            });
+          })
+          .flat()
+      )
       .join(`text`)
-      .attr(`dy`, (d) => `1em`)
-      .attr(`y`, `-0.5em`)
-      .attr(`font-weight`, `bold`)
-      .attr(`stroke`, `#fff`)
-      .attr(`stroke-width`, 5)
-      .text((d) => `${d.data.name} (${d.data.done}/${d.data.total})`)
-      .attr(`transform`, function (d, i) {
+      .text((d) => d.data.name)
+      .attr(`transform`, function (d) {
         let elem = d3.select(this);
+        let i = d.data.coeff;
         let c = arcLabel.centroid(d);
         let offset = elem.node().getBBox().width / 2;
         let coeff = i === 1 || i === 2 || i === 5 || i === 6 ? 3 : 1.5;
         let pos = c[0] + (i < 4 ? +offset + innerRadius / coeff : -offset - innerRadius / coeff);
-        return `translate(${pos},${c[1]})`;
+        return `translate(${pos},${d.data.line.max <= 1 ? c[1] : c[1] - (fontSize * (d.data.line.max - 1)) / 2 + fontSize * d.data.line.number})`;
       })
       .clone(true)
       .attr(`fill`, (d) => d3.rgb(getColor(d.index)).darker(1))
