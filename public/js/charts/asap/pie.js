@@ -6,6 +6,41 @@
 (function (d3) {
   let urlParams = URLMANAGER.getParamsOfCurrentURL();
 
+  let convertedParams = {
+    reUseDatasetsName: PARAMS.convertToString(urlParams.reUseDatasetsName),
+    reUseDatasetsColor: PARAMS.convertToString(urlParams.reUseDatasetsColor) || `#8c4e9f`,
+    reUseDatasetsDone: PARAMS.convertToInteger(urlParams.reUseDatasetsDone),
+    reUseDatasetsTotal: PARAMS.convertToInteger(urlParams.reUseDatasetsTotal),
+    reUseCodesName: PARAMS.convertToString(urlParams.reUseCodesName),
+    reUseCodesColor: PARAMS.convertToString(urlParams.reUseCodesColor) || `#0c8dc3`,
+    reUseCodesDone: PARAMS.convertToInteger(urlParams.reUseCodesDone),
+    reUseCodesTotal: PARAMS.convertToInteger(urlParams.reUseCodesTotal),
+    reUseMaterialsName: PARAMS.convertToString(urlParams.reUseMaterialsName),
+    reUseMaterialsColor: PARAMS.convertToString(urlParams.reUseMaterialsColor) || `#307a77`,
+    reUseMaterialsDone: PARAMS.convertToInteger(urlParams.reUseMaterialsDone),
+    reUseMaterialsTotal: PARAMS.convertToInteger(urlParams.reUseMaterialsTotal),
+    reUseProtocolsName: PARAMS.convertToString(urlParams.reUseProtocolsName),
+    reUseProtocolsColor: PARAMS.convertToString(urlParams.reUseProtocolsColor) || `#cf2fb3`,
+    reUseProtocolsDone: PARAMS.convertToInteger(urlParams.reUseProtocolsDone),
+    reUseProtocolsTotal: PARAMS.convertToInteger(urlParams.reUseProtocolsTotal),
+    newDatasetsName: PARAMS.convertToString(urlParams.newDatasetsName),
+    newDatasetsColor: PARAMS.convertToString(urlParams.newDatasetsColor) || `#8c4e9f`,
+    newDatasetsDone: PARAMS.convertToInteger(urlParams.newDatasetsDone),
+    newDatasetsTotal: PARAMS.convertToInteger(urlParams.newDatasetsTotal),
+    newCodesName: PARAMS.convertToString(urlParams.newCodesName),
+    newCodesColor: PARAMS.convertToString(urlParams.newCodesColor) || `#0c8dc3`,
+    newCodesDone: PARAMS.convertToInteger(urlParams.newCodesDone),
+    newCodesTotal: PARAMS.convertToInteger(urlParams.newCodesTotal),
+    newMaterialsName: PARAMS.convertToString(urlParams.newMaterialsName),
+    newMaterialsColor: PARAMS.convertToString(urlParams.newMaterialsColor) || `#307a77`,
+    newMaterialsDone: PARAMS.convertToInteger(urlParams.newMaterialsDone),
+    newMaterialsTotal: PARAMS.convertToInteger(urlParams.newMaterialsTotal),
+    newProtocolsName: PARAMS.convertToString(urlParams.newProtocolsName),
+    newProtocolsColor: PARAMS.convertToString(urlParams.newProtocolsColor) || `#34a270`,
+    newProtocolsDone: PARAMS.convertToInteger(urlParams.newProtocolsDone),
+    newProtocolsTotal: PARAMS.convertToInteger(urlParams.newProtocolsTotal)
+  };
+
   const params = {
     maxNumberOfSubSlices: PARAMS.convertToInteger(urlParams.maxNumberOfSubSlices),
     customData: PARAMS.convertToBoolean(urlParams.customData),
@@ -14,52 +49,52 @@
         datasets: {
           name: PARAMS.convertToString(urlParams.reUseDatasetsName),
           color: PARAMS.convertToString(urlParams.reUseDatasetsColor) || `#8c4e9f`,
-          done: PARAMS.convertToInteger(urlParams.reUseDatasetsDone) || -Infinity,
-          total: PARAMS.convertToInteger(urlParams.reUseDatasetsTotal) || -Infinity
+          done: isNaN(convertedParams.reUseDatasetsDone) ? -Infinity : convertedParams.reUseDatasetsDone,
+          total: isNaN(convertedParams.reUseDatasetsTotal) ? -Infinity : convertedParams.reUseDatasetsTotal
         },
         codes: {
           name: PARAMS.convertToString(urlParams.reUseCodesName),
           color: PARAMS.convertToString(urlParams.reUseCodesColor) || `#0c8dc3`,
-          done: PARAMS.convertToInteger(urlParams.reUseCodesDone) || -Infinity,
-          total: PARAMS.convertToInteger(urlParams.reUseCodesTotal) || -Infinity
+          done: isNaN(convertedParams.reUseCodesDone) ? -Infinity : convertedParams.reUseCodesDone,
+          total: isNaN(convertedParams.reUseCodesTotal) ? -Infinity : convertedParams.reUseCodesTotal
         },
         materials: {
           name: PARAMS.convertToString(urlParams.reUseMaterialsName),
           color: PARAMS.convertToString(urlParams.reUseMaterialsColor) || `#307a77`,
-          done: PARAMS.convertToInteger(urlParams.reUseMaterialsDone) || -Infinity,
-          total: PARAMS.convertToInteger(urlParams.reUseMaterialsTotal) || -Infinity
+          done: isNaN(convertedParams.reUseMaterialsDone) ? -Infinity : convertedParams.reUseMaterialsDone,
+          total: isNaN(convertedParams.reUseMaterialsTotal) ? -Infinity : convertedParams.reUseMaterialsTotal
         },
         protocols: {
           name: PARAMS.convertToString(urlParams.reUseProtocolsName),
           color: PARAMS.convertToString(urlParams.reUseProtocolsColor) || `#cf2fb3`,
-          done: PARAMS.convertToInteger(urlParams.reUseProtocolsDone) || -Infinity,
-          total: PARAMS.convertToInteger(urlParams.reUseProtocolsTotal) || -Infinity
+          done: isNaN(convertedParams.reUseProtocolsDone) ? -Infinity : convertedParams.reUseProtocolsDone,
+          total: isNaN(convertedParams.reUseProtocolsTotal) ? -Infinity : convertedParams.reUseProtocolsTotal
         }
       },
       new: {
         datasets: {
           name: PARAMS.convertToString(urlParams.newDatasetsName),
           color: PARAMS.convertToString(urlParams.newDatasetsColor) || `#8c4e9f`,
-          done: PARAMS.convertToInteger(urlParams.newDatasetsDone) || -Infinity,
-          total: PARAMS.convertToInteger(urlParams.newDatasetsTotal) || -Infinity
+          done: isNaN(convertedParams.newDatasetsDone) ? -Infinity : convertedParams.newDatasetsDone,
+          total: isNaN(convertedParams.newDatasetsTotal) ? -Infinity : convertedParams.newDatasetsTotal
         },
         codes: {
           name: PARAMS.convertToString(urlParams.newCodesName),
           color: PARAMS.convertToString(urlParams.newCodesColor) || `#0c8dc3`,
-          done: PARAMS.convertToInteger(urlParams.newCodesDone) || -Infinity,
-          total: PARAMS.convertToInteger(urlParams.newCodesTotal) || -Infinity
+          done: isNaN(convertedParams.newCodesDone) ? -Infinity : convertedParams.newCodesDone,
+          total: isNaN(convertedParams.newCodesTotal) ? -Infinity : convertedParams.newCodesTotal
         },
         materials: {
           name: PARAMS.convertToString(urlParams.newMaterialsName),
           color: PARAMS.convertToString(urlParams.newMaterialsColor) || `#307a77`,
-          done: PARAMS.convertToInteger(urlParams.newMaterialsDone) || -Infinity,
-          total: PARAMS.convertToInteger(urlParams.newMaterialsTotal) || -Infinity
+          done: isNaN(convertedParams.newMaterialsDone) ? -Infinity : convertedParams.newMaterialsDone,
+          total: isNaN(convertedParams.newMaterialsTotal) ? -Infinity : convertedParams.newMaterialsTotal
         },
         protocols: {
           name: PARAMS.convertToString(urlParams.newProtocolsName),
           color: PARAMS.convertToString(urlParams.newProtocolsColor) || `#34a270`,
-          done: PARAMS.convertToInteger(urlParams.newProtocolsDone) || -Infinity,
-          total: PARAMS.convertToInteger(urlParams.newProtocolsTotal) || -Infinity
+          done: isNaN(convertedParams.newProtocolsDone) ? -Infinity : convertedParams.newProtocolsDone,
+          total: isNaN(convertedParams.newProtocolsTotal) ? -Infinity : convertedParams.newProtocolsTotal
         }
       }
     }
