@@ -787,6 +787,8 @@ Self.upload = function (opts = {}, cb) {
               },
               function (err, buffer) {
                 if (err) return next(err, acc);
+                // Case "response to viewer" sectrion not found
+                if (buffer instanceof Error) return next(err, acc);
                 return DocumentsFilesController.upload(
                   {
                     data: {
