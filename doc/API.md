@@ -176,6 +176,7 @@ List of available API routes:
   - [(GET) /api/documents/:id/logs](./API/DOCUMENTS.md#get-apidocumentsidlogs)
   - [(GET) /api/documents/:id/reports/html/bioRxiv](./API/DOCUMENTS.md#get-apidocumentsidreportshtmlbiorxiv)
   - [(GET) /api/documents/:id/reports/html/default](./API/DOCUMENTS.md#get-apidocumentsidreportshtmldefault)
+  - [(GET) /api/documents/:id/reports/json/default](./API/DOCUMENTS.md#get-apidocumentsidreportsjsondefault)
   - [(GET) /api/documents/:id/reports/docx/default](./API/DOCUMENTS.md#get-apidocumentsidreportsdocxdefault)
   - [(GET) /api/documents/:id/reports/gSpreadsheets/:kind](./API/DOCUMENTS.md#get-apidocumentsidreportsgspreadsheetskind)
   - [(POST) /api/documents/:id/reports/gSpreadsheets/:kind](./API/DOCUMENTS.md#post-apidocumentsidreportsgspreadsheetskind)
