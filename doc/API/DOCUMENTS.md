@@ -22,6 +22,7 @@
   - [(PUT) /api/documents/:id/tei/content](#put-apidocumentsidteicontent)
   - [(GET) /api/documents/:id/reports/html/bioRxiv](#get-apidocumentsidreportshtmlbiorxiv)
   - [(GET) /api/documents/:id/reports/html/default](#get-apidocumentsidreportshtmldefault)
+  - [(GET) /api/documents/:id/reports/json/default](#get-apidocumentsidreportsjsondefault)
   - [(GET) /api/documents/:id/reports/docx/default](#get-apidocumentsidreportsdocxdefault)
   - [(GET) /api/documents/:id/reports/gSpreadsheets/:kind](#get-apidocumentsidreportsgspreadsheetskind)
   - [(POST) /api/documents/:id/reports/gSpreadsheets/:kind](#post-apidocumentsidreportsgspreadsheetskind)
@@ -1083,6 +1084,53 @@ curl "http://localhost:3000/api/documents/000000000000000000000001/reports/html/
 ## Result
 
 The HTML report
+
+---
+
+# (GET) /api/documents/:id/reports/json/default
+
+*[List of Documents routes](#documents)*
+
+## Description
+
+This route get the JSON report generated with the "default template" (JSON format).
+
+## Role required
+
+Accessible to users with the following role: **visitor**, **standardUser**, **moderator**, **administrator**.
+
+## Parameters
+
+No parameter available.
+
+## How to request
+
+```bash
+curl "http://localhost:3000/api/documents/000000000000000000000001/reports/html/default"
+```
+
+## Result
+
+## Result
+
+```json
+{
+  "err": false,
+  "res": { // The JSON file representation of the report
+    "originalDocument": {}, // The original document (see MongoDB model)
+    "sortedDatasetsInfos": { // The sorted datasets information (see MongoDB model). There is a 'type' (Object) & 'isValid' (Boolean) value added.
+      "all": [], // all datasets (= originalDocument.datasets.current without filter)
+      "protocols": [], // only datasets categorized as 'protocols' (= originalDocument.datasets.current filtered)
+      "codes": [], // only datasets categorized as 'codes' (= originalDocument.datasets.current filtered)
+      "softwares": [], // only datasets categorized as 'softwares' (= originalDocument.datasets.current filtered)
+      "reagents": [], // only datasets categorized as 'reagents' (= originalDocument.datasets.current filtered)
+      "datasets": [], // only datasets categorized as 'datasets' (= originalDocument.datasets.current filtered)
+    },
+  }
+}
+```
+
+Note: datasets stored in the "sortedDatasetsInfos" sub-properties contain additional data: "type" (Object) containing all the information about the datatype (e.g. the wiki URL) & "isValid" (Boolean) to know if the dataset is considered valid (have all required properties set with correct value).
 
 ---
 
