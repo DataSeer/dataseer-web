@@ -833,6 +833,43 @@ router.get(`/:id/reports/html/default`, function (req, res, next) {
 });
 
 /* GET SINGLE Document reports/ BY ID */
+router.get(`/:id/reports/json/default`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: { id: req.params.id, kind: `html`, organization: `default`, dataTypes: req.app.get(`dataTypes`) },
+    user: req.user
+  };
+  return DocumentsController.getReportData(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    if (isError) return res.status(404).send(conf.errors.notFound);
+    return DocumentsController.get(
+      { data: { id: opts.data.id, metadata: true }, user: opts.user },
+      function (err, doc) {
+        let isError = doc instanceof Error;
+        let result = isError ? doc.toString() : doc;
+        if (isError) return res.status(404).send(conf.errors.notFound);
+        return res.json(
+          Object.assign(
+            {},
+            {
+              sortedDatasetsInfos: data.sortedDatasetsInfos
+            },
+            { originalDocument: doc }
+          )
+        );
+      }
+    );
+  });
+});
+
+/* GET SINGLE Document reports/ BY ID */
 router.get(`/:id/reports/docx/default`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
