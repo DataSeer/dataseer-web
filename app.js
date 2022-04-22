@@ -69,6 +69,8 @@ mongoose.set(`useCreateIndex`, true);
 // URL to mongoDB
 const urlmongo = conf.mongodb.url;
 
+const maxFileUploadSize = isNaN(conf.maxFileUploadSize) ? 250 * 1024 * 1024 : conf.maxFileUploadSize;
+
 // API connection
 mongoose.connect(urlmongo, {
   useNewUrlParser: true,
@@ -161,7 +163,7 @@ db.once(`open`, function () {
       app.use(methodOverride());
       app.use(
         fileUpload({
-          limits: { fileSize: 50 * 1024 * 1024 }
+          limits: { fileSize: maxFileUploadSize }
         })
       );
       app.use(cookieParser());

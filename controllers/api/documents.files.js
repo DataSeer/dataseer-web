@@ -229,7 +229,13 @@ Self.rewriteFile = function (id, data, cb) {
         return fs.writeFile(file.path, str, file.encoding, function (err) {
           if (err) return cb(err);
           else {
-            file.md5 = md5(str);
+            let hash = ``;
+            try {
+              hash = md5(str);
+            } catch (error) {
+              console.error(error);
+            }
+            file.md5 = hash;
             file.size = str.length;
             return file.save(function (err) {
               if (err) return cb(err);
@@ -292,13 +298,19 @@ Self.upload = function (opts, cb) {
   if (typeof organizations === `undefined`) return cb(new Error(`Bad value: organizations`));
   // Build filePath
   let filePath = Self.getPath(documentId, filename);
+  let hash = ``;
+  try {
+    hash = md5(fileContent);
+  } catch (error) {
+    console.error(error);
+  }
   return DocumentsFiles.create(
     {
       document: documentId,
       filename: filename,
       name: filename,
       encoding: Self.encoding,
-      md5: md5(fileContent),
+      md5: hash,
       mimetype: mimetype,
       size: fileContent.length,
       path: filePath,
