@@ -37,5 +37,6 @@
     "automaticAccountCreation": {
       "expiresIn": 604800
     }
-  }
+  },
+  "maxFileUploadSize": 262144000
 }
