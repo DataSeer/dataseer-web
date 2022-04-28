@@ -688,7 +688,7 @@ Self.upload = function (opts = {}, cb) {
           function (acc, next) {
             if (!opts.user) {
               return Accounts.findOne({ _id: conf.mongodb.default.accounts.id }, function (err, account) {
-                if (err) return next(err);
+                if (err) return next(err, acc);
                 opts.user = account;
                 return next(null, acc);
               });
@@ -733,7 +733,7 @@ Self.upload = function (opts = {}, cb) {
               !DocumentsFilesController.isPDF(params.file.mimetype) &&
               !DocumentsFilesController.isXML(params.file.mimetype)
             )
-              return next(new Error(`Bad content type`));
+              return next(new Error(`Bad content type`), acc);
             return DocumentsFilesController.upload(
               {
                 data: {
@@ -998,7 +998,9 @@ Self.upload = function (opts = {}, cb) {
           function (err, res) {
             if (err) {
               console.log(err);
-              return Self.delete({ data: { id: res._id.toString() }, user: opts.user, force: true }, function (_err) {
+              let documentId = _.get(res, `_id`, ``).toString();
+              if (!documentId) return cb(null, err);
+              return Self.delete({ data: { id: documentId }, user: opts.user, force: true }, function (_err) {
                 if (_err) return cb(_err);
                 return cb(null, err);
               });
