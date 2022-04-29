@@ -419,7 +419,12 @@
       return (item.dataType === `other` && item.subType === `reagent`) || item.dataType === `lab materials`;
     });
     let datasets = query.res.datasets.current.filter(function (item) {
-      return item.dataType !== `other` && item.dataType !== `code software` && item.dataType !== `lab materials`;
+      return (
+        item.dataType !== `other` &&
+        item.dataType !== `code software` &&
+        item.dataType !== `lab materials` &&
+        item.dataType !== `protocol`
+      );
     });
     if (data[0].done < 0)
       data[0].done = datasets.filter(function (item) {
