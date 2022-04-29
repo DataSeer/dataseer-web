@@ -2631,7 +2631,7 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
       return c === d ? 0 : c < d ? -1 : 1;
     });
   let protocols = orderedDatasets.filter(function (item) {
-    return item.dataType === `other` && item.subType === `protocol`;
+    return item.dataType === `protocol` || (item.dataType === `other` && item.subType === `protocol`);
   });
   let codes = orderedDatasets.filter(function (item) {
     return (
