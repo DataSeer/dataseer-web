@@ -16,7 +16,7 @@ This route get the ASAP Graphics (HTML format or image).
 
 ## Role required
 
-Accessible to users with the following role: **visitor**, **standardUser**, **moderator**, **administrator**.
+This is a public URL.
 
 ## Parameters
 

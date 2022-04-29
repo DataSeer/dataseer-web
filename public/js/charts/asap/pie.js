@@ -401,7 +401,7 @@
     if (err) return;
     if (query.err) return;
     let protocols = query.res.datasets.current.filter(function (item) {
-      return item.dataType === `other` && item.subType === `protocol`;
+      return item.dataType === `protocol` || (item.dataType === `other` && item.subType === `protocol`);
     });
     let codes = query.res.datasets.current.filter(function (item) {
       return (
