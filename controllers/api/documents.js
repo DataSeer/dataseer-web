@@ -2649,7 +2649,12 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
     return (item.dataType === `other` && item.subType === `reagent`) || item.dataType === `lab materials`;
   });
   let datasets = orderedDatasets.filter(function (item) {
-    return item.dataType !== `other` && item.dataType !== `code software` && item.dataType !== `lab materials`;
+    return (
+      item.dataType !== `other` &&
+      item.dataType !== `code software` &&
+      item.dataType !== `lab materials` &&
+      item.dataType !== `protocol`
+    );
   });
   return { all: orderedDatasets, protocols, codes, softwares, reagents, datasets };
 };
