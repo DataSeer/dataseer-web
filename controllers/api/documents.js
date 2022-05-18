@@ -2600,6 +2600,7 @@ Self.getReportData = function (opts = {}, cb) {
  * @returns {object} sorted datasets
  */
 Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
+  let currentDatasets = _.get(doc, `datasets.current`, []);
   let mapping =
     doc.pdf && doc.pdf.metadata && doc.pdf.metadata.mapping
       ? doc.pdf.metadata.mapping.object
@@ -2614,7 +2615,7 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
     if (d === null) return -1;
     return c - d;
   };
-  let orderedDatasets = doc.datasets.current
+  let orderedDatasets = currentDatasets
     .map(function (item) {
       // sort sentences
       let sentences = item.sentences.sort(sortSentences);
