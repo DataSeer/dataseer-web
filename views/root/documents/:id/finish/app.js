@@ -115,7 +115,7 @@
         // Get the button Jquery element
         let button = $(this.$refs[`buildGSpreadSheet${kind}Report`]);
         // Get the loader of the button
-        let loader = $(this.$refs[`buildGSpreadSheet${kind}ReportLoader`]);
+        let loader = $(this.$refs[`buildGSpreadSheetReportLoader`]);
         // Display the loader
         loader.show();
         // Disable the button
