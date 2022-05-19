@@ -3,6 +3,7 @@
 *[Available Routes](../API.md#available-routes)*
 
   - [(POST) /api/dataseer-ml/processDataseerSentence](#post-apidataseermlprocessdataseersentence)
+  - [(POST) /api/dataseer-ml/processDataseerSentences](#post-apidataseermlprocessdataseersentences)
   - [(GET) /api/dataseer-ml/jsonDataTypes](#get-apidataseermljsonDataTypes)
   - [(POST) /api/dataseer-ml/resyncJsonDataTypes](#post-apidataseermlresyncJsonDataTypes)
 
@@ -71,7 +72,7 @@ This route process a list of DataSeer sentences
 
 ## Role required
 
-Accessible to users with the following role: **visitor**, **standardUser**, **moderator**, **administrator**.
+Accessible to users with the following role: **administrator**.
 
 ## Parameters
 
@@ -86,10 +87,10 @@ Accessible to users with the following role: **visitor**, **standardUser**, **mo
   </thead>
   <tbody>
     <tr>
-      <td>String</td>
-      <td>text</td>
+      <td>Array</td>
+      <td>sentences</td>
       <td>required</td>
-      <td>Text that will be processed</td>
+      <td>Array of string containing all sentences that will be processed.</td>
     </tr>
   </tbody>
 </table>
@@ -116,6 +117,8 @@ curl -X POST -H Content-Type:application/json --data '{"sentences":["my first se
   ...
 }]
 ```
+
+Notes: it will return an empty array if the `sentences` parameter is not an 'array', and `sentences` (array elements) that are not 'string' will be ignored.
 
 ---
 
