@@ -22,6 +22,15 @@ router.post(`/processDataseerSentence`, function (req, res, next) {
   });
 });
 
+router.post(`/processDataseerSentences`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  return DataSeerML.processDataseerSentences(req.body.sentences, function (err, results) {
+    if (err) return next(err);
+    else return res.json(results);
+  });
+});
+
 router.get(`/jsonDataTypes`, function (req, res, next) {
   return res.json(req.app.get(`dataTypes`));
 });

@@ -3,5 +3,6 @@
   "processFile": {
     "xml": "http://localhost:8060/service/processDataseerJATS",
     "pdf": "http://localhost:8060/service/processDataseerPDF"
-  }
+  },
+  "limit": 50
 }

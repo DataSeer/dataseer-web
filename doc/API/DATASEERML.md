@@ -61,6 +61,64 @@ curl -X POST -F "text=my text that will be processed" "http://localhost:3000/api
 
 ---
 
+# (POST) /api/dataseer-ml/processDataseerSentences
+
+*[List of Dataseer ML routes](#dataseer-ml)*
+
+## Description
+
+This route process a list of DataSeer sentences
+
+## Role required
+
+Accessible to users with the following role: **visitor**, **standardUser**, **moderator**, **administrator**.
+
+## Parameters
+
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>String</td>
+      <td>text</td>
+      <td>required</td>
+      <td>Text that will be processed</td>
+    </tr>
+  </tbody>
+</table>
+
+## How to request
+
+```bash
+# Will return the DataSeerML result of processDataseerSentences functionnality (JSON formated)
+curl -X POST -H Content-Type:application/json --data '{"sentences":["my first sentence","my second sentence","my third sentence"]}' "http://localhost:3000/api/dataseer-ml/processDataseerSentences"
+```
+
+## Result
+
+```json
+[{
+  "sentence": "my first sentence",
+  "result": {
+    "classifications": [], // That will contain result of classifications
+    "date": "2021-08-03T19:29:31.566717",
+    "model": "dataseer",
+    "software": "DeLFT"
+  },
+  {...},
+  ...
+}]
+```
+
+---
+
 # (GET) /api/dataseer-ml/jsonDataTypes
 
 *[List of Dataseer ML routes](#dataseer-ml)*
