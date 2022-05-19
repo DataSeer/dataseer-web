@@ -2,10 +2,10 @@
 
 *[Available Routes](../API.md#available-routes)*
 
-  - [(POST) /api/dataseer-ml/processDataseerSentence](#post-apidataseermlprocessdataseersentence)
-  - [(POST) /api/dataseer-ml/processDataseerSentences](#post-apidataseermlprocessdataseersentences)
-  - [(GET) /api/dataseer-ml/jsonDataTypes](#get-apidataseermljsonDataTypes)
-  - [(POST) /api/dataseer-ml/resyncJsonDataTypes](#post-apidataseermlresyncJsonDataTypes)
+  - [(POST) /api/dataseer-ml/processDataseerSentence](#post-apidataseer-mlprocessdataseersentence)
+  - [(POST) /api/dataseer-ml/processDataseerSentences](#post-apidataseer-mlprocessdataseersentences)
+  - [(GET) /api/dataseer-ml/jsonDataTypes](#get-apidataseer-mljsonDataTypes)
+  - [(POST) /api/dataseer-ml/resyncJsonDataTypes](#post-apidataseer-mlresyncJsonDataTypes)
 
 ---
 
