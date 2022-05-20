@@ -13,6 +13,8 @@
   - [(PUT) /api/documents/:id/datasets](#put-apidocumentsiddatasets)
   - [(GET) /api/documents/:id/logs](#get-apidocumentsidlogs)
   - [(GET) /api/documents/:id/files](#get-apidocumentsidfiles)
+  - [(POST) /api/documents/:id/files](#post-apidocumentsidfiles)
+  - [(DELETE) /api/documents/:id/files/:fileId](#delete-apidocumentsidfilesfileid)
   - [(GET) /api/documents/:id/softcite](#get-apidocumentsidsoftcite)
   - [(GET) /api/documents/:id/softcite/content](#get-apidocumentsidsoftcitecontent)
   - [(GET) /api/documents/:id/pdf](#get-apidocumentsidpdf)
@@ -246,7 +248,7 @@ The is a public URL, but some parameters coulb be restricted (depending on your 
       <td>File</td>
       <td>file</td>
       <td>required</td>
-      <td>The file you want upload on DataSeer (TEI or PDF)</td>
+      <td>The file you want to upload on DataSeer (TEI or PDF)</td>
     </tr>
     <tr>
       <td>Array</td>
@@ -803,6 +805,93 @@ curl "http://localhost:3000/api/documents/000000000000000000000001/files"
 {
   "err": false,
   "res": [{...}] // An array of files (see models documentation)
+}
+```
+
+---
+
+# (POST) /api/documents/:id/files
+
+*[List of Documents routes](#documents)*
+
+## Description
+
+This route upload attach new file to the given document (JSON formatted).
+
+Note : You can't delete the PDF or the TEI file.
+
+## Role required
+
+Accessible to users with the following role: **visitor**, **standardUser**, **moderator**, **administrator**.
+
+## Parameters
+
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>File</td>
+      <td>file</td>
+      <td>required</td>
+      <td>The file you want to to attach to this document</td>
+    </tr>
+  </tbody>
+</table>
+
+## How to request
+
+```bash
+# Will return the files of the given document (JSON formated)
+curl -X POST -F "file=@/path/to/my/file.ext" "http://localhost:3000/api/documents/62601c15e7c8711d9ef78ea2/files"
+```
+
+## Result
+
+```json
+{
+  "err": false,
+  "res": {...} // A document file (see models documentation)
+}
+```
+
+---
+
+# (DELETE) /api/documents/:id/files/:fileId
+
+*[List of Documents routes](#documents)*
+
+## Description
+
+This route delete a existing file of the given document (JSON formatted).
+
+## Role required
+
+Accessible to users with the following role: **visitor**, **standardUser**, **moderator**, **administrator**.
+
+## Parameters
+
+No parameter available.
+
+## How to request
+
+```bash
+# Will return the files of the given document (JSON formated)
+curl -X DELETE "http://localhost:3000/api/documents/000000000000000000000001/files/000000000000000000000002"
+```
+
+## Result
+
+```json
+{
+  "err": false,
+  "res": true // or an error msg
 }
 ```
 

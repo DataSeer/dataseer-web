@@ -467,6 +467,123 @@ router.get(`/:id/files`, function (req, res, next) {
   });
 });
 
+/* Add file */
+router.post(`/:id/files`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
+  return DocumentsController.get(
+    {
+      data: {
+        id: req.params.id
+      },
+      user: req.user
+    },
+    function (err, doc) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send(conf.errors.internalServerError);
+      }
+      if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+      if (!Params.checkObject(req.files) || !Params.checkObject(req.files.file))
+        return res.json({
+          err: true,
+          res: `You must select a file`
+        });
+      return DocumentsFilesController.upload(
+        {
+          data: {
+            accountId: req.user._id.toString(),
+            organizations: doc.organizations.map(function (item) {
+              return item._id;
+            }),
+            documentId: Params.convertToString(req.params.id),
+            file: req.files.file
+          },
+          user: req.user
+        },
+        function (err, file) {
+          if (err) {
+            console.log(err);
+            return res.status(500).send(conf.errors.internalServerError);
+          }
+          let isError = file instanceof Error;
+          let result = isError ? file.toString() : file;
+          if (isError)
+            return res.json({
+              err: isError,
+              res: result
+            });
+          doc.files.push(file._id.toString());
+          return doc.save(function (err) {
+            if (err)
+              return res.json({
+                err: true,
+                res: `File uploaded but not linked to this document`
+              });
+            return res.json({
+              err: false,
+              res: result
+            });
+          });
+        }
+      );
+    }
+  );
+});
+
+/* Remove file */
+router.delete(`/:id/files/:fileId`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
+  let fileId = req.params.fileId;
+  if (fileId.length <= 0) return res.json({ err: true, res: null, msg: `you must provide a fileId` });
+  return DocumentsController.get(
+    {
+      data: {
+        id: req.params.id
+      },
+      user: req.user
+    },
+    function (err, doc) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send(conf.errors.internalServerError);
+      }
+      if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+      if (doc.files.indexOf(fileId) < 0)
+        return res.json({ err: true, res: null, msg: `file not found in this document` });
+      if (doc.pdf === fileId)
+        return res.json({ err: true, res: null, msg: `this file is used as PDF and can't be deleted` });
+      if (doc.tei === fileId)
+        return res.json({ err: true, res: null, msg: `this file is used as TEI and can't be deleted` });
+      return DocumentsFilesController.deleteFile(fileId, function (err) {
+        if (err) {
+          console.log(err);
+          return res.status(500).send(conf.errors.internalServerError);
+        }
+        const index = doc.files.indexOf(fileId);
+        if (index < 0)
+          return res.json({
+            err: true,
+            res: `File not found in this document`
+          });
+        doc.files.splice(index, 1); // 2nd parameter means remove one item only
+        return doc.save(function (err) {
+          if (err)
+            return res.json({
+              err: true,
+              res: `File deleted but not unlinked to this document`
+            });
+          return res.json({
+            err: false,
+            res: true
+          });
+        });
+      });
+    }
+  );
+});
+
 /* GET Software file of document */
 router.get(`/:id/softcite`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);

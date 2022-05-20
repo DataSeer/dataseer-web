@@ -530,6 +530,12 @@ body {
   width: 75%;
 }
 
+#datasetForm .custom-row a[key="RRID\.searchUrl"] {
+  margin-top: 5px;
+  font-style: italic;
+  display: block;
+}
+
 #datasetForm .custom-row button[name="datasetForm\.unlink"] {
   width: 22px;
   margin-left: 10px;
