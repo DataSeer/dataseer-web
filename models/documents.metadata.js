@@ -10,6 +10,7 @@ const Orcid = new mongoose.Schema({ fromTEI: [String], fromAPI: [Object] }, { _i
 
 const Author = new mongoose.Schema(
   {
+    isLeadSubmitting: Boolean,
     name: String,
     email: String,
     'family-name': String,
