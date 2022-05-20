@@ -37,7 +37,7 @@ router.get(`/:id`, function (req, res) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
-    if (doc.status === ``) return res.status(500).send(`Status of this document is undefined`);
+    if (doc.status === ``) return res.status(500).send(`This document is no more available`);
     return res.redirect(Url.build(`documents/${req.params.id}/${doc.status}`, { token: req.query.token }));
   });
 });
