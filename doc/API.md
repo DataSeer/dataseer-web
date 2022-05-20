@@ -187,6 +187,8 @@ List of available API routes:
   - [(GET) /api/documents/:id/tei/content](./API/DOCUMENTS.md#get-apidocumentsidteicontent)
   - [(PUT) /api/documents/:id/tei/content](./API/DOCUMENTS.md#put-apidocumentsidteicontent)
   - [(GET) /api/documents/:id/files](./API/DOCUMENTS.md#get-apidocumentsidfiles)
+  - [(POST) /api/documents/:id/files](./API/DOCUMENTS.md#post-apidocumentsidfiles)
+  - [(DELETE) /api/documents/:id/files/:fileId](./API/DOCUMENTS.md#delete-apidocumentsidfilesfileid)
   - [(POST) /api/documents/:id/refreshToken](./API/DOCUMENTS.md#post-apidocumentsidrefreshtoken)
   - [(POST) /api/documents/:id/metadata/reload](./API/DOCUMENTS.md#post-apidocumentsidmetadatareload)
   - [(POST) /api/documents/:id/metadata/validate](./API/DOCUMENTS.md#post-apidocumentsidmetadatavalidate)
@@ -206,8 +208,6 @@ List of available API routes:
 ### [Documents files](./API/DOCUMENTS.FILES.md#documents-files)
 
   - [(GET) /api/files/:id](./API/DOCUMENTS.FILES.md#get-apifilesid)
-  - [(PUT) /api/files/:id](./API/DOCUMENTS.FILES.md#put-apifilesid)
-  - [(POST) /api/files](./API/DOCUMENTS.FILES.md#post-apifiles)
 
 ### [Dataseer ML](./API/DATASEERML.md#dataseer-ml)
 
