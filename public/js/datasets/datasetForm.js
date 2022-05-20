@@ -397,6 +397,7 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       self.container.find(`div[key="dataset\\.entity"]`).attr(`value`, value);
       if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.entity"]`).val(value);
       self.dataset.entity = value;
+      self.refreshRRIDURL(self.dataset.entity);
       return self.dataset.entity;
     },
     comments: function (value, inputs = false) {
@@ -424,6 +425,17 @@ DatasetForm.prototype.setRepos = function (cb) {
       return cb();
     }
   );
+};
+
+// Refresh RRID URL
+DatasetForm.prototype.refreshRRIDURL = function (entity) {
+  let url = URLMANAGER.buildURL(
+    `/resources-legacy/Any/search`,
+    { q: entity, l: entity },
+    { root: `https://scicrunch.org`, origin: true }
+  );
+  this.container.find(`a[key="RRID\\.searchUrl"]`).attr(`href`, url);
+  this.container.find(`label[key="RRID\\.entity"]`).text(entity);
 };
 
 // update label of dataset
