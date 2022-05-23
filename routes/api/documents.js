@@ -1055,6 +1055,7 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
       id: req.params.id,
       orcid: Params.convertToBoolean(req.body.orcid),
       metadata: {
+        authors: req.body.authors,
         article_title: Params.convertToString(req.body.article_title),
         journal: Params.convertToString(req.body.journal),
         publisher: Params.convertToString(req.body.publisher),
