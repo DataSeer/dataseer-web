@@ -1507,15 +1507,21 @@ Accessible to users with the following role: **visitor**, **standardUser**, **mo
   <tbody>
     <tr>
       <td>Boolean</td>
-      <td>orcid</td>
+      <td>refreshAuthorsNames</td>
       <td>optional</td>
-      <td>It will refresh the ORCIDs</td>
+      <td>Use it to set the authors name with the values contained in the TEI file (default: false).</td>
     </tr>
     <tr>
-      <td>Object</td>
+      <td>Boolean</td>
+      <td>orcid</td>
+      <td>optional</td>
+      <td>It will refresh the ORCIDs of the authors (using ORCID API)</td>
+    </tr>
+    <tr>
+      <td>Array</td>
       <td>authors</td>
       <td>optional</td>
-      <td>Will contain authors properties (see models). Only names will be updated (authors[i].names property). TEI file won't be modified, only the MongoDB database.</td>
+      <td>Contain authors objects (see metadata models). Only names will be updated (authors[i].name property). TEI file won't be modified, only the MongoDB database.</td>
     </tr>
     <tr>
       <td>String</td>
