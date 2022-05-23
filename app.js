@@ -168,7 +168,7 @@ db.once(`open`, function () {
       );
       app.use(cookieParser());
       app.use(bodyParser.json({ limit: `50mb`, extended: true }));
-      app.use(bodyParser.urlencoded({ limit: `10mb`, extended: true }));
+      app.use(bodyParser.urlencoded({ limit: `10mb`, extended: true, parameterLimit: 1000000 }));
       app.use(favicon(path.join(__dirname, `public`, `favicon.ico`)));
       app.use(express.static(`public`));
 

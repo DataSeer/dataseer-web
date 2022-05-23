@@ -83,7 +83,7 @@
             <label class="property">Authors:</label>
             <ul>
               <li v-for="author in item.properties.metadata.authors" v-if="author.name">
-                <label class="value">{{ author.name }}</label>
+                <input class="form-control" v-model="author.name" placeholder="Enter the publisher here" />
                 <label v-if="author.email" class="bold">({{ author.email}})</label>
                 <ul>
                   <li v-for="affiliation in author.affiliations">
