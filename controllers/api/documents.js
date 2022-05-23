@@ -1283,9 +1283,12 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
     return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
       if (err) return cb(err);
       let metadata = _.get(opts, `data.metadata`);
-      let authorsNames = metadata.authors.map(function (item) {
-        return item.name;
-      });
+      let authors = _.get(metadata, `authors`, []);
+      let authorsNames = !Array.isArray(authors)
+        ? []
+        : authors.map(function (item) {
+          return item.name;
+        });
       let refreshAuthorsNames = _.get(opts, `refreshAuthorsNames`, false);
       let xmlString = content.data.toString(DocumentsFilesController.encoding);
       return async.mapSeries(
