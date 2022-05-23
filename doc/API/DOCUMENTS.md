@@ -1493,12 +1493,74 @@ Accessible to users with the following role: **visitor**, **standardUser**, **mo
 
 ## Parameters
 
-No parameter available.
+
+
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Parameters</th>
+      <th>Requirement</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Boolean</td>
+      <td>orcid</td>
+      <td>optional</td>
+      <td>It will refresh the ORCIDs</td>
+    </tr>
+    <tr>
+      <td>Object</td>
+      <td>authors</td>
+      <td>optional</td>
+      <td>Will contain authors properties (see models). Only names will be updated (authors[i].names property). TEI file won't be modified, only the MongoDB database.</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>article_title</td>
+      <td>optional</td>
+      <td>Article title value</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>journal</td>
+      <td>optional</td>
+      <td>Journal value</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>publisher</td>
+      <td>optional</td>
+      <td>Publisher value</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>manuscript_id</td>
+      <td>optional</td>
+      <td>Manuscript ID value</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>doi</td>
+      <td>optional</td>
+      <td>DOI value</td>
+    </tr>
+    <tr>
+      <td>String</td>
+      <td>pmid</td>
+      <td>optional</td>
+      <td>PMID value</td>
+    </tr>
+  </tbody>
+</table>
 
 ## How to request
 
 ```bash
-curl -X POST "http://localhost:3000/api/documents/000000000000000000000001/metadata/reload"
+# send the modified metadata object based on the document.metada property
+curl -X POST -d "{ ... }" "http://localhost:3000/api/documents/000000000000000000000001/metadata/reload"
 ```
 
 ## Result
