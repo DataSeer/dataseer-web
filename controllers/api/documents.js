@@ -1283,7 +1283,7 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
     return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
       if (err) return cb(err);
       let metadata = _.get(opts, `data.metadata`);
-      let authorsNames = metadata.authors.map(function (item) {
+      let authorsNames = _.get(metadata, `authors`, []).map(function (item) {
         return item.name;
       });
       let refreshAuthorsNames = _.get(opts, `refreshAuthorsNames`, false);
