@@ -22,7 +22,6 @@ router.post(`/processEntity`, function (req, res, next) {
   if (typeof _.get(req.body, `entity`) === `undefined`)
     return cb(null, new Error(`Missing required parameter: entity`));
   return Scicrunch.getRRID({ entity: req.body.entity }, function (err, result) {
-    console.log(err, result);
     if (err) return res.status(500).send(conf.errors.internalServerError);
     if (result instanceof Error) return res.json({ err: true, res: result });
     else return res.json({ err: false, res: result });
