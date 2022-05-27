@@ -1,0 +1,13 @@
+{
+  "auth": "SCICRUNCH API KEY",
+  "root": "https://scicrunch.org",
+  "searchEntity": "/api/1/resource/fields/autocomplete",
+  "searchRRID": "/api/1/resource/fields/view",
+  "searchResources": "/scicrunch/Resources/search",
+  "searchAntibody": "/resources/data/source/nif-0000-07730-1/search",
+  "searchPlasmid": "/resources/data/source/nif-0000-11872-1/search",
+  "searchOrganism": "/resources/data/source/nlx_154697-1/search",
+  "searchCellLine": "/resources/data/source/SCR_013869-1/search",
+  "searchTool": "/resources/data/source/nlx_144509-1/search",
+  "searchBiosamples": "/resources/data/source/nlx_143929-1/search"
+}
