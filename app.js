@@ -37,6 +37,7 @@ const statisticsRouter = require(`./routes/api/statistics.js`);
 const hypothesisRouter = require(`./routes/api/hypothesis.js`);
 const orcidRouter = require(`./routes/api/orcid.js`);
 const sciscoreRouter = require(`./routes/api/sciscore.js`);
+const scicrunchRouter = require(`./routes/api/scicrunch.js`);
 const chartsRouter = require(`./routes/api/charts.js`);
 
 const indexRouter = require(`./routes/index.js`);
@@ -242,6 +243,7 @@ db.once(`open`, function () {
       app.use(`/api/hypothesis`, hypothesisRouter);
       app.use(`/api/orcid`, orcidRouter);
       app.use(`/api/sciscore`, sciscoreRouter);
+      app.use(`/api/scicrunch`, scicrunchRouter);
       app.use(`/api/charts`, chartsRouter);
 
       app.use(`/backoffice`, indexBackofficeRouter);
