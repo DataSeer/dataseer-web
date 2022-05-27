@@ -94,7 +94,7 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
   this.container.find(`input[type="text"]`).focusout(function (event) {
     let el = $(this),
       target = el.attr(`target`).replace(`dataset.`, ``);
-    if (target === `entity`)
+    if (target === `name`)
       self.refreshRRIDURL(el.val(), function () {
         if (typeof self.events.onPropertyChange === `function`)
           self.events.onPropertyChange(target, self.properties[target]());
@@ -361,7 +361,7 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
             `<a target="_blank" href="${data.entity.URLs.tool}">Tools</a>.</div>`
         );
       }
-      element.append(`<div class="RRIDUrls-sub">*based on the "name of entity identified" field of this dataset</div>`);
+      element.append(`<div class="RRIDUrls-sub">*based on the "name" of this dataset</div>`);
       self.dataset.RRIDUrls = RRIDs;
       // ----------------------
       return self.dataset.RRIDUrls;
@@ -805,7 +805,7 @@ DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
       self.refreshDatasetsList(datasets);
     }
     return self.setRepos(function () {
-      return self.refreshRRIDURL(data.dataset.entity, function () {
+      return self.refreshRRIDURL(data.dataset.name, function () {
         return callback(err, res);
       });
     });
