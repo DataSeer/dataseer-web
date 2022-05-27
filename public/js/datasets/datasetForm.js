@@ -430,7 +430,7 @@ DatasetForm.prototype.setRepos = function (cb) {
 // Refresh RRID URL
 DatasetForm.prototype.refreshRRIDURL = function (entity) {
   let url = URLMANAGER.buildURL(
-    `/resources-legacy/Any/search`,
+    `scicrunch/Resources/search`,
     { q: entity, l: entity },
     { root: `https://scicrunch.org`, origin: true }
   );
