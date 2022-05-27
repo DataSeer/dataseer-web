@@ -439,6 +439,46 @@ body {
   display: block !important;
 }
 
+#datasetForm .custom-row div[key="dataset\.RRIDUrls"] {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+#datasetForm .custom-row div[key="dataset\.RRIDUrls"] > .RRIDUrls-header {
+  display: block;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+#datasetForm .custom-row div[key="dataset\.RRIDUrls"] > .RRIDUrls-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-style: italic;
+  font-weight: normal;
+}
+
+#datasetForm .custom-row div[key="dataset\.RRIDUrls"] > .RRIDUrls-results {
+  display: block;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  font-weight: normal;
+}
+
+#datasetForm .custom-row div[key="dataset\.RRIDUrls"] > .RRIDUrls-results > li {
+  margin-top: 3px;
+}
+
+#datasetForm .custom-row div[key="dataset\.RRIDUrls"] > div {
+  font-size: 14px;
+}
+
+#datasetForm .custom-row div[key="dataset\.RRIDUrls"] > div.RRIDUrls-categories {
+  font-size: 12px;
+  font-style: italic;
+}
+
 #datasetForm\.message div {
   display: block;
   text-align: center;

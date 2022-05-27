@@ -94,6 +94,11 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
   this.container.find(`input[type="text"]`).focusout(function (event) {
     let el = $(this),
       target = el.attr(`target`).replace(`dataset.`, ``);
+    if (target === `entity`)
+      self.refreshRRIDURL(el.val(), function () {
+        if (typeof self.events.onPropertyChange === `function`)
+          self.events.onPropertyChange(target, self.properties[target]());
+      });
     if (typeof self.events.onLeave === `function`) self.events.onLeave(target, self.properties[target]());
   });
   // input checkbox event
@@ -121,7 +126,8 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       self.properties[target](value);
       if (target === `dataType` || target === `subType`)
         return self.setRepos(function () {
-          return self.events.onPropertyChange(target, self.properties[target]());
+          if (typeof self.events.onPropertyChange === `function`)
+            return self.events.onPropertyChange(target, self.properties[target]());
         });
       if (typeof self.events.onPropertyChange === `function`)
         self.events.onPropertyChange(target, self.properties[target]());
@@ -309,19 +315,52 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     },
     repoRecommenderUrls: function (values, inputs = false) {
       if (typeof values === `undefined`) return self.dataset.repoRecommenderUrls;
-      let data = !Array.isArray(values) ? [{ label: `n/a` }] : values;
+      let data = !Array.isArray(values) ? [] : values;
       let element = self.container.find(`div[key="dataset\\.repoRecommenderUrls"]`);
       element.attr(`value`, JSON.stringify(values));
       element.empty();
       let list = $(`<ol>`);
       data.map(function (item) {
-        if (item.url) list.append(`<li><a href="${item.url}">${item.label}</a></li>`);
+        if (item.url) list.append(`<li><a target="_blank" href="${item.url}">${item.label}</a></li>`);
         else list.append(`<li>${item.label}</li>`);
       });
       element.append(list);
       self.dataset.repoRecommenderUrls = data;
       // ----------------------
       return self.dataset.repoRecommenderUrls;
+    },
+    RRIDUrls: function (data, inputs = false) {
+      if (typeof data === `undefined`) return self.dataset.RRIDUrls;
+      let RRIDs = Object.keys(data.RRIDs.values);
+      let element = self.container.find(`div[key="dataset\\.RRIDUrls"]`);
+      element.attr(`value`, JSON.stringify(RRIDs));
+      element.empty();
+      element.append(
+        `<div class="RRIDUrls-header">Suggested RRIDs for the entity* "<a target="_blank" href="${data.entity.URLs.resources}">${data.entity.value}</a>":</div>`
+      );
+      if (RRIDs.length <= 0) element.append(`<div class="RRIDUrls-results">None</div>`);
+      else {
+        let list = $(`<ul class="RRIDUrls-results"></ul>`);
+        RRIDs.map(function (item) {
+          let RRID = data.RRIDs.values[item];
+          list.append(
+            `<li>${item} <a target="_blank" href="${data.RRIDs.URLs.resources[item]}">(${RRID.name})</a></li>`
+          );
+        });
+        element.append(list);
+      }
+      element.append(
+        `<div class="RRIDUrls-categories">Result(s) for <a target="_blank" href="${data.entity.URLs.antibody}">Antibodies</a>, ` +
+          `<a target="_blank" href="${data.entity.URLs.biosamples}">Biosamples</a>, ` +
+          `<a target="_blank" href="${data.entity.URLs.cellLine}">Cell Lines</a>, ` +
+          `<a target="_blank" href="${data.entity.URLs.organism}">Organisms</a>, ` +
+          `<a target="_blank" href="${data.entity.URLs.plasmid}">Plasmid</a> and ` +
+          `<a target="_blank" href="${data.entity.URLs.tool}">Tools</a>.</div>`
+      );
+      element.append(`<div class="RRIDUrls-sub">*based on the "name of entity identified" field of this dataset</div>`);
+      self.dataset.RRIDUrls = RRIDs;
+      // ----------------------
+      return self.dataset.RRIDUrls;
     },
     name: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.name;
@@ -397,7 +436,6 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       self.container.find(`div[key="dataset\\.entity"]`).attr(`value`, value);
       if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.entity"]`).val(value);
       self.dataset.entity = value;
-      self.refreshRRIDURL(self.dataset.entity);
       return self.dataset.entity;
     },
     comments: function (value, inputs = false) {
@@ -422,20 +460,29 @@ DatasetForm.prototype.setRepos = function (cb) {
     function (err, query) {
       console.log(err, query);
       if (!query.err) self.properties.repoRecommenderUrls(query.res);
+      else self.properties.repoRecommenderUrls(null);
       return cb();
     }
   );
 };
 
 // Refresh RRID URL
-DatasetForm.prototype.refreshRRIDURL = function (entity) {
-  let url = URLMANAGER.buildURL(
-    `scicrunch/Resources/search`,
-    { q: entity, l: entity },
-    { root: `https://scicrunch.org`, origin: true }
-  );
-  this.container.find(`a[key="RRID\\.searchUrl"]`).attr(`href`, url);
-  this.container.find(`label[key="RRID\\.entity"]`).text(entity);
+DatasetForm.prototype.refreshRRIDURL = function (entity, cb) {
+  let self = this;
+  if (!entity) {
+    // Reset entity results
+    self.properties.RRIDUrls(null);
+    return cb();
+  }
+  return API.scicrunch.processEntity({ entity: entity }, function (err, query) {
+    if (query.err) {
+      // Reset entity results
+      self.properties.RRIDUrls(null);
+    } else {
+      self.properties.RRIDUrls(query.res);
+    }
+    return cb();
+  });
 };
 
 // update label of dataset
@@ -754,7 +801,9 @@ DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
       self.refreshDatasetsList(datasets);
     }
     return self.setRepos(function () {
-      return callback(err, res);
+      return self.refreshRRIDURL(data.dataset.entity, function () {
+        return callback(err, res);
+      });
     });
   });
 };
