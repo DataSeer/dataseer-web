@@ -331,32 +331,36 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     },
     RRIDUrls: function (data, inputs = false) {
       if (typeof data === `undefined`) return self.dataset.RRIDUrls;
-      let RRIDs = Object.keys(data.RRIDs.values);
+      let RRIDs = data !== null ? Object.keys(data.RRIDs.values) : [];
       let element = self.container.find(`div[key="dataset\\.RRIDUrls"]`);
       element.attr(`value`, JSON.stringify(RRIDs));
       element.empty();
-      element.append(
-        `<div class="RRIDUrls-header">Suggested RRIDs for the entity* "<a target="_blank" href="${data.entity.URLs.resources}">${data.entity.value}</a>":</div>`
-      );
-      if (RRIDs.length <= 0) element.append(`<div class="RRIDUrls-results">None</div>`);
-      else {
-        let list = $(`<ul class="RRIDUrls-results"></ul>`);
-        RRIDs.map(function (item) {
-          let RRID = data.RRIDs.values[item];
-          list.append(
-            `<li>${item} <a target="_blank" href="${data.RRIDs.URLs.resources[item]}">(${RRID.name})</a></li>`
-          );
-        });
-        element.append(list);
+      if (data === null) {
+        element.append(`<div class="RRIDUrls-header">You must provide an entity* to obtain the suggested RRIDs.</div>`);
+      } else {
+        element.append(
+          `<div class="RRIDUrls-header">Suggested RRIDs for the entity* "<a target="_blank" href="${data.entity.URLs.resources}">${data.entity.value}</a>":</div>`
+        );
+        if (RRIDs.length <= 0) element.append(`<div class="RRIDUrls-results">None</div>`);
+        else {
+          let list = $(`<ul class="RRIDUrls-results"></ul>`);
+          RRIDs.map(function (item) {
+            let RRID = data.RRIDs.values[item];
+            list.append(
+              `<li>${item} <a target="_blank" href="${data.RRIDs.URLs.resources[item]}">(${RRID.name})</a></li>`
+            );
+          });
+          element.append(list);
+        }
+        element.append(
+          `<div class="RRIDUrls-categories">Result(s) for <a target="_blank" href="${data.entity.URLs.antibody}">Antibodies</a>, ` +
+            `<a target="_blank" href="${data.entity.URLs.biosamples}">Biosamples</a>, ` +
+            `<a target="_blank" href="${data.entity.URLs.cellLine}">Cell Lines</a>, ` +
+            `<a target="_blank" href="${data.entity.URLs.organism}">Organisms</a>, ` +
+            `<a target="_blank" href="${data.entity.URLs.plasmid}">Plasmid</a> and ` +
+            `<a target="_blank" href="${data.entity.URLs.tool}">Tools</a>.</div>`
+        );
       }
-      element.append(
-        `<div class="RRIDUrls-categories">Result(s) for <a target="_blank" href="${data.entity.URLs.antibody}">Antibodies</a>, ` +
-          `<a target="_blank" href="${data.entity.URLs.biosamples}">Biosamples</a>, ` +
-          `<a target="_blank" href="${data.entity.URLs.cellLine}">Cell Lines</a>, ` +
-          `<a target="_blank" href="${data.entity.URLs.organism}">Organisms</a>, ` +
-          `<a target="_blank" href="${data.entity.URLs.plasmid}">Plasmid</a> and ` +
-          `<a target="_blank" href="${data.entity.URLs.tool}">Tools</a>.</div>`
-      );
       element.append(`<div class="RRIDUrls-sub">*based on the "name of entity identified" field of this dataset</div>`);
       self.dataset.RRIDUrls = RRIDs;
       // ----------------------
