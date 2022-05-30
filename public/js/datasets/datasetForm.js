@@ -479,7 +479,7 @@ DatasetForm.prototype.refreshRRIDURL = function (entity, cb) {
     return cb();
   }
   return API.scicrunch.processEntity({ entity: entity }, function (err, query) {
-    if (query.err) {
+    if (err || query.err) {
       // Reset entity results
       self.properties.RRIDUrls(null);
     } else {

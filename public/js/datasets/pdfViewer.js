@@ -589,13 +589,17 @@ PdfViewer.prototype.insertDatasets = function (numPage) {
   let self = this,
     links = this.metadata.links;
   for (let i = 0; i < links.length; i++) {
+    let dataset = links[i].dataset;
+    let sentence = links[i].sentence;
     if (
-      this.getPagesOfSentence(links[i].sentence).indexOf(numPage) > -1 &&
-      this.metadata.colors[links[i].dataset.id] &&
-      this.metadata.colors[links[i].dataset.id].background &&
-      this.metadata.colors[links[i].dataset.id].background.rgb
+      dataset &&
+      dataset.id &&
+      this.getPagesOfSentence(sentence).indexOf(numPage) > -1 &&
+      this.metadata.colors[dataset.id] &&
+      this.metadata.colors[dataset.id].background &&
+      this.metadata.colors[dataset.id].background.rgb
     ) {
-      self.addDataset(links[i].dataset, links[i].sentence, false);
+      self.addDataset(dataset, sentence, false);
     }
   }
 };
