@@ -218,6 +218,14 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       // ----------------------
       return self.dataset.issue;
     },
+    issues: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.issues;
+      let issues = Array.isArray(value) ? value : [];
+      self.dataset.issues = issues;
+      // input change behaviors
+      // ----------------------
+      return self.dataset.issues;
+    },
     dataType: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.dataType;
       self.container.find(`div[key="dataset\\.dataType"]`).attr(`value`, value);
@@ -331,16 +339,20 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     },
     RRIDUrls: function (data, inputs = false) {
       if (typeof data === `undefined`) return self.dataset.RRIDUrls;
-      let RRIDs = data !== null ? Object.keys(data.RRIDs.values) : [];
+      let RRIDs =
+        data !== null && typeof data.RRIDs === `object` && typeof data.RRIDs.values === `object`
+          ? Object.keys(data.RRIDs.values)
+          : [];
       let element = self.container.find(`div[key="dataset\\.RRIDUrls"]`);
       element.attr(`value`, JSON.stringify(RRIDs));
       element.empty();
       if (data === null) {
         element.append(`<div class="RRIDUrls-header">You must provide an entity* to obtain the suggested RRIDs.</div>`);
       } else {
-        element.append(
-          `<div class="RRIDUrls-header">Suggested RRIDs for the entity* "<a target="_blank" href="${data.entity.URLs.resources}">${data.entity.value}</a>":</div>`
-        );
+        if (data.entity && data.entity.URLs && data.entity.value)
+          element.append(
+            `<div class="RRIDUrls-header">Suggested RRIDs for the entity* "<a target="_blank" href="${data.entity.URLs.resources}">${data.entity.value}</a>":</div>`
+          );
         if (RRIDs.length <= 0) element.append(`<div class="RRIDUrls-results">None</div>`);
         else {
           let list = $(`<ul class="RRIDUrls-results"></ul>`);
@@ -530,6 +542,7 @@ DatasetForm.prototype.getDataset = function () {
     qc: this.dataset.qc,
     representativeImage: this.dataset.representativeImage,
     issue: this.dataset.issue,
+    issues: this.dataset.issues,
     dataType: this.dataset.dataType ? this.dataset.dataType : this.dataset.customDataType,
     subType: this.dataset.subType,
     description: this.dataset.description,
