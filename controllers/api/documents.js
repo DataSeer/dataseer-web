@@ -1763,6 +1763,10 @@ Self.updateDataset = function (opts = {}, cb) {
                 opts.dataset.sentences = datasets.current[i].sentences;
               }
               if (opts.keepDataFromMongo) {
+                opts.dataset.representativeImage = datasets.current[i].representativeImage;
+                opts.dataset.flagged = datasets.current[i].flagged;
+                opts.dataset.issue = datasets.current[i].issue;
+                opts.dataset.issues = datasets.current[i].issues;
                 opts.dataset.notification = datasets.current[i].notification;
                 opts.dataset.highlight = datasets.current[i].highlight;
                 opts.dataset.protocolSource = datasets.current[i].protocolSource;

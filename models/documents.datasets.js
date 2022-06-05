@@ -25,6 +25,7 @@ const Sentence = new mongoose.Schema(
       qc: { type: Boolean, default: false }, // qc property
       representativeImage: { type: Boolean, default: false }, // representativeImage property
       issue: { type: String, default: `` }, // issue property
+      issues: { type: Array, default: [] }, // issues property
       notification: { type: String, default: `` }, // notification property
       highlight: { type: Boolean, default: false }, // highlight property
       flagged: { type: Boolean, default: false }, // flagged property

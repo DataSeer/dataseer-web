@@ -119,12 +119,13 @@ Self.createDataset = function (opts = {}) {
     id: opts.id, // id
     dataInstanceId: opts.dataInstanceId, // dataInstance id
     sentences: Array.isArray(opts.sentences) ? opts.sentences : [], // sentences
-    reuse: opts.reuse ? opts.reuse : false, // dataset reuse
-    qc: opts.qc ? opts.qc : false, // dataset qc
-    representativeImage: opts.representativeImage ? opts.representativeImage : false, // dataset representativeImage
+    reuse: Params.convertToBoolean(opts.reuse) ? true : false, // dataset reuse
+    qc: Params.convertToBoolean(opts.qc) ? true : false, // dataset qc
+    representativeImage: Params.convertToBoolean(opts.representativeImage) ? true : false, // dataset representativeImage
     issue: Params.convertToBoolean(opts.issue) ? opts.issue : ``, // dataset issue
-    highlight: opts.highlight ? opts.highlight : false, // dataset highlight
-    flagged: opts.flagged ? opts.flagged : false, // dataset flagged
+    issues: Array.isArray(opts.issues) ? opts.issues : [], // dataset issue
+    highlight: Params.convertToBoolean(opts.highlight) ? true : false, // dataset highlight
+    flagged: Params.convertToBoolean(opts.flagged) ? true : false, // dataset flagged
     notification: opts.notification ? opts.notification : ``, // dataset notification
     cert: opts.cert ? opts.cert : 0, // cert value (between 0 and 1)
     dataType: opts.dataType ? opts.dataType : ``, // dataType
