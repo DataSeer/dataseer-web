@@ -349,6 +349,7 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       if (data === null) {
         element.append(`<div class="RRIDUrls-header">You must provide an entity* to obtain the suggested RRIDs.</div>`);
       } else {
+        self.dataset.RRIDUrls = RRIDs;
         if (data.entity && data.entity.URLs && data.entity.value)
           element.append(
             `<div class="RRIDUrls-header">Suggested RRIDs for the entity* "<a target="_blank" href="${data.entity.URLs.resources}">${data.entity.value}</a>":</div>`
@@ -364,17 +365,17 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
           });
           element.append(list);
         }
-        element.append(
-          `<div class="RRIDUrls-categories">Result(s) for <a target="_blank" href="${data.entity.URLs.antibody}">Antibodies</a>, ` +
-            `<a target="_blank" href="${data.entity.URLs.biosamples}">Biosamples</a>, ` +
-            `<a target="_blank" href="${data.entity.URLs.cellLine}">Cell Lines</a>, ` +
-            `<a target="_blank" href="${data.entity.URLs.organism}">Organisms</a>, ` +
-            `<a target="_blank" href="${data.entity.URLs.plasmid}">Plasmid</a> and ` +
-            `<a target="_blank" href="${data.entity.URLs.tool}">Tools</a>.</div>`
-        );
+        if (data.entity && data.entity.URLs && data.entity.value)
+          element.append(
+            `<div class="RRIDUrls-categories">Result(s) for <a target="_blank" href="${data.entity.URLs.antibody}">Antibodies</a>, ` +
+              `<a target="_blank" href="${data.entity.URLs.biosamples}">Biosamples</a>, ` +
+              `<a target="_blank" href="${data.entity.URLs.cellLine}">Cell Lines</a>, ` +
+              `<a target="_blank" href="${data.entity.URLs.organism}">Organisms</a>, ` +
+              `<a target="_blank" href="${data.entity.URLs.plasmid}">Plasmid</a> and ` +
+              `<a target="_blank" href="${data.entity.URLs.tool}">Tools</a>.</div>`
+          );
       }
       element.append(`<div class="RRIDUrls-sub">*based on the "name" of this dataset</div>`);
-      self.dataset.RRIDUrls = RRIDs;
       // ----------------------
       return self.dataset.RRIDUrls;
     },
