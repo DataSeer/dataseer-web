@@ -220,7 +220,7 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     },
     issues: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.issues;
-      let issues = Array.isArray(value) ? value : [];
+      let issues = typeof value === `object` ? value : {};
       self.dataset.issues = issues;
       // input change behaviors
       // ----------------------
