@@ -16,6 +16,15 @@ const Sentence = new mongoose.Schema(
     },
     { _id: false }
   ),
+  Issues = new mongoose.Schema(
+    {
+      author: { type: String, default: `` }, // author
+      createdAt: { type: Date, default: Date.now }, // createdAt
+      active: { type: [String], default: `` }, // active issues
+      comment: { type: String, default: `` } // comment
+    },
+    { _id: false }
+  ),
   Dataset = new mongoose.Schema(
     {
       id: { type: String, default: `` }, // id
@@ -24,8 +33,8 @@ const Sentence = new mongoose.Schema(
       reuse: { type: Boolean, default: false }, // reuse property
       qc: { type: Boolean, default: false }, // qc property
       representativeImage: { type: Boolean, default: false }, // representativeImage property
-      issue: { type: String, default: `` }, // issue property
-      issues: { type: Array, default: [] }, // issues property
+      issue: { type: String, default: `` }, // issue property (deprecated)
+      issues: { type: Issues, default: null }, // issues property
       notification: { type: String, default: `` }, // notification property
       highlight: { type: Boolean, default: false }, // highlight property
       flagged: { type: Boolean, default: false }, // flagged property

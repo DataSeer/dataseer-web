@@ -122,8 +122,8 @@ Self.createDataset = function (opts = {}) {
     reuse: Params.convertToBoolean(opts.reuse) ? true : false, // dataset reuse
     qc: Params.convertToBoolean(opts.qc) ? true : false, // dataset qc
     representativeImage: Params.convertToBoolean(opts.representativeImage) ? true : false, // dataset representativeImage
-    issue: Params.convertToBoolean(opts.issue) ? opts.issue : ``, // dataset issue
-    issues: Array.isArray(opts.issues) ? opts.issues : [], // dataset issue
+    issue: Params.convertToBoolean(opts.issue) ? opts.issue : ``, // dataset issue (deprecated)
+    issues: typeof opts.issues === `object` ? opts.issues : undefined, // dataset issues
     highlight: Params.convertToBoolean(opts.highlight) ? true : false, // dataset highlight
     flagged: Params.convertToBoolean(opts.flagged) ? true : false, // dataset flagged
     notification: opts.notification ? opts.notification : ``, // dataset notification
