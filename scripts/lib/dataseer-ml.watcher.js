@@ -60,7 +60,6 @@ Watcher.prototype.restart = function (err) {
 
 Watcher.prototype.watch = function () {
   let that = this;
-  Watcher.log(`watch service`);
   if (!this._restart)
     return fetch(that.conf.url)
       .then(function (res) {
