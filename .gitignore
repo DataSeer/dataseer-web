@@ -4,6 +4,8 @@ conf/mails/*.json
 public/js/conf/*.js
 conf/private.key
 
+scripts/conf/*.json
+
 # mongodb docker container 
 mongodb/*.yml
 
