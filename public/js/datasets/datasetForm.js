@@ -17,6 +17,9 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     dataTypes: {},
     subTypes: {}
   };
+  this.focused = false;
+  this.mouseFocus = false;
+  this.elementsFocus = false;
   this.defaultDataType = undefined; // will contain the default dataType
   this.dataset = {};
   this.events = events;
@@ -152,6 +155,26 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     let el = $(this),
       target = el.attr(`target`).replace(`dataset.`, ``);
     if (typeof self.events.onLeave === `function`) self.events.onLeave(target, self.properties[target]());
+  });
+  this.screen.mouseleave(function () {
+    self.mouseFocus = false;
+    self.focused = self.mouseFocus || self.elementsFocus;
+    if (typeof self.events.onFocusChange === `function`) self.events.onFocusChange(self.getDataset());
+  });
+  this.screen.mouseenter(function () {
+    self.mouseFocus = true;
+    self.focused = self.mouseFocus || self.elementsFocus;
+    if (typeof self.events.onFocusChange === `function`) self.events.onFocusChange(self.getDataset());
+  });
+  this.screen.find(`*`).blur(function () {
+    self.elementsFocus = false;
+    self.focused = self.mouseFocus || self.elementsFocus;
+    if (typeof self.events.onFocusChange === `function`) self.events.onFocusChange(self.getDataset());
+  });
+  this.screen.find(`*`).focus(function () {
+    self.elementsFocus = true;
+    self.focused = self.mouseFocus || self.elementsFocus;
+    if (typeof self.events.onFocusChange === `function`) self.events.onFocusChange(self.getDataset());
   });
   // Set or get a property
   this.properties = {
