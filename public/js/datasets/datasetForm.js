@@ -805,6 +805,7 @@ DatasetForm.prototype.getIconOfStatus = function (status) {
 
 // update dataset
 DatasetForm.prototype.updateDataset = function (dataset) {
+  let oldDataset = this.getDataset();
   // Set properties
   for (let key in dataset) {
     if (typeof this.properties[key] === `function`) {
@@ -814,6 +815,8 @@ DatasetForm.prototype.updateDataset = function (dataset) {
   this.properties[`customDataType`](``, true);
   this.properties[`dataType`](dataset[`dataType`], true);
   this.properties[`subType`](dataset[`subType`], true);
+  let newDataset = this.getDataset();
+  if (typeof this.events.onUpdateDataset === `function`) return this.events.onUpdateDataset(oldDataset, newDataset);
 };
 
 // update dataset
@@ -837,6 +840,7 @@ DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
     })
     .join(`<br/>`);
   this.refreshText(text);
+  if (typeof this.events.onDatasetLink === `function`) return this.events.onDatasetLink(this.getDataset());
   this.refreshDataset(data, opts, function (err, res) {
     if (datasets && datasets.length > 0) {
       self.refreshDatasetsList(datasets);
@@ -916,6 +920,7 @@ DatasetForm.prototype.refreshDataset = function (data = {}, opts = {}, callback)
 
 // Link dataset to datasetForm
 DatasetForm.prototype.unlink = function () {
+  if (typeof this.events.onDatasetUnlink === `function`) return this.events.onDatasetUnlink(this.getDataset());
   this.dataset = {};
   this.uncolor();
   this.setEmptyMessage();
