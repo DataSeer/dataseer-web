@@ -284,19 +284,25 @@ The is a public URL, but some parameters coulb be restricted (depending on your 
       <td>Boolean</td>
       <td>mute</td>
       <td>optional</td>
-      <td>Mute the email notification (default: false). Only administrators/moderators can use it).</td>
+      <td>Mute the email notification (default: false). Only administrators/moderators can use it.</td>
     </tr>
     <tr>
       <td>Boolean</td>
       <td>dataseerML</td>
       <td>optional</td>
-      <td>Process dataseer-ml (default: true). Only administrators/moderators can use it).</td>
+      <td>Process dataseer-ml (default: true). You must set it to false only to re-upload an XML coming from dataseer-ml. Only administrators/moderators can use it.</td>
+    </tr>
+    <tr>
+      <td>Boolean</td>
+      <td>softcite</td>
+      <td>optional</td>
+      <td>Process softcite (default: true). You must set it to false only to disable softcite processing. Only administrators/moderators can use it.</td>
     </tr>
     <tr>
       <td>Boolean</td>
       <td>removeResponseToViewerSection</td>
       <td>optional</td>
-      <td>Remove "Response to viewer" section (default: false, use true for AmNat PDFs). Only administrators/moderators can use it).</td>
+      <td>Remove "Response to viewer" section (default : false - or default : true for AmNat PDFs). Only applicable to PDFs. Only administrators/moderators can use it.</td>
     </tr>
   </tbody>
 </table>
