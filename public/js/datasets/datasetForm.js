@@ -17,6 +17,9 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     dataTypes: {},
     subTypes: {}
   };
+  this.focused = false;
+  this.mouseFocus = false;
+  this.elementsFocus = false;
   this.defaultDataType = undefined; // will contain the default dataType
   this.dataset = {};
   this.events = events;
@@ -152,6 +155,26 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     let el = $(this),
       target = el.attr(`target`).replace(`dataset.`, ``);
     if (typeof self.events.onLeave === `function`) self.events.onLeave(target, self.properties[target]());
+  });
+  this.screen.mouseleave(function () {
+    self.mouseFocus = false;
+    self.focused = self.mouseFocus || self.elementsFocus;
+    if (typeof self.events.onFocusChange === `function`) self.events.onFocusChange(self.getDataset());
+  });
+  this.screen.mouseenter(function () {
+    self.mouseFocus = true;
+    self.focused = self.mouseFocus || self.elementsFocus;
+    if (typeof self.events.onFocusChange === `function`) self.events.onFocusChange(self.getDataset());
+  });
+  this.screen.find(`*`).blur(function () {
+    self.elementsFocus = false;
+    self.focused = self.mouseFocus || self.elementsFocus;
+    if (typeof self.events.onFocusChange === `function`) self.events.onFocusChange(self.getDataset());
+  });
+  this.screen.find(`*`).focus(function () {
+    self.elementsFocus = true;
+    self.focused = self.mouseFocus || self.elementsFocus;
+    if (typeof self.events.onFocusChange === `function`) self.events.onFocusChange(self.getDataset());
   });
   // Set or get a property
   this.properties = {
@@ -782,6 +805,7 @@ DatasetForm.prototype.getIconOfStatus = function (status) {
 
 // update dataset
 DatasetForm.prototype.updateDataset = function (dataset) {
+  let oldDataset = this.getDataset();
   // Set properties
   for (let key in dataset) {
     if (typeof this.properties[key] === `function`) {
@@ -791,6 +815,8 @@ DatasetForm.prototype.updateDataset = function (dataset) {
   this.properties[`customDataType`](``, true);
   this.properties[`dataType`](dataset[`dataType`], true);
   this.properties[`subType`](dataset[`subType`], true);
+  let newDataset = this.getDataset();
+  if (typeof this.events.onUpdateDataset === `function`) return this.events.onUpdateDataset(oldDataset, newDataset);
 };
 
 // update dataset
@@ -814,6 +840,7 @@ DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
     })
     .join(`<br/>`);
   this.refreshText(text);
+  if (typeof this.events.onDatasetLink === `function`) return this.events.onDatasetLink(this.getDataset());
   this.refreshDataset(data, opts, function (err, res) {
     if (datasets && datasets.length > 0) {
       self.refreshDatasetsList(datasets);
@@ -893,6 +920,7 @@ DatasetForm.prototype.refreshDataset = function (data = {}, opts = {}, callback)
 
 // Link dataset to datasetForm
 DatasetForm.prototype.unlink = function () {
+  if (typeof this.events.onDatasetUnlink === `function`) return this.events.onDatasetUnlink(this.getDataset());
   this.dataset = {};
   this.uncolor();
   this.setEmptyMessage();

@@ -751,19 +751,27 @@ DocumentHandler.prototype.synchronize = function () {
   }
   if (this.datasetForm) {
     // Attach datasetsList events
+    this.datasetForm.attach(`onFocusChange`, function (dataset) {
+      if (self.hasChanged[dataset.id] && !self.datasetForm.focused) {
+        self.saveDataset(dataset.id);
+      }
+    });
+    // When the dataset is updated in the datasetForm
+    this.datasetForm.attach(`onUpdateDataset`, function (oldDataset, newDataset) {
+      if (self.hasChanged[oldDataset.id]) self.saveDataset(oldDataset.id);
+    });
+    // When the dataset is unlinked in the datasetForm (not in the TEI)
+    this.datasetForm.attach(`onDatasetUnlink`, function (dataset) {
+      if (self.hasChanged[dataset.id]) self.saveDataset(dataset.id);
+    });
     this.datasetForm.attach(`onPropertyChange`, function (property, value) {
       // console.log(property, value);
       let dataset = self.datasetForm.getDataset();
       self.modified(dataset.id);
       self.updateDataset(dataset.id, dataset);
-      self.autoSave(dataset.id);
       if (property === `highlight`)
         if (value) self.datasetsList.highlight(dataset.id);
         else self.datasetsList.unhighlight(dataset.id);
-    });
-    this.datasetForm.attach(`onLeave`, function () {
-      let dataset = self.datasetForm.getDataset();
-      self.saveDataset(dataset.id);
     });
     this.datasetForm.attach(`onDatasetIdClick`, function (dataset) {
       let sentence = self.datasetForm.currentSentence();
@@ -790,7 +798,7 @@ DocumentHandler.prototype.synchronize = function () {
           });
         }
       }
-      if (self.hasChanged[dataset.id]) self.autoSave(dataset.id);
+      if (self.hasChanged[dataset.id]) self.saveDataset(dataset.id);
       let nextDataset = self.getNextDataset(dataset.id);
       return self.selectSentence({ sentence: nextDataset.sentences[0], selectedDataset: nextDataset });
     });
