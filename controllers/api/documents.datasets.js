@@ -115,39 +115,54 @@ Self.datasetAlreadyExist = function (currents = [], dataset = {}, match) {
  * @returns {object} JSON containing all data
  */
 Self.createDataset = function (opts = {}) {
+  let reuse = Params.convertToBoolean(opts.reuse);
+  let kind = `unknow`;
+  if (opts.dataType === `protocols` || (opts.dataType === `other` && opts.subType === `protocol`)) kind = `protocol`;
+  else if (
+    (opts.dataType === `other` && opts.subType === `code`) ||
+    (opts.dataType === `code software` && opts.subType === `custom scripts` && !reuse)
+  )
+    kind = `code`;
+  else if (
+    (opts.dataType === `code software` && opts.subType === `custom scripts` && reuse) ||
+    (opts.dataType === `code software` && opts.subType !== `custom scripts`)
+  )
+    kind = `software`;
+  else if ((opts.dataType === `other` && opts.subType === `reagent`) || opts.dataType === `lab materials`)
+    kind = `reagent`;
+  else if (
+    opts.dataType !== `other` &&
+    opts.dataType !== `code software` &&
+    opts.dataType !== `lab materials` &&
+    opts.dataType !== `protocol`
+  )
+    kind = `dataset`;
   return {
     id: opts.id, // id
     dataInstanceId: opts.dataInstanceId, // dataInstance id
+    kind: kind, // kind
     sentences: Array.isArray(opts.sentences) ? opts.sentences : [], // sentences
-    reuse: Params.convertToBoolean(opts.reuse) ? true : false, // dataset reuse
+    name: opts.name ? opts.name : ``, // name
+    reuse: reuse ? true : false, // dataset reuse
     qc: Params.convertToBoolean(opts.qc) ? true : false, // dataset qc
     representativeImage: Params.convertToBoolean(opts.representativeImage) ? true : false, // dataset representativeImage
-    issue: Params.convertToBoolean(opts.issue) ? opts.issue : ``, // dataset issue (deprecated)
-    issues: typeof opts.issues === `object` ? opts.issues : undefined, // dataset issues
-    highlight: Params.convertToBoolean(opts.highlight) ? true : false, // dataset highlight
+    issues: typeof opts.issues === `object` ? opts.issues : null, // dataset issues
     flagged: Params.convertToBoolean(opts.flagged) ? true : false, // dataset flagged
-    notification: opts.notification ? opts.notification : ``, // dataset notification
     cert: opts.cert ? opts.cert : 0, // cert value (between 0 and 1)
     dataType: opts.dataType ? opts.dataType : ``, // dataType
     subType: opts.subType ? opts.subType : ``, //  subType
-    description: opts.description ? opts.description : ``, // description
-    bestDataFormatForSharing: opts.bestDataFormatForSharing ? opts.bestDataFormatForSharing : ``, // best data format for sharing
-    bestPracticeForIndicatingReUseOfExistingData: opts.bestPracticeForIndicatingReUseOfExistingData
-      ? opts.bestPracticeForIndicatingReUseOfExistingData
-      : ``, // best practice for indicating re-use of existing data
-    mostSuitableRepositories: opts.mostSuitableRepositories ? opts.mostSuitableRepositories : ``, // most suitable repositories
-    protocolSource: opts.protocolSource ? opts.protocolSource : ``, // protocolSource
-    labSource: opts.labSource ? opts.labSource : ``, // labSource
+    source: opts.source ? opts.source : ``, // source
     version: opts.version ? opts.version : ``, // version
-    PID: opts.PID ? opts.PID : ``, // PID
     DOI: opts.DOI ? opts.DOI : ``, // DOI
+    PID: opts.PID ? opts.PID : ``, // PID
     RRID: opts.RRID ? opts.RRID : ``, // RRID
-    catalog: opts.catalog ? opts.catalog : ``, // catalog number
-    entity: opts.entity ? opts.entity : ``, // entity name
-    citation: opts.citation ? opts.citation : ``, // suggested citation
-    name: opts.name ? opts.name : ``, // name
+    catalogNumber: opts.catalogNumber ? opts.catalogNumber : ``, // catalog number
+    suggestedEntity: opts.suggestedEntity ? opts.suggestedEntity : ``, // suggested entity
+    suggestedURL: opts.suggestedURL ? opts.suggestedURL : ``, // suggested URL
+    suggestedRRID: opts.suggestedRRID ? opts.suggestedRRID : ``, // suggested RRID
     comments: opts.comments ? opts.comments : ``, // comments
-    status: opts.dataType && opts.name && (opts.DOI || opts.comments) ? Self.status.valid : Self.status.saved // status of the dataset
+    status:
+      opts.dataType && opts.name && (opts.DOI || opts.source || opts.comments) ? Self.status.valid : Self.status.saved // status of the dataset
   };
 };
 

@@ -46,182 +46,140 @@ div(id='datasetForm.screen')
         </tr>
         <tr class="custom-row">
           <td colspan="4">
-            <div>Text:</div>
-            <div key="sentence.text" value="undefined">undefined</div>
-          </td>
-        </tr>
-        <tr class="custom-row">
-          <td class="checkboxes">
-            <div>re-use:</div>
-            <div key="dataset.reuse" value="false"></div>
-            <input name="datasetForm.reuse" target="dataset.reuse" type="checkbox" class="form-control" />
-          </td>
-          <td class="checkboxes">
-            <div>QC/Confirmatory:</div>
-            <div key="dataset.qc" value="false"></div>
-            <input name="datasetForm.qc" target="dataset.qc" type="checkbox" class="form-control" />
-          </td>
-          <td class="checkboxes">
-            <div>Representative Image:</div>
-            <div key="dataset.representativeImage" value="false"></div>
-            <input name="datasetForm.representativeImage" target="dataset.representativeImage" type="checkbox" class="form-control" />
-          </td>
-          <td class="checkboxes">
-            <div>Issue:</div>
-            <div key="dataset.issue" value="false"></div>
-            <input name="datasetForm.issue" target="dataset.issue" type="checkbox" class="form-control" />
+            <div>Kind:</div>
+            <div key="dataset.kind" value="undefined">undefined</div>
           </td>
         </tr>
         <tr class="custom-row">
           <td colspan="4">
-            <div>Data type:</div>
+            <div>Text</div>
+            <div key="sentence.text" value="undefined">undefined</div>
+          </td>
+        </tr>
+        <tr class="custom-row">
+          <td colspan="4">
+            <div>Please provide a Name for this dataset (e.g. 'sampling locations')</div>
+            <div key="dataset.name" value=""></div>
+            <input name="datasetForm.name" target="dataset.name" value="" type="text" placeholder="Provide the Name here" class="form-control" />
+          </td>
+        </tr>
+        <tr class="custom-row" style="display: none;">
+          <td colspan="4">
+            <div>flagged:</div>
+            <div key="dataset.flagged" value="false"></div>
+            <input name="datasetForm.flagged" target="dataset.flagged" type="checkbox" class="form-control" />
+          </td>
+        </tr>
+        <tr class="custom-row">
+          <td class="checkboxes" title="This dataset is re-used from another public or private source">
+            <div>re-use:</div>
+            <div key="dataset.reuse" value="false"></div>
+            <input name="datasetForm.reuse" target="dataset.reuse" type="checkbox" class="form-control" />
+          </td>
+          <td class="checkboxes" title="This dataset was created for Quality Control (QC) or confirmatory purposes">
+            <div>QC/Confirmatory:</div>
+            <div key="dataset.qc" value="false"></div>
+            <input name="datasetForm.qc" target="dataset.qc" type="checkbox" class="form-control" />
+          </td>
+          <td class="checkboxes" title="This dataset is a Representative Image (or another type of media)">
+            <div>Representative Image:</div>
+            <div key="dataset.representativeImage" value="false"></div>
+            <input name="datasetForm.representativeImage" target="dataset.representativeImage" type="checkbox" class="form-control" />
+          </td>
+          <td class="checkboxes" title="Flag issues for authors">
+            <div>Issue:</div>
+            <div key="dataset.issues" value="false"></div>
+            <input name="datasetForm.issues" target="dataset.issues" type="checkbox" class="form-control" />
+          </td>
+        </tr>
+        <tr class="custom-row">
+          <td colspan="4">
+            <div>Data type</div>
             <div key="dataset.dataType" value=""></div>
             <select name="datasetForm.dataType" target="dataset.dataType" class="form-control"></select>
           </td>
         </tr>
         <tr class="custom-row">
           <td colspan="4">
-            <div>Sub type:</div>
+            <div>Sub type</div>
             <div key="dataset.subType" value=""></div>
             <select name="datasetForm.subType" target="dataset.subType" class="form-control"></select>
           </td>
         </tr>
         <tr class="custom-row">
           <td colspan="4">
-            <div>Custom Data type:</div>
+            <div>Custom Data type</div>
             <div key="dataset.customDataType" value=""></div>
             <input name="datasetForm.customDataType" target="dataset.customDataType" type="text" class="form-control" />
           </td>
         </tr>
         <tr class="custom-row">
           <td colspan="4">
-            <div>Description:</div>
-            <div key="dataset.description" value="undefined">undefined</div>
+            <div>Version</div>
+            <div key="dataset.version" value=""></div>
+            <input name="datasetForm.version" target="dataset.version" value="" type="text" placeholder="Version" class="form-control" />
           </td>
         </tr>
         <tr class="custom-row">
           <td colspan="4">
-            <div>Best practice for sharing this type of data:</div>
-            <div key="dataset.bestDataFormatForSharing" value="undefined">undefined</div>
+            <div>Source (Name of Lab or Commercial Source)</div>
+            <div key="dataset.source" value=""></div>
+            <input name="datasetForm.source" target="dataset.source" value="" type="text" placeholder="Provide the Source (Name of Lab or Commercial Source) here" class="form-control" />
           </td>
         </tr>
         <tr class="custom-row">
           <td colspan="4">
-            <div>Best practice for indicating re-use of existing data:</div>
-            <div key="dataset.bestPracticeForIndicatingReUseOfExistingData" value="undefined">undefined</div>
+            <div>Catalog Number</div>
+            <div key="dataset.catalogNumber" value=""></div>
+            <input name="datasetForm.catalogNumber" target="dataset.catalogNumber" value="" type="text" placeholder="Provide the Catalog Number here" class="form-control" />
           </td>
         </tr>
         <tr class="custom-row">
           <td colspan="4">
-            <div>Most suitable repositories:</div>
-            <a key="dataset.url" value="http://wiki.dataseer.ai/doku.php" href="http://wiki.dataseer.ai/doku.php" target="_blank"><i class="fas fa-question"></i></a>
-            <div key="dataset.mostSuitableRepositories" value="undefined">undefined</div>
-          </td>
-        </tr>
-        <tr class="custom-row">
-          <td colspan="4">
-            <div>RepoRecommender:</div>
-            <a href="https://dataseer.ai/reporecommender-form/" title="RepoRecommender help you know which repositories to choose" target="_blank"><i class="fas fa-question"></i></a>
-            <div key="dataset.repoRecommenderUrls" value="undefined">undefined</div>
-          </td>
-        </tr>
-        <tr class="custom-row">
-          <td colspan="4">
-            <div>Highlight this dataset:</div>
-            <div key="dataset.highlight" value="false"></div>
-            <input name="datasetForm.highlight" target="dataset.highlight" type="checkbox" class="form-control" />
-          </td>
-        </tr>
-        <tr class="custom-row">
-          <td colspan="4">
-            <div key="dataset.notification" value="" class="notification alert alert-info" title="This message come from a curator"></div>
-          </td>
-        </tr>
-        <tr class="custom-row">
-          <td colspan="4">
-            <div>Enter a message here (or leave it empty so nothing will be displayed):</div>
-            <input name="datasetForm.notification" target="dataset.notification" value="" type="text" placeholder="Enter the message here or leave it empty" class="form-control" />
-          </td>
-        </tr>
-        <tr class="custom-row">
-          <td colspan="4">
-            <div>Please provide a name for this dataset (e.g. 'sampling locations'):</div>
-            <div key="dataset.name" value=""></div>
-            <input name="datasetForm.name" target="dataset.name" value="" type="text" placeholder="Provide the name here" class="form-control" />
-          </td>
-        </tr>
-        <tr class="custom-row">
-          <td colspan="4">
-            <div>Please provide the DOI (or other stable link) to this dataset:</div>
+            <div>Stable URL, DOI, or other link to this object</div>
             <div key="dataset.DOI" value=""></div>
-            <input name="datasetForm.DOI" target="dataset.DOI" value="" type="text" placeholder="Provide the DOI here" class="form-control" />
+            <input name="datasetForm.DOI" target="dataset.DOI" value="" type="text" placeholder="https://" class="form-control" />
           </td>
         </tr>
         <tr class="custom-row">
           <td colspan="4">
-            <div>Please provide the RRID to this dataset:</div>
+            <div>Accession Number/Permanent Identifier (PID)</div>
+            <div key="dataset.PID" value=""></div>
+            <input name="datasetForm.PID" target="dataset.PID" value="" type="text" placeholder="https://" class="form-control" />
+          </td>
+        </tr>
+        <tr class="custom-row">
+          <td colspan="4">
+            <div>Research Resource Identifier (RRID)</div>
             <div key="dataset.RRID" value=""></div>
             <input name="datasetForm.RRID" target="dataset.RRID" value="" type="text" placeholder="Provide the RRID here" class="form-control" />
           </td>
         </tr>
         <tr class="custom-row">
           <td colspan="4">
-            <div>Please provide the "suggested RRID citation" to this dataset:</div>
-            <div key="dataset.citation" value=""></div>
-            <input name="datasetForm.citation" target="dataset.citation" value="" type="text" placeholder="Provide the 'suggested RRID citation' here" class="form-control" />
+            <div>Suggested Name of Entity</div>
+            <div key="dataset.suggestedEntity" value=""></div>
+            <input name="datasetForm.suggestedEntity" target="dataset.suggestedEntity" value="" type="text" placeholder="Provide the 'Suggested Name of Entity' here" class="form-control" />
+          </td>
+        </tr>
+        <tr class="custom-row">
+          <td colspan="4">
+            <div>Suggested URL</div>
+            <div key="dataset.suggestedURL" value=""></div>
+            <input name="datasetForm.suggestedURL" target="dataset.suggestedURL" value="" type="text" placeholder="Provide the 'Suggested URL' here" class="form-control" />
+          </td>
+        </tr>
+        <tr class="custom-row">
+          <td colspan="4">
+            <div>Suggested RRID</div>
+            <div key="dataset.suggestedRRID" value=""></div>
+            <input name="datasetForm.suggestedRRID" target="dataset.suggestedRRID" value="" type="text" placeholder="Provide the 'Suggested RRID' here" class="form-control" />
             <div key="dataset.RRIDUrls" value="undefined">undefined</div>
           </td>
         </tr>
         <tr class="custom-row">
           <td colspan="4">
-            <div>Please provide the PID to this dataset:</div>
-            <div key="dataset.PID" value=""></div>
-            <input name="datasetForm.PID" target="dataset.PID" value="" type="text" placeholder="Provide the PID here" class="form-control" />
-          </td>
-        </tr>
-        </tr>
-        <tr class="custom-row">
-          <td colspan="4">
-            <div>Please provide the version to this dataset:</div>
-            <div key="dataset.version" value=""></div>
-            <input name="datasetForm.version" target="dataset.version" value="" type="text" placeholder="Provide the version here" class="form-control" />
-          </td>
-        </tr>
-        <tr class="custom-row">
-          <td colspan="4">
-            <div>Please provide the "Name of Lab or Commercial Source" to this dataset:</div>
-            <div key="dataset.labSource" value=""></div>
-            <input name="datasetForm.labSource" target="dataset.labSource" value="" type="text" placeholder="Provide the 'Name of Lab or Commercial Source' here" class="form-control" />
-          </td>
-        </tr>
-        <tr class="custom-row" style="display: none;">
-          <td colspan="4">
-            <div>Please provide the "Protocol Type" to this dataset:</div>
-            <div key="dataset.protocolSource" value=""></div>
-            <select name="datasetForm.protocolSource" target="dataset.protocolSource" class="form-control">
-              <option value="">Not a protocol</option>
-              <option value="Another Protocol">Another Protocol</option>
-              <option value="Manufacturer's Instructions">Manufacturer's Instructions</option>
-            </select>
-          </td>
-        </tr>
-        <tr class="custom-row">
-          <td colspan="4">
-            <div>Please provide the "catalog number" to this dataset:</div>
-            <div key="dataset.catalog" value=""></div>
-            <input name="datasetForm.catalog" target="dataset.catalog" value="" type="text" placeholder="Provide the catalog number here" class="form-control" />
-          </td>
-        </tr>
-        <tr class="custom-row">
-          <td colspan="4">
-            <div>Please provide the "name of entity identified" to this dataset:</div>
-            <div key="dataset.entity" value=""></div>
-            <input name="datasetForm.entity" target="dataset.entity" value="" type="text" placeholder="Provide the name of entity identified here" class="form-control" />
-          </td>
-        </tr>
-        <tr class="custom-row">
-          <td colspan="4">
-            <div>Please enter any comments here (such as a reason why this dataset cannot be shared):</div>
+            <div>Additional Comments or Instructions</div>
             <div key="dataset.comments" value=""></div>
             <textarea name="datasetForm.comments" target="dataset.comments" value="" type="text" placeholder="Enter any comments here" class="form-control"></textarea>
           </td>

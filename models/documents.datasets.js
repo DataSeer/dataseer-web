@@ -27,36 +27,39 @@ const Sentence = new mongoose.Schema(
   ),
   Dataset = new mongoose.Schema(
     {
+      // "Technical" properties
       id: { type: String, default: `` }, // id
       dataInstanceId: { type: String, default: `` }, // dataInstanceId id
-      sentences: [Sentence], // sentences
-      reuse: { type: Boolean, default: false }, // reuse property
-      qc: { type: Boolean, default: false }, // qc property
-      representativeImage: { type: Boolean, default: false }, // representativeImage property
-      issue: { type: String, default: `` }, // issue property (deprecated)
-      issues: { type: Issues, default: null }, // issues property
-      notification: { type: String, default: `` }, // notification property
-      highlight: { type: Boolean, default: false }, // highlight property
+      kind: { type: String, default: `unknow` }, // kind of the data object - available values : 'unknow', 'dataset', code', 'software', 'reagent', 'protocol'
       flagged: { type: Boolean, default: false }, // flagged property
       cert: { type: String, default: `` }, // cert value (between 0 and 1)
+      status: { type: String, default: `saved` }, // status of the data object
+      // "Shared" properties
+      name: { type: String, default: `` }, // name
       dataType: { type: String, default: `` }, // dataType
       subType: { type: String, default: `` }, //  subType
-      description: { type: String, default: `` }, // description
-      bestDataFormatForSharing: { type: String, default: `` }, // best data format for sharing
-      bestPracticeForIndicatingReUseOfExistingData: { type: String, default: `` }, // best practice for indicating re-use of existing data
-      mostSuitableRepositories: { type: String, default: `` }, // most suitable repositories
-      protocolSource: { type: String, default: `` }, // protocolSource
-      labSource: { type: String, default: `` }, // labSource
-      version: { type: String, default: `` }, // version
-      PID: { type: String, default: `` }, // PID
+      reuse: { type: Boolean, default: false }, // reuse property
       DOI: { type: String, default: `` }, // DOI
-      RRID: { type: String, default: `` }, // RRID
-      catalog: { type: String, default: `` }, // catalog number
-      entity: { type: String, default: `` }, // entity name
-      citation: { type: String, default: `` }, // suggested citation
-      name: { type: String, default: `` }, // name
       comments: { type: String, default: `` }, // comments
-      status: { type: String, default: `saved` } // text of sentence
+      // - "Suggested" properties
+      suggestedEntity: { type: String, default: `` },
+      suggestedURL: { type: String, default: `` },
+      suggestedRRID: { type: String, default: `` },
+      // - "Issues" properties
+      issues: { type: Issues, default: null }, // issues property
+      // - "Sentences" properties
+      sentences: [Sentence], // sentences
+      // "Datasets" properties only
+      qc: { type: Boolean, default: false }, // qc property
+      representativeImage: { type: Boolean, default: false }, // representativeImage property
+      PID: { type: String, default: `` }, // PID
+      // "Codes" & "softwares" properties only
+      version: { type: String, default: `` }, // version
+      // "Materials" properties only
+      catalogNumber: { type: String, default: `` }, // catalog number
+      source: { type: String, default: `` }, // catalog number
+      // "Codes" & "softwares" & "Materials" properties only
+      RRID: { type: String, default: `` } // RRID
     },
     { _id: false }
   );
