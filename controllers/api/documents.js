@@ -2650,30 +2650,19 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
       return c === d ? 0 : c < d ? -1 : 1;
     });
   let protocols = orderedDatasets.filter(function (item) {
-    return item.dataType === `protocol` || (item.dataType === `other` && item.subType === `protocol`);
+    return item.kind === `protocol`;
   });
   let codes = orderedDatasets.filter(function (item) {
-    return (
-      (item.dataType === `other` && item.subType === `code`) ||
-      (item.dataType === `code software` && item.subType === `custom scripts` && !item.reuse)
-    );
+    return item.kind === `code`;
   });
   let softwares = orderedDatasets.filter(function (item) {
-    return (
-      (item.dataType === `code software` && item.subType === `custom scripts` && item.reuse) ||
-      (item.dataType === `code software` && item.subType !== `custom scripts`)
-    );
+    return item.kind === `software`;
   });
   let reagents = orderedDatasets.filter(function (item) {
-    return (item.dataType === `other` && item.subType === `reagent`) || item.dataType === `lab materials`;
+    return item.kind === `reagent`;
   });
   let datasets = orderedDatasets.filter(function (item) {
-    return (
-      item.dataType !== `other` &&
-      item.dataType !== `code software` &&
-      item.dataType !== `lab materials` &&
-      item.dataType !== `protocol`
-    );
+    return item.kind === `dataset`;
   });
   return { all: orderedDatasets, protocols, codes, softwares, reagents, datasets };
 };
