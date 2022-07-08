@@ -37,6 +37,7 @@ const Schema = new mongoose.Schema(
     watchers: [{ type: mongoose.Schema.Types.ObjectId, ref: `Accounts` }], // refers to documents.accounts collection item
     token: { type: String, default: `` }, // document token
     visible: { type: Boolean, default: true, required: true }, // document visibility
+    alreadyProcessed: { type: Boolean, default: false }, // document already assessed
     locked: { type: Boolean, default: false, required: true }, // document lock
     upload: uploadSchema
   },
