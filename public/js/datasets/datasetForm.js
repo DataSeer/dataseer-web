@@ -340,6 +340,8 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
         else {
           let list = $(`<ul class="RRIDUrls-results"></ul>`);
           RRIDs.map(function (item) {
+            if (true) {
+            }
             let RRID = data.RRIDs.values[item];
             list.append(
               `<li>${item} <a target="_blank" href="${data.RRIDs.URLs.resources[item]}">(${RRID.name})</a></li>`
@@ -347,15 +349,20 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
           });
           element.append(list);
         }
-        if (data.entity && data.entity.URLs && data.entity.value)
-          element.append(
-            `<div class="RRIDUrls-categories">Result(s) for <a target="_blank" href="${data.entity.URLs.antibody}">Antibodies</a>, ` +
-              `<a target="_blank" href="${data.entity.URLs.biosamples}">Biosamples</a>, ` +
-              `<a target="_blank" href="${data.entity.URLs.cellLine}">Cell Lines</a>, ` +
-              `<a target="_blank" href="${data.entity.URLs.organism}">Organisms</a>, ` +
-              `<a target="_blank" href="${data.entity.URLs.plasmid}">Plasmid</a> and ` +
-              `<a target="_blank" href="${data.entity.URLs.tool}">Tools</a>.</div>`
-          );
+        if (data.entity && data.entity.URLs && data.entity.value) {
+          if (self.dataset.kind === `software` || self.dataset.kind === `code`) {
+            element.append(
+              `<div class="RRIDUrls-categories">Result(s) for <a target="_blank" href="${data.entity.URLs.tool}">Tools</a>.</div>`
+            );
+          } else if (self.dataset.kind === `reagent`) {
+            element.append(
+              `<div class="RRIDUrls-categories">Result(s) for <a target="_blank" href="${data.entity.URLs.antibody}">Antibodies</a>, ` +
+                `<a target="_blank" href="${data.entity.URLs.cellLine}">Cell Lines</a>, ` +
+                `<a target="_blank" href="${data.entity.URLs.organism}">Organisms</a>, ` +
+                `<a target="_blank" href="${data.entity.URLs.plasmid}">Plasmid</a></div>`
+            );
+          }
+        }
       }
       element.append(`<div class="RRIDUrls-sub">*based on the "name" of this dataset</div>`);
       // ----------------------
@@ -783,7 +790,10 @@ DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
     if (datasets && datasets.length > 0) {
       self.refreshDatasetsList(datasets);
     }
-    return self.refreshRRIDURL(data.dataset.name, function () {
+    let entity = null;
+    if (self.dataset.kind === `code` || self.dataset.kind === `software` || self.dataset.kind === `reagent`)
+      entity = data.dataset.name;
+    return self.refreshRRIDURL(entity, function () {
       return callback(err, res);
     });
   });
