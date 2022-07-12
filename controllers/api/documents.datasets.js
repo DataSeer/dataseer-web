@@ -117,7 +117,7 @@ Self.datasetAlreadyExist = function (currents = [], dataset = {}, match) {
 Self.createDataset = function (opts = {}) {
   let reuse = Params.convertToBoolean(opts.reuse);
   let kind = `unknow`;
-  if (opts.dataType === `protocols` || (opts.dataType === `other` && opts.subType === `protocol`)) kind = `protocol`;
+  if (opts.dataType === `protocol` || (opts.dataType === `other` && opts.subType === `protocol`)) kind = `protocol`;
   else if (
     (opts.dataType === `other` && opts.subType === `code`) ||
     (opts.dataType === `code software` && opts.subType === `custom scripts` && !reuse)
