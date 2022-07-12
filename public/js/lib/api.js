@@ -818,6 +818,26 @@ const API = {
       });
     },
     /**
+     * POST fix TEI content of given document
+     * @param {object} opts Options
+     * @param {string} opts.id Id of document
+     * @param {function} done Callback function(err, res) (err: error process OR null, res: infos/data OR undefined)
+     * @returns {undefined} undefined
+     */
+    fixTEIContent: function (opts = {}, done) {
+      return $.ajax({
+        type: `POST`,
+        url: URLMANAGER.buildURL(`${this.url}/${opts.id}/fixTEIContent`, {}, { setToken: true }),
+        success: function (query) {
+          console.log(`documents.fixTEIContent`, query);
+          return done(false, query);
+        },
+        error: function (query) {
+          return done(query);
+        }
+      });
+    },
+    /**
      * Refresh token of given document
      * @param {object} opts Options
      * @param {string} opts.id Id of document
