@@ -4,6 +4,8 @@
 
 'use strict';
 
+const fs = require(`fs`);
+
 const async = require(`async`);
 const mongoose = require(`mongoose`);
 const _ = require(`lodash`);
@@ -2074,6 +2076,45 @@ Self.refreshDatasetsInTEI = function (opts = {}, cb) {
         if (err) return cb(err);
         else return cb(null);
       });
+    });
+  });
+};
+
+/**
+ * Try to fix the TEI content
+ * @param {object} opts JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.fixTEIContent = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    return DocumentsFilesController.readFileContent({ data: { id: doc.tei.toString() } }, function (err, content) {
+      if (err) return cb(err);
+      let oldContent = content.data.toString(DocumentsFilesController.encoding);
+      let chars = `</TEI>`;
+      let indexOfChars = oldContent.indexOf(chars);
+      let isCorrect = indexOfChars + chars.length === oldContent.length;
+      if (isCorrect) return cb(null);
+      let newContent = oldContent.substring(0, indexOfChars + chars.length);
+      return fs.writeFile(
+        `${content.path}.save`,
+        oldContent,
+        { encoding: DocumentsFilesController.encoding },
+        function (err) {
+          if (err) return cb(err);
+          return DocumentsFilesController.rewriteFile(doc.tei.toString(), newContent, function (err) {
+            if (err) return cb(err);
+            else return cb(null);
+          });
+        }
+      );
     });
   });
 };

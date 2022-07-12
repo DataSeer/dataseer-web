@@ -370,6 +370,29 @@ router.put(`/:id/fixEncoding`, function (req, res, next) {
   });
 });
 
+/* POST fixTEIContent */
+router.post(`/:id/fixTEIContent`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    documentId: req.params.id,
+    user: req.user
+  };
+  return DocumentsController.fixTEIContent(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
 /* POST importDatasets */
 router.post(`/:target/importDatasets/:source`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
