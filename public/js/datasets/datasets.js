@@ -75,10 +75,30 @@
         setTextLoop(`Downloading TEI content...`);
         return API.documents.getTEIContent({ id: documentId }, function (err, xml) {
           if (err) {
-            setHeaderLoop(`TEI content unavailable`);
-            setTextLoop(`Please contact a curator`);
-            hideLoader();
-            return alert(`Error : TEI content unavailable`);
+            if (user.isCurator || user.isAnnotator) {
+              setHeaderLoop(`TEI content unavailable`);
+              hideLoader();
+              if (confirm(`Try to automatically correct the content of the TEI ?`) == true) {
+                setTextLoop(`Application will try to automatically fix it.`);
+                return API.documents.fixTEIContent({ id: documentId }, function (err) {
+                  setTextLoop(`Automatic fix failed... Please contact a curator`);
+                  if (err) return alert(`Automatic fix failed... Please contact a curator`);
+                  else {
+                    setTextLoop(`Application will try to automatically fix it.`);
+                    alert(`TEI content fixed. Your navigator will automatically refresh this tab.`);
+                    return (window.location.href = window.location.href.replace(/(\/?datasets\/?)$/, ``));
+                  }
+                });
+              } else {
+                setTextLoop(`Please contact a curator`);
+                return alert(`Automatic fix cancelled`);
+              }
+            } else {
+              setHeaderLoop(`TEI content unavailable`);
+              setTextLoop(`Please contact a curator`);
+              hideLoader();
+              return alert(`Error : TEI content unavailable`);
+            }
           }
           setTextLoop(`Downloading datatypes...`);
           // Get datatypes

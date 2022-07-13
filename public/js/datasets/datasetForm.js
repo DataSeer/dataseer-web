@@ -4,6 +4,14 @@
 
 'use strict';
 
+const KIND_LABEL = {
+  'dataset': `Dataset`,
+  'code': `Code`,
+  'software': `Software`,
+  'reagent': `Lab Material`,
+  'protocol': `Protocol`
+};
+
 const DatasetForm = function (id = `datasetForm`, events = {}) {
   let self = this;
   this.id = id;
@@ -128,10 +136,8 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     if (typeof self.properties[target] === `function`) {
       self.properties[target](value);
       if (target === `dataType` || target === `subType`)
-        return self.setRepos(function () {
-          if (typeof self.events.onPropertyChange === `function`)
-            return self.events.onPropertyChange(target, self.properties[target]());
-        });
+        if (typeof self.events.onPropertyChange === `function`)
+          return self.events.onPropertyChange(target, self.properties[target]());
       if (typeof self.events.onPropertyChange === `function`)
         self.events.onPropertyChange(target, self.properties[target]());
     }
@@ -187,6 +193,15 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       // ----------------------
       return self.dataset.id;
     },
+    kind: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.kind;
+      self.container.find(`div[key="dataset\\.kind"]`).attr(`value`, value).text(KIND_LABEL[value]);
+      self.dataset.kind = value;
+      // input change behaviors
+      self.updateLabel(value);
+      // ----------------------
+      return self.dataset.kind;
+    },
     status: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.status;
       self.container
@@ -204,7 +219,7 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       if (inputs) self.container.find(`input[type="checkbox"][name="datasetForm\\.reuse"]`).prop(`checked`, reuse);
       self.dataset.reuse = reuse;
       // input change behaviors
-      self.refreshDatatypeInfos(); // refresh dataType infos
+      // self.refreshDatatypeInfos(); // refresh dataType infos
       // ----------------------
       return self.dataset.reuse;
     },
@@ -231,21 +246,33 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       // ----------------------
       return self.dataset.representativeImage;
     },
-    issue: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.issue;
-      let issue = value === `false` || value === false ? false : !!value;
-      self.container.find(`div[key="dataset\\.issue"]`).attr(`value`, issue);
-      if (inputs) self.container.find(`input[type="checkbox"][name="datasetForm\\.issue"]`).prop(`checked`, issue);
-      self.dataset.issue = issue;
+    flagged: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.flagged;
+      let flagged = value === `false` || value === false ? false : !!value;
+      self.container.find(`div[key="dataset\\.flagged"]`).attr(`value`, flagged);
+      if (inputs) self.container.find(`input[type="checkbox"][name="datasetForm\\.flagged"]`).prop(`checked`, flagged);
+      self.dataset.flagged = flagged;
       // input change behaviors
       // ----------------------
-      return self.dataset.issue;
+      return self.dataset.flagged;
     },
     issues: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.issues;
-      let issues = typeof value === `object` ? value : {};
+      let issues =
+        value === `false` || value === false || value === null
+          ? null
+          : {
+            author: `n/a`,
+            createdAt: new Date(Date.now()), // createdAt
+            active: [`issue from old GUI`], // active issues
+            comment: `` // comment
+          };
+      let hasIssues = issues !== null;
+      self.container.find(`div[key="dataset\\.issues"]`).attr(`value`, JSON.stringify(issues));
+      if (inputs) self.container.find(`input[type="checkbox"][name="datasetForm\\.issues"]`).prop(`checked`, hasIssues);
       self.dataset.issues = issues;
       // input change behaviors
+      self.properties[`flagged`](hasIssues, true);
       // ----------------------
       return self.dataset.issues;
     },
@@ -263,7 +290,7 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       } else self.dataset.dataType = value;
       // input change behaviors
       self.setSubtypes(); // set subtypes
-      self.refreshDatatypeInfos(); // refresh dataType infos
+      // self.refreshDatatypeInfos(); // refresh dataType infos
       // ----------------------
       return self.dataset.dataType;
     },
@@ -274,7 +301,7 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
         self.container.find(`select[name="datasetForm\\.subType"] option[value="${value}"]`).prop(`selected`, true);
       self.dataset.subType = value;
       // input change behaviors
-      self.refreshDatatypeInfos(); // refresh dataType infos
+      // self.refreshDatatypeInfos(); // refresh dataType infos
       // ----------------------
       return self.dataset.subType;
     },
@@ -285,80 +312,12 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       self.dataset.customDataType = value;
       return self.dataset.customDataType;
     },
-    description: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.description;
-      let text = value === `` ? `n/a` : value;
-      self.container.find(`div[key="dataset\\.description"]`).attr(`value`, value).html(text);
-      self.dataset.description = value;
-      return self.dataset.description;
-    },
-    bestDataFormatForSharing: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.bestDataFormatForSharing;
-      let text = value === `` ? `n/a` : value;
-      self.container.find(`div[key="dataset\\.bestDataFormatForSharing"]`).attr(`value`, value).html(text);
-      self.dataset.bestDataFormatForSharing = value;
-      return self.dataset.bestDataFormatForSharing;
-    },
     url: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.url;
       let data = value === `` ? `http://wiki.dataseer.ai/doku.php` : value;
       self.container.find(`a[key="dataset\\.url"]`).attr(`value`, data).attr(`href`, data);
       self.dataset.url = data;
       return self.dataset.url;
-    },
-    mostSuitableRepositories: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.mostSuitableRepositories;
-      let text = value === `` ? `n/a` : value;
-      self.container.find(`div[key="dataset\\.mostSuitableRepositories"]`).attr(`value`, value).html(text);
-      self.dataset.mostSuitableRepositories = value;
-      return self.dataset.mostSuitableRepositories;
-    },
-    bestPracticeForIndicatingReUseOfExistingData: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.bestPracticeForIndicatingReUseOfExistingData;
-      let text = value === `` ? `n/a` : value;
-      self.container
-        .find(`div[key="dataset\\.bestPracticeForIndicatingReUseOfExistingData"]`)
-        .attr(`value`, value)
-        .html(text);
-      self.dataset.bestPracticeForIndicatingReUseOfExistingData = value;
-      return self.dataset.bestPracticeForIndicatingReUseOfExistingData;
-    },
-    highlight: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.highlight;
-      let highlight = value === `false` ? false : !!value;
-      self.container.find(`div[key="dataset\\.highlight"]`).attr(`value`, highlight);
-      if (inputs)
-        self.container.find(`input[type="checkbox"][name="datasetForm\\.highlight"]`).prop(`checked`, highlight);
-      self.dataset.highlight = highlight;
-      return self.dataset.highlight;
-    },
-    notification: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.notification;
-      self.container.find(`div[key="dataset\\.notification"]`).attr(`value`, value).text(value);
-      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.notification"]`).val(value);
-      self.dataset.notification = value;
-      // input change behaviors
-      // Hide notification if empty, else show
-      if (!self.dataset.notification) self.container.find(`div[key="dataset\\.notification"]`).hide();
-      else self.container.find(`div[key="dataset\\.notification"]`).show();
-      // ----------------------
-      return self.dataset.notification;
-    },
-    repoRecommenderUrls: function (values, inputs = false) {
-      if (typeof values === `undefined`) return self.dataset.repoRecommenderUrls;
-      let data = !Array.isArray(values) ? [] : values;
-      let element = self.container.find(`div[key="dataset\\.repoRecommenderUrls"]`);
-      element.attr(`value`, JSON.stringify(values));
-      element.empty();
-      let list = $(`<ol>`);
-      data.map(function (item) {
-        if (item.url) list.append(`<li><a target="_blank" href="${item.url}">${item.label}</a></li>`);
-        else list.append(`<li>${item.label}</li>`);
-      });
-      element.append(list);
-      self.dataset.repoRecommenderUrls = data;
-      // ----------------------
-      return self.dataset.repoRecommenderUrls;
     },
     RRIDUrls: function (data, inputs = false) {
       if (typeof data === `undefined`) return self.dataset.RRIDUrls;
@@ -381,6 +340,8 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
         else {
           let list = $(`<ul class="RRIDUrls-results"></ul>`);
           RRIDs.map(function (item) {
+            if (true) {
+            }
             let RRID = data.RRIDs.values[item];
             list.append(
               `<li>${item} <a target="_blank" href="${data.RRIDs.URLs.resources[item]}">(${RRID.name})</a></li>`
@@ -388,15 +349,20 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
           });
           element.append(list);
         }
-        if (data.entity && data.entity.URLs && data.entity.value)
-          element.append(
-            `<div class="RRIDUrls-categories">Result(s) for <a target="_blank" href="${data.entity.URLs.antibody}">Antibodies</a>, ` +
-              `<a target="_blank" href="${data.entity.URLs.biosamples}">Biosamples</a>, ` +
-              `<a target="_blank" href="${data.entity.URLs.cellLine}">Cell Lines</a>, ` +
-              `<a target="_blank" href="${data.entity.URLs.organism}">Organisms</a>, ` +
-              `<a target="_blank" href="${data.entity.URLs.plasmid}">Plasmid</a> and ` +
-              `<a target="_blank" href="${data.entity.URLs.tool}">Tools</a>.</div>`
-          );
+        if (data.entity && data.entity.URLs && data.entity.value) {
+          if (self.dataset.kind === `software` || self.dataset.kind === `code`) {
+            element.append(
+              `<div class="RRIDUrls-categories">Result(s) for <a target="_blank" href="${data.entity.URLs.tool}">Tools</a>.</div>`
+            );
+          } else if (self.dataset.kind === `reagent`) {
+            element.append(
+              `<div class="RRIDUrls-categories">Result(s) for <a target="_blank" href="${data.entity.URLs.antibody}">Antibodies</a>, ` +
+                `<a target="_blank" href="${data.entity.URLs.cellLine}">Cell Lines</a>, ` +
+                `<a target="_blank" href="${data.entity.URLs.organism}">Organisms</a>, ` +
+                `<a target="_blank" href="${data.entity.URLs.plasmid}">Plasmid</a></div>`
+            );
+          }
+        }
       }
       element.append(`<div class="RRIDUrls-sub">*based on the "name" of this dataset</div>`);
       // ----------------------
@@ -440,43 +406,40 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       self.dataset.version = value;
       return self.dataset.version;
     },
-    labSource: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.labSource;
-      self.container.find(`div[key="dataset\\.labSource"]`).attr(`value`, value);
-      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.labSource"]`).val(value);
-      self.dataset.labSource = value;
-      return self.dataset.labSource;
+    source: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.source;
+      self.container.find(`div[key="dataset\\.source"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.source"]`).val(value);
+      self.dataset.source = value;
+      return self.dataset.source;
     },
-    protocolSource: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.protocolSource;
-      self.container.find(`div[key="dataset\\.protocolSource"]`).attr(`value`, value);
-      if (inputs)
-        self.container
-          .find(`select[name="datasetForm\\.protocolSource"] option[value="${value}"]`)
-          .prop(`selected`, true);
-      self.dataset.protocolSource = value;
-      return self.dataset.protocolSource;
+    catalogNumber: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.catalogNumber;
+      self.container.find(`div[key="dataset\\.catalogNumber"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.catalogNumber"]`).val(value);
+      self.dataset.catalogNumber = value;
+      return self.dataset.catalogNumber;
     },
-    catalog: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.catalog;
-      self.container.find(`div[key="dataset\\.catalog"]`).attr(`value`, value);
-      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.catalog"]`).val(value);
-      self.dataset.catalog = value;
-      return self.dataset.catalog;
+    suggestedEntity: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.suggestedEntity;
+      self.container.find(`div[key="dataset\\.suggestedEntity"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.suggestedEntity"]`).val(value);
+      self.dataset.suggestedEntity = value;
+      return self.dataset.suggestedEntity;
     },
-    citation: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.citation;
-      self.container.find(`div[key="dataset\\.citation"]`).attr(`value`, value);
-      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.citation"]`).val(value);
-      self.dataset.citation = value;
-      return self.dataset.citation;
+    suggestedURL: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.suggestedURL;
+      self.container.find(`div[key="dataset\\.suggestedURL"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.suggestedURL"]`).val(value);
+      self.dataset.suggestedURL = value;
+      return self.dataset.suggestedURL;
     },
-    entity: function (value, inputs = false) {
-      if (typeof value === `undefined`) return self.dataset.entity;
-      self.container.find(`div[key="dataset\\.entity"]`).attr(`value`, value);
-      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.entity"]`).val(value);
-      self.dataset.entity = value;
-      return self.dataset.entity;
+    suggestedRRID: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.suggestedRRID;
+      self.container.find(`div[key="dataset\\.suggestedRRID"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.suggestedRRID"]`).val(value);
+      self.dataset.suggestedRRID = value;
+      return self.dataset.suggestedRRID;
     },
     comments: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.comments;
@@ -559,34 +522,11 @@ DatasetForm.prototype.currentSentence = function () {
 
 // get current dataset (API formated)
 DatasetForm.prototype.getDataset = function () {
-  return {
-    id: this.dataset.id,
-    status: this.dataset.status,
-    reuse: this.dataset.reuse,
-    qc: this.dataset.qc,
-    representativeImage: this.dataset.representativeImage,
-    issue: this.dataset.issue,
-    issues: this.dataset.issues,
-    dataType: this.dataset.dataType ? this.dataset.dataType : this.dataset.customDataType,
-    subType: this.dataset.subType,
-    description: this.dataset.description,
-    bestDataFormatForSharing: this.dataset.bestDataFormatForSharing,
-    mostSuitableRepositories: this.dataset.mostSuitableRepositories,
-    bestPracticeForIndicatingReUseOfExistingData: this.dataset.bestPracticeForIndicatingReUseOfExistingData,
-    highlight: this.dataset.highlight,
-    notification: this.dataset.notification,
-    name: this.dataset.name,
-    DOI: this.dataset.DOI,
-    protocolSource: this.dataset.protocolSource,
-    labSource: this.dataset.labSource,
-    version: this.dataset.version,
-    PID: this.dataset.PID,
-    RRID: this.dataset.RRID,
-    catalog: this.dataset.catalog,
-    citation: this.dataset.citation,
-    entity: this.dataset.entity,
-    comments: this.dataset.comments
-  };
+  let d = Object.assign({}, this.dataset);
+  delete d.sentence;
+  delete d.RRIDUrls;
+  delete d.sentence;
+  return d;
 };
 
 // Attach event
@@ -640,15 +580,19 @@ DatasetForm.prototype.refreshDatatypeInfos = function () {
     metadata = this.extractInfos(keys, properties);
   // Set dataType/subType infos
   properties.map(function (property) {
-    if (typeof property === `string`) self.properties[property](``);
-    else if (typeof property === `object` && property.key) self.properties[property.key](``);
+    if (typeof self.properties[property] === `function`) {
+      if (typeof property === `string`) self.properties[property](``);
+      else if (typeof property === `object` && property.key) self.properties[property.key](``);
+    }
   });
   properties.map(function (property) {
     keys.map(function (key) {
-      if (typeof property === `string`)
-        self.properties[property](metadata[key][property] ? metadata[key][property] : undefined);
-      else if (typeof property === `object` && property.key)
-        self.properties[property.key](metadata[key][property.key] ? metadata[key][property.key] : undefined);
+      if (typeof self.properties[property] === `function`) {
+        if (typeof property === `string`)
+          self.properties[property](metadata[key][property] ? metadata[key][property] : undefined);
+        else if (typeof property === `object` && property.key)
+          self.properties[property.key](metadata[key][property.key] ? metadata[key][property.key] : undefined);
+      }
     });
   });
   if (this.dataset.reuse) {
@@ -816,6 +760,7 @@ DatasetForm.prototype.updateDataset = function (dataset) {
   this.properties[`dataType`](dataset[`dataType`], true);
   this.properties[`subType`](dataset[`subType`], true);
   let newDataset = this.getDataset();
+  this.refreshKind(newDataset.kind);
   if (typeof this.events.onUpdateDataset === `function`) return this.events.onUpdateDataset(oldDataset, newDataset);
 };
 
@@ -845,10 +790,11 @@ DatasetForm.prototype.link = function (data, datasets, opts = {}, callback) {
     if (datasets && datasets.length > 0) {
       self.refreshDatasetsList(datasets);
     }
-    return self.setRepos(function () {
-      return self.refreshRRIDURL(data.dataset.name, function () {
-        return callback(err, res);
-      });
+    let entity = null;
+    if (self.dataset.kind === `code` || self.dataset.kind === `software` || self.dataset.kind === `reagent`)
+      entity = data.dataset.name;
+    return self.refreshRRIDURL(entity, function () {
+      return callback(err, res);
     });
   });
 };
@@ -902,20 +848,15 @@ DatasetForm.prototype.refreshDataset = function (data = {}, opts = {}, callback)
     this.showMessage();
     return typeof callback === `function` ? callback(true) : undefined;
   }
+  this.refreshKind(data.dataset.kind);
   this.dataset.color = data.dataset.color;
   this.dataset.sentence = data.sentence;
   this.updateDataset(data.dataset);
   // this.updateSentence(data.sentence);
-  let shouldSave =
-    this.properties[`description`]() !== data.dataset.description ||
-    this.properties[`bestDataFormatForSharing`]() !== data.dataset.bestDataFormatForSharing ||
-    this.properties[`mostSuitableRepositories`]() !== data.dataset.mostSuitableRepositories ||
-    this.properties[`bestPracticeForIndicatingReUseOfExistingData`]() !==
-      data.dataset.bestPracticeForIndicatingReUseOfExistingData;
   this.setView({ isCurator: opts.isCurator, isLink: opts.isLink });
   this.color();
   this.hideMessage();
-  return typeof callback === `function` ? callback(null, { shouldSave: shouldSave, dataset: this.dataset }) : undefined;
+  return typeof callback === `function` ? callback(null, { shouldSave: false, dataset: this.dataset }) : undefined;
 };
 
 // Link dataset to datasetForm
@@ -995,4 +936,57 @@ DatasetForm.prototype.show = function () {
   this.buttons[`display-middle`].show();
   this.buttons[`display-right`].show();
   this.screen.removeClass(`minimized`).addClass(`maximized`);
+};
+
+// Show datasetForm
+DatasetForm.prototype.refreshKind = function (kind) {
+  if (kind === `dataset`) {
+    this.container.find(`div[key="dataset\\.reuse"]`).parent().show();
+    this.container.find(`div[key="dataset\\.qc"]`).parent().show();
+    this.container.find(`div[key="dataset\\.representativeImage"]`).parent().show();
+    this.container.find(`div[key="dataset\\.PID"]`).parent().show();
+    this.container.find(`div[key="dataset\\.version"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.RRID"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.source"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.catalogNumber"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.suggestedEntity"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.suggestedURL"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.suggestedRRID"]`).parent().hide();
+  } else if (kind === `software` || kind === `code`) {
+    this.container.find(`div[key="dataset\\.reuse"]`).parent().show();
+    this.container.find(`div[key="dataset\\.qc"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.representativeImage"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.PID"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.version"]`).parent().show();
+    this.container.find(`div[key="dataset\\.RRID"]`).parent().show();
+    this.container.find(`div[key="dataset\\.source"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.catalogNumber"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.suggestedEntity"]`).parent().show();
+    this.container.find(`div[key="dataset\\.suggestedURL"]`).parent().show();
+    this.container.find(`div[key="dataset\\.suggestedRRID"]`).parent().show();
+  } else if (kind === `reagent`) {
+    this.container.find(`div[key="dataset\\.reuse"]`).parent().show();
+    this.container.find(`div[key="dataset\\.qc"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.representativeImage"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.PID"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.version"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.RRID"]`).parent().show();
+    this.container.find(`div[key="dataset\\.source"]`).parent().show();
+    this.container.find(`div[key="dataset\\.catalogNumber"]`).parent().show();
+    this.container.find(`div[key="dataset\\.suggestedEntity"]`).parent().show();
+    this.container.find(`div[key="dataset\\.suggestedURL"]`).parent().show();
+    this.container.find(`div[key="dataset\\.suggestedRRID"]`).parent().show();
+  } else if (kind === `protocol`) {
+    this.container.find(`div[key="dataset\\.reuse"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.qc"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.representativeImage"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.PID"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.version"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.RRID"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.source"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.catalogNumber"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.suggestedEntity"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.suggestedURL"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.suggestedRRID"]`).parent().hide();
+  } else console.log(`case "${kind}" not handled`);
 };
