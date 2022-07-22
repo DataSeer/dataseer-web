@@ -941,7 +941,6 @@ DatasetForm.prototype.show = function () {
 // Show datasetForm
 DatasetForm.prototype.refreshKind = function (kind) {
   if (kind === `dataset`) {
-    this.container.find(`div[key="dataset\\.reuse"]`).parent().show();
     this.container.find(`div[key="dataset\\.qc"]`).parent().show();
     this.container.find(`div[key="dataset\\.representativeImage"]`).parent().show();
     this.container.find(`div[key="dataset\\.PID"]`).parent().show();
@@ -953,7 +952,6 @@ DatasetForm.prototype.refreshKind = function (kind) {
     this.container.find(`div[key="dataset\\.suggestedURL"]`).parent().hide();
     this.container.find(`div[key="dataset\\.suggestedRRID"]`).parent().hide();
   } else if (kind === `software` || kind === `code`) {
-    this.container.find(`div[key="dataset\\.reuse"]`).parent().show();
     this.container.find(`div[key="dataset\\.qc"]`).parent().hide();
     this.container.find(`div[key="dataset\\.representativeImage"]`).parent().hide();
     this.container.find(`div[key="dataset\\.PID"]`).parent().hide();
@@ -965,7 +963,6 @@ DatasetForm.prototype.refreshKind = function (kind) {
     this.container.find(`div[key="dataset\\.suggestedURL"]`).parent().show();
     this.container.find(`div[key="dataset\\.suggestedRRID"]`).parent().show();
   } else if (kind === `reagent`) {
-    this.container.find(`div[key="dataset\\.reuse"]`).parent().show();
     this.container.find(`div[key="dataset\\.qc"]`).parent().hide();
     this.container.find(`div[key="dataset\\.representativeImage"]`).parent().hide();
     this.container.find(`div[key="dataset\\.PID"]`).parent().hide();
@@ -977,7 +974,6 @@ DatasetForm.prototype.refreshKind = function (kind) {
     this.container.find(`div[key="dataset\\.suggestedURL"]`).parent().show();
     this.container.find(`div[key="dataset\\.suggestedRRID"]`).parent().show();
   } else if (kind === `protocol`) {
-    this.container.find(`div[key="dataset\\.reuse"]`).parent().hide();
     this.container.find(`div[key="dataset\\.qc"]`).parent().hide();
     this.container.find(`div[key="dataset\\.representativeImage"]`).parent().hide();
     this.container.find(`div[key="dataset\\.PID"]`).parent().hide();
