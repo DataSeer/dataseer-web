@@ -964,7 +964,9 @@ Self.upload = function (opts = {}, cb) {
                     data: {
                       accountId: params.uploaded_by,
                       documentId: acc._id,
-                      file: file,
+                      file: Object.assign(file, {
+                        name: `attached-file.${file.name}`
+                      }),
                       organizations: acc.upload.organizations
                     },
                     user: opts.user
