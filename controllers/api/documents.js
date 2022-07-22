@@ -598,7 +598,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
         visible: false,
         locked: false,
         file: file,
-        attached_files: attachedFiles,
+        attachedFiles: attachedFiles,
         emails: undefined
       });
     });
@@ -612,7 +612,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
       visible: true,
       locked: false,
       file: file,
-      attached_files: attachedFiles,
+      attachedFiles: attachedFiles,
       emails: user.username
     });
   }
@@ -633,7 +633,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
         visible: Params.convertToBoolean(params.visible),
         locked: Params.convertToBoolean(params.locked),
         file: file,
-        attached_files: attachedFiles,
+        attachedFiles: attachedFiles,
         emails: `${account.username},${user.username}`
       });
     });
@@ -964,8 +964,10 @@ Self.upload = function (opts = {}, cb) {
                     data: {
                       accountId: params.uploaded_by,
                       documentId: acc._id,
-                      file: file,
-                      organizationId: acc.upload.organization
+                      file: Object.assign(file, {
+                        name: `attached-file.${file.name}`
+                      }),
+                      organizations: acc.upload.organizations
                     },
                     user: opts.user
                   },
