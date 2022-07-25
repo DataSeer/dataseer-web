@@ -21,6 +21,7 @@
       gSpreadSheetReportName: `ASAP`,
       gSpreadSheetReportLinks: {
         ASAP: ``,
+        'DataSeer Generic': ``,
         AmNat: ``
       },
       publicUrl: ``,
@@ -305,6 +306,13 @@
                 );
                 self.gSpreadSheetReportLinks.AmNat = URLMANAGER.buildURL(
                   `documents/${self.document._id.toString()}/reports/gSpreadsheets/AmNat`,
+                  {
+                    token: self.document.token
+                  },
+                  { origin: true }
+                );
+                self.gSpreadSheetReportLinks[`DataSeer Generic`] = URLMANAGER.buildURL(
+                  `documents/${self.document._id.toString()}/reports/gSpreadsheets/DataSeer Generic`,
                   {
                     token: self.document.token
                   },
