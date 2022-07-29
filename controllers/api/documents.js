@@ -579,10 +579,10 @@ Self.getUploadParams = function (params = {}, user, cb) {
   params.organizations = Params.convertToArray(params.organizations, `string`);
   if (!params.files || !params.files[`file`]) return cb(null, new Error(`You must select a file`));
   let file = params.files[`file`];
-  if (typeof params.files[`attached_files`] !== `undefined` && !Array.isArray(params.files[`attached_files`])) {
-    params.files[`attached_files`] = [params.files[`attached_files`]];
+  if (typeof params.files[`attachedFiles`] !== `undefined` && !Array.isArray(params.files[`attachedFiles`])) {
+    params.files[`attachedFiles`] = [params.files[`attachedFiles`]];
   }
-  let attachedFiles = Array.isArray(params.files[`attached_files`]) ? params.files[`attached_files`] : [];
+  let attachedFiles = Array.isArray(params.files[`attachedFiles`]) ? params.files[`attachedFiles`] : [];
   let accessRights = AccountsManager.getAccessRights(user, AccountsManager.match.all);
   // Case user is not logged
   if (!accessRights.authenticated) {

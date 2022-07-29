@@ -41,8 +41,8 @@
           let loader = $(this.$refs.uploadLoader);
           let fd = new FormData();
           fd.append(`file`, self.$refs.file.files[0]);
-          for (let i = 0; i < self.$refs.attached_files.files.length; i++) {
-            fd.append(`attached_files`, self.$refs.attached_files.files[i]);
+          for (let i = 0; i < self.$refs.attachedFiles.files.length; i++) {
+            fd.append(`attachedFiles`, self.$refs.attachedFiles.files[i]);
           }
           fd.append(`owner`, this.owner);
           fd.append(
