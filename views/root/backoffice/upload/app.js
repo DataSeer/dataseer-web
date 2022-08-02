@@ -18,6 +18,7 @@
         visible: true,
         locked: false,
         dataseerML: true,
+        mergePDFs: true,
         removeResponseToViewerSection: true
       },
       methods: {
@@ -58,6 +59,7 @@
           fd.append(`visible`, this.visible);
           fd.append(`locked`, this.locked);
           fd.append(`dataseerML`, this.dataseerML);
+          fd.append(`mergePDFs`, this.mergePDFs);
           fd.append(`removeResponseToViewerSection`, this.removeResponseToViewerSection);
           let opts = {
             data: fd

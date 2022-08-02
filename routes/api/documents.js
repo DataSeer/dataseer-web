@@ -105,6 +105,7 @@ router.post(`/`, function (req, res, next) {
       dataTypes: req.app.get(`dataTypes`),
       mute: Params.convertToBoolean(req.body.mute),
       dataseerML: Params.convertToBoolean(req.body.dataseerML),
+      mergePDFs: Params.convertToBoolean(req.body.mergePDFs),
       removeResponseToViewerSection: Params.convertToBoolean(req.body.removeResponseToViewerSection)
     },
     function (err, data) {
