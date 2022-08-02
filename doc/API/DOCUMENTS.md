@@ -304,6 +304,12 @@ The is a public URL, but some parameters coulb be restricted (depending on your 
       <td>optional</td>
       <td>Remove "Response to viewer" section (default : false - or default : true for AmNat PDFs). Only applicable to PDFs. Only administrators/moderators can use it.</td>
     </tr>
+    <tr>
+      <td>Boolean</td>
+      <td>mergePDFs</td>
+      <td>optional</td>
+      <td>Merge attached PDF files with the main PDF file (default : true). Only applicable to PDFs. Only administrators/moderators can disable it.</td>
+    </tr>
   </tbody>
 </table>
 
