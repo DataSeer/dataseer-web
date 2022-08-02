@@ -99,6 +99,18 @@
       </div>
       <div v-if="user.role && user.role.key !== 'standardUser'" class="row">
         <div class="col">
+          <div title="">
+            <label for="mergePDFs">
+              <input id="mergePDFs" type="checkbox" v-model="mergePDFs" />
+              | Merge attached PDF files with the main PDF file
+            </label>
+            <span v-if="mergePDFs" class="sub">Attached PDF files will be merged with the main PDF file</span>
+            <span v-if="!mergePDFs" class="sub">The main PDF won't be modified</span>
+          </div>
+        </div>
+      </div>
+      <div v-if="user.role && user.role.key !== 'standardUser'" class="row">
+        <div class="col">
           <div title="Select the document visibility">
             <label for="visible">
               <input id="visible" type="checkbox" v-model="visible" />
