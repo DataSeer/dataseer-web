@@ -672,6 +672,8 @@ Self.upload = function (opts = {}, cb) {
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (typeof _.get(opts, `dataseerML`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
     opts.dataseerML = true;
+  if (typeof _.get(opts, `mergePDFs`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
+    opts.mergePDFs = true;
   if (typeof _.get(opts, `softcite`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
     opts.softcite = true;
   if (typeof _.get(opts, `mute`) === `undefined` || !accessRights.isAdministrator) opts.mute = false;
@@ -728,6 +730,27 @@ Self.upload = function (opts = {}, cb) {
               organizations: acc.organizations
             };
             return next(null, acc);
+          },
+          // merge PDFs
+          function (acc, next) {
+            // No merge required
+            if (!opts.mergePDFs) return next(null, acc);
+            // Main file is not a PDF
+            if (!DocumentsFilesController.isPDF(params.file.mimetype)) return next(new Error(`Bad content type`), acc);
+            // There is no attached files
+            if (!Array.isArray(params.attachedFiles) || params.attachedFiles.length <= 0) return next(null, acc);
+            // Get attached PDFs
+            let attachedPDFs = params.attachedFiles.filter(function (item) {
+              return DocumentsFilesController.isPDF(item.mimetype);
+            });
+            // There is no PDFs in attached files
+            if (attachedPDFs.length <= 0) return next(null, acc);
+            return PdfManager.mergeFiles({ files: [params.file].concat(attachedPDFs) }, function (err, res) {
+              if (err) return next(err, acc);
+              params.attachedFiles.push(params.file);
+              params.file = res;
+              return next(null, acc);
+            });
           },
           // Upload file
           function (acc, next) {
