@@ -182,8 +182,10 @@ router.post(`/forgotPassword`, function (req, res, next) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
+    let isError = user instanceof Error;
+    let result = isError ? user.toString() : `If this email address is registered, an email will be sent!`;
     // Username not in mongo base
-    return res.json({ err: null, res: `If this email address is registered, an email will be sent!` });
+    return res.json({ err: isError, res: result });
   });
 });
 
