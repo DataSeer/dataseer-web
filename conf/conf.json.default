@@ -16,6 +16,9 @@
   "fs": {
     "root": "./data"
   },
+  "gui": {
+    "root" : "http://localhost:8080"
+  },
   "root": "http://localhost:3000",
   "pathname": "",
   "title": "Localhost",

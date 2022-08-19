@@ -231,7 +231,6 @@ db.once(`open`, function () {
 
       app.use(`/api`, indexApiRouter);
       app.use(`/api/documents`, documentsApiRouter);
-      app.use(`/api/currentUser`, documentsApiRouter);
       app.use(`/api/accounts`, accountsApiRouter);
       app.use(`/api/organizations`, organizationsApiRouter);
       app.use(`/api/roles`, rolesApiRouter);

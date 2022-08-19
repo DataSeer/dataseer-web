@@ -11,6 +11,7 @@ const DocumentsController = require(`../../controllers/api/documents.js`);
 
 const AccountsManager = require(`../../lib/accounts.js`);
 const Url = require(`../../lib/url.js`);
+const Params = require(`../../lib/params.js`);
 
 const conf = require(`../../conf/conf.json`);
 
@@ -37,6 +38,9 @@ router.get(`/:id`, function (req, res) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
+    let fromReport = Params.convertToBoolean(req.query.fromReport);
+    if (fromReport)
+      return res.redirect(Url.build(`#/documents/${req.params.id}/report`, { token: req.query.token }, conf.gui.root));
     if (doc.status === ``) return res.status(500).send(`This document is no more available`);
     return res.redirect(Url.build(`documents/${req.params.id}/${doc.status}`, { token: req.query.token }));
   });
