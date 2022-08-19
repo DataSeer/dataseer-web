@@ -99,11 +99,14 @@ Self.authenticateToken = function (tokenInfos = {}, opts = {}, cb) {
   // Just try to authenticate. If it fail, just go next
   return JWT.check(tokenInfos.token, opts.privateKey, tokenInfos.opts, function (err, decoded) {
     if (err) return cb(err);
-    return Accounts.findOne({ _id: decoded.accountId, [tokenInfos.key]: tokenInfos.token }, function (err, account) {
-      if (err) return cb(err);
-      if (!account) return cb(null, new Error(`Autentication failed`));
-      return cb(null, account);
-    });
+    return Accounts.findOne({ _id: decoded.accountId, [tokenInfos.key]: tokenInfos.token })
+      .populate(`organizations`)
+      .populate(`role`)
+      .exec(function (err, account) {
+        if (err) return cb(err);
+        if (!account) return cb(null, new Error(`Autentication failed`));
+        return cb(null, account);
+      });
   });
 };
 
@@ -139,12 +142,15 @@ Self.checkTokenValidity = function (tokenInfos = {}, opts = {}, cb) {
       return cb(null, token);
     } else token.expired = false;
     if (!decoded.accountId) return cb(null, new Error(`Bad token : does not contain enough data`));
-    return Accounts.findOne({ _id: decoded.accountId, [tokenInfos.key]: tokenInfos.token }, function (err, account) {
-      if (err) return cb(err);
-      token.revoked = false;
-      token.expiredAt = decoded.exp;
-      return cb(null, token);
-    });
+    return Accounts.findOne({ _id: decoded.accountId, [tokenInfos.key]: tokenInfos.token })
+      .populate(`organizations`)
+      .populate(`role`)
+      .exec(function (err, account) {
+        if (err) return cb(err);
+        token.revoked = false;
+        token.expiredAt = decoded.exp;
+        return cb(null, token);
+      });
   });
 };
 
@@ -237,54 +243,57 @@ Self.signin = function (opts = {}, cb) {
   // Check all optionnal data
   if (typeof _.get(opts, `newToken`) === `undefined`) opts.newToken = false;
   // Start process
-  return Accounts.findOne({ username: opts.username }).exec(function (err, account) {
-    if (err) return cb(err);
-    if (!account) return cb(null, new Error(`Account not found`));
-    if (account.disabled) return cb(null, new Error(`This account has been disabled!`));
-    let accessRights = AccountsManager.getAccessRights(account, AccountsManager.match.all);
-    if (accessRights.isVisitor) return cb(null, new Error(`Unauthorized functionnality`));
-    // delete reset password token
-    account.tokens.resetPassword = ``;
-    account.signedAt = Date.now();
-    return JWT.check(account.tokens.api, opts.privateKey, {}, function (err, decoded) {
-      if (!(err instanceof Error) && !opts.newToken && account.tokens.api !== ``) {
-        return account.save(function (err) {
-          if (err) return cb(err);
-          // return existing token
-          return cb(null, {
-            token: account.tokens.api,
-            username: account.username,
-            fullname: account.fullname,
-            organizations: account.organizations,
-            role: account.role,
-            _id: account._id
-          });
-        });
-      }
-      // create new token
-      else
-        return JWT.create(
-          { accountId: account._id.toString() },
-          opts.privateKey,
-          conf.tokens.api.expiresIn,
-          function (err, token) {
+  return Accounts.findOne({ username: opts.username })
+    .populate(`organizations`)
+    .populate(`role`)
+    .exec(function (err, account) {
+      if (err) return cb(err);
+      if (!account) return cb(null, new Error(`Account not found`));
+      if (account.disabled) return cb(null, new Error(`This account has been disabled!`));
+      let accessRights = AccountsManager.getAccessRights(account, AccountsManager.match.all);
+      if (accessRights.isVisitor) return cb(null, new Error(`Unauthorized functionnality`));
+      // delete reset password token
+      account.tokens.resetPassword = ``;
+      account.signedAt = Date.now();
+      return JWT.check(account.tokens.api, opts.privateKey, {}, function (err, decoded) {
+        if (!(err instanceof Error) && !opts.newToken && account.tokens.api !== ``) {
+          return account.save(function (err) {
             if (err) return cb(err);
-            account.tokens.api = token;
-            return account.save(function (err) {
-              if (err) return cb(err);
-              return cb(null, {
-                token: account.tokens.api,
-                username: account.username,
-                fullname: account.fullname,
-                organizations: account.organizations,
-                role: account.role,
-                _id: account._id
-              });
+            // return existing token
+            return cb(null, {
+              token: account.tokens.api,
+              username: account.username,
+              fullname: account.fullname,
+              organizations: account.organizations,
+              role: account.role,
+              _id: account._id
             });
-          }
-        );
+          });
+        }
+        // create new token
+        else
+          return JWT.create(
+            { accountId: account._id.toString() },
+            opts.privateKey,
+            conf.tokens.api.expiresIn,
+            function (err, token) {
+              if (err) return cb(err);
+              account.tokens.api = token;
+              return account.save(function (err) {
+                if (err) return cb(err);
+                return cb(null, {
+                  token: account.tokens.api,
+                  username: account.username,
+                  fullname: account.fullname,
+                  organizations: account.organizations,
+                  role: account.role,
+                  _id: account._id
+                });
+              });
+            }
+          );
+      });
     });
-  });
 };
 
 /**
@@ -303,23 +312,26 @@ Self.signout = function (opts = {}, cb) {
   if (accessRights.isVisitor) return cb(null, new Error(`Unauthorized functionnality`));
   // Check all optionnal data
   // Start process
-  return Accounts.findOne({ username: opts.user.username }).exec(function (err, account) {
-    if (err) return cb(err);
-    if (!account) return cb(null, new Error(`Account not found`));
-    if (account.disabled) return cb(null, new Error(`This account has been disabled!`));
-    // delete api token
-    account.tokens.api = ``;
-    return account.save(function (err) {
+  return Accounts.findOne({ username: opts.user.username })
+    .populate(`organizations`)
+    .populate(`role`)
+    .exec(function (err, account) {
       if (err) return cb(err);
-      return cb(null, {
-        username: account.username,
-        fullname: account.fullname,
-        organizations: account.organizations,
-        role: account.role,
-        _id: account._id
+      if (!account) return cb(null, new Error(`Account not found`));
+      if (account.disabled) return cb(null, new Error(`This account has been disabled!`));
+      // delete api token
+      account.tokens.api = ``;
+      return account.save(function (err) {
+        if (err) return cb(err);
+        return cb(null, {
+          username: account.username,
+          fullname: account.fullname,
+          organizations: account.organizations,
+          role: account.role,
+          _id: account._id
+        });
       });
     });
-  });
 };
 
 /**
@@ -343,17 +355,20 @@ Self.resetPassword = function (opts = {}, cb) {
         Params.checkPassword(opts.current_password) &&
         Params.checkPassword(opts.new_password)
       )
-        return Accounts.findOne({ username: opts.username }, function (err, account) {
-          if (err) return next(err);
-          if (!account) return next(new Error(`Account not found!`));
-          let accessRights = AccountsManager.getAccessRights(account, AccountsManager.match.all);
-          if (accessRights.isVisitor) return cb(null, new Error(`Unauthorized functionnality`));
-          return account.changePassword(opts.current_password, opts.new_password, function (err) {
+        return Accounts.findOne({ username: opts.username })
+          .populate(`organizations`)
+          .populate(`role`)
+          .exec(function (err, account) {
             if (err) return next(err);
-            acc = account;
-            return next(null, acc);
+            if (!account) return next(new Error(`Account not found!`));
+            let accessRights = AccountsManager.getAccessRights(account, AccountsManager.match.all);
+            if (accessRights.isVisitor) return cb(null, new Error(`Unauthorized functionnality`));
+            return account.changePassword(opts.current_password, opts.new_password, function (err) {
+              if (err) return next(err);
+              acc = account;
+              return next(null, acc);
+            });
           });
-        });
       return next(null, acc);
     },
     // case user is not logged
@@ -455,36 +470,41 @@ Self.forgotPassword = function (opts = {}, cb) {
   if (typeof _.get(conf, `tokens.resetPassword.expiresIn`) === `undefined`)
     return cb(new Error(`Missing required data: conf.tokens.resetPassword.expiresIn`));
   // Start process
-  return Accounts.findOne({ username: opts.username }, function (err, account) {
-    if (err) return cb(err);
-    if (!account) return cb(null, new Error(`Account not found!`));
-    let accessRights = AccountsManager.getAccessRights(account, AccountsManager.match.all);
-    if (accessRights.isVisitor) return cb(null, new Error(`Unauthorized functionnality`));
-    return JWT.create(
-      { accountId: account._id },
-      opts.privateKey,
-      conf.tokens.resetPassword.expiresIn,
-      function (err, token) {
-        if (err) return cb(err);
-        if (token) account.tokens.resetPassword = token;
-        return account.save(function (err) {
+  return Accounts.findOne({ username: opts.username })
+    .populate(`organizations`)
+    .populate(`role`)
+    .exec(function (err, account) {
+      if (err) return cb(err);
+      if (!account) return cb(null, new Error(`Account not found!`));
+      let accessRights = AccountsManager.getAccessRights(account, AccountsManager.match.all);
+      console.log(account);
+      console.log(accessRights);
+      if (accessRights.isVisitor) return cb(null, new Error(`Unauthorized functionnality`));
+      return JWT.create(
+        { accountId: account._id },
+        opts.privateKey,
+        conf.tokens.resetPassword.expiresIn,
+        function (err, token) {
           if (err) return cb(err);
-          let url = Url.build(`resetPassword`, { resetPasswordToken: token, username: account.username });
-          return Mailer.sendMail(
-            {
-              to: account.username,
-              template: Mailer.templates.accounts.forgotPassword,
-              data: { user: account, url: url }
-            },
-            function (err, info) {
-              if (err) return cb(err);
-              return cb(null, account);
-            }
-          );
-        });
-      }
-    );
-  });
+          if (token) account.tokens.resetPassword = token;
+          return account.save(function (err) {
+            if (err) return cb(err);
+            let url = Url.build(`resetPassword`, { resetPasswordToken: token, username: account.username });
+            return Mailer.sendMail(
+              {
+                to: account.username,
+                template: Mailer.templates.accounts.forgotPassword,
+                data: { user: account, url: url }
+              },
+              function (err, info) {
+                if (err) return cb(err);
+                return cb(null, account);
+              }
+            );
+          });
+        }
+      );
+    });
 };
 
 /**
