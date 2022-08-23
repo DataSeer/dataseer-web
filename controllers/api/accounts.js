@@ -477,8 +477,6 @@ Self.forgotPassword = function (opts = {}, cb) {
       if (err) return cb(err);
       if (!account) return cb(null, new Error(`Account not found!`));
       let accessRights = AccountsManager.getAccessRights(account, AccountsManager.match.all);
-      console.log(account);
-      console.log(accessRights);
       if (accessRights.isVisitor) return cb(null, new Error(`Unauthorized functionnality`));
       return JWT.create(
         { accountId: account._id },
