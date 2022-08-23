@@ -1,9 +1,23 @@
+// Dev & Prod smtp conf (IP authentication) 
 {
-  "host": "smtp.default.com",
+  "host": "smtp-relay.gmail.com",
+  "port": 587,
+  "secureConnection": true,
+  "from": "\"Fred Foo\" <foo@example.com>"
+}
+
+// Localhost smtp conf (OAuth authentication)
+// cf https://www.freecodecamp.org/news/use-nodemailer-to-send-emails-from-your-node-js-server/
+{
+  "host": "smtp.gmail.com",
   "port": 587,
   "auth": {
-    "user": "user@default.com",
-    "pass": "pass"
+    "type": "OAuth2",
+    "user": "user@gmail.com",
+    "pass": "password",
+    "clientId": "clientID",
+    "clientSecret": "clientSecret",
+    "refreshToken": "refreshToken"
   },
   "from": "\"Fred Foo\" <foo@example.com>"
 }
