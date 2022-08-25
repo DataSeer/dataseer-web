@@ -156,6 +156,7 @@ Self.createDataset = function (opts = {}) {
     source: opts.source ? opts.source : ``, // source
     version: opts.version ? opts.version : ``, // version
     DOI: opts.DOI ? opts.DOI : ``, // DOI
+    URL: opts.URL ? opts.URL : ``, // URL
     PID: opts.PID ? opts.PID : ``, // PID
     RRID: opts.RRID ? opts.RRID : ``, // RRID
     catalogNumber: opts.catalogNumber ? opts.catalogNumber : ``, // catalog number
@@ -164,7 +165,9 @@ Self.createDataset = function (opts = {}) {
     suggestedRRID: opts.suggestedRRID ? opts.suggestedRRID : ``, // suggested RRID
     comments: opts.comments ? opts.comments : ``, // comments
     status:
-      opts.dataType && opts.name && (opts.DOI || opts.source || opts.comments) ? Self.status.valid : Self.status.saved // status of the dataset
+      opts.dataType && opts.name && (opts.DOI || opts.PID || opts.source || opts.comments)
+        ? Self.status.valid
+        : Self.status.saved // status of the dataset
   };
 };
 

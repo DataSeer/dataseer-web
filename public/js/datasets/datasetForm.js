@@ -385,6 +385,13 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
       self.dataset.DOI = value;
       return self.dataset.DOI;
     },
+    URL: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.URL;
+      self.container.find(`div[key="dataset\\.URL"]`).attr(`value`, value);
+      if (inputs) self.container.find(`input[type="text"][name="datasetForm\\.URL"]`).val(value);
+      self.dataset.URL = value;
+      return self.dataset.URL;
+    },
     RRID: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.RRID;
       self.container.find(`div[key="dataset\\.RRID"]`).attr(`value`, value);
@@ -651,8 +658,8 @@ DatasetForm.prototype.buildOptions = function (datatypes = []) {
 // Load Resources
 DatasetForm.prototype.loadResources = function (resources) {
   this.defaultDataType = Object.keys(resources.dataTypes).sort(function (a, b) {
-    if (resources.metadata[a].count < resources.metadata[b].count) return 1;
-    else if (resources.metadata[a].count > resources.metadata[b].count) return -1;
+    if (resources.metadata[a].label < resources.metadata[b].label) return 1;
+    else if (resources.metadata[a].label > resources.metadata[b].label) return -1;
     else return 0;
   })[0];
   this.resources = resources;
@@ -687,7 +694,7 @@ DatasetForm.prototype.getOptionsInfo = function (ids = []) {
         };
     })
     .sort(function (a, b) {
-      return b.count - a.count;
+      return b.label - a.label;
     });
 };
 
@@ -944,6 +951,8 @@ DatasetForm.prototype.refreshKind = function (kind) {
     this.container.find(`div[key="dataset\\.qc"]`).parent().show();
     this.container.find(`div[key="dataset\\.representativeImage"]`).parent().show();
     this.container.find(`div[key="dataset\\.PID"]`).parent().show();
+    this.container.find(`div[key="dataset\\.DOI"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.URL"]`).parent().show();
     this.container.find(`div[key="dataset\\.version"]`).parent().hide();
     this.container.find(`div[key="dataset\\.RRID"]`).parent().hide();
     this.container.find(`div[key="dataset\\.source"]`).parent().hide();
@@ -951,10 +960,25 @@ DatasetForm.prototype.refreshKind = function (kind) {
     this.container.find(`div[key="dataset\\.suggestedEntity"]`).parent().hide();
     this.container.find(`div[key="dataset\\.suggestedURL"]`).parent().hide();
     this.container.find(`div[key="dataset\\.suggestedRRID"]`).parent().hide();
-  } else if (kind === `software` || kind === `code`) {
+  } else if (kind === `software`) {
     this.container.find(`div[key="dataset\\.qc"]`).parent().hide();
     this.container.find(`div[key="dataset\\.representativeImage"]`).parent().hide();
     this.container.find(`div[key="dataset\\.PID"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.DOI"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.URL"]`).parent().show();
+    this.container.find(`div[key="dataset\\.version"]`).parent().show();
+    this.container.find(`div[key="dataset\\.RRID"]`).parent().show();
+    this.container.find(`div[key="dataset\\.source"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.catalogNumber"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.suggestedEntity"]`).parent().show();
+    this.container.find(`div[key="dataset\\.suggestedURL"]`).parent().show();
+    this.container.find(`div[key="dataset\\.suggestedRRID"]`).parent().show();
+  } else if (kind === `code`) {
+    this.container.find(`div[key="dataset\\.qc"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.representativeImage"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.PID"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.DOI"]`).parent().show();
+    this.container.find(`div[key="dataset\\.URL"]`).parent().show();
     this.container.find(`div[key="dataset\\.version"]`).parent().show();
     this.container.find(`div[key="dataset\\.RRID"]`).parent().show();
     this.container.find(`div[key="dataset\\.source"]`).parent().hide();
@@ -966,6 +990,8 @@ DatasetForm.prototype.refreshKind = function (kind) {
     this.container.find(`div[key="dataset\\.qc"]`).parent().hide();
     this.container.find(`div[key="dataset\\.representativeImage"]`).parent().hide();
     this.container.find(`div[key="dataset\\.PID"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.DOI"]`).parent().show();
+    this.container.find(`div[key="dataset\\.URL"]`).parent().hide();
     this.container.find(`div[key="dataset\\.version"]`).parent().hide();
     this.container.find(`div[key="dataset\\.RRID"]`).parent().show();
     this.container.find(`div[key="dataset\\.source"]`).parent().show();
@@ -977,6 +1003,8 @@ DatasetForm.prototype.refreshKind = function (kind) {
     this.container.find(`div[key="dataset\\.qc"]`).parent().hide();
     this.container.find(`div[key="dataset\\.representativeImage"]`).parent().hide();
     this.container.find(`div[key="dataset\\.PID"]`).parent().hide();
+    this.container.find(`div[key="dataset\\.DOI"]`).parent().show();
+    this.container.find(`div[key="dataset\\.URL"]`).parent().show();
     this.container.find(`div[key="dataset\\.version"]`).parent().hide();
     this.container.find(`div[key="dataset\\.RRID"]`).parent().hide();
     this.container.find(`div[key="dataset\\.source"]`).parent().hide();

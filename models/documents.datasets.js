@@ -49,6 +49,8 @@ const Sentence = new mongoose.Schema(
       issues: { type: Issues, default: null }, // issues property
       // - "Sentences" properties
       sentences: [Sentence], // sentences
+      // "Datasets", Protocols, "Codes" & "Softwares" properties only
+      URL: { type: String, default: `` }, // version
       // "Datasets" properties only
       qc: { type: Boolean, default: false }, // qc property
       representativeImage: { type: Boolean, default: false }, // representativeImage property
