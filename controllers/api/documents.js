@@ -1801,6 +1801,7 @@ Self.updateDataset = function (opts = {}, cb) {
                 opts.dataset.version = datasets.current[i].version;
                 opts.dataset.PID = datasets.current[i].PID;
                 opts.dataset.DOI = datasets.current[i].DOI;
+                opts.dataset.URL = datasets.current[i].URL;
                 opts.dataset.RRID = datasets.current[i].RRID;
                 opts.dataset.catalog = datasets.current[i].catalog;
                 opts.dataset.entity = datasets.current[i].entity;
