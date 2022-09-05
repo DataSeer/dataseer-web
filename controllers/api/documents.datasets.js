@@ -137,8 +137,6 @@ Self.createDataset = function (opts = {}) {
     opts.dataType !== `protocol`
   )
     kind = `dataset`;
-  // Default value depending on kind
-  if (kind === `reagent` || kind === `software`) reuse = true;
   return {
     id: opts.id, // id
     dataInstanceId: opts.dataInstanceId, // dataInstance id
