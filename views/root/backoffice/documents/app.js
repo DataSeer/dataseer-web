@@ -915,6 +915,10 @@
       buildBackofficeIdLink: function (id, params = {}) {
         return URLMANAGER.buildURL(`backoffice/${ROUTES.main}/${id}/`, params);
       },
+      // Build link to a single resource
+      buildNewGUILink: function (id, params = {}) {
+        return `${CONF.gui.root}/?token=${params.token}#documents/${id}/datasets`;
+      },
       // Build link to dataseer report
       buildReportLink: function (opts, params = {}) {
         return URLMANAGER.buildURL(`api/${ROUTES.main}/${opts.id}/reports/html/${opts.report}`, params);

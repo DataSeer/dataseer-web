@@ -161,6 +161,10 @@
       buildBackofficeIdLink: function (id, params = {}) {
         return URLMANAGER.buildURL(`backoffice/${ROUTES.main}/${id}/`, params);
       },
+      // Build link to a single resource
+      buildNewGUILink: function (id, params = {}) {
+        return `${CONF.gui.root}/?token=${params.token}#documents/${id}/datasets`;
+      },
       // Refresh all items of app.collection.items
       refreshCollection: function (collection = []) {
         const self = this;
