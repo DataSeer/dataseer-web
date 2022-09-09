@@ -530,9 +530,9 @@ DatasetForm.prototype.currentSentence = function () {
 // get current dataset (API formated)
 DatasetForm.prototype.getDataset = function () {
   let d = Object.assign({}, this.dataset);
+  if (d.dataType === `` && d.subType === ``) d.dataType = d.customDataType;
   delete d.sentence;
   delete d.RRIDUrls;
-  delete d.sentence;
   return d;
 };
 
@@ -1012,5 +1012,27 @@ DatasetForm.prototype.refreshKind = function (kind) {
     this.container.find(`div[key="dataset\\.suggestedEntity"]`).parent().hide();
     this.container.find(`div[key="dataset\\.suggestedURL"]`).parent().hide();
     this.container.find(`div[key="dataset\\.suggestedRRID"]`).parent().hide();
-  } else console.log(`case "${kind}" not handled`);
+  } else {
+    console.log(`case "${kind}" not handled`);
+    this.container.find(`div[key="datasetForm.name`).parent().show();
+    this.container.find(`div[key="datasetForm.flagged`).parent().show();
+    this.container.find(`div[key="datasetForm.reuse`).parent().show();
+    this.container.find(`div[key="datasetForm.qc`).parent().show();
+    this.container.find(`div[key="datasetForm.representativeImage`).parent().show();
+    this.container.find(`div[key="datasetForm.issues`).parent().show();
+    this.container.find(`div[key="datasetForm.dataType`).parent().show();
+    this.container.find(`div[key="datasetForm.subType`).parent().show();
+    this.container.find(`div[key="datasetForm.customDataType`).parent().show();
+    this.container.find(`div[key="datasetForm.version`).parent().show();
+    this.container.find(`div[key="datasetForm.source`).parent().show();
+    this.container.find(`div[key="datasetForm.catalogNumber`).parent().show();
+    this.container.find(`div[key="datasetForm.DOI`).parent().show();
+    this.container.find(`div[key="datasetForm.URL`).parent().show();
+    this.container.find(`div[key="datasetForm.PID`).parent().show();
+    this.container.find(`div[key="datasetForm.RRID`).parent().show();
+    this.container.find(`div[key="datasetForm.suggestedEntity`).parent().show();
+    this.container.find(`div[key="datasetForm.suggestedURL`).parent().show();
+    this.container.find(`div[key="datasetForm.suggestedRRID`).parent().show();
+    this.container.find(`div[key="datasetForm.comments`).parent().show();
+  }
 };

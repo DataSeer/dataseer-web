@@ -948,8 +948,26 @@ Self.upload = function (opts = {}, cb) {
               function (err, datasets) {
                 if (err) return next(err, acc);
                 if (datasets instanceof Error) return next(datasets, acc);
-                acc.datasets = datasets._id;
-                return next(null, acc);
+                return Self.refreshDatasetsInTEI(
+                  { user: opts.user, documentId: acc._id.toString(), datasets: datasets.current },
+                  function (err) {
+                    if (err) return next(err, acc);
+                    // Create logs
+                    return DocumentsLogsController.create(
+                      {
+                        target: datasets.document,
+                        account: opts.user._id,
+                        kind: CrudManager.actions.update._id,
+                        key: `datasets`
+                      },
+                      function (err, log) {
+                        if (err) return next(err, acc);
+                        acc.datasets = datasets._id;
+                        return next(null, acc);
+                      }
+                    );
+                  }
+                );
               }
             );
           },
@@ -1464,7 +1482,7 @@ Self.extractDatasets = function (opts = {}, cb) {
           },
           function (err, log) {
             if (err) return cb(err);
-            return cb(null, Object.assign({ _id: res.value._id }, datasets));
+            return cb(null, Object.assign({ _id: res.value._id.toString() }, res.value.toJSON()));
           }
         );
       });

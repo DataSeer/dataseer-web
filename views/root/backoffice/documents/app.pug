@@ -326,6 +326,10 @@
             <i class="fas fa-external-link-alt"></i>
             | Public
           </a>
+          <a :href="buildNewGUILink(item.properties._id, { token: item.properties.token })" target="_blank">
+            <i class="fas fa-external-link-alt"></i>
+            | New GUI
+          </a>
           <a :href="buildBackofficeIdLink(item.properties._id)" target="_blank">
             <i class="fas fa-external-link-alt"></i>
             | Backoffice
