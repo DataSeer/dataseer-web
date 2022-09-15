@@ -15,6 +15,14 @@
         </div>
       </div>
       <div class="search-row row align-items-center">
+        <div class="col text-truncate">
+          <div class="title">Search for value(s) in the documents metadata<br/><i>(will be ignored if no result matches)</i></div>
+          <div>
+            <input class="form-control" type="text" name="filter" placeholder="Type the value(s) you are looking for in the documents metadata here (separated by commas)" v-model="search.properties.filter" />
+          </div>
+        </div>
+      </div>
+      <div class="search-row row align-items-center">
         <div class="col skip-limit-sort">
           <div>
             <div class="title">Skip</div>
