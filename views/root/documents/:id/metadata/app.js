@@ -142,7 +142,7 @@
           let hasToken = typeof currentParams.token !== `undefined`;
           return (window.location = URLMANAGER.buildURL(
             `documents/${self.item.properties._id}`,
-            {},
+            { oldGUI: true },
             { setToken: hasToken }
           ));
         });

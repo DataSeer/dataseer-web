@@ -318,11 +318,11 @@
           <input type="checkbox" v-model="item.selected" :value="item.selected" @change="itemSelectedChange($event)" />
         </div>
         <div class="col text-truncate">
-          <a :href="buildIdLink(item.properties._id)" target="_blank">
+          <a :href="buildIdLink(item.properties._id, { oldGUI: true })" target="_blank">
             <i class="fas fa-external-link-alt"></i>
             | Private
           </a>
-          <a :href="buildIdLink(item.properties._id, { token: item.properties.token })" target="_blank">
+          <a :href="buildIdLink(item.properties._id, { token: item.properties.token, oldGUI: true })" target="_blank">
             <i class="fas fa-external-link-alt"></i>
             | Public
           </a>
