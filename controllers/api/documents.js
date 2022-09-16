@@ -1394,7 +1394,7 @@ Self.search = function (opts = {}, cb) {
  * @param {string} opts.data.metadata.doi - Document metadata doi
  * @param {string} opts.data.metadata.pmid - Document metadata pmid
  * @param {object} opts.user - Current user
- * @param {object} opts.refreshAuthorsNames - Refresh value of authors name property (using TEI data)
+ * @param {object} opts.refreshAuthors - Refresh value of authors name property (using TEI data)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: ObjectId OR new Error)
  * @returns {undefined} undefined
  */
@@ -1414,12 +1414,7 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
       if (err) return cb(err);
       let metadata = _.get(opts, `data.metadata`);
       let authors = _.get(metadata, `authors`, []);
-      let authorsNames = !Array.isArray(authors)
-        ? []
-        : authors.map(function (item) {
-          return item.name;
-        });
-      let refreshAuthorsNames = _.get(opts, `refreshAuthorsNames`, false);
+      let refreshAuthors = _.get(opts, `refreshAuthors`, false);
       let xmlString = content.data.toString(DocumentsFilesController.encoding);
       return async.mapSeries(
         [
@@ -1439,11 +1434,10 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
           function (next) {
             // Extract metadata
             metadata = XML.extractMetadata(XML.load(xmlString));
-            if (!refreshAuthorsNames) {
-              if (metadata.authors.length === authorsNames.length)
-                for (let i = 0; i < metadata.authors.length; i++) {
-                  metadata.authors[i].name = authorsNames[i];
-                }
+            if (!refreshAuthors) {
+              metadata.authors = authors.map(function (e) {
+                return e;
+              });
             }
             return next();
           },

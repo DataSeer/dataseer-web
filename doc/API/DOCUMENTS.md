@@ -1519,9 +1519,9 @@ Accessible to users with the following role: **visitor**, **standardUser**, **mo
   <tbody>
     <tr>
       <td>Boolean</td>
-      <td>refreshAuthorsNames</td>
+      <td>refreshAuthors</td>
       <td>optional</td>
-      <td>Use it to set the authors name with the values contained in the TEI file (default: false).</td>
+      <td>Use it to set the authors with the values contained in the TEI file (default: false).</td>
     </tr>
     <tr>
       <td>Boolean</td>
