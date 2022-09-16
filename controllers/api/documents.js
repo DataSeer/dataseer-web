@@ -1296,6 +1296,91 @@ Self.reopen = function (opts = {}, cb) {
 };
 
 /**
+ * search for documents
+ * @param {object} opts - Options available
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.query - Global query
+ * @param {string} opts.data.documents - Custom query for document collection
+ * @param {string} opts.data.metadata - Custom query for metadata collection
+ * @param {object} opts.user - Current user
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: ObjectId OR new Error)
+ * @returns {undefined} undefined
+ */
+Self.search = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  let query = _.get(opts, `data.query`, ``);
+  if (!query) return cb(null, new Error(`Error : Empty search request`));
+  let filteredQuery = query.toString().trim().replace(/\s+/gim, ` `).replace(`,`, `|`);
+  let queryDocuments = _.get(opts, `data.documents`, filteredQuery);
+  let queryMetadata = _.get(opts, `data.metadata`, filteredQuery);
+  let regexDocuments = queryDocuments.toString().trim().replace(/\s+/gim, ` `).replace(`,`, `|`);
+  let regexMetadata = queryMetadata.toString().trim().replace(/\s+/gim, ` `).replace(`,`, `|`);
+  let documentsQuery = {
+    '$or': [
+      { 'name': { '$regex': regexDocuments, $options: `imx` } },
+      { 'identifiers.doi': { '$regex': regexDocuments, $options: `imx` } },
+      { 'identifiers.pmid': { '$regex': regexDocuments, $options: `imx` } },
+      { 'identifiers.manuscript_id': { '$regex': regexDocuments, $options: `imx` } }
+    ]
+  };
+  let metadataQuery = {
+    '$or': [
+      { 'article_title': { '$regex': regexMetadata, $options: `imx` } },
+      { 'doi': { '$regex': regexMetadata, $options: `imx` } },
+      { 'isbn': { '$regex': regexMetadata, $options: `imx` } },
+      { 'journal': { '$regex': regexMetadata, $options: `imx` } },
+      { 'manuscript_id': { '$regex': regexMetadata, $options: `imx` } },
+      { 'pmid': { '$regex': regexMetadata, $options: `imx` } },
+      { 'publisher': { '$regex': regexMetadata, $options: `imx` } },
+      { 'submitting_author': { '$regex': regexMetadata, $options: `imx` } },
+      { 'submitting_author_email': { '$regex': regexMetadata, $options: `imx` } },
+      { 'authors.name': { '$regex': regexMetadata, $options: `imx` } }
+    ]
+  };
+  const actions = [
+    // Search in documents collection
+    function (acc, next) {
+      return Documents.find(documentsQuery).exec(function (err, res) {
+        if (err) return next(err);
+        acc = acc.concat(res.map((obj) => obj._id));
+        return next(null, acc);
+      });
+    },
+    // Search in metadata collection
+    function (acc, next) {
+      return DocumentsMetadata.find(metadataQuery).exec(function (err, res) {
+        if (err) return next(err);
+        acc = acc.concat(res.map((obj) => obj.document));
+        return next(null, acc);
+      });
+    },
+    // return all results
+    function (acc, next) {
+      const ids = [...new Set(acc)];
+      if (ids.length <= 0) return next(null, []);
+      return next(null, ids);
+    }
+  ];
+  let results = [];
+  // Execute all actions & get documents
+  return async.reduce(
+    actions, // [Function, function, ... ]
+    results, // Array of searches results
+    function (acc, action, next) {
+      return action(acc, function (err, acc) {
+        return next(err, acc);
+      });
+    },
+    function (err, res) {
+      if (err) return cb(err);
+      return cb(null, res);
+    }
+  );
+};
+
+/**
  * Update Or Create Metadata of document
  * @param {object} opts - Options available (You must call getUploadParams)
  * @param {boolean} opts.orcid - Refresh orcid (request ORCID API)
@@ -2500,6 +2585,7 @@ Self.all = function (opts = {}, cb) {
   let files = Params.convertToBoolean(opts.data.files);
   let metadata = Params.convertToBoolean(opts.data.metadata);
   let datasets = Params.convertToBoolean(opts.data.datasets);
+  let filter = Params.convertToString(opts.data.filter);
   let query = {};
   // Set default value
   if (typeof ids === `undefined`) ids = [];
@@ -2577,35 +2663,60 @@ Self.all = function (opts = {}, cb) {
     uploadRange,
     updateRange
   };
-  let transaction = Documents.find(query).skip(skip).limit(limit);
-  // Populate dependings on the parameters
-  transaction.populate(`owner`, `-tokens -hash -salt`);
-  transaction.populate(`organizations`);
-  transaction.populate(`upload.organizations`);
-  if (metadata) transaction.populate(`metadata`);
-  if (datasets) transaction.populate(`datasets`);
-  if (pdf) transaction.populate(`pdf`);
-  if (tei) transaction.populate(`tei`);
-  if (files) transaction.populate(`files`);
-  transaction.sort(sort === `asc` ? { _id: 1 } : { _id: -1 });
-  return transaction.exec(function (err, docs) {
-    if (err) return cb(err);
-    if (count)
-      return Documents.find(query).countDocuments(function (err, count) {
+  return async.reduce(
+    [
+      function (acc, next) {
+        if (!filter) return next(null, acc);
+        return Self.search({ data: { query: filter }, user: opts.user }, function (err, res) {
+          if (err) return next(err);
+          if (res instanceof Error) return next(null, acc);
+          if (Array.isArray(res) && res.length > 0)
+            return next(null, {
+              $and: [{ _id: { $in: res } }, acc]
+            });
+          return next(null, acc);
+        });
+      }
+    ],
+    query,
+    function (acc, action, next) {
+      return action(acc, function (err, acc) {
+        return next(err, acc);
+      });
+    },
+    function (err, res) {
+      if (err) return cb(err);
+      let transaction = Documents.find(res).skip(skip).limit(limit);
+      // Populate dependings on the parameters
+      transaction.populate(`owner`, `-tokens -hash -salt`);
+      transaction.populate(`organizations`);
+      transaction.populate(`upload.organizations`);
+      if (metadata) transaction.populate(`metadata`);
+      if (datasets) transaction.populate(`datasets`);
+      if (pdf) transaction.populate(`pdf`);
+      if (tei) transaction.populate(`tei`);
+      if (files) transaction.populate(`files`);
+      transaction.sort(sort === `asc` ? { _id: 1 } : { _id: -1 });
+      return transaction.exec(function (err, docs) {
         if (err) return cb(err);
+        if (count)
+          return Documents.find(res).countDocuments(function (err, count) {
+            if (err) return cb(err);
+            let result = {
+              count: count,
+              data: docs,
+              params: params
+            };
+            return cb(null, result);
+          });
         let result = {
-          count: count,
           data: docs,
           params: params
         };
         return cb(null, result);
       });
-    let result = {
-      data: docs,
-      params: params
-    };
-    return cb(null, result);
-  });
+    }
+  );
 };
 
 /**

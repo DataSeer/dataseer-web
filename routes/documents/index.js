@@ -38,11 +38,14 @@ router.get(`/:id`, function (req, res) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
+    let oldGUI = Params.convertToBoolean(req.query.oldGUI);
     let fromReport = Params.convertToBoolean(req.query.fromReport);
-    if (fromReport)
+    if (!oldGUI || fromReport)
       return res.redirect(Url.build(`#/documents/${req.params.id}/report`, { token: req.query.token }, conf.gui.root));
     if (doc.status === ``) return res.status(500).send(`This document is no more available`);
-    return res.redirect(Url.build(`documents/${req.params.id}/${doc.status}`, { token: req.query.token }));
+    return res.redirect(
+      Url.build(`documents/${req.params.id}/${doc.status}`, { token: req.query.token, oldGUI: oldGUI })
+    );
   });
 });
 

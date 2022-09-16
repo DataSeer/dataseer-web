@@ -34,6 +34,12 @@
       $(`#loading-loop .loader`).hide();
     };
 
+  const redirect = function () {
+    let currentParams = URLMANAGER.getParamsOfCurrentURL();
+    let hasToken = typeof currentParams.token !== `undefined`;
+    return (window.location = URLMANAGER.buildURL(`documents/${documentId}`, { oldGUI: true }, { setToken: hasToken }));
+  };
+
   // window.addEventListener('unhandledrejection', function (event) {
   //   alert(`An error has occured while processing this document... (${documentId})`);
   //   hideLoop();
@@ -86,7 +92,7 @@
                   else {
                     setTextLoop(`Application will try to automatically fix it.`);
                     alert(`TEI content fixed. Your navigator will automatically refresh this tab.`);
-                    return (window.location.href = window.location.href.replace(/(\/?datasets\/?)$/, ``));
+                    return redirect();
                   }
                 });
               } else {
@@ -158,7 +164,7 @@
               return API.documents.validateDatasets({ id: documentId }, function (err, res) {
                 console.log(err, res);
                 if (err || res.err) return alert(`Process has failed`);
-                if (res.res) return (window.location.href = window.location.href.replace(/(\/?datasets\/?)$/, ``));
+                if (res.res) return redirect();
                 return currentDocument.throwDatasetsNotValidError();
               });
             });
@@ -168,7 +174,7 @@
               return API.documents.backToMetadata({ id: documentId }, function (err, res) {
                 console.log(err, res);
                 if (err || res.err) return alert(`Process has failed`);
-                else return (window.location.href = window.location.href.replace(/(\/?datasets\/?)$/, ``));
+                else return redirect();
               });
             });
 

@@ -36,6 +36,7 @@
           uploadedAfter: { kind: `date` },
           updateRange: {},
           uploadRange: {},
+          filter: { typeof: `string`, optionnal: true },
           sort: {}
         },
         default: {
@@ -65,6 +66,7 @@
           uploadedAfter: undefined,
           updateRange: undefined,
           uploadRange: undefined,
+          filter: undefined,
           sort: undefined
         }
       },
@@ -945,7 +947,8 @@
           uploadedBefore: PARAMS.convertToString(urlParams.uploadedBefore),
           uploadedAfter: PARAMS.convertToString(urlParams.uploadedAfter),
           updateRange: PARAMS.convertToString(urlParams.updateRange),
-          uploadRange: PARAMS.convertToString(urlParams.uploadRange)
+          uploadRange: PARAMS.convertToString(urlParams.uploadRange),
+          filter: PARAMS.convertToString(urlParams.filter)
         };
       },
       // Get "multiple selections" params representation ("well formated" representation of app.multipleSelections.properties used to request API or build an URL)
