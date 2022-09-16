@@ -15,6 +15,14 @@
         </div>
       </div>
       <div class="search-row row align-items-center">
+        <div class="col text-truncate">
+          <div class="title">Search for value(s) in the documents metadata<br/><i>(will be ignored if no result matches)</i></div>
+          <div>
+            <input class="form-control" type="text" name="filter" placeholder="Type the value(s) you are looking for in the documents metadata here (separated by commas)" v-model="search.properties.filter" />
+          </div>
+        </div>
+      </div>
+      <div class="search-row row align-items-center">
         <div class="col skip-limit-sort">
           <div>
             <div class="title">Skip</div>
@@ -318,11 +326,11 @@
           <input type="checkbox" v-model="item.selected" :value="item.selected" @change="itemSelectedChange($event)" />
         </div>
         <div class="col text-truncate">
-          <a :href="buildIdLink(item.properties._id)" target="_blank">
+          <a :href="buildIdLink(item.properties._id, { oldGUI: true })" target="_blank">
             <i class="fas fa-external-link-alt"></i>
             | Private
           </a>
-          <a :href="buildIdLink(item.properties._id, { token: item.properties.token })" target="_blank">
+          <a :href="buildIdLink(item.properties._id, { token: item.properties.token, oldGUI: true })" target="_blank">
             <i class="fas fa-external-link-alt"></i>
             | Public
           </a>

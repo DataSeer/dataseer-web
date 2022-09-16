@@ -26,6 +26,7 @@ router.get(`/`, function (req, res, next) {
   if (!accessRights.isStandardUser) return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     data: {
+      filter: Params.convertToString(req.query.filter),
       count: Params.convertToBoolean(req.query.count),
       ids: Params.convertToArray(req.query.ids, `string`),
       limit: Params.convertToInteger(req.query.limit),

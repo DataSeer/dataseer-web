@@ -44,7 +44,15 @@
                 autoclose: false
               })
             );
-          else return (window.location.href = window.location.href.replace(/(\/?finish\/?)$/, ``));
+          else {
+            let currentParams = URLMANAGER.getParamsOfCurrentURL();
+            let hasToken = typeof currentParams.token !== `undefined`;
+            return (window.location = URLMANAGER.buildURL(
+              `documents/${documentId}`,
+              { oldGUI: true },
+              { setToken: hasToken }
+            ));
+          }
         });
       },
       updateOrCreateAnnotation: function (event) {
