@@ -56,6 +56,7 @@ const Accounts = require(`./models/accounts.js`);
 
 const AccountsController = require(`./controllers/api/accounts.js`);
 const DocumentsController = require(`./controllers/api/documents.js`);
+const DocumentsDatasetsController = require(`./controllers/api/documents.datasets.js`);
 const RolesController = require(`./controllers/api/roles.js`);
 const CrudController = require(`./controllers/api/crud.js`);
 
@@ -105,6 +106,7 @@ db.once(`open`, function () {
             return next(err);
           }
           app.set(`dataTypes`, dataTypes);
+          DocumentsDatasetsController.refreshDataTypes(dataTypes);
           console.log(`dataTypes initialized`);
           return next(err);
         });
