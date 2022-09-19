@@ -6,6 +6,8 @@
 
 const _ = require(`lodash`);
 
+const conf = require(`../../conf/dataTypes.json`);
+
 const DocumentsDatasets = require(`../../models/documents.datasets.js`);
 
 const Params = require(`../../lib/params.js`);
@@ -16,6 +18,19 @@ let Self = {};
 Self.status = {
   valid: `valid`,
   saved: `saved`
+};
+
+// Dataset Status
+Self.dataTypes = {};
+
+/**
+ * Refresh dataTypes
+ * @param {object} dataTypes - JSON containing all dataTypes
+ * @returns {object} Refreshed dataTypes
+ */
+Self.refreshDataTypes = function (dataTypes = {}) {
+  Self.dataTypes = Object.assign({}, dataTypes);
+  return Self.dataTypes;
 };
 
 /**
@@ -97,6 +112,79 @@ Self.datasetAlreadyExist = function (currents = [], dataset = {}, match) {
 };
 
 /**
+ * Fix dataset JSON object
+ * @param {object} opts - JSON containing all data
+ * @param {string} opts.id - Dataset id
+ * @param {string} opts.dataInstance - DataInstance id
+ * @param {string} opts.reuse - Dataset reuse
+ * @param {string} opts.notification - Dataset notification
+ * @param {string} opts.cert - Dataset cert value (between 0 and 1)
+ * @param {string} opts.dataType - Dataset dataType
+ * @param {string} opts.subType - Dataset subType
+ * @param {string} opts.description - Dataset description
+ * @param {string} opts.bestDataFormatForSharing - Dataset best data format for sharing
+ * @param {string} opts.mostSuitableRepositories - Dataset most suitable repositories
+ * @param {string} opts.DOI - Dataset DOI
+ * @param {string} opts.name - Dataset name
+ * @param {string} opts.comments - Dataset comments
+ * @param {object} dataTypes - JSON containing all dataTypes & subTypes
+ * @returns {object} JSON containing all data
+ */
+Self.fixDataset = function (opts = {}) {
+  let dataset = Object.assign({}, opts);
+  let dataTypeIsEmpty =
+    typeof dataset.dataType !== `string` ||
+    !dataset.dataType ||
+    typeof Self.dataTypes.metadata[dataset.dataType] !== `object`;
+  let subTypeIsEmpty =
+    typeof dataset.subType !== `string` ||
+    !dataset.subType ||
+    typeof Self.dataTypes.metadata[dataset.subType] !== `object`;
+  // Case there is no datatype & no subtype
+  if (dataTypeIsEmpty) {
+    // Case subtype is empty
+    if (subTypeIsEmpty) {
+      dataset.dataType = conf.defaultDataType;
+      dataset.subType = conf.defaultSubType;
+      dataset.cert = `0`;
+      return dataset;
+    }
+    // Case there is no datatype but a subtype
+    dataset.dataType = dataset.subType;
+    dataset.subType = ``;
+    subTypeIsEmpty = true;
+    dataTypeIsEmpty = false;
+  }
+  // Check datatype & subtype
+  let dataTypeExist = Array.isArray(Self.dataTypes.dataTypes[dataset.dataType]);
+  let subTypeExist = !subTypeIsEmpty && typeof Self.dataTypes.subTypes[dataset.subType] === `string`;
+  // Case there is a correct datatype
+  if (dataTypeExist) {
+    if (subTypeIsEmpty) return dataset;
+    if (!subTypeExist) dataset.subType = ``;
+    return dataset;
+  }
+  // Case there is a correct subtype
+  if (subTypeExist) {
+    dataset.dataType = Self.dataTypes.subTypes[dataset.subType];
+    return dataset;
+  }
+  // Case there is an incorrect datatype & subtype
+  let dataTypeIsSubtype = typeof Self.dataTypes.subTypes[dataset.dataType] === `string`;
+  // Case datatype is a subtype
+  if (dataTypeIsSubtype) {
+    dataset.subType = dataset.dataType;
+    dataset.dataType = Self.dataTypes.subTypes[dataset.dataType];
+    return dataset;
+  }
+  // Default case, return default dataset
+  dataset.dataType = conf.defaultDataType;
+  dataset.subType = conf.defaultSubType;
+  dataset.cert = `0`;
+  return dataset;
+};
+
+/**
  * Create new dataset JSON object
  * @param {object} opts - JSON containing all data
  * @param {string} opts.id - Dataset id
@@ -112,58 +200,61 @@ Self.datasetAlreadyExist = function (currents = [], dataset = {}, match) {
  * @param {string} opts.DOI - Dataset DOI
  * @param {string} opts.name - Dataset name
  * @param {string} opts.comments - Dataset comments
+ * @param {object} dataTypes - JSON containing all dataTypes & subTypes
  * @returns {object} JSON containing all data
  */
 Self.createDataset = function (opts = {}) {
   let reuse = Params.convertToBoolean(opts.reuse);
   let kind = `unknow`;
-  if (opts.dataType === `protocol` || (opts.dataType === `other` && opts.subType === `protocol`)) kind = `protocol`;
+  let dataset = Self.fixDataset(opts);
+  if (dataset.dataType === `protocol` || (dataset.dataType === `other` && dataset.subType === `protocol`))
+    kind = `protocol`;
   else if (
-    (opts.dataType === `other` && opts.subType === `code`) ||
-    (opts.dataType === `code software` && opts.subType === `custom scripts` && !reuse)
+    (dataset.dataType === `other` && dataset.subType === `code`) ||
+    (dataset.dataType === `code software` && dataset.subType === `custom scripts` && !reuse)
   )
     kind = `code`;
   else if (
-    (opts.dataType === `code software` && opts.subType === `custom scripts` && reuse) ||
-    (opts.dataType === `code software` && opts.subType !== `custom scripts`)
+    (dataset.dataType === `code software` && dataset.subType === `custom scripts` && reuse) ||
+    (dataset.dataType === `code software` && dataset.subType !== `custom scripts`)
   )
     kind = `software`;
-  else if ((opts.dataType === `other` && opts.subType === `reagent`) || opts.dataType === `lab materials`)
+  else if ((dataset.dataType === `other` && dataset.subType === `reagent`) || dataset.dataType === `lab materials`)
     kind = `reagent`;
   else if (
-    opts.dataType !== `other` &&
-    opts.dataType !== `code software` &&
-    opts.dataType !== `lab materials` &&
-    opts.dataType !== `protocol`
+    dataset.dataType !== `other` &&
+    dataset.dataType !== `code software` &&
+    dataset.dataType !== `lab materials` &&
+    dataset.dataType !== `protocol`
   )
     kind = `dataset`;
   return {
-    id: opts.id, // id
-    dataInstanceId: opts.dataInstanceId, // dataInstance id
+    id: dataset.id, // id
+    dataInstanceId: dataset.dataInstanceId, // dataInstance id
     kind: kind, // kind
-    sentences: Array.isArray(opts.sentences) ? opts.sentences : [], // sentences
-    name: opts.name ? opts.name : ``, // name
+    sentences: Array.isArray(dataset.sentences) ? dataset.sentences : [], // sentences
+    name: dataset.name ? dataset.name : ``, // name
     reuse: reuse ? true : false, // dataset reuse
-    qc: Params.convertToBoolean(opts.qc) ? true : false, // dataset qc
-    representativeImage: Params.convertToBoolean(opts.representativeImage) ? true : false, // dataset representativeImage
-    issues: typeof opts.issues === `object` ? opts.issues : null, // dataset issues
-    flagged: Params.convertToBoolean(opts.flagged) ? true : false, // dataset flagged
-    cert: opts.cert ? opts.cert : 0, // cert value (between 0 and 1)
-    dataType: opts.dataType ? opts.dataType : ``, // dataType
-    subType: opts.subType ? opts.subType : ``, //  subType
-    source: opts.source ? opts.source : ``, // source
-    version: opts.version ? opts.version : ``, // version
-    DOI: opts.DOI ? opts.DOI : ``, // DOI
-    URL: opts.URL ? opts.URL : ``, // URL
-    PID: opts.PID ? opts.PID : ``, // PID
-    RRID: opts.RRID ? opts.RRID : ``, // RRID
-    catalogNumber: opts.catalogNumber ? opts.catalogNumber : ``, // catalog number
-    suggestedEntity: opts.suggestedEntity ? opts.suggestedEntity : ``, // suggested entity
-    suggestedURL: opts.suggestedURL ? opts.suggestedURL : ``, // suggested URL
-    suggestedRRID: opts.suggestedRRID ? opts.suggestedRRID : ``, // suggested RRID
-    comments: opts.comments ? opts.comments : ``, // comments
+    qc: Params.convertToBoolean(dataset.qc) ? true : false, // dataset qc
+    representativeImage: Params.convertToBoolean(dataset.representativeImage) ? true : false, // dataset representativeImage
+    issues: typeof dataset.issues === `object` ? dataset.issues : null, // dataset issues
+    flagged: Params.convertToBoolean(dataset.flagged) ? true : false, // dataset flagged
+    cert: dataset.cert ? dataset.cert : 0, // cert value (between 0 and 1)
+    dataType: dataset.dataType ? dataset.dataType : ``, // dataType
+    subType: dataset.subType ? dataset.subType : ``, //  subType
+    source: dataset.source ? dataset.source : ``, // source
+    version: dataset.version ? dataset.version : ``, // version
+    DOI: dataset.DOI ? dataset.DOI : ``, // DOI
+    URL: dataset.URL ? dataset.URL : ``, // URL
+    PID: dataset.PID ? dataset.PID : ``, // PID
+    RRID: dataset.RRID ? dataset.RRID : ``, // RRID
+    catalogNumber: dataset.catalogNumber ? dataset.catalogNumber : ``, // catalog number
+    suggestedEntity: dataset.suggestedEntity ? dataset.suggestedEntity : ``, // suggested entity
+    suggestedURL: dataset.suggestedURL ? dataset.suggestedURL : ``, // suggested URL
+    suggestedRRID: dataset.suggestedRRID ? dataset.suggestedRRID : ``, // suggested RRID
+    comments: dataset.comments ? dataset.comments : ``, // comments
     status:
-      opts.dataType && opts.name && (opts.DOI || opts.PID || opts.source || opts.comments)
+      dataset.dataType && dataset.name && (dataset.DOI || dataset.PID || dataset.source || dataset.comments)
         ? Self.status.valid
         : Self.status.saved // status of the dataset
   };
