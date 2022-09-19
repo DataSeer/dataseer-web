@@ -7,6 +7,8 @@
 const express = require(`express`);
 const router = express.Router();
 
+const DocumentsDatasetsController = require(`../../controllers/api/documents.datasets.js`);
+
 const AccountsManager = require(`../../lib/accounts.js`);
 const Wiki = require(`../../lib/wiki.js`);
 const DataSeerML = require(`../../lib/dataseer-ml.js`);
@@ -42,6 +44,7 @@ router.post(`/resyncJsonDataTypes`, function (req, res, next) {
     if (err) return next(err);
     else {
       req.app.set(`dataTypes`, dataTypes);
+      DocumentsDatasetsController.refreshDataTypes(dataTypes);
       return res.json(req.app.get(`dataTypes`));
     }
   });
