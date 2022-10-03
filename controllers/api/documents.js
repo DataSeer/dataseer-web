@@ -926,7 +926,7 @@ Self.upload = function (opts = {}, cb) {
           // Process metadata
           function (acc, next) {
             return Self.updateOrCreateMetadata(
-              { data: { id: acc._id.toString() }, orcid: true, user: opts.user },
+              { data: { id: acc._id.toString() }, orcid: true, user: opts.user, refreshAuthors: true },
               function (err, metadata) {
                 if (err) return next(err, acc);
                 if (metadata instanceof Error) return next(metadata, acc);
