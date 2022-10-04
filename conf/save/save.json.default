@@ -1,0 +1,14 @@
+{
+  "folder": "main google drive folder ID",
+  "files":
+  {
+    "default": "conf/save/defaultFile.json",
+    "1": "conf/save/1.json",
+    "5": "conf/save/5.json",
+    "3": "conf/save/3.json",
+    "4": "conf/save/4.json",
+    "5": "conf/save/5.json",
+    "6": "conf/save/6.json",
+    "7": "conf/save/7.json"
+  }
+}
