@@ -1,6 +1,7 @@
 conf/*.json
 conf/services/*.json
 conf/mails/*.json
+conf/save/*.json
 public/js/conf/*.js
 conf/private.key
 
