@@ -10,6 +10,12 @@ const path = require(`path`);
 
 const dbSave = require(`../lib/googleDriveSave.js`);
 
+const args = process.argv.slice(2);
+const day = args[0];
+const authFilePath = dbSave.getDailyAuthFilePath(day);
+
+dbSave.authenticate(authFilePath);
+
 console.log(`Clear Google Drive storage...`);
 dbSave.getListOfFiles(function (err, files) {
   if (err) console.log(err);
