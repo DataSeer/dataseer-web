@@ -1821,6 +1821,98 @@ Self.updateDatasets = function (opts = {}, cb) {
 };
 
 /**
+ * Refresh all datasets of all documents
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.refreshAllDatasets = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  return Documents.find(
+    {},
+    {
+      _id: 1 // By default
+    }
+  ).exec(function (err, ids) {
+    if (err) return cb(err);
+    let results = [];
+    return async.reduce(
+      ids,
+      results,
+      function (acc, item, next) {
+        return Self.refreshDatasets({ user: opts.user, data: { id: item._id.toString() } }, function (err, res) {
+          if (err) acc.push({ err, document: { _id: item._id.toString() }, res: res });
+          else if (res && res._id && res.document)
+            acc.push({
+              err,
+              document: { _id: item._id.toString() },
+              datasets: { _id: res._id.toString(), document: res.document.toString() }
+            });
+          else acc.push({ err, res: res });
+          return next(null, acc);
+        });
+      },
+      function (err, res) {
+        return cb(err, res);
+      }
+    );
+  });
+};
+
+/**
+ * Refresh datasets
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {object} opts.data - Available data
+ * @param {string} opts.data.id - Document id
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.refreshDatasets = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  return DocumentsDatasets.findOne({ document: opts.data.id }, function (err, datasets) {
+    if (err) return cb(err);
+    if (!datasets) return cb(null, new Error(`Datasets not found`));
+    // Reset dataInstanceIds
+    for (let i = 0; i < datasets.current.length; i++) {
+      datasets.current[i] = DocumentsDatasetsController.createDataset(datasets.current[i].toJSON());
+      datasets.current[i].dataInstanceId = `dataInstance-${i + 1}`;
+      datasets.current[i].id = `dataset-${i + 1}`;
+    }
+    return datasets.save(function (err) {
+      if (err) return cb(err);
+      Self.refreshDatasetsInTEI(
+        { user: opts.user, documentId: opts.data.id, datasets: datasets.current },
+        function (err) {
+          if (err) return cb(err);
+          // Create logs
+          return DocumentsLogsController.create(
+            {
+              target: datasets.document,
+              account: opts.user._id,
+              kind: CrudManager.actions.update._id,
+              key: `datasets`
+            },
+            function (err, log) {
+              if (err) return cb(err);
+              return cb(null, datasets);
+            }
+          );
+        }
+      );
+    });
+  });
+};
+
+/**
  * Update dataset
  * @param {object} opts - JSON containing all data
  * @param {object} opts.user - User
@@ -2831,7 +2923,7 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
       return Object.assign({}, item.toJSON(), {
         type,
         sentences,
-        isValid: item.status === DocumentsDatasetsController.status.valid ? true : false
+        isValid: item.actionRequired && item.actionRequired !== `Yes`
       });
     })
     .sort(function (a, b) {

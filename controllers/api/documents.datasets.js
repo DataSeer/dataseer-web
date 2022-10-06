@@ -12,13 +12,9 @@ const DocumentsDatasets = require(`../../models/documents.datasets.js`);
 
 const Params = require(`../../lib/params.js`);
 
-let Self = {};
+const dataObjects = require(`../../resources/rules/dataObjects.js`);
 
-// Dataset Status
-Self.status = {
-  valid: `valid`,
-  saved: `saved`
-};
+let Self = {};
 
 // Dataset Status
 Self.dataTypes = {};
@@ -51,7 +47,7 @@ Self.checkValidation = function (opts = {}, cb) {
     else if (!datasets) return cb(true);
     let result = true;
     for (let i = 0; i < datasets.current.length; i++) {
-      if (datasets.current[i].status !== Self.status.valid) {
+      if (datasets.current[i].actionRequired && datasets.current[i].actionRequired !== `Yes`) {
         result = false;
         break;
       }
@@ -222,13 +218,11 @@ Self.createDataset = function (opts = {}) {
   else if ((dataset.dataType === `other` && dataset.subType === `reagent`) || dataset.dataType === `lab materials`)
     kind = `reagent`;
   else if (
-    dataset.dataType !== `other` &&
-    dataset.dataType !== `code software` &&
-    dataset.dataType !== `lab materials` &&
-    dataset.dataType !== `protocol`
+    (dataset.dataType === `other` && dataset.subType === ``) ||
+    (dataset.dataType !== `code software` && dataset.dataType !== `lab materials` && dataset.dataType !== `protocol`)
   )
     kind = `dataset`;
-  return {
+  let result = {
     id: dataset.id, // id
     dataInstanceId: dataset.dataInstanceId, // dataInstance id
     kind: kind, // kind
@@ -253,11 +247,35 @@ Self.createDataset = function (opts = {}) {
     suggestedURL: dataset.suggestedURL ? dataset.suggestedURL : ``, // suggested URL
     suggestedRRID: dataset.suggestedRRID ? dataset.suggestedRRID : ``, // suggested RRID
     comments: dataset.comments ? dataset.comments : ``, // comments
-    status:
-      dataset.dataType && dataset.name && (dataset.DOI || dataset.PID || dataset.source || dataset.comments)
-        ? Self.status.valid
-        : Self.status.saved // status of the dataset
+    status: `unknow`,
+    actionRequired: `unknow`
   };
+  let infos = Self.getStatus(result);
+  result.status = infos.status;
+  result.actionRequired = infos.actionRequired;
+  return result;
+};
+
+/**
+ * Get the status of the given data object
+ * @param {object} object - Data Object
+ * @returns {string} The given status
+ */
+Self.getStatus = function (object) {
+  switch (object.kind) {
+  case `code`:
+    return dataObjects.getCodeStatus(object);
+  case `software`:
+    return dataObjects.getSoftwareStatus(object);
+  case `reagent`:
+    return dataObjects.getMaterialStatus(object);
+  case `protocol`:
+    return dataObjects.getProtocolStatus(object);
+  case `dataset`:
+    return dataObjects.getDatasetStatus(object);
+  default:
+    return new Error(`Not handled : unknow dataType`);
+  }
 };
 
 /**

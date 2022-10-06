@@ -130,14 +130,12 @@ DatasetsList.prototype.sortItems = function () {
     .appendTo(this.container);
 };
 
-// Return icon for a given status
-DatasetsList.prototype.getIconOfStatus = function (status) {
+// Return icon for a given actionRequired
+DatasetsList.prototype.getIconOfActionRequired = function (actionRequired, status) {
   let i = $(`<i>`);
-  if (status === `valid`) i.addClass(`fas fa-check success-color-dark`).attr(`title`, `This dataset is valid`);
-  else if (status === `saved`) i.addClass(`far fa-save success-color-dark`).attr(`title`, `This dataset is saved`);
-  else if (status === `modified`) i.addClass(`fas fa-pen warning-color-dark`).attr(`title`, `This dataset is modified`);
-  else if (status === `loading`)
-    i.addClass(`fas fa-spinner success-color-dark`).attr(`title`, `This dataset is updating`);
+  if (actionRequired === `No` || actionRequired === `Optionnal`)
+    i.addClass(`fas fa-check success-color-dark`).attr(`title`, status);
+  else if (actionRequired === `Yes`) i.addClass(`far fa-save success-color-dark`).attr(`title`, status);
   else i.addClass(`far fa-question-circle`).attr(`title`, `Unknow status`);
   return i;
 };
@@ -258,10 +256,11 @@ DatasetsList.prototype.add = function (dataset) {
         .attr(`title`, `Click here to work on this Dataset`)
         .css(`color`, dataset.color.foreground)
         .append($(`<div>`).text(label).addClass(`noselect`)),
-      status: $(`<div>`)
-        .attr(`key`, `dataset.status`)
-        .attr(`value`, dataset.status)
-        .append(this.getIconOfStatus(dataset.status)),
+      actionRequired: $(`<div>`)
+        .attr(`key`, `dataset.actionRequired`)
+        .attr(`value`, dataset.actionRequired)
+        .attr(`title`, dataset.status)
+        .append(this.getIconOfActionRequired(dataset.actionRequired, dataset.status)),
       checked: $(`<div>`)
         .attr(`key`, `dataset.checked`)
         .attr(`value`, false)
@@ -284,7 +283,7 @@ DatasetsList.prototype.add = function (dataset) {
     .append(elements.checked)
     .append(elements.link)
     .append(elements.delete)
-    .append(elements.status);
+    .append(elements.actionRequired);
   this.container.append(elements.item);
   // sort elements by sentence Ids
   if (this.sentencesMapping) this.sortItems();
@@ -359,7 +358,7 @@ DatasetsList.prototype.update = function (id, dataset) {
   let element = this.container.find(`.item[key="dataset.id"][value="${id}"]`);
   if (!element.get().length) return false;
   let label = dataset.name ? dataset.name : dataset.id;
-  this.setStatus(dataset.id, dataset.status);
+  this.setActionRequired(dataset.id, dataset.actionRequired, dataset.status);
   element.attr(`sentences`, JSON.stringify(dataset.sentences));
   element.find(`div[key="dataset.label"]`).attr(`value`, label).find(`div.noselect`).text(label);
 };
@@ -424,11 +423,11 @@ DatasetsList.prototype.uncheck = function (id) {
 };
 
 // Set status to a dataset
-DatasetsList.prototype.setStatus = function (id, status) {
+DatasetsList.prototype.setActionRequired = function (id, actionRequired, status) {
   return this.container
-    .find(`.item[key="dataset.id"][value="${id}"] div[key="dataset.status"]`)
+    .find(`.item[key="dataset.id"][value="${id}"] div[key="dataset.actionRequired"]`)
     .empty()
-    .append(this.getIconOfStatus(status));
+    .append(this.getIconOfActionRequired(actionRequired, status));
 };
 
 // Highlight a dataset
@@ -455,15 +454,10 @@ DatasetsList.prototype.uncolor = function (id) {
 };
 
 // Set status "modified"
-DatasetsList.prototype.modified = function () {
-  let id = this.container.find(`.item[key="dataset.id"].selected`).attr(`value`);
-  if (id) return this.setStatus(id, `modified`);
-};
+DatasetsList.prototype.modified = function () {};
 
 // Set status "loading"
-DatasetsList.prototype.loading = function (id) {
-  if (id) return this.setStatus(id, `loading`);
-};
+DatasetsList.prototype.loading = function (id) {};
 
 // Merge some datasets (into the first)
 DatasetsList.prototype.merge = function (datasets) {};
