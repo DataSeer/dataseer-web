@@ -16,6 +16,7 @@ div(id='datasetForm.screen')
       <div>If they are, click the button "Add new Dataset"</div>
     </div>
     <div id="datasetForm.container">
+      <div id="datasetForm.loader"><i class="fas fa-spinner success-color-dark"></i></div>
       <table>
         <tr class="custom-row">
           <th colspan="4">
@@ -33,7 +34,8 @@ div(id='datasetForm.screen')
         <tr class="custom-row">
           <td class="dataset-header" colspan="4">
             <div key="dataset.label" value=""></div>
-            <div key="dataset.status" value="unknow"><i class="far fa-question-circle"></i></div>
+            <div key="dataset.status" value="unknow"></div>
+            <div key="dataset.actionRequired" value="unknow"><i class="far fa-question-circle"></i></div>
             <button name='datasetForm.unlink' class="btn btn-danger btn-sm btn-lite" title="Unlink selected sentence to this dataset">
               <i class="fas fa-unlink"></i>
             </button>

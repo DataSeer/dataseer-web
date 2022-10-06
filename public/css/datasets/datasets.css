@@ -24,7 +24,7 @@ body {
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
-.fas.fa-spinner {
+.fa-spinner {
   -webkit-animation:spin 1s linear infinite;
   -moz-animation:spin 1s linear infinite;
   animation:spin 1s linear infinite;
@@ -171,8 +171,8 @@ body {
   margin: 3px 0px 0px 4px;
 }
 
-#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.status"][value="saved"] i,
-#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.status"][value="saved"] svg {
+#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.actionRequired"][value="Yes"] i,
+#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.actionRequired"][value="Yes"] svg {
   position: absolute;
   top: 2px;
   right: 4px;
@@ -181,8 +181,10 @@ body {
   font-size: 18px;
 }
 
-#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.status"][value="valid"] i,
-#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.status"][value="valid"] svg {
+#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.actionRequired"][value="No"] i,
+#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.actionRequired"][value="No"] svg,
+#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.actionRequired"][value="Optionnal"] i,
+#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.actionRequired"][value="Optionnal"] svg {
   position: absolute;
   top: 3px;
   right: 0px;
@@ -191,18 +193,8 @@ body {
   font-size: 18px;
 }
 
-#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.status"] i.fas.fa-spinner,
-#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.status"] svg.fas.fa-spinner {
-  position: absolute;
-  top: 3px;
-  right: 0px;
-  height: 18px;
-  width: 20px;
-  font-size: 20px;
-}
-
-#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.status"] i.far.fa-question-circle,
-#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.status"] svg.far.fa-question-circle {
+#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.actionRequired"] i.far.fa-question-circle,
+#datasetsList #datasetsList\.container\.items\.container .item div[key="dataset.actionRequired"] svg.far.fa-question-circle {
   position: absolute;
   top: 3px;
   right: 0px;
@@ -364,7 +356,13 @@ body {
   font-size: 20px;
 }
 
-#datasetForm .fa-spinner {
+#datasetForm #datasetForm\.loader {
+  position: absolute;
+  top: 6px;
+  right: 20px;
+}
+
+#datasetForm #datasetForm\.loader .fa-spinner {
   -webkit-text-stroke: 1px white;
   height: 20px;
   width: 20px;
@@ -421,13 +419,18 @@ body {
   display: none !important;
 }
 
-#datasetForm .custom-row div[key="dataset\.status"][value="saved"] {
+#datasetForm .custom-row div[key="dataset\.status"] {
+  display: none;
+}
+
+#datasetForm .custom-row div[key="dataset\.actionRequired"] {
   border-top-right-radius: 7px;
   border-top-left-radius: 3px;
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
   padding: 0px;
   margin-left: 5px;
+  padding-top: 5px;
   overflow: visible;
   width: 16px;
   height: 16px;
@@ -613,10 +616,6 @@ body {
   width: 20px;
   height: 14px;
   font-size: 14px;
-}
-
-#datasetForm .custom-row div[key="dataset\.status"] {
-  margin-left: 5px;
 }
 
 #datasetForm .custom-row div[key="dataset\.id"] {
