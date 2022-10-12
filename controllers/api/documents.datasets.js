@@ -206,13 +206,13 @@ Self.createDataset = function (opts = {}) {
   if (dataset.dataType === `protocol` || (dataset.dataType === `other` && dataset.subType === `protocol`))
     kind = `protocol`;
   else if (
-    (dataset.dataType === `other` && dataset.subType === `code`) ||
-    (dataset.dataType === `code software` && dataset.subType === `custom scripts` && !reuse)
+    (dataset.dataType === `other` && dataset.subType === `code` && !reuse) ||
+    (dataset.dataType === `code software` && !reuse)
   )
     kind = `code`;
   else if (
-    (dataset.dataType === `code software` && dataset.subType === `custom scripts` && reuse) ||
-    (dataset.dataType === `code software` && dataset.subType !== `custom scripts`)
+    (dataset.dataType === `other` && dataset.subType === `code` && reuse) ||
+    (dataset.dataType === `code software` && reuse)
   )
     kind = `software`;
   else if ((dataset.dataType === `other` && dataset.subType === `reagent`) || dataset.dataType === `lab materials`)
@@ -262,11 +262,16 @@ Self.createDataset = function (opts = {}) {
  * @returns {string} The given status
  */
 Self.getStatus = function (object) {
+  let codeStatus, softwareStatus, reagentStatus, protocolStatus, datasetStatus;
   switch (object.kind) {
   case `code`:
-    return dataObjects.getCodeStatus(object);
+    codeStatus = dataObjects.getCodeStatus(object);
+    softwareStatus = dataObjects.getSoftwareStatus(object);
+    return codeStatus.status === `unknow` ? softwareStatus : codeStatus;
   case `software`:
-    return dataObjects.getSoftwareStatus(object);
+    codeStatus = dataObjects.getCodeStatus(object);
+    softwareStatus = dataObjects.getSoftwareStatus(object);
+    return softwareStatus.status === `unknow` ? codeStatus : softwareStatus;
   case `reagent`:
     return dataObjects.getMaterialStatus(object);
   case `protocol`:
