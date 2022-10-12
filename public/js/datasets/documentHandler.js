@@ -426,11 +426,13 @@ DocumentHandler.prototype.newDataset = function (sentences = {}, cb) {
     if (res.err) return cb(true, res);
     let dataType = res[`datatype`] ? res[`datatype`] : self.datasetForm.defaultDataType,
       subType = res[`subtype`] ? res[`subtype`] : ``,
-      cert = res[`cert`] ? res[`cert`] : 0;
+      cert = res[`cert`] ? res[`cert`] : 0,
+      reuse = res[`reuse`] ? res[`reuse`] : false;
     let sentence = { id: datasetSentence.id, text: datasetSentence.text },
       dataset = {
         dataType: dataType,
         subType: subType,
+        reuse: reuse,
         cert: cert
       };
     return API.datasets.createDataset(
