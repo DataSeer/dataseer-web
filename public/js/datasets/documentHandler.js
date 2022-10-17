@@ -148,6 +148,11 @@ DocumentHandler.prototype.loading = function (id) {
   this.datasetsList.loading(id);
 };
 
+// Change status of the dataset (with the given id) to "loading"
+DocumentHandler.prototype.unloading = function (id) {
+  if (id === this.datasetForm.currentId()) this.datasetForm.unloading();
+};
+
 // Get datasets of a sentence
 DocumentHandler.prototype.getDatasetsOfSentence = function (sentence) {
   return this.datasets.current.filter(function (dataset) {
@@ -290,6 +295,7 @@ DocumentHandler.prototype.saveDataset = function (id, cb) {
       console.log(err, res);
       if (err) return typeof cb === `function` ? cb(err) : undefined;
       if (res.err) return typeof cb === `function` ? cb(true, res) : undefined;
+      self.unloading(id);
       self.saved(id);
       self.hasChanged[id] = false;
       self.updateDataset(id, res.res);
@@ -420,11 +426,13 @@ DocumentHandler.prototype.newDataset = function (sentences = {}, cb) {
     if (res.err) return cb(true, res);
     let dataType = res[`datatype`] ? res[`datatype`] : self.datasetForm.defaultDataType,
       subType = res[`subtype`] ? res[`subtype`] : ``,
-      cert = res[`cert`] ? res[`cert`] : 0;
+      cert = res[`cert`] ? res[`cert`] : 0,
+      reuse = res[`reuse`] ? res[`reuse`] : false;
     let sentence = { id: datasetSentence.id, text: datasetSentence.text },
       dataset = {
         dataType: dataType,
         subType: subType,
+        reuse: reuse,
         cert: cert
       };
     return API.datasets.createDataset(

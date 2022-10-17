@@ -349,6 +349,51 @@ router.put(`/:id/datasets`, function (req, res, next) {
   });
 });
 
+/* POST datasets */
+router.post(`/:id/refreshDatasets`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: { id: req.params.id },
+    user: req.user
+  };
+  return DocumentsController.refreshDatasets(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* POST datasets */
+router.post(`/refreshAllDatasets`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    user: req.user
+  };
+  return DocumentsController.refreshAllDatasets(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
 /* PUT fixEncoding */
 router.put(`/:id/fixEncoding`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);

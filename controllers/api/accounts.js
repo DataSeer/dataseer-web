@@ -667,35 +667,45 @@ Self.add = function (opts = {}, cb) {
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
   // Check all optionnal data
   if (typeof _.get(opts, `logs`) === `undefined`) opts.logs = true;
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
+  let organizations = Params.convertToArray(opts.data.organizations, `string`);
+  if (!Array.isArray(organizations) || organizations.length <= 0)
+    organizations = [conf.mongodb.default.organizations.id];
   // Start process
-  return Roles.findById(Params.convertToString(opts.data.role), function (err, role) {
+  return Organizations.find({ _id: { $in: organizations } }, function (err, res) {
     if (err) return cb(err);
-    else if (!role) return cb(null, new Error(`Given role does not exist`));
-    let account = new Accounts({
-      username: Params.convertToString(opts.data.username),
-      fullname: Params.convertToString(opts.data.fullname),
-      role: role._id,
-      organizations: Params.convertToArray(opts.data.organizations, `string`),
-      visible: Params.convertToBoolean(opts.data.visible),
-      disabled: Params.convertToBoolean(opts.data.disabled)
-    });
-    return Accounts.register(account, Params.convertToString(opts.data.password), function (err, account) {
-      if (err) {
-        if (err.name === `UserExistsError`) return cb(null, new Error(`User already exist`));
-        else return cb(err);
-      }
-      if (!opts.logs) return cb(null, account);
-      return AccountsLogsController.create(
-        {
-          target: account._id,
-          account: opts.user._id,
-          kind: CrudManager.actions.create._id
-        },
-        function (err) {
-          if (err) return cb(err);
-          return cb(null, account);
+    if (!res || res.length !== organizations.length)
+      return cb(null, new Error(`At least one of the given organizations does not exist`));
+    return Roles.findById(Params.convertToString(opts.data.role), function (err, role) {
+      if (err) return cb(err);
+      else if (!role) return cb(null, new Error(`Given role does not exist`));
+      let account = new Accounts({
+        username: Params.convertToString(opts.data.username),
+        fullname: Params.convertToString(opts.data.fullname),
+        role: role._id,
+        organizations: organizations,
+        visible: Params.convertToBoolean(opts.data.visible),
+        disabled: Params.convertToBoolean(opts.data.disabled)
+      });
+      return Accounts.register(account, Params.convertToString(opts.data.password), function (err, account) {
+        if (err) {
+          if (err.name === `UserExistsError`) return cb(null, new Error(`User already exist`));
+          else return cb(err);
         }
-      );
+        if (!opts.logs) return cb(null, account);
+        return AccountsLogsController.create(
+          {
+            target: account._id,
+            account: opts.user._id,
+            kind: CrudManager.actions.create._id
+          },
+          function (err) {
+            if (err) return cb(err);
+            return cb(null, account);
+          }
+        );
+      });
     });
   });
 };

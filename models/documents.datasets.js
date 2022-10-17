@@ -33,7 +33,8 @@ const Sentence = new mongoose.Schema(
       kind: { type: String, default: `unknow` }, // kind of the data object - available values : 'unknow', 'dataset', code', 'software', 'reagent', 'protocol'
       flagged: { type: Boolean, default: false }, // flagged property
       cert: { type: String, default: `` }, // cert value (between 0 and 1)
-      status: { type: String, default: `saved` }, // status of the data object
+      status: { type: String, default: `` }, // status of the data object
+      actionRequired: { type: String, default: `` }, // status of the data object - available values : 'Yes', 'No', Optionnal', "unknow"
       // "Shared" properties
       name: { type: String, default: `` }, // name
       dataType: { type: String, default: `` }, // dataType

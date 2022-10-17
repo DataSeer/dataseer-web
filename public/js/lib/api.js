@@ -409,8 +409,9 @@ const API = {
       let keys = Object.keys(classifications);
       if (keys.length > 0) {
         let datatype = keys[0];
-        let max = classifications[keys[0]];
+        let max = typeof classifications[keys[0]] === `number` ? classifications[keys[0]] : 0;
         for (let i = 1; i < keys.length; i++) {
+          if (typeof classifications[keys[i]] !== `number`) continue;
           if (max < classifications[keys[i]]) {
             max = classifications[keys[i]];
             datatype = keys[i];
@@ -419,6 +420,7 @@ const API = {
         // result.datatype = datatype;
         result.datatype = datatype.toLowerCase(); // lowercase to match with metadata returned by dataseer-ml
         result.cert = max;
+        result.reuse = classifications.reuse;
       }
       return result;
     },

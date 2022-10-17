@@ -1,3 +1,4 @@
 {
-  "bcc": "email@email.com"
+  "bcc": "email@email.com",
+  "from": "\"Fred Foo\" <foo@example.com>"
 }

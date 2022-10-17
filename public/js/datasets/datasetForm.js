@@ -19,6 +19,8 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
   this.container = $(`#${this.id} #datasetForm\\.container`); // container of datasetForm
   this.message = $(`#${this.id} #datasetForm\\.message`);
   this.datasetsTabs = this.container.find(`div[key="datasets"]`); // datasets list
+  this.loader = $(`#${this.id} #datasetForm\\.loader`); // loader
+  this.loader.hide();
   this.datasetTab = this.datasetsTabs.find(`div.tpl[key="datasets"]`); // dataset tab tpl
   this.resources = {
     metadata: {},
@@ -204,13 +206,19 @@ const DatasetForm = function (id = `datasetForm`, events = {}) {
     },
     status: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.status;
-      self.container
-        .find(`div[key="dataset\\.status"]`)
-        .attr(`value`, value)
-        .empty()
-        .append(self.getIconOfStatus(value));
+      self.container.find(`div[key="dataset\\.status"]`).attr(`value`, value).empty();
       self.dataset.status = value;
       return self.dataset.status;
+    },
+    actionRequired: function (value, inputs = false) {
+      if (typeof value === `undefined`) return self.dataset.actionRequired;
+      self.container
+        .find(`div[key="dataset\\.actionRequired"]`)
+        .attr(`value`, value)
+        .empty()
+        .append(self.getIconOfActionRequired(value, self.dataset.status));
+      self.dataset.actionRequired = value;
+      return self.dataset.actionRequired;
     },
     reuse: function (value, inputs = false) {
       if (typeof value === `undefined`) return self.dataset.reuse;
@@ -743,13 +751,11 @@ DatasetForm.prototype.setView = function (opts = {}) {
 };
 
 // Return icon for a given status
-DatasetForm.prototype.getIconOfStatus = function (status) {
+DatasetForm.prototype.getIconOfActionRequired = function (actionRequired, status) {
   let i = $(`<i>`);
-  if (status === `valid`) i.addClass(`fas fa-check success-color-dark`).attr(`title`, `This dataset is valid`);
-  else if (status === `saved`) i.addClass(`far fa-save success-color-dark`).attr(`title`, `This dataset is saved`);
-  else if (status === `modified`) i.addClass(`fas fa-pen warning-color-dark`).attr(`title`, `This dataset is modified`);
-  else if (status === `loading`)
-    i.addClass(`fas fa-spinner success-color-dark`).attr(`title`, `This dataset is updating`);
+  if (actionRequired === `No` || actionRequired === `Optionnal`)
+    i.addClass(`fas fa-check success-color-dark`).attr(`title`, status);
+  else if (actionRequired === `Yes`) i.addClass(`far fa-save success-color-dark`).attr(`title`, status);
   else i.addClass(`far fa-question-circle`).attr(`title`, `Unknow status`);
   return i;
 };
@@ -890,13 +896,16 @@ DatasetForm.prototype.uncolor = function () {
 };
 
 // Set status "modified"
-DatasetForm.prototype.modified = function () {
-  return this.properties[`status`](`modified`);
-};
+DatasetForm.prototype.modified = function () {};
 
 // Set status "modified"
 DatasetForm.prototype.loading = function () {
-  return this.properties[`status`](`loading`);
+  this.loader.show();
+};
+
+// Set status "modified"
+DatasetForm.prototype.unloading = function () {
+  this.loader.hide();
 };
 
 // Set Empty datasetForm Message
