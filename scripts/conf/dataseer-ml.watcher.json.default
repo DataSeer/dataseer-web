@@ -2,5 +2,5 @@
   "enabled": true,
   "timeout": 60000,
   "url": "http://localhost:8060",
-  "cmd": "docker logs dataseer-ml > \"dataseer-ml.$(date).log\" 2>&1; docker rm -f dataseer-ml; docker run --name dataseer-ml -d -it -p 8060:8060 --init dataseer/dataseer:0.7.2-SNAPSHOT"
+  "cmd": "docker logs dataseer-ml > \"dataseer-ml.$(date).log\" 2>&1; docker rm -f dataseer-ml; docker run --name dataseer-ml -d -it -p 8060:8060 --init dataseer/dataseer-ml:0.7.2-SNAPSHOT"
 }
