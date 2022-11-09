@@ -2,7 +2,7 @@
   "2": {
     "key": 2,
     "actionRequired": "Yes",
-    "label": "Include missing information in citation"
+    "label": "Upload code to Zenodo and provide DOI or register tool for an RRID"
   },
   "1": {
     "key": 1,
@@ -12,6 +12,6 @@
   "0": {
     "key": 0,
     "actionRequired": "No",
-    "label": "Done - Citation meets minimum standards"
+    "label": "Done - Cited correctly"
   }
 }

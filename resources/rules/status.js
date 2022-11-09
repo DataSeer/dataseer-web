@@ -18,6 +18,11 @@ module.exports = {
     'software package': require(`./status/softwares.software-package.json`),
     'software': require(`./status/softwares.software.json`)
   },
-  codes: require(`./status/codes.json`),
+  codes: {
+    'custom scripts': require(`./status/codes.custom-scripts.json`),
+    '': require(`./status/codes.none.json`),
+    'software package': require(`./status/codes.software-package.json`),
+    'software': require(`./status/codes.software.json`)
+  },
   reagents: require(`./status/reagents.json`)
 };

@@ -18,6 +18,11 @@ module.exports = {
     'software package': require(`./checks/softwares.software-package.js`),
     'software': require(`./checks/softwares.software.js`)
   },
-  codes: require(`./checks/codes.js`),
+  codes: {
+    'custom scripts': require(`./checks/codes.custom-scripts.js`),
+    '': require(`./checks/codes.none.js`),
+    'software package': require(`./checks/codes.software-package.js`),
+    'software': require(`./checks/codes.software.js`)
+  },
   reagents: require(`./checks/reagents.js`)
 };

@@ -5,7 +5,7 @@
 'use strict';
 
 const rules = require(`./rules.js`);
-const customCheck = require(`./customCheck.js`);
+const customChecks = require(`./customChecks.js`);
 const status = require(`./status.js`);
 
 let Self = {};
@@ -37,17 +37,19 @@ Self.getDatasetStatus = function (object) {
     array.push(object[keys[i]]);
   }
   let nbTest = Self.booleanArrayToNumber(array);
-  let postCheck = true;
-  for (let i = keys.length - 1; i >= 0; i--) {
-    postCheck = postCheck && customCheck.datasets.check(keys[i], object[keys[i]], nbTest);
-    if (!postCheck) break;
-  }
-  let defaultResult = { status: `unknow`, actionRequired: `unknow` };
-  if (!postCheck) return `unknow`;
-  let key = rules.datasets[nbTest];
+  let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
+  let availableRules = rules.datasets[nbTest];
+  if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
+  let key = availableRules[0];
+  let customCheck = customChecks.datasets.check(nbTest, object);
+  if (availableRules.length > 1 && typeof customCheck === `number` && !isNaN(customCheck)) key = customCheck;
   let result =
     typeof status.datasets[key] === `object`
-      ? { status: status.datasets[key].label, actionRequired: status.datasets[key].actionRequired }
+      ? {
+        status: status.datasets[key].label,
+        actionRequired: status.datasets[key].actionRequired,
+        rule: object.kind ? `${object.kind}:${nbTest}[${key}]` : nbTest
+      }
       : defaultResult;
   return result;
 };
@@ -63,18 +65,21 @@ Self.getCodeStatus = function (object) {
   for (let i = keys.length - 1; i >= 0; i--) {
     array.push(object[keys[i]]);
   }
+  let subType = object.dataType === `other` ? `` : object.subType;
   let nbTest = Self.booleanArrayToNumber(array);
-  let postCheck = true;
-  for (let i = keys.length - 1; i >= 0; i--) {
-    postCheck = postCheck && customCheck.codes.check(keys[i], object[keys[i]], nbTest);
-    if (!postCheck) break;
-  }
-  let defaultResult = { status: `unknow`, actionRequired: `unknow` };
-  if (!postCheck) return `unknow`;
-  let key = rules.codes[nbTest];
+  let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
+  let availableRules = rules.codes[subType][nbTest];
+  if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
+  let key = availableRules[0];
+  let customCheck = customChecks.codes[subType].check(nbTest, object);
+  if (availableRules.length > 1 && typeof customCheck === `number` && !isNaN(customCheck)) key = customCheck;
   let result =
-    typeof status.codes[key] === `object`
-      ? { status: status.codes[key].label, actionRequired: status.codes[key].actionRequired }
+    typeof status.codes[subType][key] === `object`
+      ? {
+        status: status.codes[subType][key].label,
+        actionRequired: status.codes[subType][key].actionRequired,
+        rule: object.kind ? `${object.kind}.${subType}:${nbTest}[${key}]` : nbTest
+      }
       : defaultResult;
   return result;
 };
@@ -92,19 +97,18 @@ Self.getSoftwareStatus = function (object) {
   }
   let subType = object.dataType === `other` ? `` : object.subType;
   let nbTest = Self.booleanArrayToNumber(array);
-  let postCheck = true;
-  for (let i = keys.length - 1; i >= 0; i--) {
-    postCheck = postCheck && customCheck.softwares[subType].check(keys[i], object[keys[i]], nbTest);
-    if (!postCheck) break;
-  }
-  let defaultResult = { status: `unknow`, actionRequired: `unknow` };
-  if (!postCheck) return `unknow`;
-  let key = rules.softwares[subType][nbTest];
+  let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
+  let availableRules = rules.softwares[subType][nbTest];
+  if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
+  let key = availableRules[0];
+  let customCheck = customChecks.softwares[subType].check(nbTest, object);
+  if (availableRules.length > 1 && typeof customCheck === `number` && !isNaN(customCheck)) key = customCheck;
   let result =
     typeof status.softwares[subType][key] === `object`
       ? {
         status: status.softwares[subType][key].label,
-        actionRequired: status.softwares[subType][key].actionRequired
+        actionRequired: status.softwares[subType][key].actionRequired,
+        rule: object.kind ? `${object.kind}.${subType}:${nbTest}[${key}]` : nbTest
       }
       : defaultResult;
   return result;
@@ -122,17 +126,19 @@ Self.getMaterialStatus = function (object) {
     array.push(object[keys[i]]);
   }
   let nbTest = Self.booleanArrayToNumber(array);
-  let postCheck = true;
-  for (let i = keys.length - 1; i >= 0; i--) {
-    postCheck = postCheck && customCheck.reagents.check(keys[i], object[keys[i]], nbTest);
-    if (!postCheck) break;
-  }
-  let defaultResult = { status: `unknow`, actionRequired: `unknow` };
-  if (!postCheck) return `unknow`;
-  let key = rules.reagents[nbTest];
+  let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
+  let availableRules = rules.reagents[nbTest];
+  if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
+  let key = availableRules[0];
+  let customCheck = customChecks.reagents.check(nbTest, object);
+  if (availableRules.length > 1 && typeof customCheck === `number` && !isNaN(customCheck)) key = customCheck;
   let result =
     typeof status.reagents[key] === `object`
-      ? { status: status.reagents[key].label, actionRequired: status.reagents[key].actionRequired }
+      ? {
+        status: status.reagents[key].label,
+        actionRequired: status.reagents[key].actionRequired,
+        rule: object.kind ? `${object.kind}:${nbTest}[${key}]` : nbTest
+      }
       : defaultResult;
   return result;
 };
@@ -150,19 +156,18 @@ Self.getProtocolStatus = function (object) {
   }
   let subType = object.dataType === `other` ? `` : object.subType;
   let nbTest = Self.booleanArrayToNumber(array);
-  let postCheck = true;
-  for (let i = keys.length - 1; i >= 0; i--) {
-    postCheck = postCheck && customCheck.protocols[subType].check(keys[i], object[keys[i]], nbTest);
-    if (!postCheck) break;
-  }
-  let defaultResult = { status: `unknow`, actionRequired: `unknow` };
-  if (!postCheck) return `unknow`;
-  let key = rules.protocols[subType][nbTest];
+  let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
+  let availableRules = rules.protocols[subType][nbTest];
+  if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
+  let key = availableRules[0];
+  let customCheck = customChecks.protocols[subType].check(nbTest, object);
+  if (availableRules.length > 1 && typeof customCheck === `number` && !isNaN(customCheck)) key = customCheck;
   let result =
     typeof status.protocols[subType][key] === `object`
       ? {
         status: status.protocols[subType][key].label,
-        actionRequired: status.protocols[subType][key].actionRequired
+        actionRequired: status.protocols[subType][key].actionRequired,
+        rule: object.kind ? `${object.kind}.${subType}:${nbTest}[${key}]` : nbTest
       }
       : defaultResult;
   return result;

@@ -2,25 +2,21 @@
   "3": {
     "key": 3,
     "actionRequired": "Yes",
-    "label": "Confirm citations meet minimum standards",
-    "nbTest": ["4"]
+    "label": "Confirm citations meet minimum standards"
   },
   "2": {
     "key": 2,
     "actionRequired": "Yes",
-    "label": "Deposit in repository and cite DOI in text",
-    "nbTest": ["0"]
+    "label": "Deposit in repository and cite DOI in text"
   },
   "1": {
     "key": 1,
     "actionRequired": "Yes",
-    "label": "Verify citation",
-    "nbTest": ["8","9","10","11","12","13","14","15"]
+    "label": "Verify citation"
   },
   "0": {
     "key": 0,
     "actionRequired": "No",
-    "label": "Done - Cited correctly",
-    "nbTest": ["1","2","3","5","6","7"]
+    "label": "Done - Cited correctly"
   }
 }
