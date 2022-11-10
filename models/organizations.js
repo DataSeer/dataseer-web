@@ -11,11 +11,11 @@ const Settings = new mongoose.Schema(
     reports: {
       templates: {
         default: { type: String, default: `ASAP` },
-        list: [String] // available values:  "AmNat", "ASAP", "DataSeer Generic", "bioRxiv"
+        list: [`AmNat`, `ASAP`, `DataSeer Generic`, `bioRxiv`]
       },
       actions: {
         default: { type: String, default: `generate` },
-        list: [String] // available values: "open", "generate"
+        list: [`open`, `generate`]
       }
     },
     upload: {
