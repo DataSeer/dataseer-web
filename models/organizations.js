@@ -9,14 +9,14 @@ const mongoose = require(`mongoose`);
 const Settings = new mongoose.Schema(
   {
     reports: {
-      templates: {
-        default: { type: String, default: `ASAP` },
-        list: [`AmNat`, `ASAP`, `DataSeer Generic`, `bioRxiv`]
-      },
-      actions: {
-        default: { type: String, default: `generate` },
-        list: [`open`, `generate`]
-      }
+      templates: [
+        {
+          label: { type: String },
+          enabled: { type: Boolean },
+          isDefault: { type: Boolean },
+          actions: [{ label: { type: String }, enabled: { type: Boolean }, isDefault: { type: Boolean } }]
+        }
+      ]
     },
     upload: {
       alreadyProcessed: { type: Boolean, default: false },
