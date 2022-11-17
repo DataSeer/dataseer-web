@@ -6,6 +6,8 @@
 
 const mongoose = require(`mongoose`);
 
+const Action = new mongoose.Schema({ enabled: { type: Boolean }, isDefault: { type: Boolean } }, { _id: false });
+
 const Settings = new mongoose.Schema(
   {
     reports: {
@@ -14,7 +16,10 @@ const Settings = new mongoose.Schema(
           label: { type: String },
           enabled: { type: Boolean },
           isDefault: { type: Boolean },
-          actions: [{ label: { type: String }, enabled: { type: Boolean }, isDefault: { type: Boolean } }]
+          actions: {
+            'open': { type: Action },
+            'generate': { type: Action }
+          }
         }
       ]
     },
