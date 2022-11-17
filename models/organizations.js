@@ -6,11 +6,34 @@
 
 const mongoose = require(`mongoose`);
 
+const Settings = new mongoose.Schema(
+  {
+    reports: {
+      templates: {
+        default: { type: String, default: `ASAP` },
+        list: [`AmNat`, `ASAP`, `DataSeer Generic`, `bioRxiv`]
+      },
+      actions: {
+        default: { type: String, default: `generate` },
+        list: [`open`, `generate`]
+      }
+    },
+    upload: {
+      alreadyProcessed: { type: Boolean, default: false },
+      removeResponseToViewerSection: { type: Boolean, default: false },
+      dataseerML: { type: Boolean, default: true },
+      mergePDFs: { type: Boolean, default: true }
+    }
+  },
+  { _id: false }
+);
+
 const Schema = new mongoose.Schema(
   {
     name: { type: String, default: `None`, required: true, unique: true }, // name of organization
     color: { type: String, default: `` }, // Color of organization
-    visible: { type: Boolean, default: true, require: true }
+    visible: { type: Boolean, default: true, require: true },
+    settings: { type: Settings }
   },
   { minimize: false, timestamps: { createdAt: `createdAt`, updatedAt: `updatedAt` } }
 );

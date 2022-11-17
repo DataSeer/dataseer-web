@@ -206,12 +206,14 @@ Self.update = function (opts = {}, cb) {
   let name = Params.convertToString(opts.data.name);
   let visible = Params.convertToBoolean(opts.data.visible);
   let color = Params.convertToString(opts.data.color);
+  let settings = Object.assign({}, opts.data.settings);
   return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, organization) {
     if (err) return cb(err);
     if (organization instanceof Error) return cb(null, organization);
     if (typeof name !== `undefined`) organization.name = name;
     if (typeof visible !== `undefined`) organization.visible = visible;
     if (typeof color !== `undefined`) organization.color = color;
+    if (typeof settings !== `undefined`) organization.settings = settings;
     return organization.save(function (err, organization) {
       if (err) return cb(err);
       if (!opts.logs) return cb(null, organization);
@@ -251,6 +253,7 @@ Self.updateMany = function (opts = {}, cb) {
   let name = Params.convertToString(opts.data.name);
   let visible = Params.convertToBoolean(opts.data.visible);
   let color = Params.convertToString(opts.data.color);
+  let settings = Object.assign({}, opts.data.settings);
   return async.reduce(
     ids,
     [],
@@ -258,7 +261,7 @@ Self.updateMany = function (opts = {}, cb) {
       return Self.update(
         {
           user: opts.user,
-          data: { id: item, name: name, visible: visible, color: color },
+          data: { id: item, name: name, visible: visible, color: color, settings: settings },
           logs: opts.logs
         },
         function (err, res) {
