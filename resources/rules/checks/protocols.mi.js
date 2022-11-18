@@ -6,11 +6,10 @@
 
 let Self = {};
 
-Self.check = function (key, value, nbTest) {
-  switch (key) {
+Self.check = function (nbTest, object) {
+  switch (nbTest) {
   default:
-    return true;
-    break;
+    return NaN;
   }
 };
 

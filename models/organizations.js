@@ -6,11 +6,39 @@
 
 const mongoose = require(`mongoose`);
 
+const Action = new mongoose.Schema({ enabled: { type: Boolean }, isDefault: { type: Boolean } }, { _id: false });
+
+const Settings = new mongoose.Schema(
+  {
+    reports: {
+      templates: [
+        {
+          label: { type: String },
+          enabled: { type: Boolean },
+          isDefault: { type: Boolean },
+          actions: {
+            'open': { type: Action },
+            'generate': { type: Action }
+          }
+        }
+      ]
+    },
+    upload: {
+      alreadyProcessed: { type: Boolean, default: false },
+      removeResponseToViewerSection: { type: Boolean, default: false },
+      dataseerML: { type: Boolean, default: true },
+      mergePDFs: { type: Boolean, default: true }
+    }
+  },
+  { _id: false }
+);
+
 const Schema = new mongoose.Schema(
   {
     name: { type: String, default: `None`, required: true, unique: true }, // name of organization
     color: { type: String, default: `` }, // Color of organization
-    visible: { type: Boolean, default: true, require: true }
+    visible: { type: Boolean, default: true, require: true },
+    settings: { type: Settings }
   },
   { minimize: false, timestamps: { createdAt: `createdAt`, updatedAt: `updatedAt` } }
 );

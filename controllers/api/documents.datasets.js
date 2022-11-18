@@ -247,10 +247,12 @@ Self.createDataset = function (opts = {}) {
     suggestedURL: dataset.suggestedURL ? dataset.suggestedURL : ``, // suggested URL
     suggestedRRID: dataset.suggestedRRID ? dataset.suggestedRRID : ``, // suggested RRID
     comments: dataset.comments ? dataset.comments : ``, // comments
+    rule: `unknow`,
     status: `unknow`,
     actionRequired: `unknow`
   };
   let infos = Self.getStatus(result);
+  result.rule = infos.rule;
   result.status = infos.status;
   result.actionRequired = infos.actionRequired;
   return result;
@@ -265,13 +267,9 @@ Self.getStatus = function (object) {
   let codeStatus, softwareStatus, reagentStatus, protocolStatus, datasetStatus;
   switch (object.kind) {
   case `code`:
-    codeStatus = dataObjects.getCodeStatus(object);
-    softwareStatus = dataObjects.getSoftwareStatus(object);
-    return codeStatus.status === `unknow` ? softwareStatus : codeStatus;
+    return dataObjects.getCodeStatus(object);
   case `software`:
-    codeStatus = dataObjects.getCodeStatus(object);
-    softwareStatus = dataObjects.getSoftwareStatus(object);
-    return softwareStatus.status === `unknow` ? codeStatus : softwareStatus;
+    return dataObjects.getSoftwareStatus(object);
   case `reagent`:
     return dataObjects.getMaterialStatus(object);
   case `protocol`:

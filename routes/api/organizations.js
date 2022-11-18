@@ -81,7 +81,8 @@ router.put(`/`, function (req, res, next) {
     data: {
       ids: Params.convertToArray(req.body.ids, `string`),
       color: Params.convertToString(req.body.color),
-      visible: Params.convertToBoolean(req.body.visible)
+      visible: Params.convertToBoolean(req.body.visible),
+      settings: req.body.settings
     },
     user: req.user
   };
@@ -159,7 +160,8 @@ router.put(`/:id`, function (req, res, next) {
       id: req.params.id,
       name: Params.convertToString(req.body.name),
       color: Params.convertToString(req.body.color),
-      visible: Params.convertToBoolean(req.body.visible)
+      visible: Params.convertToBoolean(req.body.visible),
+      settings: req.body.settings
     },
     user: req.user
   };
