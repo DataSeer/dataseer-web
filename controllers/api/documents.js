@@ -392,8 +392,12 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
     return cb(new Error(`Missing required data: opts.dataTypes`));
   let kind = _.get(opts, `kind`);
   if (typeof kind === `undefined`) return cb(Error(`Missing required data: opts.kind`));
-  if (kind !== `ASAP` && kind !== `AmNat` && kind !== `DataSeer Generic`)
-    return cb(Error(`Invalid required data: opts.kind must be 'ASAP or 'AmNat' or 'DataSeer Generic'`));
+  if (kind !== `ASAP` && kind !== `AmNat` && kind !== `DataSeer Generic` && kind !== `Universal Journal Report`)
+    return cb(
+      Error(
+        `Invalid required data: opts.kind must be 'ASAP or 'AmNat' or 'DataSeer Generic' or 'Universal Journal Report'`
+      )
+    );
   let accessRights = AccountsManager.getAccessRights(opts.user);
   if (!accessRights.isAdministrator && !accessRights.isModerator)
     return cb(null, new Error(`Unauthorized functionnality`));
