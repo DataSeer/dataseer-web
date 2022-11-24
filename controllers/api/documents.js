@@ -800,14 +800,14 @@ Self.upload = function (opts = {}, cb) {
             // Default value if user is not (Moderator or Administrator) and one of organizations is AmNat : true
             if (
               (accessRights.isVisitor || accessRights.isStandardUser) &&
-              acc.organizations.indexOf(uploadConf.AmNat.organization.id) > -1
+              acc.organizations.indexOf(uploadConf.organizations.AmNat.organization.id) > -1
             )
               opts.removeResponseToViewerSection = true;
             // If removeResponseToViewerSection option is not defined (for Moderator or Administrator), then it's true by default
             if (
               (accessRights.isModerator || accessRights.isAdministrator) &&
               typeof opts.removeResponseToViewerSection === `undefined` &&
-              acc.organizations.indexOf(uploadConf.AmNat.organization.id) > -1
+              acc.organizations.indexOf(uploadConf.organizations.AmNat.organization.id) > -1
             )
               opts.removeResponseToViewerSection = true;
             if (!opts.removeResponseToViewerSection) return next(null, acc);
@@ -949,7 +949,12 @@ Self.upload = function (opts = {}, cb) {
           // Process datasets
           function (acc, next) {
             return Self.extractDatasets(
-              { data: { id: acc._id.toString() }, user: opts.user, dataTypes: opts.dataTypes },
+              {
+                data: { id: acc._id.toString() },
+                user: opts.user,
+                dataTypes: opts.dataTypes,
+                setCustomDefaultProperties: uploadConf.setCustomDefaultProperties
+              },
               function (err, datasets) {
                 if (err) return next(err, acc);
                 if (datasets instanceof Error) return next(datasets, acc);
@@ -1518,6 +1523,7 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
  * @param {string} opts.data.id - Document id
  * @param {object} opts.dataTypes - Current dataTypes
  * @param {object} opts.user - Current user
+ * @param {object} opts.setCustomDefaultProperties - Set custom default properties on current datasets
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: ObjectId OR new Error)
  * @returns {undefined} undefined
  */
@@ -1535,16 +1541,26 @@ Self.extractDatasets = function (opts = {}, cb) {
     return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
       if (err) return cb(err);
       // Extract metadata
-      let datasets = XML.extractDatasets(
+      let extractedDatasets = XML.extractDatasets(
         XML.load(content.data.toString(DocumentsFilesController.encoding)),
         opts.dataTypes
       );
+      let currentDatasets = [].concat(extractedDatasets);
+      // Set custom default properties
+      if (opts.setCustomDefaultProperties) {
+        for (let i = 0; i < currentDatasets.length; i++) {
+          let dataset = currentDatasets[i];
+          if (dataset.kind === `dataset`) {
+            dataset.reuse = false;
+          }
+        }
+      }
       // Update them
       return DocumentsDatasets.findOneAndUpdate(
         { document: doc._id },
         {
-          extracted: datasets,
-          current: datasets,
+          extracted: extractedDatasets,
+          current: currentDatasets,
           deleted: []
         },
         {
