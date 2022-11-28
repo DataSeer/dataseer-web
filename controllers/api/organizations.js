@@ -17,6 +17,7 @@ const AccountsManager = require(`../../lib/accounts.js`);
 const Params = require(`../../lib/params.js`);
 
 const conf = require(`../../conf/conf.json`);
+const organizationsSettings = require(`../../conf/organizations.settings.json`);
 
 let Self = {};
 
@@ -161,7 +162,8 @@ Self.add = function (opts = {}, cb) {
     let organization = new Organizations({
       name: name,
       color: color,
-      visible: visible
+      visible: visible,
+      settings: organizationsSettings
     });
     return Organizations.create(organization, function (err, query) {
       if (err) return cb(err);
