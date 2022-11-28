@@ -111,7 +111,7 @@ Self.get = function (opts = {}, cb) {
   // Execute transaction
   return transaction.exec(function (err, organization) {
     if (err) return cb(err);
-    if (!organization) return cb(true, new Error(`Organization not found`));
+    if (!organization) return cb(null, new Error(`Organization not found`));
     if (!opts.logs) return cb(null, organization);
     return OrganizationsLogsController.create(
       {
