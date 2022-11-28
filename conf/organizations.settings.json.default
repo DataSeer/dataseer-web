@@ -1,0 +1,105 @@
+{
+  "reports":
+  {
+    "templates":
+    [
+      {
+        "label": "AmNat",
+        "enabled": false,
+        "isDefault": false,
+        "actions":
+        {
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
+          },
+          "generate":
+          {
+            "enabled": true,
+            "isDefault": true
+          }
+        }
+      },
+      {
+        "label": "ASAP",
+        "enabled": true,
+        "isDefault": true,
+        "actions":
+        {
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
+          },
+          "generate":
+          {
+            "enabled": true,
+            "isDefault": true
+          }
+        }
+      },
+      {
+        "label": "bioRxiv",
+        "enabled": true,
+        "isDefault": false,
+        "actions":
+        {
+          "open":
+          {
+            "enabled": true,
+            "isDefault": true
+          },
+          "generate":
+          {
+            "enabled": false,
+            "isDefault": false
+          }
+        }
+      },
+      {
+        "label": "DataSeer Generic",
+        "enabled": true,
+        "isDefault": false,
+        "actions":
+        {
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
+          },
+          "generate":
+          {
+            "enabled": true,
+            "isDefault": true
+          }
+        }
+      },
+      {
+        "label": "Universal Journal Report",
+        "enabled": true,
+        "isDefault": false,
+        "actions":
+        {
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
+          },
+          "generate":
+          {
+            "enabled": true,
+            "isDefault": true
+          }
+        }
+      }
+    ]
+  },
+  "upload":
+  {
+    "alreadyProcessed": false,
+    "removeResponseToViewerSection": false,
+    "dataseerML": true,
+    "mergePDFs": true
+  }
+}
