@@ -144,6 +144,7 @@ router.get(`/:id`, function (req, res, next) {
     }
     let isError = data instanceof Error;
     let result = isError ? data.toString() : data;
+    if (isError) return res.status(404).send(conf.errors.notFound);
     return res.json({
       err: isError,
       res: result
