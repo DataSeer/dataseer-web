@@ -1,4 +1,4 @@
-# datasser-web
+# dataseer-web
 
 ## Purposes
 
