@@ -2750,6 +2750,12 @@ Self.all = function (opts = {}, cb) {
   // Delete organizations restriction for visitor (because its token can be used for only one document)
   if (!accessRights.isStandardUser) delete query.organizations;
   if (!accessRights.isModerator) {
+    if (!Array.isArray(organizations))
+      organizations = opts.user.organizations.map(function (item) {
+        return item._id.toString();
+      });
+    let filteredOrganizations = AccountsManager.getOwnOrganizations(organizations, opts.user);
+    query.organizations = { $in: filteredOrganizations };
     query.owner = { $in: [opts.user._id.toString()] };
   }
   if (accessRights.isVisitor || accessRights.isStandardUser) {
