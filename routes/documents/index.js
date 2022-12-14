@@ -39,9 +39,17 @@ router.get(`/:id`, function (req, res) {
     }
     if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
     let oldGUI = Params.convertToBoolean(req.query.oldGUI);
+    let view = Params.convertToString(req.query.view);
     let fromReport = Params.convertToBoolean(req.query.fromReport);
-    if (!oldGUI || fromReport)
-      return res.redirect(Url.build(`#/documents/${req.params.id}/report`, { token: req.query.token }, conf.gui.root));
+    if (!oldGUI || fromReport) {
+      if (view === `datasets`)
+        return res.redirect(
+          Url.build(`#/documents/${req.params.id}/datasets`, Object.assign({}, req.query), conf.gui.root)
+        );
+      return res.redirect(
+        Url.build(`#/documents/${req.params.id}/report`, Object.assign({}, req.query), conf.gui.root)
+      );
+    }
     if (doc.status === ``) return res.status(500).send(`This document is no more available`);
     return res.redirect(
       Url.build(`documents/${req.params.id}/${doc.status}`, { token: req.query.token, oldGUI: oldGUI })

@@ -98,6 +98,8 @@ router.get(`/csv`, function (req, res, next) {
 
 /* ADD Document */
 router.post(`/`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   return DocumentsController.upload(
     {
       data: Object.assign({ files: req.files }, req.body),
