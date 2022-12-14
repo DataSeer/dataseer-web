@@ -62,9 +62,6 @@ if(currentUser && currentUser.role.key !== "visitor")
           a(href=`${conf.root}/backoffice/accounts/${currentUser._id.toString()}` class=`${myAccount ? 'active' : '' }`) My account
         </li>
         <li>
-          a(href=`${conf.root}/backoffice/upload` class=`${currentRoute === '/backoffice/upload' ? 'active' : '' }`) Upload
-        </li>
-        <li>
           a(href=`${conf.root}/signout` class=``) Signout
         </li>
     </ul>
