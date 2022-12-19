@@ -1,11 +1,23 @@
 {
   "folders": {
+    "DataSeer Generic": "folderID",
     "AmNat": "folderID",
+    "Universal Journal Report": "folderID",
     "ASAP": "folderID"
   },
   "templates": {
-    "AmNat": "fileID",
-    "ASAP": "fileID"
+    "DataSeer Generic": "folderID",
+    "AmNat": "folderID",
+    "Universal Journal Report": "folderID",
+    "ASAP": "folderID"
+  },
+  "settings": {
+    "datasetsLinks": {
+      "DataSeer Generic": false,
+      "AmNat": false,
+      "Universal Journal Report": false,
+      "ASAP": false
+    }
   },
   "prefix": "prefix of the filename (e.g. 'localhost - ' for localhost, 'dev - ' for development, an empty string for production)"
 }
