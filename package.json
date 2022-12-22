@@ -33,7 +33,7 @@
     "html-entities": "^2.3.2",
     "http-errors": "~1.6.3",
     "jsdom": "^16.7.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "md5": "^2.3.0",
     "method-override": "^3.0.0",
     "minhash": "^0.0.9",
