@@ -249,7 +249,8 @@ Self.createDataset = function (opts = {}) {
     comments: dataset.comments ? dataset.comments : ``, // comments
     rule: `unknow`,
     status: `unknow`,
-    actionRequired: `unknow`
+    actionRequired: `unknow`,
+    index: dataset.index
   };
   let infos = Self.getStatus(result);
   result.rule = infos.rule;
