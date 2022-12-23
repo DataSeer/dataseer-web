@@ -375,14 +375,36 @@ router.post(`/:id/refreshDatasets`, function (req, res, next) {
 });
 
 /* POST datasets */
-router.post(`/refreshAllDatasets`, function (req, res, next) {
+router.post(`/refreshAllDataObjects`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
     user: req.user
   };
-  return DocumentsController.refreshAllDatasets(opts, function (err, data) {
+  return DocumentsController.refreshAllDataObjects(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* POST datasets */
+router.post(`/refreshAllDataObjectsIndexes`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    user: req.user
+  };
+  return DocumentsController.refreshAllDataObjectsIndexes(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);

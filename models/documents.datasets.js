@@ -36,6 +36,7 @@ const Sentence = new mongoose.Schema(
       rule: { type: String, default: `` }, // rule used for the status of the data object
       status: { type: String, default: `` }, // status of the data object
       actionRequired: { type: String, default: `` }, // actionRequired of the data object - available values : 'Yes', 'No', Optionnal', "unknow"
+      index: { type: Number, default: undefined }, // index - index value to allow custom sorting (default index is the order of appearance of the sentence in the PDF)
       // "Shared" properties
       name: { type: String, default: `` }, // name
       dataType: { type: String, default: `` }, // dataType

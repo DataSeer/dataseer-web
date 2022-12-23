@@ -1036,6 +1036,17 @@ Self.upload = function (opts = {}, cb) {
                 return next(err, acc);
               }
             );
+          },
+          // Refresh Datasets Indexes
+          function (acc, next) {
+            return Self.refreshDataObjectsIndexes(
+              { user: opts.user, data: { id: acc._id.toString() } },
+              function (err, ok) {
+                if (err) return next(err, acc);
+                if (ok instanceof Error) return next(ok, acc);
+                return next(null, acc);
+              }
+            );
           }
         ];
         // Execute all actions & create document
@@ -1848,7 +1859,7 @@ Self.updateDatasets = function (opts = {}, cb) {
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.refreshAllDatasets = function (opts = {}, cb) {
+Self.refreshAllDataObjects = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   let accessRights = AccountsManager.getAccessRights(opts.user);
@@ -1865,7 +1876,7 @@ Self.refreshAllDatasets = function (opts = {}, cb) {
       ids,
       results,
       function (acc, item, next) {
-        return Self.refreshDatasets({ user: opts.user, data: { id: item._id.toString() } }, function (err, res) {
+        return Self.refreshDataObjects({ user: opts.user, data: { id: item._id.toString() } }, function (err, res) {
           if (err) acc.push({ err, document: { _id: item._id.toString() }, res: res });
           else if (res && res._id && res.document)
             acc.push({
@@ -1893,7 +1904,7 @@ Self.refreshAllDatasets = function (opts = {}, cb) {
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.refreshDatasets = function (opts = {}, cb) {
+Self.refreshDataObjects = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
@@ -1934,11 +1945,96 @@ Self.refreshDatasets = function (opts = {}, cb) {
 };
 
 /**
+ * Refresh all datasets indexes of all documents
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.refreshAllDataObjectsIndexes = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  return Documents.find(
+    {},
+    {
+      _id: 1 // By default
+    }
+  ).exec(function (err, ids) {
+    if (err) return cb(err);
+    let results = [];
+    return async.reduce(
+      ids,
+      results,
+      function (acc, item, next) {
+        return Self.refreshDataObjectsIndexes(
+          { user: opts.user, data: { id: item._id.toString() } },
+          function (err, res) {
+            if (err) acc.push({ err, document: { _id: item._id.toString() }, res: res });
+            else if (res && res._id && res.document)
+              acc.push({
+                err,
+                document: { _id: item._id.toString() },
+                datasets: { _id: res._id.toString(), document: res.document.toString() }
+              });
+            else acc.push({ err, res: res });
+            return next(null, acc);
+          }
+        );
+      },
+      function (err, res) {
+        return cb(err, res);
+      }
+    );
+  });
+};
+
+/**
+ * Refresh datasets indexes
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {object} opts.data - Available data
+ * @param {string} opts.data.id - Document id
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.refreshDataObjectsIndexes = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  return Self.get({ data: { id: opts.data.id, pdf: true, tei: true }, user: opts.user }, function (err, doc) {
+    let mapping = undefined;
+    if (doc.tei && doc.tei.metadata && doc.tei.metadata.mapping && doc.tei.metadata.mapping.object)
+      mapping = doc.tei.metadata.mapping.object;
+    if (doc.pdf && doc.pdf.metadata && doc.pdf.metadata.mapping && doc.pdf.metadata.mapping.object)
+      mapping = doc.pdf.metadata.mapping.object;
+    if (typeof mapping === `undefined`) return cb(null, new Error(`mapping not available`));
+    return DocumentsDatasets.findOne({ document: opts.data.id }, function (err, datasets) {
+      if (err) return cb(err);
+      if (!datasets) return cb(null, new Error(`Datasets not found`));
+      for (let i = 0; i < datasets.current.length; i++) {
+        if (datasets.current[i].sentences.length > 0) {
+          let sentence = datasets.current[i].sentences[0];
+          if (typeof datasets.current[i].index === `undefined` && sentence && sentence.id)
+            datasets.current[i].index = mapping[sentence.id];
+        }
+      }
+      return datasets.save(function (err) {
+        if (err) return cb(err);
+        return cb(null, datasets);
+      });
+    });
+  });
+};
+
+/**
  * Update dataset
  * @param {object} opts - JSON containing all data
  * @param {object} opts.user - User
  * @param {string} opts.fromAPI - Update dataset without sentences & dataInstanceId properties
- * @param {string} opts.keepDataFromMongo - Will keep data from mongodb
  * @param {string} opts.datasetsId - Datasets id
  * @param {string} opts.dataset.id - Dataset id
  * @param {string} opts.dataset.dataInstanceId - Dataset dataInstanceId
@@ -1998,27 +2094,6 @@ Self.updateDataset = function (opts = {}, cb) {
               if (opts.fromAPI) {
                 opts.dataset.dataInstanceId = datasets.current[i].dataInstanceId;
                 opts.dataset.sentences = datasets.current[i].sentences;
-              }
-              if (opts.keepDataFromMongo) {
-                opts.dataset.representativeImage = datasets.current[i].representativeImage;
-                opts.dataset.flagged = datasets.current[i].flagged;
-                opts.dataset.issue = datasets.current[i].issue;
-                opts.dataset.issues = datasets.current[i].issues;
-                opts.dataset.notification = datasets.current[i].notification;
-                opts.dataset.highlight = datasets.current[i].highlight;
-                opts.dataset.protocolSource = datasets.current[i].protocolSource;
-                opts.dataset.labSource = datasets.current[i].labSource;
-                opts.dataset.version = datasets.current[i].version;
-                opts.dataset.PID = datasets.current[i].PID;
-                opts.dataset.DOI = datasets.current[i].DOI;
-                opts.dataset.URL = datasets.current[i].URL;
-                opts.dataset.RRID = datasets.current[i].RRID;
-                opts.dataset.catalog = datasets.current[i].catalog;
-                opts.dataset.entity = datasets.current[i].entity;
-                opts.dataset.citation = datasets.current[i].citation;
-                opts.dataset.version = datasets.current[i].version;
-                opts.dataset.name = datasets.current[i].name;
-                opts.dataset.comments = datasets.current[i].comments;
               }
               datasets.current[i] = DocumentsDatasetsController.createDataset(opts.dataset);
               dataset = datasets.current[i];
