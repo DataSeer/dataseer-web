@@ -1454,12 +1454,17 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
           },
           function (next) {
             // Extract metadata
-            metadata = XML.extractMetadata(XML.load(xmlString));
+            const _metadata = Object.assign({}, metadata, XML.extractMetadata(XML.load(xmlString)));
+            if (!_metadata.license && metadata.license) _metadata.license = metadata.license;
+            if (!_metadata.acknowledgement && metadata.acknowledgement)
+              _metadata.acknowledgement = metadata.acknowledgement;
+            if (!_metadata.affiliation && metadata.affiliation) _metadata.affiliation = metadata.affiliation;
             if (!refreshAuthors) {
-              metadata.authors = authors.map(function (e) {
+              _metadata.authors = authors.map(function (e) {
                 return e;
               });
             }
+            metadata = Object.assign({}, _metadata);
             return next();
           },
           function (next) {

@@ -1156,7 +1156,10 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
         publisher: Params.convertToString(req.body.publisher),
         manuscript_id: Params.convertToString(req.body.manuscript_id),
         doi: Params.convertToString(req.body.doi),
-        pmid: Params.convertToString(req.body.pmid)
+        pmid: Params.convertToString(req.body.pmid),
+        license: Params.convertToString(req.body.license),
+        acknowledgement: Params.convertToString(req.body.acknowledgement),
+        affiliation: Params.convertToString(req.body.affiliation)
       }
     },
     user: req.user
