@@ -64,6 +64,7 @@ const AccountsManager = require(`./lib/accounts.js`);
 const CrudManager = require(`./lib/crud.js`);
 const Wiki = require(`./lib/wiki.js`);
 const OCR = require(`./lib/ocr.js`);
+const ORCID = require(`./lib/orcid.js`);
 // mongoose object
 const mongoose = require(`mongoose`);
 mongoose.set(`useCreateIndex`, true);
@@ -108,6 +109,14 @@ db.once(`open`, function () {
           app.set(`dataTypes`, dataTypes);
           DocumentsDatasetsController.refreshDataTypes(dataTypes);
           console.log(`dataTypes initialized`);
+          return next(err);
+        });
+      },
+      function (next) {
+        return ORCID.refreshASAPAuthors(function (err, data) {
+          if (err) return next(err);
+          app.set(`ASAP.authors`, data);
+          console.log(`ASAP authors list initialized`);
           return next(err);
         });
       },

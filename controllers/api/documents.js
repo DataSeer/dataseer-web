@@ -931,7 +931,13 @@ Self.upload = function (opts = {}, cb) {
           // Process metadata
           function (acc, next) {
             return Self.updateOrCreateMetadata(
-              { data: { id: acc._id.toString() }, orcid: true, user: opts.user, refreshAuthors: true },
+              {
+                data: { id: acc._id.toString() },
+                refreshORCIDsFromAPI: true,
+                refreshORCIDsFromASAPList: true,
+                user: opts.user,
+                refreshAuthors: true
+              },
               function (err, metadata) {
                 if (err) return next(err, acc);
                 if (metadata instanceof Error) return next(metadata, acc);
@@ -1404,7 +1410,6 @@ Self.search = function (opts = {}, cb) {
 /**
  * Update Or Create Metadata of document
  * @param {object} opts - Options available (You must call getUploadParams)
- * @param {boolean} opts.orcid - Refresh orcid (request ORCID API)
  * @param {object} opts.data - Data available
  * @param {string} opts.data.id - Document id
  * @param {object} opts.data.metadata - Document metadata
@@ -1416,6 +1421,8 @@ Self.search = function (opts = {}, cb) {
  * @param {string} opts.data.metadata.pmid - Document metadata pmid
  * @param {object} opts.user - Current user
  * @param {object} opts.refreshAuthors - Refresh value of authors name property (using TEI data)
+ * @param {object} opts.refreshORCIDsFromAPI - Refresh value of authors ORCID property (using ORCID data)
+ * @param {object} opts.refreshORCIDsFromASAPList - Refresh value of authors ORCID property (using ASAP List data)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: ObjectId OR new Error)
  * @returns {undefined} undefined
  */
@@ -1436,6 +1443,8 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
       let metadata = _.get(opts, `data.metadata`);
       let authors = _.get(metadata, `authors`, []);
       let refreshAuthors = _.get(opts, `refreshAuthors`, false);
+      let refreshORCIDsFromAPI = _.get(opts, `data.refreshORCIDsFromAPI`, false);
+      let refreshORCIDsFromASAPList = _.get(opts, `data.refreshORCIDsFromASAPList`, false);
       let xmlString = content.data.toString(DocumentsFilesController.encoding);
       return async.mapSeries(
         [
@@ -1455,10 +1464,11 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
           function (next) {
             // Extract metadata
             const _metadata = Object.assign({}, metadata, XML.extractMetadata(XML.load(xmlString)));
-            if (!_metadata.license && metadata.license) _metadata.license = metadata.license;
-            if (!_metadata.acknowledgement && metadata.acknowledgement)
+            if (!_metadata.license && metadata && metadata.license) _metadata.license = metadata.license;
+            if (!_metadata.acknowledgement && metadata && metadata.acknowledgement)
               _metadata.acknowledgement = metadata.acknowledgement;
-            if (!_metadata.affiliation && metadata.affiliation) _metadata.affiliation = metadata.affiliation;
+            if (!_metadata.affiliation && metadata && metadata.affiliation)
+              _metadata.affiliation = metadata.affiliation;
             if (!refreshAuthors) {
               _metadata.authors = authors.map(function (e) {
                 return e;
@@ -1469,12 +1479,12 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
           },
           function (next) {
             // Get ORCIDs from API
-            if (!opts.orcid) return next();
+            if (!refreshORCIDsFromAPI) return next();
             if (metadata.authors.length <= 0) return next();
             return async.mapSeries(
               metadata.authors,
               function (item, _next) {
-                return ORCID.findAuthor(
+                return ORCID.findAuthorFromAPI(
                   {
                     'family-name': item[`family-name`],
                     'given-names': item[`given-names`]
@@ -1495,6 +1505,21 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
                 return next();
               }
             );
+          },
+          function (next) {
+            // Get ORCIDs from ASAP List
+            console.log(`Get ORCIDs from ASAP List`, refreshORCIDsFromASAPList);
+            if (!refreshORCIDsFromASAPList) return next();
+            if (metadata.authors.length <= 0) return next();
+            for (let i = 0; i < metadata.authors.length; i++) {
+              let author = metadata.authors[i];
+              let results = ORCID.findAuthorFromASAPList(author.name);
+              if (results instanceof Error || !Array.isArray(results)) continue;
+              author.orcid.suggestedValues = results.map((item) => {
+                return `${item.orcid} (${item.firstname} ${item.lastname})`;
+              });
+            }
+            return next();
           }
         ],
         function (action, next) {
@@ -3119,123 +3144,6 @@ Self.updateOrCreateHypothesisAnnotation = function (opts, cb) {
       });
     }
   );
-};
-
-/**
- * Fix document encoding by id
- * @param {object} opts - Options available
- * @param {object} opts.user - Current user
- * @param {object} opts.data - Data available
- * @param {string} opts.data.id - Id of the document
- * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
- * @returns {undefined} undefined
- */
-Self.fixEncoding = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
-  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
-  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
-  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
-  let id = Params.convertToString(opts.data.id);
-  return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    return async.mapSeries(
-      [
-        // Fix TEI
-        function (next) {
-          if (_.get(doc, `tei`))
-            return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
-              if (err) return next(err);
-              if (content instanceof Error) return next(content);
-              return DocumentsFilesController.rewriteFile(
-                doc.tei.toString(),
-                Encoding.fix(content.data.toString(), true),
-                function (err) {
-                  if (err) return next(err);
-                  else return next();
-                }
-              );
-            });
-          return next();
-        },
-        // Fix Softcite
-        function (next) {
-          if (_.get(doc, `softcite`))
-            return DocumentsFilesController.readFile(
-              { data: { id: doc.softcite.toString() } },
-              function (err, content) {
-                if (err) return next(err);
-                if (content instanceof Error) return next(content);
-                return DocumentsFilesController.rewriteFile(
-                  doc.softcite.toString(),
-                  Encoding.fix(content.data.toString()),
-                  function (err) {
-                    if (err) return next(err);
-                    else return next();
-                  }
-                );
-              }
-            );
-          return next();
-        },
-        // Refresh Datasets
-        function (next) {
-          if (_.get(doc, `datasets`))
-            return DocumentsDatasets.findOne({ _id: doc.datasets.toString() }).exec(function (err, datasets) {
-              if (err) return next(err);
-              if (!datasets) return next(new Error(`Datasets not found`));
-              for (let i = 0; i < datasets.current.length; i++) {
-                if (
-                  datasets.current[i] &&
-                  Array.isArray(datasets.current[i].sentences) &&
-                  datasets.current[i].sentences.length > 0
-                ) {
-                  for (let j = 0; j < datasets.current[i].sentences.length; j++) {
-                    if (datasets.current[i].sentences[j].text && datasets.current[i].sentences[j].text.length) {
-                      datasets.current[i].sentences[j].text = Encoding.fix(datasets.current[i].sentences[j].text);
-                    }
-                  }
-                }
-              }
-              return datasets.save(function (err) {
-                if (err) return next(err);
-                return next();
-              });
-            });
-          return next();
-        },
-        // Refresh Metadata
-        function (next) {
-          return Self.updateOrCreateMetadata(
-            { data: { id: doc._id.toString() }, user: opts.user },
-            function (err, metadata) {
-              if (err) return next(err);
-              if (metadata instanceof Error) return next(metadata);
-              doc.identifiers = {
-                doi: metadata.doi,
-                pmid: metadata.pmid,
-                manuscript_id: metadata.manuscript_id
-              };
-              return next();
-            }
-          );
-        }
-      ],
-      function (item, next) {
-        return item(next);
-      },
-      function (err) {
-        if (err) return cb(err);
-        return doc.save(function (err) {
-          if (err) return cb(err);
-          return cb(null, doc);
-        });
-      }
-    );
-  });
 };
 
 /**
