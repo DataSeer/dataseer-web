@@ -375,14 +375,14 @@ router.post(`/:id/refreshDatasets`, function (req, res, next) {
 });
 
 /* POST datasets */
-router.post(`/refreshAllDatasets`, function (req, res, next) {
+router.post(`/refreshAllDataObjects`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
     user: req.user
   };
-  return DocumentsController.refreshAllDatasets(opts, function (err, data) {
+  return DocumentsController.refreshAllDataObjects(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
@@ -396,16 +396,15 @@ router.post(`/refreshAllDatasets`, function (req, res, next) {
   });
 });
 
-/* PUT fixEncoding */
-router.put(`/:id/fixEncoding`, function (req, res, next) {
+/* POST datasets */
+router.post(`/refreshAllDataObjectsIndexes`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
-    data: { id: req.params.id },
     user: req.user
   };
-  return DocumentsController.fixEncoding(opts, function (err, data) {
+  return DocumentsController.refreshAllDataObjectsIndexes(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
@@ -1125,8 +1124,9 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
   let opts = {
     data: {
       id: req.params.id,
-      orcid: Params.convertToBoolean(req.body.orcid),
       refreshAuthors: Params.convertToBoolean(req.body.refreshAuthors),
+      refreshORCIDsFromAPI: Params.convertToBoolean(req.body.refreshORCIDsFromAPI),
+      refreshORCIDsFromASAPList: Params.convertToBoolean(req.body.refreshORCIDsFromASAPList),
       metadata: {
         authors: req.body.authors,
         article_title: Params.convertToString(req.body.article_title),
@@ -1134,7 +1134,10 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
         publisher: Params.convertToString(req.body.publisher),
         manuscript_id: Params.convertToString(req.body.manuscript_id),
         doi: Params.convertToString(req.body.doi),
-        pmid: Params.convertToString(req.body.pmid)
+        pmid: Params.convertToString(req.body.pmid),
+        license: Params.convertToString(req.body.license),
+        acknowledgement: Params.convertToString(req.body.acknowledgement),
+        affiliation: Params.convertToString(req.body.affiliation)
       }
     },
     user: req.user

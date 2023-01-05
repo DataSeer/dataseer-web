@@ -12,57 +12,41 @@ const async = require(`async`);
 
 const AccountsManager = require(`../../lib/accounts.js`);
 const Params = require(`../../lib/params.js`);
-const Url = require(`../../lib/url.js`);
 const ORCID = require(`../../lib/orcid.js`);
-
-const DocumentsController = require(`../../controllers/api/documents.js`);
-const DocumentsFilesController = require(`../../controllers/api/documents.files.js`);
 
 const conf = require(`../../conf/conf.json`);
 
-/* [DEPRECATED] Search for the ORCID of the given Document authors */
-router.get(`/:id/authors`, function (req, res) {
+router.get(`/ASAP/authors`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
-  let opts = {
-    data: {
-      id: req.params.id
-    },
-    user: req.user
-  };
-  return DocumentsController.get(opts, function (err, doc) {
+  let authors = req.app.get(`ASAP.authors`);
+  if (!Array.isArray(authors)) return res.json([]);
+  return res.json(authors);
+});
+
+router.post(`/ASAP/findAuthor`, function (req, res) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  let name = Params.convertToString(req.body.name);
+  let data = ORCID.findAuthorFromASAPList(name);
+  let isError = data instanceof Error;
+  let result = isError ? data.toString() : data;
+  return res.json({
+    err: isError,
+    res: result
+  });
+});
+
+router.post(`/ASAP/refreshAuthors`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  return ORCID.refreshASAPAuthors(function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
-    if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
-    if (!doc.tei) return res.json({ err: true, res: null, msg: `TEI file content not found` });
-    return DocumentsFilesController.readFileContent(
-      { data: { id: doc.tei ? doc.tei.toString() : undefined } },
-      function (err, file) {
-        if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-        if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
-        let xmlString = file.data;
-        let authors = ORCID.extractAuthorsFromTEI(xmlString);
-        if (authors.length <= 0) return res.json({ err: false, res: [] });
-        return async.mapSeries(
-          authors,
-          function (item, next) {
-            return ORCID.findAuthor(item, function (err, data) {
-              if (err) return next(err);
-              return next(null, data);
-            });
-          },
-          function (err, result) {
-            if (err) {
-              console.log(err);
-              return res.status(500).send(conf.errors.internalServerError);
-            }
-            return res.json(result);
-          }
-        );
-      }
-    );
+    req.app.set(`ASAP.authors`, data);
+    return res.json(req.app.get(`ASAP.authors`));
   });
 });
 

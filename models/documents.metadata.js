@@ -6,7 +6,17 @@
 
 const mongoose = require(`mongoose`);
 
-const Orcid = new mongoose.Schema({ fromTEI: [String], fromAPI: [Object] }, { _id: false });
+const Orcid = new mongoose.Schema(
+  {
+    ASAPAffiliationInUpload: Boolean,
+    partOfASAPNetwork: Boolean,
+    suggestedValues: [String],
+    currentValue: { type: String, default: `` },
+    fromTEI: [String],
+    fromAPI: [Object]
+  },
+  { _id: false }
+);
 
 const Author = new mongoose.Schema(
   {
@@ -27,6 +37,9 @@ const Schema = new mongoose.Schema(
     document: { type: mongoose.Schema.Types.ObjectId, ref: `Documents` }, // refers to documents collection (id of a given document)
     article_title: { type: String, default: `` }, // articleTitle
     journal: { type: String, default: `` }, // journal
+    license: { type: String, default: `` }, // license
+    acknowledgement: { type: String, default: `` }, // acknowledgement
+    affiliation: { type: String, default: `` }, // affiliation
     publisher: { type: String, default: `` }, // publisher
     date_published: { type: String, default: `` }, // date_published
     manuscript_id: { type: String, default: `` }, // manuscriptId

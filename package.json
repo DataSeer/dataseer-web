@@ -53,6 +53,7 @@
     "puppeteer": "^11.0.0",
     "sbd": "^1.0.19",
     "serve-favicon": "^2.5.0",
+    "string-similarity": "^4.0.4",
     "tesseract.js": "^2.1.5",
     "url-join": "^4.0.1"
   },
