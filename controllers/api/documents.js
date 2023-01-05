@@ -1508,7 +1508,6 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
           },
           function (next) {
             // Get ORCIDs from ASAP List
-            console.log(`Get ORCIDs from ASAP List`, refreshORCIDsFromASAPList);
             if (!refreshORCIDsFromASAPList) return next();
             if (metadata.authors.length <= 0) return next();
             for (let i = 0; i < metadata.authors.length; i++) {
