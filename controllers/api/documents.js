@@ -427,7 +427,10 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
                 url: `${Url.build(`/documents/${opts.data.id}`, { token: data.doc.token })}`,
                 label: data.doc.name ? data.doc.name : data.doc._id.toString()
               },
-              dataseerDomain: Url.build(`/`, {})
+              dataseerDomain: Url.build(`/`, {}),
+              acknowledgement: data.doc.metadata.acknowledgement,
+              affiliation: data.doc.metadata.affiliation,
+              license: data.doc.metadata.license
             },
             summary: data.datasetsSummary,
             datasets: data.sortedDatasetsInfos.datasets,
