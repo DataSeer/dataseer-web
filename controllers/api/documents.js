@@ -427,7 +427,10 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
                 url: `${Url.build(`/documents/${opts.data.id}`, { token: data.doc.token })}`,
                 label: data.doc.name ? data.doc.name : data.doc._id.toString()
               },
-              dataseerDomain: Url.build(`/`, {})
+              dataseerDomain: Url.build(`/`, {}),
+              acknowledgement: data.doc.metadata.acknowledgement,
+              affiliation: data.doc.metadata.affiliation,
+              license: data.doc.metadata.license
             },
             summary: data.datasetsSummary,
             datasets: data.sortedDatasetsInfos.datasets,
@@ -2033,7 +2036,7 @@ Self.refreshDataObjectsIndexes = function (opts = {}, cb) {
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
   let accessRights = AccountsManager.getAccessRights(opts.user);
-  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
   return Self.get({ data: { id: opts.data.id, pdf: true, tei: true }, user: opts.user }, function (err, doc) {
     let mapping = undefined;
     if (doc.tei && doc.tei.metadata && doc.tei.metadata.mapping && doc.tei.metadata.mapping.object)
