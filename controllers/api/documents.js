@@ -1330,6 +1330,7 @@ Self.reopen = function (opts = {}, cb) {
  * @param {object} opts - Options available
  * @param {object} opts.data - Data available
  * @param {string} opts.data.query - Global query
+ * @param {Array} opts.data.fields - Fields
  * @param {string} opts.data.documents - Custom query for document collection
  * @param {string} opts.data.metadata - Custom query for metadata collection
  * @param {object} opts.user - Current user
@@ -1342,36 +1343,59 @@ Self.search = function (opts = {}, cb) {
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
   let query = _.get(opts, `data.query`, ``);
   if (!query) return cb(null, new Error(`Error : Empty search request`));
+  let fieldsArray = _.get(opts, `data.fields`, []);
+  let fields = fieldsArray.reduce(
+    function (acc, item) {
+      let split = item.split(`.`);
+      if (split.length !== 2) return acc;
+      if (split[0] === `document`) acc.document[split[1]] = true;
+      else if (split[0] === `metadata`) acc.metadata[split[1]] = true;
+      return acc;
+    },
+    { document: {}, metadata: {} }
+  );
   let filteredQuery = query.toString().trim().replace(/\s+/gim, ` `).replace(`,`, `|`);
   let queryDocuments = _.get(opts, `data.documents`, filteredQuery);
   let queryMetadata = _.get(opts, `data.metadata`, filteredQuery);
   let regexDocuments = queryDocuments.toString().trim().replace(/\s+/gim, ` `).replace(`,`, `|`);
   let regexMetadata = queryMetadata.toString().trim().replace(/\s+/gim, ` `).replace(`,`, `|`);
-  let documentsQuery = {
-    '$or': [
-      { 'name': { '$regex': regexDocuments, $options: `imx` } },
-      { 'identifiers.doi': { '$regex': regexDocuments, $options: `imx` } },
-      { 'identifiers.pmid': { '$regex': regexDocuments, $options: `imx` } },
-      { 'identifiers.manuscript_id': { '$regex': regexDocuments, $options: `imx` } }
-    ]
-  };
-  let metadataQuery = {
-    '$or': [
-      { 'article_title': { '$regex': regexMetadata, $options: `imx` } },
-      { 'doi': { '$regex': regexMetadata, $options: `imx` } },
-      { 'isbn': { '$regex': regexMetadata, $options: `imx` } },
-      { 'journal': { '$regex': regexMetadata, $options: `imx` } },
-      { 'manuscript_id': { '$regex': regexMetadata, $options: `imx` } },
-      { 'pmid': { '$regex': regexMetadata, $options: `imx` } },
-      { 'publisher': { '$regex': regexMetadata, $options: `imx` } },
-      { 'submitting_author': { '$regex': regexMetadata, $options: `imx` } },
-      { 'submitting_author_email': { '$regex': regexMetadata, $options: `imx` } },
-      { 'authors.name': { '$regex': regexMetadata, $options: `imx` } }
-    ]
-  };
+  let documentsQuery = { '$or': [] };
+  if (typeof fields.document === `object`) {
+    if (fields.document[`name`]) documentsQuery[`$or`].push({ 'name': { '$regex': regexDocuments, $options: `imx` } });
+    if (fields.document[`doi`])
+      documentsQuery[`$or`].push({ 'identifiers.doi': { '$regex': regexDocuments, $options: `imx` } });
+    if (fields.document[`pmid`])
+      documentsQuery[`$or`].push({ 'identifiers.pmid': { '$regex': regexDocuments, $options: `imx` } });
+    if (fields.document[`manuscript_id`])
+      documentsQuery[`$or`].push({ 'identifiers.manuscript_id': { '$regex': regexDocuments, $options: `imx` } });
+  }
+  let metadataQuery = { '$or': [] };
+  if (typeof fields.metadata === `object`) {
+    if (fields.metadata[`article_title`])
+      metadataQuery[`$or`].push({ 'article_title': { '$regex': regexMetadata, $options: `imx` } });
+    if (fields.metadata[`doi`]) metadataQuery[`$or`].push({ 'doi': { '$regex': regexMetadata, $options: `imx` } });
+    if (fields.metadata[`isbn`]) metadataQuery[`$or`].push({ 'isbn': { '$regex': regexMetadata, $options: `imx` } });
+    if (fields.metadata[`journal`])
+      metadataQuery[`$or`].push({ 'journal': { '$regex': regexMetadata, $options: `imx` } });
+    if (fields.metadata[`manuscript_id`])
+      metadataQuery[`$or`].push({ 'manuscript_id': { '$regex': regexMetadata, $options: `imx` } });
+    if (fields.metadata[`pmid`]) metadataQuery[`$or`].push({ 'pmid': { '$regex': regexMetadata, $options: `imx` } });
+    if (fields.metadata[`publisher`])
+      metadataQuery[`$or`].push({ 'publisher': { '$regex': regexMetadata, $options: `imx` } });
+    if (fields.metadata[`submitting_author`])
+      metadataQuery[`$or`].push({ 'submitting_author': { '$regex': regexMetadata, $options: `imx` } });
+    if (fields.metadata[`submitting_author_email`])
+      metadataQuery[`$or`].push({ 'submitting_author_email': { '$regex': regexMetadata, $options: `imx` } });
+    if (fields.metadata[`authorsName`])
+      metadataQuery[`$or`].push({ 'authors.name': { '$regex': regexMetadata, $options: `imx` } });
+  }
+  console.log(metadataQuery, documentsQuery);
+  let ignoreDocumentsQuery = documentsQuery[`$or`].length <= 0;
+  let ignoreMetadataQuery = metadataQuery[`$or`].length <= 0;
   const actions = [
     // Search in documents collection
     function (acc, next) {
+      if (ignoreDocumentsQuery) return next(null, acc);
       return Documents.find(documentsQuery).exec(function (err, res) {
         if (err) return next(err);
         acc = acc.concat(res.map((obj) => obj._id));
@@ -1380,6 +1404,7 @@ Self.search = function (opts = {}, cb) {
     },
     // Search in metadata collection
     function (acc, next) {
+      if (ignoreMetadataQuery) return next(null, acc);
       return DocumentsMetadata.find(metadataQuery).exec(function (err, res) {
         if (err) return next(err);
         acc = acc.concat(res.map((obj) => obj.document));
@@ -2800,6 +2825,7 @@ Self.all = function (opts = {}, cb) {
   let metadata = Params.convertToBoolean(opts.data.metadata);
   let datasets = Params.convertToBoolean(opts.data.datasets);
   let filter = Params.convertToString(opts.data.filter);
+  let filterFields = Params.convertToArray(opts.data.filterFields, `string`);
   let query = {};
   // Set default value
   if (typeof ids === `undefined`) ids = [];
@@ -2872,6 +2898,8 @@ Self.all = function (opts = {}, cb) {
     ids,
     limit,
     skip,
+    filter,
+    filterFields,
     owners,
     organizations,
     visibleStates,
@@ -2887,7 +2915,7 @@ Self.all = function (opts = {}, cb) {
     [
       function (acc, next) {
         if (!filter) return next(null, acc);
-        return Self.search({ data: { query: filter }, user: opts.user }, function (err, res) {
+        return Self.search({ data: { query: filter, fields: filterFields }, user: opts.user }, function (err, res) {
           if (err) return next(err);
           if (res instanceof Error) return next(null, acc);
           if (Array.isArray(res) && res.length > 0)

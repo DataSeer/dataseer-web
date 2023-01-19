@@ -14,12 +14,33 @@
       organizations: `organizations`
     }
   };
+  const FILTER_CONFIGS = {
+    'all': [
+      `document.name`,
+      `document.doi`,
+      `document.pmid`,
+      `document.manuscript_id`,
+      `metadata.article_title`,
+      `metadata.doi`,
+      `metadata.isbn`,
+      `metadata.journal`,
+      `metadata.manuscript_id`,
+      `metadata.pmid`,
+      `metadata.publisher`,
+      `metadata.submitting_author`,
+      `metadata.submitting_author_email`,
+      `metadata.authorsName`
+    ],
+    'name': [`document.name`],
+    'name+title': [`document.name`, `metadata.article_title`]
+  };
   let app = new Vue({
     el: `#app`,
     data: {
       user: {}, // Will be initialized with API
       notifications: [],
       search: {
+        selectedFilterConfig: undefined,
         schema: {
           count: {},
           metadata: {},
@@ -37,6 +58,7 @@
           updateRange: {},
           uploadRange: {},
           filter: { typeof: `string`, optionnal: true },
+          filterFields: {},
           sort: {}
         },
         default: {
@@ -67,6 +89,7 @@
           updateRange: undefined,
           uploadRange: undefined,
           filter: undefined,
+          filterFields: undefined,
           sort: undefined
         }
       },
@@ -948,7 +971,8 @@
           uploadedAfter: PARAMS.convertToString(urlParams.uploadedAfter),
           updateRange: PARAMS.convertToString(urlParams.updateRange),
           uploadRange: PARAMS.convertToString(urlParams.uploadRange),
-          filter: PARAMS.convertToString(urlParams.filter)
+          filter: PARAMS.convertToString(urlParams.filter),
+          filterFields: PARAMS.convertToArray(urlParams.filterFields, `string`)
         };
       },
       // Get "multiple selections" params representation ("well formated" representation of app.multipleSelections.properties used to request API or build an URL)
@@ -1311,6 +1335,20 @@
             });
           }
         );
+      },
+      onFilterFieldsChange: function () {
+        this.search.properties.filterFields = FILTER_CONFIGS[this.search.selectedFilterConfig];
+      },
+      initialize: function () {
+        if (typeof this.search.properties.filterFields === `undefined`) this.search.selectedFilterConfig = `name+title`;
+        else this.search.selectedFilterConfig = this.getSelectedFilterConfig(this.search.properties.filterFields);
+        this.search.properties.filterFields = FILTER_CONFIGS[this.search.selectedFilterConfig];
+      },
+      getSelectedFilterConfig: function (values = []) {
+        if (!values.length) return `name+title`;
+        else if (values.length === 1) return `name`;
+        else if (values.length === 2) return `name+title`;
+        else if (values.length === 14) return `all`;
       }
     },
     mounted: function () {
@@ -1349,5 +1387,6 @@
         })
       );
     }
+    app.initialize();
   });
 })(jQuery, _, async);

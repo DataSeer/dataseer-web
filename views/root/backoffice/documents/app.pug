@@ -17,8 +17,23 @@
       <div class="search-row row align-items-center">
         <div class="col text-truncate">
           <div class="title">Search for value(s) in the documents metadata<br/><i>(will be ignored if no result matches)</i></div>
+        </div>
+      </div>
+      <div class="row align-items-center">
+        <div class="col text-truncate" style="width: 75%;" >
           <div>
+            <div>Type the value(s) you are looking for in the documents metadata here (separated by commas)</div>
             <input class="form-control" type="text" name="filter" placeholder="Type the value(s) you are looking for in the documents metadata here (separated by commas)" v-model="search.properties.filter" />
+          </div>
+        </div>
+        <div class="col text-truncate" style="width: 25%;" >
+          <div>
+            <div>Restrict search to specific field(s)</div>
+            <select class="custom-select form-select" v-model="search.selectedFilterConfig" @change="onFilterFieldsChange($event)">
+              <option value="name">document name</option>
+              <option value="name+title">document name OR article title</option>
+              <option value="all">Everywhere</option>
+            </select>
           </div>
         </div>
       </div>
