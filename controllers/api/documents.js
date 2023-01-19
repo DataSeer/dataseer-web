@@ -1389,7 +1389,6 @@ Self.search = function (opts = {}, cb) {
     if (fields.metadata[`authorsName`])
       metadataQuery[`$or`].push({ 'authors.name': { '$regex': regexMetadata, $options: `imx` } });
   }
-  console.log(metadataQuery, documentsQuery);
   let ignoreDocumentsQuery = documentsQuery[`$or`].length <= 0;
   let ignoreMetadataQuery = metadataQuery[`$or`].length <= 0;
   const actions = [
