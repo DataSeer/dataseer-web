@@ -27,6 +27,7 @@ router.get(`/`, function (req, res, next) {
   let opts = {
     data: {
       filter: Params.convertToString(req.query.filter),
+      filterFields: Params.convertToArray(req.query.filterFields, `string`),
       count: Params.convertToBoolean(req.query.count),
       ids: Params.convertToArray(req.query.ids, `string`),
       limit: Params.convertToInteger(req.query.limit),
