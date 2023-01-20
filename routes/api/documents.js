@@ -66,6 +66,8 @@ router.get(`/csv`, function (req, res, next) {
   if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     data: {
+      filter: Params.convertToString(req.query.filter),
+      filterFields: Params.convertToArray(req.query.filterFields, `string`),
       limit: Params.convertToInteger(req.query.limit),
       ids: Params.convertToArray(req.query.ids, `string`),
       skip: Params.convertToInteger(req.query.skip),
