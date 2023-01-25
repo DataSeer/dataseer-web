@@ -111,6 +111,7 @@ Self.getFilePath = function (opts, cb) {
     .select(`+path`) // path is not returned by default
     .exec(function (err, file) {
       if (err) return cb(err);
+      if (!file) return cb(err, new Error(`File Not Found`));
       return cb(err, file.path);
     });
 };
@@ -132,6 +133,7 @@ Self.readFile = function (opts, cb) {
     .select(`+path`) // path is not returned by default
     .exec(function (err, file) {
       if (err) return cb(err);
+      if (!file) return cb(err, new Error(`File Not Found`));
       return fs.readFile(file.path, file.encoding, function (err, res) {
         return cb(err, { mimetype: file.mimetype, data: Buffer.from(res, file.encoding) });
       });
@@ -155,6 +157,7 @@ Self.readFileContent = function (opts, cb) {
     .select(`+path`) // path is not returned by default
     .exec(function (err, file) {
       if (err) return cb(err);
+      if (!file) return cb(err, new Error(`File Not Found`));
       return fs.readFile(file.path, file.encoding, function (err, res) {
         return cb(err, { mimetype: file.mimetype, data: res, path: file.path });
       });
@@ -177,6 +180,7 @@ Self.readFileStream = function (opts, cb) {
     .select(`+path`) // path is not returned by default
     .exec(function (err, file) {
       if (err) return cb(err);
+      if (!file) return cb(err, new Error(`File Not Found`));
       return fs.stat(file.path, function (err, stats) {
         if (err) return cb(err);
         return cb(null, {
@@ -200,13 +204,13 @@ Self.deleteFile = function (id, cb) {
     .select(`+path`) // path is not returned by default
     .exec(function (err, file) {
       if (err) return cb(err);
-      else
-        return fs.unlink(file.path, function (err) {
-          if (err) return cb(err);
-          return DocumentsFiles.deleteOne({ _id: file._id }, function (err) {
-            return cb(err);
-          });
+      if (!file) return cb(err, new Error(`File Not Found`));
+      return fs.unlink(file.path, function (err) {
+        if (err) return cb(err);
+        return DocumentsFiles.deleteOne({ _id: file._id }, function (err) {
+          return cb(err);
         });
+      });
     });
 };
 
@@ -224,26 +228,23 @@ Self.rewriteFile = function (id, data, cb) {
     .select(`+path`) // path is not returned by default
     .exec(function (err, file) {
       if (err) return cb(err);
-      else {
-        let str = data.toString(file.encoding); // re-encode data
-        return fs.writeFile(file.path, str, file.encoding, function (err) {
+      if (!file) return cb(err, new Error(`File Not Found`));
+      let str = data.toString(file.encoding); // re-encode data
+      return fs.writeFile(file.path, str, file.encoding, function (err) {
+        if (err) return cb(err);
+        let hash = ``;
+        try {
+          hash = md5(str);
+        } catch (error) {
+          console.error(error);
+        }
+        file.md5 = hash;
+        file.size = str.length;
+        return file.save(function (err) {
           if (err) return cb(err);
-          else {
-            let hash = ``;
-            try {
-              hash = md5(str);
-            } catch (error) {
-              console.error(error);
-            }
-            file.md5 = hash;
-            file.size = str.length;
-            return file.save(function (err) {
-              if (err) return cb(err);
-              return cb(null, true);
-            });
-          }
+          return cb(null, true);
         });
-      }
+      });
     });
 };
 
