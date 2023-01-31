@@ -17,6 +17,12 @@
       "AmNat": false,
       "Universal Journal Report": false,
       "ASAP": false
+    },
+    "ROAS": {
+      "DataSeer Generic": false,
+      "AmNat": false, // n/a
+      "Universal Journal Report": false, // n/a
+      "ASAP": false // n/a
     }
   },
   "prefix": "prefix of the filename (e.g. 'localhost - ' for localhost, 'dev - ' for development, an empty string for production)"
