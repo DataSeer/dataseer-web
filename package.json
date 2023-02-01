@@ -38,7 +38,7 @@
     "method-override": "^3.0.0",
     "minhash": "^0.0.9",
     "mongodb": "^3.6.6",
-    "mongoose": "^5.12.14",
+    "mongoose": "^5.13.15",
     "morgan": "~1.9.1",
     "multer": "^1.4.2",
     "node-fetch": "^2.6.7",
