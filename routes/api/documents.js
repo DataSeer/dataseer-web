@@ -276,6 +276,7 @@ router.put(`/:id`, function (req, res, next) {
       id: req.params.id,
       name: Params.convertToString(req.body.name),
       owner: Params.convertToString(req.body.owner),
+      urls: typeof req.body.urls === `object` ? req.body.urls : undefined,
       organizations: Params.convertToArray(req.body.organizations, `string`),
       visible: Params.convertToBoolean(req.body.visible),
       locked: Params.convertToBoolean(req.body.locked)
