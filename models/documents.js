@@ -22,6 +22,7 @@ const Schema = new mongoose.Schema(
     name: { type: String, default: `` }, // document name
     status: { type: String, default: `` }, // document status
     urls: {
+      originalFile: { type: String, default: `` }, // original file link
       preprint: { type: String, default: `` }, // preprint link
       bioRxiv: { type: String, default: `` }, // bioRxiv
       hypothesis: { type: String, default: `` } // hypothesis annotation

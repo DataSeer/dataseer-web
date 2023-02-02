@@ -3334,6 +3334,7 @@ Self.update = function (opts = {}, cb) {
           // Update urls property
           function (next) {
             if (typeof _.get(opts, `data.urls`) !== `object`) return next();
+            if (Params.checkString(opts.data.urls.originalFile)) doc.urls.originalFile = opts.data.urls.originalFile;
             if (Params.checkString(opts.data.urls.bioRxiv)) doc.urls.bioRxiv = opts.data.urls.bioRxiv;
             if (Params.checkString(opts.data.urls.hypothesis) && accessRights.isAdministrator)
               doc.urls.hypothesis = opts.data.urls.hypothesis;
