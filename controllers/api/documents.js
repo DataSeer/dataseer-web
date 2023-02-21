@@ -519,27 +519,23 @@ Self.authenticate = function (req, res, next) {
   let tokenInfos = Self.getTokenfromHeaderOrQuerystring(req);
   if (!tokenInfos || !tokenInfos.token || !tokenInfos.key) return next();
   // Just try to authenticate. If it fail, just go next
-  else
-    return JWT.check(tokenInfos.token, req.app.get(`private.key`), {}, function (err, decoded) {
-      if (err || !decoded) return next();
+  return JWT.check(tokenInfos.token, req.app.get(`private.key`), { ignoreExpiration: true }, function (err, decoded) {
+    if (err || !decoded) return next();
+    return Documents.findOne({ _id: decoded.documentId, [tokenInfos.key]: tokenInfos.token }, function (err, doc) {
+      if (err || !doc) return next();
       return Accounts.findOne({ _id: decoded.accountId, disabled: false })
         .populate(`organizations`)
         .populate(`role`)
         .exec(function (err, user) {
           if (err || !user) return next();
-          return Documents.findOne(
-            { _id: decoded.documentId, [tokenInfos.key]: tokenInfos.token },
-            function (err, doc) {
-              if (err || !doc) return next();
-              if (doc._id.toString() === decoded.documentId) {
-                req.user = user; // Set user
-                res.locals = { useDocumentToken: true };
-              }
-              return next();
-            }
-          );
+          if (doc._id.toString() === decoded.documentId) {
+            req.user = user; // Set user
+            res.locals = { useDocumentToken: true };
+          }
+          return next();
         });
     });
+  });
 };
 
 /**
