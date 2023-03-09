@@ -2491,7 +2491,7 @@ Self.fixTEIContent = function (opts = {}, cb) {
  * @param {object} opts JSON object containing all data
  * @param {object} opts.user - Current user
  * @param {string} opts.documentId - Document id
- * @param {string} opts.pagesNumber - Pages number
+ * @param {object} opts.pages - Pages that will be processed
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -2499,13 +2499,15 @@ Self.processOCR = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
-  let pagesNumber = Array.isArray(opts.pagesNumber) ? opts.pagesNumber : undefined;
+  if (typeof _.get(opts, `pages`) === `undefined`) return cb(null, new Error(`Missing required data: opts.pages`));
+  let pages = Array.isArray(opts.pages) ? opts.pages : undefined;
+  if (!pages) return cb(null, new Error(`Pages not found`));
   return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
     if (err) return cb(err);
     if (doc instanceof Error) return cb(null, doc);
     return DocumentsFilesController.getFilePath({ data: { id: doc.pdf.toString() } }, function (err, pdfFilePath) {
       if (err) return cb(err);
-      return OCR.processPDF(pdfFilePath, pagesNumber, function (err, res) {
+      return OCR.processPDF(pdfFilePath, pages, function (err, res) {
         if (err) return cb(err);
         else return cb(null, res);
       });
@@ -2518,7 +2520,7 @@ Self.processOCR = function (opts = {}, cb) {
  * @param {object} opts JSON object containing all data
  * @param {object} opts.user - Current user
  * @param {string} opts.documentId - Document id
- * @param {string} opts.pagesNumber - Pages number
+ * @param {object} opts.pages - Pages that will be processed
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -2539,7 +2541,7 @@ Self.detectNewSentences = function (opts = {}, cb) {
         if (page instanceof Error) {
           results.errors.push(page.toString());
         } else {
-          let numPage = page.page;
+          let numPage = page.number;
           let words = page.words.map(function (word) {
             return {
               text: word.text,
