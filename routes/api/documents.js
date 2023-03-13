@@ -1320,16 +1320,20 @@ router.post(`/:id/processOCR`, function (req, res) {
   if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     documentId: req.params.id,
-    pagesNumber: Params.convertPages(req.query.pages),
+    pages: Array.isArray(req.body.pages) ? req.body.pages : Params.convertPages(req.body.pages),
     user: req.user
   };
-  return DocumentsController.processOCR(opts, function (err, result) {
+  return DocumentsController.processOCR(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
-    if (!result) return res.status(404).send(conf.errors.notFound);
-    return res.json(result);
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
   });
 });
 
@@ -1339,16 +1343,20 @@ router.post(`/:id/detectNewSentences`, function (req, res) {
   if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     documentId: req.params.id,
-    pagesNumber: Params.convertPages(req.query.pages),
+    pages: Array.isArray(req.body.pages) ? req.body.pages : Params.convertPages(req.body.pages),
     user: req.user
   };
-  return DocumentsController.detectNewSentences(opts, function (err, result) {
+  return DocumentsController.detectNewSentences(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
-    if (!result) return res.status(404).send(conf.errors.notFound);
-    return res.json(result);
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
   });
 });
 
