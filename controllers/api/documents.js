@@ -1496,6 +1496,12 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
               _metadata.acknowledgement = metadata.acknowledgement;
             if (!_metadata.affiliation && metadata && metadata.affiliation)
               _metadata.affiliation = metadata.affiliation;
+            if (!_metadata.readmeIncluded && metadata && metadata.readmeIncluded)
+              _metadata.readmeIncluded = metadata.readmeIncluded;
+            if (!_metadata.describesFiles && metadata && metadata.describesFiles)
+              _metadata.describesFiles = metadata.describesFiles;
+            if (!_metadata.describesVariables && metadata && metadata.describesVariables)
+              _metadata.describesVariables = metadata.describesVariables;
             if (!refreshAuthors) {
               _metadata.authors = authors.map(function (e) {
                 return e;

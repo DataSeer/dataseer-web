@@ -34,6 +34,28 @@ const Author = new mongoose.Schema(
 
 const Schema = new mongoose.Schema(
   {
+    // README included
+    readmeIncluded: new mongoose.Schema(
+      {
+        value: { type: Boolean, default: false },
+        notes: { type: String, default: `` }
+      },
+      { minimize: false, _id: false }
+    ),
+    describesFiles: new mongoose.Schema(
+      {
+        value: { type: Boolean, default: false },
+        notes: { type: String, default: `` }
+      },
+      { minimize: false, _id: false }
+    ),
+    describesVariables: new mongoose.Schema(
+      {
+        value: { type: Boolean, default: false },
+        notes: { type: String, default: `` }
+      },
+      { minimize: false, _id: false }
+    ),
     document: { type: mongoose.Schema.Types.ObjectId, ref: `Documents` }, // refers to documents collection (id of a given document)
     article_title: { type: String, default: `` }, // articleTitle
     journal: { type: String, default: `` }, // journal

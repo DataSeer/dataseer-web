@@ -1132,6 +1132,9 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
       refreshORCIDsFromAPI: Params.convertToBoolean(req.body.refreshORCIDsFromAPI),
       refreshORCIDsFromASAPList: Params.convertToBoolean(req.body.refreshORCIDsFromASAPList),
       metadata: {
+        readmeIncluded: req.body.readmeIncluded,
+        describesFiles: req.body.describesFiles,
+        describesVariables: req.body.describesVariables,
         authors: req.body.authors,
         article_title: Params.convertToString(req.body.article_title),
         journal: Params.convertToString(req.body.journal),
