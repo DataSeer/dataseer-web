@@ -8,8 +8,8 @@ const mongoose = require(`mongoose`);
 
 const Orcid = new mongoose.Schema(
   {
-    ASAPAffiliationInUpload: Boolean,
-    partOfASAPNetwork: Boolean,
+    ASAPAffiliationInUpload: { type: Boolean, default: false },
+    partOfASAPNetwork: { type: Boolean, default: false },
     suggestedValues: [String],
     currentValue: { type: String, default: `` },
     fromTEI: [String],
@@ -35,27 +35,18 @@ const Author = new mongoose.Schema(
 const Schema = new mongoose.Schema(
   {
     // README included
-    readmeIncluded: new mongoose.Schema(
-      {
-        value: { type: Boolean, default: false },
-        notes: { type: String, default: `` }
-      },
-      { minimize: false, _id: false }
-    ),
-    describesFiles: new mongoose.Schema(
-      {
-        value: { type: Boolean, default: false },
-        notes: { type: String, default: `` }
-      },
-      { minimize: false, _id: false }
-    ),
-    describesVariables: new mongoose.Schema(
-      {
-        value: { type: Boolean, default: false },
-        notes: { type: String, default: `` }
-      },
-      { minimize: false, _id: false }
-    ),
+    readmeIncluded: {
+      value: { type: Boolean, default: false },
+      notes: { type: String, default: `` }
+    },
+    describesFiles: {
+      value: { type: Boolean, default: false },
+      notes: { type: String, default: `` }
+    },
+    describesVariables: {
+      value: { type: Boolean, default: false },
+      notes: { type: String, default: `` }
+    },
     document: { type: mongoose.Schema.Types.ObjectId, ref: `Documents` }, // refers to documents collection (id of a given document)
     article_title: { type: String, default: `` }, // articleTitle
     journal: { type: String, default: `` }, // journal
