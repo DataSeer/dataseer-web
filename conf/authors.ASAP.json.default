@@ -1,4 +1,9 @@
 {
   "fileId": "File ID of the ASAP authors list",
-  "spreadsheetName": "Spreadsheet name"
+  "spreadsheetName": "Spreadsheet name",
+  "affiliationNames": [
+    "Aligning Science Across Parkinson's (ASAP)",
+    "Aligning Science Across Parkinson's",
+    "(ASAP)"
+  ]
 }

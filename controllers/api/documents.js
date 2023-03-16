@@ -45,6 +45,7 @@ const PdfManager = require(`../../lib/pdfManager.js`);
 
 const conf = require(`../../conf/conf.json`);
 const uploadConf = require(`../../conf/upload.json`);
+const ASAPAuthorsConf = require(`../../conf/authors.ASAP.json`);
 
 let Self = {};
 
@@ -419,6 +420,9 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
             dataTypesInfos: opts.data.dataTypes,
             metadata: {
               articleTitle: data.doc.metadata.article_title,
+              readmeIncluded: data.doc.metadata.readmeIncluded,
+              describesFiles: data.doc.metadata.describesFiles,
+              describesVariables: data.doc.metadata.describesVariables,
               doi: data.doc.metadata.doi,
               authors: data.doc.metadata.authors.filter(function (item) {
                 return item.name.length > 0;
@@ -935,11 +939,15 @@ Self.upload = function (opts = {}, cb) {
           function (acc, next) {
             return Self.updateOrCreateMetadata(
               {
-                data: { id: acc._id.toString() },
-                refreshORCIDsFromAPI: true,
-                refreshORCIDsFromASAPList: true,
-                user: opts.user,
-                refreshAuthors: true
+                data: {
+                  id: acc._id.toString(),
+                  refreshORCIDsFromAPI: true,
+                  refreshORCIDsFromASAPList: true,
+                  automaticallySetPartOfASAPNetwork: true,
+                  automaticallySetASAPAffiliationInUpload: true,
+                  refreshAuthors: true
+                },
+                user: opts.user
               },
               function (err, metadata) {
                 if (err) return next(err, acc);
@@ -1450,6 +1458,8 @@ Self.search = function (opts = {}, cb) {
  * @param {object} opts.refreshAuthors - Refresh value of authors name property (using TEI data)
  * @param {object} opts.refreshORCIDsFromAPI - Refresh value of authors ORCID property (using ORCID data)
  * @param {object} opts.refreshORCIDsFromASAPList - Refresh value of authors ORCID property (using ASAP List data)
+ * @param {object} opts.automaticallySetPartOfASAPNetwork - Automatically set PartOfASAPNetwork
+ * @param {object} opts.automaticallySetASAPAffiliationInUpload - Automatically set ASAPAffiliationInUpload
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: ObjectId OR new Error)
  * @returns {undefined} undefined
  */
@@ -1469,9 +1479,11 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
       if (err) return cb(err);
       let metadata = _.get(opts, `data.metadata`);
       let authors = _.get(metadata, `authors`, []);
-      let refreshAuthors = _.get(opts, `refreshAuthors`, false);
+      let refreshAuthors = _.get(opts, `data.refreshAuthors`, false);
       let refreshORCIDsFromAPI = _.get(opts, `data.refreshORCIDsFromAPI`, false);
       let refreshORCIDsFromASAPList = _.get(opts, `data.refreshORCIDsFromASAPList`, false);
+      let automaticallySetPartOfASAPNetwork = _.get(opts, `data.automaticallySetPartOfASAPNetwork`, false);
+      let automaticallySetASAPAffiliationInUpload = _.get(opts, `data.automaticallySetASAPAffiliationInUpload`, false);
       let xmlString = content.data.toString(DocumentsFilesController.encoding);
       return async.mapSeries(
         [
@@ -1496,6 +1508,12 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
               _metadata.acknowledgement = metadata.acknowledgement;
             if (!_metadata.affiliation && metadata && metadata.affiliation)
               _metadata.affiliation = metadata.affiliation;
+            if (!_metadata.readmeIncluded && metadata && metadata.readmeIncluded)
+              _metadata.readmeIncluded = metadata.readmeIncluded;
+            if (!_metadata.describesFiles && metadata && metadata.describesFiles)
+              _metadata.describesFiles = metadata.describesFiles;
+            if (!_metadata.describesVariables && metadata && metadata.describesVariables)
+              _metadata.describesVariables = metadata.describesVariables;
             if (!refreshAuthors) {
               _metadata.authors = authors.map(function (e) {
                 return e;
@@ -1506,8 +1524,8 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
           },
           function (next) {
             // Get ORCIDs from API
-            if (!refreshORCIDsFromAPI) return next();
             if (metadata.authors.length <= 0) return next();
+            if (!refreshORCIDsFromAPI) return next();
             return async.mapSeries(
               metadata.authors,
               function (item, _next) {
@@ -1522,7 +1540,10 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
                     // 'isbn': metadata[`isbn`]
                   },
                   function (err, data) {
-                    if (err) return _next(err);
+                    if (err) {
+                      console.log(err);
+                      return _next(err);
+                    }
                     item.orcid.fromAPI = data[`num-found`] > 0 ? data[`expanded-result`] : [];
                     return _next(null, data);
                   }
@@ -1535,15 +1556,32 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
           },
           function (next) {
             // Get ORCIDs from ASAP List
-            if (!refreshORCIDsFromASAPList) return next();
             if (metadata.authors.length <= 0) return next();
             for (let i = 0; i < metadata.authors.length; i++) {
               let author = metadata.authors[i];
-              let results = ORCID.findAuthorFromASAPList(author.name);
-              if (results instanceof Error || !Array.isArray(results)) continue;
-              author.orcid.suggestedValues = results.map((item) => {
-                return `${item.orcid} (${item.firstname} ${item.lastname})`;
-              });
+              if (refreshORCIDsFromASAPList) {
+                let results = ORCID.findAuthorFromASAPList(author.name);
+                if (Array.isArray(results)) {
+                  author.orcid.suggestedValues = results.map((item) => {
+                    return `${item.orcid} (${item.firstname} ${item.lastname})`;
+                  });
+                } else author.orcid.suggestedValues = [];
+              }
+              if (automaticallySetPartOfASAPNetwork) {
+                author.orcid.partOfASAPNetwork =
+                  author.orcid &&
+                  Array.isArray(author.orcid.suggestedValues) &&
+                  author.orcid.suggestedValues.length > 0;
+              }
+              if (automaticallySetASAPAffiliationInUpload) {
+                author.orcid.ASAPAffiliationInUpload =
+                  author.affiliations.filter(function (item) {
+                    for (let j = 0; j < ASAPAuthorsConf.affiliationNames.length; j++) {
+                      if (item.indexOf(ASAPAuthorsConf.affiliationNames[j]) > -1) return true;
+                    }
+                    return false;
+                  }).length > 0;
+              }
             }
             return next();
           }
