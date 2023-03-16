@@ -939,13 +939,15 @@ Self.upload = function (opts = {}, cb) {
           function (acc, next) {
             return Self.updateOrCreateMetadata(
               {
-                data: { id: acc._id.toString() },
-                refreshORCIDsFromAPI: true,
-                refreshORCIDsFromASAPList: true,
-                automaticallySetPartOfASAPNetwork: true,
-                automaticallySetASAPAffiliationInUpload: true,
-                user: opts.user,
-                refreshAuthors: true
+                data: {
+                  id: acc._id.toString(),
+                  refreshORCIDsFromAPI: true,
+                  refreshORCIDsFromASAPList: true,
+                  automaticallySetPartOfASAPNetwork: true,
+                  automaticallySetASAPAffiliationInUpload: true,
+                  refreshAuthors: true
+                },
+                user: opts.user
               },
               function (err, metadata) {
                 if (err) return next(err, acc);
@@ -1477,11 +1479,11 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
       if (err) return cb(err);
       let metadata = _.get(opts, `data.metadata`);
       let authors = _.get(metadata, `authors`, []);
-      let refreshAuthors = _.get(opts, `refreshAuthors`, false);
-      let refreshORCIDsFromAPI = _.get(opts, `refreshORCIDsFromAPI`, false);
-      let refreshORCIDsFromASAPList = _.get(opts, `refreshORCIDsFromASAPList`, false);
-      let automaticallySetPartOfASAPNetwork = _.get(opts, `automaticallySetPartOfASAPNetwork`, false);
-      let automaticallySetASAPAffiliationInUpload = _.get(opts, `automaticallySetASAPAffiliationInUpload`, false);
+      let refreshAuthors = _.get(opts, `data.refreshAuthors`, false);
+      let refreshORCIDsFromAPI = _.get(opts, `data.refreshORCIDsFromAPI`, false);
+      let refreshORCIDsFromASAPList = _.get(opts, `data.refreshORCIDsFromASAPList`, false);
+      let automaticallySetPartOfASAPNetwork = _.get(opts, `data.automaticallySetPartOfASAPNetwork`, false);
+      let automaticallySetASAPAffiliationInUpload = _.get(opts, `data.automaticallySetASAPAffiliationInUpload`, false);
       let xmlString = content.data.toString(DocumentsFilesController.encoding);
       return async.mapSeries(
         [
@@ -1522,8 +1524,8 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
           },
           function (next) {
             // Get ORCIDs from API
-            if (!refreshORCIDsFromAPI) return next();
             if (metadata.authors.length <= 0) return next();
+            if (!refreshORCIDsFromAPI) return next();
             return async.mapSeries(
               metadata.authors,
               function (item, _next) {
@@ -1557,28 +1559,27 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
             if (metadata.authors.length <= 0) return next();
             for (let i = 0; i < metadata.authors.length; i++) {
               let author = metadata.authors[i];
-              if (!refreshORCIDsFromASAPList) {
+              if (refreshORCIDsFromASAPList) {
                 let results = ORCID.findAuthorFromASAPList(author.name);
-                if (results instanceof Error || !Array.isArray(results)) continue;
-                author.orcid.suggestedValues = results.map((item) => {
-                  return `${item.orcid} (${item.firstname} ${item.lastname})`;
-                });
+                if (Array.isArray(results)) {
+                  author.orcid.suggestedValues = results.map((item) => {
+                    return `${item.orcid} (${item.firstname} ${item.lastname})`;
+                  });
+                } else author.orcid.suggestedValues = [];
               }
-              if (automaticallySetPartOfASAPNetwork)
+              if (automaticallySetPartOfASAPNetwork) {
                 author.orcid.partOfASAPNetwork =
                   author.orcid &&
                   Array.isArray(author.orcid.suggestedValues) &&
                   author.orcid.suggestedValues.length > 0;
+              }
               if (automaticallySetASAPAffiliationInUpload) {
                 author.orcid.ASAPAffiliationInUpload =
                   author.affiliations.filter(function (item) {
-                    let containASAP = false;
                     for (let j = 0; j < ASAPAuthorsConf.affiliationNames.length; j++) {
-                      let name = ASAPAuthorsConf.affiliationNames[j];
-                      containASAP = item.indexOf(name) > -1;
-                      if (containASAP) break;
+                      if (item.indexOf(ASAPAuthorsConf.affiliationNames[j]) > -1) return true;
                     }
-                    return containASAP;
+                    return false;
                   }).length > 0;
               }
             }

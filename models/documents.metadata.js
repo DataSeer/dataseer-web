@@ -6,18 +6,6 @@
 
 const mongoose = require(`mongoose`);
 
-const Orcid = new mongoose.Schema(
-  {
-    ASAPAffiliationInUpload: { type: Boolean, default: false },
-    partOfASAPNetwork: { type: Boolean, default: false },
-    suggestedValues: [String],
-    currentValue: { type: String, default: `` },
-    fromTEI: [String],
-    fromAPI: [Object]
-  },
-  { _id: false }
-);
-
 const Author = new mongoose.Schema(
   {
     isLeadSubmitting: { type: Boolean, default: false },
@@ -27,7 +15,14 @@ const Author = new mongoose.Schema(
     'given-names': String,
     'other-name': String,
     affiliations: [String],
-    orcid: Orcid
+    orcid: {
+      ASAPAffiliationInUpload: { type: Boolean, default: false },
+      partOfASAPNetwork: { type: Boolean, default: false },
+      suggestedValues: [String],
+      currentValue: { type: String, default: `` },
+      fromTEI: [String],
+      fromAPI: [Object]
+    }
   },
   { _id: false }
 );
