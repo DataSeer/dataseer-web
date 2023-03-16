@@ -419,6 +419,9 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
             dataTypesInfos: opts.data.dataTypes,
             metadata: {
               articleTitle: data.doc.metadata.article_title,
+              readmeIncluded: data.doc.metadata.readmeIncluded,
+              describesFiles: data.doc.metadata.describesFiles,
+              describesVariables: data.doc.metadata.describesVariables,
               doi: data.doc.metadata.doi,
               authors: data.doc.metadata.authors.filter(function (item) {
                 return item.name.length > 0;
