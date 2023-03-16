@@ -1131,7 +1131,14 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
       refreshAuthors: Params.convertToBoolean(req.body.refreshAuthors),
       refreshORCIDsFromAPI: Params.convertToBoolean(req.body.refreshORCIDsFromAPI),
       refreshORCIDsFromASAPList: Params.convertToBoolean(req.body.refreshORCIDsFromASAPList),
+      automaticallySetPartOfASAPNetwork: Params.convertToBoolean(req.body.automaticallySetPartOfASAPNetwork),
+      automaticallySetASAPAffiliationInUpload: Params.convertToBoolean(
+        req.body.automaticallySetASAPAffiliationInUpload
+      ),
       metadata: {
+        readmeIncluded: req.body.readmeIncluded,
+        describesFiles: req.body.describesFiles,
+        describesVariables: req.body.describesVariables,
         authors: req.body.authors,
         article_title: Params.convertToString(req.body.article_title),
         journal: Params.convertToString(req.body.journal),
