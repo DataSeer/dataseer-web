@@ -1,6 +1,9 @@
 {
-  "pdf2pic": {
-    "density": 70
+  "canvas": {
+    "format": "image/jpeg",
+    "opts": {
+      "quality": 1
+    }
   },
   "tesseract": {
     "langPath": "resources/tesseract/tessdata/fast",
