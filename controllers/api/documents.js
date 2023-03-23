@@ -2545,10 +2545,13 @@ Self.processOCR = function (opts = {}, cb) {
     if (doc instanceof Error) return cb(null, doc);
     return DocumentsFilesController.getFilePath({ data: { id: doc.pdf.toString() } }, function (err, pdfFilePath) {
       if (err) return cb(err);
-      return OCR.processPDF(pdfFilePath, pages, function (err, res) {
-        if (err) return cb(err);
-        else return cb(null, res);
-      });
+      return OCR.processPDF(
+        { pdfPath: pdfFilePath, pages: pages, getTextContent: true, getTextOCR: true },
+        function (err, res) {
+          if (err) return cb(err);
+          else return cb(null, res);
+        }
+      );
     });
   });
 };
@@ -2580,7 +2583,7 @@ Self.detectNewSentences = function (opts = {}, cb) {
           results.errors.push(page.toString());
         } else {
           let numPage = page.number;
-          let words = page.words.map(function (word) {
+          let words = page.mergedText.map(function (word) {
             return {
               text: word.text,
               bbox: {
