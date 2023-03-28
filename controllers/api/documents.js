@@ -364,11 +364,15 @@ Self.getGSpreadsheets = function (opts = {}, cb) {
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
   let id = Params.convertToString(opts.data.id);
+  let organizations = Params.convertToArray(opts.data.organizations, `string`);
   let kind = Params.convertToString(opts.kind);
   let strict = Params.convertToBoolean(opts.strict);
-  return GoogleSheets.getReportFileId({ strict: strict, kind: kind, data: { name: id } }, function (err, res) {
-    return cb(err, res);
-  });
+  return GoogleSheets.getReportFileId(
+    { strict: strict, kind: kind, data: { name: id, organizations: organizations } },
+    function (err, res) {
+      return cb(err, res);
+    }
+  );
 };
 
 /**
@@ -416,7 +420,13 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
           filename: `${data.doc.name} (${opts.data.id})`,
           kind: kind,
           data: {
-            doc: { id: data.doc._id.toString(), token: data.doc.token },
+            doc: {
+              id: data.doc._id.toString(),
+              token: data.doc.token,
+              organizations: data.doc.organizations.map(function (item) {
+                return item._id.toString();
+              })
+            },
             dataTypesInfos: opts.data.dataTypes,
             metadata: {
               articleTitle: data.doc.metadata.article_title,
