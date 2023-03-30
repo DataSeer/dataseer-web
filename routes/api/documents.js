@@ -719,6 +719,29 @@ router.get(`/:id/softcite/content`, function (req, res, next) {
   });
 });
 
+/* Import softwares from Softcite results */
+router.post(`/:id/softcite/importSoftwares`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
+  if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    documentId: req.params.id,
+    user: req.user
+  };
+  return DocumentsController.importSoftwaresFromSoftcite(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
 /* GET PDF of document */
 router.get(`/:id/pdf`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
@@ -972,24 +995,36 @@ router.post(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
 router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
-  // Init transaction
-  let opts = {
-    strict: false,
-    data: { id: req.params.id },
-    kind: req.params.kind,
-    user: req.user
-  };
-  return DocumentsController.getGSpreadsheets(opts, function (err, data) {
+  return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
-    let isError = data instanceof Error;
-    let result = isError ? data.toString() : data;
-    if (isError) return res.status(404).send(conf.errors.notFound);
-    return res.json({
-      err: isError,
-      res: result
+    if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
+    // Init transaction
+    let opts = {
+      strict: false,
+      data: {
+        id: req.params.id,
+        organizations: doc.organizations.map(function (item) {
+          return item._id.toString();
+        })
+      },
+      kind: req.params.kind,
+      user: req.user
+    };
+    return DocumentsController.getGSpreadsheets(opts, function (err, data) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send(conf.errors.internalServerError);
+      }
+      let isError = data instanceof Error;
+      let result = isError ? data.toString() : data;
+      if (isError) return res.status(404).send(conf.errors.notFound);
+      return res.json({
+        err: isError,
+        res: result
+      });
     });
   });
 });
