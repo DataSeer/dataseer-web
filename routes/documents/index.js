@@ -135,7 +135,12 @@ router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res) {
     }
     if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
     let opts = {
-      data: { id: req.params.id },
+      data: {
+        id: req.params.id,
+        organizations: doc.organizations.map(function (item) {
+          return item._id.toString();
+        })
+      },
       strict: false,
       kind: req.params.kind,
       user: req.user

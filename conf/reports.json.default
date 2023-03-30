@@ -1,9 +1,9 @@
 {
   "folders": {
-    "DataSeer Generic": "folderID",
-    "AmNat": "folderID",
-    "Universal Journal Report": "folderID",
-    "ASAP": "folderID"
+    "DataSeer Generic": { "default": "folderID" },
+    "AmNat": { "default": "folderID" },
+    "Universal Journal Report": { "default": "folderID" },
+    "ASAP": { "OrganizationID": "folderID", "default": "folderID" }
   },
   "templates": {
     "DataSeer Generic": "folderID",
