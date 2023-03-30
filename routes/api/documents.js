@@ -719,6 +719,29 @@ router.get(`/:id/softcite/content`, function (req, res, next) {
   });
 });
 
+/* Import softwares from Softcite results */
+router.post(`/:id/softcite/importSoftwares`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
+  if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    documentId: req.params.id,
+    user: req.user
+  };
+  return DocumentsController.importSoftwaresFromSoftcite(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
 /* GET PDF of document */
 router.get(`/:id/pdf`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);

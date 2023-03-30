@@ -1074,6 +1074,15 @@ Self.upload = function (opts = {}, cb) {
                 return next(null, acc);
               }
             );
+          },
+          // Process softcite
+          function (acc, next) {
+            return Self.importSoftwaresFromSoftcite(
+              { documentId: acc._id.toString(), user: opts.user },
+              function (err, res) {
+                return next(err, acc);
+              }
+            );
           }
         ];
         // Execute all actions & create document
@@ -1134,6 +1143,237 @@ Self.upload = function (opts = {}, cb) {
         );
       }
     );
+  });
+};
+
+/**
+ * Extract software from softcie result
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.extractSoftwaresFromSoftcite = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  return Self.get({ data: { id: opts.documentId.toString(), pdf: true }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    return Self.getSoftciteResults(
+      { documentId: opts.documentId.toString(), user: opts.user },
+      function (err, jsonData) {
+        if (err) return cb(err);
+        if (jsonData instanceof Error) return cb(null, jsonData);
+        return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, xmlContent) {
+          if (err) return cb(err);
+          if (xmlContent instanceof Error) return cb(null, xmlContent);
+          let $ = XML.load(xmlContent.data.toString(DocumentsFilesController.encoding));
+          let softwares = {};
+          if (!jsonData.mentions || !Array.isArray(jsonData.mentions)) return cb(null, softwares);
+          for (let i = 0; i < jsonData.mentions.length; i++) {
+            let mention = jsonData.mentions[i];
+            let name = mention[`software-name`]?.normalizedForm || ``;
+            let version = mention[`version`]?.normalizedForm || ``;
+            let id = `${name}${version ? `:${version}` : ``}`;
+            let areas = mention[`software-name`]?.boundingBoxes || [];
+            let text = mention[`context`] || ``;
+            for (let j = 0; j < areas.length; j++) {
+              let item = areas[j];
+              if (typeof item.p !== `number`) return;
+              let idsOfSentences = Object.keys(doc.pdf.metadata.pages[item.p].sentences);
+              let results = idsOfSentences.map(function (k) {
+                let matches = doc.pdf.metadata.sentences[k].areas
+                  .map(function (area) {
+                    return area.boxes
+                      .filter(function (box) {
+                        return box.p === item.p;
+                      })
+                      .map(function (box) {
+                        let bboxTEI = { x0: box.min.x, x1: box.max.x, y0: box.min.y, y1: box.max.y };
+                        let bboxSoftcite = { x0: item.x, x1: item.x + item.w, y0: item.y, y1: item.y + item.h };
+                        let areaTEI = (bboxTEI.x1 - bboxTEI.x0) * (bboxTEI.y1 - bboxTEI.y0);
+                        let areaSoftcite = (bboxSoftcite.x1 - bboxSoftcite.x0) * (bboxSoftcite.y1 - bboxSoftcite.y0);
+                        let overlap = OCR.getIntersectingRectangle(bboxTEI, bboxSoftcite);
+                        if (overlap) {
+                          let areaOverlap = (overlap.x1 - overlap.x0) * (overlap.y1 - overlap.y0);
+                          let textTEI = $(`s[xml\\:id="${box.sentence.id}"]`).text();
+                          let softMatch = Analyzer.softMatch(
+                            textTEI.replace(/\s+/gm, ` `),
+                            text.replace(/\s+/gm, ` `),
+                            0.85
+                          );
+                          let strictMatch = textTEI.replace(/\s+/gm, ` `) === text.replace(/\s+/gm, ` `);
+                          let sameAera = areaOverlap / areaSoftcite >= 0.8;
+                          if ((strictMatch || softMatch) && sameAera)
+                            return {
+                              id: area.sentence.id,
+                              TEI: textTEI,
+                              Softcite: text,
+                              index: doc.pdf.metadata.mapping.object[area.sentence.id]
+                            };
+                        }
+                      });
+                  })
+                  .flat()
+                  .filter(function (e) {
+                    return typeof e !== `undefined`;
+                  });
+                if (matches.length > 0) {
+                  if (typeof softwares[id] === `undefined`) softwares[id] = { name, version, sentences: matches };
+                  else if (typeof softwares[id] === `object`)
+                    softwares[id].sentences = softwares[id].sentences.concat(matches).sort(function (a, b) {
+                      return a.index - b.index;
+                    });
+                }
+              });
+            }
+          }
+          return cb(null, softwares);
+        });
+      }
+    );
+  });
+};
+
+/**
+ * Import softwares from softcie in the document
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.importSoftwaresFromSoftcite = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    return Self.extractSoftwaresFromSoftcite(opts, function (err, softwares) {
+      if (err) return cb(err);
+      if (softwares instanceof Error) return cb(null, softwares);
+      let ids = Object.keys(softwares);
+      return async.mapSeries(
+        ids,
+        function (id, next) {
+          let software = softwares[id];
+          let sentences = software.sentences;
+          if (sentences.length <= 0) return next();
+          return Self.newDataset(
+            {
+              datasetsId: doc.datasets.toString(),
+              dataset: {
+                reuse: true,
+                dataType: `code software`,
+                subType: `software`,
+                cert: `0`,
+                name: `${software.name}${software.version ? ` ${software.version}` : ``}`,
+                comments: `Automatically created using Softcite data`
+              },
+              sentence: sentences[0],
+              user: opts.user,
+              logs: true
+            },
+            function (err, newDataset) {
+              if (err) return next(err);
+              if (sentences.length <= 1) return next();
+              return async.mapSeries(
+                sentences.slice(1),
+                function (sentence, _next) {
+                  return Self.linkSentence(
+                    {
+                      datasetsId: doc.datasets.toString(),
+                      link: { dataset: { id: newDataset.id }, sentence: { id: sentence.id } },
+                      user: opts.user
+                    },
+                    function (err, s) {
+                      return _next(err);
+                    }
+                  );
+                },
+                function (err) {
+                  return next(err);
+                }
+              );
+            }
+          );
+        },
+        function (err) {
+          return cb(err, doc);
+        }
+      );
+    });
+  });
+};
+
+/**
+ * Get softcite results
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.getSoftciteResults = function (opts, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    if (doc.softcite)
+      return DocumentsFilesController.readFile({ data: { id: doc.softcite.toString() } }, function (err, jsonContent) {
+        if (err) return cb(err);
+        if (jsonContent instanceof Error) return cb(null, jsonContent);
+        let json = {};
+        try {
+          json = JSON.parse(jsonContent.data.toString());
+        } catch (e) {
+          return cb(e);
+        }
+        return cb(null, json);
+      });
+    else if (doc.pdf)
+      return DocumentsFilesController.readFile({ data: { id: doc.pdf.toString() } }, function (err, contentPDF) {
+        if (err) return cb(err);
+        if (contentPDF instanceof Error) return cb(null, contentPDF);
+        return Softcite.annotateSoftwarePDF({ disambiguate: true, buffer: contentPDF.data }, function (err, json) {
+          if (err) return cb(err);
+          if (json instanceof Error) return cb(null, json);
+          return DocumentsFilesController.upload(
+            {
+              data: {
+                accountId: opts.user._id.toString(),
+                documentId: doc._id.toString(),
+                file: {
+                  name: `${doc.name}.softcite.json`,
+                  data: json.toString(`utf8`).toString(DocumentsFilesController.encoding),
+                  mimetype: `application/json`,
+                  encoding: DocumentsFilesController.encoding
+                },
+                organizations: doc.upload.organizations.map(function (item) {
+                  return item._id.toString();
+                })
+              },
+              user: opts.user
+            },
+            function (err, res) {
+              if (err) return cb(err, doc);
+              // Set softcite
+              doc.softcite = res._id;
+              // Add file to files
+              doc.files.push(res._id);
+              return doc.save(function (err) {
+                return cb(err, json);
+              });
+            }
+          );
+        });
+      });
+    else return cb(null, new Error(`PDF not found, functionnality unavailable`));
   });
 };
 
