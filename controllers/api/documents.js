@@ -46,6 +46,7 @@ const PdfManager = require(`../../lib/pdfManager.js`);
 const conf = require(`../../conf/conf.json`);
 const uploadConf = require(`../../conf/upload.json`);
 const ASAPAuthorsConf = require(`../../conf/authors.ASAP.json`);
+const SoftwaresConf = require(`../../conf/softwares.json`);
 
 let Self = {};
 
@@ -1206,13 +1207,14 @@ Self.extractSoftwaresFromSoftcite = function (opts = {}, cb) {
                           );
                           let strictMatch = textTEI.replace(/\s+/gm, ` `) === text.replace(/\s+/gm, ` `);
                           let sameAera = areaOverlap / areaSoftcite >= 0.8;
-                          if ((strictMatch || softMatch) && sameAera)
-                            return {
-                              id: area.sentence.id,
-                              TEI: textTEI,
-                              Softcite: text,
-                              index: doc.pdf.metadata.mapping.object[area.sentence.id]
-                            };
+                          let match = (strictMatch || softMatch) && sameAera;
+                          return {
+                            id: area.sentence.id,
+                            TEI: textTEI,
+                            Softcite: text,
+                            index: doc.pdf.metadata.mapping.object[area.sentence.id],
+                            match
+                          };
                         }
                       });
                   })
@@ -1220,17 +1222,29 @@ Self.extractSoftwaresFromSoftcite = function (opts = {}, cb) {
                   .filter(function (e) {
                     return typeof e !== `undefined`;
                   });
-                if (matches.length > 0) {
-                  if (typeof softwares[id] === `undefined`) softwares[id] = { name, version, sentences: matches };
-                  else if (typeof softwares[id] === `object`)
-                    softwares[id].sentences = softwares[id].sentences.concat(matches).sort(function (a, b) {
-                      return a.index - b.index;
-                    });
-                }
+                if (typeof softwares[id] === `undefined`) softwares[id] = { name, version, sentences: matches };
+                else if (typeof softwares[id] === `object`)
+                  softwares[id].sentences = softwares[id].sentences.concat(matches).sort(function (a, b) {
+                    if (!a.match) return 1;
+                    if (!b.match) return -1;
+                    return a.index - b.index;
+                  });
               });
             }
           }
-          return cb(null, softwares);
+          let ids = Object.keys(softwares);
+          let results = [];
+          for (let i = 0; i < ids.length; i++) {
+            let id = ids[i];
+            let software = softwares[id];
+            software.match =
+              software.sentences.filter(function (e) {
+                return e.match;
+              }).length > 0;
+            software.isCommandLine = !!SoftwaresConf[software.name];
+            results.push(software);
+          }
+          return cb(null, results);
         });
       }
     );
@@ -1255,20 +1269,21 @@ Self.importSoftwaresFromSoftcite = function (opts = {}, cb) {
     return Self.extractSoftwaresFromSoftcite(opts, function (err, softwares) {
       if (err) return cb(err);
       if (softwares instanceof Error) return cb(null, softwares);
-      let ids = Object.keys(softwares);
       return async.mapSeries(
-        ids,
-        function (id, next) {
-          let software = softwares[id];
-          let sentences = software.sentences;
+        softwares,
+        function (software, next) {
+          if (software.match <= 0) return next();
+          let sentences = software.sentences.filter(function (e) {
+            return e.match;
+          });
           if (sentences.length <= 0) return next();
           return Self.newDataset(
             {
               datasetsId: doc.datasets.toString(),
               dataset: {
-                reuse: true,
+                reuse: software.isCommandLine ? false : true,
                 dataType: `code software`,
-                subType: `software`,
+                subType: software.isCommandLine ? `software` : `custom scripts`,
                 cert: `0`,
                 name: `${software.name}${software.version ? ` ${software.version}` : ``}`,
                 comments: `Automatically created using Softcite data`
@@ -1302,7 +1317,7 @@ Self.importSoftwaresFromSoftcite = function (opts = {}, cb) {
           );
         },
         function (err) {
-          return cb(err, doc);
+          return cb(err, softwares);
         }
       );
     });
