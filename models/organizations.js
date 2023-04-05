@@ -27,6 +27,8 @@ const Settings = new mongoose.Schema(
       alreadyProcessed: { type: Boolean, default: false },
       removeResponseToViewerSection: { type: Boolean, default: false },
       dataseerML: { type: Boolean, default: true },
+      softcite: { type: Boolean, default: false },
+      extractSoftwaresFromSoftcite: { type: Boolean, default: false },
       mergePDFs: { type: Boolean, default: true }
     }
   },

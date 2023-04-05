@@ -111,7 +111,9 @@ router.post(`/`, function (req, res, next) {
       dataTypes: req.app.get(`dataTypes`),
       mute: Params.convertToBoolean(req.body.mute),
       dataseerML: Params.convertToBoolean(req.body.dataseerML),
+      softcite: Params.convertToBoolean(req.body.softcite),
       mergePDFs: Params.convertToBoolean(req.body.mergePDFs),
+      extractSoftwaresFromSoftcite: Params.convertToBoolean(req.body.extractSoftwaresFromSoftcite),
       removeResponseToViewerSection: Params.convertToBoolean(req.body.removeResponseToViewerSection)
     },
     function (err, data) {

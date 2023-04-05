@@ -1078,6 +1078,7 @@ Self.upload = function (opts = {}, cb) {
           },
           // Process softcite
           function (acc, next) {
+            if (!opts.extractSoftwaresFromSoftcite) return next(null, acc);
             return Self.importSoftwaresFromSoftcite(
               { documentId: acc._id.toString(), user: opts.user },
               function (err, res) {
