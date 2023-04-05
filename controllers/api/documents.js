@@ -1153,6 +1153,7 @@ Self.upload = function (opts = {}, cb) {
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
  * @param {string} opts.documentId - Document id
+ * @param {boolean} opts.softcite - Enable/disable softcite service request (default: true)
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -1164,7 +1165,7 @@ Self.extractSoftwaresFromSoftcite = function (opts = {}, cb) {
     if (err) return cb(err);
     if (doc instanceof Error) return cb(null, doc);
     return Self.getSoftciteResults(
-      { documentId: opts.documentId.toString(), user: opts.user },
+      { documentId: opts.documentId.toString(), user: opts.user, softcite: opts.softcite },
       function (err, jsonData) {
         if (err) return cb(err);
         if (jsonData instanceof Error) return cb(null, jsonData);
@@ -1257,6 +1258,7 @@ Self.extractSoftwaresFromSoftcite = function (opts = {}, cb) {
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
  * @param {string} opts.documentId - Document id
+ * @param {boolean} opts.softcite - Enable/disable softcite service request (default: true)
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -1330,6 +1332,7 @@ Self.importSoftwaresFromSoftcite = function (opts = {}, cb) {
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
  * @param {string} opts.documentId - Document id
+ * @param {boolean} opts.softcite - Enable/disable softcite service request (default: true)
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -1337,6 +1340,7 @@ Self.getSoftciteResults = function (opts, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  if (typeof _.get(opts, `softcite`) === `undefined`) opts.softcite = true;
   return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
     if (err) return cb(err);
     if (doc instanceof Error) return cb(null, doc);
@@ -1352,44 +1356,54 @@ Self.getSoftciteResults = function (opts, cb) {
         }
         return cb(null, json);
       });
-    else if (doc.pdf)
-      return DocumentsFilesController.readFile({ data: { id: doc.pdf.toString() } }, function (err, contentPDF) {
-        if (err) return cb(err);
-        if (contentPDF instanceof Error) return cb(null, contentPDF);
-        return Softcite.annotateSoftwarePDF({ disambiguate: true, buffer: contentPDF.data }, function (err, json) {
+    else {
+      if (!opts.softcite)
+        return cb(null, new Error(`Softcite results not found (you must enable softcite service service request)`));
+      if (doc.pdf)
+        return DocumentsFilesController.readFile({ data: { id: doc.pdf.toString() } }, function (err, contentPDF) {
           if (err) return cb(err);
-          if (json instanceof Error) return cb(null, json);
-          return DocumentsFilesController.upload(
-            {
-              data: {
-                accountId: opts.user._id.toString(),
-                documentId: doc._id.toString(),
-                file: {
-                  name: `${doc.name}.softcite.json`,
-                  data: json.toString(`utf8`).toString(DocumentsFilesController.encoding),
-                  mimetype: `application/json`,
-                  encoding: DocumentsFilesController.encoding
+          if (contentPDF instanceof Error) return cb(null, contentPDF);
+          return Softcite.annotateSoftwarePDF({ disambiguate: true, buffer: contentPDF.data }, function (err, buffer) {
+            if (err) return cb(err);
+            if (buffer instanceof Error) return cb(null, buffer);
+            return DocumentsFilesController.upload(
+              {
+                data: {
+                  accountId: opts.user._id.toString(),
+                  documentId: doc._id.toString(),
+                  file: {
+                    name: `${doc.name}.softcite.json`,
+                    data: buffer.toString(`utf8`).toString(DocumentsFilesController.encoding),
+                    mimetype: `application/json`,
+                    encoding: DocumentsFilesController.encoding
+                  },
+                  organizations: doc.upload.organizations.map(function (item) {
+                    return item._id.toString();
+                  })
                 },
-                organizations: doc.upload.organizations.map(function (item) {
-                  return item._id.toString();
-                })
+                user: opts.user
               },
-              user: opts.user
-            },
-            function (err, res) {
-              if (err) return cb(err, doc);
-              // Set softcite
-              doc.softcite = res._id;
-              // Add file to files
-              doc.files.push(res._id);
-              return doc.save(function (err) {
-                return cb(err, json);
-              });
-            }
-          );
+              function (err, res) {
+                if (err) return cb(err, doc);
+                // Set softcite
+                doc.softcite = res._id;
+                // Add file to files
+                doc.files.push(res._id);
+                return doc.save(function (err) {
+                  let json = {};
+                  try {
+                    json = JSON.parse(buffer.toString());
+                  } catch (e) {
+                    return cb(e);
+                  }
+                  return cb(err, json);
+                });
+              }
+            );
+          });
         });
-      });
-    else return cb(null, new Error(`PDF not found, functionnality unavailable`));
+      else return cb(null, new Error(`PDF not found, functionnality unavailable`));
+    }
   });
 };
 

@@ -728,6 +728,7 @@ router.post(`/:id/softcite/importSoftwares`, function (req, res, next) {
     return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     documentId: req.params.id,
+    softcite: Params.convertToBoolean(req.body.softcite),
     user: req.user
   };
   return DocumentsController.importSoftwaresFromSoftcite(opts, function (err, data) {
@@ -751,6 +752,7 @@ router.post(`/:id/softcite/extractSoftwares`, function (req, res, next) {
     return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     documentId: req.params.id,
+    softcite: Params.convertToBoolean(req.body.softcite),
     user: req.user
   };
   return DocumentsController.extractSoftwaresFromSoftcite(opts, function (err, data) {
@@ -774,6 +776,7 @@ router.post(`/:id/softcite/softwares`, function (req, res, next) {
     return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     documentId: req.params.id,
+    softcite: Params.convertToBoolean(req.body.softcite),
     user: req.user
   };
   return DocumentsController.getSoftciteResults(opts, function (err, data) {
