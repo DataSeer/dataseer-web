@@ -111,7 +111,11 @@ router.post(`/`, function (req, res, next) {
       dataTypes: req.app.get(`dataTypes`),
       mute: Params.convertToBoolean(req.body.mute),
       dataseerML: Params.convertToBoolean(req.body.dataseerML),
+      softcite: Params.convertToBoolean(req.body.softcite),
       mergePDFs: Params.convertToBoolean(req.body.mergePDFs),
+      importDataFromSoftcite: Params.convertToBoolean(req.body.importDataFromSoftcite),
+      ignoreSoftCiteCommandLines: Params.convertToBoolean(req.body.ignoreSoftCiteCommandLines),
+      ignoreSoftCiteSoftware: Params.convertToBoolean(req.body.ignoreSoftCiteSoftware),
       removeResponseToViewerSection: Params.convertToBoolean(req.body.removeResponseToViewerSection)
     },
     function (err, data) {
@@ -720,15 +724,69 @@ router.get(`/:id/softcite/content`, function (req, res, next) {
 });
 
 /* Import softwares from Softcite results */
-router.post(`/:id/softcite/importSoftwares`, function (req, res, next) {
+router.post(`/:id/softcite/importData`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
   if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
     return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     documentId: req.params.id,
+    softcite: Params.convertToBoolean(req.body.softcite),
+    refreshData: Params.convertToBoolean(req.body.refreshData),
+    ignoreSoftCiteCommandLines: Params.convertToBoolean(req.body.ignoreSoftCiteCommandLines),
+    ignoreSoftCiteSoftware: Params.convertToBoolean(req.body.ignoreSoftCiteSoftware),
     user: req.user
   };
-  return DocumentsController.importSoftwaresFromSoftcite(opts, function (err, data) {
+  return DocumentsController.importDataFromSoftcite(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* Extract softwares from Softcite results */
+router.post(`/:id/softcite/extractData`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
+  if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    documentId: req.params.id,
+    softcite: Params.convertToBoolean(req.body.softcite),
+    refreshData: Params.convertToBoolean(req.body.refreshData),
+    user: req.user
+  };
+  return DocumentsController.extractDataFromSoftcite(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
+/* Get softwares from Softcite results */
+router.post(`/:id/softcite/softwares`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
+  if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    documentId: req.params.id,
+    softcite: Params.convertToBoolean(req.body.softcite),
+    refreshData: Params.convertToBoolean(req.body.refreshData),
+    user: req.user
+  };
+  return DocumentsController.getSoftciteResults(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
