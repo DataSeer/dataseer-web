@@ -1167,101 +1167,115 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
-  return Self.get({ data: { id: opts.documentId.toString(), pdf: true }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    return Self.getSoftciteResults(
-      {
-        documentId: opts.documentId.toString(),
-        user: opts.user,
-        softcite: opts.softcite,
-        refreshData: opts.refreshData
-      },
-      function (err, jsonData) {
-        if (err) return cb(err);
-        if (jsonData instanceof Error) return cb(null, jsonData);
-        return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, xmlContent) {
+  return Self.get(
+    { data: { id: opts.documentId.toString(), datasets: true, pdf: true }, user: opts.user },
+    function (err, doc) {
+      let codeAndSoftware = doc.datasets.current.filter(function (item) {
+        return item.kind === `code` || item.kind === `software`;
+      });
+      if (err) return cb(err);
+      if (doc instanceof Error) return cb(null, doc);
+      return Self.getSoftciteResults(
+        {
+          documentId: opts.documentId.toString(),
+          user: opts.user,
+          softcite: opts.softcite,
+          refreshData: opts.refreshData
+        },
+        function (err, jsonData) {
           if (err) return cb(err);
-          if (xmlContent instanceof Error) return cb(null, xmlContent);
-          let $ = XML.load(xmlContent.data.toString(DocumentsFilesController.encoding));
-          let softwares = {};
-          if (!jsonData.mentions || !Array.isArray(jsonData.mentions)) return cb(null, softwares);
-          for (let i = 0; i < jsonData.mentions.length; i++) {
-            let mention = jsonData.mentions[i];
-            let name = mention[`software-name`]?.normalizedForm || ``;
-            let version = mention[`version`]?.normalizedForm || ``;
-            let id = `${name}${version ? `:${version}` : ``}`;
-            let areas = mention[`software-name`]?.boundingBoxes || [];
-            let text = mention[`context`] || ``;
-            for (let j = 0; j < areas.length; j++) {
-              let item = areas[j];
-              if (typeof item.p !== `number`) return;
-              let idsOfSentences = Object.keys(doc.pdf.metadata.pages[item.p].sentences);
-              let results = idsOfSentences.map(function (k) {
-                let matches = doc.pdf.metadata.sentences[k].areas
-                  .map(function (area) {
-                    return area.boxes
-                      .filter(function (box) {
-                        return box.p === item.p;
-                      })
-                      .map(function (box) {
-                        let bboxTEI = { x0: box.min.x, x1: box.max.x, y0: box.min.y, y1: box.max.y };
-                        let bboxSoftcite = { x0: item.x, x1: item.x + item.w, y0: item.y, y1: item.y + item.h };
-                        let areaTEI = (bboxTEI.x1 - bboxTEI.x0) * (bboxTEI.y1 - bboxTEI.y0);
-                        let areaSoftcite = (bboxSoftcite.x1 - bboxSoftcite.x0) * (bboxSoftcite.y1 - bboxSoftcite.y0);
-                        let overlap = OCR.getIntersectingRectangle(bboxTEI, bboxSoftcite);
-                        if (overlap) {
-                          let areaOverlap = (overlap.x1 - overlap.x0) * (overlap.y1 - overlap.y0);
-                          let textTEI = $(`s[xml\\:id="${box.sentence.id}"]`).text();
-                          let softMatch = Analyzer.softMatch(
-                            textTEI.replace(/\s+/gm, ` `),
-                            text.replace(/\s+/gm, ` `),
-                            0.85
-                          );
-                          let strictMatch = textTEI.replace(/\s+/gm, ` `) === text.replace(/\s+/gm, ` `);
-                          let sameAera = areaOverlap / areaSoftcite >= 0.8;
-                          let match = (strictMatch || softMatch) && sameAera;
-                          return {
-                            id: area.sentence.id,
-                            TEI: textTEI,
-                            Softcite: text,
-                            index: doc.pdf.metadata.mapping.object[area.sentence.id],
-                            match
-                          };
-                        }
-                      });
-                  })
-                  .flat()
-                  .filter(function (e) {
-                    return typeof e !== `undefined`;
-                  });
-                if (typeof softwares[id] === `undefined`) softwares[id] = { name, version, sentences: matches };
-                else if (typeof softwares[id] === `object`)
-                  softwares[id].sentences = softwares[id].sentences.concat(matches).sort(function (a, b) {
-                    if (!a.match) return 1;
-                    if (!b.match) return -1;
-                    return a.index - b.index;
-                  });
-              });
+          if (jsonData instanceof Error) return cb(null, jsonData);
+          return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, xmlContent) {
+            if (err) return cb(err);
+            if (xmlContent instanceof Error) return cb(null, xmlContent);
+            let $ = XML.load(xmlContent.data.toString(DocumentsFilesController.encoding));
+            let softwares = {};
+            if (!jsonData.mentions || !Array.isArray(jsonData.mentions)) return cb(null, softwares);
+            for (let i = 0; i < jsonData.mentions.length; i++) {
+              let mention = jsonData.mentions[i];
+              let name = mention[`software-name`]?.normalizedForm || ``;
+              let version = mention[`version`]?.normalizedForm || ``;
+              let id = `${name.toLowerCase()}`;
+              let identifier = `name: ${name}${version ? `, version: ${version}` : ``}`;
+              let areas = mention[`software-name`]?.boundingBoxes || [];
+              let text = mention[`context`] || ``;
+              for (let j = 0; j < areas.length; j++) {
+                let item = areas[j];
+                if (typeof item.p !== `number`) return;
+                let idsOfSentences = Object.keys(doc.pdf.metadata.pages[item.p].sentences);
+                let results = idsOfSentences.map(function (k) {
+                  let matches = doc.pdf.metadata.sentences[k].areas
+                    .map(function (area) {
+                      return area.boxes
+                        .filter(function (box) {
+                          return box.p === item.p;
+                        })
+                        .map(function (box) {
+                          let bboxTEI = { x0: box.min.x, x1: box.max.x, y0: box.min.y, y1: box.max.y };
+                          let bboxSoftcite = { x0: item.x, x1: item.x + item.w, y0: item.y, y1: item.y + item.h };
+                          let areaTEI = (bboxTEI.x1 - bboxTEI.x0) * (bboxTEI.y1 - bboxTEI.y0);
+                          let areaSoftcite = (bboxSoftcite.x1 - bboxSoftcite.x0) * (bboxSoftcite.y1 - bboxSoftcite.y0);
+                          let overlap = OCR.getIntersectingRectangle(bboxTEI, bboxSoftcite);
+                          if (overlap) {
+                            let areaOverlap = (overlap.x1 - overlap.x0) * (overlap.y1 - overlap.y0);
+                            let textTEI = $(`s[xml\\:id="${box.sentence.id}"]`).text();
+                            let softMatch = Analyzer.softMatch(
+                              textTEI.replace(/\s+/gm, ` `),
+                              text.replace(/\s+/gm, ` `),
+                              0.85
+                            );
+                            let strictMatch = textTEI.replace(/\s+/gm, ` `) === text.replace(/\s+/gm, ` `);
+                            let sameAera = areaOverlap / areaSoftcite >= 0.8;
+                            let match = (strictMatch || softMatch) && sameAera;
+                            return {
+                              id: area.sentence.id,
+                              TEI: textTEI,
+                              Softcite: text,
+                              index: doc.pdf.metadata.mapping.object[area.sentence.id],
+                              match
+                            };
+                          }
+                        });
+                    })
+                    .flat()
+                    .filter(function (e) {
+                      return typeof e !== `undefined`;
+                    });
+                  if (typeof softwares[id] === `undefined`) {
+                    softwares[id] = { name, version, sentences: matches, mentions: {} };
+                  } else if (typeof softwares[id] === `object`)
+                    softwares[id].sentences = softwares[id].sentences.concat(matches).sort(function (a, b) {
+                      if (!a.match) return 1;
+                      if (!b.match) return -1;
+                      return a.index - b.index;
+                    });
+                  softwares[id].mentions[identifier] = true;
+                });
+              }
             }
-          }
-          let ids = Object.keys(softwares);
-          let results = [];
-          for (let i = 0; i < ids.length; i++) {
-            let id = ids[i];
-            let software = softwares[id];
-            software.match =
-              software.sentences.filter(function (e) {
-                return e.match;
-              }).length > 0;
-            software.isCommandLine = !!SoftwaresConf[software.name];
-            results.push(software);
-          }
-          return cb(null, results);
-        });
-      }
-    );
-  });
+            let ids = Object.keys(softwares);
+            let results = [];
+            for (let i = 0; i < ids.length; i++) {
+              let id = ids[i];
+              let software = softwares[id];
+              software.match =
+                software.sentences.filter(function (e) {
+                  return e.match;
+                }).length > 0;
+              software.isCommandLine = !!SoftwaresConf[software.name.toLowerCase()];
+              software.mentions = Object.keys(software.mentions);
+              software.alreadyExist =
+                codeAndSoftware.filter(function (e) {
+                  return e.name === software.name;
+                }).length > 0;
+              results.push(software);
+            }
+            return cb(null, results);
+          });
+        }
+      );
+    }
+  );
 };
 
 /**
@@ -1292,7 +1306,8 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
       return async.mapSeries(
         softwares,
         function (software, next) {
-          if (software.match <= 0) return next();
+          if (!software.match) return next();
+          if (software.alreadyExist) return next();
           let sentences = software.sentences.filter(function (e) {
             return e.match;
           });
@@ -1312,7 +1327,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                       subType: `custom scripts`,
                       cert: `0`,
                       name: software.name,
-                      comments: ``
+                      comments: [`List of all mentions`, ``].concat(software.mentions).join(`\n`)
                     },
                     sentence: sentences[0],
                     user: opts.user,
@@ -1337,7 +1352,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                       cert: `0`,
                       name: software.name,
                       version: software.version,
-                      comments: ``
+                      comments: [`List of all mentions`, ``].concat(software.mentions).join(`\n`)
                     },
                     sentence: sentences[0],
                     user: opts.user,
