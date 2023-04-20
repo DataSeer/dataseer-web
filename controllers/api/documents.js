@@ -1196,7 +1196,7 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
               let name = mention[`software-name`]?.normalizedForm || ``;
               let version = mention[`version`]?.normalizedForm || ``;
               let id = `${name.toLowerCase()}`;
-              let identifier = `name: ${name}${version ? `, version: ${version}` : ``}`;
+              let identifier = `${name}${version ? ` ${version}` : ``}`;
               let areas = mention[`software-name`]?.boundingBoxes || [];
               let text = mention[`context`] || ``;
               for (let j = 0; j < areas.length; j++) {
@@ -1327,7 +1327,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                       subType: `custom scripts`,
                       cert: `0`,
                       name: software.name,
-                      comments: [`List of all mentions`, ``].concat(software.mentions).join(`\n`)
+                      comments: software.mentions.join(`, `)
                     },
                     sentence: sentences[0],
                     user: opts.user,
@@ -1352,7 +1352,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                       cert: `0`,
                       name: software.name,
                       version: software.version,
-                      comments: [`List of all mentions`, ``].concat(software.mentions).join(`\n`)
+                      comments: software.mentions.join(`, `)
                     },
                     sentence: sentences[0],
                     user: opts.user,
