@@ -699,7 +699,6 @@ Self.upload = function (opts = {}, cb) {
     opts.mergePDFs = true;
   if (typeof _.get(opts, `softcite`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
     opts.softcite = true;
-  if (typeof _.get(opts, `mute`) === `undefined` || !accessRights.isAdministrator) opts.mute = false;
   return Self.getUploadParams(opts.data, opts.user, function (err, params) {
     if (err) return cb(err);
     if (params instanceof Error) return cb(null, params);
@@ -1128,6 +1127,11 @@ Self.upload = function (opts = {}, cb) {
                   function (err, res) {
                     if (err) return cb(err);
                     let url = Url.build(`documents/${res._id.toString()}`);
+                    if (typeof _.get(opts, `mute`) === `undefined` || !accessRights.isAdministrator)
+                      opts.mute =
+                        res.upload.organizations.filter(function (_item) {
+                          return _item.settings.upload.mute;
+                        }).length > 0;
                     let mute = Params.convertToBoolean(opts.mute);
                     if (mute) return cb(null, res);
                     return Mailer.sendMail(
