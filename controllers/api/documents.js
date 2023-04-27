@@ -1199,6 +1199,7 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
               let mention = jsonData.mentions[i];
               let name = mention[`software-name`]?.normalizedForm || ``;
               let version = mention[`version`]?.normalizedForm || ``;
+              let url = mention[`url`]?.normalizedForm || ``;
               let id = `${name.toLowerCase()}`;
               let identifier = `${name}${version ? ` ${version}` : ``}`;
               let areas = mention[`software-name`]?.boundingBoxes || [];
@@ -1246,7 +1247,7 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
                       return typeof e !== `undefined`;
                     });
                   if (typeof softwares[id] === `undefined`) {
-                    softwares[id] = { name, version, sentences: matches, mentions: {} };
+                    softwares[id] = { name, version, url, sentences: matches, mentions: {} };
                   } else if (typeof softwares[id] === `object`)
                     softwares[id].sentences = softwares[id].sentences.concat(matches).sort(function (a, b) {
                       if (!a.match) return 1;
@@ -1331,6 +1332,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                       subType: `custom scripts`,
                       cert: `0`,
                       name: software.name,
+                      URL: software.url,
                       comments: software.mentions.join(`, `)
                     },
                     sentence: sentences[0],
@@ -1356,6 +1358,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                       cert: `0`,
                       name: software.name,
                       version: software.version,
+                      URL: software.url,
                       comments: software.mentions.join(`, `)
                     },
                     sentence: sentences[0],
