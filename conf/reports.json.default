@@ -3,32 +3,42 @@
     "DataSeer Generic": { "default": "folderID" },
     "AmNat": { "default": "folderID" },
     "Universal Journal Report": { "default": "folderID" },
-    "ASAP": { "OrganizationID": "folderID", "default": "folderID" }
+    "ASAP": { "OrganizationID": "folderID", "default": "folderID" },
+    "ASAP-PPMI": { "OrganizationID": "folderID", "default": "folderID" },
+    "ASAP-GP2": { "OrganizationID": "folderID", "default": "folderID" }
   },
   "templates": {
     "DataSeer Generic": "folderID",
     "AmNat": "folderID",
     "Universal Journal Report": "folderID",
-    "ASAP": "folderID"
+    "ASAP": "folderID",
+    "ASAP-PPMI": "folderID",
+    "ASAP-GP2": "folderID"
   },
   "settings": {
     "datasetsLinks": {
       "DataSeer Generic": false,
       "AmNat": false,
       "Universal Journal Report": false,
-      "ASAP": false
+      "ASAP": false,
+      "ASAP-PPMI": false,
+      "ASAP-GP2": false
     },
     "ROAS": {
       "DataSeer Generic": false,
       "AmNat": false, // n/a
       "Universal Journal Report": false, // n/a
-      "ASAP": false // n/a
+      "ASAP": false, // n/a
+      "ASAP-PPMI": false, // n/a
+      "ASAP-GP2": false // n/a
     }
     "authors": {
       "DataSeer Generic": false,
       "AmNat": false, // n/a
       "Universal Journal Report": false, // n/a
-      "ASAP": false // n/a
+      "ASAP": false, // n/a
+      "ASAP-PPMI": false, // n/a
+      "ASAP-GP2": false // n/a
     }
   },
   "prefix": "prefix of the filename (e.g. 'localhost - ' for localhost, 'dev - ' for development, an empty string for production)"

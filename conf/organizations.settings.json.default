@@ -40,6 +40,42 @@
         }
       },
       {
+        "label": "ASAP - PPMI",
+        "enabled": true,
+        "isDefault": false,
+        "actions":
+        {
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
+          },
+          "generate":
+          {
+            "enabled": true,
+            "isDefault": true
+          }
+        }
+      },
+      {
+        "label": "ASAP - GP2",
+        "enabled": true,
+        "isDefault": false,
+        "actions":
+        {
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
+          },
+          "generate":
+          {
+            "enabled": true,
+            "isDefault": true
+          }
+        }
+      },
+      {
         "label": "bioRxiv",
         "enabled": true,
         "isDefault": false,
