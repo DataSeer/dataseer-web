@@ -47,6 +47,7 @@ const conf = require(`../../conf/conf.json`);
 const uploadConf = require(`../../conf/upload.json`);
 const ASAPAuthorsConf = require(`../../conf/authors.ASAP.json`);
 const SoftwaresConf = require(`../../conf/softwares.json`);
+const reportsConf = require(`../../conf/reports.json`);
 
 let Self = {};
 
@@ -397,13 +398,10 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
   if (typeof _.get(opts, `data.dataTypes`) === `undefined`)
     return cb(new Error(`Missing required data: opts.dataTypes`));
   let kind = _.get(opts, `kind`);
+
   if (typeof kind === `undefined`) return cb(Error(`Missing required data: opts.kind`));
-  if (kind !== `ASAP` && kind !== `AmNat` && kind !== `DataSeer Generic` && kind !== `Universal Journal Report`)
-    return cb(
-      Error(
-        `Invalid required data: opts.kind must be 'ASAP or 'AmNat' or 'DataSeer Generic' or 'Universal Journal Report'`
-      )
-    );
+  if (Object.keys(reportsConf.templates).indexOf(kind) === -1)
+    return cb(Error(`Invalid required data: opts.kind must be ${Object.keys(reportsConf.templates).join(`, `)}`));
   let accessRights = AccountsManager.getAccessRights(opts.user);
   if (!accessRights.isAdministrator && !accessRights.isModerator)
     return cb(null, new Error(`Unauthorized functionnality`));
