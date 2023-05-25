@@ -17,7 +17,8 @@ const conf = require(`../../conf/conf.json`);
 /* POST dataset of datasets */
 router.post(`/:id/dataset`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  if (!accessRights.authenticated || !accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
     datasetsId: req.params.id,
@@ -43,7 +44,8 @@ router.post(`/:id/dataset`, function (req, res, next) {
 /* PUT dataset of datasets */
 router.put(`/:id/dataset`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  if (!accessRights.authenticated || !accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
     datasetsId: req.params.id,
@@ -69,7 +71,8 @@ router.put(`/:id/dataset`, function (req, res, next) {
 /* DELETE dataset of datasets */
 router.delete(`/:id/dataset`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  if (!accessRights.authenticated || !accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
     datasetsId: req.params.id,
@@ -94,7 +97,8 @@ router.delete(`/:id/dataset`, function (req, res, next) {
 /* POST link of datasets */
 router.post(`/:id/link`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  if (!accessRights.authenticated || !accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
     datasetsId: req.params.id,
@@ -119,7 +123,8 @@ router.post(`/:id/link`, function (req, res, next) {
 /* DELETE link of datasets */
 router.delete(`/:id/unlink`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  if (!accessRights.authenticated || !accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = { user: req.user, datasetsId: req.params.id, link: req.body.link, logs: true };
   return DocumentsController.unlinkSentence(opts, function (err, data) {
