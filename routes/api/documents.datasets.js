@@ -68,6 +68,30 @@ router.put(`/:id/dataset`, function (req, res, next) {
   });
 });
 
+/* PUT metadata of datasets */
+router.put(`/:id/metadata`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    datasetsId: req.params.id,
+    metadata: req.body.metadata,
+    user: req.user
+  };
+  return DocumentsController.updateDatasetsMetadata(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({
+      err: isError,
+      res: result
+    });
+  });
+});
+
 /* DELETE dataset of datasets */
 router.delete(`/:id/dataset`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
