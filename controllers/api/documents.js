@@ -398,7 +398,6 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
   if (typeof _.get(opts, `data.dataTypes`) === `undefined`)
     return cb(new Error(`Missing required data: opts.dataTypes`));
   let kind = _.get(opts, `kind`);
-
   if (typeof kind === `undefined`) return cb(Error(`Missing required data: opts.kind`));
   if (Object.keys(reportsConf.templates).indexOf(kind) === -1)
     return cb(Error(`Invalid required data: opts.kind must be ${Object.keys(reportsConf.templates).join(`, `)}`));
@@ -449,6 +448,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
               affiliation: data.doc.metadata.affiliation,
               license: data.doc.metadata.license
             },
+            datasetsMetadata: data.doc.datasets.metadata,
             summary: data.datasetsSummary,
             datasets: data.sortedDatasetsInfos.datasets,
             protocols: data.sortedDatasetsInfos.protocols,
