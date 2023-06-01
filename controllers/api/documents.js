@@ -2381,6 +2381,51 @@ Self.updateDatasets = function (opts = {}, cb) {
 };
 
 /**
+ * Update datasets metadata
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {string} opts.id - Document id
+ * @param {string} opts.metadata - Document datasets mettadata
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.updateDatasetsMetadata = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `datasetsId`) === `undefined`) return cb(new Error(`Missing required data: opts.datasetsId`));
+  if (typeof _.get(opts, `metadata`) === `undefined`)
+    opts.metadata = {
+      datasets: { notes: `` },
+      codeAndSoftware: { notes: `` },
+      materials: { notes: `` },
+      protocols: { notes: `` }
+    };
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
+  return DocumentsDatasets.findOne({ _id: opts.datasetsId }, function (err, datasets) {
+    if (err) return cb(err);
+    if (!datasets) return cb(null, new Error(`Datasets not found`));
+    datasets.metadata = opts.metadata;
+    return datasets.save(function (err) {
+      if (err) return cb(err);
+      // Create logs
+      return DocumentsLogsController.create(
+        {
+          target: datasets.document,
+          account: opts.user._id,
+          kind: CrudManager.actions.update._id,
+          key: `datasets.metadata`
+        },
+        function (err, log) {
+          if (err) return cb(err);
+          return cb(null, datasets);
+        }
+      );
+    });
+  });
+};
+
+/**
  * Refresh all datasets of all documents
  * @param {object} opts - JSON containing all data
  * @param {object} opts.user - User
