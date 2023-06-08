@@ -456,6 +456,7 @@ router.post(`/:target/importDatasets/:source`, function (req, res, next) {
   // Init transaction
   let opts = {
     data: {
+      onlyLogs: Params.convertToBoolean(req.body.onlyLogs),
       target: req.params.target,
       source: req.params.source
     },
