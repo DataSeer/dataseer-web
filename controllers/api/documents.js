@@ -74,6 +74,7 @@ Self.buildDatasetsCSV = function (documents) {
  * @param {object} opts.data - Data available
  * @param {string} opts.data.source - Id of the source document (that contain datasets you want to import)
  * @param {string} opts.data.target - Id of the target document (that will receiving imported datasets)
+ * @param {boolean} opts.data.onlyLogs - Only logs no data objects creation
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
  * @returns {undefined} undefined
  */
@@ -86,6 +87,7 @@ Self.importDatasets = function (opts = {}, cb) {
     return cb(new Error(`Missing required data: opts.data.source`));
   if (typeof _.get(opts, `data.target`) === `undefined`)
     return cb(new Error(`Missing required data: opts.data.target`));
+  if (typeof _.get(opts, `data.onlyLogs`) === `undefined`) opts.data.onlyLogs = false;
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
   let source = Params.convertToString(opts.data.source);
@@ -158,6 +160,7 @@ Self.importDatasets = function (opts = {}, cb) {
                 return next();
               }
               result.merged.push(cp);
+              if (opts.data.onlyLogs) return next();
               return Self.newDataset(
                 {
                   datasetsId: res.target.doc.datasets._id.toString(),
