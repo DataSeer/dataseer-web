@@ -434,6 +434,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
               readmeIncluded: data.doc.metadata.readmeIncluded,
               describesFiles: data.doc.metadata.describesFiles,
               describesVariables: data.doc.metadata.describesVariables,
+              affiliationAcknowledgementsLicenseNotes: data.doc.metadata.affiliationAcknowledgementsLicenseNotes,
               doi: data.doc.metadata.doi,
               authors: data.doc.metadata.authors.filter(function (item) {
                 return item.name.length > 0;
@@ -1938,6 +1939,12 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
           function (next) {
             // Extract metadata
             const _metadata = Object.assign({}, metadata, XML.extractMetadata(XML.load(xmlString)));
+            if (
+              !_metadata.affiliationAcknowledgementsLicenseNotes &&
+              metadata &&
+              metadata.affiliationAcknowledgementsLicenseNotes
+            )
+              _metadata.affiliationAcknowledgementsLicenseNotes = metadata.affiliationAcknowledgementsLicenseNotes;
             if (!_metadata.license && metadata && metadata.license) _metadata.license = metadata.license;
             if (!_metadata.acknowledgement && metadata && metadata.acknowledgement)
               _metadata.acknowledgement = metadata.acknowledgement;
