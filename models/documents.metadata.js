@@ -42,6 +42,7 @@ const Schema = new mongoose.Schema(
       value: { type: Boolean, default: false },
       notes: { type: String, default: `` }
     },
+    affiliationAcknowledgementsLicenseNotes: { type: String, default: `` },
     document: { type: mongoose.Schema.Types.ObjectId, ref: `Documents` }, // refers to documents collection (id of a given document)
     article_title: { type: String, default: `` }, // articleTitle
     journal: { type: String, default: `` }, // journal

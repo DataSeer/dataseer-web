@@ -1242,7 +1242,10 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
         pmid: Params.convertToString(req.body.pmid),
         license: Params.convertToString(req.body.license),
         acknowledgement: Params.convertToString(req.body.acknowledgement),
-        affiliation: Params.convertToString(req.body.affiliation)
+        affiliation: Params.convertToString(req.body.affiliation),
+        affiliationAcknowledgementsLicenseNotes: Params.convertToString(
+          req.body.affiliationAcknowledgementsLicenseNotes
+        )
       }
     },
     user: req.user
