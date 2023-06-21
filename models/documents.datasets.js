@@ -72,6 +72,20 @@ const Sentence = new mongoose.Schema(
 const Schema = new mongoose.Schema(
   {
     document: { type: mongoose.Schema.Types.ObjectId, ref: `Documents` }, // refers to documents collection (id of a given document)
+    metadata: {
+      datasets: {
+        notes: { type: String, default: `` }
+      },
+      codeAndSoftware: {
+        notes: { type: String, default: `` }
+      },
+      materials: {
+        notes: { type: String, default: `` }
+      },
+      protocols: {
+        notes: { type: String, default: `` }
+      }
+    },
     deleted: [Dataset], // deleted datasets (Array of datasets)
     extracted: [Dataset], // extracted datasets (Array of datasets)
     current: [Dataset] // current datasets (Array of datasets)

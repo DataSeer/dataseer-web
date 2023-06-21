@@ -199,7 +199,13 @@ Self.signup = function (opts = {}, cb) {
       });
       return Accounts.register(account, opts.password, function (err) {
         if (err) {
-          if (err.name === `UserExistsError`) return cb(null, new Error(`Given username not correct`));
+          if (err.name === `UserExistsError`)
+            return cb(
+              null,
+              new Error(
+                `The provided information already exists within our system. In order to proceed further, please choose an unused e-mail address.`
+              )
+            );
           else return cb(err);
         }
         return Mailer.sendMail(

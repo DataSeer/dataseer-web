@@ -456,6 +456,7 @@ router.post(`/:target/importDatasets/:source`, function (req, res, next) {
   // Init transaction
   let opts = {
     data: {
+      onlyLogs: Params.convertToBoolean(req.body.onlyLogs),
       target: req.params.target,
       source: req.params.source
     },
@@ -1241,7 +1242,10 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
         pmid: Params.convertToString(req.body.pmid),
         license: Params.convertToString(req.body.license),
         acknowledgement: Params.convertToString(req.body.acknowledgement),
-        affiliation: Params.convertToString(req.body.affiliation)
+        affiliation: Params.convertToString(req.body.affiliation),
+        affiliationAcknowledgementsLicenseNotes: Params.convertToString(
+          req.body.affiliationAcknowledgementsLicenseNotes
+        )
       }
     },
     user: req.user

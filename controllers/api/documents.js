@@ -74,6 +74,7 @@ Self.buildDatasetsCSV = function (documents) {
  * @param {object} opts.data - Data available
  * @param {string} opts.data.source - Id of the source document (that contain datasets you want to import)
  * @param {string} opts.data.target - Id of the target document (that will receiving imported datasets)
+ * @param {boolean} opts.data.onlyLogs - Only logs no data objects creation
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
  * @returns {undefined} undefined
  */
@@ -86,6 +87,7 @@ Self.importDatasets = function (opts = {}, cb) {
     return cb(new Error(`Missing required data: opts.data.source`));
   if (typeof _.get(opts, `data.target`) === `undefined`)
     return cb(new Error(`Missing required data: opts.data.target`));
+  if (typeof _.get(opts, `data.onlyLogs`) === `undefined`) opts.data.onlyLogs = false;
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
   let source = Params.convertToString(opts.data.source);
@@ -158,6 +160,7 @@ Self.importDatasets = function (opts = {}, cb) {
                 return next();
               }
               result.merged.push(cp);
+              if (opts.data.onlyLogs) return next();
               return Self.newDataset(
                 {
                   datasetsId: res.target.doc.datasets._id.toString(),
@@ -398,7 +401,6 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
   if (typeof _.get(opts, `data.dataTypes`) === `undefined`)
     return cb(new Error(`Missing required data: opts.dataTypes`));
   let kind = _.get(opts, `kind`);
-
   if (typeof kind === `undefined`) return cb(Error(`Missing required data: opts.kind`));
   if (Object.keys(reportsConf.templates).indexOf(kind) === -1)
     return cb(Error(`Invalid required data: opts.kind must be ${Object.keys(reportsConf.templates).join(`, `)}`));
@@ -432,6 +434,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
               readmeIncluded: data.doc.metadata.readmeIncluded,
               describesFiles: data.doc.metadata.describesFiles,
               describesVariables: data.doc.metadata.describesVariables,
+              affiliationAcknowledgementsLicenseNotes: data.doc.metadata.affiliationAcknowledgementsLicenseNotes,
               doi: data.doc.metadata.doi,
               authors: data.doc.metadata.authors.filter(function (item) {
                 return item.name.length > 0;
@@ -449,6 +452,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
               affiliation: data.doc.metadata.affiliation,
               license: data.doc.metadata.license
             },
+            datasetsMetadata: data.doc.datasets.metadata,
             summary: data.datasetsSummary,
             datasets: data.sortedDatasetsInfos.datasets,
             protocols: data.sortedDatasetsInfos.protocols,
@@ -1935,6 +1939,12 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
           function (next) {
             // Extract metadata
             const _metadata = Object.assign({}, metadata, XML.extractMetadata(XML.load(xmlString)));
+            if (
+              !_metadata.affiliationAcknowledgementsLicenseNotes &&
+              metadata &&
+              metadata.affiliationAcknowledgementsLicenseNotes
+            )
+              _metadata.affiliationAcknowledgementsLicenseNotes = metadata.affiliationAcknowledgementsLicenseNotes;
             if (!_metadata.license && metadata && metadata.license) _metadata.license = metadata.license;
             if (!_metadata.acknowledgement && metadata && metadata.acknowledgement)
               _metadata.acknowledgement = metadata.acknowledgement;
@@ -2374,6 +2384,51 @@ Self.updateDatasets = function (opts = {}, cb) {
               return cb(null, datasets);
             }
           );
+        }
+      );
+    });
+  });
+};
+
+/**
+ * Update datasets metadata
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {string} opts.id - Document id
+ * @param {string} opts.metadata - Document datasets mettadata
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.updateDatasetsMetadata = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `datasetsId`) === `undefined`) return cb(new Error(`Missing required data: opts.datasetsId`));
+  if (typeof _.get(opts, `metadata`) === `undefined`)
+    opts.metadata = {
+      datasets: { notes: `` },
+      codeAndSoftware: { notes: `` },
+      materials: { notes: `` },
+      protocols: { notes: `` }
+    };
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
+  return DocumentsDatasets.findOne({ _id: opts.datasetsId }, function (err, datasets) {
+    if (err) return cb(err);
+    if (!datasets) return cb(null, new Error(`Datasets not found`));
+    datasets.metadata = opts.metadata;
+    return datasets.save(function (err) {
+      if (err) return cb(err);
+      // Create logs
+      return DocumentsLogsController.create(
+        {
+          target: datasets.document,
+          account: opts.user._id,
+          kind: CrudManager.actions.update._id,
+          key: `datasets.metadata`
+        },
+        function (err, log) {
+          if (err) return cb(err);
+          return cb(null, datasets);
         }
       );
     });
