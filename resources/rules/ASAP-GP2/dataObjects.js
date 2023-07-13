@@ -8,7 +8,7 @@ const rules = require(`./rules.js`);
 const customChecks = require(`./customChecks.js`);
 const status = require(`./status.js`);
 
-let Self = {};
+let Self = { status: status };
 
 /**
  * Convert a boolean Array to a Number

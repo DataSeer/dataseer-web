@@ -1,0 +1,22 @@
+{
+  "3": {
+    "key": 3,
+    "actionRequired": "Yes",
+    "label": "Confirm citations meet minimum standards"
+  },
+  "2": {
+    "key": 2,
+    "actionRequired": "Yes",
+    "label": "Deposit in repository and cite DOI in text"
+  },
+  "1": {
+    "key": 1,
+    "actionRequired": "Yes",
+    "label": "Verify citation"
+  },
+  "0": {
+    "key": 0,
+    "actionRequired": "No",
+    "label": "Done - Cited correctly"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "3": {
+    "key": 3,
+    "actionRequired": "Optional",
+    "label": "Assign RRID and cite in text"
+  },
+  "2": {
+    "key": 2,
+    "actionRequired": "Optional",
+    "label": "Check for an existing RRID"
+  },
+  "1": {
+    "key": 1,
+    "actionRequired": "Optional",
+    "label": "Verify citation"
+  },
+  "0": {
+    "key": 0,
+    "actionRequired": "No",
+    "label": "Done - Cited correctly"
+  }
+}
