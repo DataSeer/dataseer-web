@@ -53,6 +53,7 @@
     "pdfjs-dist": "^2.13.216",
     "pug": "^3.0.2",
     "puppeteer": "^11.0.0",
+    "remove-accents": "^0.4.4",
     "sbd": "^1.0.19",
     "serve-favicon": "^2.5.0",
     "string-similarity": "^4.0.4",
