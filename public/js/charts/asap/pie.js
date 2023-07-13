@@ -166,7 +166,7 @@
       background: `#FFFFFF`
     },
     {
-      name: params.data.reUse.codes.name ? params.data.reUse.codes.name : `Code/Software\\Cited`,
+      name: params.data.reUse.codes.name ? params.data.reUse.codes.name : `Reuse Code/Software\\Cited`,
       done: params.data.reUse.codes.done,
       total: params.data.reUse.codes.total,
       opacity: 0.6,
