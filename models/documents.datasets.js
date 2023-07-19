@@ -34,6 +34,7 @@ const Sentence = new mongoose.Schema(
       flagged: { type: Boolean, default: false }, // flagged property
       cert: { type: String, default: `` }, // cert value (between 0 and 1)
       rule: { type: String, default: `` }, // rule used for the status of the data object
+      rules: {}, // all rules
       status: { type: String, default: `` }, // status of the data object
       actionRequired: { type: String, default: `` }, // actionRequired of the data object - available values : 'Yes', 'No', Optionnal', "unknow"
       index: { type: Number, default: undefined }, // index - index value to allow custom sorting (default index is the order of appearance of the sentence in the PDF)

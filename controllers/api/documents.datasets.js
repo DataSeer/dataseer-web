@@ -12,7 +12,8 @@ const DocumentsDatasets = require(`../../models/documents.datasets.js`);
 
 const Params = require(`../../lib/params.js`);
 
-const dataObjects = require(`../../resources/rules/dataObjects.js`);
+const RULES = require(`../../resources/rules/rules.js`);
+const availableRules = require(`../../resources/rules/rules.json`);
 
 let Self = {};
 
@@ -250,33 +251,37 @@ Self.createDataset = function (opts = {}) {
     rule: `unknow`,
     status: `unknow`,
     actionRequired: `unknow`,
-    index: dataset.index
+    index: dataset.index,
+    rules: {}
   };
-  let infos = Self.getStatus(result);
-  result.rule = infos.rule;
-  result.status = infos.status;
-  result.actionRequired = infos.actionRequired;
+  for (let key in availableRules) {
+    result.rules[key] = Self.getStatus(key, result);
+  }
+  result.rule = result.rules.default.rule;
+  result.status = result.rules.default.status;
+  result.actionRequired = result.rules.default.actionRequired;
   return result;
 };
 
 /**
  * Get the status of the given data object
+ * @param {string} key - Key of rules used
  * @param {object} object - Data Object
  * @returns {string} The given status
  */
-Self.getStatus = function (object) {
+Self.getStatus = function (key, object) {
   let codeStatus, softwareStatus, reagentStatus, protocolStatus, datasetStatus;
   switch (object.kind) {
   case `code`:
-    return dataObjects.getCodeStatus(object);
+    return RULES[key].getCodeStatus(object);
   case `software`:
-    return dataObjects.getSoftwareStatus(object);
+    return RULES[key].getSoftwareStatus(object);
   case `reagent`:
-    return dataObjects.getMaterialStatus(object);
+    return RULES[key].getMaterialStatus(object);
   case `protocol`:
-    return dataObjects.getProtocolStatus(object);
+    return RULES[key].getProtocolStatus(object);
   case `dataset`:
-    return dataObjects.getDatasetStatus(object);
+    return RULES[key].getDatasetStatus(object);
   default:
     return new Error(`Not handled : unknow dataType`);
   }
