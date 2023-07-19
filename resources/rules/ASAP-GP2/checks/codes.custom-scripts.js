@@ -4,7 +4,7 @@
 
 'use strict';
 
-const Params = require(`../../../lib/params.js`);
+const Params = require(`../../../../lib/params.js`);
 
 let Self = {};
 
