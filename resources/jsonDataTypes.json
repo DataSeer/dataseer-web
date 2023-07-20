@@ -179,6 +179,8 @@
             "matrix assisted laser desorption ionization mass spectrometry",
             "thermal ionization mass spectrometry"
         ],
+        "morphological data":
+        [],
         "other":
         [
             "code",
@@ -755,8 +757,8 @@
             "id": "genetic data",
             "mesh_id":
             [],
-            "description": "<p><a target=\"_blank\" href=\"https://gdpr-info.eu/recitals/no-34/\" class=\"urlextern\" title=\"https://gdpr-info.eu/recitals/no-34/\" rel=\"nofollow\">Genetic data</a> is personal data relating to the inherited or acquired genetic characteristics of a natural person which result from the analysis of a biological sample from the natural person in question, in particular chromosomal, deoxyribonucleic acid (DNA) or ribonucleic acid (RNA) analysis, or from the analysis of another element enabling equivalent information to be obtained.</p>",
-            "bestDataFormatForSharing": "<p>Caution should be practiced in processing and sharing of sensitive personal data to ensure adequate permission has been granted.</p>",
+            "description": "<p><a target=\"_blank\" href=\"https://gdpr-info.eu/recitals/no-34/\" class=\"urlextern\" title=\"https://gdpr-info.eu/recitals/no-34/\" rel=\"nofollow\">Genetic data</a> is data relating to the inherited or acquired genetic characteristics of an organism which result from the analysis of a biological sample from the organism, in particular chromosomal, deoxyribonucleic acid (DNA) or ribonucleic acid (RNA) analysis, or from the analysis of another element enabling equivalent information to be obtained.</p>",
+            "bestDataFormatForSharing": "<p>Caution should be practiced in processing and sharing of human data to ensure adequate permission has been granted.</p>",
             "mostSuitableRepositories":
             {
                 "reuse": "",
@@ -1609,13 +1611,31 @@
             "count": 1,
             "url": "https://wiki.dataseer.ai/doku.php?id=data_type:mass_spectrometry:thermal_ionization"
         },
+        "morphological data":
+        {
+            "path": "morphological data",
+            "id": "morphological data",
+            "mesh_id":
+            [],
+            "description": "<p>Morphological data are physical characteristics of an organism or object that can be observed and assessed or measured. They may be quantitative (e.g., number of petals or length of a particular bone) or qualitative (e.g., eye color or shape of leaf) in nature.</p>",
+            "bestDataFormatForSharing": "<p></p>",
+            "mostSuitableRepositories":
+            {
+                "reuse": "",
+                "default": "<p><a target=\"_blank\" href=\"http://www.morphobank.org\" class=\"urlextern\" title=\"http://www.morphobank.org\" rel=\"nofollow\">MorphoBank</a> is an open access repository for morphological data matrices used for reconstructing phylogenetic trees.</p>"
+            },
+            "bestPracticeForIndicatingReUseOfExistingData": "<p>For public datasets please provide a DOI or other stable identifier for the dataset itself *and* include a citation for the dataset in the reference list. Be sure to indicate exactly which data has been re-used, particularly when multiple versions of the dataset exist. In many cases, this is best achieved by sharing the code used to extract the part of the data that you analyzed. In some cases it may be best to share the exact dataset(s) you analyzed as well.</p>",
+            "label": "Morphological Data",
+            "count": 0,
+            "url": "https://wiki.dataseer.ai/doku.php?id=data_type:morphological_data"
+        },
         "other":
         {
             "path": "other",
             "id": "other",
             "mesh_id":
             [],
-            "description": "<p>This is a dummy &apos;data type&apos; to enable other types of checks on manuscripts. The most common &#x201C;other&#x201D; subtype is protocol data, although code and reagent data are also listed.</p>",
+            "description": "<p>This is a dummy &apos;data type&apos; to enable other types of checks on manuscripts. The most common &#x201C;other&#x201D; subtype is protocol, although code and reagent are also listed.</p>",
             "bestDataFormatForSharing": "",
             "mostSuitableRepositories":
             {
