@@ -1333,7 +1333,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                       dataType: `code software`,
                       subType: `custom scripts`,
                       cert: `0`,
-                      name: software.name,
+                      name: software.name + ` Code`,
                       URL: software.url,
                       comments: software.mentions.join(`, `)
                     },
