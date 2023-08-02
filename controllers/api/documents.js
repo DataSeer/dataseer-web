@@ -780,7 +780,8 @@ Self.upload = function (opts = {}, cb) {
           function (acc, next) {
             if (
               !DocumentsFilesController.isPDF(params.file.mimetype) &&
-              !DocumentsFilesController.isXML(params.file.mimetype)
+              !DocumentsFilesController.isXML(params.file.mimetype) &&
+              !accessRights.isAdministrator // to handle nxml format case
             )
               return next(new Error(`Bad content type`), acc);
             return DocumentsFilesController.upload(
@@ -804,7 +805,10 @@ Self.upload = function (opts = {}, cb) {
                   // Set PDF
                   acc.pdf = res._id;
                 }
-                if (DocumentsFilesController.isXML(res.mimetype)) {
+                if (
+                  DocumentsFilesController.isXML(res.mimetype) ||
+                  accessRights.isAdministrator // to handle nxml format case
+                ) {
                   // Set XML only when dataseer-ml do not need to be requested
                   acc.tei = res._id;
                 }
