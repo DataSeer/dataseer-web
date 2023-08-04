@@ -1213,7 +1213,8 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
               for (let j = 0; j < areas.length; j++) {
                 let item = areas[j];
                 if (typeof item.p !== `number`) return;
-                let idsOfSentences = Object.keys(doc.pdf.metadata.pages[item.p].sentences);
+                let pageMapping = doc.pdf.metadata.pages[item.p] ? doc.pdf.metadata.pages[item.p].sentences : {};
+                let idsOfSentences = Object.keys(pageMapping);
                 let results = idsOfSentences.map(function (k) {
                   let matches = doc.pdf.metadata.sentences[k].areas
                     .map(function (area) {
