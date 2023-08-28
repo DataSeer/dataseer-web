@@ -2,12 +2,12 @@
   "6": {
     "key": 6,
     "actionRequired": "Yes",
-    "label": "Cite PPMI dataset unique identifier in text"
+    "label": "Cite dataset unique identifier in text"
   },
   "5": {
     "key": 5,
     "actionRequired": "Yes",
-    "label": "Cite dataset unique identifier in text"
+    "label": "Cite PPMI dataset unique identifier in text"
   },
   "4": {
     "key": 4,
