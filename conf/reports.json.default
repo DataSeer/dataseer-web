@@ -16,6 +16,51 @@
     "ASAP-GP2": "folderID"
   },
   "settings": {
+      "displayNoDataSection": {
+    "displayNoDataSection": {
+      "DataSeer Generic": {
+        "datasets": true,
+        "code": true,
+        "software": true,
+        "materials": true,
+        "protocols": true
+      },
+      "AmNat": {
+        "datasets": false,
+        "code": false,
+        "software": false,
+        "materials": false,
+        "protocols": false
+      },
+      "Universal Journal Report": {
+        "datasets": false,
+        "code": false,
+        "software": false,
+        "materials": false,
+        "protocols": false
+      },
+      "ASAP": {
+        "datasets": false,
+        "code": false,
+        "software": false,
+        "materials": false,
+        "protocols": false
+      },
+      "ASAP-PPMI": {
+        "datasets": false,
+        "code": false,
+        "software": false,
+        "materials": false,
+        "protocols": false
+      },
+      "ASAP-GP2": {
+        "datasets": false,
+        "code": false,
+        "software": false,
+        "materials": false,
+        "protocols": false
+      }
+    },
     "datasetsLinks": {
       "DataSeer Generic": false,
       "AmNat": false,
