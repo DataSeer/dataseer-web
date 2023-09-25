@@ -1,4 +1,12 @@
 {
+  "permissions": {
+    "DataSeer Generic": { "OrganizationID": "writer", "default": "reader" },
+    "AmNat": { "default": "reader" },
+    "Universal Journal Report": {"default": "reader" },
+    "ASAP": { "default": "reader" },
+    "ASAP-PPMI": { "default": "reader" },
+    "ASAP-GP2": { "default": "reader" }
+  },
   "folders": {
     "DataSeer Generic": { "default": "folderID" },
     "AmNat": { "default": "folderID" },
