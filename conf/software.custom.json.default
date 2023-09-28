@@ -1,0 +1,7 @@
+{
+  "fileId": "File ID of the ASAP authors list",
+  "spreadsheetName": "Spreadsheet name",
+  "settings": {
+    "minRating": 0.70
+  }
+}

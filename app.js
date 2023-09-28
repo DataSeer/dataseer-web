@@ -36,6 +36,7 @@ const softciteRouter = require(`./routes/api/softcite.js`);
 const statisticsRouter = require(`./routes/api/statistics.js`);
 const hypothesisRouter = require(`./routes/api/hypothesis.js`);
 const orcidRouter = require(`./routes/api/orcid.js`);
+const softwareRouter = require(`./routes/api/software.js`);
 const sciscoreRouter = require(`./routes/api/sciscore.js`);
 const scicrunchRouter = require(`./routes/api/scicrunch.js`);
 const chartsRouter = require(`./routes/api/charts.js`);
@@ -65,6 +66,7 @@ const CrudManager = require(`./lib/crud.js`);
 const Wiki = require(`./lib/wiki.js`);
 const OCR = require(`./lib/ocr.js`);
 const ORCID = require(`./lib/orcid.js`);
+const Software = require(`./lib/software.js`);
 // mongoose object
 const mongoose = require(`mongoose`);
 mongoose.set(`useCreateIndex`, true);
@@ -117,6 +119,14 @@ db.once(`open`, function () {
           if (err) return next(err);
           app.set(`ASAP.authors`, data);
           console.log(`ASAP authors list initialized`);
+          return next(err);
+        });
+      },
+      function (next) {
+        return Software.refreshCustomList(function (err, data) {
+          if (err) return next(err);
+          app.set(`Software.customList`, data);
+          console.log(`Custom software list initialized`);
           return next(err);
         });
       },
@@ -252,6 +262,7 @@ db.once(`open`, function () {
       app.use(`/api/statistics`, statisticsRouter);
       app.use(`/api/hypothesis`, hypothesisRouter);
       app.use(`/api/orcid`, orcidRouter);
+      app.use(`/api/software`, softwareRouter);
       app.use(`/api/sciscore`, sciscoreRouter);
       app.use(`/api/scicrunch`, scicrunchRouter);
       app.use(`/api/charts`, chartsRouter);
