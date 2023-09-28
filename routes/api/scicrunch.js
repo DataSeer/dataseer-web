@@ -28,4 +28,15 @@ router.post(`/processEntity`, function (req, res, next) {
   });
 });
 
+router.post(`/processRRID`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  if (typeof _.get(req.body, `RRID`) === `undefined`) return cb(null, new Error(`Missing required parameter: RRID`));
+  return Scicrunch.getEntity({ RRID: req.body.RRID }, function (err, result) {
+    if (err) return res.status(500).send(conf.errors.internalServerError);
+    if (result instanceof Error) return res.json({ err: true, res: result });
+    else return res.json({ err: false, res: result });
+  });
+});
+
 module.exports = router;
