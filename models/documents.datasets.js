@@ -59,6 +59,7 @@ const Sentence = new mongoose.Schema(
       qc: { type: Boolean, default: false }, // qc property
       representativeImage: { type: Boolean, default: false }, // representativeImage property
       PID: { type: String, default: `` }, // PID
+      associatedFigureOrTable: { type: String, default: `` }, // associated figure or table
       // "Codes" & "softwares" properties only
       version: { type: String, default: `` }, // version
       // "Materials" properties only

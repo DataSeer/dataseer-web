@@ -243,6 +243,7 @@ Self.createDataset = function (opts = {}) {
     URL: dataset.URL ? dataset.URL : ``, // URL
     PID: dataset.PID ? dataset.PID : ``, // PID
     RRID: dataset.RRID ? dataset.RRID : ``, // RRID
+    associatedFigureOrTable: dataset.associatedFigureOrTable ? dataset.associatedFigureOrTable : ``, // associated figure or table
     catalogNumber: dataset.catalogNumber ? dataset.catalogNumber : ``, // catalog number
     suggestedEntity: dataset.suggestedEntity ? dataset.suggestedEntity : ``, // suggested entity
     suggestedURL: dataset.suggestedURL ? dataset.suggestedURL : ``, // suggested URL

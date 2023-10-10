@@ -46,7 +46,7 @@ const PdfManager = require(`../../lib/pdfManager.js`);
 const conf = require(`../../conf/conf.json`);
 const uploadConf = require(`../../conf/upload.json`);
 const ASAPAuthorsConf = require(`../../conf/authors.ASAP.json`);
-const SoftwaresConf = require(`../../conf/softwares.json`);
+const SoftwareConf = require(`../../conf/software.json`);
 const reportsConf = require(`../../conf/reports.json`);
 
 let Self = {};
@@ -1274,7 +1274,7 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
                 software.sentences.filter(function (e) {
                   return e.match;
                 }).length > 0;
-              software.isCommandLine = !!SoftwaresConf[software.name.toLowerCase()];
+              software.isCommandLine = !!SoftwareConf[software.name.toLowerCase()];
               software.mentions = Object.keys(software.mentions);
               software.alreadyExist =
                 codeAndSoftware.filter(function (e) {
