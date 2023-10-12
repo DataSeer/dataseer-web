@@ -46,9 +46,14 @@ router.get(`/:id`, function (req, res) {
         return res.redirect(
           Url.build(`#/documents/${req.params.id}/datasets`, Object.assign({}, req.query), conf.gui.root)
         );
-      return res.redirect(
-        Url.build(`#/documents/${req.params.id}/report`, Object.assign({}, req.query), conf.gui.root)
-      );
+      else if (view === `report`)
+        return res.redirect(
+          Url.build(`#/documents/${req.params.id}/report`, Object.assign({}, req.query), conf.gui.root)
+        );
+      else
+        return res.redirect(
+          Url.build(`#/documents/${req.params.id}/datasets`, Object.assign({}, req.query), conf.gui.root)
+        );
     }
     if (doc.status === ``) return res.status(500).send(`This document is no more available`);
     return res.redirect(

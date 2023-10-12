@@ -440,7 +440,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
                 return item.name.length > 0;
               }),
               dataSeerLink: {
-                url: `${Url.build(`/documents/${opts.data.id}`, { token: data.doc.token })}`,
+                url: `${Url.build(`/documents/${opts.data.id}`, { view: `datasets`, token: data.doc.token })}`,
                 label: data.doc.name ? data.doc.name : data.doc._id.toString()
               },
               originalFileLink: {
