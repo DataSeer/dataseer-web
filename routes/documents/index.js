@@ -14,6 +14,7 @@ const Url = require(`../../lib/url.js`);
 const Params = require(`../../lib/params.js`);
 
 const conf = require(`../../conf/conf.json`);
+const lensConf = require(`../../conf/services/lens.json`);
 
 /* My documents view */
 router.get(`/`, function (req, res) {
@@ -158,6 +159,29 @@ router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res) {
       if (!data || data instanceof Error) return res.status(404).send(conf.errors.notFound);
       return res.redirect(Url.build(`spreadsheets/d/${data}`, {}, `https://docs.google.com/`));
     });
+  });
+});
+
+/* Document process finish */
+router.get(`/:id/lens`, function (req, res) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated)
+    return res.redirect(Url.build(`/signin`, { unauthorized: true, redirect: req.originalUrl }));
+  return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
+    return res.redirect(
+      Url.build(
+        `/`,
+        {
+          url: Url.build(`/api/documents/${req.params.id}/tei/content`, { token: doc.token })
+        },
+        lensConf.root
+      )
+    );
   });
 });
 
