@@ -1,0 +1,29 @@
+{
+  "API":
+  {
+    "BIONLP": {
+      "url": "...",
+      "api_key": "placeholder"
+    },
+    "GeniaTagger": {
+      "url": "...",
+      "api_key": "..."
+    },
+    "BERT": {
+      "CRAFT5000": {
+        "url": "...",
+        "api_key": "placeholder"
+      },
+      "LabMaterial": {
+        "url": "...",
+        "api_key": "..."
+      }
+    },
+    "bioBERT": {
+      "url": "..."
+    }
+  },
+  "settings": {
+    "limit": 50
+  }
+}
