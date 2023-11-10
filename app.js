@@ -30,8 +30,10 @@ const organizationsApiRouter = require(`./routes/api/organizations.js`);
 const rolesApiRouter = require(`./routes/api/roles.js`);
 const documentsFilesApiRouter = require(`./routes/api/documents.files.js`);
 const documentsDatasetsApiRouter = require(`./routes/api/documents.datasets.js`);
+const documentsDataObjectsApiRouter = require(`./routes/api/documents.dataObjects.js`);
 const dataseerMLRouter = require(`./routes/api/dataseer-ml.js`);
 const repoRecommenderRouter = require(`./routes/api/repoRecommender.js`);
+const bioNLPRouter = require(`./routes/api/bioNLP.js`);
 const softciteRouter = require(`./routes/api/softcite.js`);
 const statisticsRouter = require(`./routes/api/statistics.js`);
 const hypothesisRouter = require(`./routes/api/hypothesis.js`);
@@ -57,7 +59,6 @@ const Accounts = require(`./models/accounts.js`);
 
 const AccountsController = require(`./controllers/api/accounts.js`);
 const DocumentsController = require(`./controllers/api/documents.js`);
-const DocumentsDatasetsController = require(`./controllers/api/documents.datasets.js`);
 const RolesController = require(`./controllers/api/roles.js`);
 const CrudController = require(`./controllers/api/crud.js`);
 
@@ -67,6 +68,7 @@ const Wiki = require(`./lib/wiki.js`);
 const OCR = require(`./lib/ocr.js`);
 const ORCID = require(`./lib/orcid.js`);
 const Software = require(`./lib/software.js`);
+const DataObjects = require(`./lib/dataObjects.js`);
 // mongoose object
 const mongoose = require(`mongoose`);
 mongoose.set(`useCreateIndex`, true);
@@ -109,7 +111,7 @@ db.once(`open`, function () {
             return next(err);
           }
           app.set(`dataTypes`, dataTypes);
-          DocumentsDatasetsController.refreshDataTypes(dataTypes);
+          DataObjects.refreshDataTypes(dataTypes);
           console.log(`dataTypes initialized`);
           return next(err);
         });
@@ -257,8 +259,10 @@ db.once(`open`, function () {
       app.use(`/api/roles`, rolesApiRouter);
       app.use(`/api/files`, documentsFilesApiRouter);
       app.use(`/api/datasets`, documentsDatasetsApiRouter);
+      app.use(`/api/dataObjects`, documentsDataObjectsApiRouter);
       app.use(`/api/dataseer-ml`, dataseerMLRouter);
       app.use(`/api/repoRecommender`, repoRecommenderRouter);
+      app.use(`/api/BIONLP`, bioNLPRouter);
       app.use(`/api/statistics`, statisticsRouter);
       app.use(`/api/hypothesis`, hypothesisRouter);
       app.use(`/api/orcid`, orcidRouter);

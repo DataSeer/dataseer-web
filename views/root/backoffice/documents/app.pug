@@ -378,7 +378,7 @@
           <label class="text" v-if="item.properties.status === 'finish'">Process Finished</label>
         </div>
         <div class="col article_title">
-          | {{ item.properties.metadata.article_title }}
+          | {{ item.properties.metadata ? item.properties.metadata.article_title : "" }}
         </div>
         <div class="col text-truncate">
           <select class="custom-select form-select" name="accounts" v-model="item.properties.owner._id">

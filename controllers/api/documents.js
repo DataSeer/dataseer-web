@@ -17,11 +17,16 @@ const Accounts = require(`../../models/accounts.js`);
 const Organizations = require(`../../models/organizations.js`);
 const DocumentsFiles = require(`../../models/documents.files.js`);
 const DocumentsLogs = require(`../../models/documents.logs.js`);
+const DocumentsDataObjects = require(`../../models/documents.dataObjects.js`);
+const DocumentsDataObjectsLogs = require(`../../models/documents.dataObjects.logs.js`);
+const DocumentsDataObjectsMetadata = require(`../../models/documents.dataObjects.metadata.js`);
 
 const AccountsController = require(`./accounts.js`);
 const DocumentsFilesController = require(`./documents.files.js`);
 const DocumentsDatasetsController = require(`./documents.datasets.js`);
 const DocumentsLogsController = require(`./documents.logs.js`);
+const DocumentsDataObjectsController = require(`./documents.dataObjects.js`);
+const DocumentsDataObjectsMetadataController = require(`./documents.dataObjects.metadata.js`);
 
 const AccountsManager = require(`../../lib/accounts.js`);
 const CrudManager = require(`../../lib/crud.js`);
@@ -42,6 +47,7 @@ const GoogleSheets = require(`../../lib/googleSheets.js`);
 const OCR = require(`../../lib/ocr.js`);
 const ORCID = require(`../../lib/orcid.js`);
 const PdfManager = require(`../../lib/pdfManager.js`);
+const BioNLP = require(`../../lib/bioNLP.js`);
 
 const conf = require(`../../conf/conf.json`);
 const uploadConf = require(`../../conf/upload.json`);
@@ -59,12 +65,12 @@ Self.status = {
 };
 
 /**
- * Build CSV of all datasets of given documents
+ * Build CSV of all dataObjects of given documents
  * @param {object} documents - List of documents
  * @returns {buffer} buffer
  */
-Self.buildDatasetsCSV = function (documents) {
-  return CSV.buildDatasets(documents);
+Self.buildDataObjectsCSV = function (documents) {
+  return CSV.buildDataObjects(documents);
 };
 
 /**
@@ -72,13 +78,13 @@ Self.buildDatasetsCSV = function (documents) {
  * @param {object} opts - Options available
  * @param {object} opts.user - Current user
  * @param {object} opts.data - Data available
- * @param {string} opts.data.source - Id of the source document (that contain datasets you want to import)
- * @param {string} opts.data.target - Id of the target document (that will receiving imported datasets)
+ * @param {string} opts.data.source - Id of the source document (that contain dataObjects you want to import)
+ * @param {string} opts.data.target - Id of the target document (that will receiving imported dataObjects)
  * @param {boolean} opts.data.onlyLogs - Only logs no data objects creation
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
  * @returns {undefined} undefined
  */
-Self.importDatasets = function (opts = {}, cb) {
+Self.importDataObjects = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
@@ -100,7 +106,7 @@ Self.importDatasets = function (opts = {}, cb) {
     {},
     function (acc, item, next) {
       return Self.get(
-        { data: { id: item.id, datasets: true, pdf: true, tei: true }, user: opts.user },
+        { data: { id: item.id, dataObjects: true, pdf: true, tei: true }, user: opts.user },
         function (err, doc) {
           if (err) return next(err, acc);
           if (doc instanceof Error) {
@@ -115,9 +121,9 @@ Self.importDatasets = function (opts = {}, cb) {
                 acc[item.kind] = content;
                 return next(null, acc);
               }
-              let datasets = _.get(doc, `datasets.current`);
+              let dataObjects = _.get(doc, `dataObjects.current`);
               acc[item.kind] = { doc: doc };
-              acc[item.kind].datasets = typeof datasets === `undefined` ? [] : datasets.toObject();
+              acc[item.kind].dataObjects = typeof dataObjects === `undefined` ? [] : dataObjects.toObject();
               acc[item.kind].metadata = doc.pdf && doc.pdf.metadata ? doc.pdf.metadata : doc.tei.metadata;
               acc[item.kind].tei = { id: doc.tei._id.toString(), content: content.data };
               return next(null, acc);
@@ -130,29 +136,27 @@ Self.importDatasets = function (opts = {}, cb) {
       if (err) return cb(err);
       if (res.source instanceof Error) return cb(err, res.source);
       if (res.target instanceof Error) return cb(err, res.target);
-      return Analyzer.checkDatasetsInTEI(
+      return Analyzer.checkDataObjectsInTEI(
         {
-          datasets: res.source.datasets,
+          dataObjects: res.source.dataObjects,
           tei: {
             name: `dataseer`,
             content: res.target.tei.content,
             metadata: res.target.metadata
           }
         },
-        function (err, datasets) {
+        function (err, dataObjects) {
           if (err) return cb(err);
-          let result = { merged: [], existing: [], rejected: datasets.rejected };
+          let result = { merged: [], existing: [], rejected: dataObjects.rejected };
           return async.mapSeries(
-            datasets.mergeable,
+            dataObjects.mergeable,
             function (item, next) {
-              let dataset = Object.assign({}, item);
-              let cp = Object.assign({}, dataset);
-              let sentences = dataset.sentences.filter(function (item) {
-                return true;
-              });
-              let alreadyExist = DocumentsDatasetsController.datasetAlreadyExist(
-                res.target.datasets,
-                dataset,
+              let dataObject = JSON.parse(JSON.stringify(item));
+              let cp = JSON.parse(JSON.stringify(dataObject));
+              let sentences = dataObject.sentences;
+              let alreadyExist = DocumentsDataObjectsController.dataObjectsAlreadyExist(
+                res.target.dataObjects,
+                dataObject,
                 Analyzer.softMatch
               );
               if (alreadyExist) {
@@ -161,42 +165,24 @@ Self.importDatasets = function (opts = {}, cb) {
               }
               result.merged.push(cp);
               if (opts.data.onlyLogs) return next();
-              return Self.newDataset(
-                {
-                  datasetsId: res.target.doc.datasets._id.toString(),
-                  dataset: dataset,
-                  sentence: sentences[0],
-                  user: opts.user,
-                  logs: true
-                },
-                function (err, newDataset) {
-                  if (err) return next(err);
-                  if (sentences.length <= 1) return next();
-                  return async.mapSeries(
-                    sentences.slice(1),
-                    function (sentence, _next) {
-                      return Self.linkSentence(
-                        {
-                          datasetsId: res.target.doc.datasets._id.toString(),
-                          link: { dataset: { id: newDataset.id }, sentence: { id: sentence.id } },
-                          user: opts.user
-                        },
-                        function (err, s) {
-                          return _next(err);
-                        }
-                      );
-                    },
-                    function (err) {
-                      return next(err);
-                    }
-                  );
-                }
-              );
             },
             function (err) {
-              console.log(err);
               if (err) return cb(null, err);
-              return cb(null, result);
+              let mergedDataObjects = result.merged.map(function (item) {
+                let d = { document: doc, dataObject: item, isExtracted: false, isDeleted: false, saveDocument: true };
+                d.dataObject.document = doc._id.toString();
+                return d;
+              });
+              return Self.addDataObjects(
+                {
+                  user: opts.user,
+                  data: mergedDataObjects
+                },
+                function (err, res) {
+                  if (err) return cb(null, err);
+                  return cb(null, result);
+                }
+              );
             }
           );
         }
@@ -428,7 +414,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
                 return item._id.toString();
               })
             },
-            dataTypesInfos: opts.data.dataTypes,
+            dataTypesInfo: opts.data.dataTypes,
             metadata: {
               articleTitle: data.doc.metadata.article_title,
               readmeIncluded: data.doc.metadata.readmeIncluded,
@@ -456,13 +442,13 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
               affiliation: data.doc.metadata.affiliation,
               license: data.doc.metadata.license
             },
-            datasetsMetadata: data.doc.datasets.metadata,
-            summary: data.datasetsSummary,
-            datasets: data.sortedDatasetsInfos.datasets,
-            protocols: data.sortedDatasetsInfos.protocols,
-            reagents: data.sortedDatasetsInfos.reagents,
-            codes: data.sortedDatasetsInfos.codes,
-            softwares: data.sortedDatasetsInfos.softwares
+            dataObjectsMetadata: data.doc.dataObjects.metadata,
+            summary: data.dataObjectsSummary,
+            datasets: data.sortedDataObjectsInfo.datasets,
+            protocols: data.sortedDataObjectsInfo.protocols,
+            reagents: data.sortedDataObjectsInfo.reagents,
+            codes: data.sortedDataObjectsInfo.codes,
+            softwares: data.sortedDataObjectsInfo.softwares
           }
         },
         function (err, spreadsheetId) {
@@ -537,12 +523,12 @@ Self.authenticate = function (req, res, next) {
   // If user is already authenticated with session, just go next
   if (req.user) return next();
   // Get token
-  let tokenInfos = Self.getTokenfromHeaderOrQuerystring(req);
-  if (!tokenInfos || !tokenInfos.token || !tokenInfos.key) return next();
+  let tokenInfo = Self.getTokenfromHeaderOrQuerystring(req);
+  if (!tokenInfo || !tokenInfo.token || !tokenInfo.key) return next();
   // Just try to authenticate. If it fail, just go next
-  return JWT.check(tokenInfos.token, req.app.get(`private.key`), { ignoreExpiration: true }, function (err, decoded) {
+  return JWT.check(tokenInfo.token, req.app.get(`private.key`), { ignoreExpiration: true }, function (err, decoded) {
     if (err || !decoded) return next();
-    return Documents.findOne({ _id: decoded.documentId, [tokenInfos.key]: tokenInfos.token }, function (err, doc) {
+    return Documents.findOne({ _id: decoded.documentId, [tokenInfo.key]: tokenInfo.token }, function (err, doc) {
       if (err || !doc) return next();
       return Accounts.findOne({ _id: decoded.accountId, disabled: false })
         .populate(`organizations`)
@@ -561,26 +547,25 @@ Self.authenticate = function (req, res, next) {
 
 /**
  * Check token validity
- * @param {object} tokenInfos - Infos about the token
- * @param {string} tokenInfos.token - Content of the token
- * @param {string} tokenInfos.key - Key of the token that must be used to find the account in mongodb
- * @param {object} tokenInfos.[opts] - Options sent to jwt.vertify function (default: {})
+ * @param {object} tokenInfo - Info about the token
+ * @param {string} tokenInfo.token - Content of the token
+ * @param {string} tokenInfo.key - Key of the token that must be used to find the account in mongodb
+ * @param {object} tokenInfo.[opts] - Options sent to jwt.vertify function (default: {})
  * @param {object} opts - Options data
  * @param {string} opts.privateKey - Private key that must be used
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: decoded token OR undefined)
  * @returns {undefined} undefined
  */
-Self.checkTokenValidity = function (tokenInfos = {}, opts = {}, cb) {
+Self.checkTokenValidity = function (tokenInfo = {}, opts = {}, cb) {
   // Check all required data
-  if (typeof _.get(tokenInfos, `token`) === `undefined`)
-    return cb(new Error(`Missing required data: tokenInfos.token`));
-  if (typeof _.get(tokenInfos, `key`) === `undefined`) return cb(new Error(`Missing required data: tokenInfos.key`));
+  if (typeof _.get(tokenInfo, `token`) === `undefined`) return cb(new Error(`Missing required data: tokenInfo.token`));
+  if (typeof _.get(tokenInfo, `key`) === `undefined`) return cb(new Error(`Missing required data: tokenInfo.key`));
   if (typeof _.get(opts, `privateKey`) === `undefined`) return cb(new Error(`Missing required data: opts.privateKey`));
   // Check all optionnal data
-  if (typeof _.get(tokenInfos, `opts`) === `undefined`) tokenInfos.opts = {};
+  if (typeof _.get(tokenInfo, `opts`) === `undefined`) tokenInfo.opts = {};
   // Start process
   // Just try to authenticate. If it fail, just go next
-  return JWT.check(tokenInfos.token, opts.privateKey, tokenInfos.opts, function (err, decoded) {
+  return JWT.check(tokenInfo.token, opts.privateKey, tokenInfo.opts, function (err, decoded) {
     let token = { valid: false };
     if (err && err.name !== `TokenExpiredError`) return cb(null, token);
     token.valid = true;
@@ -591,7 +576,7 @@ Self.checkTokenValidity = function (tokenInfos = {}, opts = {}, cb) {
       return cb(null, token);
     } else token.expired = false;
     if (!decoded.documentId) return cb(null, new Error(`Bad token : does not contain enough data`));
-    return Documents.findOne({ _id: decoded.documentId, [tokenInfos.key]: tokenInfos.token }, function (err, doc) {
+    return Documents.findOne({ _id: decoded.documentId, [tokenInfo.key]: tokenInfo.token }, function (err, doc) {
       if (err) return cb(err);
       token.revoked = false;
       token.expiredAt = decoded.exp;
@@ -686,7 +671,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
  * @param {boolean} opts.data.visible - Visibility of the document
  * @param {boolean} opts.data.locked - Lock of the document
  * @param {string} opts.privateKey - PrivateKey to create JWT token (stored in app.get('private.key'))
- * @param {string} opts.dataTypes - dataTypes to create datasets (stored in app.get('dataTypes'))
+ * @param {string} opts.dataTypes - dataTypes to create dataObjects (stored in app.get('dataTypes'))
  * @param {object} opts.user - Current user (must come from req.user)
  * @param {boolean} opts.[dataseerML] - Process dataseer-ml (default: true)
  * @param {boolean} opts.[removeResponseToViewerSection] - Remove "Response to viewer" section (default: false)
@@ -705,6 +690,8 @@ Self.upload = function (opts = {}, cb) {
     opts.mergePDFs = true;
   if (typeof _.get(opts, `softcite`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
     opts.softcite = true;
+  if (typeof _.get(opts, `bioNLP`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
+    opts.bioNLP = true;
   return Self.getUploadParams(opts.data, opts.user, function (err, params) {
     if (err) return cb(err);
     if (params instanceof Error) return cb(null, params);
@@ -955,6 +942,47 @@ Self.upload = function (opts = {}, cb) {
               }
             );
           },
+          // Process BioNLP
+          function (acc, next) {
+            // Process BioNLP
+            if (!opts.bioNLP && !opts.importDataFromBioNLP) return next(null, acc);
+            // Get buffer
+            return DocumentsFilesController.readFile({ data: { id: acc.tei.toString() } }, function (err, content) {
+              if (err) return next(err, acc);
+              let sentences = XML.extractTEISentences(
+                XML.load(content.data.toString(DocumentsFilesController.encoding))
+              );
+              // Guess which kind of file it is to call the great function
+              return BioNLP.processSentences(sentences, function (err, results) {
+                console.log(err, results);
+                if (err) return next(null, acc);
+                return DocumentsFilesController.upload(
+                  {
+                    data: {
+                      accountId: params.uploaded_by.toString(),
+                      documentId: acc._id.toString(),
+                      file: {
+                        name: `${params.file.name}.bioNLP.json`,
+                        data: JSON.stringify(results).toString(DocumentsFilesController.encoding),
+                        mimetype: `application/json`,
+                        encoding: DocumentsFilesController.encoding
+                      },
+                      organizations: acc.upload.organizations
+                    },
+                    user: opts.user
+                  },
+                  function (err, res) {
+                    if (err) return next(err, acc);
+                    // Set bionlp
+                    acc.bioNLP = res._id;
+                    // Add file to files
+                    acc.files.push(res._id);
+                    return next(null, acc);
+                  }
+                );
+              });
+            });
+          },
           // Process metadata
           function (acc, next) {
             return Self.updateOrCreateMetadata(
@@ -983,40 +1011,69 @@ Self.upload = function (opts = {}, cb) {
               }
             );
           },
-          // Process datasets
+          // Process dataObjects metadata
           function (acc, next) {
-            return Self.extractDatasets(
-              {
-                data: { id: acc._id.toString() },
-                user: opts.user,
-                dataTypes: opts.dataTypes,
-                setCustomDefaultProperties: uploadConf.setCustomDefaultProperties
-              },
-              function (err, datasets) {
-                if (err) return next(err, acc);
-                if (datasets instanceof Error) return next(datasets, acc);
-                return Self.refreshDatasetsInTEI(
-                  { user: opts.user, documentId: acc._id.toString(), datasets: datasets.current },
-                  function (err) {
-                    if (err) return next(err, acc);
-                    // Create logs
-                    return DocumentsLogsController.create(
-                      {
-                        target: datasets.document,
-                        account: opts.user._id,
-                        kind: CrudManager.actions.update._id,
-                        key: `datasets`
-                      },
-                      function (err, log) {
-                        if (err) return next(err, acc);
-                        acc.datasets = datasets._id;
-                        return next(null, acc);
-                      }
-                    );
-                  }
-                );
-              }
-            );
+            return DocumentsDataObjectsMetadata.create({ document: acc._id.toString() }, function (err, metadata) {
+              if (err) return next(err, acc);
+              // Create logs
+              return DocumentsLogsController.create(
+                {
+                  target: metadata.document,
+                  account: opts.user._id,
+                  kind: CrudManager.actions.create._id,
+                  key: `documents.dataObjects.metadata`
+                },
+                function (err, log) {
+                  if (err) return next(err, acc);
+                  acc.dataObjects.metadata = metadata._id;
+                  return next(null, acc);
+                }
+              );
+            });
+          },
+          // Process dataObjects
+          function (acc, next) {
+            return DocumentsFilesController.readFile({ data: { id: acc.tei.toString() } }, function (err, content) {
+              if (err) return next(err, acc);
+              return Self.extractDataObjectsFromTEI(
+                {
+                  file: { id: acc.tei.toString(), xmlString: content.data.toString(DocumentsFilesController.encoding) },
+                  user: opts.user,
+                  dataTypes: opts.dataTypes,
+                  setCustomDefaultProperties: uploadConf.setCustomDefaultProperties,
+                  erase: true
+                },
+                function (err, dataObjects) {
+                  if (err) return next(err, acc);
+                  if (dataObjects instanceof Error) return next(dataObjects, acc);
+                  let extractedDataObjects = dataObjects.map(function (item) {
+                    let d = {
+                      document: acc,
+                      dataObject: item,
+                      isExtracted: true,
+                      isDeleted: false,
+                      saveDocument: false
+                    };
+                    d.dataObject.document = acc._id.toString();
+                    return d;
+                  });
+                  return Self.addDataObjects(
+                    {
+                      user: opts.user,
+                      data: extractedDataObjects
+                    },
+                    function (err, res) {
+                      if (err) return next(err, acc);
+                      let errors = res.filter(function (item) {
+                        return item.err;
+                      });
+                      if (errors.length > 0) return next(errors, acc);
+                      return next(null, acc);
+                    }
+                  );
+                }
+              );
+            });
           },
           // Process TEI metadata
           function (acc, next) {
@@ -1074,17 +1131,6 @@ Self.upload = function (opts = {}, cb) {
               }
             );
           },
-          // Refresh Datasets Indexes
-          function (acc, next) {
-            return Self.refreshDataObjectsIndexes(
-              { user: opts.user, data: { id: acc._id.toString() } },
-              function (err, ok) {
-                if (err) return next(err, acc);
-                if (ok instanceof Error) return next(ok, acc);
-                return next(null, acc);
-              }
-            );
-          },
           // Process softcite
           function (acc, next) {
             if (!opts.importDataFromSoftcite) return next(null, acc);
@@ -1093,12 +1139,34 @@ Self.upload = function (opts = {}, cb) {
                 documentId: acc._id.toString(),
                 user: opts.user,
                 ignoreSoftCiteCommandLines: opts.ignoreSoftCiteCommandLines,
-                ignoreSoftCiteSoftware: opts.ignoreSoftCiteSoftware
+                ignoreSoftCiteSoftware: opts.ignoreSoftCiteSoftware,
+                saveDocument: false
               },
               function (err, res) {
                 return next(err, acc);
               }
             );
+          },
+          // Process BioNLP
+          function (acc, next) {
+            if (!opts.importDataFromBioNLP) return next(null, acc);
+            return Self.importDataFromBioNLP(
+              {
+                documentId: acc._id.toString(),
+                user: opts.user
+              },
+              function (err, res) {
+                return next(err, acc);
+              }
+            );
+          },
+          // Refresh DataObjects (Indexes)
+          function (acc, next) {
+            return Self.refreshDataObjects({ user: opts.user, document: acc, resetIndex: true }, function (err, ok) {
+              if (err) return next(err, acc);
+              if (ok instanceof Error) return next(ok, acc);
+              return next(null, acc);
+            });
           }
         ];
         // Execute all actions & create document
@@ -1182,9 +1250,9 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
   return Self.get(
-    { data: { id: opts.documentId.toString(), datasets: true, pdf: true }, user: opts.user },
+    { data: { id: opts.documentId.toString(), dataObjects: true, pdf: true }, user: opts.user },
     function (err, doc) {
-      let codeAndSoftware = doc.datasets.current.filter(function (item) {
+      let codeAndSoftware = doc.dataObjects.current.filter(function (item) {
         return item.kind === `code` || item.kind === `software`;
       });
       if (err) return cb(err);
@@ -1295,6 +1363,69 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
 };
 
 /**
+ * Extract data from Bio NLP result
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {boolean} opts.bioNLP - Enable/disable bioNLP service request (default: true)
+ * @param {boolean} opts.refreshData - Refresh data (force request bioNLP)
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.extractDataFromBioNLP = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  return Self.get(
+    { data: { id: opts.documentId.toString(), dataObjects: true }, user: opts.user },
+    function (err, doc) {
+      let labMaterials = doc.dataObjects.current.filter(function (item) {
+        return item.kind === `reagents`;
+      });
+      if (err) return cb(err);
+      if (doc instanceof Error) return cb(null, doc);
+      return Self.getBioNLPResults(
+        {
+          documentId: opts.documentId.toString(),
+          user: opts.user,
+          bioNLP: opts.bioNLP,
+          refreshData: opts.refreshData
+        },
+        function (err, jsonData) {
+          if (err) return cb(err);
+          if (jsonData instanceof Error) return cb(null, jsonData);
+          let results = [];
+          if (!Array.isArray(jsonData)) return cb(null, results);
+          for (let key in jsonData) {
+            let sentenceId = key;
+            let items = jsonData[key];
+            for (let i = 0; i < items.length; i++) {
+              // TO DO : Manage bioNLP results & create data objects found in sentences
+              /*let item = items[i];
+            let name = item.token;
+            let alreadyExist =
+              labMaterials.filter(function (e) {
+                return e.name === name;
+              }).length > 0;*/
+              // if (item.BioNLPLabMaterial === `I-CL`) {
+              // } else if (item.BioNLPLabMaterial === `I-ORG`) {
+              // } else if (item.BioNLPLabMaterial === `I-PLS`) {
+              // } else if (item.BioNLPLabMaterial === `I-AB`) {
+              // } else if (item.GenTaggType === `protein`) {
+              // } else if (item.GenTaggType === `DNA`) {
+              // } else if (item.GenTaggType === `cell_type`) {
+              // } else if (item.GenTaggType === `cell_line`) {
+              // }
+            }
+          }
+          return cb(null, results);
+        }
+      );
+    }
+  );
+};
+
+/**
  * Import data from softcite in the document
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
@@ -1303,6 +1434,7 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
  * @param {boolean} opts.refreshData - Refresh data (force request softcite)
  * @param {boolean} opts.ignoreCommandLines - Ignore command lines, they won't be created (default: false)
  * @param {boolean} opts.ignoreSoftwares - Ignore softwares, they won't be created (default: false)
+ * @param {boolean} opts.saveDocument - Save document
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -1316,109 +1448,137 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
   return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
     if (err) return cb(err);
     if (doc instanceof Error) return cb(null, doc);
-    return Self.extractDataFromSoftcite(opts, function (err, softwares) {
+    return Self.extractDataFromSoftcite(opts, function (err, software) {
       if (err) return cb(err);
-      if (softwares instanceof Error) return cb(null, softwares);
-      return async.mapSeries(
-        softwares,
-        function (software, next) {
-          if (!software.match) return next();
-          if (software.alreadyExist) return next();
-          let sentences = software.sentences.filter(function (e) {
-            return e.match;
+      if (software instanceof Error) return cb(null, software);
+      let softCiteCustomScripts = software
+        .filter(function (item) {
+          if (!item.match) return false;
+          if (item.alreadyExist) return false;
+          return true;
+        })
+        .map(function (item) {
+          let d = {
+            doc: doc,
+            dataObject: DataObjects.create({
+              reuse: false,
+              dataType: `code software`,
+              subType: `custom scripts`,
+              cert: `0`,
+              name: item.name + ` Code`,
+              URL: ``,
+              comments: item.mentions.join(`, `),
+              sentences: item.sentences.filter(function (e) {
+                return e.match;
+              })
+            }),
+            isExtracted: true,
+            isDeleted: false,
+            saveDocument: opts.saveDocument
+          };
+          d.dataObject.document = doc._id.toString();
+          return d;
+        });
+      let softCiteSoftware = opts.ignoreSoftCiteSoftware
+        ? []
+        : software
+          .filter(function (item) {
+            if (!item.match) return false;
+            if (item.alreadyExist) return false;
+            return true;
+          })
+          .map(function (item) {
+            let d = {
+              document: doc,
+              dataObject: DataObjects.create({
+                reuse: true,
+                dataType: `code software`,
+                subType: `software`,
+                cert: `0`,
+                name: software.name,
+                version: software.version,
+                URL: software.url,
+                comments: software.mentions.join(`, `),
+                sentences: item.sentences.filter(function (e) {
+                  return e.match;
+                })
+              }),
+              isExtracted: true,
+              isDeleted: false,
+              saveDocument: opts.saveDocument
+            };
+            d.dataObject.document = doc._id.toString();
+            return d;
           });
-          if (sentences.length <= 0) return next();
-          return async.reduce(
-            [
-              function (acc, _next) {
-                // create the custom script
-                if (!software.isCommandLine) return _next(null, acc);
-                if (opts.ignoreSoftCiteCommandLines) return _next(null, acc);
-                return Self.newDataset(
-                  {
-                    datasetsId: doc.datasets.toString(),
-                    dataset: {
-                      reuse: false,
-                      dataType: `code software`,
-                      subType: `custom scripts`,
-                      cert: `0`,
-                      name: software.name + ` Code`,
-                      URL: ``,
-                      comments: software.mentions.join(`, `)
-                    },
-                    sentence: sentences[0],
-                    user: opts.user,
-                    logs: true,
-                    isExtracted: true
-                  },
-                  function (err, newDataset) {
-                    return _next(err, newDataset);
-                  }
-                );
-              },
-              function (acc, _next) {
-                // create the software
-                if (opts.ignoreSoftCiteSoftware) return _next(null, acc);
-                return Self.newDataset(
-                  {
-                    datasetsId: doc.datasets.toString(),
-                    dataset: {
-                      reuse: true,
-                      dataType: `code software`,
-                      subType: `software`,
-                      cert: `0`,
-                      name: software.name,
-                      version: software.version,
-                      URL: software.url,
-                      comments: software.mentions.join(`, `)
-                    },
-                    sentence: sentences[0],
-                    user: opts.user,
-                    logs: true,
-                    isExtracted: true
-                  },
-                  function (err, newDataset) {
-                    return _next(err, newDataset);
-                  }
-                );
-              },
-              function (acc, _next) {
-                // link sentence
-                if (sentences.length <= 1) return _next(null, acc);
-                if (!acc.id) return _next(null, acc);
-                return async.mapSeries(
-                  sentences.slice(1),
-                  function (sentence, callback) {
-                    return Self.linkSentence(
-                      {
-                        datasetsId: doc.datasets.toString(),
-                        link: { dataset: { id: acc.id }, sentence: { id: sentence.id } },
-                        user: opts.user
-                      },
-                      function (err, s) {
-                        return callback(err);
-                      }
-                    );
-                  },
-                  function (err) {
-                    return _next(err, acc);
-                  }
-                );
-              }
-            ],
-            {}, // accumulator (will contain software or custom script)
-            function (acc, action, _next) {
-              return action(acc, function (err, acc) {
-                return _next(err, acc);
-              });
-            },
-            function (err, res) {
-              return next(err);
-            }
-          );
+      return Self.addDataObjects(
+        {
+          user: opts.user,
+          data: softCiteCustomScripts.concat(softCiteSoftware)
         },
-        function (err) {
+        function (err, res) {
           return cb(err, softwares);
+        }
+      );
+    });
+  });
+};
+
+/**
+ * Import data from Bio NLP in the document
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {boolean} opts.bioNLP - Enable/disable bioNLP request (default: true)
+ * @param {boolean} opts.refreshData - Refresh data (force request bioNLP)
+ * @param {boolean} opts.saveDocument - Save document
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.importDataFromBioNLP = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  if (typeof _.get(opts, `refreshData`) === `undefined`) opts.refreshData = false;
+  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    return Self.extractDataFromBioNLP(opts, function (err, data) {
+      if (err) return cb(err);
+      if (data instanceof Error) return cb(null, data);
+      let dataObjects = data
+        .filter(function (item) {
+          return (
+            item.sentences.filter(function (e) {
+              return e.match;
+            }).length > 0
+          );
+        })
+        .map(function (item) {
+          let d = {
+            document: doc,
+            dataObject: DataObjects.create({
+              reuse: false,
+              dataType: item.dataType,
+              subType: item.subType,
+              cert: `0`,
+              name: item.name,
+              comments: ``,
+              sentence: sentences[0]
+            }),
+            isExtracted: true,
+            isDeleted: false,
+            saveDocument: opts.saveDocument
+          };
+          d.dataObject.document = doc._id.toString();
+          return d;
+        });
+      return Self.addDataObjects(
+        {
+          user: opts.user,
+          data: dataObjects
+        },
+        function (err, res) {
+          return cb(err, data);
         }
       );
     });
@@ -1573,6 +1733,153 @@ Self.getSoftciteResults = function (opts, cb) {
 };
 
 /**
+ * Get Bio NLP results
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {boolean} opts.bioNLP - Enable/disable bioNLP service request (default: true)
+ * @param {boolean} opts.refreshData - Refresh data (force request bioNLP)
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.getBioNLPResults = function (opts, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  if (typeof _.get(opts, `bioNLP`) === `undefined`) opts.bioNLP = true;
+  if (typeof _.get(opts, `refreshData`) === `undefined`) opts.refreshData = false;
+  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    return async.reduce(
+      [
+        // Read local Data
+        function (acc, next) {
+          if (acc instanceof Error) return next(acc);
+          if (!doc.bioNLP) {
+            acc.fromFile = new Error(`Local data not found, functionnality unavailable`);
+            return next(null, acc);
+          }
+          return DocumentsFilesController.readFile(
+            { data: { id: doc.bioNLP.toString() } },
+            function (err, jsonContent) {
+              if (err) return next(err);
+              if (jsonContent instanceof Error) {
+                acc.fromFile = jsonContent;
+                return next(null, acc);
+              }
+              acc.fromFile = {
+                name: `${doc.name}.bioNLP.json`,
+                data: jsonContent.data.toString(DocumentsFilesController.encoding),
+                mimetype: `application/json`,
+                encoding: DocumentsFilesController.encoding
+              };
+              return next(null, acc);
+            }
+          );
+        },
+        // Call Bio NLP service if necessary
+        function (acc, next) {
+          if (!opts.bioNLP) return next(null, acc);
+          if (!opts.refreshData && !(acc.fromFile instanceof Error)) return next(null, acc);
+          if (!doc.tei) {
+            acc.fromBioNLP = new Error(`TEI not found, functionnality unavailable`);
+            return next(null, acc);
+          }
+          return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, contentTEI) {
+            if (err) return next(err);
+            if (contentTEI instanceof Error) {
+              acc.fromBioNLP = contentTEI;
+              return next(null, acc);
+            }
+            let sentences = XML.extractTEISentences(
+              XML.load(contentTEI.data.toString(DocumentsFilesController.encoding))
+            );
+            return BioNLP.processSentences(sentences, function (err, results) {
+              if (err) return next(err);
+              if (results instanceof Error) {
+                acc.fromBioNLP = results;
+                return next(null, acc);
+              }
+              acc.fromBioNLP = {
+                name: `${doc.name}.bioNLP.json`,
+                data: JSON.stringify(results).toString(DocumentsFilesController.encoding),
+                mimetype: `application/json`,
+                encoding: DocumentsFilesController.encoding
+              };
+              return next(null, acc);
+            });
+          });
+        },
+        // Write/Rewrite Data if necessary
+        function (acc, next) {
+          let alreadyExist = !!doc.bioNLP;
+          // By default use bioNLP version
+          let requestFailed = acc.fromBioNLP instanceof Error;
+          let readFileFailed = acc.fromFile instanceof Error;
+          let file =
+            acc.fromBioNLP && !requestFailed
+              ? acc.fromBioNLP
+              : acc.fromFile && !readFileFailed
+                ? acc.fromFile
+                : new Error(`Error: No data available (from bioNLP or local file)`);
+          if (file instanceof Error) return next(null, file);
+          if (alreadyExist)
+            return DocumentsFilesController.rewriteFile(doc.bioNLP.toString(), file.data, function (err) {
+              if (err) return next(err);
+              return next(null, file.data);
+            });
+          return DocumentsFilesController.upload(
+            {
+              data: {
+                accountId: opts.user._id.toString(),
+                documentId: doc._id.toString(),
+                file: file,
+                organizations: doc.upload.organizations.map(function (item) {
+                  return item._id.toString();
+                })
+              },
+              user: opts.user
+            },
+            function (err, res) {
+              if (err) return next(err, acc);
+              // Set bioNLP
+              doc.bioNLP = res._id;
+              // Add file to files
+              doc.files.push(res._id);
+              return doc.save(function (err) {
+                return next(err, file.data);
+              });
+            }
+          );
+        },
+        // Parse Data to JSON
+        function (acc, next) {
+          if (acc instanceof Error) return next(null, acc);
+          let json = {};
+          try {
+            json = JSON.parse(acc);
+          } catch (e) {
+            return next(e);
+          }
+          return next(null, json);
+        }
+      ],
+      {},
+      function (acc, action, next) {
+        return action(acc, function (err, acc) {
+          return next(err, acc);
+        });
+      },
+      function (err, res) {
+        if (err) return cb(err);
+        return cb(null, res);
+      }
+    );
+  });
+};
+
+/**
  * Refresh the token of a given document
  * @param {object} opts - Options available (You must call getUploadParams)
  * @param {object} opts.data - Data available
@@ -1625,165 +1932,11 @@ Self.refreshToken = function (opts = {}, cb) {
 };
 
 /**
- * Validate Datasets of document
- * @param {object} opts - Options available (You must call getUploadParams)
- * @param {object} opts.data - Data available
- * @param {string} opts.data.id - Document id
- * @param {object} opts.user - Current user
- * @param {function} cb - Callback function(err, res) (err: error process OR null, res: ObjectId OR new Error)
- * @returns {undefined} undefined
- */
-Self.validateDatasets = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
-  let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
-  return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    return DocumentsDatasetsController.checkValidation({ data: { id: doc.datasets } }, function (err, validated) {
-      if (err) return cb(err);
-      if (validated instanceof Error) return cb(null, validated);
-      if ((accessRights.isVisitor || accessRights.isStandardUser) && !validated) return cb(null, validated);
-      doc.status = Self.status.finish;
-      return doc.save(function (err) {
-        if (err) return cb(err);
-        // Create logs
-        return DocumentsLogsController.create(
-          {
-            target: doc._id,
-            account: opts.user._id,
-            kind: CrudManager.actions.update._id,
-            key: `validateDatasets`
-          },
-          function (err, log) {
-            if (err) return cb(err);
-            return cb(null, true); // Return true because document.status is now updated
-          }
-        );
-      });
-    });
-  });
-};
-
-/**
- * Validate Metadata of document
- * @param {object} opts - Options available (You must call getUploadParams)
- * @param {object} opts.data - Data available
- * @param {string} opts.data.id - Document id
- * @param {object} opts.user - Current user
- * @param {function} cb - Callback function(err, res) (err: error process OR null, res: ObjectId OR new Error)
- * @returns {undefined} undefined
- */
-Self.validateMetadata = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
-  return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    doc.status = Self.status.datasets;
-    return doc.save(function (err) {
-      if (err) return cb(err);
-      // Create logs
-      return DocumentsLogsController.create(
-        {
-          target: doc._id,
-          account: opts.user._id,
-          kind: CrudManager.actions.update._id,
-          key: `validateMetadata`
-        },
-        function (err, log) {
-          if (err) return cb(err);
-          return cb(null, true);
-        }
-      );
-    });
-  });
-};
-
-/**
- * Back to metadata for the given document
- * @param {object} opts - Options available (You must call getUploadParams)
- * @param {object} opts.data - Data available
- * @param {string} opts.data.id - Document id
- * @param {object} opts.user - Current user
- * @param {function} cb - Callback function(err, res) (err: error process OR null, res: ObjectId OR new Error)
- * @returns {undefined} undefined
- */
-Self.backToMetadata = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
-  return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    doc.status = Self.status.metadata;
-    return doc.save(function (err) {
-      if (err) return cb(err);
-      // Create logs
-      return DocumentsLogsController.create(
-        {
-          target: doc._id,
-          account: opts.user._id,
-          kind: CrudManager.actions.update._id,
-          key: `backToMetadata`
-        },
-        function (err, log) {
-          if (err) return cb(err);
-          return cb(null, true);
-        }
-      );
-    });
-  });
-};
-
-/**
- * Reopen the given document
- * @param {object} opts - Options available (You must call getUploadParams)
- * @param {object} opts.data - Data available
- * @param {string} opts.data.id - Document id
- * @param {object} opts.user - Current user
- * @param {function} cb - Callback function(err, res) (err: error process OR null, res: ObjectId OR new Error)
- * @returns {undefined} undefined
- */
-Self.reopen = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
-  return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    doc.status = Self.status.metadata;
-    return doc.save(function (err) {
-      if (err) return cb(err);
-      // Create logs
-      return DocumentsLogsController.create(
-        {
-          target: doc._id,
-          account: opts.user._id,
-          kind: CrudManager.actions.update._id,
-          key: `reopen`
-        },
-        function (err, log) {
-          if (err) return cb(err);
-          return cb(null, true);
-        }
-      );
-    });
-  });
-};
-
-/**
  * search for documents
  * @param {object} opts - Options available
  * @param {object} opts.data - Data available
  * @param {string} opts.data.query - Global query
- * @param {Array} opts.data.fields - Fields
+ * @param {array} opts.data.fields - Fields
  * @param {string} opts.data.documents - Custom query for document collection
  * @param {string} opts.data.metadata - Custom query for metadata collection
  * @param {object} opts.user - Current user
@@ -2073,80 +2226,6 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
 };
 
 /**
- * Update Or Create Datasets of document
- * @param {object} opts - Options available (You must call getUploadParams)
- * @param {object} opts.data - Data available
- * @param {string} opts.data.id - Document id
- * @param {object} opts.dataTypes - Current dataTypes
- * @param {object} opts.user - Current user
- * @param {object} opts.setCustomDefaultProperties - Set custom default properties on current datasets
- * @param {function} cb - Callback function(err, res) (err: error process OR null, res: ObjectId OR new Error)
- * @returns {undefined} undefined
- */
-Self.extractDatasets = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `dataTypes`) === `undefined`) return cb(new Error(`Missing required data: opts.dataTypes`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
-  return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    if (!doc.tei) return cb(null, new Error(`TEI file not found`));
-    // Read TEI file (containing PDF metadata)
-    return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
-      if (err) return cb(err);
-      // Extract metadata
-      let extractedDatasets = XML.extractDatasets(
-        XML.load(content.data.toString(DocumentsFilesController.encoding)),
-        opts.dataTypes
-      );
-      let currentDatasets = [].concat(extractedDatasets);
-      // Set custom default properties
-      if (opts.setCustomDefaultProperties) {
-        for (let i = 0; i < currentDatasets.length; i++) {
-          let dataset = currentDatasets[i];
-          if (dataset.kind === `dataset`) {
-            dataset.reuse = false;
-          }
-        }
-      }
-      // Update them
-      return DocumentsDatasets.findOneAndUpdate(
-        { document: doc._id },
-        {
-          extracted: extractedDatasets,
-          current: currentDatasets,
-          deleted: []
-        },
-        {
-          new: true,
-          upsert: true, // Make this update into an upsert
-          rawResult: true
-        }
-      ).exec(function (err, res) {
-        if (err) return cb(err);
-        if (typeof _.get(res, `value._id`) === `undefined`) return cb(null, new Error(`ObjectId not found`));
-        let created = !_.get(res, `lastErrorObject.updatedExisting`, true);
-        // Create logs
-        return DocumentsLogsController.create(
-          {
-            target: doc._id,
-            account: opts.user._id,
-            kind: created ? CrudManager.actions.create._id : CrudManager.actions.update._id,
-            key: `datasets`
-          },
-          function (err, log) {
-            if (err) return cb(err);
-            return cb(null, Object.assign({ _id: res.value._id.toString() }, res.value.toJSON()));
-          }
-        );
-      });
-    });
-  });
-};
-
-/**
  * Update Or Create metadata of PDF document
  * @param {object} opts - Options available (You must call getUploadParams)
  * @param {object} opts.data - Data available
@@ -2248,778 +2327,273 @@ Self.updateOrCreateTEIMetadata = function (opts = {}, cb) {
 };
 
 /**
- * Create new dataset
+ * Extract dataObjects from TEI
  * @param {object} opts - JSON containing all data
+ * @param {string} opts.file - JSON containing all data
+ * @param {string} opts.file.xmlString - XML string
+ * @param {string} opts.file.id - Id of document
  * @param {object} opts.user - User
- * @param {boolean} opts.isExtracted - Add this dataset in extracted list too (useful for softcite softwares & scripts)
- * @param {string} opts.datasetsId - Datasets id
- * @param {string} opts.sentence - Sentence
- * @param {string} opts.sentence.id - Sentence id
- * @param {string} opts.dataset - Dataset
- * @param {boolean} opts.dataset.reuse - Dataset reuse property
- * @param {string} opts.dataset.cert - Dataset cert value (between 0 and 1)
- * @param {string} opts.dataset.dataType - Dataset dataType
- * @param {string} opts.dataset.subType - Dataset subType
- * @param {string} opts.dataset.description - Dataset description
- * @param {string} opts.dataset.bestDataFormatForSharing - Dataset best data format for sharing
- * @param {string} opts.dataset.mostSuitableRepositories - Dataset most suitable repositories
- * @param {string} opts.dataset.DOI - Dataset DOI
- * @param {string} opts.dataset.name - Dataset name
- * @param {string} opts.dataset.comments - Dataset comments
+ * @param {object} opts.dataTypes - dataTypes
+ * @param {boolean} opts.setCustomDefaultProperties - setCustomDefaultProperties
+ * @param {boolean} opts.erase - Erase existing dataObjects
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.newDataset = function (opts = {}, cb) {
+Self.extractDataObjectsFromTEI = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `datasetsId`) === `undefined`) return cb(new Error(`Missing required data: opts.datasetsId`));
-  if (typeof _.get(opts, `dataset`) === `undefined`) return cb(new Error(`Missing required data: opts.dataset`));
-  if (typeof _.get(opts, `sentence.id`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.sentence.id`));
-  // Init transaction
-  return Documents.findOne({ datasets: opts.datasetsId }).exec(function (err, doc) {
-    if (err) return cb(err);
-    if (!doc) return cb(null, new Error(`Document not found`));
-    let accessRights = AccountsManager.getAccessRights(opts.user);
-    if (doc.locked && (accessRights.isStandardUser || accessRights.isVisitor))
-      return cb(null, new Error(`Document is locked`));
-    let transaction = DocumentsDatasets.findOne({ _id: opts.datasetsId });
-    // Execute transaction
-    return transaction.exec(function (err, datasets) {
-      if (err) return cb(err);
-      if (!datasets) return cb(null, new Error(`Datasets not found`));
-      return Self.addDatasetInTEI(
-        {
-          documentId: datasets.document,
-          sentence: { id: opts.sentence.id },
-          dataset: {
-            reuse: opts.dataset.reuse ? !!opts.dataset.reuse : false,
-            type: opts.dataset.dataType,
-            subtype: opts.dataset.subType,
-            cert: opts.dataset.cert
-          },
-          user: opts.user
-        },
-        function (err, teiInfos) {
-          if (err) return cb(err);
-          if (teiInfos instanceof Error) return cb(null, teiInfos);
-          let error = false;
-          // Check dataset with opts.id already exist
-          for (let i = 0; i < datasets.current.length; i++) {
-            if (datasets.current[i].id === teiInfos.dataset.id) error = true;
-          }
-          if (error) return cb(null, new Error(`Dataset not created in mongodb`));
-          // add new dataset
-          opts.dataset.id = teiInfos.dataset.id;
-          opts.dataset.dataInstanceId = teiInfos.dataset.dataInstanceId;
-          opts.dataset.sentences = [teiInfos.links[0].sentence];
-          let dataset = DocumentsDatasetsController.createDataset(opts.dataset);
-          datasets.current.push(dataset);
-          if (opts.isExtracted) datasets.extracted.push(dataset);
-          let mongoInfos = dataset;
-          return datasets.save(function (err, res) {
-            if (err) return cb(err);
-            // Create logs
-            return DocumentsLogsController.create(
-              {
-                target: datasets.document,
-                account: opts.user._id,
-                kind: CrudManager.actions.create._id,
-                key: `${opts.dataset.id}`
-              },
-              function (err, log) {
-                if (err) return cb(err);
-                return cb(null, mongoInfos);
-              }
-            );
-          });
-        }
-      );
-    });
-  });
-};
-
-/**
- * Update dataset
- * @param {object} opts - JSON containing all data
- * @param {object} opts.user - User
- * @param {object} opts.data - Available data
- * @param {string} opts.data.id - Document id
- * @param {string} opts.data.datasets - Document datasets
- * @param {boolean} opts.[merge] - Merge new current datasets with old current datasets (default: false)
- * @param {function} cb - Callback function(err, res) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.updateDatasets = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
-  if (typeof _.get(opts, `data.datasets`) === `undefined`) opts.data.datasets = {};
-  if (typeof _.get(opts, `merge`) === `undefined`) opts.merge = false;
-  let accessRights = AccountsManager.getAccessRights(opts.user);
-  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
-  return DocumentsDatasets.findOne({ document: opts.data.id }, function (err, datasets) {
-    if (err) return cb(err);
-    if (!datasets) return cb(null, new Error(`Datasets not found`));
-    if (Params.checkArray(opts.data.datasets.current)) {
-      if (opts.merge)
-        datasets.current = DocumentsDatasetsController.mergeDatasets(datasets.current, opts.data.datasets.current);
-      else datasets.current = opts.data.datasets.current;
-      // Reset dataInstanceIds
-      datasets.current = datasets.current.map(function (item, i) {
-        item.dataInstanceId = `dataInstance-${i + 1}`;
-        item.id = `dataset-${i + 1}`;
-        return item;
-      });
-    }
-    if (Params.checkArray(opts.data.datasets.deleted)) datasets.deleted = opts.data.datasets.deleted;
-    if (Params.checkArray(opts.data.datasets.extracted)) datasets.extracted = opts.data.datasets.extracted;
-    return datasets.save(function (err) {
-      if (err) return cb(err);
-      Self.refreshDatasetsInTEI(
-        { user: opts.user, documentId: opts.data.id, datasets: datasets.current },
-        function (err) {
-          if (err) return cb(err);
-          // Create logs
-          return DocumentsLogsController.create(
-            {
-              target: datasets.document,
-              account: opts.user._id,
-              kind: CrudManager.actions.update._id,
-              key: `datasets`
-            },
-            function (err, log) {
-              if (err) return cb(err);
-              return cb(null, datasets);
-            }
-          );
-        }
-      );
-    });
-  });
-};
-
-/**
- * Update datasets metadata
- * @param {object} opts - JSON containing all data
- * @param {object} opts.user - User
- * @param {string} opts.id - Document id
- * @param {string} opts.metadata - Document datasets mettadata
- * @param {function} cb - Callback function(err, res) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.updateDatasetsMetadata = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `datasetsId`) === `undefined`) return cb(new Error(`Missing required data: opts.datasetsId`));
-  if (typeof _.get(opts, `metadata`) === `undefined`)
-    opts.metadata = {
-      datasets: { notes: `` },
-      codeAndSoftware: { notes: `` },
-      materials: { notes: `` },
-      protocols: { notes: `` }
-    };
+  if (typeof _.get(opts, `file.xmlString`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.xmlString`));
+  if (typeof _.get(opts, `file.id`) === `undefined`) return cb(new Error(`Missing required data: opts.id`));
+  if (typeof _.get(opts, `dataTypes`) === `undefined`) return cb(new Error(`Missing required data: opts.dataTypes`));
+  if (typeof _.get(opts, `setCustomDefaultProperties`) === `undefined`) opts.setCustomDefaultProperties = true;
+  if (typeof _.get(opts, `erase`) === `undefined`) opts.erase = false;
   let accessRights = AccountsManager.getAccessRights(opts.user);
   if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
-  return DocumentsDatasets.findOne({ _id: opts.datasetsId }, function (err, datasets) {
-    if (err) return cb(err);
-    if (!datasets) return cb(null, new Error(`Datasets not found`));
-    datasets.metadata = opts.metadata;
-    return datasets.save(function (err) {
-      if (err) return cb(err);
-      // Create logs
-      return DocumentsLogsController.create(
-        {
-          target: datasets.document,
-          account: opts.user._id,
-          kind: CrudManager.actions.update._id,
-          key: `datasets.metadata`
-        },
-        function (err, log) {
-          if (err) return cb(err);
-          return cb(null, datasets);
-        }
-      );
-    });
+  let $ = XML.load(opts.file.xmlString);
+  let dataObjects = XML.extractDataObjects($, {
+    dataTypes: opts.dataTypes,
+    setCustomDefaultProperties: opts.setCustomDefaultProperties
   });
+  if (opts.erase) {
+    for (let i = 0; i < dataObjects.length; i++) {
+      let dataObject = dataObjects[i];
+      DocumentsDataObjectsController._deleteDataObjectInTEI($, dataObject);
+    }
+    return DocumentsFilesController.rewriteFile(opts.file.id, $.xml(), function (err) {
+      if (err) return cb(err);
+      return cb(null, dataObjects);
+    });
+  }
+  return cb(null, dataObjects);
 };
 
 /**
- * Refresh all datasets of all documents
+ * Update dataObjects Metadata
  * @param {object} opts - JSON containing all data
  * @param {object} opts.user - User
+ * @param {string} opts.documentId - Document id
+ * @param {object} opts.metadata - Metadata
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.refreshAllDataObjects = function (opts = {}, cb) {
+Self.updateDataObjectsMetadata = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  let accessRights = AccountsManager.getAccessRights(opts.user);
-  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
-  return Documents.find(
-    {},
-    {
-      _id: 1 // By default
-    }
-  ).exec(function (err, ids) {
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  // Check documents exists
+  return Self.get({ data: { id: opts.documentId }, user: opts.user }, function (err, doc) {
     if (err) return cb(err);
-    let results = [];
-    return async.reduce(
-      ids,
-      results,
-      function (acc, item, next) {
-        return Self.refreshDataObjects({ user: opts.user, data: { id: item._id.toString() } }, function (err, res) {
-          if (err) acc.push({ err, document: { _id: item._id.toString() }, res: res });
-          else if (res && res._id && res.document)
-            acc.push({
-              err,
-              document: { _id: item._id.toString() },
-              datasets: { _id: res._id.toString(), document: res.document.toString() }
-            });
-          else acc.push({ err, res: res });
-          return next(null, acc);
-        });
-      },
+    if (doc instanceof Error) return cb(null, doc);
+    if (!doc) return cb(null, new Error(`Document not found`));
+    return DocumentsDataObjectsMetadataController.update(
+      { user: opts.user, document: doc, metadata: opts.metadata },
       function (err, res) {
-        return cb(err, res);
+        if (err) return cb(err);
+        if (res instanceof Error) return cb(null, res);
+        return cb(null, res);
       }
     );
   });
 };
 
 /**
- * Refresh datasets
+ * Add dataObjects
  * @param {object} opts - JSON containing all data
  * @param {object} opts.user - User
- * @param {object} opts.data - Available data
- * @param {string} opts.data.id - Document id
+ * @param {array} opts.data - List of dataObjects info
+ * -> item.saveDocument (default: true, use false on upload process to avoid mongoose errors)
+ * -> item.isExtracted
+ * -> item.dataObject
+ * -> item.document
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.addDataObjects = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  let actions = _.get(opts, `data`);
+  if (!Array.isArray(actions)) return cb(new Error(`Bad data: opts.data must be an array`));
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
+  return async.reduce(
+    actions,
+    [],
+    function (acc, item, next) {
+      return DocumentsDataObjectsController.create(
+        { user: opts.user, isExtracted: item.isExtracted, dataObject: item.dataObject, document: item.document },
+        function (err, dataObject) {
+          if (err) return next(err, acc);
+          if (dataObject instanceof Error) return next(dataObject, acc);
+          acc.push({ err: dataObject instanceof Error, res: dataObject });
+          // Update Document in MongoDB
+          if (dataObject.extracted) item.document.dataObjects.extracted.push(dataObject._id.toString());
+          item.document.dataObjects.current.push(dataObject._id.toString());
+          let saveDocument = _.get(item, `saveDocument`, true);
+          if (!saveDocument) return next(null, acc);
+          return Documents.updateOne({ _id: dataObject.document }, item.document, function (err, doc) {
+            if (err) return next(err, acc);
+            return next(null, acc);
+          });
+        }
+      );
+    },
+    function (err, res) {
+      if (err) return cb(err);
+      return cb(null, res);
+    }
+  );
+};
+
+/**
+ * Update dataObjects
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {array} opts.data - List of dataObjects info
+ * -> item.saveDocument (default: true)
+ * -> item.isExtracted
+ * -> item.dataObject
+ * -> item.document
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.updateDataObjects = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  let actions = _.get(opts, `data`);
+  if (!Array.isArray(actions)) return cb(new Error(`Bad data: opts.data must be an array`));
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
+  return async.reduce(
+    actions,
+    [],
+    function (acc, item, next) {
+      return DocumentsDataObjectsController.update(
+        { user: opts.user, isExtracted: item.isExtracted, dataObject: item.dataObject, document: item.document },
+        function (err, dataObject) {
+          if (err) return next(err, acc);
+          if (dataObject instanceof Error) return next(dataObject, acc);
+          acc.push({ err: dataObject instanceof Error, res: dataObject });
+          let saveDocument = _.get(item, `saveDocument`, true);
+          if (!saveDocument) return next(null, acc);
+          return Documents.updateOne({ _id: dataObject.document }, item.document, function (err, doc) {
+            if (err) return next(err, acc);
+            return next(null, acc);
+          });
+        }
+      );
+    },
+    function (err, res) {
+      if (err) return cb(err);
+      return cb(null, res);
+    }
+  );
+};
+
+/**
+ * Delete dataObjects
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {array} opts.data - List of dataObjects info
+ * -> item.saveDocument (default: true)
+ * -> item.isExtracted
+ * -> item.dataObject
+ * -> item.document
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.deleteDataObjects = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  let actions = _.get(opts, `data`);
+  if (!Array.isArray(actions)) return cb(new Error(`Bad data: opts.data must be an array`));
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
+  return async.reduce(
+    actions,
+    [],
+    function (acc, item, next) {
+      return DocumentsDataObjectsController.delete(
+        { user: opts.user, isExtracted: item.isExtracted, dataObject: item.dataObject, document: item.document },
+        function (err, dataObject) {
+          if (err) return next(err, acc);
+          if (dataObject instanceof Error) return next(dataObject, acc);
+          acc.push({ err: dataObject instanceof Error, res: dataObject });
+          // Update Document
+          item.document.dataObjects.current = item.document.dataObjects.current.filter(function (item) {
+            return item.toString() !== dataObject._id.toString();
+          });
+          item.document.dataObjects.deleted.push(dataObject._id.toString());
+          let saveDocument = _.get(item, `saveDocument`, true);
+          if (!saveDocument) return next(null, acc);
+          return Documents.updateOne({ _id: dataObject.document }, item.document, function (err, doc) {
+            if (err) return next(err, acc);
+            return next(null, acc);
+          });
+        }
+      );
+    },
+    function (err, res) {
+      if (err) return cb(err);
+      return cb(null, res);
+    }
+  );
+};
+
+/**
+ * Refresh dataObjects
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {string} opts.document - Document
+ * @param {string} opts.resetIndex - Reset DataObject index (default false)
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
 Self.refreshDataObjects = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  if (typeof _.get(opts, `document`) === `undefined`) return cb(new Error(`Missing required data: opts.document`));
+  if (typeof _.get(opts, `resetIndex`) === `undefined`) opts.resetIndex = false;
   let accessRights = AccountsManager.getAccessRights(opts.user);
-  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
-  return DocumentsDatasets.findOne({ document: opts.data.id }, function (err, datasets) {
-    if (err) return cb(err);
-    if (!datasets) return cb(null, new Error(`Datasets not found`));
-    // Reset dataInstanceIds
-    for (let i = 0; i < datasets.current.length; i++) {
-      datasets.current[i] = DocumentsDatasetsController.createDataset(datasets.current[i].toJSON());
-      datasets.current[i].dataInstanceId = `dataInstance-${i + 1}`;
-      datasets.current[i].id = `dataset-${i + 1}`;
-    }
-    return datasets.save(function (err) {
+  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
+  return Self.getSentencesMapping(
+    { user: opts.user, documentId: opts.document._id.toString() },
+    function (err, mapping) {
       if (err) return cb(err);
-      Self.refreshDatasetsInTEI(
-        { user: opts.user, documentId: opts.data.id, datasets: datasets.current },
-        function (err) {
+      if (mapping instanceof Error) return cb(null, mapping);
+      let sort = Self.sortSentencesUsingMapping(mapping);
+      return DocumentsDataObjectsController.all(
+        { user: opts.user, data: { documents: [opts.document._id.toString()] } },
+        function (err, res) {
           if (err) return cb(err);
-          // Create logs
-          return DocumentsLogsController.create(
-            {
-              target: datasets.document,
-              account: opts.user._id,
-              kind: CrudManager.actions.update._id,
-              key: `datasets`
+          if (res instanceof Error) return cb(null, res);
+          if (!res || !Array.isArray(res.data)) return cb(null, new Error(`DataObjects not found`));
+          return async.mapSeries(
+            res.data,
+            function (dataObject, next) {
+              if (opts.resetIndex && dataObject.sentences.length > 0) {
+                let sentences = dataObject.sentences.sort(sort);
+                dataObject.index = mapping[sentences[0].id];
+              }
+              return DocumentsDataObjectsController.update(
+                { user: opts.user, dataObject: dataObject, document: opts.document },
+                function (err, res) {
+                  return next(err);
+                }
+              );
             },
-            function (err, log) {
+            function (err) {
               if (err) return cb(err);
-              return cb(null, datasets);
+              return cb(null, true);
             }
           );
         }
       );
-    });
-  });
-};
-
-/**
- * Refresh all datasets indexes of all documents
- * @param {object} opts - JSON containing all data
- * @param {object} opts.user - User
- * @param {function} cb - Callback function(err, res) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.refreshAllDataObjectsIndexes = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  let accessRights = AccountsManager.getAccessRights(opts.user);
-  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
-  return Documents.find(
-    {},
-    {
-      _id: 1 // By default
     }
-  ).exec(function (err, ids) {
-    if (err) return cb(err);
-    let results = [];
-    return async.reduce(
-      ids,
-      results,
-      function (acc, item, next) {
-        return Self.refreshDataObjectsIndexes(
-          { user: opts.user, data: { id: item._id.toString() } },
-          function (err, res) {
-            if (err) acc.push({ err, document: { _id: item._id.toString() }, res: res });
-            else if (res && res._id && res.document)
-              acc.push({
-                err,
-                document: { _id: item._id.toString() },
-                datasets: { _id: res._id.toString(), document: res.document.toString() }
-              });
-            else acc.push({ err, res: res });
-            return next(null, acc);
-          }
-        );
-      },
-      function (err, res) {
-        return cb(err, res);
-      }
-    );
-  });
-};
-
-/**
- * Refresh datasets indexes
- * @param {object} opts - JSON containing all data
- * @param {object} opts.user - User
- * @param {object} opts.data - Available data
- * @param {string} opts.data.id - Document id
- * @param {function} cb - Callback function(err, res) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.refreshDataObjectsIndexes = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
-  let accessRights = AccountsManager.getAccessRights(opts.user);
-  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
-  return Self.get({ data: { id: opts.data.id, pdf: true, tei: true }, user: opts.user }, function (err, doc) {
-    let mapping = undefined;
-    if (doc.tei && doc.tei.metadata && doc.tei.metadata.mapping && doc.tei.metadata.mapping.object)
-      mapping = doc.tei.metadata.mapping.object;
-    if (doc.pdf && doc.pdf.metadata && doc.pdf.metadata.mapping && doc.pdf.metadata.mapping.object)
-      mapping = doc.pdf.metadata.mapping.object;
-    if (typeof mapping === `undefined`) return cb(null, new Error(`mapping not available`));
-    return DocumentsDatasets.findOne({ document: opts.data.id }, function (err, datasets) {
-      if (err) return cb(err);
-      if (!datasets) return cb(null, new Error(`Datasets not found`));
-      for (let i = 0; i < datasets.current.length; i++) {
-        if (datasets.current[i].sentences.length > 0) {
-          let sentence = datasets.current[i].sentences[0];
-          if (typeof datasets.current[i].index === `undefined` && sentence && sentence.id)
-            datasets.current[i].index = mapping[sentence.id];
-        }
-      }
-      return datasets.save(function (err) {
-        if (err) return cb(err);
-        return cb(null, datasets);
-      });
-    });
-  });
-};
-
-/**
- * Update dataset
- * @param {object} opts - JSON containing all data
- * @param {object} opts.user - User
- * @param {string} opts.fromAPI - Update dataset without sentences & dataInstanceId properties
- * @param {string} opts.datasetsId - Datasets id
- * @param {string} opts.dataset.id - Dataset id
- * @param {string} opts.dataset.dataInstanceId - Dataset dataInstanceId
- * @param {string} opts.dataset.sentences - Dataset sentences
- * @param {boolean} opts.dataset.reuse - Dataset reuse property
- * @param {string} opts.dataset.cert - Dataset cert value (between 0 and 1)
- * @param {string} opts.dataset.dataType - Dataset dataType
- * @param {string} opts.dataset.subType - Dataset subType
- * @param {string} opts.dataset.description - Dataset description
- * @param {string} opts.dataset.bestDataFormatForSharing - Dataset best data format for sharing
- * @param {string} opts.dataset.mostSuitableRepositories - Dataset most suitable repositories
- * @param {string} opts.dataset.DOI - Dataset DOI
- * @param {string} opts.dataset.name - Dataset name
- * @param {string} opts.dataset.comments - Dataset comments
- * @param {function} cb - Callback function(err, res) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.updateDataset = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `datasetsId`) === `undefined`) return cb(new Error(`Missing required data: opts.datasetsId`));
-  if (typeof _.get(opts, `dataset.id`) === `undefined`) return cb(new Error(`Missing required data: opts.dataset.id`));
-  return Documents.findOne({ datasets: opts.datasetsId }).exec(function (err, doc) {
-    if (err) return cb(err);
-    if (!doc) return cb(null, new Error(`Document not found`));
-    let accessRights = AccountsManager.getAccessRights(opts.user);
-    if (doc.locked && (accessRights.isStandardUser || accessRights.isVisitor))
-      return cb(null, new Error(`Document is locked`));
-    // Init transaction
-    let transaction = DocumentsDatasets.findOne({ _id: opts.datasetsId });
-    // Execute transaction
-    return transaction.exec(function (err, datasets) {
-      if (err) return cb(err);
-      if (!datasets) return cb(null, new Error(`Datasets not found`));
-      return Self.updateDatasetInTEI(
-        {
-          documentId: datasets.document,
-          dataset: {
-            id: opts.dataset.id,
-            reuse: opts.dataset.reuse ? !!opts.dataset.reuse : false,
-            type: opts.dataset.dataType,
-            subtype: opts.dataset.subType,
-            cert: opts.dataset.cert
-          },
-          user: opts.user
-        },
-        function (err, teiInfos) {
-          if (err) return cb(err);
-          if (teiInfos instanceof Error) return cb(null, teiInfos);
-          // Check dataset with opts.id already exist
-          let updated = false;
-          let dataset;
-          for (let i = 0; i < datasets.current.length; i++) {
-            // update dataset
-            if (datasets.current[i].id === opts.dataset.id) {
-              updated = true;
-              if (opts.fromAPI) {
-                opts.dataset.dataInstanceId = datasets.current[i].dataInstanceId;
-                opts.dataset.sentences = datasets.current[i].sentences;
-              }
-              datasets.current[i] = DocumentsDatasetsController.createDataset(opts.dataset);
-              dataset = datasets.current[i];
-            }
-          }
-          if (!updated) return cb(null, new Error(`Dataset not updated in mongodb`));
-          let mongoInfos = dataset;
-          return datasets.save(function (err, res) {
-            if (err) return cb(err);
-            // Create logs
-            return DocumentsLogsController.create(
-              {
-                target: datasets.document,
-                account: opts.user._id,
-                kind: CrudManager.actions.update._id,
-                key: `${opts.dataset.id}`
-              },
-              function (err, log) {
-                if (err) return cb(err);
-                return cb(null, mongoInfos);
-              }
-            );
-          });
-        }
-      );
-    });
-  });
-};
-
-/**
- * Delete dataset
- * @param {object} opts - JSON containing all data
- * @param {object} opts.user - User
- * @param {string} opts.datasetsId - Datasets id
- * @param {string} opts.dataset.id - Dataset id
- * @returns {undefined} undefined
- */
-Self.deleteDataset = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `datasetsId`) === `undefined`) return cb(new Error(`Missing required data: opts.datasetsId`));
-  if (typeof _.get(opts, `dataset.id`) === `undefined`) return cb(new Error(`Missing required data: opts.dataset.id`));
-  return Documents.findOne({ datasets: opts.datasetsId }).exec(function (err, doc) {
-    if (err) return cb(err);
-    if (!doc) return cb(null, new Error(`Document not found`));
-    let accessRights = AccountsManager.getAccessRights(opts.user);
-    if (doc.locked && (accessRights.isStandardUser || accessRights.isVisitor))
-      return cb(null, new Error(`Document is locked`));
-    // Init transaction
-    let transaction = DocumentsDatasets.findOne({ _id: opts.datasetsId });
-    // Execute transaction
-    return transaction.exec(function (err, datasets) {
-      if (err) return cb(err);
-      if (!datasets) return cb(null, new Error(`Datasets not found`));
-      return Self.deleteDatasetInTEI(
-        {
-          documentId: datasets.document,
-          dataset: { id: opts.dataset.id },
-          user: opts.user
-        },
-        function (err, teiInfos) {
-          if (err) return cb(err);
-          if (teiInfos instanceof Error) return cb(null, teiInfos);
-          // Check dataset with opts.id already exist
-          let deleted = false;
-          let dataset;
-          for (let i = 0; i < datasets.current.length; i++) {
-            // update dataset
-            if (datasets.current[i].id === opts.dataset.id) {
-              datasets.current[i].sentences = [];
-              datasets.current[i].dataInstanceId = null;
-              dataset = datasets.current.splice(i, 1)[0];
-              datasets.deleted.push(dataset);
-              deleted = true;
-            }
-          }
-          if (!deleted) return cb(null, new Error(`Dataset not deleted in mongodb`));
-          let mongoInfos = dataset;
-          return datasets.save(function (err, res) {
-            if (err) return cb(err);
-            // Create logs
-            return DocumentsLogsController.create(
-              {
-                target: datasets.document,
-                account: opts.user._id,
-                kind: CrudManager.actions.delete._id,
-                key: `${opts.dataset.id}`
-              },
-              function (err, log) {
-                if (err) return cb(err);
-                return cb(null, mongoInfos);
-              }
-            );
-          });
-        }
-      );
-    });
-  });
-};
-
-/**
- * Create new link
- * @param {object} opts - JSON containing all data
- * @param {object} opts.user - Account
- * @param {string} opts.datasetsId - Datasets id
- * @param {string} opts.link - Link
- * @param {string} opts.link.dataset - Dataset
- * @param {string} opts.link.dataset.id - Dataset id
- * @param {string} opts.link.sentence - Linked sentence
- * @param {string} opts.link.sentence.id - Linked sentence id
- * @param {function} cb - Callback function(err, res) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.linkSentence = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `datasetsId`) === `undefined`) return cb(new Error(`Missing required data: opts.datasetsId`));
-  if (typeof _.get(opts, `link.sentence.id`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.link.sentence.id`));
-  if (typeof _.get(opts, `link.dataset.id`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.link.dataset.id`));
-  return Documents.findOne({ datasets: opts.datasetsId }).exec(function (err, doc) {
-    if (err) return cb(err);
-    if (!doc) return cb(null, new Error(`Document not found`));
-    let accessRights = AccountsManager.getAccessRights(opts.user);
-    if (doc.locked && (accessRights.isStandardUser || accessRights.isVisitor))
-      return cb(null, new Error(`Document is locked`));
-    // Init transaction
-    let transaction = DocumentsDatasets.findOne({ _id: opts.datasetsId });
-    // Execute transaction
-    return transaction.exec(function (err, datasets) {
-      if (err) return cb(err);
-      if (!datasets) return cb(null, new Error(`Datasets not found`));
-      return Self.linkSentenceInTEI(
-        {
-          documentId: datasets.document,
-          sentence: { id: opts.link.sentence.id },
-          dataset: { id: opts.link.dataset.id },
-          user: opts.user
-        },
-        function (err, teiInfos) {
-          if (err) return cb(err);
-          if (teiInfos instanceof Error) return cb(null, teiInfos);
-          // Check dataset with opts.id exist
-          let updated = false;
-          let dataset;
-          for (let i = 0; i < datasets.current.length; i++) {
-            // update dataset
-            if (datasets.current[i].id === opts.link.dataset.id) {
-              updated = true;
-              dataset = datasets.current[i];
-              let sentenceAlreadyLinked = false;
-              dataset.sentences.map(function (sentence) {
-                if (sentence.id === teiInfos.sentence.id) sentenceAlreadyLinked = true;
-              });
-              if (!sentenceAlreadyLinked) dataset.sentences.push(teiInfos.sentence);
-            }
-          }
-          if (!updated) return cb(null, new Error(`Dataset not linked in mongodb`));
-          let mongoInfos = dataset;
-          return datasets.save(function (err, res) {
-            if (err) return cb(err);
-            // Create logs
-            return DocumentsLogsController.create(
-              {
-                target: datasets.document,
-                account: opts.user._id,
-                kind: CrudManager.actions.update._id,
-                key: `${opts.link.dataset.id}`
-              },
-              function (err, log) {
-                if (err) return cb(err);
-                return cb(null, mongoInfos);
-              }
-            );
-          });
-        }
-      );
-    });
-  });
-};
-
-/**
- * Delete link
- * @param {object} opts - JSON containing all data
- * @param {object} opts.user - Account
- * @param {string} opts.datasetsId - Datasets id
- * @param {string} opts.link - Link
- * @param {string} opts.link.dataset - Dataset
- * @param {string} opts.link.dataset.id - Dataset id
- * @param {string} opts.link.sentence - Linked sentence
- * @param {string} opts.link.sentence.id - Linked sentence id
- * @param {function} cb - Callback function(err, res) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.unlinkSentence = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `datasetsId`) === `undefined`) return cb(new Error(`Missing required data: opts.datasetsId`));
-  if (typeof _.get(opts, `link.sentence.id`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.link.sentence.id`));
-  if (typeof _.get(opts, `link.dataset.id`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.link.dataset.id`));
-  return Documents.findOne({ datasets: opts.datasetsId }).exec(function (err, doc) {
-    if (err) return cb(err);
-    if (!doc) return cb(null, new Error(`Document not found`));
-    let accessRights = AccountsManager.getAccessRights(opts.user);
-    if (doc.locked && (accessRights.isStandardUser || accessRights.isVisitor))
-      return cb(null, new Error(`Document is locked`));
-    // Init transaction
-    let transaction = DocumentsDatasets.findOne({ _id: opts.datasetsId });
-    // Execute transaction
-    return transaction.exec(function (err, datasets) {
-      if (err) return cb(err);
-      else if (!datasets) return cb(null, new Error(`Datasets not found`));
-      return Self.unlinkSentenceInTEI(
-        {
-          documentId: datasets.document,
-          sentence: { id: opts.link.sentence.id },
-          dataset: { id: opts.link.dataset.id },
-          user: opts.user
-        },
-        function (err, teiInfos) {
-          if (err) return cb(err);
-          if (teiInfos instanceof Error) return cb(null, teiInfos);
-          // Check dataset with opts.id exist
-          let updated = false;
-          let dataset;
-          for (let i = 0; i < datasets.current.length; i++) {
-            // update dataset
-            if (datasets.current[i].id === teiInfos.dataset.id) {
-              dataset = datasets.current[i];
-              let sentenceIndex = dataset.sentences.reduce(function (acc, sentence, index) {
-                if (sentence.id === teiInfos.sentence.id) acc = index;
-                return acc;
-              }, -1);
-              if (sentenceIndex > -1) {
-                updated = true;
-                dataset.sentences.splice(sentenceIndex, 1);
-              }
-            }
-          }
-          if (!updated) return cb(null, new Error(`Dataset not unlinked in mongodb`));
-          let mongoInfos = dataset;
-          return datasets.save(function (err, res) {
-            if (err) return cb(err);
-            // Create logs
-            return DocumentsLogsController.create(
-              {
-                target: datasets.document,
-                account: opts.user._id,
-                kind: CrudManager.actions.update._id,
-                key: `${opts.link.dataset.id}`
-              },
-              function (err, log) {
-                if (err) return cb(err);
-                return cb(null, mongoInfos);
-              }
-            );
-          });
-        }
-      );
-    });
-  });
-};
-
-/**
- * Refresh datasets in TEI
- * @param {object} opts JSON object containing all data
- * @param {object} opts.user - Current user
- * @param {string} opts.documentId - Document id
- * @param {array} opts.datasets - datasets
- * @param {function} cb - Callback function(err) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.refreshDatasetsInTEI = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
-  if (typeof _.get(opts, `datasets`) === `undefined`) return cb(new Error(`Missing required data: opts.datasets`));
-  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
-      if (err) return cb(err);
-      let teiInfos = XML.refreshDatasets(XML.load(content.data.toString(DocumentsFilesController.encoding)), {
-        datasets: opts.datasets
-      });
-      if (teiInfos.err) return cb(null, new Error(`Dataset not linked in TEI`));
-      return DocumentsFilesController.rewriteFile(doc.tei.toString(), teiInfos.res.xml, function (err) {
-        if (err) return cb(err);
-        else return cb(null);
-      });
-    });
-  });
-};
-
-/**
- * Try to fix the TEI content
- * @param {object} opts JSON object containing all data
- * @param {object} opts.user - Current user
- * @param {string} opts.documentId - Document id
- * @param {function} cb - Callback function(err) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.fixTEIContent = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
-  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    return DocumentsFilesController.readFileContent({ data: { id: doc.tei.toString() } }, function (err, content) {
-      if (err) return cb(err);
-      let oldContent = content.data.toString(DocumentsFilesController.encoding);
-      let chars = `</TEI>`;
-      let indexOfChars = oldContent.indexOf(chars);
-      let isCorrect = indexOfChars + chars.length === oldContent.length;
-      if (isCorrect) return cb(null);
-      let newContent = oldContent.substring(0, indexOfChars + chars.length);
-      return fs.writeFile(
-        `${content.path}.save`,
-        oldContent,
-        { encoding: DocumentsFilesController.encoding },
-        function (err) {
-          if (err) return cb(err);
-          return DocumentsFilesController.rewriteFile(doc.tei.toString(), newContent, function (err) {
-            if (err) return cb(err);
-            else return cb(null);
-          });
-        }
-      );
-    });
-  });
+  );
 };
 
 /**
@@ -3138,174 +2712,6 @@ Self.detectNewSentences = function (opts = {}, cb) {
 };
 
 /**
- * Add dataset in TEI file
- * @param {object} opts - JSON object containing all data
- * @param {object} opts.user - Current user
- * @param {string} opts.documentId - Document id
- * @param {string} opts.sentence - Linked sentence
- * @param {string} opts.sentence.id - Linked sentence id
- * @param {object} opts.dataset - JSON object containing all dataset infos
- * @param {string} opts.dataset.dataInstanceId - Dataset dataInstanceId
- * @param {string} opts.dataset.id - Dataset id
- * @param {string} opts.dataset.type - Dataset type
- * @param {string} opts.dataset.cert - Dataset cert
- * @param {function} cb - Callback function(err) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.addDatasetInTEI = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
-  if (typeof _.get(opts, `sentence.id`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.sentence.id`));
-  if (typeof _.get(opts, `dataset`) === `undefined`) return cb(new Error(`Missing required data: opts.dataset`));
-  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
-      if (err) return cb(err);
-      let teiInfos = XML.addDataset(XML.load(content.data.toString(DocumentsFilesController.encoding)), opts);
-      if (teiInfos.err) return cb(null, new Error(`Dataset not created in TEI`));
-      return DocumentsFilesController.rewriteFile(doc.tei.toString(), teiInfos.res.xml, function (err) {
-        if (err) return cb(err);
-        else return cb(null, teiInfos.res.data);
-      });
-    });
-  });
-};
-
-/**
- * Update dataset in TEI file
- * @param {object} opts - JSON object containing all data
- * @param {object} opts.user - Current user
- * @param {string} opts.documentId - Document id
- * @param {object} opts.dataset - JSON object containing all dataset infos
- * @param {string} opts.dataset.dataInstanceId - Dataset dataInstanceId
- * @param {string} opts.dataset.id - Dataset id
- * @param {string} opts.dataset.type - Dataset type
- * @param {string} opts.dataset.cert - Dataset cert
- * @param {function} cb - Callback function(err) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.updateDatasetInTEI = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
-  if (typeof _.get(opts, `dataset.id`) === `undefined`) return cb(new Error(`Missing required data: opts.dataset.id`));
-  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
-      if (err) return cb(err);
-      let teiInfos = XML.updateDataset(XML.load(content.data.toString(DocumentsFilesController.encoding)), opts);
-      if (teiInfos.err) return cb(null, new Error(`Dataset not updated in TEI`));
-      return DocumentsFilesController.rewriteFile(doc.tei.toString(), teiInfos.res.xml, function (err) {
-        if (err) return cb(err);
-        else return cb(null, teiInfos.res.data);
-      });
-    });
-  });
-};
-
-/**
- * Delete dataset in TEI file
- * @param {object} opts JSON object containing all data
- * @param {object} opts.user - Current user
- * @param {string} opts.documentId - Document id
- * @param {object} opts.dataset - JSON object containing all dataset infos
- * @param {string} opts.dataset.id - Dataset id
- * @param {function} cb - Callback function(err) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.deleteDatasetInTEI = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
-  if (typeof _.get(opts, `dataset.id`) === `undefined`) return cb(new Error(`Missing required data: opts.dataset.id`));
-  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
-      if (err) return cb(err);
-      let teiInfos = XML.deleteDataset(XML.load(content.data.toString(DocumentsFilesController.encoding)), opts);
-      if (teiInfos.err) return cb(null, new Error(`Dataset not deleted in TEI`));
-      return DocumentsFilesController.rewriteFile(doc.tei.toString(), teiInfos.res.xml, function (err) {
-        if (err) return cb(err);
-        else return cb(null, teiInfos.res.data);
-      });
-    });
-  });
-};
-
-/**
- * Add link in TEI file
- * @param {object} opts JSON object containing all data
- * @param {object} opts.user - Current user
- * @param {string} opts.documentId - Document id
- * @param {string} opts.sentence - Linked sentence
- * @param {string} opts.sentence.id - Linked sentence id
- * @param {object} opts.dataset - JSON object containing all dataset infos
- * @param {string} opts.dataset.id - Dataset id
- * @param {function} cb - Callback function(err) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.linkSentenceInTEI = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
-  if (typeof _.get(opts, `dataset.id`) === `undefined`) return cb(new Error(`Missing required data: opts.dataset.id`));
-  if (typeof _.get(opts, `sentence.id`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.sentence.id`));
-  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
-      if (err) return cb(err);
-      let teiInfos = XML.linkSentence(XML.load(content.data.toString(DocumentsFilesController.encoding)), opts);
-      if (teiInfos.err) return cb(null, new Error(`Dataset not linked in TEI`));
-      return DocumentsFilesController.rewriteFile(doc.tei.toString(), teiInfos.res.xml, function (err) {
-        if (err) return cb(err);
-        else return cb(null, teiInfos.res.data);
-      });
-    });
-  });
-};
-
-/**
- * Delete link in TEI file
- * @param {object} opts JSON object containing all data
- * @param {object} opts.user - Current user
- * @param {string} opts.documentId - Document id
- * @param {string} opts.sentence - Linked sentence
- * @param {string} opts.sentence.id - Linked sentence id
- * @param {object} opts.dataset - JSON object containing all dataset infos
- * @param {string} opts.dataset.id - Dataset id
- * @param {function} cb - Callback function(err) (err: error process OR null)
- * @returns {undefined} undefined
- */
-Self.unlinkSentenceInTEI = function (opts = {}, cb) {
-  // Check all required data
-  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
-  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
-  if (typeof _.get(opts, `dataset.id`) === `undefined`) return cb(new Error(`Missing required data: opts.dataset.id`));
-  if (typeof _.get(opts, `sentence.id`) === `undefined`)
-    return cb(new Error(`Missing required data: opts.sentence.id`));
-  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
-    if (err) return cb(err);
-    if (doc instanceof Error) return cb(null, doc);
-    return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
-      if (err) return cb(err);
-      let teiInfos = XML.unlinkSentence(XML.load(content.data.toString(DocumentsFilesController.encoding)), opts);
-      if (teiInfos.err) return cb(null, new Error(`Dataset not unlinked in TEI`));
-      return DocumentsFilesController.rewriteFile(doc.tei.toString(), teiInfos.res.xml, function (err) {
-        if (err) return cb(err);
-        else return cb(null, teiInfos.res.data);
-      });
-    });
-  });
-};
-
-/**
  * Get all documents
  * @param {object} opts - Options available (You must call getUploadParams)
  * @param {object} opts.data - Data available
@@ -3326,6 +2732,8 @@ Self.unlinkSentenceInTEI = function (opts = {}, cb) {
  * @param {boolean} opts.data.[pdf] - Populate pdf property (default: false)
  * @param {boolean} opts.data.[tei] - Populate tei property (default: false)
  * @param {boolean} opts.data.[files] - Populate files property (default: false)
+ * @param {boolean} opts.data.[dataObjects] - Populate dataObjects current, deleted & extracted property (default: false)
+ * @param {boolean} opts.data.[dataObjectsMetadata] - Populate dataObjects.metadata property (default: false)
  * @param {object} opts.user - Current user
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: array of documents instance OR undefined)
  * @returns {undefined} undefined
@@ -3363,7 +2771,8 @@ Self.all = function (opts = {}, cb) {
   let tei = Params.convertToBoolean(opts.data.tei);
   let files = Params.convertToBoolean(opts.data.files);
   let metadata = Params.convertToBoolean(opts.data.metadata);
-  let datasets = Params.convertToBoolean(opts.data.datasets);
+  let dataObjects = Params.convertToBoolean(opts.data.dataObjects);
+  let dataObjectsMetadata = Params.convertToBoolean(opts.data.dataObjectsMetadata);
   let filter = Params.convertToString(opts.data.filter);
   let filterFields = Params.convertToArray(opts.data.filterFields, `string`);
   let query = {};
@@ -3480,7 +2889,12 @@ Self.all = function (opts = {}, cb) {
       transaction.populate(`organizations`);
       transaction.populate(`upload.organizations`);
       if (metadata) transaction.populate(`metadata`);
-      if (datasets) transaction.populate(`datasets`);
+      if (dataObjects) {
+        transaction.populate(`dataObjects.current`);
+        transaction.populate(`dataObjects.deleted`);
+        transaction.populate(`dataObjects.extracted`);
+      }
+      if (dataObjectsMetadata) transaction.populate(`dataObjects.metadata`);
       if (pdf) transaction.populate(`pdf`);
       if (tei) transaction.populate(`tei`);
       if (files) transaction.populate(`files`);
@@ -3559,28 +2973,31 @@ Self.getReportData = function (opts = {}, cb) {
   if (opts.data.kind === `docx` && opts.data.organization !== `default`)
     return cb(new Error(`Bad value: opts.data.organization`));
   return Self.get(
-    { data: { id: opts.data.id, datasets: true, metadata: true, pdf: true, tei: true }, user: opts.user },
+    {
+      data: { id: opts.data.id, dataObjects: true, dataObjectsMetadata: true, metadata: true, pdf: true, tei: true },
+      user: opts.user
+    },
     function (err, doc) {
       if (err) return cb(err);
       if (doc instanceof Error) return cb(null, doc);
       if (opts.data.kind === `html`) {
         if (opts.data.organization === `default` || opts.data.organization === `bioRxiv`) {
-          let sortedDatasetsInfos = Self.getSortedDatasetsInfos(doc, opts.data.dataTypes);
-          let datasetsSummary = DataTypes.getDatasetsSummary(sortedDatasetsInfos.all, opts.data.dataTypes);
+          let sortedDataObjectsInfo = Self.getSortedDataObjectsInfo(doc, opts.data.dataTypes);
+          let dataObjectsSummary = DataTypes.getDataObjectsSummary(sortedDataObjectsInfo.all, opts.data.dataTypes);
           let bestPractices = DataTypes.getBestPractices(
             [].concat(
-              sortedDatasetsInfos.protocols,
-              sortedDatasetsInfos.datasets,
-              sortedDatasetsInfos.codes,
-              sortedDatasetsInfos.softwares,
-              sortedDatasetsInfos.reagents
+              sortedDataObjectsInfo.protocols,
+              sortedDataObjectsInfo.datasets,
+              sortedDataObjectsInfo.codes,
+              sortedDataObjectsInfo.softwares,
+              sortedDataObjectsInfo.reagents
             ),
             opts.data.dataTypes
           );
           return cb(null, {
             doc,
-            sortedDatasetsInfos,
-            datasetsSummary,
+            sortedDataObjectsInfo,
+            dataObjectsSummary,
             bestPractices
           });
         }
@@ -3596,13 +3013,50 @@ Self.getReportData = function (opts = {}, cb) {
 };
 
 /**
- * Sort datasets of the given document (useful to create reports)
+ * Get sentences mapping of a given document
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {string} opts.documentId - Document id
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ */
+Self.getSentencesMapping = function (opts, cb) {
+  return Self.get({ data: { id: opts.documentId, tei: true, pdf: true }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    let mapping =
+      doc.pdf && doc.pdf.metadata && doc.pdf.metadata.mapping
+        ? doc.pdf.metadata.mapping.object
+        : doc.tei && doc.tei.metadata && doc.tei.metadata.mapping
+          ? doc.tei.metadata.mapping.object
+          : {};
+    return cb(null, mapping);
+  });
+};
+
+/**
+ * Get sentences mapping function
+ * @param {object} mapping - Sentence mapping
+ * @returns {function} Sorting function using mapping
+ */
+Self.sortSentencesUsingMapping = function (mapping) {
+  return function (a, b) {
+    let c = mapping[a.id] ? mapping[a.id] : null;
+    let d = mapping[b.id] ? mapping[b.id] : null;
+    if (c === null && d === null) return 0;
+    if (c === null) return 1;
+    if (d === null) return -1;
+    return c - d;
+  };
+};
+
+/**
+ * Sort dataObjects of the given document (useful to create reports)
  * @param {object} doc - Document mongodb object
  * @param {object} dataTypes - dataTypes object
- * @returns {object} sorted datasets
+ * @returns {object} sorted dataObjects
  */
-Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
-  let currentDatasets = _.get(doc, `datasets.current`, []);
+Self.getSortedDataObjectsInfo = function (doc, dataTypes = {}) {
+  let currentDataObjects = _.get(doc, `dataObjects.current`, []);
   let mapping =
     doc.pdf && doc.pdf.metadata && doc.pdf.metadata.mapping
       ? doc.pdf.metadata.mapping.object
@@ -3617,11 +3071,11 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
     if (d === null) return -1;
     return c - d;
   };
-  let orderedDatasets = currentDatasets
+  let orderedDataObjects = currentDataObjects
     .map(function (item) {
       // sort sentences
       let sentences = item.sentences.sort(sortSentences);
-      let type = DataTypes.getDataTypeInfos(item, dataTypes);
+      let type = DataTypes.getDataTypeInfo(item, dataTypes);
       return Object.assign({}, item.toJSON(), {
         type,
         sentences,
@@ -3633,22 +3087,22 @@ Self.getSortedDatasetsInfos = function (doc, dataTypes = {}) {
       let d = b.sentences && b.sentences[0] && b.sentences[0].id ? mapping[b.sentences[0].id] : Infinity;
       return c === d ? 0 : c < d ? -1 : 1;
     });
-  let protocols = orderedDatasets.filter(function (item) {
+  let protocols = orderedDataObjects.filter(function (item) {
     return item.kind === `protocol`;
   });
-  let codes = orderedDatasets.filter(function (item) {
+  let codes = orderedDataObjects.filter(function (item) {
     return item.kind === `code`;
   });
-  let softwares = orderedDatasets.filter(function (item) {
+  let softwares = orderedDataObjects.filter(function (item) {
     return item.kind === `software`;
   });
-  let reagents = orderedDatasets.filter(function (item) {
+  let reagents = orderedDataObjects.filter(function (item) {
     return item.kind === `reagent`;
   });
-  let datasets = orderedDatasets.filter(function (item) {
+  let datasets = orderedDataObjects.filter(function (item) {
     return item.kind === `dataset`;
   });
-  return { all: orderedDatasets, protocols, codes, softwares, reagents, datasets };
+  return { all: orderedDataObjects, protocols, codes, softwares, reagents, datasets };
 };
 
 /**
@@ -3726,7 +3180,8 @@ Self.updateOrCreateHypothesisAnnotation = function (opts, cb) {
  * @param {boolean} opts.data.[tei] - Populate tei property (default: false)
  * @param {boolean} opts.data.[files] - Populate files property (default: false)
  * @param {boolean} opts.data.[metadata] - Populate metadata property (default: false)
- * @param {boolean} opts.data.[datasets] - Populate datasets property (default: false)
+ * @param {boolean} opts.data.[dataObjects] - Populate dataObjects current, deleted & extracted property (default: false)
+ * @param {boolean} opts.data.[dataObjectsMetadata] - Populate dataObjects.metadata property (default: false)
  * @param {boolean} opts.[logs] - Specify if action must be logged (default: false)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
  * @returns {undefined} undefined
@@ -3746,7 +3201,8 @@ Self.get = function (opts = {}, cb) {
   let tei = Params.convertToBoolean(opts.data.tei);
   let files = Params.convertToBoolean(opts.data.files);
   let metadata = Params.convertToBoolean(opts.data.metadata);
-  let datasets = Params.convertToBoolean(opts.data.datasets);
+  let dataObjects = Params.convertToBoolean(opts.data.dataObjects);
+  let dataObjectsMetadata = Params.convertToBoolean(opts.data.dataObjectsMetadata);
   let query = {};
   if (accessRights.isVisitor || accessRights.isStandardUser) {
     query.visible = [true];
@@ -3767,7 +3223,12 @@ Self.get = function (opts = {}, cb) {
   transaction.populate(`organizations`);
   transaction.populate(`upload.organizations`);
   if (metadata) transaction.populate(`metadata`);
-  if (datasets) transaction.populate(`datasets`);
+  if (dataObjects) {
+    transaction.populate(`dataObjects.current`);
+    transaction.populate(`dataObjects.deleted`);
+    transaction.populate(`dataObjects.extracted`);
+  }
+  if (dataObjectsMetadata) transaction.populate(`dataObjects.metadata`);
   if (pdf) transaction.populate(`pdf`);
   if (tei) transaction.populate(`tei`);
   if (files) transaction.populate(`files`);
@@ -4011,31 +3472,48 @@ Self.delete = function (opts = {}, cb) {
         });
       },
       function (callback) {
-        let opts = {
-          documentId: doc._id
-        };
         return DocumentsLogsController.delete({ target: doc._id }, function (err) {
           if (err) return callback(err);
           return callback(err);
         });
       },
       function (callback) {
-        let opts = {
-          documentId: doc._id
-        };
         return DocumentsMetadata.deleteOne({ document: doc._id }, function (err) {
           if (err) return callback(err);
           return callback(err);
         });
       },
       function (callback) {
-        let opts = {
-          documentId: doc._id
-        };
         return DocumentsDatasets.deleteOne({ document: doc._id }, function (err) {
           if (err) return callback(err);
           return callback(err);
         });
+      },
+      function (callback) {
+        return DocumentsDataObjectsMetadata.deleteOne({ document: doc._id }, function (err) {
+          if (err) return callback(err);
+          return callback(err);
+        });
+      },
+      function (callback) {
+        return DocumentsDataObjectsController.all(
+          { user: opts.user, data: { documents: [doc._id] } },
+          function (err, res) {
+            if (err) return callback(err);
+            if (res instanceof Error) return callback(null, res);
+            if (!res || !Array.isArray(res.data)) return callback(null, new Error(`DataObjects not found`));
+            let dataObjectsIds = res.data.map(function (item) {
+              return item._id.toString();
+            });
+            if (dataObjectsIds.length < 1) return callback(err);
+            return DocumentsDataObjects.deleteMany({ _id: { $in: dataObjectsIds } }, function (err) {
+              if (err) return callback(err);
+              return DocumentsDataObjectsLogs.deleteMany({ target: { $in: dataObjectsIds } }, function (err) {
+                return callback(err);
+              });
+            });
+          }
+        );
       }
     ];
     // Execute all delete actions
