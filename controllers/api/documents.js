@@ -48,6 +48,7 @@ const OCR = require(`../../lib/ocr.js`);
 const ORCID = require(`../../lib/orcid.js`);
 const PdfManager = require(`../../lib/pdfManager.js`);
 const BioNLP = require(`../../lib/bioNLP.js`);
+const DataObjects = require(`../../lib/dataObjects.js`);
 
 const conf = require(`../../conf/conf.json`);
 const uploadConf = require(`../../conf/upload.json`);
@@ -1236,6 +1237,202 @@ Self.upload = function (opts = {}, cb) {
 };
 
 /**
+ * Convert Old document
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {boolean} opts.dataTypes - DataTypes
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.convertOldDocument = function (opts, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  let actions = [
+    function (acc, next) {
+      return Self.get(
+        { data: { id: opts.documentId.toString(), dataObjects: true, datasets: true }, user: opts.user },
+        function (err, doc) {
+          if (err) return next(err);
+          if (doc instanceof Error) return next(doc);
+          if (_.get(doc, `dataObjects.metadata`) !== null) return next(new Error(`This document can't be converted`));
+          doc.dataObjects = { metadata: null, current: [], deleted: [], extracted: [] };
+          acc.document = doc;
+          return next(null, acc);
+        }
+      );
+    },
+    function (acc, next) {
+      return DocumentsDataObjectsMetadata.create({ document: acc.document._id.toString() }, function (err, metadata) {
+        if (err) return next(err);
+        if (metadata instanceof Error) return next(metadata);
+        acc.document.dataObjects.metadata = metadata._id.toString();
+        acc.metadata = metadata;
+        return next(null, acc);
+      });
+    },
+    function (acc, next) {
+      // Create logs
+      return DocumentsLogsController.create(
+        {
+          target: acc.metadata.document,
+          account: opts.user._id,
+          kind: CrudManager.actions.create._id,
+          key: `documents.dataObjects.metadata`
+        },
+        function (err, log) {
+          if (err) return next(err);
+          if (log instanceof Error) return next(log);
+          return next(null, acc);
+        }
+      );
+    },
+    function (acc, next) {
+      return DocumentsFilesController.readFile({ data: { id: acc.document.tei.toString() } }, function (err, content) {
+        if (err) return next(err);
+        return Self.extractDataObjectsFromTEI(
+          {
+            file: {
+              id: acc.document.tei.toString(),
+              xmlString: content.data.toString(DocumentsFilesController.encoding)
+            },
+            user: opts.user,
+            dataTypes: opts.dataTypes,
+            setCustomDefaultProperties: uploadConf.setCustomDefaultProperties,
+            erase: true
+          },
+          function (err, dataObjects) {
+            if (err) return next(err);
+            if (dataObjects instanceof Error) return next(dataObjects);
+            let currentDataObjects = dataObjects.map(function (item) {
+              let d = {
+                document: acc.document,
+                dataObject: item,
+                isExtracted: false,
+                isDeleted: false,
+                saveDocument: false
+              };
+              return d;
+            });
+            return Self.addDataObjects({ user: opts.user, data: currentDataObjects }, function (err, res) {
+              if (err) return next(err);
+              let errors = res.filter(function (item) {
+                return item.err;
+              });
+              if (errors.length > 0) return next(errors);
+              return next(null, acc);
+            });
+          }
+        );
+      });
+    },
+    function (acc, next) {
+      // Create logs
+      return DocumentsLogsController.create(
+        {
+          target: acc.document._id,
+          account: opts.user._id,
+          kind: CrudManager.actions.update._id,
+          key: `convert documents.datasets.current`
+        },
+        function (err, log) {
+          if (err) return next(err);
+          if (log instanceof Error) return next(log);
+          return next(null, acc);
+        }
+      );
+    },
+    // Directly create dataObjects (no need to write nything in the TEI)
+    function (acc, next) {
+      let extractedDataObjects = acc.document.datasets.extracted.map(function (item) {
+        let d = DataObjects.create(item);
+        d.document = acc.document._id.toString();
+        d.extracted = true;
+        d.deleted = false;
+        return d;
+      });
+      let deletedDataObjects = acc.document.datasets.deleted.map(function (item) {
+        let d = DataObjects.create(item);
+        d.document = acc.document._id.toString();
+        d.extracted = false;
+        d.deleted = true;
+        return d;
+      });
+      let dataObjects = [].concat(extractedDataObjects).concat(deletedDataObjects);
+      if (dataObjects.length <= 0) return next(null, acc);
+      return async.mapSeries(
+        dataObjects,
+        function (item, _next) {
+          return DocumentsDataObjects.create(item, function (err, dataObject) {
+            if (err) return _next(err);
+            if (dataObject instanceof Error) return _next(dataObject);
+            if (item.deleted) acc.document.dataObjects.deleted.push(dataObject._id.toString());
+            if (item.extracted) acc.document.dataObjects.extracted.push(dataObject._id.toString());
+            return _next();
+          });
+        },
+        function (err) {
+          if (err) return next(err, acc);
+          return next(null, acc);
+        }
+      );
+    },
+    function (acc, next) {
+      // Create logs
+      return DocumentsLogsController.create(
+        {
+          target: acc.document._id,
+          account: opts.user._id,
+          kind: CrudManager.actions.update._id,
+          key: `convert documents.datasets.deleted`
+        },
+        function (err, log) {
+          if (err) return next(err);
+          if (log instanceof Error) return next(log);
+          return next(null, acc);
+        }
+      );
+    },
+    function (acc, next) {
+      // Create logs
+      return DocumentsLogsController.create(
+        {
+          target: acc.document._id,
+          account: opts.user._id,
+          kind: CrudManager.actions.update._id,
+          key: `convert documents.datasets.extracted`
+        },
+        function (err, log) {
+          if (err) return next(err);
+          if (log instanceof Error) return next(log);
+          return next(null, acc);
+        }
+      );
+    },
+    function (acc, next) {
+      return acc.document.save(function (err) {
+        if (err) return next(err);
+        return next(null, acc.document);
+      });
+    }
+  ];
+  return async.reduce(
+    actions,
+    {},
+    function (acc, action, next) {
+      return action(acc, function (err, acc) {
+        return next(err, acc);
+      });
+    },
+    function (err, res) {
+      if (err) return cb(err);
+      return cb(null, res);
+    }
+  );
+};
+
+/**
  * Extract data from softcie result
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
@@ -1252,11 +1449,11 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
   return Self.get(
     { data: { id: opts.documentId.toString(), dataObjects: true, pdf: true }, user: opts.user },
     function (err, doc) {
+      if (err) return cb(err);
+      if (doc instanceof Error) return cb(null, doc);
       let codeAndSoftware = doc.dataObjects.current.filter(function (item) {
         return item.kind === `code` || item.kind === `software`;
       });
-      if (err) return cb(err);
-      if (doc instanceof Error) return cb(null, doc);
       return Self.getSoftciteResults(
         {
           documentId: opts.documentId.toString(),
@@ -1379,11 +1576,11 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
   return Self.get(
     { data: { id: opts.documentId.toString(), dataObjects: true }, user: opts.user },
     function (err, doc) {
+      if (err) return cb(err);
+      if (doc instanceof Error) return cb(null, doc);
       let labMaterials = doc.dataObjects.current.filter(function (item) {
         return item.kind === `reagents`;
       });
-      if (err) return cb(err);
-      if (doc instanceof Error) return cb(null, doc);
       return Self.getBioNLPResults(
         {
           documentId: opts.documentId.toString(),
@@ -3200,6 +3397,7 @@ Self.get = function (opts = {}, cb) {
   let pdf = Params.convertToBoolean(opts.data.pdf);
   let tei = Params.convertToBoolean(opts.data.tei);
   let files = Params.convertToBoolean(opts.data.files);
+  let datasets = Params.convertToBoolean(opts.data.datasets);
   let metadata = Params.convertToBoolean(opts.data.metadata);
   let dataObjects = Params.convertToBoolean(opts.data.dataObjects);
   let dataObjectsMetadata = Params.convertToBoolean(opts.data.dataObjectsMetadata);
@@ -3223,6 +3421,7 @@ Self.get = function (opts = {}, cb) {
   transaction.populate(`organizations`);
   transaction.populate(`upload.organizations`);
   if (metadata) transaction.populate(`metadata`);
+  if (datasets) transaction.populate(`datasets`);
   if (dataObjects) {
     transaction.populate(`dataObjects.current`);
     transaction.populate(`dataObjects.deleted`);

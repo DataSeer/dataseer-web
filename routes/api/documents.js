@@ -213,6 +213,7 @@ router.get(`/:id`, function (req, res, next) {
       tei: Params.convertToBoolean(req.query.tei),
       files: Params.convertToBoolean(req.query.files),
       metadata: Params.convertToBoolean(req.query.metadata),
+      datasets: Params.convertToBoolean(req.query.datasets),
       dataObjects: Params.convertToBoolean(req.query.dataObjects),
       dataObjectsMetadata: Params.convertToBoolean(req.query.dataObjectsMetadata)
     },
@@ -287,6 +288,22 @@ router.delete(`/:id`, function (req, res, next) {
         return res.json({ err: isError, res: result });
       }
     );
+});
+
+/* UPDATE Document BY ID */
+router.put(`/:id/convert`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { documentId: req.params.id, dataTypes: req.app.get(`dataTypes`), user: req.user };
+  return DocumentsController.convertOldDocument(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error || Array.isArray(data); // Case there are multiple errors
+    let result = isError ? (Array.isArray(data) ? data : data.toString()) : data;
+    return res.json({ err: isError, res: result });
+  });
 });
 
 /* POST Bulk of dataObjects on given document */
