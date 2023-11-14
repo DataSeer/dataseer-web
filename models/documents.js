@@ -31,6 +31,7 @@ const Schema = new mongoose.Schema(
     softcite: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (softcite)
     pdf: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (pdf)
     tei: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (tei)
+    datasets: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDatasets` }, // refers to documents.metadata collection item
     dataObjects: {
       metadata: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDataObjectsMetadata`, default: null }, // refers to documents.dataObjectsMetadata collection item
       current: [{ type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDataObjects` }], // refers to documents.DocumentsDataObjects collection item
