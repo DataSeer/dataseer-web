@@ -123,7 +123,7 @@ Self.importDataObjects = function (opts = {}, cb) {
                 return next(null, acc);
               }
               let dataObjects = _.get(doc, `dataObjects.current`);
-              acc[item.kind] = { doc: doc };
+              acc[item.kind] = { document: doc };
               acc[item.kind].dataObjects = typeof dataObjects === `undefined` ? [] : dataObjects.toObject();
               acc[item.kind].metadata = doc.pdf && doc.pdf.metadata ? doc.pdf.metadata : doc.tei.metadata;
               acc[item.kind].tei = { id: doc.tei._id.toString(), content: content.data };
@@ -154,8 +154,7 @@ Self.importDataObjects = function (opts = {}, cb) {
             function (item, next) {
               let dataObject = JSON.parse(JSON.stringify(item));
               let cp = JSON.parse(JSON.stringify(dataObject));
-              let sentences = dataObject.sentences;
-              let alreadyExist = DocumentsDataObjectsController.dataObjectsAlreadyExist(
+              let alreadyExist = DataObjects.dataObjectsAlreadyExist(
                 res.target.dataObjects,
                 dataObject,
                 Analyzer.softMatch
@@ -165,13 +164,20 @@ Self.importDataObjects = function (opts = {}, cb) {
                 return next();
               }
               result.merged.push(cp);
-              if (opts.data.onlyLogs) return next();
+              return next();
             },
             function (err) {
               if (err) return cb(null, err);
+              if (opts.data.onlyLogs) return cb(null, result);
               let mergedDataObjects = result.merged.map(function (item) {
-                let d = { document: doc, dataObject: item, isExtracted: false, isDeleted: false, saveDocument: true };
-                d.dataObject.document = doc._id.toString();
+                let d = {
+                  document: res.target.document,
+                  dataObject: item,
+                  isExtracted: false,
+                  isDeleted: false,
+                  saveDocument: true
+                };
+                d.dataObject.document = res.target.document._id.toString();
                 return d;
               });
               return Self.addDataObjects(
