@@ -47,7 +47,7 @@
     <section>
         div.subtitle Summary List of datasets associated with article:
         <ul>
-            each item in [{"key":"protocols","label": "Protocol(s)"},{"key":"datasets","label": "Dataset(s)"},{"key":"codes","label": "Code(s)"},{"key":"reagents","label": "Reagents/Materials/Lab Resources"}]
+            each item in [{"key":"protocols","label": "Protocol(s)"},{"key":"datasets","label": "Dataset(s)"},{"key":"code","label": "Code"},{"key":"reagents","label": "Reagents/Materials/Lab Resources"}]
               li #{`${reportData.sortedDataObjectsInfo[item.key].length} ${item.label}`}
                 if (item.key === "datasets")
                   each dataType in reportData.dataObjectsSummary
@@ -164,12 +164,12 @@
           <th>Data Sentence from Method</th>
           <th>Dataset Permanent Link</th>
         </tr>
-        if (reportData.sortedDataObjectsInfo.codes.length === 0)
+        if (reportData.sortedDataObjectsInfo.code.length === 0)
           <tr>
             <td colspan=9 style="text-align: center;">None</td>
           </tr>
         else
-          each item, index in reportData.sortedDataObjectsInfo.codes
+          each item, index in reportData.sortedDataObjectsInfo.code
             <tr>
               <td style="text-align: center;"><input type="checkbox"></td>
               <td>#{item.reuse ? "Yes" : "No"}</td>

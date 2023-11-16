@@ -12,17 +12,17 @@ const mappings = {
     'published protocol': require(`./mappings/protocols.pp.json`),
     'surveys and questionnaires': require(`./mappings/protocols.s&q.json`)
   },
-  'softwares': {
-    'custom scripts': require(`./mappings/softwares.custom-scripts.json`),
-    '': require(`./mappings/softwares.none.json`),
-    'software package': require(`./mappings/softwares.software-package.json`),
-    'software': require(`./mappings/softwares.software.json`)
+  'software': {
+    'custom scripts': require(`./mappings/software.custom-scripts.json`),
+    '': require(`./mappings/software.none.json`),
+    'software package': require(`./mappings/software.software-package.json`),
+    'software': require(`./mappings/software.software.json`)
   },
-  'codes': {
-    'custom scripts': require(`./mappings/codes.custom-scripts.json`),
-    '': require(`./mappings/codes.none.json`),
-    'software package': require(`./mappings/codes.software-package.json`),
-    'software': require(`./mappings/codes.software.json`)
+  'code': {
+    'custom scripts': require(`./mappings/code.custom-scripts.json`),
+    '': require(`./mappings/code.none.json`),
+    'software package': require(`./mappings/code.software-package.json`),
+    'software': require(`./mappings/code.software.json`)
   },
   'reagents': require(`./mappings/reagents.json`)
 };
@@ -55,17 +55,17 @@ module.exports = {
     'published protocol': buildMapping(mappings.protocols[`published protocol`]),
     'surveys and questionnaires': buildMapping(mappings.protocols[`surveys and questionnaires`])
   },
-  'softwares': {
-    'custom scripts': buildMapping(mappings.softwares[`custom scripts`]),
-    '': buildMapping(mappings.softwares[``]),
-    'software package': buildMapping(mappings.softwares[`software package`]),
-    'software': buildMapping(mappings.softwares[`software`])
+  'software': {
+    'custom scripts': buildMapping(mappings.software[`custom scripts`]),
+    '': buildMapping(mappings.software[``]),
+    'software package': buildMapping(mappings.software[`software package`]),
+    'software': buildMapping(mappings.software[`software`])
   },
-  'codes': {
-    'custom scripts': buildMapping(mappings.codes[`custom scripts`]),
-    '': buildMapping(mappings.codes[``]),
-    'software package': buildMapping(mappings.codes[`software package`]),
-    'software': buildMapping(mappings.codes[`software`])
+  'code': {
+    'custom scripts': buildMapping(mappings.code[`custom scripts`]),
+    '': buildMapping(mappings.code[``]),
+    'software package': buildMapping(mappings.code[`software package`]),
+    'software': buildMapping(mappings.code[`software`])
   },
   'reagents': buildMapping(mappings.reagents)
 };

@@ -52,7 +52,7 @@
           done: isNaN(convertedParams.reUseDatasetsDone) ? -Infinity : convertedParams.reUseDatasetsDone,
           total: isNaN(convertedParams.reUseDatasetsTotal) ? -Infinity : convertedParams.reUseDatasetsTotal
         },
-        codes: {
+        code: {
           name: PARAMS.convertToString(urlParams.reUseCodesName),
           color: PARAMS.convertToString(urlParams.reUseCodesColor) || `#0c8dc3`,
           done: isNaN(convertedParams.reUseCodesDone) ? -Infinity : convertedParams.reUseCodesDone,
@@ -78,7 +78,7 @@
           done: isNaN(convertedParams.newDatasetsDone) ? -Infinity : convertedParams.newDatasetsDone,
           total: isNaN(convertedParams.newDatasetsTotal) ? -Infinity : convertedParams.newDatasetsTotal
         },
-        codes: {
+        code: {
           name: PARAMS.convertToString(urlParams.newCodesName),
           color: PARAMS.convertToString(urlParams.newCodesColor) || `#0c8dc3`,
           done: isNaN(convertedParams.newCodesDone) ? -Infinity : convertedParams.newCodesDone,
@@ -107,12 +107,12 @@
 
   const slicesColor = [
     params.data.new.datasets.color,
-    params.data.new.codes.color,
+    params.data.new.code.color,
     params.data.new.materials.color,
     params.data.new.protocols.color,
     params.data.reUse.protocols.color,
     params.data.reUse.materials.color,
-    params.data.reUse.codes.color,
+    params.data.reUse.code.color,
     params.data.reUse.datasets.color
   ];
 
@@ -126,11 +126,11 @@
       background: `#FFFFFF`
     }, // Top right slice
     {
-      name: params.data.new.codes.name ? params.data.new.codes.name : `New Code/Software\\Shared`,
-      done: params.data.new.codes.done,
-      total: params.data.new.codes.total,
+      name: params.data.new.code.name ? params.data.new.code.name : `New Code/Software\\Shared`,
+      done: params.data.new.code.done,
+      total: params.data.new.code.total,
       opacity: 0.9,
-      color: params.data.new.codes.color,
+      color: params.data.new.code.color,
       background: `#FFFFFF`
     },
     {
@@ -166,11 +166,11 @@
       background: `#FFFFFF`
     },
     {
-      name: params.data.reUse.codes.name ? params.data.reUse.codes.name : `Reuse Code/Software\\Cited`,
-      done: params.data.reUse.codes.done,
-      total: params.data.reUse.codes.total,
+      name: params.data.reUse.code.name ? params.data.reUse.code.name : `Reuse Code/Software\\Cited`,
+      done: params.data.reUse.code.done,
+      total: params.data.reUse.code.total,
       opacity: 0.6,
-      color: params.data.reUse.codes.color,
+      color: params.data.reUse.code.color,
       background: `#FFFFFF`
     },
     {
@@ -403,10 +403,10 @@
     let protocols = query.res.datasets.current.filter(function (item) {
       return item.kind === `protocol`;
     });
-    let codes = query.res.datasets.current.filter(function (item) {
+    let code = query.res.datasets.current.filter(function (item) {
       return item.kind === `code`;
     });
-    let softwares = query.res.datasets.current.filter(function (item) {
+    let software = query.res.datasets.current.filter(function (item) {
       return item.kind === `software`;
     });
     let reagents = query.res.datasets.current.filter(function (item) {
@@ -424,10 +424,10 @@
         return !item.reuse;
       }).length;
     if (data[1].done < 0)
-      data[1].done = codes.filter(function (item) {
+      data[1].done = code.filter(function (item) {
         return item.status === `valid`;
       }).length;
-    if (data[1].total < 0) data[1].total = codes.length;
+    if (data[1].total < 0) data[1].total = code.length;
     if (data[2].done < 0)
       data[2].done = reagents.filter(function (item) {
         return !item.reuse && item.status === `valid`;
@@ -461,10 +461,10 @@
         return item.reuse;
       }).length;
     if (data[6].done < 0)
-      data[6].done = softwares.filter(function (item) {
+      data[6].done = software.filter(function (item) {
         return item.status === `valid`;
       }).length;
-    if (data[6].total < 0) data[6].total = softwares.length;
+    if (data[6].total < 0) data[6].total = software.length;
     if (data[7].done < 0)
       data[7].done = datasets.filter(function (item) {
         return item.reuse && item.status === `valid`;

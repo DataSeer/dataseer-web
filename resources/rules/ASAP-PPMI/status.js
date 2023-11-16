@@ -12,17 +12,17 @@ module.exports = {
     'published protocol': require(`./status/protocols.pp.json`),
     'surveys and questionnaires': require(`./status/protocols.s&q.json`)
   },
-  softwares: {
-    'custom scripts': require(`./status/softwares.custom-scripts.json`),
-    '': require(`./status/softwares.none.json`),
-    'software package': require(`./status/softwares.software-package.json`),
-    'software': require(`./status/softwares.software.json`)
+  software: {
+    'custom scripts': require(`./status/software.custom-scripts.json`),
+    '': require(`./status/software.none.json`),
+    'software package': require(`./status/software.software-package.json`),
+    'software': require(`./status/software.software.json`)
   },
-  codes: {
-    'custom scripts': require(`./status/codes.custom-scripts.json`),
-    '': require(`./status/codes.none.json`),
-    'software package': require(`./status/codes.software-package.json`),
-    'software': require(`./status/codes.software.json`)
+  code: {
+    'custom scripts': require(`./status/code.custom-scripts.json`),
+    '': require(`./status/code.none.json`),
+    'software package': require(`./status/code.software-package.json`),
+    'software': require(`./status/code.software.json`)
   },
   reagents: require(`./status/reagents.json`)
 };
