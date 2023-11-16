@@ -1351,14 +1351,16 @@ Self.convertOldDocument = function (opts, cb) {
     },
     // Directly create dataObjects (no need to write nything in the TEI)
     function (acc, next) {
-      let extractedDataObjects = acc.document.datasets.extracted.map(function (item) {
+      let extracted = _.get(acc.document, `datasets.extracted`, []);
+      let deleted = _.get(acc.document, `datasets.deleted`, []);
+      let extractedDataObjects = extracted.map(function (item) {
         let d = DataObjects.create(item);
         d.document = acc.document._id.toString();
         d.extracted = true;
         d.deleted = false;
         return d;
       });
-      let deletedDataObjects = acc.document.datasets.deleted.map(function (item) {
+      let deletedDataObjects = deleted.map(function (item) {
         let d = DataObjects.create(item);
         d.document = acc.document._id.toString();
         d.extracted = false;
