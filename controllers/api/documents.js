@@ -1262,7 +1262,8 @@ Self.convertOldDocument = function (opts, cb) {
         function (err, doc) {
           if (err) return next(err);
           if (doc instanceof Error) return next(doc);
-          if (_.get(doc, `dataObjects.metadata`) !== null) return next(new Error(`This document can't be converted`));
+          if (_.get(doc, `dataObjects.metadata`) !== null)
+            return next(new Error(`This document can't be converted (already processed)`));
           doc.dataObjects = { metadata: null, current: [], deleted: [], extracted: [] };
           acc.document = doc;
           return next(null, acc);
@@ -1295,6 +1296,8 @@ Self.convertOldDocument = function (opts, cb) {
       );
     },
     function (acc, next) {
+      if (_.get(acc, `document.tei`) === null)
+        return next(new Error(`This document can't be converted (TEI not found)`));
       return DocumentsFilesController.readFile({ data: { id: acc.document.tei.toString() } }, function (err, content) {
         if (err) return next(err);
         return Self.extractDataObjectsFromTEI(
