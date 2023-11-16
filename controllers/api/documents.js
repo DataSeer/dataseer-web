@@ -414,7 +414,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
           filename: `${data.doc.name} (${opts.data.id})`,
           kind: kind,
           data: {
-            doc: {
+            document: {
               id: data.doc._id.toString(),
               token: data.doc.token,
               organizations: data.doc.organizations.map(function (item) {
@@ -1669,7 +1669,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
         })
         .map(function (item) {
           let d = {
-            doc: doc,
+            document: doc,
             dataObject: DataObjects.create({
               reuse: false,
               dataType: `code software`,
