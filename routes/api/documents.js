@@ -673,7 +673,7 @@ router.get(`/:id/softcite/content`, function (req, res, next) {
   });
 });
 
-/* Import softwares from Softcite results */
+/* Import software from Softcite results */
 router.post(`/:id/softcite/importData`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
   if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
@@ -698,7 +698,7 @@ router.post(`/:id/softcite/importData`, function (req, res, next) {
   });
 });
 
-/* Extract softwares from Softcite results */
+/* Extract software from Softcite results */
 router.post(`/:id/softcite/extractData`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
   if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
@@ -720,8 +720,8 @@ router.post(`/:id/softcite/extractData`, function (req, res, next) {
   });
 });
 
-/* Get softwares from Softcite results */
-router.post(`/:id/softcite/softwares`, function (req, res, next) {
+/* Get software from Softcite results */
+router.post(`/:id/softcite/software`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
   if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
     return res.status(401).send(conf.errors.unauthorized);

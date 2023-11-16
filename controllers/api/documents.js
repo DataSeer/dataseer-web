@@ -414,7 +414,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
           filename: `${data.doc.name} (${opts.data.id})`,
           kind: kind,
           data: {
-            doc: {
+            document: {
               id: data.doc._id.toString(),
               token: data.doc.token,
               organizations: data.doc.organizations.map(function (item) {
@@ -454,8 +454,8 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
             datasets: data.sortedDataObjectsInfo.datasets,
             protocols: data.sortedDataObjectsInfo.protocols,
             reagents: data.sortedDataObjectsInfo.reagents,
-            codes: data.sortedDataObjectsInfo.codes,
-            softwares: data.sortedDataObjectsInfo.softwares
+            code: data.sortedDataObjectsInfo.code,
+            software: data.sortedDataObjectsInfo.software
           }
         },
         function (err, spreadsheetId) {
@@ -1481,8 +1481,8 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
             if (err) return cb(err);
             if (xmlContent instanceof Error) return cb(null, xmlContent);
             let $ = XML.load(xmlContent.data.toString(DocumentsFilesController.encoding));
-            let softwares = {};
-            if (!jsonData.mentions || !Array.isArray(jsonData.mentions)) return cb(null, softwares);
+            let software = {};
+            if (!jsonData.mentions || !Array.isArray(jsonData.mentions)) return cb(null, software);
             for (let i = 0; i < jsonData.mentions.length; i++) {
               let mention = jsonData.mentions[i];
               let name = mention[`software-name`]?.normalizedForm || ``;
@@ -1535,34 +1535,34 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
                     .filter(function (e) {
                       return typeof e !== `undefined`;
                     });
-                  if (typeof softwares[id] === `undefined`) {
-                    softwares[id] = { name, version, url, sentences: matches, mentions: {} };
-                  } else if (typeof softwares[id] === `object`)
-                    softwares[id].sentences = softwares[id].sentences.concat(matches).sort(function (a, b) {
+                  if (typeof software[id] === `undefined`) {
+                    software[id] = { name, version, url, sentences: matches, mentions: {} };
+                  } else if (typeof software[id] === `object`)
+                    software[id].sentences = software[id].sentences.concat(matches).sort(function (a, b) {
                       if (!a.match) return 1;
                       if (!b.match) return -1;
                       return a.index - b.index;
                     });
-                  softwares[id].mentions[identifier] = true;
+                  software[id].mentions[identifier] = true;
                 });
               }
             }
-            let ids = Object.keys(softwares);
+            let ids = Object.keys(software);
             let results = [];
             for (let i = 0; i < ids.length; i++) {
               let id = ids[i];
-              let software = softwares[id];
-              software.match =
-                software.sentences.filter(function (e) {
+              let s = software[id];
+              s.match =
+                s.sentences.filter(function (e) {
                   return e.match;
                 }).length > 0;
-              software.isCommandLine = !!SoftwareConf[software.name.toLowerCase()];
-              software.mentions = Object.keys(software.mentions);
-              software.alreadyExist =
+              s.isCommandLine = !!SoftwareConf[s.name.toLowerCase()];
+              s.mentions = Object.keys(s.mentions);
+              s.alreadyExist =
                 codeAndSoftware.filter(function (e) {
-                  return e.name === software.name;
+                  return e.name === s.name;
                 }).length > 0;
-              results.push(software);
+              results.push(s);
             }
             return cb(null, results);
           });
@@ -1643,7 +1643,7 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
  * @param {boolean} opts.softcite - Enable/disable softcite service request (default: true)
  * @param {boolean} opts.refreshData - Refresh data (force request softcite)
  * @param {boolean} opts.ignoreCommandLines - Ignore command lines, they won't be created (default: false)
- * @param {boolean} opts.ignoreSoftwares - Ignore softwares, they won't be created (default: false)
+ * @param {boolean} opts.ignoreSoftware - Ignore software, they won't be created (default: false)
  * @param {boolean} opts.saveDocument - Save document
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
@@ -1669,7 +1669,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
         })
         .map(function (item) {
           let d = {
-            doc: doc,
+            document: doc,
             dataObject: DataObjects.create({
               reuse: false,
               dataType: `code software`,
@@ -1705,10 +1705,10 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                 dataType: `code software`,
                 subType: `software`,
                 cert: `0`,
-                name: software.name,
-                version: software.version,
-                URL: software.url,
-                comments: software.mentions.join(`, `),
+                name: item.name,
+                version: item.version,
+                URL: item.url,
+                comments: item.mentions.join(`, `),
                 sentences: item.sentences.filter(function (e) {
                   return e.match;
                 })
@@ -1726,7 +1726,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
           data: softCiteCustomScripts.concat(softCiteSoftware)
         },
         function (err, res) {
-          return cb(err, softwares);
+          return cb(err, software);
         }
       );
     });
@@ -3198,8 +3198,8 @@ Self.getReportData = function (opts = {}, cb) {
             [].concat(
               sortedDataObjectsInfo.protocols,
               sortedDataObjectsInfo.datasets,
-              sortedDataObjectsInfo.codes,
-              sortedDataObjectsInfo.softwares,
+              sortedDataObjectsInfo.code,
+              sortedDataObjectsInfo.software,
               sortedDataObjectsInfo.reagents
             ),
             opts.data.dataTypes
@@ -3300,10 +3300,10 @@ Self.getSortedDataObjectsInfo = function (doc, dataTypes = {}) {
   let protocols = orderedDataObjects.filter(function (item) {
     return item.kind === `protocol`;
   });
-  let codes = orderedDataObjects.filter(function (item) {
+  let code = orderedDataObjects.filter(function (item) {
     return item.kind === `code`;
   });
-  let softwares = orderedDataObjects.filter(function (item) {
+  let software = orderedDataObjects.filter(function (item) {
     return item.kind === `software`;
   });
   let reagents = orderedDataObjects.filter(function (item) {
@@ -3312,7 +3312,7 @@ Self.getSortedDataObjectsInfo = function (doc, dataTypes = {}) {
   let datasets = orderedDataObjects.filter(function (item) {
     return item.kind === `dataset`;
   });
-  return { all: orderedDataObjects, protocols, codes, softwares, reagents, datasets };
+  return { all: orderedDataObjects, protocols, code, software, reagents, datasets };
 };
 
 /**

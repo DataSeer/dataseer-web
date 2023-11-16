@@ -52,19 +52,19 @@ const Schema = new mongoose.Schema(
     issues: { type: Issues, default: null }, // issues property
     // - "Sentences" properties
     sentences: [Sentence], // sentences
-    // "Datasets", Protocols, "Codes" & "Softwares" properties only
+    // "Datasets", Protocols, "Code" & "Software" properties only
     URL: { type: String, default: `` }, // version
     // "Datasets" properties only
     qc: { type: Boolean, default: false }, // qc property
     representativeImage: { type: Boolean, default: false }, // representativeImage property
     PID: { type: String, default: `` }, // PID
     associatedFigureOrTable: { type: String, default: `` }, // associated figure or table
-    // "Codes" & "softwares" properties only
+    // "Code" & "Software" properties only
     version: { type: String, default: `` }, // version
     // "Materials" properties only
     catalogNumber: { type: String, default: `` }, // catalog number
     source: { type: String, default: `` }, // catalog number
-    // "Codes" & "softwares" & "Materials" properties only
+    // "Code" & "Software" & "Materials" properties only
     RRID: { type: String, default: `` } // RRID
   },
   { minimize: false, timestamps: { createdAt: `createdAt`, updatedAt: `updatedAt` } }

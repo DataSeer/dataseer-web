@@ -68,16 +68,16 @@ Self.getCodeStatus = function (object) {
   let subType = object.dataType === `other` ? `` : object.subType;
   let nbTest = Self.booleanArrayToNumber(array);
   let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
-  let availableRules = rules.codes[subType][nbTest];
+  let availableRules = rules.code[subType][nbTest];
   if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
   let key = availableRules[0];
-  let customCheck = customChecks.codes[subType].check(nbTest, object);
+  let customCheck = customChecks.code[subType].check(nbTest, object);
   if (availableRules.length > 1 && typeof customCheck === `number` && !isNaN(customCheck)) key = customCheck;
   let result =
-    typeof status.codes[subType][key] === `object`
+    typeof status.code[subType][key] === `object`
       ? {
-        status: status.codes[subType][key].label,
-        actionRequired: status.codes[subType][key].actionRequired,
+        status: status.code[subType][key].label,
+        actionRequired: status.code[subType][key].actionRequired,
         rule: object.kind ? `${object.kind}.${subType}:${nbTest}[${key}]` : nbTest
       }
       : defaultResult;
@@ -98,16 +98,16 @@ Self.getSoftwareStatus = function (object) {
   let subType = object.dataType === `other` ? `` : object.subType;
   let nbTest = Self.booleanArrayToNumber(array);
   let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
-  let availableRules = rules.softwares[subType][nbTest];
+  let availableRules = rules.software[subType][nbTest];
   if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
   let key = availableRules[0];
-  let customCheck = customChecks.softwares[subType].check(nbTest, object);
+  let customCheck = customChecks.software[subType].check(nbTest, object);
   if (availableRules.length > 1 && typeof customCheck === `number` && !isNaN(customCheck)) key = customCheck;
   let result =
-    typeof status.softwares[subType][key] === `object`
+    typeof status.software[subType][key] === `object`
       ? {
-        status: status.softwares[subType][key].label,
-        actionRequired: status.softwares[subType][key].actionRequired,
+        status: status.software[subType][key].label,
+        actionRequired: status.software[subType][key].actionRequired,
         rule: object.kind ? `${object.kind}.${subType}:${nbTest}[${key}]` : nbTest
       }
       : defaultResult;
