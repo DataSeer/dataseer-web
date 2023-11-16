@@ -1311,16 +1311,20 @@ Self.convertOldDocument = function (opts, cb) {
           function (err, dataObjects) {
             if (err) return next(err);
             if (dataObjects instanceof Error) return next(dataObjects);
-            let currentDataObjects = dataObjects.map(function (item) {
-              let d = {
-                document: acc.document,
-                dataObject: item,
-                isExtracted: false,
-                isDeleted: false,
-                saveDocument: false
-              };
-              return d;
-            });
+            let currentDataObjects = dataObjects
+              .filter(function (item) {
+                return item.sentences.length > 0;
+              })
+              .map(function (item) {
+                let d = {
+                  document: acc.document,
+                  dataObject: item,
+                  isExtracted: false,
+                  isDeleted: false,
+                  saveDocument: false
+                };
+                return d;
+              });
             return Self.addDataObjects({ user: opts.user, data: currentDataObjects }, function (err, res) {
               if (err) return next(err);
               let errors = res.filter(function (item) {
