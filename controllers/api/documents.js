@@ -1325,6 +1325,7 @@ Self.convertOldDocument = function (opts, cb) {
                 };
                 return d;
               });
+            if (currentDataObjects.length <= 0) return next(null, acc);
             return Self.addDataObjects({ user: opts.user, data: currentDataObjects }, function (err, res) {
               if (err) return next(err);
               let errors = res.filter(function (item) {
