@@ -1427,16 +1427,16 @@ Self.convertOldDocument = function (opts, cb) {
       );
     },
     function (acc, next) {
-      return acc.document.save(function (err) {
-        if (err) return next(err);
-        return next(null, acc.document);
-      });
-    },
-    function (acc, next) {
       return Self.refreshDataObjects({ user: opts.user, document: acc.document, resetIndex: true }, function (err, ok) {
         if (err) return next(err, acc);
         if (ok instanceof Error) return next(ok, acc);
         return next(null, acc);
+      });
+    },
+    function (acc, next) {
+      return acc.document.save(function (err) {
+        if (err) return next(err);
+        return next(null, acc.document);
       });
     }
   ];
