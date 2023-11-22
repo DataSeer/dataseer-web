@@ -55,6 +55,7 @@ Self.create = function (opts = {}, cb) {
           let dataObject = DataObjects.create(opts.dataObject);
           // Override these values
           dataObject._id = res._id.toString();
+          dataObject.document = acc.document._id.toString();
           dataObject.dataInstanceId = `dataInstance-${res._id.toString()}`;
           dataObject.extracted = !!opts.isExtracted;
           dataObject.deleted = false;
