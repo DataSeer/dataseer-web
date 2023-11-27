@@ -31,6 +31,8 @@ const Settings = new mongoose.Schema(
       importDataFromSoftcite: { type: Boolean, default: false },
       ignoreSoftCiteCommandLines: { type: Boolean, default: false },
       ignoreSoftCiteSoftware: { type: Boolean, default: false },
+      bioNLP: { type: Boolean, default: false },
+      importDataFromBioNLP: { type: Boolean, default: false },
       mute: { type: Boolean, default: false },
       mergePDFs: { type: Boolean, default: true }
     }

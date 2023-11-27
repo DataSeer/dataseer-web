@@ -1222,8 +1222,8 @@ curl "http://localhost:3000/api/documents/000000000000000000000001/reports/html/
     "sortedDatasetsInfos": { // The sorted datasets information (see MongoDB model). There is a 'type' (Object) & 'isValid' (Boolean) value added.
       "all": [], // all datasets (= originalDocument.datasets.current without filter)
       "protocols": [], // only datasets categorized as 'protocols' (= originalDocument.datasets.current filtered)
-      "codes": [], // only datasets categorized as 'codes' (= originalDocument.datasets.current filtered)
-      "softwares": [], // only datasets categorized as 'softwares' (= originalDocument.datasets.current filtered)
+      "code": [], // only datasets categorized as 'code' (= originalDocument.datasets.current filtered)
+      "software": [], // only datasets categorized as 'software' (= originalDocument.datasets.current filtered)
       "reagents": [], // only datasets categorized as 'reagents' (= originalDocument.datasets.current filtered)
       "datasets": [], // only datasets categorized as 'datasets' (= originalDocument.datasets.current filtered)
     },

@@ -60,12 +60,12 @@ const Sentence = new mongoose.Schema(
       representativeImage: { type: Boolean, default: false }, // representativeImage property
       PID: { type: String, default: `` }, // PID
       associatedFigureOrTable: { type: String, default: `` }, // associated figure or table
-      // "Codes" & "softwares" properties only
+      // "Code" & "software" properties only
       version: { type: String, default: `` }, // version
       // "Materials" properties only
       catalogNumber: { type: String, default: `` }, // catalog number
       source: { type: String, default: `` }, // catalog number
-      // "Codes" & "softwares" & "Materials" properties only
+      // "Code" & "software" & "Materials" properties only
       RRID: { type: String, default: `` } // RRID
     },
     { _id: false }

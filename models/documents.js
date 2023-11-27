@@ -27,10 +27,17 @@ const Schema = new mongoose.Schema(
       bioRxiv: { type: String, default: `` }, // bioRxiv
       hypothesis: { type: String, default: `` } // hypothesis annotation
     },
+    bioNLP: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (bioNLP)
     softcite: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (softcite)
     pdf: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (pdf)
     tei: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (tei)
-    datasets: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDatasets` }, // refers to documents.datasets collection item
+    datasets: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDatasets` }, // refers to documents.metadata collection item
+    dataObjects: {
+      metadata: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDataObjectsMetadata`, default: null }, // refers to documents.dataObjectsMetadata collection item
+      current: [{ type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDataObjects` }], // refers to documents.DocumentsDataObjects collection item
+      deleted: [{ type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDataObjects` }], // refers to documents.DocumentsDataObjects collection item
+      extracted: [{ type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDataObjects` }] // refers to documents.DocumentsDataObjects collection item
+    },
     metadata: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsMetadata` }, // refers to documents.metadata collection item
     files: [{ type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles` }], // refers to documents.files collection items (all kind of files)
     organizations: [{ type: mongoose.Schema.Types.ObjectId, ref: `Organizations` }], // refers to organizations collection item

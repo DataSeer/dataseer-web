@@ -86,13 +86,8 @@ router.post(
       if (!user) return res.json({ err: true, res: `Incorrect credentials` });
       let accessRights = AccountsManager.getAccessRights(user);
       if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
-      return req.logIn(user, function (err) {
-        if (err) {
-          console.log(err);
-          return res.status(500).send(conf.errors.internalServerError);
-        }
-        return next();
-      });
+      req.user = user;
+      return next();
     })(req, res, next);
   },
   function (req, res, next) {
