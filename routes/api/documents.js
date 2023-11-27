@@ -306,6 +306,22 @@ router.put(`/:id/convert`, function (req, res, next) {
   });
 });
 
+/* UPDATE Document BY ID */
+router.put(`/:id/patch`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { documentId: req.params.id, dataTypes: req.app.get(`dataTypes`), user: req.user };
+  return DocumentsController.patchConvertedDocument(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error || Array.isArray(data); // Case there are multiple errors
+    let result = isError ? (Array.isArray(data) ? data : data.toString()) : data;
+    return res.json({ err: isError, res: result });
+  });
+});
+
 /* POST Bulk of dataObjects on given document */
 router.post(`/:id/dataObjects`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);

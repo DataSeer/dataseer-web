@@ -1243,6 +1243,77 @@ Self.upload = function (opts = {}, cb) {
 };
 
 /**
+ * Patch converted document
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {boolean} opts.dataTypes - DataTypes
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.patchConvertedDocument = function (opts, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  return Self.get(
+    { data: { id: opts.documentId.toString(), dataObjects: true, datasets: true }, user: opts.user },
+    function (err, doc) {
+      if (err) return cb(err);
+      if (doc instanceof Error) return cb(null, doc);
+      let dataObjectsNames = doc.dataObjects.current
+        .filter(function (item) {
+          return item.name.match(/(dataset\-\d+)/g) === null;
+        })
+        .map(function (item) {
+          return item.name;
+        });
+      let oldDatasets = doc.datasets.current
+        .filter(function (item) {
+          return item.sentences.length > 0 && item.name !== `` && dataObjectsNames.indexOf(item.name) === -1;
+        })
+        .map(function (item) {
+          return { data: item, matched: false };
+        });
+      let dataObjects = [];
+      for (let i = 0; i < doc.dataObjects.current.length; i++) {
+        let current = doc.dataObjects.current[i];
+        let sentencesIds = current.sentences.map(function (item) {
+          return item.id;
+        });
+        let matchingName = current.name.match(/(dataset\-\d+)/g);
+        if (!Array.isArray(matchingName) || matchingName.length !== 1) continue;
+        for (let j = 0; j < oldDatasets.length; j++) {
+          let oldDataset = oldDatasets[j];
+          if (oldDataset.matched) continue;
+          let matched =
+            oldDataset.data.sentences.filter(function (s) {
+              return sentencesIds.indexOf(s.id) > -1;
+            }).length === oldDataset.data.sentences.length;
+          if (matched) {
+            oldDataset.matched = true;
+            let d = {
+              document: doc,
+              dataObject: DataObjects.create(oldDataset.data),
+              saveDocument: false
+            };
+            d.dataObject._id = current._id.toString();
+            d.dataObject.document = doc._id.toString();
+            dataObjects.push(d);
+            break;
+          }
+        }
+      }
+      if (dataObjects.length <= 0) return cb(null, true);
+      return Self.updateDataObjects({ user: opts.user, data: dataObjects }, function (err, ok) {
+        if (err) return cb(err);
+        if (ok instanceof Error) return cb(null, ok);
+        return cb(null, true);
+      });
+    }
+  );
+};
+
+/**
  * Convert Old document
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
