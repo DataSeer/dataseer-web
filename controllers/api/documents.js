@@ -1267,13 +1267,15 @@ Self.patchConvertedDocument = function (opts, cb) {
         .map(function (item) {
           return item.name;
         });
-      let oldDatasets = doc.datasets.current
-        .filter(function (item) {
-          return item.sentences.length > 0 && item.name !== `` && dataObjectsNames.indexOf(item.name) === -1;
-        })
-        .map(function (item) {
-          return { data: item, matched: false };
-        });
+      let oldDatasets = doc.datasets
+        ? doc.datasets.current
+          .filter(function (item) {
+            return item.sentences.length > 0 && item.name !== `` && dataObjectsNames.indexOf(item.name) === -1;
+          })
+          .map(function (item) {
+            return { data: item, matched: false };
+          })
+        : [];
       let dataObjects = [];
       for (let i = 0; i < doc.dataObjects.current.length; i++) {
         let current = doc.dataObjects.current[i];
@@ -1288,7 +1290,9 @@ Self.patchConvertedDocument = function (opts, cb) {
           let matched =
             oldDataset.data.sentences.filter(function (s) {
               return sentencesIds.indexOf(s.id) > -1;
-            }).length === oldDataset.data.sentences.length;
+            }).length === oldDataset.data.sentences.length &&
+            oldDataset.data.dataType === current.dataType &&
+            oldDataset.data.subType === current.subType;
           if (matched) {
             oldDataset.matched = true;
             let d = {
