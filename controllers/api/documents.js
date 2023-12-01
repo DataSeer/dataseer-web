@@ -957,7 +957,8 @@ Self.upload = function (opts = {}, cb) {
             return DocumentsFilesController.readFile({ data: { id: acc.tei.toString() } }, function (err, content) {
               if (err) return next(err, acc);
               let sentences = XML.extractTEISentences(
-                XML.load(content.data.toString(DocumentsFilesController.encoding))
+                XML.load(content.data.toString(DocumentsFilesController.encoding)),
+                `array`
               );
               // Guess which kind of file it is to call the great function
               return BioNLP.processSentences(sentences, function (err, results) {
@@ -1237,6 +1238,50 @@ Self.upload = function (opts = {}, cb) {
             );
           }
         );
+      }
+    );
+  });
+};
+
+/**
+ * Patch DataObjects sentences
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.patchDataObjectSentences = function (opts, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  let transaction = DocumentsDataObjects.find({ 'sentences.text': `` });
+  transaction.populate(`document`);
+  transaction.exec(function (err, dataObjects) {
+    if (err) return cb(err);
+    if (!dataObjects) return cb(null, new Error(`DataObjects not found`));
+    let count = dataObjects.length;
+    return async.mapSeries(
+      dataObjects,
+      function (dataObject, next) {
+        return DocumentsFilesController.readFile(
+          { data: { id: dataObject.document.tei.toString() } },
+          function (err, content) {
+            let sentences = XML.extractTEISentences(
+              XML.load(content.data.toString(DocumentsFilesController.encoding)),
+              `object`
+            );
+            if (!Array.isArray(dataObject.sentences) || dataObject.sentences.length <= 0) return next();
+            for (let i = 0; i < dataObject.sentences.length; i++) {
+              let sentence = dataObject.sentences[i];
+              if (sentence.text === `` && sentence.id !== ``) sentence.text = sentences[sentence.id].text;
+            }
+            return DocumentsDataObjects.updateOne({ _id: dataObject._id }, dataObject, function (err, res) {
+              return next(err);
+            });
+          }
+        );
+      },
+      function (err) {
+        return cb(err, err ? false : dataObjects.length);
       }
     );
   });
@@ -1608,6 +1653,7 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
                             let match = (strictMatch || softMatch) && sameAera;
                             return {
                               id: area.sentence.id,
+                              text: textTEI,
                               TEI: textTEI,
                               Softcite: text,
                               index: doc.pdf.metadata.mapping.object[area.sentence.id],
@@ -2088,7 +2134,8 @@ Self.getBioNLPResults = function (opts, cb) {
               return next(null, acc);
             }
             let sentences = XML.extractTEISentences(
-              XML.load(contentTEI.data.toString(DocumentsFilesController.encoding))
+              XML.load(contentTEI.data.toString(DocumentsFilesController.encoding)),
+              `array`
             );
             return BioNLP.processSentences(sentences, function (err, results) {
               if (err) return next(err);
