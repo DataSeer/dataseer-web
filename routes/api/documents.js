@@ -202,6 +202,22 @@ router.get(`/checkTokenValidity`, function (req, res, next) {
   );
 });
 
+/* UPDATE Patch dataObjects sentences */
+router.put(`/patchDataObjectsSentences`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { user: req.user };
+  return DocumentsController.patchDataObjectSentences(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error || Array.isArray(data); // Case there are multiple errors
+    let result = isError ? (Array.isArray(data) ? data : data.toString()) : data;
+    return res.json({ err: isError, res: result });
+  });
+});
+
 /* GET SINGLE Document BY ID */
 router.get(`/:id`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
