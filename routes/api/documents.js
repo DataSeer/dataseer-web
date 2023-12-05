@@ -449,15 +449,27 @@ router.post(`/:id/refreshDataObjects`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
-  let opts = { data: { id: req.params.id }, user: req.user };
-  return DocumentsController.refreshDataObjects(opts, function (err, data) {
+  let opts = { data: { id: req.params.id, dataObjects: true }, user: req.user };
+  return DocumentsController.get(opts, function (err, doc) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
     }
-    let isError = data instanceof Error;
-    let result = isError ? data.toString() : data;
-    return res.json({ err: isError, res: result });
+    let isError = doc instanceof Error;
+    let result = isError ? doc.toString() : doc;
+    if (isError) return res.json({ err: isError, res: result });
+    return DocumentsController.refreshDataObjects(
+      { document: doc, resetIndex: Params.convertToBoolean(req.body.resetIndex), user: req.user },
+      function (err, data) {
+        if (err) {
+          console.log(err);
+          return res.status(500).send(conf.errors.internalServerError);
+        }
+        let isError = data instanceof Error;
+        let result = isError ? data.toString() : data;
+        return res.json({ err: isError, res: result });
+      }
+    );
   });
 });
 
