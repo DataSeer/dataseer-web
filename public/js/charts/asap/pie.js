@@ -41,6 +41,13 @@
     newProtocolsTotal: PARAMS.convertToInteger(urlParams.newProtocolsTotal)
   };
 
+  let hideLogo = PARAMS.convertToBoolean(urlParams.hideLogo);
+
+  if (hideLogo) {
+    let element = document.getElementById(`logo`);
+    element.style.display = `none`;
+  }
+
   const params = {
     maxNumberOfSubSlices: PARAMS.convertToInteger(urlParams.maxNumberOfSubSlices),
     customData: PARAMS.convertToBoolean(urlParams.customData),
