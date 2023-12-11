@@ -1735,28 +1735,84 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
         function (err, jsonData) {
           if (err) return cb(err);
           if (jsonData instanceof Error) return cb(null, jsonData);
-          let results = [];
-          if (!Array.isArray(jsonData)) return cb(null, results);
-          for (let key in jsonData) {
+          let mapping = {};
+          for (let key in jsonData.BIONLP) {
             let sentenceId = key;
-            let items = jsonData[key];
-            for (let i = 0; i < items.length; i++) {
-              // TO DO : Manage bioNLP results & create data objects found in sentences
-              /*let item = items[i];
-            let name = item.token;
-            let alreadyExist =
-              labMaterials.filter(function (e) {
-                return e.name === name;
-              }).length > 0;*/
-              // if (item.BioNLPLabMaterial === `I-CL`) {
-              // } else if (item.BioNLPLabMaterial === `I-ORG`) {
-              // } else if (item.BioNLPLabMaterial === `I-PLS`) {
-              // } else if (item.BioNLPLabMaterial === `I-AB`) {
-              // } else if (item.GenTaggType === `protein`) {
-              // } else if (item.GenTaggType === `DNA`) {
-              // } else if (item.GenTaggType === `cell_type`) {
-              // } else if (item.GenTaggType === `cell_line`) {
-              // }
+            let items = jsonData.BIONLP[key];
+            for (let k in items) {
+              // TO DO : Manage BIONLP results & create data objects found in sentences
+              let item = items[k];
+              let name = item.token;
+              let dataType = `lab materials`;
+              let subType = ``;
+              let comments = [
+                `BioNLPLabMaterial === '${item.BioNLPLabMaterial}'`,
+                `CraftLabMaterial === '${item.CraftLabMaterial}'`,
+                `Gazetteer Antibodies === '${item[`Gazetteer Antibodies`]}'`,
+                `Gazetteer Cell Lines === '${item[`Gazetteer Cell Lines`]}'`,
+                `Gazetteer Plasmids === '${item[`Gazetteer Plasmids`]}'`,
+                `GenTaggType === '${item.GenTaggType}'`
+              ].join(`\n`);
+              let alreadyExist =
+                labMaterials.filter(function (e) {
+                  return e.name === name;
+                }).length > 0;
+              if (alreadyExist) continue;
+              if (item.BioNLPLabMaterial === `I-CL`) {
+                subType = ``;
+              } else if (item.BioNLPLabMaterial === `I-ORG`) {
+                subType = ``;
+              } else if (item.BioNLPLabMaterial === `I-PLS`) {
+                subType = ``;
+              } else if (item.BioNLPLabMaterial === `I-AB`) {
+                subType = ``;
+              } else if (item.CraftLabMaterial === `GO_CC`) {
+                subType = ``;
+              } else if (item.CraftLabMaterial === `GO_BP`) {
+                subType = ``;
+              } else if (item.CraftLabMaterial === `PR`) {
+                subType = ``;
+              } else if (item.CraftLabMaterial === `CHEBI`) {
+                subType = ``;
+              } else if (item.CraftLabMaterial === `UBERON`) {
+                subType = ``;
+              } else if (item.CraftLabMaterial === `NCBITaxon`) {
+                subType = ``;
+              } else if (item.CraftLabMaterial === `CL`) {
+                subType = ``;
+              } else if (item.CraftLabMaterial === `SO`) {
+                subType = ``;
+              } else if (item.GenTaggType === `protein`) {
+                subType = ``;
+              } else if (item.GenTaggType === `DNA`) {
+                subType = ``;
+              } else if (item.GenTaggType === `cell_type`) {
+                subType = ``;
+              } else if (item[`Gazetteer Antibodies`] === 1) {
+                subType = `antibodies`;
+              } else if (item[`Gazetteer Cell Lines`] === 1) {
+                subType = ``;
+              } else if (item[`Gazetteer Plasmids`] === 1) {
+                subType = ``;
+              }
+              if (typeof mapping[name] === `undefined`) mapping[name] = {};
+              if (typeof mapping[name][`${dataType}:${subType}`] === `undefined`)
+                mapping[name][`${dataType}:${subType}`] = {
+                  name,
+                  dataType,
+                  subType,
+                  comments,
+                  sentences: [{ id: sentenceId }]
+                };
+              else mapping[name][`${dataType}:${subType}`].sentences.push({ id: sentenceId });
+            }
+          }
+          let results = [];
+          let names = Object.keys(mapping);
+          for (let i = 0; i < names.length; i++) {
+            let types = Object.keys(mapping[names[i]]);
+            for (let j = 0; j < types.length; j++) {
+              results.push(mapping[names[i]][types[j]]);
             }
           }
           return cb(null, results);
@@ -1883,46 +1939,57 @@ Self.importDataFromBioNLP = function (opts = {}, cb) {
   return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
     if (err) return cb(err);
     if (doc instanceof Error) return cb(null, doc);
-    return Self.extractDataFromBioNLP(opts, function (err, data) {
-      if (err) return cb(err);
-      if (data instanceof Error) return cb(null, data);
-      let dataObjects = data
-        .filter(function (item) {
-          return (
-            item.sentences.filter(function (e) {
-              return e.match;
-            }).length > 0
+    return Self.getSentencesMapping(
+      { user: opts.user, documentId: opts.documentId.toString() },
+      function (err, mapping) {
+        if (err) return cb(err);
+        if (mapping instanceof Error) return cb(null, mapping);
+        let sort = Self.sortSentencesUsingMapping(mapping);
+        return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
+          if (err) return next(err, content);
+          let sentences = XML.extractTEISentences(
+            XML.load(content.data.toString(DocumentsFilesController.encoding)),
+            `object`
           );
-        })
-        .map(function (item) {
-          let d = {
-            document: doc,
-            dataObject: DataObjects.create({
-              reuse: false,
-              dataType: item.dataType,
-              subType: item.subType,
-              cert: `0`,
-              name: item.name,
-              comments: ``,
-              sentence: sentences[0]
-            }),
-            isExtracted: true,
-            isDeleted: false,
-            saveDocument: opts.saveDocument
-          };
-          d.dataObject.document = doc._id.toString();
-          return d;
+          return Self.extractDataFromBioNLP(opts, function (err, data) {
+            if (err) return cb(err);
+            if (data instanceof Error) return cb(null, data);
+            let dataObjects = data.map(function (item) {
+              let d = {
+                document: doc,
+                dataObject: DataObjects.create({
+                  reuse: false,
+                  dataType: item.dataType,
+                  subType: item.subType,
+                  cert: `0`,
+                  name: item.name,
+                  comments: item.comments,
+                  sentences: item.sentences
+                    .map(function (s) {
+                      return sentences[s.id];
+                    })
+                    .sort(sort)
+                }),
+                isExtracted: true,
+                isDeleted: false,
+                saveDocument: opts.saveDocument
+              };
+              d.dataObject.document = doc._id.toString();
+              return d;
+            });
+            return Self.addDataObjects(
+              {
+                user: opts.user,
+                data: dataObjects
+              },
+              function (err, res) {
+                return cb(err, res);
+              }
+            );
+          });
         });
-      return Self.addDataObjects(
-        {
-          user: opts.user,
-          data: dataObjects
-        },
-        function (err, res) {
-          return cb(err, data);
-        }
-      );
-    });
+      }
+    );
   });
 };
 
