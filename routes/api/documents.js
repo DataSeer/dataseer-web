@@ -786,6 +786,73 @@ router.post(`/:id/softcite/software`, function (req, res, next) {
   });
 });
 
+/* Import software from BioNLP results */
+router.post(`/:id/bioNLP/importData`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
+  if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    documentId: req.params.id,
+    bioNLP: Params.convertToBoolean(req.body.bioNLP),
+    refreshData: Params.convertToBoolean(req.body.refreshData),
+    saveDocument: Params.convertToBoolean(req.body.saveDocument),
+    user: req.user
+  };
+  return DocumentsController.importDataFromBioNLP(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({ err: isError, res: result });
+  });
+});
+
+/* Extract software from BioNLP results */
+router.post(`/:id/bioNLP/extractData`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
+  if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    documentId: req.params.id,
+    bioNLP: Params.convertToBoolean(req.body.bioNLP),
+    refreshData: Params.convertToBoolean(req.body.refreshData),
+    user: req.user
+  };
+  return DocumentsController.extractDataFromBioNLP(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({ err: isError, res: result });
+  });
+});
+
+/* Get software from BioNLP results */
+router.post(`/:id/bioNLP/results`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
+  if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
+  let opts = {
+    documentId: req.params.id,
+    bioNLP: Params.convertToBoolean(req.body.bioNLP),
+    refreshData: Params.convertToBoolean(req.body.refreshData),
+    user: req.user
+  };
+  return DocumentsController.getBioNLPResults(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({ err: isError, res: result });
+  });
+});
+
 /* GET PDF of document */
 router.get(`/:id/pdf`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
