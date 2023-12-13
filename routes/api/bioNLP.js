@@ -21,6 +21,15 @@ router.post(`/`, function (req, res, next) {
   });
 });
 
+router.post(`/processSentences`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  return BioNLP.processSentences(req.body.sentences, function (err, results) {
+    if (err) return res.json({ err: true, msg: results.toString() });
+    else return res.json({ err: false, res: results });
+  });
+});
+
 router.post(`/GeniaTagger`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
@@ -39,10 +48,10 @@ router.post(`/BERT/CRAFT5000`, function (req, res, next) {
   });
 });
 
-router.post(`/BERT/LabMaterial`, function (req, res, next) {
+router.post(`/BERT/LabMaterials`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
-  return BioNLP.request(`BERT.LabMaterial`, { sentence: req.body.sentence }, function (err, body) {
+  return BioNLP.request(`BERT.LabMaterials`, { sentence: req.body.sentence }, function (err, body) {
     if (err) return res.json({ err: true, msg: err.toString() });
     else return res.json({ err: false, res: body });
   });

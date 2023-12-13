@@ -1,25 +1,29 @@
 {
-  "API":
-  {
+  "API": {
     "BIONLP": {
+      "disabled": true,
       "url": "...",
       "api_key": "placeholder"
     },
     "GeniaTagger": {
+      "disabled": true,
       "url": "...",
       "api_key": "..."
     },
     "BERT": {
       "CRAFT5000": {
+        "disabled": true,
         "url": "...",
         "api_key": "placeholder"
       },
-      "LabMaterial": {
+      "LabMaterials": {
+        "disabled": true,
         "url": "...",
         "api_key": "..."
       }
     },
     "bioBERT": {
+      "disabled": true,
       "url": "..."
     }
   },
