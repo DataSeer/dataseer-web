@@ -643,30 +643,6 @@ router.delete(`/:id/files/:fileId`, function (req, res, next) {
   });
 });
 
-/* GET Software file content of document */
-router.get(`/:id/bioNLP/content`, function (req, res, next) {
-  let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
-  let opts = { data: { id: req.params.id }, user: req.user };
-  return DocumentsController.get(opts, function (err, doc) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
-    if (!doc.bioNLP) return res.json({ err: true, res: null, msg: `Bio NLP file content not found` });
-    return DocumentsFilesController.readFile(
-      { data: { id: doc.bioNLP ? doc.bioNLP.toString() : undefined } },
-      function (err, file) {
-        if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
-        if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
-        res.setHeader(`Content-Type`, file.mimetype);
-        return res.send(file.data);
-      }
-    );
-  });
-});
-
 /* GET Software file of document */
 router.get(`/:id/softcite`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
@@ -783,6 +759,30 @@ router.post(`/:id/softcite/software`, function (req, res, next) {
     let isError = data instanceof Error;
     let result = isError ? data.toString() : data;
     return res.json({ err: isError, res: result });
+  });
+});
+
+/* GET Software file content of document */
+router.get(`/:id/bioNLP/content`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { data: { id: req.params.id }, user: req.user };
+  return DocumentsController.get(opts, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.bioNLP) return res.json({ err: true, res: null, msg: `Bio NLP file content not found` });
+    return DocumentsFilesController.readFile(
+      { data: { id: doc.bioNLP ? doc.bioNLP.toString() : undefined } },
+      function (err, file) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+        if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
+        res.setHeader(`Content-Type`, file.mimetype);
+        return res.send(file.data);
+      }
+    );
   });
 });
 
