@@ -9,7 +9,10 @@ const URLMANAGER = {
     let currentUrl = new URL(window.location.href),
       result = {};
     for (let key of currentUrl.searchParams.keys()) {
-      result[key] = currentUrl.searchParams.get(key);
+      result[key] = currentUrl.searchParams.getAll(key);
+    }
+    for (let key in result) {
+      if (result[key].length === 1) result[key] = result[key][0];
     }
     return result;
   },
