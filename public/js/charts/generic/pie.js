@@ -51,7 +51,7 @@
       label: params.label[i] !== `` ? params.label[i] : `Slice ${i}`,
       done: isNaN(params.done[i]) || params.done[i] === `` ? i : PARAMS.convertToInteger(params.done[i]),
       total: isNaN(params.total[i]) || params.total[i] === `` ? limit : PARAMS.convertToInteger(params.total[i]),
-      opacity: isNaN(params.opacity[i]) || params.opacity[i] === `` ? 0.9 : PARAMS.convertToInteger(params.opacity[i]),
+      opacity: isNaN(params.opacity[i]) || params.opacity[i] === `` ? 0.9 : parseFloat(params.opacity[i]),
       color: !params.color[i] ? `#000000` : params.color[i],
       backgroundColor: !params.backgroundColor[i] ? `#FFFFFF` : params.backgroundColor[i],
       startAngle: ((2 * Math.PI) / limit) * i - startAngleDelta,
