@@ -1,0 +1,32 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>#{conf.title}</title>
+    <!-- include of global css dependencies -->
+    link(rel="icon" type="image/png" href=conf.root + "/public/favicon.ico")
+    link(rel="stylesheet" type="text/css" href=conf.root + "/public/css/charts/generic/pie.css")
+  </head>
+  <body>
+    div(id="graphic")
+    if(document_url)
+      label Document URL: #{document_url}
+    if(assessed_at)
+      label Assessed at: #{assessed_at}
+    if(report_url)
+      label Dataseer report: #{report_url}
+    <!-- include of global js dependencies -->
+    script(src=conf.root + "/public/js/dependencies/d3.min.js")
+    script(src=conf.root + "/public/js/dependencies/jquery.min.js")
+    script(src=conf.root + "/public/js/dependencies/lodash.min.js")
+    script(src=conf.root + "/public/js/dependencies/async.min.js")
+    script(src=conf.root + "/public/js/dependencies/bootstrap.min.js")
+    script(src=conf.root + "/public/js/dependencies/url-join.js")
+    script(src=conf.root + "/public/js/conf/conf.js")
+    script(src=conf.root + "/public/js/lib/url.js")
+    script(src=conf.root + "/public/js/lib/params.js")
+    script(src=conf.root + "/public/js/lib/api.js")
+    script(src=conf.root + "/public/js/charts/generic/pie.js")
+  </body>
+</html>
