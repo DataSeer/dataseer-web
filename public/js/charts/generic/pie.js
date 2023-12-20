@@ -23,6 +23,8 @@
   const width = window.innerWidth > minWidth ? window.innerWidth : minWidth;
   const height = window.innerHeight > minHeight ? window.innerHeight : minHeight;
 
+  let radius = Math.min(width, height) * 0.75;
+
   const limit = Math.max(
     params.label.length,
     params.done.length,
@@ -66,12 +68,12 @@
 
   let topOffset = 0;
   let bottomOffset = 0;
+  let leftOffset = 0;
+  let rightOffset = 0;
 
   const slicesColor = data.map(function (item, i) {
     return item.color;
   });
-
-  let radius = Math.min(width, height) * 0.75;
 
   const maxNumberOfSubSlices = isNaN(params.maxNumberOfSubSlices) ? 20 : params.maxNumberOfSubSlices; // Maximum number of "sub-slices" rendered. If this number is higher, they will not be rendered.
 
@@ -162,7 +164,7 @@
       .select(`div#graphic`)
       .append(`svg`)
       .attr(`preserveAspectRatio`, `xMinYMin meet`)
-      .attr(`viewBox`, [-width, -radius - 25, width * 2, radius * 2 + 50]);
+      .attr(`viewBox`, [-radius, -radius, radius * 2, radius * 2]);
 
     let radialGradient = svg
       .append(`defs`)
@@ -261,18 +263,24 @@
         let c = arcLabel(1, d.index).centroid(d);
         let offset = { x: elem.node().getBBox().width, y: elem.node().getBBox().height };
         let x = c[0];
-        let y = c[1];
+        let y = c[1] + ((fontSize * (d.data.line.max - 1)) / 2 + fontSize * d.data.line.number);
         if (d.data.inTop) {
-          y -= offset.y / 2;
-          topOffset = offset.y > topOffset ? offset.y : topOffset;
+          let _o = offset.y;
+          y -= _o / 2;
+          topOffset = _o > topOffset ? _o : topOffset;
         } else if (d.data.inBottom) {
-          y += offset.y;
-          bottomOffset = offset.y > bottomOffset ? offset.y : bottomOffset;
+          let _o = offset.y;
+          y += _o / 2 + fontSize;
+          bottomOffset = _o > bottomOffset ? _o : bottomOffset;
         }
         if (d.data.inLeft) {
-          x -= offset.x / 2 + 30;
+          let _o = offset.x;
+          x -= _o / 2 + fontSize;
+          leftOffset = _o > leftOffset ? _o : leftOffset;
         } else if (d.data.inRight) {
-          x += offset.x / 2 + 30;
+          let _o = offset.x;
+          x += _o / 2 + fontSize;
+          rightOffset = _o > rightOffset ? _o : rightOffset;
         }
         return `translate(${x},${y})`;
       })
@@ -283,9 +291,19 @@
     // Y axis
     if (scale) svg.append(`g`).call(yAxis);
 
-    radius += bottomOffset + topOffset;
+    let xRadiusOffset = (leftOffset + rightOffset) / 1.5;
+    let yRadiusOffset = bottomOffset + topOffset;
 
-    svg.attr(`viewBox`, [-width, -radius - 25, width * 2, radius * 2 + 50]);
+    let computedWidth = radius + xRadiusOffset;
+    let computedHeight = radius + yRadiusOffset; // +50 is for the Assesed Date
+
+    radius += xRadiusOffset > yRadiusOffset ? xRadiusOffset : yRadiusOffset;
+
+    svg.attr(`viewBox`, [-computedWidth, -computedHeight, computedWidth * 2, computedHeight * 2]);
+    svg.style(`width`, computedWidth);
+    svg.style(`height`, computedHeight);
+    svg.style(`display`, `block`);
+    svg.style(`margin`, `auto`);
 
     // Dispatch the event.
     window.document.dispatchEvent(new Event(`build`));
