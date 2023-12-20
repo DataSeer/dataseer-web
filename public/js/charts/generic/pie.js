@@ -64,14 +64,6 @@
     data.push(_d);
   }
 
-  const hasBottomSlice = data.filter(function (item, i) {
-    return item.inBottom;
-  });
-
-  const hasTopSlice = data.filter(function (item, i) {
-    return item.inTop;
-  });
-
   let topOffset = 0;
   let bottomOffset = 0;
 
@@ -96,37 +88,39 @@
       .attr(`font-family`, `sans-serif`)
       .attr(`font-size`, fontSize)
       .attr(`text-anchor`, `middle`)
-      .call((g) => {
-        let tmp = g.selectAll(`g`).data(y.ticks(20).reverse()).join(`g`).attr(`fill`, `none`);
-        if (scale)
-          tmp
-            .call((g) =>
-              g
-                .append(`text`)
-                .attr(`y`, (d) => -y(d) + y(0) - innerRadius)
-                .attr(`dy`, `0.3em`)
-                .attr(`dx`, `-0.25em`)
-                .attr(`stroke`, `#fff`)
-                .attr(`stroke-width`, 5)
-                .text((d) => (d > 0 && d < 100 && d % 25 === 0 ? `-` : ``)) // Hide first & last "scale"
-                .clone(true)
-                .attr(`fill`, `currentColor`)
-                .attr(`stroke`, `none`)
-            )
-            .call((g) =>
-              g
-                .append(`text`)
-                .attr(`y`, (d) => -y(d) + y(5) - innerRadius)
-                .attr(`dy`, `-0.15em`)
-                .attr(`dx`, `-1.8em`)
-                .attr(`stroke`, `#fff`)
-                .attr(`stroke-width`, 5)
-                .text((x, i) => (x > 0 && x < 100 && x % 25 === 0 ? `${x.toFixed(0)}%` : ``))
-                .clone(true)
-                .attr(`fill`, `currentColor`)
-                .attr(`stroke`, `none`)
-            );
-      });
+      .call((g) =>
+        g
+          .selectAll(`g`)
+          .data(y.ticks(20).reverse())
+          .join(`g`)
+          .attr(`fill`, `none`)
+          .call((g) =>
+            g
+              .append(`text`)
+              .attr(`y`, (d) => -y(d) + y(0) - innerRadius)
+              .attr(`dy`, `0.3em`)
+              .attr(`dx`, `-0.25em`)
+              .attr(`stroke`, `#fff`)
+              .attr(`stroke-width`, 5)
+              .text((d) => (d > 0 && d < 100 && d % 25 === 0 ? `-` : ``)) // Hide first & last "scale"
+              .clone(true)
+              .attr(`fill`, `currentColor`)
+              .attr(`stroke`, `none`)
+          )
+          .call((g) =>
+            g
+              .append(`text`)
+              .attr(`y`, (d) => -y(d) + y(5) - innerRadius)
+              .attr(`dy`, `-0.15em`)
+              .attr(`dx`, `-1.8em`)
+              .attr(`stroke`, `#fff`)
+              .attr(`stroke-width`, 5)
+              .text((x, i) => (x > 0 && x < 100 && x % 25 === 0 ? `${x.toFixed(0)}%` : ``))
+              .clone(true)
+              .attr(`fill`, `currentColor`)
+              .attr(`stroke`, `none`)
+          )
+      );
 
   const y = d3.scaleLinear().domain([0, 100]).range([innerRadius, outerRadius]);
 
@@ -287,7 +281,7 @@
       .attr(`stroke`, `none`);
 
     // Y axis
-    svg.append(`g`).call(yAxis);
+    if (scale) svg.append(`g`).call(yAxis);
 
     radius += bottomOffset + topOffset;
 
@@ -295,10 +289,7 @@
 
     // Dispatch the event.
     window.document.dispatchEvent(new Event(`build`));
-    return svg.node();
   };
-
-  let id = URLMANAGER.extractIdsFromCurrentURL()[`documents`];
 
   return init(data);
 })(d3);
