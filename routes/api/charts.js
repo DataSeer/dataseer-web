@@ -84,8 +84,7 @@ router.get(`/generic`, function (req, res) {
         return res.status(500).send(conf.errors.internalServerError);
       }
       let isError = data instanceof Error;
-      let result = isError ? data.toString() : data;
-      return res.json({ err: isError, res: result });
+      return isError ? res.json({ err: isError, res: data.toString() }) : res.send(data);
     }
   );
 });
