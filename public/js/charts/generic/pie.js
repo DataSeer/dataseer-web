@@ -297,17 +297,7 @@
     let computedWidth = radius + xRadiusOffset;
     let computedHeight = radius + yRadiusOffset; // +50 is for the Assesed Date
 
-    console.log(radius);
     radius += xRadiusOffset > yRadiusOffset ? xRadiusOffset : yRadiusOffset;
-    console.log(radius);
-
-    console.log(width, height);
-    console.log(`leftOffset`, leftOffset);
-    console.log(`rightOffset`, rightOffset);
-    console.log(`topOffset`, topOffset);
-    console.log(`bottomOffset`, bottomOffset);
-    console.log(xRadiusOffset, yRadiusOffset);
-    console.log(computedWidth, computedHeight);
 
     svg.attr(`viewBox`, [-computedWidth, -computedHeight, computedWidth * 2, computedHeight * 2]);
     svg.style(`width`, computedWidth);
