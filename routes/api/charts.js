@@ -39,7 +39,7 @@ router.get(`/asap`, function (req, res) {
     {
       url: `${Url.build(
         `api/charts/asap`,
-        Object.assign({ token: render }, req.query, { render: `` }) // disable render & add token if not in the URL
+        Object.assign({ token: token }, req.query, { render: `` }) // disable render & add token if not in the URL
       )}`,
       render: { type: render, width: width, height: height, quality: quality }
     },
@@ -74,7 +74,7 @@ router.get(`/generic`, function (req, res) {
     {
       url: `${Url.build(
         `api/charts/generic`,
-        Object.assign({ token: render }, req.query, { render: `` }) // disable render & add token if not in the URL
+        Object.assign({ token: token }, req.query, { render: `` }) // disable render & add token if not in the URL
       )}`,
       render: { type: render, width: width, height: height, quality: quality }
     },
