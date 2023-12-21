@@ -27,6 +27,10 @@ const Schema = new mongoose.Schema(
       bioRxiv: { type: String, default: `` }, // bioRxiv
       hypothesis: { type: String, default: `` } // hypothesis annotation
     },
+    HHMI: {
+      preprint: { type: String, default: `` }, // HHMI preprint
+      DOI: { type: String, default: `` } // HHMI DOI
+    },
     bioNLP: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (bioNLP)
     softcite: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (softcite)
     pdf: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (pdf)

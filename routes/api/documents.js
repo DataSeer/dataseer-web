@@ -260,6 +260,7 @@ router.put(`/:id`, function (req, res, next) {
       name: Params.convertToString(req.body.name),
       owner: Params.convertToString(req.body.owner),
       urls: typeof req.body.urls === `object` ? req.body.urls : undefined,
+      HHMI: typeof req.body.HHMI === `object` ? req.body.HHMI : undefined,
       organizations: Params.convertToArray(req.body.organizations, `string`),
       visible: Params.convertToBoolean(req.body.visible),
       locked: Params.convertToBoolean(req.body.locked)
@@ -1038,6 +1039,31 @@ router.post(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
     user: req.user
   };
   return DocumentsController.buildGSpreadsheets(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    if (isError) return res.status(404).send(conf.errors.notFound);
+    return res.json({ err: isError, res: result });
+  });
+});
+
+/* POST SINGLE Document reports/ BY ID */
+router.post(`/reports/gSpreadsheets/:kind`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator && !accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: {
+      ids: Params.convertToArray(req.body.ids, `string`),
+      dataTypes: req.app.get(`dataTypes`)
+    },
+    kind: req.params.kind,
+    user: req.user
+  };
+  return DocumentsController._buildGSpreadsheets(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);

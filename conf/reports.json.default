@@ -27,6 +27,29 @@
     "ASAP-GP2": "folderID"
   },
   "settings": {
+    "googleAPI": {
+      "HHMI": {
+        "timeout": 1500
+      },
+      "DataSeer Generic": {
+        "timeout": 500
+      },
+      "AmNat": {
+        "timeout": 500
+      },
+      "Universal Journal Report": {
+        "timeout": 500
+      },
+      "ASAP": {
+        "timeout": 500
+      },
+      "ASAP-PPMI": {
+        "timeout": 500
+      },
+      "ASAP-GP2": {
+        "timeout": 500
+      }
+    },
     "displayNoDataSection": {
       "HHMI": {
         "datasets": true,
@@ -88,14 +111,23 @@
       "ASAP-GP2": false
     },
     "ROAS": {
-      "HHMI": false,
+      "HHMI": false, // n/a
       "DataSeer Generic": false,
       "AmNat": false, // n/a
       "Universal Journal Report": false, // n/a
       "ASAP": false, // n/a
       "ASAP-PPMI": false, // n/a
       "ASAP-GP2": false // n/a
-    }
+    },
+    "OSIS": {
+      "HHMI": true,
+      "DataSeer Generic": false, // n/a
+      "AmNat": false, // n/a
+      "Universal Journal Report": false, // n/a
+      "ASAP": false, // n/a
+      "ASAP-PPMI": false, // n/a
+      "ASAP-GP2": false // n/a
+    },
     "authors": {
       "HHMI": false,
       "DataSeer Generic": false,
