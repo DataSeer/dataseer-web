@@ -413,14 +413,121 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
         {
           filename: `${data.doc.name} (${opts.data.id})`,
           kind: kind,
-          data: {
+          data: [
+            {
+              document: {
+                id: data.doc._id.toString(),
+                token: data.doc.token,
+                organizations: data.doc.organizations.map(function (item) {
+                  return item._id.toString();
+                })
+              },
+              dataTypesInfo: opts.data.dataTypes,
+              metadata: {
+                articleTitle: data.doc.metadata.article_title,
+                readmeIncluded: data.doc.metadata.readmeIncluded,
+                describesFiles: data.doc.metadata.describesFiles,
+                describesVariables: data.doc.metadata.describesVariables,
+                affiliationAcknowledgementsLicenseNotes: data.doc.metadata.affiliationAcknowledgementsLicenseNotes,
+                doi: data.doc.metadata.doi,
+                authors: data.doc.metadata.authors.filter(function (item) {
+                  return item.name.length > 0;
+                }),
+                dataSeerLink: {
+                  url: `${Url.build(`/documents/${opts.data.id}`, {
+                    view: `datasets`,
+                    fromReport: true,
+                    token: data.doc.token
+                  })}`,
+                  label: data.doc.name ? data.doc.name : data.doc._id.toString()
+                },
+                originalFileLink: {
+                  url: data.doc.urls.originalFile,
+                  label: data.doc.name ? data.doc.name : data.doc._id.toString()
+                },
+                dataseerDomain: Url.build(`/`, {}),
+                acknowledgement: data.doc.metadata.acknowledgement,
+                affiliation: data.doc.metadata.affiliation,
+                license: data.doc.metadata.license
+              },
+              dataObjectsMetadata: data.doc.dataObjects.metadata,
+              summary: data.dataObjectsSummary,
+              datasets: data.sortedDataObjectsInfo.datasets,
+              protocols: data.sortedDataObjectsInfo.protocols,
+              reagents: data.sortedDataObjectsInfo.reagents,
+              code: data.sortedDataObjectsInfo.code,
+              software: data.sortedDataObjectsInfo.software
+            }
+          ]
+        },
+        function (err, spreadsheetId) {
+          if (err) return cb(err);
+          return cb(null, spreadsheetId);
+        }
+      );
+    }
+  );
+};
+
+/**
+ * build the gSpeadsheets of the given documents
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.data - Data available
+ * @param {object} opts.data.dataTypes - datatypes
+ * @param {string} opts.data.ids - Id of the document
+ * @param {string} opts.kind - Kind of report (available values : ASAP or AmNat)
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self._buildGSpreadsheets = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
+  if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
+  if (typeof _.get(opts, `data.dataTypes`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.dataTypes`));
+  let kind = _.get(opts, `kind`);
+  if (typeof kind === `undefined`) return cb(Error(`Missing required data: opts.kind`));
+  if (Object.keys(reportsConf.templates).indexOf(kind) === -1)
+    return cb(Error(`Invalid required data: opts.kind must be ${Object.keys(reportsConf.templates).join(`, `)}`));
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator && !accessRights.isModerator)
+    return cb(null, new Error(`Unauthorized functionnality`));
+  let ids = Params.convertToArray(opts.data.ids, `string`);
+  let preprints = Params.convertToArray(opts.data.preprints, `string`);
+  let dois = Params.convertToArray(opts.data.dois, `string`);
+  if (!Array.isArray(ids)) ids = [];
+  if (!Array.isArray(preprints)) preprints = [];
+  if (!Array.isArray(dois)) dois = [];
+  let limit = Math.max(ids.length, preprints.length, dois.length);
+  let list = [];
+  for (let i = 0; i < limit; i++) {
+    list.push({ id: ids[i], preprint: preprints[i], doi: dois[i] });
+  }
+  return async.mapSeries(
+    list,
+    function (item, next) {
+      return Self.getReportData(
+        {
+          data: { id: item.id, kind: `html`, organization: `default`, dataTypes: opts.data.dataTypes },
+          user: opts.user
+        },
+        function (err, data) {
+          if (err) return next(err);
+          if (data instanceof Error) return next(data);
+          return next(null, {
             document: {
               id: data.doc._id.toString(),
+              name: data.doc.name,
               token: data.doc.token,
               organizations: data.doc.organizations.map(function (item) {
                 return item._id.toString();
               })
             },
+            preprint: { url: item.preprint, doi: item.doi },
             dataTypesInfo: opts.data.dataTypes,
             metadata: {
               articleTitle: data.doc.metadata.article_title,
@@ -456,7 +563,17 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
             reagents: data.sortedDataObjectsInfo.reagents,
             code: data.sortedDataObjectsInfo.code,
             software: data.sortedDataObjectsInfo.software
-          }
+          });
+        }
+      );
+    },
+    function (err, res) {
+      if (err) return cb(err);
+      return GoogleSheets.buildReport(
+        {
+          filename: `${res[0].document.name} (${res[0].document.id})`,
+          kind: kind,
+          data: res
         },
         function (err, spreadsheetId) {
           if (err) return cb(err);
@@ -3458,11 +3575,6 @@ Self.getReportData = function (opts = {}, cb) {
             dataObjectsSummary,
             bestPractices
           });
-        }
-      }
-      if (opts.data.kind === `docx`) {
-        if (opts.data.organization === `default`) {
-          return cb(null, DocX.getData(doc, opts.data.dataTypes));
         }
       }
       return cb(null, new Error(`Case not handled`));
