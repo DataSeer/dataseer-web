@@ -1049,6 +1049,33 @@ router.post(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
   });
 });
 
+/* POST SINGLE Document reports/ BY ID */
+router.post(`/reports/gSpreadsheets/:kind`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator && !accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: {
+      ids: Params.convertToArray(req.body.ids, `string`),
+      preprints: Params.convertToArray(req.body.preprints, `string`),
+      dois: Params.convertToArray(req.body.dois, `string`),
+      dataTypes: req.app.get(`dataTypes`)
+    },
+    kind: req.params.kind,
+    user: req.user
+  };
+  return DocumentsController._buildGSpreadsheets(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    if (isError) return res.status(404).send(conf.errors.notFound);
+    return res.json({ err: isError, res: result });
+  });
+});
+
 /* GET SINGLE Document reports/ BY ID */
 router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
