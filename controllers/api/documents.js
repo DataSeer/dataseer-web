@@ -500,12 +500,10 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
   let preprints = Params.convertToArray(opts.data.preprints, `string`);
   let dois = Params.convertToArray(opts.data.dois, `string`);
   if (!Array.isArray(ids)) ids = [];
-  if (!Array.isArray(preprints)) preprints = [];
-  if (!Array.isArray(dois)) dois = [];
-  let limit = Math.max(ids.length, preprints.length, dois.length);
+  let limit = ids.length;
   let list = [];
   for (let i = 0; i < limit; i++) {
-    list.push({ id: ids[i], preprint: preprints[i], doi: dois[i] });
+    list.push({ id: ids[i] });
   }
   return async.mapSeries(
     list,
@@ -527,7 +525,7 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
                 return item._id.toString();
               })
             },
-            preprint: { url: item.preprint, doi: item.doi },
+            preprint: { url: data.doc.HHMI.preprint, doi: data.doc.HHMI.DOI },
             dataTypesInfo: opts.data.dataTypes,
             metadata: {
               articleTitle: data.doc.metadata.article_title,
@@ -3910,8 +3908,16 @@ Self.update = function (opts = {}, cb) {
             if (typeof _.get(opts, `data.urls`) !== `object`) return next();
             if (Params.checkString(opts.data.urls.originalFile)) doc.urls.originalFile = opts.data.urls.originalFile;
             if (Params.checkString(opts.data.urls.bioRxiv)) doc.urls.bioRxiv = opts.data.urls.bioRxiv;
+            if (Params.checkString(opts.data.urls.preprint)) doc.urls.bioRxiv = opts.data.urls.preprint;
             if (Params.checkString(opts.data.urls.hypothesis) && accessRights.isAdministrator)
               doc.urls.hypothesis = opts.data.urls.hypothesis;
+            return next();
+          },
+          // Update HHMI property
+          function (next) {
+            if (typeof _.get(opts, `data.HHMI`) !== `object`) return next();
+            if (Params.checkString(opts.data.HHMI.DOI)) doc.HHMI.DOI = opts.data.HHMI.DOI;
+            if (Params.checkString(opts.data.HHMI.preprint)) doc.HHMI.preprint = opts.data.HHMI.preprint;
             return next();
           }
         ],

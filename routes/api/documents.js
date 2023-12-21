@@ -260,6 +260,7 @@ router.put(`/:id`, function (req, res, next) {
       name: Params.convertToString(req.body.name),
       owner: Params.convertToString(req.body.owner),
       urls: typeof req.body.urls === `object` ? req.body.urls : undefined,
+      HHMI: typeof req.body.HHMI === `object` ? req.body.HHMI : undefined,
       organizations: Params.convertToArray(req.body.organizations, `string`),
       visible: Params.convertToBoolean(req.body.visible),
       locked: Params.convertToBoolean(req.body.locked)
@@ -1057,8 +1058,6 @@ router.post(`/reports/gSpreadsheets/:kind`, function (req, res, next) {
   let opts = {
     data: {
       ids: Params.convertToArray(req.body.ids, `string`),
-      preprints: Params.convertToArray(req.body.preprints, `string`),
-      dois: Params.convertToArray(req.body.dois, `string`),
       dataTypes: req.app.get(`dataTypes`)
     },
     kind: req.params.kind,
