@@ -1955,7 +1955,7 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
                     }
                     // Set DataObject values
                     if (typeof tmp[name] === `undefined`) tmp[name] = {};
-                    if (typeof tmp[name][`${dataType}:${subType}`] === `undefined`)
+                    if (typeof tmp[name][`${dataType}:${subType}`] === `undefined`) {
                       tmp[name][`${dataType}:${subType}`] = {
                         alreadyExist,
                         name,
@@ -1964,12 +1964,15 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
                         comments: comments.join(`\n`),
                         sentences: [{ id: sentenceId }]
                       };
-                    else {
+                    } else {
                       let alreadyIn =
                         tmp[name][`${dataType}:${subType}`].sentences.filter(function (s) {
                           return s.id === sentenceId;
                         }).length > 0;
-                      if (!alreadyIn) tmp[name][`${dataType}:${subType}`].sentences.push({ id: sentenceId });
+                      if (!alreadyIn) {
+                        tmp[name][`${dataType}:${subType}`].comments += `\n` + comments.join(`\n`);
+                        tmp[name][`${dataType}:${subType}`].sentences.push({ id: sentenceId });
+                      }
                     }
                   }
                 }
@@ -2035,6 +2038,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
           let d = {
             document: doc,
             dataObject: DataObjects.create({
+              index: item.sentences[0].index,
               reuse: false,
               dataType: `code software`,
               subType: `custom scripts`,
@@ -2065,6 +2069,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
             let d = {
               document: doc,
               dataObject: DataObjects.create({
+                index: item.sentences[0].index,
                 reuse: true,
                 dataType: `code software`,
                 subType: `software`,
@@ -3005,10 +3010,14 @@ Self.addDataObjects = function (opts = {}, cb) {
           item.document.dataObjects.current.push(dataObject._id.toString());
           let saveDocument = _.get(item, `saveDocument`, true);
           if (!saveDocument) return next(null, acc);
-          return Documents.updateOne({ _id: dataObject.document }, item.document, function (err, doc) {
-            if (err) return next(err, acc);
-            return next(null, acc);
-          });
+          return Documents.updateOne(
+            { _id: dataObject.document },
+            { dataObjects: item.document.dataObjects },
+            function (err, doc) {
+              if (err) return next(err, acc);
+              return next(null, acc);
+            }
+          );
         }
       );
     },
@@ -3051,10 +3060,14 @@ Self.updateDataObjects = function (opts = {}, cb) {
           acc.push({ err: dataObject instanceof Error, res: dataObject });
           let saveDocument = _.get(item, `saveDocument`, true);
           if (!saveDocument) return next(null, acc);
-          return Documents.updateOne({ _id: dataObject.document }, item.document, function (err, doc) {
-            if (err) return next(err, acc);
-            return next(null, acc);
-          });
+          return Documents.updateOne(
+            { _id: dataObject.document.data },
+            { dataObjects: item.document.dataObjects },
+            function (err, doc) {
+              if (err) return next(err, acc);
+              return next(null, acc);
+            }
+          );
         }
       );
     },
@@ -3102,10 +3115,14 @@ Self.deleteDataObjects = function (opts = {}, cb) {
           item.document.dataObjects.deleted.push(dataObject._id.toString());
           let saveDocument = _.get(item, `saveDocument`, true);
           if (!saveDocument) return next(null, acc);
-          return Documents.updateOne({ _id: dataObject.document }, item.document, function (err, doc) {
-            if (err) return next(err, acc);
-            return next(null, acc);
-          });
+          return Documents.updateOne(
+            { _id: dataObject.document },
+            { dataObjects: item.document.dataObjects },
+            function (err, doc) {
+              if (err) return next(err, acc);
+              return next(null, acc);
+            }
+          );
         }
       );
     },
