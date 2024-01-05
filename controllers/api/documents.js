@@ -1862,6 +1862,7 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
                 if (err) return cb(err);
                 if (jsonData instanceof Error) return cb(null, jsonData);
                 let tmp = {};
+                let tags = {};
                 for (let key in jsonData.BIONLP) {
                   let sentenceId = key;
                   let items = jsonData.BIONLP[key];
@@ -1870,9 +1871,39 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
                     let item = items[i];
                     if (item.token === ``) continue;
                     let name = item.token;
-                    let dataType = `lab materials`;
+                    let dataType = ``;
                     let subType = ``;
                     let comments = [];
+
+                    if (typeof tags[name] === `undefined`) {
+                      tags[name] = {
+                        'BioNLPLabMaterial': {},
+                        'GenTaggType': {},
+                        'CraftLabMaterial': {},
+                        'Gazetteer Antibodies': false,
+                        'Gazetteer Cell Lines': false,
+                        'Gazetteer Plasmids': false
+                      };
+                    }
+
+                    if (item.BioNLPLabMaterial) {
+                      tags[name][`BioNLPLabMaterial`][item.BioNLPLabMaterial] = true;
+                    }
+                    if (item.GenTaggType) {
+                      tags[name][`GenTaggType`][item.GenTaggType] = true;
+                    }
+                    if (item.CraftLabMaterial) {
+                      tags[name][`CraftLabMaterial`][item.CraftLabMaterial] = true;
+                    }
+                    if (item[`Gazetteer Antibodies`]) {
+                      tags[name][`Gazetteer Antibodies`] = true;
+                    }
+                    if (item[`Gazetteer Cell Lines`]) {
+                      tags[name][`Gazetteer Cell Lines`] = true;
+                    }
+                    if (item[`Gazetteer Plasmids`]) {
+                      tags[name][`Gazetteer Plasmids`] = true;
+                    }
                     // [
                     //   `BioNLPLabMaterial === '${item.BioNLPLabMaterial}'`,
                     //   `CraftLabMaterial === '${item.CraftLabMaterial}'`,
@@ -1891,68 +1922,49 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
                     case `I-ORG`:
                     case `I-PLS`:
                     case `I-AB`:
-                      dataType = `lab materials`;
-                      subType = ``;
-                      comments.push(`BioNLPLabMaterial: ${item.BioNLPLabMaterial}`);
                       break;
                     default:
-                      dataType = `lab materials`;
-                      subType = ``;
-                      comments.push(`BioNLPLabMaterial: ${item.BioNLPLabMaterial}`);
                     }
                     // Check item.GenTaggType
                     switch (item.GenTaggType) {
+                    case `cell_type`:
                     case `protein`:
                     case `DNA`:
-                    case `cell_type`:
+                      break;
                     case `cell_line`:
                       dataType = `lab materials`;
                       subType = ``;
-                      comments.push(`GenTaggType: ${item.GenTaggType}`);
                       break;
                     default:
-                      dataType = `lab materials`;
-                      subType = ``;
-                      comments.push(`GenTaggType: ${item.GenTaggType}`);
                     }
                     // Check item.CraftLabMaterial
                     switch (item.CraftLabMaterial) {
+                    case `CHEBI`:
+                    case `UBERON`:
                     case `GO_BP`:
                     case `PR`:
                     case `GO_CC`:
-                    case `NCBITaxon`:
                     case `SO`:
-                      dataType = `lab materials`;
-                      subType = ``;
-                      comments.push(`CraftLabMaterial: ${item.CraftLabMaterial}`);
                       break;
-                      // Unhandled tags
-                    case `CHEBI`:
-                    case `UBERON`:
                     case `CL`:
+                    case `NCBITaxon`:
                       dataType = `lab materials`;
                       subType = ``;
-                      comments.push(`CraftLabMaterial: ${item.CraftLabMaterial}`);
                       break;
                     default:
-                      dataType = `lab materials`;
-                      subType = ``;
-                      comments.push(`CraftLabMaterial: ${item.CraftLabMaterial}`);
                     }
                     // Check Gazetteer
                     if (item[`Gazetteer Antibodies`] === 1) {
-                      dataType = `lab materials`;
+                      dataType = ``;
                       subType = ``;
-                      comments.push(`Gazetteer Antibodies`);
                     } else if (item[`Gazetteer Cell Lines`] === 1) {
                       dataType = `lab materials`;
                       subType = ``;
-                      comments.push(`Gazetteer Cell Lines`);
                     } else if (item[`Gazetteer Plasmids`] === 1) {
                       dataType = `lab materials`;
                       subType = ``;
-                      comments.push(`Gazetteer Plasmids`);
                     }
+                    if (!dataType && !subType) continue;
                     // Set DataObject values
                     if (typeof tmp[name] === `undefined`) tmp[name] = {};
                     if (typeof tmp[name][`${dataType}:${subType}`] === `undefined`) {
@@ -1961,7 +1973,7 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
                         name,
                         dataType,
                         subType,
-                        comments: comments.join(`\n`),
+                        comments: JSON.stringify(tags[name], null, 2),
                         sentences: [{ id: sentenceId }]
                       };
                     } else {
@@ -1970,7 +1982,7 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
                           return s.id === sentenceId;
                         }).length > 0;
                       if (!alreadyIn) {
-                        tmp[name][`${dataType}:${subType}`].comments += `\n` + comments.join(`\n`);
+                        tmp[name][`${dataType}:${subType}`].comments = JSON.stringify(tags[name], null, 2);
                         tmp[name][`${dataType}:${subType}`].sentences.push({ id: sentenceId });
                       }
                     }
