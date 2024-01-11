@@ -30,6 +30,7 @@ router.get(`/signout`, function (req, res, next) {
     }
     let isError = data instanceof Error,
       result = isError ? data.toString() : data;
+    return res.redirect(Url.build(`/`));
   });
 });
 
