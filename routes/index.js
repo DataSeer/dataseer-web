@@ -17,16 +17,7 @@ const conf = require(`../conf/conf.json`);
 const recaptcha = require(`../conf/recaptcha.json`);
 
 router.get(`/`, function (req, res) {
-  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
-  if (!accessRights.authenticated) return res.redirect(Url.build(`/signin`));
-  if (accessRights.isVisitor) return res.redirect(Url.build(`/unauthorized`));
-  if (accessRights.isStandardUser) return res.redirect(Url.build(`/documents`));
-  if (accessRights.isModerator) return res.redirect(Url.build(`/backoffice/documents`));
-  return res.render(`root/layout.pug`, {
-    currentRoute: `/`,
-    currentUser: req.user,
-    conf: conf
-  });
+  return res.redirect(Url.build(`#/documents/`, Object.assign({}, req.query), conf.gui.root));
 });
 
 router.get(`/signout`, function (req, res, next) {
