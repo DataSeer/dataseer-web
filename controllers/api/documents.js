@@ -2040,35 +2040,38 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
     return Self.extractDataFromSoftcite(opts, function (err, software) {
       if (err) return cb(err);
       if (software instanceof Error) return cb(null, software);
-      let softCiteCustomScripts = software
-        .filter(function (item) {
-          if (!item.match) return false;
-          if (item.alreadyExist) return false;
-          return true;
-        })
-        .map(function (item) {
-          let d = {
-            document: doc,
-            dataObject: DataObjects.create({
-              index: item.sentences[0].index,
-              reuse: false,
-              dataType: `code software`,
-              subType: `custom scripts`,
-              cert: `0`,
-              name: item.name + ` Code`,
-              URL: ``,
-              comments: item.mentions.join(`, `),
-              sentences: item.sentences.filter(function (e) {
-                return e.match;
-              })
-            }),
-            isExtracted: true,
-            isDeleted: false,
-            saveDocument: opts.saveDocument
-          };
-          d.dataObject.document = doc._id.toString();
-          return d;
-        });
+      let softCiteCommandLines = opts.ignoreSoftCiteCommandLines
+        ? []
+        : software
+          .filter(function (item) {
+            if (!item.match) return false;
+            if (item.alreadyExist) return false;
+            if (!item.isCommandLine) return false;
+            return true;
+          })
+          .map(function (item) {
+            let d = {
+              document: doc,
+              dataObject: DataObjects.create({
+                index: item.sentences[0].index,
+                reuse: false,
+                dataType: `code software`,
+                subType: `custom scripts`,
+                cert: `0`,
+                name: item.name + ` Code`,
+                URL: ``,
+                comments: item.mentions.join(`, `),
+                sentences: item.sentences.filter(function (e) {
+                  return e.match;
+                })
+              }),
+              isExtracted: true,
+              isDeleted: false,
+              saveDocument: opts.saveDocument
+            };
+            d.dataObject.document = doc._id.toString();
+            return d;
+          });
       let softCiteSoftware = opts.ignoreSoftCiteSoftware
         ? []
         : software
@@ -2104,7 +2107,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
       return Self.addDataObjects(
         {
           user: opts.user,
-          data: softCiteCustomScripts.concat(softCiteSoftware)
+          data: softCiteCommandLines.concat(softCiteSoftware)
         },
         function (err, res) {
           return cb(err, software);
