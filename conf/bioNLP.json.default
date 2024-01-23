@@ -1,0 +1,42 @@
+{
+  "BioNLPLabMaterial": {
+    "default": { "dataType": "", "subType": "" },
+    "I-CL": { "dataType": "", "subType": "" },
+    "I-ORG": { "dataType": "", "subType": "" },
+    "I-PLS": { "dataType": "", "subType": "" },
+    "I-AB": { "dataType": "", "subType": "" }
+  },
+  "GenTaggType":{
+    "default": { "dataType": "", "subType": "" },
+    "cell_type": { "dataType": "", "subType": "" },
+    "protein": { "dataType": "", "subType": "" },
+    "DNA": { "dataType": "", "subType": "" },
+    "cell_line": { "dataType": "lab materials", "subType": "" }
+  },
+  "CraftLabMaterial":{
+    "default": { "dataType": "", "subType": "" },
+    "CHEBI": { "dataType": "", "subType": "" },
+    "UBERON": { "dataType": "", "subType": "" },
+    "GO_BP": { "dataType": "", "subType": "" },
+    "PR": { "dataType": "", "subType": "" },
+    "GO_CC": { "dataType": "", "subType": "" },
+    "SO": { "dataType": "", "subType": "" },
+    "CL": { "dataType": "lab materials", "subType": "" },
+    "NCBITaxon": { "dataType": "lab materials", "subType": "" },
+  },
+  "Gazetteer Antibodies": {
+    "default": { "dataType": "", "subType": "" },
+    "1": { "dataType": "", "subType": "" },
+    "0": { "dataType": "", "subType": "" }
+  },
+  "Gazetteer Cell Lines": {
+    "default": { "dataType": "", "subType": "" },
+    "1": { "dataType": "lab materials", "subType": "" },
+    "0": { "dataType": "", "subType": "" }
+  },
+  "Gazetteer Plasmids": {
+    "default": { "dataType": "", "subType": "" },
+    "1": { "dataType": "lab materials", "subType": "" },
+    "0": { "dataType": "", "subType": "" }
+  }
+}
