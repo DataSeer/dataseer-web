@@ -29,6 +29,7 @@ router.get(`/:id`, function (req, res, next) {
     if (file instanceof Error) return res.json({ 'err': true, 'res': null, 'msg': file.toString() });
     if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
     res.setHeader(`Content-Type`, file.mimetype);
+    res.setHeader(`Content-Disposition`, `attachment; filename=` + file.name);
     return res.send(file.data);
   });
 });

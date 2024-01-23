@@ -55,6 +55,7 @@ const uploadConf = require(`../../conf/upload.json`);
 const ASAPAuthorsConf = require(`../../conf/authors.ASAP.json`);
 const SoftwareConf = require(`../../conf/software.json`);
 const reportsConf = require(`../../conf/reports.json`);
+const bioNLPConf = require(`../../conf/bioNLP.json`);
 
 let Self = {};
 
@@ -1822,6 +1823,8 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
  * @param {string} opts.documentId - Document id
+ * @param {array} opts.pages - List of pages
+ * @param {boolean} opts.labMaterialsSectionsOnly - Automatically detect lab materials sections (default: false)
  * @param {boolean} opts.bioNLP - Enable/disable bioNLP service request (default: true)
  * @param {boolean} opts.refreshData - Refresh data (force request bioNLP)
  * @param {function} cb - Callback function(err) (err: error process OR null)
@@ -1831,6 +1834,10 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  if (typeof _.get(opts, `bioNLP`) === `undefined`) opts.bioNLP = true;
+  if (typeof _.get(opts, `refreshData`) === `undefined`) opts.refreshData = false;
+  if (typeof _.get(opts, `pages`) === `undefined`) opts.pages = [];
+  if (typeof _.get(opts, `labMaterialsSectionsOnly`) === `undefined`) opts.labMaterialsSectionsOnly = false;
   return Self.get(
     { data: { id: opts.documentId.toString(), dataObjects: true }, user: opts.user },
     function (err, doc) {
@@ -1839,22 +1846,38 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
       let labMaterials = doc.dataObjects.current.filter(function (item) {
         return item.kind === `reagent`;
       });
-      return Self.getSentencesMapping(
+      return Self.getSentencesMetadata(
         { user: opts.user, documentId: opts.documentId.toString() },
-        function (err, mapping) {
+        function (err, metadata) {
           if (err) return cb(err);
-          if (mapping instanceof Error) return cb(null, mapping);
+          if (metadata instanceof Error) return cb(null, metadata);
+          let mapping = metadata.mapping.object;
           let sort = Self.sortSentencesUsingMapping(mapping);
           return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
             if (err) return next(err, content);
             let sentences = XML.extractTEISentences(
               XML.load(content.data.toString(DocumentsFilesController.encoding)),
-              `object`
+              `array`
             );
+            if (opts.labMaterialsSectionsOnly) sentences = Self.filterBioNLPSentences(sentences.sort(sort));
+            if (opts.pages.length > 0) {
+              sentences = sentences.filter(function (item) {
+                return (
+                  Object.keys(metadata.sentences[item.id].pages).filter(function (page) {
+                    return opts.pages.indexOf(parseInt(page)) > -1;
+                  }).length > 0
+                );
+              });
+            }
+            let sentencesMapping = sentences.reduce(function (acc, item) {
+              acc[item.id] = item;
+              return acc;
+            }, {});
             return Self.getBioNLPResults(
               {
                 documentId: opts.documentId.toString(),
                 user: opts.user,
+                pages: opts.pages,
                 bioNLP: opts.bioNLP,
                 refreshData: opts.refreshData
               },
@@ -1865,14 +1888,16 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
                 let tags = {};
                 for (let key in jsonData.BIONLP) {
                   let sentenceId = key;
+                  // Check pages of sentence if there are restricted pages
+                  if (typeof sentencesMapping[sentenceId] === `undefined`) continue;
                   let items = jsonData.BIONLP[key];
                   for (let i = 0; i < items.length; i++) {
                     // TO DO : Manage BIONLP results & create data objects found in sentences
                     let item = items[i];
                     if (item.token === ``) continue;
                     let name = item.token;
-                    let dataType = ``;
-                    let subType = ``;
+                    let types = [];
+                    let shouldCreateDataObject = false;
                     let comments = [];
 
                     if (typeof tags[name] === `undefined`) {
@@ -1880,91 +1905,39 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
                         'BioNLPLabMaterial': {},
                         'GenTaggType': {},
                         'CraftLabMaterial': {},
-                        'Gazetteer Antibodies': false,
-                        'Gazetteer Cell Lines': false,
-                        'Gazetteer Plasmids': false
+                        'Gazetteer Antibodies': {},
+                        'Gazetteer Cell Lines': {},
+                        'Gazetteer Plasmids': {}
                       };
                     }
-
-                    if (item.BioNLPLabMaterial) {
-                      tags[name][`BioNLPLabMaterial`][item.BioNLPLabMaterial] = true;
-                    }
-                    if (item.GenTaggType) {
-                      tags[name][`GenTaggType`][item.GenTaggType] = true;
-                    }
-                    if (item.CraftLabMaterial) {
-                      tags[name][`CraftLabMaterial`][item.CraftLabMaterial] = true;
-                    }
-                    if (item[`Gazetteer Antibodies`]) {
-                      tags[name][`Gazetteer Antibodies`] = true;
-                    }
-                    if (item[`Gazetteer Cell Lines`]) {
-                      tags[name][`Gazetteer Cell Lines`] = true;
-                    }
-                    if (item[`Gazetteer Plasmids`]) {
-                      tags[name][`Gazetteer Plasmids`] = true;
-                    }
-                    // [
-                    //   `BioNLPLabMaterial === '${item.BioNLPLabMaterial}'`,
-                    //   `CraftLabMaterial === '${item.CraftLabMaterial}'`,
-                    //   `Gazetteer Antibodies === '${item[`Gazetteer Antibodies`]}'`,
-                    //   `Gazetteer Cell Lines === '${item[`Gazetteer Cell Lines`]}'`,
-                    //   `Gazetteer Plasmids === '${item[`Gazetteer Plasmids`]}'`,
-                    //   `GenTaggType === '${item.GenTaggType}'`
-                    // ].join(`\n`);
                     let alreadyExist =
                       labMaterials.filter(function (e) {
                         return e.name === name;
                       }).length > 0;
-                    // Check item.BioNLPLabMaterial
-                    switch (item.BioNLPLabMaterial) {
-                    case `I-CL`:
-                    case `I-ORG`:
-                    case `I-PLS`:
-                    case `I-AB`:
-                      break;
-                    default:
+                    // Check all tags
+                    for (let k in bioNLPConf) {
+                      tags[name][k][item[k].toString()] = true;
+                      if (typeof item[k] !== `undefined` && typeof bioNLPConf[k][item[k]] !== `undefined`) {
+                        // Add tag
+                        // Set given dataType/subType
+                        types.push({
+                          dataType: bioNLPConf[k][item[k].toString()].dataType,
+                          subType: bioNLPConf[k][item[k].toString()].subType
+                        });
+                      } else {
+                        // Set default dataType/subType
+                        types.push({
+                          dataType: bioNLPConf[k][`default`].dataType,
+                          subType: bioNLPConf[k][`default`].subType
+                        });
+                      }
                     }
-                    // Check item.GenTaggType
-                    switch (item.GenTaggType) {
-                    case `cell_type`:
-                    case `protein`:
-                    case `DNA`:
-                      break;
-                    case `cell_line`:
-                      dataType = `lab materials`;
-                      subType = ``;
-                      break;
-                    default:
-                    }
-                    // Check item.CraftLabMaterial
-                    switch (item.CraftLabMaterial) {
-                    case `CHEBI`:
-                    case `UBERON`:
-                    case `GO_BP`:
-                    case `PR`:
-                    case `GO_CC`:
-                    case `SO`:
-                      break;
-                    case `CL`:
-                    case `NCBITaxon`:
-                      dataType = `lab materials`;
-                      subType = ``;
-                      break;
-                    default:
-                    }
-                    // Check Gazetteer
-                    if (item[`Gazetteer Antibodies`] === 1) {
-                      dataType = ``;
-                      subType = ``;
-                    } else if (item[`Gazetteer Cell Lines`] === 1) {
-                      dataType = `lab materials`;
-                      subType = ``;
-                    } else if (item[`Gazetteer Plasmids`] === 1) {
-                      dataType = `lab materials`;
-                      subType = ``;
-                    }
-                    if (!dataType && !subType) continue;
+                    let filteredTypes = types.filter(function (t) {
+                      return t.dataType !== ``;
+                    });
+                    if (filteredTypes.length <= 0) continue;
+                    let dataType = filteredTypes[0].dataType;
+                    let subType = filteredTypes[0].subType;
                     // Set DataObject values
                     if (typeof tmp[name] === `undefined`) tmp[name] = {};
                     if (typeof tmp[name][`${dataType}:${subType}`] === `undefined`) {
@@ -1997,7 +1970,7 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
                     let dataObject = tmp[names[i]][types[j]];
                     dataObject.sentences = dataObject.sentences
                       .map(function (s) {
-                        return { ...sentences[s.id] };
+                        return { ...sentencesMapping[s.id] };
                       })
                       .sort(sort);
                     dataObject.index = mapping[dataObject.sentences[0].id];
@@ -2122,6 +2095,8 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
  * @param {string} opts.documentId - Document id
+ * @param {array} opts.pages - List of pages
+ * @param {boolean} opts.labMaterialsSectionsOnly - Automatically detect lab materials sections (default: false)
  * @param {boolean} opts.bioNLP - Enable/disable bioNLP request (default: true)
  * @param {boolean} opts.refreshData - Refresh data (force request bioNLP)
  * @param {boolean} opts.saveDocument - Save document
@@ -2133,6 +2108,9 @@ Self.importDataFromBioNLP = function (opts = {}, cb) {
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
   if (typeof _.get(opts, `refreshData`) === `undefined`) opts.refreshData = false;
+  if (typeof _.get(opts, `pages`) === `undefined`) opts.pages = [];
+  if (typeof _.get(opts, `labMaterialsSectionsOnly`) === `undefined`) opts.labMaterialsSectionsOnly = false;
+  if (typeof _.get(opts, `bioNLP`) === `undefined`) opts.bioNLP = true;
   return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
     if (err) return cb(err);
     if (doc instanceof Error) return cb(null, doc);
@@ -2325,11 +2303,30 @@ Self.getSoftciteResults = function (opts, cb) {
 };
 
 /**
+ * Filter sentences based on automatically detected sections
+ * @param {array} sentences - sentences
+ * @returns {array} Array of filtered sentences
+ */
+Self.filterBioNLPSentences = function (sentences) {
+  let index = 0;
+  for (let i = 0; i < sentences.length; i++) {
+    let sentence = sentences[i];
+    if (sentence.head && XML.checkHeaderContent(sentence.text)) {
+      index = i;
+      break;
+    }
+  }
+  return sentences.slice(index);
+};
+
+/**
  * Get Bio NLP results
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
  * @param {string} opts.documentId - Document id
  * @param {boolean} opts.bioNLP - Enable/disable bioNLP service request (default: true)
+ * @param {array} opts.pages - List of pages
+ * @param {boolean} opts.labMaterialsSectionsOnly - Automatically detect lab materials sections (default: false)
  * @param {boolean} opts.refreshData - Refresh data (force request bioNLP)
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
@@ -2340,11 +2337,26 @@ Self.getBioNLPResults = function (opts, cb) {
   if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
   if (typeof _.get(opts, `bioNLP`) === `undefined`) opts.bioNLP = true;
   if (typeof _.get(opts, `refreshData`) === `undefined`) opts.refreshData = false;
+  if (typeof _.get(opts, `pages`) === `undefined`) opts.pages = [];
+  if (typeof _.get(opts, `labMaterialsSectionsOnly`) === `undefined`) opts.labMaterialsSectionsOnly = false;
   return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
     if (err) return cb(err);
     if (doc instanceof Error) return cb(null, doc);
     return async.reduce(
       [
+        function (acc, next) {
+          if (acc instanceof Error) return next(acc);
+          return Self.getSentencesMetadata(
+            { user: opts.user, documentId: opts.documentId.toString() },
+            function (err, metadata) {
+              if (err) return next(err);
+              if (metadata instanceof Error) return next(null, metadata);
+              acc.metadata = metadata;
+              acc.sort = Self.sortSentencesUsingMapping(metadata.mapping.object);
+              return next(null, acc);
+            }
+          );
+        },
         // Read local Data
         function (acc, next) {
           if (acc instanceof Error) return next(acc);
@@ -2388,6 +2400,16 @@ Self.getBioNLPResults = function (opts, cb) {
               XML.load(contentTEI.data.toString(DocumentsFilesController.encoding)),
               `array`
             );
+            if (opts.labMaterialsSectionsOnly) sentences = Self.filterBioNLPSentences(sentences.sort(acc.sort));
+            if (opts.pages.length > 0) {
+              sentences = sentences.filter(function (item) {
+                return (
+                  Object.keys(acc.metadata.sentences[item.id].pages).filter(function (page) {
+                    return opts.pages.indexOf(parseInt(page)) > -1;
+                  }).length > 0
+                );
+              });
+            }
             return BioNLP.processSentences(sentences, function (err, results) {
               if (err) return next(err);
               if (results instanceof Error) {
@@ -3630,6 +3652,22 @@ Self.getSentencesMapping = function (opts, cb) {
           ? doc.tei.metadata.mapping.object
           : {};
     return cb(null, mapping);
+  });
+};
+
+/**
+ * Get sentences metadata of a given document
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {string} opts.documentId - Document id
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ */
+Self.getSentencesMetadata = function (opts, cb) {
+  return Self.get({ data: { id: opts.documentId, tei: true, pdf: true }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    let metadata = doc.pdf && doc.pdf.metadata ? doc.pdf.metadata : doc.tei && doc.tei.metadata ? doc.tei.metadata : {};
+    return cb(null, metadata);
   });
 };
 

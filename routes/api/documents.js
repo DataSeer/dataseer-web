@@ -687,6 +687,7 @@ router.get(`/:id/softcite/content`, function (req, res, next) {
       function (err, file) {
         if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
         if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
+        res.setHeader(`Content-Disposition`, `filename=` + file.name);
         res.setHeader(`Content-Type`, file.mimetype);
         return res.send(file.data);
       }
@@ -780,6 +781,7 @@ router.get(`/:id/bioNLP/content`, function (req, res, next) {
       function (err, file) {
         if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
         if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
+        res.setHeader(`Content-Disposition`, `filename=` + file.name);
         res.setHeader(`Content-Type`, file.mimetype);
         return res.send(file.data);
       }
@@ -794,7 +796,9 @@ router.post(`/:id/bioNLP/importData`, function (req, res, next) {
     return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     documentId: req.params.id,
+    pages: Array.isArray(req.body.pages) ? req.body.pages : Params.convertPages(req.body.pages),
     bioNLP: Params.convertToBoolean(req.body.bioNLP),
+    labMaterialsSectionsOnly: Params.convertToBoolean(req.body.labMaterialsSectionsOnly),
     refreshData: Params.convertToBoolean(req.body.refreshData),
     saveDocument: Params.convertToBoolean(req.body.saveDocument),
     user: req.user
@@ -817,7 +821,9 @@ router.post(`/:id/bioNLP/extractData`, function (req, res, next) {
     return res.status(401).send(conf.errors.unauthorized);
   let opts = {
     documentId: req.params.id,
+    pages: Array.isArray(req.body.pages) ? req.body.pages : Params.convertPages(req.body.pages),
     bioNLP: Params.convertToBoolean(req.body.bioNLP),
+    labMaterialsSectionsOnly: Params.convertToBoolean(req.body.labMaterialsSectionsOnly),
     refreshData: Params.convertToBoolean(req.body.refreshData),
     user: req.user
   };
@@ -840,6 +846,8 @@ router.post(`/:id/bioNLP/results`, function (req, res, next) {
   let opts = {
     documentId: req.params.id,
     bioNLP: Params.convertToBoolean(req.body.bioNLP),
+    pages: Array.isArray(req.body.pages) ? req.body.pages : Params.convertPages(req.body.pages),
+    labMaterialsSectionsOnly: Params.convertToBoolean(req.body.labMaterialsSectionsOnly),
     refreshData: Params.convertToBoolean(req.body.refreshData),
     user: req.user
   };
@@ -897,6 +905,7 @@ router.get(`/:id/pdf/content`, function (req, res, next) {
       function (err, file) {
         if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
         if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
+        res.setHeader(`Content-Disposition`, `filename=` + file.name);
         res.setHeader(`Content-Type`, file.mimetype);
         return res.send(file.data);
       }
@@ -947,6 +956,7 @@ router.get(`/:id/tei/content`, function (req, res, next) {
       function (err, file) {
         if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
         if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
+        res.setHeader(`Content-Disposition`, `filename=` + file.name);
         res.setHeader(`Content-Type`, file.mimetype);
         return res.send(file.data);
       }

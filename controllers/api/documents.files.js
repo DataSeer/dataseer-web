@@ -135,7 +135,7 @@ Self.readFile = function (opts, cb) {
       if (err) return cb(err);
       if (!file) return cb(err, new Error(`File Not Found`));
       return fs.readFile(file.path, file.encoding, function (err, res) {
-        return cb(err, { mimetype: file.mimetype, data: Buffer.from(res, file.encoding) });
+        return cb(err, { name: file.name, mimetype: file.mimetype, data: Buffer.from(res, file.encoding) });
       });
     });
 };
@@ -159,7 +159,7 @@ Self.readFileContent = function (opts, cb) {
       if (err) return cb(err);
       if (!file) return cb(err, new Error(`File Not Found`));
       return fs.readFile(file.path, file.encoding, function (err, res) {
-        return cb(err, { mimetype: file.mimetype, data: res, path: file.path });
+        return cb(err, { name: file.name, mimetype: file.mimetype, data: res, path: file.path });
       });
     });
 };
@@ -184,6 +184,7 @@ Self.readFileStream = function (opts, cb) {
       return fs.stat(file.path, function (err, stats) {
         if (err) return cb(err);
         return cb(null, {
+          name: file.name,
           stream: fs.createReadStream(file.path, { encoding: file.encoding }),
           stats: stats,
           mimetype: file.mimetype
