@@ -22,7 +22,7 @@
     "GO_CC": { "dataType": "", "subType": "" },
     "SO": { "dataType": "", "subType": "" },
     "CL": { "dataType": "lab materials", "subType": "" },
-    "NCBITaxon": { "dataType": "lab materials", "subType": "" },
+    "NCBITaxon": { "dataType": "lab materials", "subType": "" }
   },
   "Gazetteer Antibodies": {
     "default": { "dataType": "", "subType": "" },
