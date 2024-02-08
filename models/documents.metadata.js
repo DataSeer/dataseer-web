@@ -27,6 +27,14 @@ const Author = new mongoose.Schema(
   { _id: false }
 );
 
+const Sentence = new mongoose.Schema(
+  {
+    id: { type: String, default: `` }, // id
+    text: { type: String, default: `` } // text
+  },
+  { _id: false }
+);
+
 const Schema = new mongoose.Schema(
   {
     // README included
@@ -41,6 +49,10 @@ const Schema = new mongoose.Schema(
     describesVariables: {
       value: { type: Boolean, default: false },
       notes: { type: String, default: `` }
+    },
+    DAS: {
+      sentences: [Sentence],
+      content: { type: String, default: `` }
     },
     affiliationAcknowledgementsLicenseNotes: { type: String, default: `` },
     document: { type: mongoose.Schema.Types.ObjectId, ref: `Documents` }, // refers to documents collection (id of a given document)

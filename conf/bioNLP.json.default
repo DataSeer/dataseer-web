@@ -11,6 +11,7 @@
     "cell_type": { "dataType": "", "subType": "" },
     "protein": { "dataType": "", "subType": "" },
     "DNA": { "dataType": "", "subType": "" },
+    "RNA": { "dataType": "", "subType": "" },
     "cell_line": { "dataType": "lab materials", "subType": "" }
   },
   "CraftLabMaterial":{
