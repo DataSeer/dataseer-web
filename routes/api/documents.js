@@ -1206,6 +1206,7 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
     data: {
       id: req.params.id,
       refreshAuthors: Params.convertToBoolean(req.body.refreshAuthors),
+      refreshDAS: Params.convertToBoolean(req.body.refreshDAS),
       refreshORCIDsFromAPI: Params.convertToBoolean(req.body.refreshORCIDsFromAPI),
       refreshORCIDsFromASAPList: Params.convertToBoolean(req.body.refreshORCIDsFromASAPList),
       automaticallySetPartOfASAPNetwork: Params.convertToBoolean(req.body.automaticallySetPartOfASAPNetwork),
@@ -1213,6 +1214,7 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
         req.body.automaticallySetASAPAffiliationInUpload
       ),
       metadata: {
+        DAS: req.body.DAS,
         readmeIncluded: req.body.readmeIncluded,
         describesFiles: req.body.describesFiles,
         describesVariables: req.body.describesVariables,
