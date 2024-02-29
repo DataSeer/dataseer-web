@@ -41,6 +41,34 @@ router.get(`/:id/logs`, function (req, res, next) {
   });
 });
 
+/* GET Get changes of a dataObject */
+router.get(`/:id/changes/untrusted`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: {
+      target: Params.convertToString(req.params.id),
+      accounts: {
+        trusted: Params.convertToArray(req.body.trustedAccounts, `string`),
+        untrusted: Params.convertToArray(req.body.untrustedAccounts, `string`)
+      },
+      updatedBefore: Params.convertToDate(req.body.updatedBefore),
+      updatedAfter: Params.convertToDate(req.body.updatedAfter)
+    },
+    user: req.user
+  };
+  return DocumentsDataObjectsController.getUntrustedChanges(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    return res.json({ err: isError, res: result });
+  });
+});
+
 router.post(`/resyncJsonDataTypes`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);

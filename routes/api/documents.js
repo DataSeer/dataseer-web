@@ -445,6 +445,39 @@ router.put(`/:id/dataObjects/metadata`, function (req, res, next) {
   });
 });
 
+/* GET SINGLE Document logs BY ID */
+router.post(`/dataObjects/changes/untrusted`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: {
+      documents: Params.convertToArray(req.body.documents, `string`),
+      accounts: {
+        trusted: Params.convertToArray(req.body.trustedAccounts, `string`),
+        untrusted: Params.convertToArray(req.body.untrustedAccounts, `string`)
+      },
+      updatedBefore: Params.convertToDate(req.body.updatedBefore),
+      updatedAfter: Params.convertToDate(req.body.updatedAfter)
+    },
+    user: req.user
+  };
+  return DocumentsController.getDataObjectsUntrustedChanges(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    if (isError) return res.json({ err: isError, res: result });
+    res.writeHead(200, [
+      [`Content-Type`, `text/csv`],
+      [`Content-Disposition`, `attachment; filename=changes.csv`]
+    ]);
+    return res.end(DocumentsController.buildDataObjectsUntrustedChanges(result));
+  });
+});
+
 /* POST refreshDataObjects */
 router.post(`/:id/refreshDataObjects`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);

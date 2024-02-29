@@ -68,11 +68,20 @@ Self.status = {
 
 /**
  * Build CSV of all dataObjects of given documents
- * @param {object} documents - List of documents
+ * @param {array} documents - List of documents
  * @returns {buffer} buffer
  */
 Self.buildDataObjectsCSV = function (documents) {
   return CSV.buildDataObjects(documents);
+};
+
+/**
+ * Build CSV of all dataObjects untrusted changes of given documents
+ * @param {array} changes - List of changes
+ * @returns {buffer} buffer
+ */
+Self.buildDataObjectsUntrustedChanges = function (changes) {
+  return CSV.buildDataObjectsUntrustedChanges(changes);
 };
 
 /**
@@ -1962,6 +1971,37 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
                     }
                   }
                 }
+                // let csv = Object.keys(tags)
+                //   .map(function (k) {
+                //     return [
+                //       `"${k}"`,
+                //       `"${!!tags[k][`Gazetteer Antibodies`][`0`]}"`,
+                //       `"${!!tags[k][`Gazetteer Antibodies`][`1`]}"`,
+                //       `"${!!tags[k][`Gazetteer Cell Lines`][`0`]}"`,
+                //       `"${!!tags[k][`Gazetteer Cell Lines`][`1`]}"`,
+                //       `"${!!tags[k][`Gazetteer Plasmids`][`0`]}"`,
+                //       `"${!!tags[k][`Gazetteer Plasmids`][`1`]}"`,
+                //       `"${!!tags[k][`BioNLPLabMaterial`][`I-CL`]}"`,
+                //       `"${!!tags[k][`BioNLPLabMaterial`][`I-ORG`]}"`,
+                //       `"${!!tags[k][`BioNLPLabMaterial`][`I-PLS`]}"`,
+                //       `"${!!tags[k][`BioNLPLabMaterial`][`I-AB`]}"`,
+                //       `"${!!tags[k][`GenTaggType`][`cell_type`]}"`,
+                //       `"${!!tags[k][`GenTaggType`][`protein`]}"`,
+                //       `"${!!tags[k][`GenTaggType`][`DNA`]}"`,
+                //       `"${!!tags[k][`GenTaggType`][`RNA`]}"`,
+                //       `"${!!tags[k][`GenTaggType`][`cell_line`]}"`,
+                //       `"${!!tags[k][`CraftLabMaterial`][`CHEBI`]}"`,
+                //       `"${!!tags[k][`CraftLabMaterial`][`UBERON`]}"`,
+                //       `"${!!tags[k][`CraftLabMaterial`][`NCBITaxon`]}"`,
+                //       `"${!!tags[k][`CraftLabMaterial`][`GO_BP`]}"`,
+                //       `"${!!tags[k][`CraftLabMaterial`][`PR`]}"`,
+                //       `"${!!tags[k][`CraftLabMaterial`][`GO_CC`]}"`,
+                //       `"${!!tags[k][`CraftLabMaterial`][`SO`]}"`,
+                //       `"${!!tags[k][`CraftLabMaterial`][`CL`]}"`
+                //     ].join(`,`);
+                //   })
+                //   .join(`\n`);
+                // fs.writeFileSync(`~/${doc.name}.csv`, csv);
                 // Convert tmp to an array
                 let results = [];
                 let names = Object.keys(tmp);
@@ -3579,6 +3619,79 @@ Self.getLogs = function (opts = {}, cb) {
     if (!logs) return cb(null, new Error(`Logs not found`));
     return cb(null, logs);
   });
+};
+
+/**
+ * Get changes of a all dataObjects of a given document
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - User
+ * @param {object} opts.data - JSON object containing all data
+ * @param {array} opts.data.documents - Id of documents
+ * @param {objects} opts.data.accounts - All infos about accounts
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.getDataObjectsUntrustedChanges = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  // Check Access Rights
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  return DocumentsDataObjectsController.all(
+    {
+      data: { documents: opts.data.documents, limit: 500, populate: { document: true } },
+      user: opts.user
+    },
+    function (err, res) {
+      if (err) return cb(err);
+      return async.reduce(
+        res.data,
+        [],
+        function (acc, dataObject, next) {
+          return DocumentsDataObjectsController.getUntrustedChanges(
+            {
+              data: {
+                updatedBefore: opts.data.updatedBefore,
+                updatedAfter: opts.data.updatedAfter,
+                dataObject: { ...dataObject.toJSON(), document: dataObject.document._id.toString() }, // Do no send document properties
+                target: dataObject._id.toString(),
+                accounts: opts.data.accounts
+              },
+              user: opts.user
+            },
+            function (err, res) {
+              if (err)
+                acc.push({
+                  err: err,
+                  document: {
+                    id: dataObject.document._id.toString(),
+                    name: dataObject.document.name,
+                    token: dataObject.document.token
+                  }
+                });
+              else
+                acc.push({
+                  err: false,
+                  res: {
+                    ...res,
+                    document: {
+                      id: dataObject.document._id.toString(),
+                      name: dataObject.document.name,
+                      token: dataObject.document.token
+                    }
+                  }
+                });
+              return next(null, acc);
+            }
+          );
+        },
+        function (err, result) {
+          if (err) return cb(err);
+          return cb(null, result);
+        }
+      );
+    }
+  );
 };
 
 /**

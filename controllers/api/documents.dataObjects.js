@@ -6,6 +6,7 @@
 
 const _ = require(`lodash`);
 const async = require(`async`);
+const jsonDiff = require(`json-diff`);
 
 const DocumentsDataObjects = require(`../../models/documents.dataObjects.js`);
 const Documents = require(`../../models/documents.js`);
@@ -531,6 +532,88 @@ Self.getLogs = function (opts = {}, cb) {
 };
 
 /**
+ * Get untrusted changes of a given dataObject
+ * @param {object} opts - object
+ * @param {object} opts.user - User
+ * @param {object} opts.data - JSON object containing all data
+ * @param {string} opts.data.target - Id of object who receive the action
+ * @param {object} opts.data.accounts - JSON object containing all data
+ * @param {array} opts.data.accounts.untrusted - Ids of untrusted modifiers
+ * @param {array} opts.data.accounts.trusted - Ids of trusted modifiers
+ * @param {string} opts.data.kind - Id of action (create, delete, update, read)
+ * @param {integer} opts.data.limit - Limit
+ * @param {integer} opts.data.skip - Skip
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.getUntrustedChanges = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  // Check Access Rights
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
+  return DocumentsDataObjectsLogsController.all(
+    {
+      target: opts.data.target,
+      updatedBefore: opts.data.updatedBefore,
+      updatedAfter: opts.data.updatedAfter,
+      limit: 500
+    },
+    function (err, logs) {
+      if (err) return cb(err);
+      // sort ASC
+      let filteredLogs = logs
+        .sort(function (a, b) {
+          return a.date - b.date;
+        })
+        .filter(function (item) {
+          return (
+            item.kind._id.toString() === CrudManager.actions.update._id.toString() ||
+            item.kind._id.toString() === CrudManager.actions.create._id.toString()
+          );
+        });
+      let result = {
+        dataObjects: {
+          trusted: null,
+          untrusted: null
+        },
+        modifiers: {
+          trusted: null,
+          untrusted: null
+        },
+        dates: {
+          trusted: null,
+          untrusted: null
+        },
+        changes: null
+      };
+      let trustedAccounts = Array.isArray(opts.data.accounts.trusted) ? opts.data.accounts.trusted : [];
+      let untrustedAccounts = Array.isArray(opts.data.accounts.untrusted) ? opts.data.accounts.untrusted : [];
+      if (logs.length <= 0) return cb(null, result);
+      if (untrustedAccounts.indexOf(logs[logs.length - 1].account._id.toString()) === -1) return cb(null, result);
+      result.dataObjects.untrusted = opts.data.dataObject;
+      result.dates.untrusted = new Date();
+      result.modifiers.untrusted = logs[logs.length - 1].account;
+      if (filteredLogs.length < 2) return cb(null, result);
+      for (let i = filteredLogs.length - 2; i >= 0; i--) {
+        if (
+          trustedAccounts.indexOf(filteredLogs[i].account._id.toString()) > -1 ||
+          untrustedAccounts.indexOf(filteredLogs[i].account._id.toString()) === -1
+        ) {
+          result.dataObjects.trusted = filteredLogs[i + 1].state;
+          result.dates.trusted = filteredLogs[i + 1].date;
+          result.modifiers.trusted = filteredLogs[i].account;
+          break;
+        }
+      }
+      if (result.dataObjects.trusted !== null && result.dataObjects.untrusted !== null)
+        result.changes = Self.getDiff(result.dataObjects.trusted, result.dataObjects.untrusted);
+      return cb(null, result);
+    }
+  );
+};
+
+/**
  * Get all dataObjects
  * @param {object} opts - Options available (You must call getUploadParams)
  * @param {object} opts.user - Current user
@@ -558,6 +641,7 @@ Self.all = function (opts = {}, cb) {
   let limit = Params.convertToInteger(opts.data.limit);
   let skip = Params.convertToInteger(opts.data.skip);
   let documents = Params.convertToArray(opts.data.documents, `string`);
+  let populate = typeof opts.data.populate !== `object` ? {} : opts.data.populate;
   let query = {};
   // Set default value
   if (typeof ids === `undefined`) ids = [];
@@ -568,18 +652,79 @@ Self.all = function (opts = {}, cb) {
   if (ids.length > 0) query._id = { $in: ids };
   if (documents.length > 0) query.document = { $in: documents };
   let params = { ids, limit, skip, documents };
-  return DocumentsDataObjects.find(query)
-    .skip(skip)
-    .limit(limit)
-    .exec(function (err, dataObjects) {
-      if (err) return cb(err);
-      if (count)
-        return DocumentsDataObjects.find(query).countDocuments(function (err, count) {
-          if (err) return cb(err);
-          return cb(null, { count: count, data: dataObjects, params: params });
-        });
-      return cb(null, { data: dataObjects, params: params });
-    });
+  let transaction = DocumentsDataObjects.find(query).skip(skip).limit(limit);
+  if (populate.document) transaction.populate(`document`);
+  return transaction.exec(function (err, dataObjects) {
+    if (err) return cb(err);
+    if (count)
+      return DocumentsDataObjects.find(query).countDocuments(function (err, count) {
+        if (err) return cb(err);
+        return cb(null, { count: count, data: dataObjects, params: params });
+      });
+    return cb(null, { data: dataObjects, params: params });
+  });
+};
+
+/**
+ * Get all differences between 2 states of a given dataObject
+ * @param {object} source - Source state (e.g. older)
+ * @param {object} target - Target state (e.g. newer)
+ * @returns {object} All diff (properties & sentences changes)
+ */
+Self.getDiff = function (_source, _target) {
+  let source = JSON.parse(JSON.stringify(_source));
+  let target = JSON.parse(JSON.stringify(_target));
+  let sentences = {};
+  let sourceSentences = source.sentences.reduce(function (acc, item) {
+    sentences[item.id] = item.text;
+    acc[item.id] = item.text;
+    return acc;
+  }, {});
+  let targetSentences = target.sentences.reduce(function (acc, item) {
+    sentences[item.id] = item.text;
+    acc[item.id] = item.text;
+    return acc;
+  }, {});
+  delete source.document;
+  delete source.updatedAt;
+  delete source.createdAt;
+  delete source.__v;
+  delete source.index;
+  delete source.issues;
+  delete source.flagged;
+  delete source.sentences;
+  delete source.rules;
+  delete source.rule;
+  delete source.status;
+  delete source.actionRequired;
+  // ---
+  delete target.document;
+  delete target.updatedAt;
+  delete target.createdAt;
+  delete target.__v;
+  delete target.index;
+  delete target.issues;
+  delete target.flagged;
+  delete target.sentences;
+  delete target.rules;
+  delete target.rule;
+  delete target.status;
+  delete target.actionRequired;
+  // ---
+  let propertiesDiff = jsonDiff.diff(source, target);
+  let sentencesDiff = jsonDiff.diff(sourceSentences, targetSentences);
+  let hasDiff = !!propertiesDiff || !!sentencesDiff;
+  let _propertiesDiff = propertiesDiff ? propertiesDiff : {};
+  let _sentencesDiff = {};
+  for (let key in sentencesDiff) {
+    let split = key.split(`__`);
+    _sentencesDiff[split[0]] = {
+      value: sentences[split[0]],
+      isDeleted: split[1] === `deleted`,
+      isAdded: split[1] === `added`
+    };
+  }
+  return { sentences: _sentencesDiff, properties: _propertiesDiff };
 };
 
 module.exports = Self;
