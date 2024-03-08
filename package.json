@@ -35,6 +35,7 @@
     "html-entities": "^2.3.2",
     "http-errors": "~1.6.3",
     "jsdom": "^16.7.0",
+    "json-diff": "^1.0.6",
     "jsonwebtoken": "^9.0.1",
     "lens": "github:elifesciences/lens#2.0.0",
     "md5": "^2.3.0",
