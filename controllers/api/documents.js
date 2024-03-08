@@ -3639,7 +3639,7 @@ Self.getDataObjectsUntrustedChanges = function (opts = {}, cb) {
   if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
   return DocumentsDataObjectsController.all(
     {
-      data: { documents: opts.data.documents, limit: 500, populate: { document: true } },
+      data: { documents: opts.data.documents, limit: 100000, populate: { document: true } },
       user: opts.user
     },
     function (err, res) {

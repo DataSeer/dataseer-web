@@ -589,10 +589,17 @@ Self.getUntrustedChanges = function (opts = {}, cb) {
       };
       let trustedAccounts = Array.isArray(opts.data.accounts.trusted) ? opts.data.accounts.trusted : [];
       let untrustedAccounts = Array.isArray(opts.data.accounts.untrusted) ? opts.data.accounts.untrusted : [];
+      let lastUntrustedChange = logs
+        .sort(function (a, b) {
+          return b.date - a.date;
+        })
+        .filter(function (item) {
+          return untrustedAccounts.indexOf(item.account._id.toString()) > -1;
+        })[0];
       if (logs.length <= 0) return cb(null, result);
       if (untrustedAccounts.indexOf(logs[logs.length - 1].account._id.toString()) === -1) return cb(null, result);
       result.dataObjects.untrusted = opts.data.dataObject;
-      result.dates.untrusted = new Date();
+      result.dates.untrusted = lastUntrustedChange ? lastUntrustedChange.date : new Date();
       result.modifiers.untrusted = logs[logs.length - 1].account;
       if (filteredLogs.length < 2) return cb(null, result);
       for (let i = filteredLogs.length - 2; i >= 0; i--) {
@@ -690,26 +697,26 @@ Self.getDiff = function (_source, _target) {
   delete source.createdAt;
   delete source.__v;
   delete source.index;
-  delete source.issues;
   delete source.flagged;
   delete source.sentences;
   delete source.rules;
   delete source.rule;
   delete source.status;
   delete source.actionRequired;
+  source.issues = !!source.issues;
   // ---
   delete target.document;
   delete target.updatedAt;
   delete target.createdAt;
   delete target.__v;
   delete target.index;
-  delete target.issues;
   delete target.flagged;
   delete target.sentences;
   delete target.rules;
   delete target.rule;
   delete target.status;
   delete target.actionRequired;
+  target.issues = !!target.issues;
   // ---
   let propertiesDiff = jsonDiff.diff(source, target);
   let sentencesDiff = jsonDiff.diff(sourceSentences, targetSentences);
