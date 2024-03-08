@@ -32,8 +32,19 @@ Self.all = function (opts = {}, cb) {
   let kind = Params.convertToString(opts.kind);
   let limit = Params.convertToInteger(opts.limit);
   let skip = Params.convertToInteger(opts.skip);
+  let updatedBefore = Params.convertToDate(opts.updatedBefore);
+  let updatedAfter = Params.convertToDate(opts.updatedAfter);
   // Check converted values
   let filters = {};
+  // Update between date & date
+  if (Params.checkDate(updatedBefore)) {
+    if (typeof filters.date === `undefined`) filters.date = {};
+    filters.date.$lte = new Date(updatedBefore);
+  }
+  if (Params.checkDate(updatedAfter)) {
+    if (typeof filters.date === `undefined`) filters.date = {};
+    filters.date.$gte = new Date(updatedAfter);
+  }
   if (typeof target !== `undefined`) filters[`target`] = target;
   if (Array.isArray(accounts) && accounts.length > 0) filters[`account`] = { $in: accounts };
   if (typeof kind !== `undefined`) filters[`kind`] = kind;
