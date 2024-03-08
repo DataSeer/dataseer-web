@@ -589,7 +589,7 @@ Self.getUntrustedChanges = function (opts = {}, cb) {
       };
       let trustedAccounts = Array.isArray(opts.data.accounts.trusted) ? opts.data.accounts.trusted : [];
       let untrustedAccounts = Array.isArray(opts.data.accounts.untrusted) ? opts.data.accounts.untrusted : [];
-      let lastUntrustedChange = logs
+      let lastUntrustedChange = [...logs]
         .sort(function (a, b) {
           return b.date - a.date;
         })
@@ -597,6 +597,7 @@ Self.getUntrustedChanges = function (opts = {}, cb) {
           return untrustedAccounts.indexOf(item.account._id.toString()) > -1;
         })[0];
       if (logs.length <= 0) return cb(null, result);
+      // If the last update is not from an untrusted account, skip it
       if (untrustedAccounts.indexOf(logs[logs.length - 1].account._id.toString()) === -1) return cb(null, result);
       result.dataObjects.untrusted = opts.data.dataObject;
       result.dates.untrusted = lastUntrustedChange ? lastUntrustedChange.date : new Date();
