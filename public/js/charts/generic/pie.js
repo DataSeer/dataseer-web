@@ -23,6 +23,13 @@
   const width = window.innerWidth > minWidth ? window.innerWidth : minWidth;
   const height = window.innerHeight > minHeight ? window.innerHeight : minHeight;
 
+  let hideDate = PARAMS.convertToBoolean(urlParams.hideDate);
+
+  if (hideDate) {
+    let element = document.getElementById(`date`);
+    element.style.display = `none`;
+  }
+
   let radius = Math.min(width, height) * 0.75;
 
   const limit = Math.max(

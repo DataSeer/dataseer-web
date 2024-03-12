@@ -1100,6 +1100,7 @@ router.post(`/reports/gSpreadsheets/:kind`, function (req, res, next) {
   // Init transaction
   let opts = {
     data: {
+      name: Params.convertToString(req.body.name),
       ids: Params.convertToArray(req.body.ids, `string`),
       dataTypes: req.app.get(`dataTypes`)
     },
