@@ -529,9 +529,10 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
           // HHMI report name format (ex "JC-11.23" -> if report name is "HHMI-0000JC-001" & document uploaded on "November 2023")
           if (kind === `HHMI`) {
             let date = new Date(data.doc.upload.date);
-            name = `${data.doc.name.replace(`.pdf`, ``).substring(name.length - 6, 2)}-${
-              date.getUTCMonth() + 1
-            }.${date.getUTCFullYear().toString().substring(2)}`;
+            name = `HHMI-${data.doc.name.substring(
+              data.doc.name.lastIndexOf(`-`) - 2,
+              data.doc.name.lastIndexOf(`-`)
+            )}-${date.getUTCMonth() + 1}.${date.getUTCFullYear().toString().substring(2)}`.replace(`.pdf`, ``);
           }
           if (name === ``) name = data.doc.name;
           return next(null, {
