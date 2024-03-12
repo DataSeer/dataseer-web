@@ -496,7 +496,6 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
   if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
   if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
-  if (typeof _.get(opts, `data.ids`) === `undefined`) return cb(new Error(`Missing required data: opts.data.ids`));
   if (typeof _.get(opts, `data.dataTypes`) === `undefined`)
     return cb(new Error(`Missing required data: opts.dataTypes`));
   let kind = _.get(opts, `kind`);
@@ -507,6 +506,7 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
   if (!accessRights.isAdministrator && !accessRights.isModerator)
     return cb(null, new Error(`Unauthorized functionnality`));
   let ids = Params.convertToArray(opts.data.ids, `string`);
+  let name = opts.data.name ? opts.data.name : ``;
   let preprints = Params.convertToArray(opts.data.preprints, `string`);
   let dois = Params.convertToArray(opts.data.dois, `string`);
   if (!Array.isArray(ids)) ids = [];
@@ -526,6 +526,14 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
         function (err, data) {
           if (err) return next(err);
           if (data instanceof Error) return next(data);
+          // HHMI report name format (ex "JC-11.23" -> if report name is "HHMI-0000JC-001" & document uploaded on "November 2023")
+          if (kind === `HHMI`) {
+            let date = new Date(data.doc.upload.date);
+            name = `${data.doc.name.replace(`.pdf`, ``).substring(name.length - 6, 2)}-${
+              date.getUTCMonth() + 1
+            }.${date.getUTCFullYear().toString().substring(2)}`;
+          }
+          if (name === ``) name = data.doc.name;
           return next(null, {
             document: {
               id: data.doc._id.toString(),
@@ -548,7 +556,7 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
                 return item.name.length > 0;
               }),
               dataSeerLink: {
-                url: `${Url.build(`/documents/${opts.data.id}`, {
+                url: `${Url.build(`/documents/${item.id}`, {
                   view: `datasets`,
                   fromReport: true,
                   token: data.doc.token
@@ -579,7 +587,7 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
       if (err) return cb(err);
       return GoogleSheets.buildReport(
         {
-          filename: `${res[0].document.name} (${res[0].document.id})`,
+          filename: `${name} (${ids.join(`,`)})`,
           kind: kind,
           data: res
         },
@@ -924,6 +932,7 @@ Self.upload = function (opts = {}, cb) {
                 acc.files.push(res._id);
                 // Set document name
                 acc.name = params.name ? params.name : res.filename;
+                acc.name = acc.name.replace(`.merged`, ``);
                 if (DocumentsFilesController.isPDF(res.mimetype)) {
                   // Set PDF
                   acc.pdf = res._id;
