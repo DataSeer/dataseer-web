@@ -547,6 +547,7 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
             preprint: { url: data.doc.HHMI.preprint, doi: data.doc.HHMI.DOI },
             dataTypesInfo: opts.data.dataTypes,
             metadata: {
+              DAS: data.doc.metadata.DAS,
               articleTitle: data.doc.metadata.article_title,
               readmeIncluded: data.doc.metadata.readmeIncluded,
               describesFiles: data.doc.metadata.describesFiles,
