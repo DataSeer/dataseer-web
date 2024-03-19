@@ -562,16 +562,9 @@ Self.getUntrustedChanges = function (opts = {}, cb) {
     function (err, logs) {
       if (err) return cb(err);
       // sort ASC
-      let filteredLogs = logs
-        .sort(function (a, b) {
-          return a.date - b.date;
-        })
-        .filter(function (item) {
-          return (
-            item.kind._id.toString() === CrudManager.actions.update._id.toString() ||
-            item.kind._id.toString() === CrudManager.actions.create._id.toString()
-          );
-        });
+      let filteredLogs = logs.sort(function (a, b) {
+        return a.date - b.date;
+      });
       let result = {
         dataObjects: {
           trusted: null,
@@ -609,8 +602,9 @@ Self.getUntrustedChanges = function (opts = {}, cb) {
           untrustedAccounts.indexOf(filteredLogs[i].account._id.toString()) === -1
         ) {
           result.dataObjects.trusted = filteredLogs[i + 1].state;
-          result.dates.trusted = filteredLogs[i + 1].date;
+          result.dates.trusted = filteredLogs[i].date;
           result.modifiers.trusted = filteredLogs[i].account;
+          result.dataObjects.trusted.deleted = false; // because if the last logs is a delete, state contain the revert. Only this value need to be restored to true
           break;
         }
       }
