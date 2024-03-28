@@ -9,6 +9,7 @@ const fs = require(`fs`);
 const async = require(`async`);
 const mongoose = require(`mongoose`);
 const _ = require(`lodash`);
+const jsonDiff = require(`json-diff`);
 
 const Documents = require(`../../models/documents.js`);
 const DocumentsMetadata = require(`../../models/documents.metadata.js`);
@@ -76,12 +77,30 @@ Self.buildDataObjectsCSV = function (documents) {
 };
 
 /**
- * Build CSV of all dataObjects untrusted changes of given documents
+ * Build CSV of all dataObjects changes of given documents
  * @param {array} changes - List of changes
  * @returns {buffer} buffer
  */
-Self.buildDataObjectsUntrustedChanges = function (changes) {
-  return CSV.buildDataObjectsUntrustedChanges(changes);
+Self.formatDataObjectsChangesToCSV = function (changes) {
+  return CSV.formatDataObjectsChangesToCSV(changes);
+};
+
+/**
+ * Build CSV of all dataObjects changes of given documents
+ * @param {array} changes - List of changes
+ * @returns {buffer} buffer
+ */
+Self.formatDataObjectsHistoriesToCSV = function (changes) {
+  return CSV.formatDataObjectsHistoriesToCSV(changes);
+};
+
+/**
+ * Build CSV of all dataObjects changes of given documents
+ * @param {array} changes - List of changes
+ * @returns {buffer} buffer
+ */
+Self.formatDataObjectsChangesFromReportsToCSV = function (changes) {
+  return CSV.formatDataObjectsChangesFromReportsToCSV(changes);
 };
 
 /**
@@ -384,6 +403,72 @@ Self.getGSpreadsheets = function (opts = {}, cb) {
 };
 
 /**
+ * Get the gSpeadsheets changes
+ * @param {object} opts - Options available
+ * @param {object} opts.user - Current user
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.old - Id of the reports (old)
+ * @param {string} opts.data.new - Id of the reports (new)
+ * @param {string} opts.kind - Kind of report (available values : ASAP or AmNat)
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
+ * @returns {undefined} undefined
+ */
+Self.getGSpreadsheetsChanges = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.old`) === `undefined`) return cb(new Error(`Missing required data: opts.data.old`));
+  if (typeof _.get(opts, `data.new`) === `undefined`) return cb(new Error(`Missing required data: opts.data.new`));
+  let kind = _.get(opts, `kind`);
+  if (typeof kind === `undefined`) return cb(Error(`Missing required data: opts.kind`));
+  if (Object.keys(reportsConf.templates).indexOf(kind) === -1)
+    return cb(Error(`Invalid required data: opts.kind must be ${Object.keys(reportsConf.templates).join(`, `)}`));
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator && !accessRights.isModerator)
+    return cb(null, new Error(`Unauthorized functionnality`));
+  return GoogleSheets.getReportsChanges(
+    { data: { old: { spreadsheetId: opts.data.old }, new: { spreadsheetId: opts.data.new } } },
+    function (err, infos) {
+      if (err) return cb(err);
+      let results = {
+        metadata: {
+          old: infos.old.metadata,
+          new: infos.new.metadata
+        },
+        dataObjects: {}
+      };
+      for (let k in infos) {
+        for (let kind in infos[k]) {
+          if (kind === `metadata`) continue; // skip metadata part
+          for (let i = 0; i < infos[k][kind].length; i++) {
+            let dataObject = infos[k][kind][i];
+            if (typeof results.dataObjects[kind] === `undefined`) results.dataObjects[kind] = {};
+            if (typeof results.dataObjects[kind][dataObject.name] === `undefined`)
+              results.dataObjects[kind][dataObject.name] = {};
+            results.dataObjects[kind][dataObject.name][k] = dataObject;
+            if (typeof results.dataObjects[kind][dataObject.name].old === `undefined`)
+              results.dataObjects[kind][dataObject.name].change = `add`;
+            else if (typeof results.dataObjects[kind][dataObject.name].new === `undefined`)
+              results.dataObjects[kind][dataObject.name].change = `remove`;
+            else {
+              let diff = jsonDiff.diff(
+                results.dataObjects[kind][dataObject.name].old,
+                results.dataObjects[kind][dataObject.name].new
+              );
+              results.dataObjects[kind][dataObject.name].change = diff ? `modify` : `none`;
+              results.dataObjects[kind][dataObject.name].diff = diff;
+            }
+          }
+        }
+      }
+      if (err) return cb(err);
+      return cb(null, results);
+    }
+  );
+};
+
+/**
  * build the gSpeadsheets of the given document
  * @param {object} opts - Options available
  * @param {object} opts.user - Current user
@@ -399,7 +484,6 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
   if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
   if (typeof _.get(opts, `data.dataTypes`) === `undefined`)
     return cb(new Error(`Missing required data: opts.dataTypes`));
@@ -3642,7 +3726,7 @@ Self.getLogs = function (opts = {}, cb) {
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.getDataObjectsUntrustedChanges = function (opts = {}, cb) {
+Self.getDataObjectsChanges = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   // Check Access Rights
@@ -3659,7 +3743,7 @@ Self.getDataObjectsUntrustedChanges = function (opts = {}, cb) {
         res.data,
         [],
         function (acc, dataObject, next) {
-          return DocumentsDataObjectsController.getUntrustedChanges(
+          return DocumentsDataObjectsController.getChanges(
             {
               data: {
                 updatedBefore: opts.data.updatedBefore,
@@ -3674,6 +3758,97 @@ Self.getDataObjectsUntrustedChanges = function (opts = {}, cb) {
               if (err)
                 acc.push({
                   err: err,
+                  document: {
+                    id: dataObject.document._id.toString(),
+                    name: dataObject.document.name,
+                    token: dataObject.document.token
+                  }
+                });
+              else if (res instanceof Error)
+                acc.push({
+                  err: res,
+                  document: {
+                    id: dataObject.document._id.toString(),
+                    name: dataObject.document.name,
+                    token: dataObject.document.token
+                  }
+                });
+              else
+                acc.push({
+                  err: false,
+                  res: {
+                    ...res,
+                    document: {
+                      id: dataObject.document._id.toString(),
+                      name: dataObject.document.name,
+                      token: dataObject.document.token
+                    }
+                  }
+                });
+              return next(null, acc);
+            }
+          );
+        },
+        function (err, result) {
+          if (err) return cb(err);
+          return cb(null, result);
+        }
+      );
+    }
+  );
+};
+
+/**
+ * Get histories of a all dataObjects of a given document
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - User
+ * @param {object} opts.data - JSON object containing all data
+ * @param {array} opts.data.documents - Id of documents
+ * @param {objects} opts.data.accounts - All infos about accounts
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.getDataObjectsHistories = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  // Check Access Rights
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  return DocumentsDataObjectsController.all(
+    {
+      data: { documents: opts.data.documents, limit: 100000, populate: { document: true } },
+      user: opts.user
+    },
+    function (err, res) {
+      if (err) return cb(err);
+      return async.reduce(
+        res.data,
+        [],
+        function (acc, dataObject, next) {
+          return DocumentsDataObjectsController.getHistories(
+            {
+              data: {
+                updatedBefore: opts.data.updatedBefore,
+                updatedAfter: opts.data.updatedAfter,
+                dataObject: { ...dataObject.toJSON(), document: dataObject.document._id.toString() }, // Do no send document properties
+                target: dataObject._id.toString(),
+                accounts: opts.data.accounts
+              },
+              user: opts.user
+            },
+            function (err, res) {
+              if (err)
+                acc.push({
+                  err: err,
+                  document: {
+                    id: dataObject.document._id.toString(),
+                    name: dataObject.document.name,
+                    token: dataObject.document.token
+                  }
+                });
+              else if (res instanceof Error)
+                acc.push({
+                  err: res,
                   document: {
                     id: dataObject.document._id.toString(),
                     name: dataObject.document.name,

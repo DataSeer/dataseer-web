@@ -532,7 +532,7 @@ Self.getLogs = function (opts = {}, cb) {
 };
 
 /**
- * Get untrusted changes of a given dataObject
+ * Get changes of a given dataObject
  * @param {object} opts - object
  * @param {object} opts.user - User
  * @param {object} opts.data - JSON object containing all data
@@ -546,12 +546,15 @@ Self.getLogs = function (opts = {}, cb) {
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.getUntrustedChanges = function (opts = {}, cb) {
+Self.getChanges = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   // Check Access Rights
   let accessRights = AccountsManager.getAccessRights(opts.user);
   if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
+  let trustedAccounts = Array.isArray(opts.data.accounts.trusted) ? opts.data.accounts.trusted : [];
+  let untrustedAccounts = Array.isArray(opts.data.accounts.untrusted) ? opts.data.accounts.untrusted : [];
+  if (untrustedAccounts.length <= 0) return cb(null, new Error(`You must send at least one untrusted account`));
   return DocumentsDataObjectsLogsController.all(
     {
       target: opts.data.target,
@@ -562,7 +565,7 @@ Self.getUntrustedChanges = function (opts = {}, cb) {
     function (err, logs) {
       if (err) return cb(err);
       // sort ASC
-      let filteredLogs = logs.sort(function (a, b) {
+      let sortedLogs = logs.sort(function (a, b) {
         return a.date - b.date;
       });
       let result = {
@@ -580,8 +583,6 @@ Self.getUntrustedChanges = function (opts = {}, cb) {
         },
         changes: null
       };
-      let trustedAccounts = Array.isArray(opts.data.accounts.trusted) ? opts.data.accounts.trusted : [];
-      let untrustedAccounts = Array.isArray(opts.data.accounts.untrusted) ? opts.data.accounts.untrusted : [];
       let lastUntrustedChange = [...logs]
         .sort(function (a, b) {
           return b.date - a.date;
@@ -589,27 +590,106 @@ Self.getUntrustedChanges = function (opts = {}, cb) {
         .filter(function (item) {
           return untrustedAccounts.indexOf(item.account._id.toString()) > -1;
         })[0];
-      if (logs.length <= 0) return cb(null, result);
+      if (sortedLogs.length <= 0) return cb(null, result);
       // If the last update is not from an untrusted account, skip it
       if (untrustedAccounts.indexOf(logs[logs.length - 1].account._id.toString()) === -1) return cb(null, result);
       result.dataObjects.untrusted = opts.data.dataObject;
       result.dates.untrusted = lastUntrustedChange ? lastUntrustedChange.date : new Date();
       result.modifiers.untrusted = logs[logs.length - 1].account;
-      if (filteredLogs.length < 2) return cb(null, result);
-      for (let i = filteredLogs.length - 2; i >= 0; i--) {
+      if (sortedLogs.length < 2) return cb(null, result);
+      for (let i = sortedLogs.length - 2; i >= 0; i--) {
         if (
-          trustedAccounts.indexOf(filteredLogs[i].account._id.toString()) > -1 ||
-          untrustedAccounts.indexOf(filteredLogs[i].account._id.toString()) === -1
+          trustedAccounts.indexOf(sortedLogs[i].account._id.toString()) > -1 ||
+          untrustedAccounts.indexOf(sortedLogs[i].account._id.toString()) === -1
         ) {
-          result.dataObjects.trusted = filteredLogs[i + 1].state;
-          result.dates.trusted = filteredLogs[i].date;
-          result.modifiers.trusted = filteredLogs[i].account;
+          result.dataObjects.trusted = sortedLogs[i + 1].state;
+          result.dates.trusted = sortedLogs[i].date;
+          result.modifiers.trusted = sortedLogs[i].account;
           result.dataObjects.trusted.deleted = false; // because if the last logs is a delete, state contain the revert. Only this value need to be restored to true
           break;
         }
       }
       if (result.dataObjects.trusted !== null && result.dataObjects.untrusted !== null)
         result.changes = Self.getDiff(result.dataObjects.trusted, result.dataObjects.untrusted);
+      return cb(null, result);
+    }
+  );
+};
+
+/**
+ * Get hitories of a given dataObject
+ * @param {object} opts - object
+ * @param {object} opts.user - User
+ * @param {object} opts.data - JSON object containing all data
+ * @param {string} opts.data.target - Id of object who receive the action
+ * @param {array} opts.data.accounts - Ids of modifiers
+ * @param {string} opts.data.kind - Id of action (create, delete, update, read)
+ * @param {integer} opts.data.limit - Limit
+ * @param {integer} opts.data.skip - Skip
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.getHistories = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  // Check Access Rights
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
+  let accounts = Array.isArray(opts.data.accounts) ? opts.data.accounts : [];
+  if (accounts.length <= 0) return cb(null, new Error(`You must send at least one account`));
+  return DocumentsDataObjectsLogsController.all(
+    {
+      target: opts.data.target,
+      updatedBefore: opts.data.updatedBefore,
+      updatedAfter: opts.data.updatedAfter,
+      limit: 500
+    },
+    function (err, logs) {
+      if (err) return cb(err);
+      // sort ASC
+      let sortedLogs = logs.sort(function (a, b) {
+        return a.date - b.date;
+      });
+      let result = {
+        dataObjects: {
+          first: null,
+          last: null
+        },
+        modifiers: {
+          first: null,
+          last: null
+        },
+        dates: {
+          first: null,
+          last: null
+        },
+        changes: null
+      };
+      let changesfromAccounts = [...logs]
+        .sort(function (a, b) {
+          return b.date - a.date;
+        })
+        .filter(function (item) {
+          return accounts.indexOf(item.account._id.toString()) > -1;
+        })[0];
+      if (sortedLogs.length <= 0) return cb(null, result);
+      // If the there is no changes from one of the given accounts, skip it
+      if (!changesfromAccounts || changesfromAccounts.length <= 0) return cb(null, result);
+      result.dataObjects.first = sortedLogs[0].state;
+      result.dates.first = sortedLogs[0].date;
+      result.modifiers.first = sortedLogs[0].account;
+      if (sortedLogs.length < 2) return cb(null, result);
+      let found = false;
+      for (let i = 1; i < sortedLogs.length; i++) {
+        if (accounts.indexOf(sortedLogs[i].account._id.toString()) !== -1) {
+          result.dataObjects.last = sortedLogs[i + 1] ? sortedLogs[i + 1].state : opts.data.dataObject;
+          result.dates.last = sortedLogs[i].date;
+          result.modifiers.last = sortedLogs[i].account;
+          found = true;
+        } else if (found) break;
+      }
+      if (result.dataObjects.first !== null && result.dataObjects.last !== null)
+        result.changes = Self.getDiff(result.dataObjects.first, result.dataObjects.last);
       return cb(null, result);
     }
   );
