@@ -430,6 +430,7 @@ Self.getGSpreadsheetsChanges = function (opts = {}, cb) {
   return GoogleSheets.getReportsChanges(
     { data: { old: { spreadsheetId: opts.data.old }, new: { spreadsheetId: opts.data.new } } },
     function (err, infos) {
+      if (err) return cb(err);
       let results = {
         metadata: {
           old: infos.old.metadata,
