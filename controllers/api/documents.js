@@ -100,7 +100,6 @@ Self.formatDataObjectsHistoriesToCSV = function (changes) {
  * @returns {buffer} buffer
  */
 Self.formatDataObjectsChangesFromReportsToCSV = function (changes) {
-  fs.writeFileSync(`/home/nicolas/Projects/dataseer-web/tmp/tmp.json`, JSON.stringify(changes, null, 2));
   return CSV.formatDataObjectsChangesFromReportsToCSV(changes);
 };
 
