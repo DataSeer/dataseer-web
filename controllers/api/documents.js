@@ -2621,7 +2621,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                 cert: `0`,
                 name: item.name + ` Code`,
                 URL: ``,
-                comments: item.mentions.join(`, `),
+                comments: ``,
                 sentences: item.sentences.filter(function (e) {
                   return e.match;
                 })
@@ -2652,8 +2652,8 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                 cert: `0`,
                 name: item.name,
                 version: item.version,
-                URL: item.url,
-                comments: item.mentions.join(`, `),
+                URL: Url.sanitize(item.url),
+                comments: ``,
                 sentences: item.sentences.filter(function (e) {
                   return e.match;
                 })
