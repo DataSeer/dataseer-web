@@ -1,4 +1,4 @@
-{
+
   "default": {
     "dataType": "tabular data",
     "subType": ""
@@ -21,7 +21,7 @@
     },
     "Experimental model: Organism/strain": {
       "dataType": "lab materials",
-      "subType": "",
+      "subType": "organism",
       "reuse": false
     },
     "Other": {
@@ -41,7 +41,7 @@
     },
     "Virus strain": {
       "dataType": "lab materials",
-      "subType": "organism",
+      "subType": "plasmid",
       "reuse": false
     }
   }
