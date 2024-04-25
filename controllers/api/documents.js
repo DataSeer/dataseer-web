@@ -5,6 +5,7 @@
 'use strict';
 
 const fs = require(`fs`);
+const path = require(`path`);
 
 const async = require(`async`);
 const mongoose = require(`mongoose`);
@@ -50,6 +51,7 @@ const ORCID = require(`../../lib/orcid.js`);
 const PdfManager = require(`../../lib/pdfManager.js`);
 const BioNLP = require(`../../lib/bioNLP.js`);
 const DataObjects = require(`../../lib/dataObjects.js`);
+const { processCSV, extractIdentifiers } = require(`../../lib/krt.js`);
 
 const conf = require(`../../conf/conf.json`);
 const uploadConf = require(`../../conf/upload.json`);
@@ -57,6 +59,8 @@ const ASAPAuthorsConf = require(`../../conf/authors.ASAP.json`);
 const SoftwareConf = require(`../../conf/software.json`);
 const reportsConf = require(`../../conf/reports.json`);
 const bioNLPConf = require(`../../conf/bioNLP.json`);
+const krtConfig = require(`../../conf/krt.json`);
+const krtRules = require(`../../conf/krt.rules.json`);
 
 let Self = {};
 
@@ -819,6 +823,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
   params.organizations = Params.convertToArray(params.organizations, `string`);
   if (!params.files || !params.files[`file`]) return cb(null, new Error(`You must select a file`));
   let file = params.files[`file`];
+  let krt = params.files[`krt`];
   if (typeof params.files[`attachedFiles`] !== `undefined` && !Array.isArray(params.files[`attachedFiles`])) {
     params.files[`attachedFiles`] = [params.files[`attachedFiles`]];
   }
@@ -838,6 +843,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
         visible: false,
         locked: false,
         file: file,
+        krt: krt,
         attachedFiles: attachedFiles,
         emails: undefined
       });
@@ -852,6 +858,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
       visible: true,
       locked: false,
       file: file,
+      krt: krt,
       attachedFiles: attachedFiles,
       emails: user.username
     });
@@ -873,6 +880,7 @@ Self.getUploadParams = function (params = {}, user, cb) {
         visible: Params.convertToBoolean(params.visible),
         locked: Params.convertToBoolean(params.locked),
         file: file,
+        krt: krt,
         attachedFiles: attachedFiles,
         emails: `${account.username},${user.username}`
       });
@@ -918,6 +926,8 @@ Self.upload = function (opts = {}, cb) {
     opts.softcite = true;
   if (typeof _.get(opts, `bioNLP`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
     opts.bioNLP = true;
+  opts.importDataFromKRT = typeof opts.importDataFromKRT !== `undefined` ? opts.importDataFromKRT : true;
+  opts.deleteDataObjects = !!opts.deleteDataObjects;
   return Self.getUploadParams(opts.data, opts.user, function (err, params) {
     if (err) return cb(err);
     if (params instanceof Error) return cb(null, params);
@@ -972,27 +982,6 @@ Self.upload = function (opts = {}, cb) {
             };
             return next(null, acc);
           },
-          // merge PDFs
-          function (acc, next) {
-            // No merge required
-            if (!opts.mergePDFs) return next(null, acc);
-            // Main file is not a PDF
-            if (!DocumentsFilesController.isPDF(params.file.mimetype)) return next(new Error(`Bad content type`), acc);
-            // There is no attached files
-            if (!Array.isArray(params.attachedFiles) || params.attachedFiles.length <= 0) return next(null, acc);
-            // Get attached PDFs
-            let attachedPDFs = params.attachedFiles.filter(function (item) {
-              return DocumentsFilesController.isPDF(item.mimetype);
-            });
-            // There is no PDFs in attached files
-            if (attachedPDFs.length <= 0) return next(null, acc);
-            return PdfManager.mergeFiles({ files: [params.file].concat(attachedPDFs) }, function (err, res) {
-              if (err) return next(err, acc);
-              params.attachedFiles.push(params.file);
-              params.file = res;
-              return next(null, acc);
-            });
-          },
           // Upload file
           function (acc, next) {
             if (
@@ -1018,10 +1007,10 @@ Self.upload = function (opts = {}, cb) {
                 acc.files.push(res._id);
                 // Set document name
                 acc.name = params.name ? params.name : res.filename;
-                acc.name = acc.name.replace(`.merged`, ``);
                 if (DocumentsFilesController.isPDF(res.mimetype)) {
                   // Set PDF
                   acc.pdf = res._id;
+                  acc.originalPDF = res._id;
                 }
                 if (
                   DocumentsFilesController.isXML(res.mimetype) ||
@@ -1030,6 +1019,70 @@ Self.upload = function (opts = {}, cb) {
                   // Set XML only when dataseer-ml do not need to be requested
                   acc.tei = res._id;
                 }
+                return next(null, acc);
+              }
+            );
+          },
+          // merge PDFs
+          function (acc, next) {
+            // No merge required
+            if (!opts.mergePDFs) return next(null, acc);
+            // Main file is not a PDF
+            if (!DocumentsFilesController.isPDF(params.file.mimetype)) return next(new Error(`Bad content type`), acc);
+            // There is no attached files
+            if (!Array.isArray(params.attachedFiles) || params.attachedFiles.length <= 0) return next(null, acc);
+            // Get attached PDFs
+            let attachedPDFs = params.attachedFiles.filter(function (item) {
+              return DocumentsFilesController.isPDF(item.mimetype);
+            });
+            // There is no PDFs in attached files
+            if (attachedPDFs.length <= 0) return next(null, acc);
+            return PdfManager.mergeFiles(
+              { files: [params.file].concat(attachedPDFs), extension: `.pdf` },
+              function (err, mergedFile) {
+                if (err) return next(err, acc);
+                return DocumentsFilesController.upload(
+                  {
+                    data: {
+                      accountId: params.uploaded_by.toString(),
+                      documentId: acc._id.toString(),
+                      file: mergedFile,
+                      organizations: acc.upload.organizations
+                    },
+                    user: opts.user
+                  },
+                  function (err, res) {
+                    params.file = res;
+                    // Set PDF
+                    acc.pdf = res._id;
+                    // Add file to files
+                    acc.files.push(res._id);
+                    return next(null, acc);
+                  }
+                );
+              }
+            );
+          },
+          // Upload krt
+          function (acc, next) {
+            if (!params.krt) return next(null, acc);
+            if (!DocumentsFilesController.hasCSV(params.krt.mimetype)) return next(new Error(`Bad content type`), acc);
+            return DocumentsFilesController.upload(
+              {
+                data: {
+                  accountId: params.uploaded_by.toString(),
+                  documentId: acc._id.toString(),
+                  file: params.krt,
+                  organizations: acc.upload.organizations
+                },
+                user: opts.user
+              },
+              function (err, res) {
+                if (err) return next(err, acc);
+                if (!Array.isArray(acc.files)) acc.files = [];
+                // Add krt to files
+                acc.files.push(res._id);
+                acc.krt.source = res._id;
                 return next(null, acc);
               }
             );
@@ -1066,7 +1119,7 @@ Self.upload = function (opts = {}, cb) {
                       accountId: params.uploaded_by.toString(),
                       documentId: acc._id.toString(),
                       file: Object.assign(params.file, {
-                        name: `${params.file.name}.sanitized.pdf`,
+                        name: `${path.parse(params.file.name).name}.sanitized.pdf`,
                         data: buffer.toString(DocumentsFilesController.encoding),
                         encoding: DocumentsFilesController.encoding
                       }),
@@ -1106,7 +1159,7 @@ Self.upload = function (opts = {}, cb) {
                         accountId: params.uploaded_by.toString(),
                         documentId: acc._id.toString(),
                         file: {
-                          name: `${params.file.name}.ds-ml.tei.xml`,
+                          name: `${path.parse(params.file.name).name}.ds-ml.tei.xml`,
                           data: XML.sanitize(tei.toString(`utf8`)).toString(DocumentsFilesController.encoding),
                           mimetype: `application/xml`,
                           encoding: DocumentsFilesController.encoding
@@ -1147,7 +1200,7 @@ Self.upload = function (opts = {}, cb) {
                         accountId: params.uploaded_by.toString(),
                         documentId: acc._id.toString(),
                         file: {
-                          name: `${params.file.name}.softcite.json`,
+                          name: `${path.parse(params.file.name).name}.softcite.json`,
                           data: json.toString(DocumentsFilesController.encoding),
                           mimetype: `application/json`,
                           encoding: DocumentsFilesController.encoding
@@ -1189,7 +1242,7 @@ Self.upload = function (opts = {}, cb) {
                       accountId: params.uploaded_by.toString(),
                       documentId: acc._id.toString(),
                       file: {
-                        name: `${params.file.name}.bioNLP.json`,
+                        name: `${path.parse(params.file.name).name}.bioNLP.json`,
                         data: JSON.stringify(results).toString(DocumentsFilesController.encoding),
                         mimetype: `application/json`,
                         encoding: DocumentsFilesController.encoding
@@ -1209,6 +1262,97 @@ Self.upload = function (opts = {}, cb) {
                 );
               });
             });
+          },
+          // Process Key Resource Table
+          function (acc, next) {
+            // Process KRT
+            if (!params.krt) return next(null, acc);
+            // Get buffer
+            return DocumentsFilesController.getFilePath(
+              { data: { id: acc.krt.source.toString() } },
+              function (err, filePath) {
+                if (err) return next(err, acc);
+                return processCSV({ csvFilePath: filePath, hash: acc._id.toString() })
+                  .then((result) => {
+                    return DocumentsFilesController.upload(
+                      {
+                        data: {
+                          accountId: params.uploaded_by,
+                          documentId: acc._id,
+                          file: Object.assign(params.krt, {
+                            name: `${path.parse(params.krt.name).name}.krt.pdf`,
+                            mimetype: `application/pdf`,
+                            data: result.pdf.toString(DocumentsFilesController.encoding),
+                            encoding: DocumentsFilesController.encoding
+                          }),
+                          organizations: acc.upload.organizations
+                        },
+                        user: opts.user
+                      },
+                      function (err, res) {
+                        if (err) return next(err, acc);
+                        // Set krt.pdf
+                        acc.krt.pdf = res._id;
+                        // Add file to files
+                        acc.files.push(res._id);
+                        return DocumentsFilesController.upload(
+                          {
+                            data: {
+                              accountId: params.uploaded_by,
+                              documentId: acc._id,
+                              file: Object.assign(params.krt, {
+                                name: `${path.parse(params.krt.name).name}.krt.json`,
+                                data: Buffer.from(JSON.stringify(result.json)).toString(
+                                  DocumentsFilesController.encoding
+                                ),
+                                mimetype: `application/json`,
+                                encoding: DocumentsFilesController.encoding
+                              }),
+                              organizations: acc.upload.organizations
+                            },
+                            user: opts.user
+                          },
+                          function (err, res) {
+                            if (err) return next(err, acc);
+                            // Set krt.json
+                            acc.krt.json = res._id;
+                            // Add file to files
+                            acc.files.push(res._id);
+                            return next(null, acc);
+                          }
+                        );
+                      }
+                    );
+                  })
+                  .catch((error) => {
+                    console.error(`Error:`, error);
+                    return next(null, acc);
+                  });
+                // Guess which kind of file it is to call the great function
+              }
+            );
+          },
+          // Refresh KRT
+          function (acc, next) {
+            if (!acc.krt.pdf || !acc.originalPDF) return next(null, acc);
+            return Self.refreshKRT(
+              {
+                data: {
+                  document: acc,
+                  saveDocument: false, // Do not save the document
+                  refreshKRTinPDF: true, // It will add the KRT table in the PDF
+                  refreshTEIMetadata: false, // It will be refreshed after
+                  refreshPDFMetadata: false, // It will be refreshed after
+                  importDataFromKRT: false // It will be done after
+                },
+                user: opts.user
+              },
+              function (err, res) {
+                if (err) return next(err, acc);
+                acc = res;
+                return next(null, acc);
+              }
+            );
           },
           // Process metadata
           function (acc, next) {
@@ -1368,7 +1512,7 @@ Self.upload = function (opts = {}, cb) {
                 user: opts.user,
                 ignoreSoftCiteCommandLines: opts.ignoreSoftCiteCommandLines,
                 ignoreSoftCiteSoftware: opts.ignoreSoftCiteSoftware,
-                saveDocument: false
+                saveDocument: true
               },
               function (err, res) {
                 return next(err, acc);
@@ -1381,7 +1525,23 @@ Self.upload = function (opts = {}, cb) {
             return Self.importDataFromBioNLP(
               {
                 documentId: acc._id.toString(),
-                user: opts.user
+                user: opts.user,
+                saveDocument: true
+              },
+              function (err, res) {
+                return next(err, acc);
+              }
+            );
+          },
+          // Process KRT
+          function (acc, next) {
+            if (!acc.krt.pdf || !acc.originalPDF) return next(null, acc);
+            if (!opts.importDataFromKRT) return next(null, acc);
+            return Self.importDataFromKRT(
+              {
+                documentId: acc._id.toString(),
+                user: opts.user,
+                saveDocument: true
               },
               function (err, res) {
                 return next(err, acc);
@@ -1395,6 +1555,25 @@ Self.upload = function (opts = {}, cb) {
               if (ok instanceof Error) return next(ok, acc);
               return next(null, acc);
             });
+          },
+          // Delete DataObjects
+          function (acc, next) {
+            if (!opts.deleteDataObjects) return next(null, acc);
+            return Self.get(
+              { data: { id: acc._id.toString(), dataObjects: true }, user: opts.user },
+              function (err, doc) {
+                if (err) return cb(err);
+                if (doc instanceof Error) return cb(null, doc);
+                let data = doc.dataObjects.current.map(function (item) {
+                  return { document: acc, dataObject: item, isExtracted: true, isDeleted: true, saveDocument: true };
+                });
+                return Self.deleteDataObjects({ user: opts.user, data: data }, function (err, ok) {
+                  if (err) return next(err, acc);
+                  if (ok instanceof Error) return next(ok, acc);
+                  return next(null, acc);
+                });
+              }
+            );
           }
         ];
         // Execute all actions & create document
@@ -1796,6 +1975,243 @@ Self.convertOldDocument = function (opts, cb) {
 };
 
 /**
+ * Refresh the KRT of a given document
+ * @param {object} opts - Options available (You must call getUploadParams)
+ * @param {object} opts.data - Data available
+ * @param {object} opts.data.document - Document
+ * @param {boolean} opts.data.saveDocument - Save the document
+ * @param {boolean} opts.data.refreshKRTinPDF - Add KRT in the PDF
+ * @param {boolean} opts.data.refreshPDFMetadata - Refresh PDF metadata
+ * @param {boolean} opts.data.refreshTEIMetadata - Refresh TEI metadata
+ * @param {boolean} opts.data.importDataFromKRT - Import DataObjects
+ * @param {object} opts.user - Current user
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document OR new Error)
+ * @returns {undefined} undefined
+ */
+Self.refreshKRT = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.document`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.data.document`));
+  let doc = opts.data.document;
+  if (!doc.tei) return cb(new Error(`Missing required data: opts.data.document.tei`));
+  if (!doc.originalPDF) return cb(new Error(`Missing required data: opts.data.document.originalPDF`));
+  if (!doc.krt.pdf) return cb(new Error(`Missing required data: opts.data.document.krt.pdf`));
+  if (!doc.krt.json) return cb(new Error(`Missing required data: opts.data.document.krt.json`));
+  let saveDocument = typeof opts.data.saveDocument !== `undefined` ? !!opts.data.saveDocument : false; // True by default
+  let refreshKRTinPDF = !!opts.data.refreshKRTinPDF;
+  let refreshPDFMetadata = !!opts.data.refreshPDFMetadata;
+  let refreshTEIMetadata = !!opts.data.refreshTEIMetadata;
+  let importDataFromKRT = !!opts.data.importDataFromKRT;
+  let mapping = {};
+  return async.mapSeries(
+    [
+      // Refresh the current PDF
+      function (next) {
+        if (!refreshKRTinPDF || !doc.originalPDF || !doc.krt.pdf) return next();
+        return DocumentsFilesController.readFile({ data: { id: doc.originalPDF.toString() } }, function (err, pdfFile) {
+          if (err) return next(err);
+          return DocumentsFilesController.readFile({ data: { id: doc.krt.pdf.toString() } }, function (err, krtFile) {
+            if (err) return next(err);
+            return PdfManager.getPagesNumberOfFiles(
+              {
+                files: [
+                  { name: `pdf`, data: pdfFile.data },
+                  { name: `krt`, data: krtFile.data }
+                ]
+              },
+              function (err, res) {
+                mapping = res; // get pages numbers of PDFs
+                return PdfManager.mergeFiles(
+                  { files: [pdfFile, krtFile], extension: `.krt.merged.pdf` },
+                  function (err, mergedPDF) {
+                    if (err) return next(err);
+                    return DocumentsFilesController.upload(
+                      {
+                        data: {
+                          accountId: doc.upload.account.toString(),
+                          documentId: doc._id.toString(),
+                          file: mergedPDF,
+                          organizations: doc.upload.organizations
+                        },
+                        user: opts.user
+                      },
+                      function (err, res) {
+                        if (err) return next(err);
+                        doc.pdf = res._id;
+                        doc.files.push(res._id);
+                        return next();
+                      }
+                    );
+                  }
+                );
+              }
+            );
+          });
+        });
+      },
+      // Add sentences in the TEI
+      function (next) {
+        if (!refreshKRTinPDF || !doc.tei || !doc.krt.json) return next();
+        return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, teiContent) {
+          if (err) return next(err);
+          return DocumentsFilesController.readFile(
+            { data: { id: doc.krt.json.toString() } },
+            function (err, jsonContent) {
+              if (err) return next(err);
+              let xmlString = teiContent.data.toString(DocumentsFilesController.encoding);
+              let krtData = JSON.parse(jsonContent.data.toString(DocumentsFilesController.encoding));
+              let pageOffset = mapping[`pdf`];
+              let newSentences = krtData.lines
+                .filter(function (item) {
+                  return !item.isHeader;
+                })
+                .map(function (item, i) {
+                  return {
+                    id: `krt-sentence-${item.line}`,
+                    p: pageOffset + item.page,
+                    x: item.x,
+                    y: krtData.pages.height - item.y,
+                    w: item.width,
+                    h: item.height,
+                    text: item.cells[krtConfig.columnIndexes[`ResourceName`]].content
+                  };
+                });
+              let outpout = XML.addSentences(xmlString, newSentences, `krt`);
+              return DocumentsFilesController.rewriteFile(doc.tei.toString(), outpout, function (err) {
+                if (err) return next(err);
+                return next();
+              });
+            }
+          );
+        });
+      },
+      // Refresh TEI Metadata
+      function (next) {
+        if (!refreshTEIMetadata) return next();
+        return Self.updateOrCreateTEIMetadata(
+          { data: { id: doc._id.toString() }, user: opts.user },
+          function (err, ok) {
+            if (err) return next(err);
+            if (ok instanceof Error) return next(ok);
+            return next();
+          }
+        );
+      },
+      // Refresh PDF Metadata
+      function (next) {
+        if (!refreshPDFMetadata) return next();
+        return Self.updateOrCreatePDFMetadata(
+          { data: { id: doc._id.toString() }, user: opts.user },
+          function (err, ok) {
+            if (err) return next(err);
+            if (ok instanceof Error) return next(ok);
+            return next();
+          }
+        );
+      },
+      // Import DataObjects
+      function (next) {
+        if (!importDataFromKRT) return next();
+        return Self.importDataFromKRT(
+          { user: opts.user, documentId: doc._id.toString(), saveDocument: saveDocument },
+          function (err, ok) {
+            if (err) return next(err);
+            if (ok instanceof Error) return next(ok);
+            return next();
+          }
+        );
+      },
+      // Save Document
+      function (next) {
+        if (!saveDocument) return next();
+        return doc.save(function (err) {
+          if (err) return next(err);
+          return next();
+        });
+      }
+    ],
+    function (action, next) {
+      return action(function (err) {
+        return next(err);
+      });
+    },
+    function (err) {
+      return cb(err, doc);
+    }
+  );
+};
+
+/**
+ * Extract data from softcie result
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.extractDataFromKRT = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  return Self.get(
+    { data: { id: opts.documentId.toString(), dataObjects: true }, user: opts.user },
+    function (err, doc) {
+      if (err) return cb(err);
+      if (doc instanceof Error) return cb(null, doc);
+      let currentDataObjects = doc.dataObjects.current.map(function (item) {
+        return { ...item };
+      });
+      return Self.getKRTResults(
+        {
+          documentId: opts.documentId.toString(),
+          user: opts.user
+        },
+        function (err, jsonData) {
+          if (err) return cb(err);
+          if (jsonData instanceof Error) return cb(null, jsonData);
+          let results = [];
+          for (let i = 0; i < jsonData.lines.length; i++) {
+            let item = jsonData.lines[i];
+            if (item.isHeader) continue; // Do not process headers
+            let resourceType = item.cells[krtConfig.columnIndexes[`ResourceType`]].content;
+            let resourceName = item.cells[krtConfig.columnIndexes[`ResourceName`]].content;
+            let source = item.cells[krtConfig.columnIndexes[`Source`]].content;
+            let identifiers = item.cells[krtConfig.columnIndexes[`Identifer`]].content;
+            let additionalInformation = item.cells[krtConfig.columnIndexes[`AdditionalInformation`]].content;
+            let { dataType, subType } =
+              typeof krtRules.resourceType[resourceType] !== `undefined`
+                ? krtRules.resourceType[resourceType]
+                : krtRules.default;
+            let { URL, PID, DOI, RRID, catalogNumber } = extractIdentifiers(identifiers);
+            let dataObject = DataObjects.create({
+              reuse: false,
+              dataType: dataType,
+              subType: subType,
+              cert: `1`,
+              name: resourceName,
+              URL: URL,
+              PID: PID,
+              DOI: DOI,
+              RRID: RRID,
+              source: source,
+              catalogNumber: catalogNumber,
+              comments: additionalInformation,
+              sentences: [{ id: `krt-sentence-${item.line}`, text: resourceName }]
+            });
+            if (dataObject.kind !== `reagent`) dataObject.source = ``; // Do not use source for dataObject NOT reagent
+            dataObject.document = doc._id.toString();
+            results.push(dataObject);
+          }
+          return cb(null, results);
+        }
+      );
+    }
+  );
+};
+
+/**
  * Extract data from softcie result
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
@@ -2124,6 +2540,42 @@ Self.extractDataFromBioNLP = function (opts = {}, cb) {
 };
 
 /**
+ * Import data from KRT in the document
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {boolean} opts.saveDocument - Save document
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.importDataFromKRT = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  if (typeof _.get(opts, `saveDocument`) === `undefined`) opts.saveDocument = false;
+  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    return Self.extractDataFromKRT(opts, function (err, dataObjects) {
+      if (err) return cb(err);
+      if (dataObjects instanceof Error) return cb(null, dataObjects);
+      if (dataObjects.length === 0) return cb(null, dataObjects);
+      return Self.addDataObjects(
+        {
+          user: opts.user,
+          data: dataObjects.map(function (item) {
+            return { isExtracted: true, dataObject: item, document: doc, saveDocument: opts.saveDocument };
+          })
+        },
+        function (err, res) {
+          return cb(err, dataObjects);
+        }
+      );
+    });
+  });
+};
+
+/**
  * Import data from softcite in the document
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
@@ -2169,7 +2621,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                 cert: `0`,
                 name: item.name + ` Code`,
                 URL: ``,
-                comments: item.mentions.join(`, `),
+                comments: ``,
                 sentences: item.sentences.filter(function (e) {
                   return e.match;
                 })
@@ -2200,8 +2652,8 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
                 cert: `0`,
                 name: item.name,
                 version: item.version,
-                URL: item.url,
-                comments: item.mentions.join(`, `),
+                URL: Url.sanitize(item.url),
+                comments: ``,
                 sentences: item.sentences.filter(function (e) {
                   return e.match;
                 })
@@ -2235,6 +2687,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
  * @param {boolean} opts.labMaterialsSectionsOnly - Automatically detect lab materials sections (default: false)
  * @param {boolean} opts.bioNLP - Enable/disable bioNLP request (default: true)
  * @param {boolean} opts.refreshData - Refresh data (force request bioNLP)
+ * @param {boolean} opts.saveDocument - Save document
  * @param {boolean} opts.saveDocument - Save document
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
@@ -2287,6 +2740,30 @@ Self.importDataFromBioNLP = function (opts = {}, cb) {
           return cb(err, data);
         }
       );
+    });
+  });
+};
+
+/**
+ * Get KRT results
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - Current user
+ * @param {string} opts.documentId - Document id
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.getKRTResults = function (opts, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `documentId`) === `undefined`) return cb(new Error(`Missing required data: opts.documentId`));
+  return Self.get({ data: { id: opts.documentId.toString() }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    if (!doc.krt.json) return cb(new Error(`Local data not found, functionnality unavailable`));
+    return DocumentsFilesController.readFile({ data: { id: doc.krt.json.toString() } }, function (err, jsonContent) {
+      if (err) return cb(err);
+      if (jsonContent instanceof Error) return cb(null, jsonContent);
+      return cb(null, JSON.parse(jsonContent.data.toString(DocumentsFilesController.encoding)));
     });
   });
 };
@@ -3455,7 +3932,7 @@ Self.detectNewSentences = function (opts = {}, cb) {
       return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
         if (err) return cb(err);
         let xmlString = content.data.toString(DocumentsFilesController.encoding);
-        let outpout = XML.addSentences(xmlString, results.newSentences);
+        let outpout = XML.addSentences(xmlString, results.newSentences, `ocr`);
         return DocumentsFilesController.rewriteFile(doc.tei.toString(), outpout, function (err) {
           if (err) return cb(err);
           return Self.updateOrCreateTEIMetadata(
@@ -4141,6 +4618,7 @@ Self.get = function (opts = {}, cb) {
   if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
   let id = Params.convertToString(opts.data.id);
   let pdf = Params.convertToBoolean(opts.data.pdf);
+  let krt = Params.convertToBoolean(opts.data.krt);
   let tei = Params.convertToBoolean(opts.data.tei);
   let files = Params.convertToBoolean(opts.data.files);
   let datasets = Params.convertToBoolean(opts.data.datasets);
@@ -4177,6 +4655,7 @@ Self.get = function (opts = {}, cb) {
   if (pdf) transaction.populate(`pdf`);
   if (tei) transaction.populate(`tei`);
   if (files) transaction.populate(`files`);
+  if (krt) transaction.populate(`krt.pdf`).populate(`krt.json`).populate(`krt.source`);
   return transaction.exec(function (err, doc) {
     if (err) return cb(err);
     if (!doc) return cb(null, new Error(`Document not found`));

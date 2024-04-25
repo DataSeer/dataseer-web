@@ -1,0 +1,40 @@
+{
+  "default": {
+    "dataType": "tabular data",
+    "subType": ""
+  },
+  "resourceType": {
+    "Antibody": {
+      "dataType": "lab materials",
+      "subType": "antibodies"
+    },
+    "Chemical, peptide, or recombinant protein": {
+      "dataType": "lab materials",
+      "subType": ""
+    },
+    "Dataset": {
+      "dataType": "tabular data",
+      "subType": ""
+    },
+    "Experimental model: Organism/strain": {
+      "dataType": "lab materials",
+      "subType": ""
+    },
+    "Other": {
+      "dataType": "other",
+      "subType": ""
+    },
+    "Recombinant DNA": {
+      "dataType": "lab materials",
+      "subType": "plasmid"
+    },
+    "Software/code": {
+      "dataType": "code software",
+      "subType": ""
+    },
+    "Virus strain": {
+      "dataType": "lab materials",
+      "subType": "organism"
+    }
+  }
+}
