@@ -2180,23 +2180,26 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
             let source = item.cells[krtConfig.columnIndexes[`Source`]].content;
             let identifiers = item.cells[krtConfig.columnIndexes[`Identifer`]].content;
             let additionalInformation = item.cells[krtConfig.columnIndexes[`AdditionalInformation`]].content;
-            let { dataType, subType } =
+            let { dataType, subType, reuse } =
               typeof krtRules.resourceType[resourceType] !== `undefined`
                 ? krtRules.resourceType[resourceType]
                 : krtRules.default;
-            let { URL, PID, DOI, RRID, catalogNumber } = extractIdentifiers(identifiers);
+            let { URL, DOI, RRID, catalogNumber, CAS, accessionNumber } = extractIdentifiers(identifiers);
             let dataObject = DataObjects.create({
               reuse: false,
               dataType: dataType,
               subType: subType,
               cert: `1`,
               name: resourceName,
-              URL: URL,
-              PID: PID,
-              DOI: DOI,
-              RRID: RRID,
+              URL: URL.filter(function (e) {
+                return !DOI.includes(e);
+              }).join(` ;`),
+              PID: DOI.join(` ;`),
+              DOI: DOI.join(` ;`),
+              RRID: RRID.join(` ;`),
               source: source,
-              catalogNumber: catalogNumber,
+              reuse: reuse,
+              catalogNumber: [].concat(catalogNumber, CAS, accessionNumber).flat().join(` ;`),
               comments: additionalInformation,
               sentences: [{ id: `krt-sentence-${item.line}`, text: resourceName }]
             });
