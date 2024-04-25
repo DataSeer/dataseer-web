@@ -4760,18 +4760,18 @@ Self.update = function (opts = {}, cb) {
           // Update urls property
           function (next) {
             if (typeof _.get(opts, `data.urls`) !== `object`) return next();
-            if (Params.checkString(opts.data.urls.originalFile)) doc.urls.originalFile = opts.data.urls.originalFile;
-            if (Params.checkString(opts.data.urls.bioRxiv)) doc.urls.bioRxiv = opts.data.urls.bioRxiv;
-            if (Params.checkString(opts.data.urls.preprint)) doc.urls.bioRxiv = opts.data.urls.preprint;
-            if (Params.checkString(opts.data.urls.hypothesis) && accessRights.isAdministrator)
+            if (typeof opts.data.urls.originalFile === `string`) doc.urls.originalFile = opts.data.urls.originalFile;
+            if (typeof opts.data.urls.bioRxiv === `string`) doc.urls.bioRxiv = opts.data.urls.bioRxiv;
+            if (typeof opts.data.urls.preprint === `string`) doc.urls.bioRxiv = opts.data.urls.preprint;
+            if (typeof opts.data.urls.hypothesis === `string` && accessRights.isAdministrator)
               doc.urls.hypothesis = opts.data.urls.hypothesis;
             return next();
           },
           // Update HHMI property
           function (next) {
             if (typeof _.get(opts, `data.HHMI`) !== `object`) return next();
-            if (Params.checkString(opts.data.HHMI.DOI)) doc.HHMI.DOI = opts.data.HHMI.DOI;
-            if (Params.checkString(opts.data.HHMI.preprint)) doc.HHMI.preprint = opts.data.HHMI.preprint;
+            if (typeof opts.data.HHMI.DOI === `string`) doc.HHMI.DOI = opts.data.HHMI.DOI;
+            if (typeof opts.data.HHMI.preprint === `string`) doc.HHMI.preprint = opts.data.HHMI.preprint;
             return next();
           }
         ],
