@@ -1,7 +1,7 @@
 {
   "columnIndexes": {
-    "RessourceType": 0,
-    "RessourceName": 1,
+    "ResourceType": 0,
+    "ResourceName": 1,
     "Source": 2,
     "Identifer": 3,
     "AdditionalInformation": 4
