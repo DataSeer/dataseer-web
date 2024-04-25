@@ -927,6 +927,7 @@ Self.upload = function (opts = {}, cb) {
   if (typeof _.get(opts, `bioNLP`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
     opts.bioNLP = true;
   opts.importDataFromKRT = typeof opts.importDataFromKRT !== `undefined` ? opts.importDataFromKRT : true;
+  opts.deleteDataObjects = !!opts.deleteDataObjects;
   return Self.getUploadParams(opts.data, opts.user, function (err, params) {
     if (err) return cb(err);
     if (params instanceof Error) return cb(null, params);
@@ -1504,7 +1505,6 @@ Self.upload = function (opts = {}, cb) {
           },
           // Process softcite
           function (acc, next) {
-            console.log(`importDataFromSoftcite`, opts.importDataFromSoftcite);
             if (!opts.importDataFromSoftcite) return next(null, acc);
             return Self.importDataFromSoftcite(
               {
@@ -1555,6 +1555,25 @@ Self.upload = function (opts = {}, cb) {
               if (ok instanceof Error) return next(ok, acc);
               return next(null, acc);
             });
+          },
+          // Delete DataObjects
+          function (acc, next) {
+            if (!opts.deleteDataObjects) return next(null, acc);
+            return Self.get(
+              { data: { id: acc._id.toString(), dataObjects: true }, user: opts.user },
+              function (err, doc) {
+                if (err) return cb(err);
+                if (doc instanceof Error) return cb(null, doc);
+                let data = doc.dataObjects.current.map(function (item) {
+                  return { document: acc, dataObject: item, isExtracted: true, isDeleted: true, saveDocument: true };
+                });
+                return Self.deleteDataObjects({ user: opts.user, data: data }, function (err, ok) {
+                  if (err) return next(err, acc);
+                  if (ok instanceof Error) return next(ok, acc);
+                  return next(null, acc);
+                });
+              }
+            );
           }
         ];
         // Execute all actions & create document

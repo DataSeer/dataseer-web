@@ -77,6 +77,7 @@ router.post(`/`, function (req, res, next) {
       dataseerML: Params.convertToBoolean(req.body.dataseerML),
       softcite: Params.convertToBoolean(req.body.softcite),
       bioNLP: Params.convertToBoolean(req.body.bioNLP),
+      deleteDataObjects: Params.convertToBoolean(req.body.deleteDataObjects),
       importDataFromKRT: Params.convertToBoolean(req.body.importDataFromKRT),
       importDataFromBioNLP: Params.convertToBoolean(req.body.importDataFromBioNLP),
       mergePDFs: Params.convertToBoolean(req.body.mergePDFs),
