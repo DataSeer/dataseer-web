@@ -1,0 +1,26 @@
+{
+  "columnIndexes": {
+    "RessourceType": 0,
+    "RessourceName": 1,
+    "Source": 2,
+    "Identifer": 3,
+    "AdditionalInformation": 4
+  },
+  "fontFiles": {
+    "regular": "../resources/krt/Roboto-Regular.ttf",
+    "bold": "../resources/krt/Roboto-Bold.ttf"
+  },
+  "headerOnFirstPageOnly": false,
+  "avgChar": "a",
+  "fontSize": 12,
+  "cellPadding": 5,
+  "topMargin": 50,
+  "bottomMargin": 50,
+  "leftMargin": 25,
+  "rightMargin": 25,
+  "columnWidths": [20, 20, 20, 22, 18],
+  "border": {
+    "color": [0, 0, 0],
+    "thickness": 1
+  }
+}

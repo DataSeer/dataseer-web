@@ -31,8 +31,14 @@ const Schema = new mongoose.Schema(
       preprint: { type: String, default: `` }, // HHMI preprint
       DOI: { type: String, default: `` } // HHMI DOI
     },
+    krt: {
+      pdf: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // PDF file containing KRT
+      source: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // Source file (containing CSV data)
+      json: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null } // JSON file (containing JSON data)
+    }, // refers to documents.files collection item (Key Resource Table)
     bioNLP: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (bioNLP)
     softcite: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (softcite)
+    originalPDF: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (original PDF file)
     pdf: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (pdf)
     tei: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsFiles`, default: null }, // refers to documents.files collection item (tei)
     datasets: { type: mongoose.Schema.Types.ObjectId, ref: `DocumentsDatasets` }, // refers to documents.metadata collection item

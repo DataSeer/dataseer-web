@@ -41,6 +41,30 @@ Self.isXML = function (mimetype) {
 };
 
 /**
+ * Check if mimetype is a CSV like
+ * @param {string} mimetype - Given mimtype
+ * @returns {boolean} True if mimetype matched, else false
+ */
+Self.hasCSV = function (mimetype) {
+  if (!mimetype) throw new Error(`Missing required data: mimetype`);
+  return (
+    mimetype === `text/csv` ||
+    mimetype === `application/vnd.ms-excel` ||
+    mimetype === `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+  );
+};
+
+/**
+ * Check if mimetype is CSV
+ * @param {string} mimetype - Given mimtype
+ * @returns {boolean} True if mimetype matched, else false
+ */
+Self.isCSV = function (mimetype) {
+  if (!mimetype) throw new Error(`Missing required data: mimetype`);
+  return mimetype === `text/csv`;
+};
+
+/**
  * Get path (on FileSystem) of given documentId
  * @param {string} documentId - Document id
  * @param {string} filename - Filename
