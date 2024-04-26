@@ -1,7 +1,8 @@
-
+{
   "default": {
     "dataType": "tabular data",
-    "subType": ""
+    "subType": "",
+    "reuse": false
   },
   "resourceType": {
     "Antibody": {
