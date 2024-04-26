@@ -34,7 +34,9 @@ const Settings = new mongoose.Schema(
       bioNLP: { type: Boolean, default: false },
       importDataFromBioNLP: { type: Boolean, default: false },
       mute: { type: Boolean, default: false },
-      mergePDFs: { type: Boolean, default: true }
+      mergePDFs: { type: Boolean, default: true },
+      importDataFromKRT: { type: Boolean, default: true },
+      deleteDataObjects: { type: Boolean, default: true }
     }
   },
   { _id: false }

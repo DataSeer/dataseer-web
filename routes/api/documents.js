@@ -46,6 +46,7 @@ router.get(`/`, function (req, res, next) {
       sort: Params.convertToString(req.query.sort),
       pdf: Params.convertToBoolean(req.query.pdf),
       tei: Params.convertToBoolean(req.query.tei),
+      krt: Params.convertToBoolean(req.query.krt),
       files: Params.convertToBoolean(req.query.files),
       metadata: Params.convertToBoolean(req.query.metadata),
       dataObjects: Params.convertToBoolean(req.query.dataObjects),
@@ -76,6 +77,8 @@ router.post(`/`, function (req, res, next) {
       dataseerML: Params.convertToBoolean(req.body.dataseerML),
       softcite: Params.convertToBoolean(req.body.softcite),
       bioNLP: Params.convertToBoolean(req.body.bioNLP),
+      deleteDataObjects: Params.convertToBoolean(req.body.deleteDataObjects),
+      importDataFromKRT: Params.convertToBoolean(req.body.importDataFromKRT),
       importDataFromBioNLP: Params.convertToBoolean(req.body.importDataFromBioNLP),
       mergePDFs: Params.convertToBoolean(req.body.mergePDFs),
       importDataFromSoftcite: Params.convertToBoolean(req.body.importDataFromSoftcite),
@@ -227,6 +230,7 @@ router.get(`/:id`, function (req, res, next) {
       id: req.params.id,
       pdf: Params.convertToBoolean(req.query.pdf),
       tei: Params.convertToBoolean(req.query.tei),
+      krt: Params.convertToBoolean(req.query.krt),
       files: Params.convertToBoolean(req.query.files),
       metadata: Params.convertToBoolean(req.query.metadata),
       datasets: Params.convertToBoolean(req.query.datasets),
@@ -922,6 +926,159 @@ router.post(`/:id/bioNLP/results`, function (req, res, next) {
     let isError = data instanceof Error;
     let result = isError ? data.toString() : data;
     return res.json({ err: isError, res: result });
+  });
+});
+
+/* GET KRT PDF of document */
+router.get(`/:id/krt/pdf`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { data: { id: req.params.id }, user: req.user };
+  return DocumentsController.get(opts, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.krt.pdf) return res.json({ err: true, res: null, msg: `KRT PDF file not found` });
+    return DocumentsFilesController.get(
+      { data: { id: doc.krt.pdf ? doc.krt.pdf.toString() : undefined } },
+      function (err, file) {
+        if (err) {
+          console.log(err);
+          return res.status(500).send(conf.errors.internalServerError);
+        }
+        if (!file) return res.json({ err: true, res: null, msg: `file not found` });
+        return res.json({ err: false, res: file });
+      }
+    );
+  });
+});
+
+/* GET PDF KRT content of document */
+router.get(`/:id/krt/pdf/content`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { data: { id: req.params.id }, user: req.user };
+  return DocumentsController.get(opts, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.krt.pdf) return res.json({ err: true, res: null, msg: `PDF file content not found` });
+    return DocumentsFilesController.readFile(
+      { data: { id: doc.krt.pdf ? doc.krt.pdf.toString() : undefined } },
+      function (err, file) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+        if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
+        res.setHeader(`Content-Disposition`, `filename=` + file.name);
+        res.setHeader(`Content-Type`, file.mimetype);
+        return res.send(file.data);
+      }
+    );
+  });
+});
+
+/* GET JSON KRT of document */
+router.get(`/:id/krt/json`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { data: { id: req.params.id }, user: req.user };
+  return DocumentsController.get(opts, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.krt.json) return res.json({ err: true, res: null, msg: `PDF KRT file not found` });
+    return DocumentsFilesController.get(
+      { data: { id: doc.krt.json ? doc.krt.json.toString() : undefined } },
+      function (err, file) {
+        if (err) {
+          console.log(err);
+          return res.status(500).send(conf.errors.internalServerError);
+        }
+        if (!file) return res.json({ err: true, res: null, msg: `file not found` });
+        return res.json({ err: false, res: file });
+      }
+    );
+  });
+});
+
+/* GET JSON KRT content of document */
+router.get(`/:id/krt/json/content`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { data: { id: req.params.id }, user: req.user };
+  return DocumentsController.get(opts, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.krt.json) return res.json({ err: true, res: null, msg: `JSON KRT file content not found` });
+    return DocumentsFilesController.readFile(
+      { data: { id: doc.krt.json ? doc.krt.json.toString() : undefined } },
+      function (err, file) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+        if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
+        res.setHeader(`Content-Disposition`, `filename=` + file.name);
+        res.setHeader(`Content-Type`, file.mimetype);
+        return res.send(file.data);
+      }
+    );
+  });
+});
+
+/* GET Source KRT of document */
+router.get(`/:id/krt/source`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { data: { id: req.params.id }, user: req.user };
+  return DocumentsController.get(opts, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.krt.source) return res.json({ err: true, res: null, msg: `PDF KRT file not found` });
+    return DocumentsFilesController.get(
+      { data: { id: doc.krt.source ? doc.krt.source.toString() : undefined } },
+      function (err, file) {
+        if (err) {
+          console.log(err);
+          return res.status(500).send(conf.errors.internalServerError);
+        }
+        if (!file) return res.json({ err: true, res: null, msg: `file not found` });
+        return res.json({ err: false, res: file });
+      }
+    );
+  });
+});
+
+/* GET Source KRT content of document */
+router.get(`/:id/krt/source/content`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { data: { id: req.params.id }, user: req.user };
+  return DocumentsController.get(opts, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc) return res.json({ err: true, res: null, msg: `document not found` });
+    if (!doc.krt.source) return res.json({ err: true, res: null, msg: `Source KRT file content not found` });
+    return DocumentsFilesController.readFile(
+      { data: { id: doc.krt.source ? doc.krt.source.toString() : undefined } },
+      function (err, file) {
+        if (err) return res.json({ 'err': true, 'res': null, 'msg': err instanceof Error ? err.toString() : err });
+        if (!file) return res.json({ 'err': true, 'res': null, 'msg': `file not found` });
+        res.setHeader(`Content-Disposition`, `filename=` + file.name);
+        res.setHeader(`Content-Type`, file.mimetype);
+        return res.send(file.data);
+      }
+    );
   });
 });
 

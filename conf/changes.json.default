@@ -1,0 +1,15 @@
+{
+  "prefix": "conf - ",
+  "permissions": {
+    "Org": { "default": "writer" },
+    "DS": { "default": "writer" }
+  },
+  "templates": {
+    "Org": "GOOGLE_ID",
+    "DS": "GOOGLE_ID"
+  },
+  "folders": {
+    "Org": "GOOGLE_ID",
+    "DS": "GOOGLE_ID"
+  }
+}

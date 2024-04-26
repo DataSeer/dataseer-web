@@ -1,0 +1,48 @@
+
+  "default": {
+    "dataType": "tabular data",
+    "subType": ""
+  },
+  "resourceType": {
+    "Antibody": {
+      "dataType": "lab materials",
+      "subType": "antibodies",
+      "reuse": false
+    },
+    "Chemical, peptide, or recombinant protein": {
+      "dataType": "lab materials",
+      "subType": "",
+      "reuse": false
+    },
+    "Dataset": {
+      "dataType": "tabular data",
+      "subType": "",
+      "reuse": false
+    },
+    "Experimental model: Organism/strain": {
+      "dataType": "lab materials",
+      "subType": "organism",
+      "reuse": false
+    },
+    "Other": {
+      "dataType": "other",
+      "subType": "",
+      "reuse": false
+    },
+    "Recombinant DNA": {
+      "dataType": "lab materials",
+      "subType": "plasmid",
+      "reuse": false
+    },
+    "Software/code": {
+      "dataType": "code software",
+      "subType": "",
+      "reuse": true
+    },
+    "Virus strain": {
+      "dataType": "lab materials",
+      "subType": "plasmid",
+      "reuse": false
+    }
+  }
+}
