@@ -2171,6 +2171,7 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
         function (err, jsonData) {
           if (err) return cb(err);
           if (jsonData instanceof Error) return cb(null, jsonData);
+          const sourceRegExp = new RegExp(krtRules.sourceRegExp.content, krtRules.sourceRegExp.flags);
           let results = [];
           for (let i = 0; i < jsonData.lines.length; i++) {
             let item = jsonData.lines[i];
@@ -2180,10 +2181,16 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
             let source = item.cells[krtConfig.columnIndexes[`Source`]].content;
             let identifiers = item.cells[krtConfig.columnIndexes[`Identifer`]].content;
             let additionalInformation = item.cells[krtConfig.columnIndexes[`AdditionalInformation`]].content;
+            // Get dataType, subType and reuse property based on resourceType value (lowerCase)
             let { dataType, subType, reuse } =
-              typeof krtRules.resourceType[resourceType] !== `undefined`
-                ? krtRules.resourceType[resourceType]
-                : krtRules.default;
+              typeof krtRules.resourceType.mapping[resourceType.toLowerCase()] !== `undefined`
+                ? krtRules.resourceType.mapping[resourceType.toLowerCase()]
+                : krtRules.resourceType.default;
+            // If "reuse" depends on the value of the "source"
+            if (typeof reuse === `undefined`) {
+              let sourceMatch = source.match(sourceRegExp); // sourceRegExp content is found in source
+              reuse = !(source.length > 0 && Array.isArray(sourceMatch) && sourceMatch.length > 0); // reuse is false if sourceRegExp content is found in source
+            }
             let { URL, DOI, RRID, catalogNumber, CAS, accessionNumber } = extractIdentifiers(identifiers);
             let dataObject = DataObjects.create({
               reuse: false,
@@ -2206,6 +2213,28 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
             if (dataObject.kind !== `reagent`) dataObject.source = ``; // Do not use source for dataObject NOT reagent
             dataObject.document = doc._id.toString();
             results.push(dataObject);
+            let isCommandLine = !!SoftwareConf[dataObject.name.toLowerCase()];
+            if (dataObject.kind === `software` && krtRules.createCommandLines && isCommandLine) {
+              let code = DataObjects.create({
+                reuse: false,
+                dataType: `code software`,
+                subType: `custom scripts`,
+                cert: `1`,
+                name: resourceName + ` Code`,
+                URL: URL.filter(function (e) {
+                  return !DOI.includes(e);
+                }).join(` ;`),
+                PID: DOI.join(` ;`),
+                DOI: DOI.join(` ;`),
+                RRID: RRID.join(` ;`),
+                source: source,
+                reuse: false,
+                catalogNumber: [].concat(catalogNumber, CAS, accessionNumber).flat().join(` ;`),
+                comments: additionalInformation,
+                sentences: [{ id: `krt-sentence-${item.line}`, text: resourceName }]
+              });
+              results.push(code);
+            }
           }
           return cb(null, results);
         }
