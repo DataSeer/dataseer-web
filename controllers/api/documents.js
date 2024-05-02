@@ -522,6 +522,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
               },
               dataTypesInfo: opts.data.dataTypes,
               metadata: {
+                DAS: data.doc.metadata.DAS,
                 articleTitle: data.doc.metadata.article_title,
                 readmeIncluded: data.doc.metadata.readmeIncluded,
                 describesFiles: data.doc.metadata.describesFiles,
