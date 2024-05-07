@@ -26,7 +26,7 @@ router.get(`/customList`, function (req, res) {
 
 router.post(`/customList/find`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
   let name = Params.convertToString(req.body.name);
   let data = Software.findSoftwareFromCustomList(name);
   let isError = data instanceof Error;
