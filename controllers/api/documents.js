@@ -59,7 +59,6 @@ const ASAPAuthorsConf = require(`../../conf/authors.ASAP.json`);
 const SoftwareConf = require(`../../conf/software.json`);
 const reportsConf = require(`../../conf/reports.json`);
 const bioNLPConf = require(`../../conf/bioNLP.json`);
-const krtConfig = require(`../../conf/krt.json`);
 const krtRules = require(`../../conf/krt.rules.json`);
 
 let Self = {};
@@ -2064,6 +2063,12 @@ Self.refreshKRT = function (opts = {}, cb) {
               let xmlString = teiContent.data.toString(DocumentsFilesController.encoding);
               let krtData = JSON.parse(jsonContent.data.toString(DocumentsFilesController.encoding));
               let pageOffset = mapping[`pdf`];
+              let headers = krtData.lines.filter(function (item) {
+                return item.isHeader;
+              });
+              if (headers.length <= 0) return next(new Error(`KRT : headers not found`));
+              let columnIndexes = Self.getColumnsIndexesOfKRT(headers[0]);
+              if (columnIndexes instanceof Error) return next(columnIndexes);
               let newSentences = krtData.lines
                 .filter(function (item) {
                   return !item.isHeader;
@@ -2076,7 +2081,7 @@ Self.refreshKRT = function (opts = {}, cb) {
                     y: krtData.pages.height - item.y,
                     w: item.width,
                     h: item.height,
-                    text: item.cells[krtConfig.columnIndexes[`ResourceName`]].content
+                    text: item.cells[columnIndexes[`ResourceName`]].content
                   };
                 });
               let outpout = XML.addSentences(xmlString, newSentences, `krt`);
@@ -2145,7 +2150,47 @@ Self.refreshKRT = function (opts = {}, cb) {
 };
 
 /**
- * Extract data from softcie result
+ * Get columns indexes from KRT headers
+ * @param {object} headers - JSON object containing all headers
+ * @returns {object} return columns indexes or an Error
+ */
+Self.getColumnsIndexesOfKRT = function (headers) {
+  if (!Array.isArray(headers.cells) || headers.cells.length <= 0)
+    return new Error(`KRT : no content available in headers`);
+  let columnIndexes = {}; // This variable will store all columns indexes
+  let regExp = [];
+  let requiredHeadersCheck = {}; // This object will be used to check if all headers have been found
+  for (let key in krtRules.columnsIndexesRegExp) {
+    regExp.push({
+      id: key,
+      content: new RegExp(krtRules.columnsIndexesRegExp[key].content, krtRules.columnsIndexesRegExp[key].flags),
+      required: krtRules.columnsIndexesRegExp[key].required
+    });
+    requiredHeadersCheck[key] = !krtRules.columnsIndexesRegExp[key].required; // if required, it will be false (will be changed to true after if found)
+  }
+  for (let i = 0; i < headers.cells.length; i++) {
+    let cell = headers.cells[i];
+    if (typeof cell.content !== `string`) continue;
+    for (let j = 0; j < regExp.length; j++) {
+      let regExpMatch = cell.content.match(regExp[j].content);
+      let found = Array.isArray(regExpMatch) && regExpMatch.length > 0;
+      if (found) {
+        columnIndexes[regExp[j].id] = i;
+        requiredHeadersCheck[regExp[j].id] = true;
+        break;
+      }
+    }
+  }
+  let hasErrors = false;
+  for (let key in requiredHeadersCheck) {
+    if (!requiredHeadersCheck[key]) hasErrors = true;
+  }
+  if (hasErrors) return new Error(`KRT : required headers not found`);
+  return columnIndexes;
+};
+
+/**
+ * Extract data from KRT result
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - Current user
  * @param {string} opts.documentId - Document id
@@ -2172,27 +2217,58 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
         function (err, jsonData) {
           if (err) return cb(err);
           if (jsonData instanceof Error) return cb(null, jsonData);
-          const sourceRegExp = new RegExp(krtRules.sourceRegExp.content, krtRules.sourceRegExp.flags);
           let results = [];
+          let headers = jsonData.lines.filter(function (item) {
+            return item.isHeader;
+          });
+          if (headers.length <= 0) return cb(null, new Error(`KRT : headers not found`));
+          let columnIndexes = Self.getColumnsIndexesOfKRT(headers[0]);
+          if (columnIndexes instanceof Error) return cb(null, columnIndexes);
+          const sourceContentRegExp = new RegExp(
+            krtRules.columnsContentRegExp[`Source`].content,
+            krtRules.columnsContentRegExp[`Source`].flags
+          );
           for (let i = 0; i < jsonData.lines.length; i++) {
             let item = jsonData.lines[i];
             if (item.isHeader) continue; // Do not process headers
-            let resourceType = item.cells[krtConfig.columnIndexes[`ResourceType`]].content;
-            let resourceName = item.cells[krtConfig.columnIndexes[`ResourceName`]].content;
-            let source = item.cells[krtConfig.columnIndexes[`Source`]].content;
-            let identifiers = item.cells[krtConfig.columnIndexes[`Identifer`]].content;
-            let additionalInformation = item.cells[krtConfig.columnIndexes[`AdditionalInformation`]].content;
+            let resourceType =
+              typeof columnIndexes[`ResourceType`] !== `undefined`
+                ? item.cells[columnIndexes[`ResourceType`]].content
+                : ``;
+            let resourceName =
+              typeof columnIndexes[`ResourceName`] !== `undefined`
+                ? item.cells[columnIndexes[`ResourceName`]].content
+                : ``;
+            let source =
+              typeof columnIndexes[`Source`] !== `undefined` ? item.cells[columnIndexes[`Source`]].content : ``;
+            let identifiers =
+              typeof columnIndexes[`Identifer`] !== `undefined` ? item.cells[columnIndexes[`Identifer`]].content : ``;
+            let additionalInformation =
+              typeof columnIndexes[`AdditionalInformation`] !== `undefined`
+                ? item.cells[columnIndexes[`AdditionalInformation`]].content
+                : ``;
+            let newReuse =
+              typeof columnIndexes[`NewReuse`] !== `undefined`
+                ? item.cells[columnIndexes[`NewReuse`]].content
+                : undefined;
             // Get dataType, subType and reuse property based on resourceType value (lowerCase)
             let { dataType, subType, reuse } =
               typeof krtRules.resourceType.mapping[resourceType.toLowerCase()] !== `undefined`
                 ? krtRules.resourceType.mapping[resourceType.toLowerCase()]
                 : krtRules.resourceType.default;
-            // If "reuse" depends on the value of the "source"
+            // If "reuse" is not defined by rules, try to guess the value using the "source"
             if (typeof reuse === `undefined`) {
-              let sourceMatch = source.match(sourceRegExp); // sourceRegExp content is found in source
-              reuse = !(source.length > 0 && Array.isArray(sourceMatch) && sourceMatch.length > 0); // reuse is false if sourceRegExp content is found in source
+              if (source !== ``) {
+                let sourceMatch = source.match(sourceContentRegExp); // sourceContentRegExp is found in source
+                reuse = !(source.length > 0 && Array.isArray(sourceMatch) && sourceMatch.length > 0); // reuse is false if sourceContentRegExp is found in source
+              }
             }
-            let { URL, DOI, RRID, catalogNumber, CAS, accessionNumber } = extractIdentifiers(identifiers);
+            // Overwrite the reuse if "New/Reuse" column
+            if (typeof newReuse !== `undefined`) {
+              if (newReuse.toLowerCase() === `new`) reuse = false;
+              if (newReuse.toLowerCase() === `reuse`) reuse = true;
+            }
+            let { URL, DOI, RRID, catalogNumber, CAS, accessionNumber, PID } = extractIdentifiers(identifiers);
             let dataObject = DataObjects.create({
               reuse: false,
               dataType: dataType,
@@ -2202,7 +2278,7 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
               URL: URL.filter(function (e) {
                 return !DOI.includes(e);
               }).join(` ;`),
-              PID: DOI.join(` ;`),
+              PID: PID.join(` ;`),
               DOI: DOI.join(` ;`),
               RRID: RRID.join(` ;`),
               source: source,

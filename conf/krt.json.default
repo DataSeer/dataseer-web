@@ -1,11 +1,4 @@
 {
-  "columnIndexes": {
-    "ResourceType": 0,
-    "ResourceName": 1,
-    "Source": 2,
-    "Identifer": 3,
-    "AdditionalInformation": 4
-  },
   "fontFiles": {
     "regular": "../resources/krt/Roboto-Regular.ttf",
     "bold": "../resources/krt/Roboto-Bold.ttf"
