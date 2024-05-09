@@ -3,32 +3,32 @@
   "columnsIndexesRegExp": {
     "ResourceType": {
       "required": true,
-      "content": "resource\\s+type",
+      "content": "^(?:\\W+)?resource\\s+type(?:\\W+)?$",
       "flags": "gmi"
     },
     "ResourceName": {
       "required": true,
-      "content": "resource\\s+name",
+      "content": "^(?:\\W+)?resource\\s+name(?:\\W+)?$",
       "flags": "gmi"
     },
     "Source": {
       "required": true,
-      "content": "source",
+      "content": "^(?:\\W+)?source(?:\\W+)?$",
       "flags": "gmi"
     },
-    "Identifer": {
+    "Identifier": {
       "required": true,
-      "content": "identifer",
+      "content": "^(?:\\W+)?identifier(?:\\W+)?$",
       "flags": "gmi"
     },
     "AdditionalInformation": {
       "required": false,
-      "content": "additional\\s+information",
+      "content": "^(?:\\W+)?additional\\s+information(?:\\W+)?$",
       "flags": "gmi"
     },
     "NewReuse": {
       "required": true,
-      "content": "new\/reuse",
+      "content": "^(?:\\W+)?new\/reuse(?:\\W+)?$",
       "flags": "gmi"
     }
   },
