@@ -1,8 +1,42 @@
 {
   "createCommandLines": true,
-  "sourceRegExp": {
-    "content": "this\\s+paper",
-    "flags": "gmi"
+  "columnsIndexesRegExp": {
+    "ResourceType": {
+      "required": true,
+      "content": "resource\\s+type",
+      "flags": "gmi"
+    },
+    "ResourceName": {
+      "required": true,
+      "content": "resource\\s+name",
+      "flags": "gmi"
+    },
+    "Source": {
+      "required": true,
+      "content": "source",
+      "flags": "gmi"
+    },
+    "Identifer": {
+      "required": true,
+      "content": "identifer",
+      "flags": "gmi"
+    },
+    "AdditionalInformation": {
+      "required": false,
+      "content": "additional\\s+information",
+      "flags": "gmi"
+    },
+    "NewReuse": {
+      "required": true,
+      "content": "new\/reuse",
+      "flags": "gmi"
+    }
+  },
+  "columnsContentRegExp": {
+    "Source": {
+      "content": "this\\s+paper",
+      "flags": "gmi"
+    }
   },
   "resourceType": {
     "default": {
@@ -44,12 +78,16 @@
         "subType": "custom scripts",
         "reuse": false
       },
+      "software/code": {
+        "dataType": "code software",
+        "subType": ""
+      },
       "virus strain": {
         "dataType": "lab materials",
         "subType": "plasmid"
       },
       "protocol": {
-        "dataType": "protocols",
+        "dataType": "protocol",
         "subType":  ""
       }
     }
