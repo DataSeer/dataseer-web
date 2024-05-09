@@ -52,11 +52,11 @@ const PdfManager = require(`../../lib/pdfManager.js`);
 const BioNLP = require(`../../lib/bioNLP.js`);
 const DataObjects = require(`../../lib/dataObjects.js`);
 const { processCSV, extractIdentifiers } = require(`../../lib/krt.js`);
+const Software = require(`../../lib/software.js`);
 
 const conf = require(`../../conf/conf.json`);
 const uploadConf = require(`../../conf/upload.json`);
 const ASAPAuthorsConf = require(`../../conf/authors.ASAP.json`);
-const SoftwareConf = require(`../../conf/software.json`);
 const reportsConf = require(`../../conf/reports.json`);
 const bioNLPConf = require(`../../conf/bioNLP.json`);
 const krtRules = require(`../../conf/krt.rules.json`);
@@ -2290,7 +2290,14 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
             if (dataObject.kind !== `reagent`) dataObject.source = ``; // Do not use source for dataObject NOT reagent
             dataObject.document = doc._id.toString();
             results.push(dataObject);
-            let isCommandLine = !!SoftwareConf[dataObject.name.toLowerCase()];
+            let softwareFound = Software.findSoftwareFromCustomList(dataObject.name);
+            let isCommandLine = false;
+            if (
+              Array.isArray(softwareFound) &&
+              softwareFound.length > 0 &&
+              typeof softwareFound[0].isCommandLine !== `undefined`
+            )
+              isCommandLine = softwareFound[0].isCommandLine;
             if (dataObject.kind === `software` && krtRules.createCommandLines && isCommandLine) {
               let code = DataObjects.create({
                 reuse: false,
@@ -2432,7 +2439,15 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
                 s.sentences.filter(function (e) {
                   return e.match;
                 }).length > 0;
-              s.isCommandLine = !!SoftwareConf[s.name.toLowerCase()];
+              let softwareFound = Software.findSoftwareFromCustomList(s.name);
+              let isCommandLine = false;
+              if (
+                Array.isArray(softwareFound) &&
+                softwareFound.length > 0 &&
+                typeof softwareFound[0].isCommandLine !== `undefined`
+              )
+                isCommandLine = softwareFound[0].isCommandLine;
+              s.isCommandLine = isCommandLine;
               s.mentions = Object.keys(s.mentions);
               s.alreadyExist =
                 codeAndSoftware.filter(function (e) {
