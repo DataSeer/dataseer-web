@@ -2242,7 +2242,7 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
             let source =
               typeof columnIndexes[`Source`] !== `undefined` ? item.cells[columnIndexes[`Source`]].content : ``;
             let identifiers =
-              typeof columnIndexes[`Identifer`] !== `undefined` ? item.cells[columnIndexes[`Identifer`]].content : ``;
+              typeof columnIndexes[`Identifier`] !== `undefined` ? item.cells[columnIndexes[`Identifier`]].content : ``;
             let additionalInformation =
               typeof columnIndexes[`AdditionalInformation`] !== `undefined`
                 ? item.cells[columnIndexes[`AdditionalInformation`]].content
