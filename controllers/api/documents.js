@@ -377,7 +377,8 @@ Self.checkSentencesBoundingBoxes = function (opts = {}, cb) {
  * @param {object} opts - Options available
  * @param {object} opts.user - Current user
  * @param {object} opts.data - Data available
- * @param {string} opts.data.id - Id of the document
+ * @param {string} opts.data.reportName - Content used for search
+ * @param {string} opts.data.organizations - Organizations of the document
  * @param {string} opts.kind - Kind of report (available values : ASAP or AmNat)
  * @param {boolean} opts.strict - Strict mode (default : true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
@@ -388,17 +389,18 @@ Self.getGSpreadsheets = function (opts = {}, cb) {
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  if (typeof _.get(opts, `data.reportName`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.data.reportName`));
   if (typeof _.get(opts, `kind`) === `undefined`) return cb(new Error(`Missing required data: opts.kind`));
   if (typeof _.get(opts, `strict`) === `undefined`) return cb(new Error(`Missing required data: opts.kind`));
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
-  let id = Params.convertToString(opts.data.id);
+  let reportName = Params.convertToString(opts.data.reportName);
   let organizations = Params.convertToArray(opts.data.organizations, `string`);
   let kind = Params.convertToString(opts.kind);
   let strict = Params.convertToBoolean(opts.strict);
-  return GoogleSheets.getReportFileId(
-    { strict: strict, kind: kind, data: { name: id, organizations: organizations } },
+  return GoogleSheets.getReportFileIds(
+    { strict: strict, kind: kind, data: { name: reportName, organizations: organizations } },
     function (err, res) {
       return cb(err, res);
     }

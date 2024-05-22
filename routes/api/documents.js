@@ -1378,11 +1378,12 @@ router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
+    const hasDocumentId = Params.convertToBoolean(req.query.hasDocumentId);
     // Init transaction
     let opts = {
       strict: false,
       data: {
-        id: req.params.id,
+        reportName: hasDocumentId ? `${doc.name} (${doc._id.toString()})` : doc.name,
         organizations: doc.organizations.map(function (item) {
           return item._id.toString();
         })
