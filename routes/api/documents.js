@@ -20,6 +20,7 @@ const DocumentsDataObjectsMetadata = require(`../../controllers/api/documents.da
 const DocumentsController = require(`../../controllers/api/documents.js`);
 
 const conf = require(`../../conf/conf.json`);
+const csvConf = require(`../../conf/csv.json`);
 
 /* GET Documents */
 router.get(`/`, function (req, res, next) {
@@ -171,6 +172,7 @@ router.get(`/csv`, function (req, res, next) {
     },
     user: req.user
   };
+  if (!opts.limit || opts.limit > csvConf.limit) opts.limit = csvConf.limit;
   return DocumentsController.all(opts, function (err, result) {
     if (err) {
       console.log(err);
