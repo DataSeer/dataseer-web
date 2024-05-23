@@ -923,23 +923,6 @@ Self.upload = function (opts = {}, cb) {
   return Self.getUploadParams(opts.data, opts.user, function (err, params) {
     if (err) return cb(err);
     if (params instanceof Error) return cb(null, params);
-    if (params.organizations.length <= 0) return cb(null, new Error(`You must select at least one organization`));
-    if (!accessRights.isAdministrator) {
-      let settings = params.organizations[0].settings.upload;
-      opts.alreadyProcessed = settings.alreadyProcessed;
-      opts.removeResponseToViewerSection = settings.removeResponseToViewerSection;
-      opts.dataseerML = settings.dataseerML;
-      opts.mergePDFs = settings.mergePDFs;
-      opts.mute = settings.mute;
-      opts.softcite = settings.softcite;
-      opts.importDataFromSoftcite = settings.importDataFromSoftcite;
-      opts.ignoreSoftCiteCommandLines = settings.ignoreSoftCiteCommandLines;
-      opts.ignoreSoftCiteSoftware = settings.ignoreSoftCiteSoftware;
-      opts.bioNLP = settings.bioNLP;
-      opts.importDataFromBioNLP = settings.importDataFromBioNLP;
-      opts.importDataFromKRT = settings.importDataFromKRT;
-      opts.deleteDataObjects = settings.deleteDataObjects;
-    }
     return Documents.create(
       {
         locked: opts.data.locked,
@@ -957,6 +940,30 @@ Self.upload = function (opts = {}, cb) {
                 return next(null, acc);
               });
             } else return next(null, acc);
+          },
+          // Set default opts if user is not administrator
+          function (acc, next) {
+            if (accessRights.isAdministrator) return next(null, acc);
+            if (params.organizations.length <= 0)
+              return next(new Error(`You must select at least one organization`), acc);
+            return Organizations.findOne({ _id: params.organizations[0] }, function (err, organization) {
+              if (err) return next(err, acc);
+              let settings = organization.settings.upload;
+              opts.alreadyProcessed = settings.alreadyProcessed;
+              opts.removeResponseToViewerSection = settings.removeResponseToViewerSection;
+              opts.dataseerML = settings.dataseerML;
+              opts.mergePDFs = settings.mergePDFs;
+              opts.mute = settings.mute;
+              opts.softcite = settings.softcite;
+              opts.importDataFromSoftcite = settings.importDataFromSoftcite;
+              opts.ignoreSoftCiteCommandLines = settings.ignoreSoftCiteCommandLines;
+              opts.ignoreSoftCiteSoftware = settings.ignoreSoftCiteSoftware;
+              opts.bioNLP = settings.bioNLP;
+              opts.importDataFromBioNLP = settings.importDataFromBioNLP;
+              opts.importDataFromKRT = settings.importDataFromKRT;
+              opts.deleteDataObjects = settings.deleteDataObjects;
+              return next(null, acc);
+            });
           },
           // Get organization
           // Set organization & upload_journal properties
