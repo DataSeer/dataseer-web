@@ -920,19 +920,26 @@ Self.upload = function (opts = {}, cb) {
   if (typeof _.get(opts, `dataTypes`) === `undefined`) return cb(new Error(`Missing required data: opts.dataTypes`));
   if (typeof _.get(opts, `privateKey`) === `undefined`) return cb(new Error(`Missing required data: opts.privateKey`));
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
-  if (typeof _.get(opts, `dataseerML`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
-    opts.dataseerML = true;
-  if (typeof _.get(opts, `mergePDFs`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
-    opts.mergePDFs = true;
-  if (typeof _.get(opts, `softcite`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
-    opts.softcite = true;
-  if (typeof _.get(opts, `bioNLP`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
-    opts.bioNLP = true;
-  opts.importDataFromKRT = typeof opts.importDataFromKRT !== `undefined` ? opts.importDataFromKRT : true;
-  opts.deleteDataObjects = !!opts.deleteDataObjects;
   return Self.getUploadParams(opts.data, opts.user, function (err, params) {
     if (err) return cb(err);
     if (params instanceof Error) return cb(null, params);
+    if (params.organizations.length <= 0) return cb(null, new Error(`You must select at least one organization`));
+    if (!accessRights.isAdministrator) {
+      let settings = params.organizations[0].settings.upload;
+      opts.alreadyProcessed = settings.alreadyProcessed;
+      opts.removeResponseToViewerSection = settings.removeResponseToViewerSection;
+      opts.dataseerML = settings.dataseerML;
+      opts.mergePDFs = settings.mergePDFs;
+      opts.mute = settings.mute;
+      opts.softcite = settings.softcite;
+      opts.importDataFromSoftcite = settings.importDataFromSoftcite;
+      opts.ignoreSoftCiteCommandLines = settings.ignoreSoftCiteCommandLines;
+      opts.ignoreSoftCiteSoftware = settings.ignoreSoftCiteSoftware;
+      opts.bioNLP = settings.bioNLP;
+      opts.importDataFromBioNLP = settings.importDataFromBioNLP;
+      opts.importDataFromKRT = settings.importDataFromKRT;
+      opts.deleteDataObjects = settings.deleteDataObjects;
+    }
     return Documents.create(
       {
         locked: opts.data.locked,

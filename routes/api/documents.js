@@ -74,6 +74,7 @@ router.post(`/`, function (req, res, next) {
       user: req.user,
       privateKey: req.app.get(`private.key`),
       dataTypes: req.app.get(`dataTypes`),
+      alreadyProcessed: Params.convertToBoolean(req.body.alreadyProcessed),
       mute: Params.convertToBoolean(req.body.mute),
       dataseerML: Params.convertToBoolean(req.body.dataseerML),
       softcite: Params.convertToBoolean(req.body.softcite),
