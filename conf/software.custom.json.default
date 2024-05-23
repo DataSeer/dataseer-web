@@ -7,7 +7,9 @@
       "minRating": 0.70
     },
     "extractSoftwareFromText": {
-      "minScore": 0.85
+      "textLengthCoeff": 0.20,
+      "tokensLengthDelta": 1,
+      "minScore": 0.90
     }
   }
 }
