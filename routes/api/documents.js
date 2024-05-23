@@ -20,6 +20,7 @@ const DocumentsDataObjectsMetadata = require(`../../controllers/api/documents.da
 const DocumentsController = require(`../../controllers/api/documents.js`);
 
 const conf = require(`../../conf/conf.json`);
+const csvConf = require(`../../conf/csv.json`);
 
 /* GET Documents */
 router.get(`/`, function (req, res, next) {
@@ -73,6 +74,7 @@ router.post(`/`, function (req, res, next) {
       user: req.user,
       privateKey: req.app.get(`private.key`),
       dataTypes: req.app.get(`dataTypes`),
+      alreadyProcessed: Params.convertToBoolean(req.body.alreadyProcessed),
       mute: Params.convertToBoolean(req.body.mute),
       dataseerML: Params.convertToBoolean(req.body.dataseerML),
       softcite: Params.convertToBoolean(req.body.softcite),
@@ -171,6 +173,7 @@ router.get(`/csv`, function (req, res, next) {
     },
     user: req.user
   };
+  if (!opts.limit || opts.limit > csvConf.limit) opts.limit = csvConf.limit;
   return DocumentsController.all(opts, function (err, result) {
     if (err) {
       console.log(err);
@@ -1184,6 +1187,22 @@ router.get(`/:id/tei/content`, function (req, res, next) {
   });
 });
 
+/* GET TEI of document */
+router.get(`/:id/tei/sentences`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { data: { id: req.params.id }, user: req.user };
+  return DocumentsController.extractTEISentences(opts, function (err, sentences) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = sentences instanceof Error;
+    let result = isError ? file.toString() : sentences;
+    return res.json({ err: isError, res: result });
+  });
+});
+
 /* Update file content BY ID */
 router.put(`/:id/tei/content`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
@@ -1376,11 +1395,12 @@ router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
       return res.status(500).send(conf.errors.internalServerError);
     }
     if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
+    const hasDocumentId = Params.convertToBoolean(req.query.hasDocumentId);
     // Init transaction
     let opts = {
       strict: false,
       data: {
-        id: req.params.id,
+        reportName: hasDocumentId ? `${doc.name} (${doc._id.toString()})` : doc.name,
         organizations: doc.organizations.map(function (item) {
           return item._id.toString();
         })

@@ -377,7 +377,8 @@ Self.checkSentencesBoundingBoxes = function (opts = {}, cb) {
  * @param {object} opts - Options available
  * @param {object} opts.user - Current user
  * @param {object} opts.data - Data available
- * @param {string} opts.data.id - Id of the document
+ * @param {string} opts.data.reportName - Content used for search
+ * @param {string} opts.data.organizations - Organizations of the document
  * @param {string} opts.kind - Kind of report (available values : ASAP or AmNat)
  * @param {boolean} opts.strict - Strict mode (default : true)
  * @param {function} cb - Callback function(err, res) (err: error process OR null, res: document instance OR undefined)
@@ -388,17 +389,18 @@ Self.getGSpreadsheets = function (opts = {}, cb) {
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
   if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
   if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
-  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  if (typeof _.get(opts, `data.reportName`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.data.reportName`));
   if (typeof _.get(opts, `kind`) === `undefined`) return cb(new Error(`Missing required data: opts.kind`));
   if (typeof _.get(opts, `strict`) === `undefined`) return cb(new Error(`Missing required data: opts.kind`));
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (!accessRights.authenticated) return cb(null, new Error(`Unauthorized functionnality`));
-  let id = Params.convertToString(opts.data.id);
+  let reportName = Params.convertToString(opts.data.reportName);
   let organizations = Params.convertToArray(opts.data.organizations, `string`);
   let kind = Params.convertToString(opts.kind);
   let strict = Params.convertToBoolean(opts.strict);
-  return GoogleSheets.getReportFileId(
-    { strict: strict, kind: kind, data: { name: id, organizations: organizations } },
+  return GoogleSheets.getReportFileIds(
+    { strict: strict, kind: kind, data: { name: reportName, organizations: organizations } },
     function (err, res) {
       return cb(err, res);
     }
@@ -918,19 +920,26 @@ Self.upload = function (opts = {}, cb) {
   if (typeof _.get(opts, `dataTypes`) === `undefined`) return cb(new Error(`Missing required data: opts.dataTypes`));
   if (typeof _.get(opts, `privateKey`) === `undefined`) return cb(new Error(`Missing required data: opts.privateKey`));
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
-  if (typeof _.get(opts, `dataseerML`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
-    opts.dataseerML = true;
-  if (typeof _.get(opts, `mergePDFs`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
-    opts.mergePDFs = true;
-  if (typeof _.get(opts, `softcite`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
-    opts.softcite = true;
-  if (typeof _.get(opts, `bioNLP`) === `undefined` || accessRights.isVisitor || accessRights.isStandardUser)
-    opts.bioNLP = true;
-  opts.importDataFromKRT = typeof opts.importDataFromKRT !== `undefined` ? opts.importDataFromKRT : true;
-  opts.deleteDataObjects = !!opts.deleteDataObjects;
   return Self.getUploadParams(opts.data, opts.user, function (err, params) {
     if (err) return cb(err);
     if (params instanceof Error) return cb(null, params);
+    if (params.organizations.length <= 0) return cb(null, new Error(`You must select at least one organization`));
+    if (!accessRights.isAdministrator) {
+      let settings = params.organizations[0].settings.upload;
+      opts.alreadyProcessed = settings.alreadyProcessed;
+      opts.removeResponseToViewerSection = settings.removeResponseToViewerSection;
+      opts.dataseerML = settings.dataseerML;
+      opts.mergePDFs = settings.mergePDFs;
+      opts.mute = settings.mute;
+      opts.softcite = settings.softcite;
+      opts.importDataFromSoftcite = settings.importDataFromSoftcite;
+      opts.ignoreSoftCiteCommandLines = settings.ignoreSoftCiteCommandLines;
+      opts.ignoreSoftCiteSoftware = settings.ignoreSoftCiteSoftware;
+      opts.bioNLP = settings.bioNLP;
+      opts.importDataFromBioNLP = settings.importDataFromBioNLP;
+      opts.importDataFromKRT = settings.importDataFromKRT;
+      opts.deleteDataObjects = settings.deleteDataObjects;
+    }
     return Documents.create(
       {
         locked: opts.data.locked,
@@ -3678,6 +3687,38 @@ Self.updateOrCreateTEIMetadata = function (opts = {}, cb) {
             }
           );
         });
+      });
+    });
+  });
+};
+
+/**
+ * Get the TEI sentences
+ * @param {object} opts - Options available (You must call getUploadParams)
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.id - Document id
+ * @param {object} opts.user - Current user
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: true OR new Error)
+ * @returns {undefined} undefined
+ */
+Self.extractTEISentences = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    if (!doc.tei) return cb(null, new Error(`TEI file not found`));
+    // Read TEI file (containing PDF metadata)
+    return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
+      if (err) return cb(err);
+      return DocumentsFiles.findById(doc.tei).exec(function (err, file) {
+        if (err) return cb(err);
+        if (!file) return cb(null, new Error(`File not found`));
+        // Add metadata in file
+        let sentences = XML.extractTEISentences(XML.load(content.data.toString(DocumentsFilesController.encoding)));
+        return cb(null, sentences);
       });
     });
   });
