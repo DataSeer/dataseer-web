@@ -962,14 +962,12 @@ Self.upload = function (opts = {}, cb) {
               opts.importDataFromBioNLP = settings.importDataFromBioNLP;
               opts.importDataFromKRT = settings.importDataFromKRT;
               opts.deleteDataObjects = settings.deleteDataObjects;
-              console.log(`no admin`, opts);
               return next(null, acc);
             });
           },
           // Get organization
           // Set organization & upload_journal properties
           function (acc, next) {
-            console.log(opts);
             if (params.organizations.length <= 0)
               return next(new Error(`You must select at least one organization`), acc);
             acc.organizations = params.organizations;
