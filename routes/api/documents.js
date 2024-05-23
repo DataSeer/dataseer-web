@@ -1186,6 +1186,22 @@ router.get(`/:id/tei/content`, function (req, res, next) {
   });
 });
 
+/* GET TEI of document */
+router.get(`/:id/tei/sentences`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let opts = { data: { id: req.params.id }, user: req.user };
+  return DocumentsController.extractTEISentences(opts, function (err, sentences) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = sentences instanceof Error;
+    let result = isError ? file.toString() : sentences;
+    return res.json({ err: isError, res: result });
+  });
+});
+
 /* Update file content BY ID */
 router.put(`/:id/tei/content`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);

@@ -3686,6 +3686,38 @@ Self.updateOrCreateTEIMetadata = function (opts = {}, cb) {
 };
 
 /**
+ * Get the TEI sentences
+ * @param {object} opts - Options available (You must call getUploadParams)
+ * @param {object} opts.data - Data available
+ * @param {string} opts.data.id - Document id
+ * @param {object} opts.user - Current user
+ * @param {function} cb - Callback function(err, res) (err: error process OR null, res: true OR new Error)
+ * @returns {undefined} undefined
+ */
+Self.extractTEISentences = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `data`) === `undefined`) return cb(new Error(`Missing required data: opts.data`));
+  if (typeof _.get(opts, `data.id`) === `undefined`) return cb(new Error(`Missing required data: opts.data.id`));
+  return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
+    if (err) return cb(err);
+    if (doc instanceof Error) return cb(null, doc);
+    if (!doc.tei) return cb(null, new Error(`TEI file not found`));
+    // Read TEI file (containing PDF metadata)
+    return DocumentsFilesController.readFile({ data: { id: doc.tei.toString() } }, function (err, content) {
+      if (err) return cb(err);
+      return DocumentsFiles.findById(doc.tei).exec(function (err, file) {
+        if (err) return cb(err);
+        if (!file) return cb(null, new Error(`File not found`));
+        // Add metadata in file
+        let sentences = XML.extractTEISentences(XML.load(content.data.toString(DocumentsFilesController.encoding)));
+        return cb(null, sentences);
+      });
+    });
+  });
+};
+
+/**
  * Extract dataObjects from TEI
  * @param {object} opts - JSON containing all data
  * @param {string} opts.file - JSON containing all data
