@@ -41,5 +41,6 @@
       "expiresIn": 604800
     }
   },
-  "maxFileUploadSize": 262144000
+  "maxFileUploadSize": 52428800,
+  "maxFileUploadErrorMessage": "This file exceeds the upload size limit. Please amend the document by removing excess pages."
 }
