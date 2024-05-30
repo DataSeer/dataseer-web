@@ -1284,11 +1284,11 @@ Self.upload = function (opts = {}, cb) {
             // Process KRT
             if (!params.krt) return next(null, acc);
             // Get buffer
-            return DocumentsFilesController.getFilePath(
+            return DocumentsFilesController.getFileInfo(
               { data: { id: acc.krt.source.toString() } },
-              function (err, filePath) {
+              function (err, file) {
                 if (err) return next(err, acc);
-                return processCSV({ csvFilePath: filePath, hash: acc._id.toString() })
+                return processCSV({ csvFilePath: file.path, mimeType: file.mimetype, hash: acc._id.toString() })
                   .then((result) => {
                     return DocumentsFilesController.upload(
                       {
@@ -2285,6 +2285,14 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
               if (newReuse.toLowerCase() === `reuse`) reuse = true;
             }
             let { URL, DOI, RRID, catalogNumber, CAS, accessionNumber, PID } = extractIdentifiers(identifiers);
+            let sentence = {
+              id: `krt-sentence-${item.line}`,
+              text: item.cells
+                .map(function (e) {
+                  return e.content;
+                })
+                .join(`\n`)
+            };
             let dataObject = DataObjects.create({
               reuse: false,
               dataType: dataType,
@@ -2301,7 +2309,7 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
               reuse: reuse,
               catalogNumber: [].concat(catalogNumber, CAS, accessionNumber).flat().join(` ;`),
               comments: additionalInformation,
-              sentences: [{ id: `krt-sentence-${item.line}`, text: resourceName }]
+              sentences: [sentence]
             });
             if (dataObject.kind !== `reagent`) dataObject.source = ``; // Do not use source for dataObject NOT reagent
             dataObject.document = doc._id.toString();
@@ -2331,7 +2339,7 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
                 reuse: false,
                 catalogNumber: [].concat(catalogNumber, CAS, accessionNumber).flat().join(` ;`),
                 comments: additionalInformation,
-                sentences: [{ id: `krt-sentence-${item.line}`, text: resourceName }]
+                sentences: [sentence]
               });
               results.push(code);
             }
