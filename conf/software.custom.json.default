@@ -3,6 +3,13 @@
   "spreadsheetName": "Spreadsheet name",
   "spreadsheetRange": "Spreadsheet range",
   "settings": {
-    "minRating": 0.70
+    "findSoftwareFromCustomList": {
+      "minRating": 0.70
+    },
+    "extractSoftwareFromText": {
+      "textLengthCoeff": 0.20,
+      "tokensLengthDelta": 1,
+      "minScore": 0.90
+    }
   }
 }

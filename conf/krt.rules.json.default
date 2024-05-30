@@ -44,11 +44,27 @@
       "subType": ""
     },
     "mapping": {
+      "cell line": {
+        "dataType": "lab materials",
+        "subType": "cell line"
+      },
       "antibody": {
         "dataType": "lab materials",
         "subType": "antibodies"
       },
       "chemical, peptide, or recombinant protein": {
+        "dataType": "lab materials",
+        "subType": ""
+      },
+      "chemical": {
+        "dataType": "lab materials",
+        "subType": ""
+      },
+      "peptide": {
+        "dataType": "lab materials",
+        "subType": ""
+      },
+      "recombinant protein": {
         "dataType": "lab materials",
         "subType": ""
       },

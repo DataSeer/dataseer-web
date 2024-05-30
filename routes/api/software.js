@@ -16,6 +16,31 @@ const Software = require(`../../lib/software.js`);
 
 const conf = require(`../../conf/conf.json`);
 
+router.post(`/processText`, function (req, res) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let text = Params.convertToString(req.body.text);
+  let data = Software.extractSoftwareFromText(text);
+  let isError = data instanceof Error;
+  let result = isError ? data.toString() : data;
+  return res.json({
+    err: isError,
+    res: result
+  });
+});
+router.post(`/processSentence`, function (req, res) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  let sentence = req.body.sentence;
+  let data = Software.extractSoftwareFromSentence(sentence);
+  let isError = data instanceof Error;
+  let result = isError ? data.toString() : data;
+  return res.json({
+    err: isError,
+    res: result
+  });
+});
+
 router.get(`/customList`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);

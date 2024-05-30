@@ -1,5 +1,6 @@
 {
   "responseToViewerSection": {
-    "numPagesCoeff": 0.25
+    "numPagesCoeff": 0.33,
+    "tokens": ["manuscript"]
   }
 }

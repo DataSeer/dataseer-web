@@ -130,12 +130,5 @@
         }
       }
     ]
-  },
-  "upload":
-  {
-    "alreadyProcessed": false,
-    "removeResponseToViewerSection": false,
-    "dataseerML": true,
-    "mergePDFs": true
   }
 }
