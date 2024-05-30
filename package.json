@@ -20,7 +20,7 @@
     "cheerio": "^1.0.0-rc.9",
     "cookie": "^0.4.0",
     "cookie-parser": "~1.4.4",
-    "csv-parser": "^3.0.0",
+    "csv-parse": "^5.5.6",
     "date-and-time": "^1.0.1",
     "debug": "~2.6.9",
     "docx-templates": "^4.7.0",
@@ -42,6 +42,7 @@
     "lens": "github:elifesciences/lens#2.0.0",
     "md5": "^2.3.0",
     "method-override": "^3.0.0",
+    "mime": "^4.0.3",
     "minhash": "^0.0.9",
     "mongodb": "^3.6.6",
     "mongoose": "^5.12.14",
@@ -63,7 +64,8 @@
     "serve-favicon": "^2.5.0",
     "string-similarity": "^4.0.4",
     "tesseract.js": "^2.1.5",
-    "url-join": "^4.0.1"
+    "url-join": "^4.0.1",
+    "xlsx": "^0.18.5"
   },
   "description": "Repository of the dataseer-web app",
   "main": "./bin/www",
