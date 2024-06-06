@@ -1341,8 +1341,9 @@ Self.upload = function (opts = {}, cb) {
                     );
                   })
                   .catch((error) => {
-                    console.error(`Error:`, error);
-                    return next(null, acc);
+                    if (error.code === `CSV_INVALID_CLOSING_QUOTE`)
+                      return next(new Error(`Invalid delimiter (comma for .csv, tab for .tsv)`), acc);
+                    return next(error, acc);
                   });
                 // Guess which kind of file it is to call the great function
               }
