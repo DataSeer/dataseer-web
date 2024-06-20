@@ -86,7 +86,8 @@ router.post(`/`, function (req, res, next) {
       importDataFromSoftcite: Params.convertToBoolean(req.body.importDataFromSoftcite),
       ignoreSoftCiteCommandLines: Params.convertToBoolean(req.body.ignoreSoftCiteCommandLines),
       ignoreSoftCiteSoftware: Params.convertToBoolean(req.body.ignoreSoftCiteSoftware),
-      removeResponseToViewerSection: Params.convertToBoolean(req.body.removeResponseToViewerSection)
+      removeResponseToViewerSection: Params.convertToBoolean(req.body.removeResponseToViewerSection),
+      refreshDataObjectsSuggestedProperties: Params.convertToBoolean(req.body.refreshDataObjectsSuggestedProperties)
     },
     function (err, data) {
       if (err) {
@@ -425,6 +426,33 @@ router.delete(`/:id/dataObjects`, function (req, res, next) {
     });
     let opts = { data: data, user: req.user };
     return DocumentsController.deleteDataObjects(opts, function (err, data) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send(conf.errors.internalServerError);
+      }
+      let isError = data instanceof Error;
+      let result = isError ? data.toString() : data;
+      return res.json({ err: isError, res: result });
+    });
+  });
+});
+
+/* Refresh suggested properties */
+router.post(`/:id/dataObjects/refreshSuggestedProperties`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user, AccountsManager.match.all);
+  if (!accessRights.authenticated || accessRights.isVisitor || accessRights.isStandardUser)
+    return res.status(401).send(conf.errors.unauthorized);
+  return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let opts = {
+      document: doc,
+      saveDocument: Params.convertToBoolean(req.body.saveDocument),
+      user: req.user
+    };
+    return DocumentsController.refreshDataObjectsSuggestedProperties(opts, function (err, data) {
       if (err) {
         console.log(err);
         return res.status(500).send(conf.errors.internalServerError);
