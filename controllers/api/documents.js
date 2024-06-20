@@ -2392,13 +2392,18 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
             if (!jsonData.mentions || !Array.isArray(jsonData.mentions)) return cb(null, software);
             for (let i = 0; i < jsonData.mentions.length; i++) {
               let mention = jsonData.mentions[i];
+              let text = mention[`context`] || ``;
               let name = mention[`software-name`]?.normalizedForm || ``;
-              let version = mention[`version`]?.normalizedForm || ``;
-              let url = mention[`url`]?.normalizedForm || ``;
+              let rawName = mention[`software-name`]?.rawForm || ``;
+              let extractedVersion = Software.extractVersion(text, rawName);
+              let checkedVersion = Software.extractVersion(mention[`version`]?.normalizedForm, rawName); // If version can't be extract, probably a not correct version
+              let version = !!checkedVersion ? checkedVersion : extractedVersion || ``;
+              let extractedURL = Software.extractURL(text, rawName);
+              let checkedURL = Software.extractURL(mention[`url`]?.normalizedForm, rawName); // If URL can't be extract, probably a not correct URL
+              let url = !!checkedURL ? checkedURL : extractedURL || ``;
               let id = `${name.toLowerCase()}`;
               let identifier = `${name}${version ? ` ${version}` : ``}`;
               let areas = mention[`software-name`]?.boundingBoxes || [];
-              let text = mention[`context`] || ``;
               for (let j = 0; j < areas.length; j++) {
                 let item = areas[j];
                 if (typeof item.p !== `number`) return;
