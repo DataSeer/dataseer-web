@@ -53,6 +53,7 @@ const BioNLP = require(`../../lib/bioNLP.js`);
 const DataObjects = require(`../../lib/dataObjects.js`);
 const { processCSV, extractIdentifiers } = require(`../../lib/krt.js`);
 const Software = require(`../../lib/software.js`);
+const Scicrunch = require(`../../lib/scicrunch.js`);
 
 const conf = require(`../../conf/conf.json`);
 const uploadConf = require(`../../conf/upload.json`);
@@ -962,6 +963,7 @@ Self.upload = function (opts = {}, cb) {
               opts.importDataFromBioNLP = settings.importDataFromBioNLP;
               opts.importDataFromKRT = settings.importDataFromKRT;
               opts.deleteDataObjects = settings.deleteDataObjects;
+              opts.refreshDataObjectsSuggestedProperties = settings.refreshDataObjectsSuggestedProperties;
               return next(null, acc);
             });
           },
@@ -1572,6 +1574,18 @@ Self.upload = function (opts = {}, cb) {
               if (ok instanceof Error) return next(ok, acc);
               return next(null, acc);
             });
+          },
+          // Populate suggested properties of DataObjects
+          function (acc, next) {
+            if (!opts.refreshDataObjectsSuggestedProperties) return next(null, acc);
+            return Self.refreshDataObjectsSuggestedProperties(
+              { user: opts.user, document: acc, saveDocument: true },
+              function (err, res) {
+                if (err) return next(err, acc);
+                if (res instanceof Error) return next(res, acc);
+                return next(null, acc);
+              }
+            );
           },
           // Delete DataObjects
           function (acc, next) {
@@ -2392,13 +2406,18 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
             if (!jsonData.mentions || !Array.isArray(jsonData.mentions)) return cb(null, software);
             for (let i = 0; i < jsonData.mentions.length; i++) {
               let mention = jsonData.mentions[i];
+              let text = mention[`context`] || ``;
               let name = mention[`software-name`]?.normalizedForm || ``;
-              let version = mention[`version`]?.normalizedForm || ``;
-              let url = mention[`url`]?.normalizedForm || ``;
+              let rawName = mention[`software-name`]?.rawForm || ``;
+              let extractedVersion = Software.extractVersion(text, rawName);
+              let checkedVersion = Software.extractVersion(mention[`version`]?.normalizedForm, rawName); // If version can't be extract, probably a not correct version
+              let version = !!checkedVersion ? checkedVersion : extractedVersion || ``;
+              let extractedURL = Software.extractURL(text, rawName);
+              let checkedURL = Software.extractURL(mention[`url`]?.normalizedForm, rawName); // If URL can't be extract, probably a not correct URL
+              let url = !!checkedURL ? checkedURL : extractedURL || ``;
               let id = `${name.toLowerCase()}`;
               let identifier = `${name}${version ? ` ${version}` : ``}`;
               let areas = mention[`software-name`]?.boundingBoxes || [];
-              let text = mention[`context`] || ``;
               for (let j = 0; j < areas.length; j++) {
                 let item = areas[j];
                 if (typeof item.p !== `number`) return;
@@ -3992,7 +4011,14 @@ Self.refreshDataObjects = function (opts = {}, cb) {
       if (mapping instanceof Error) return cb(null, mapping);
       let sort = Self.sortSentencesUsingMapping(mapping);
       return DocumentsDataObjectsController.all(
-        { user: opts.user, data: { documents: [opts.document._id.toString()] } },
+        {
+          user: opts.user,
+          data: {
+            documents: [opts.document._id.toString()],
+            deletedState: [false],
+            limit: 9999
+          }
+        },
         function (err, res) {
           if (err) return cb(err);
           if (res instanceof Error) return cb(null, res);
@@ -4018,6 +4044,132 @@ Self.refreshDataObjects = function (opts = {}, cb) {
           );
         }
       );
+    }
+  );
+};
+
+/**
+ * Refresh dataObjects suggested properties
+ * @param {object} opts - JSON containing all data
+ * @param {object} opts.user - User
+ * @param {string} opts.document - Document
+ * @param {boolean} opts.saveDocument - Save document
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.refreshDataObjectsSuggestedProperties = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts, `document`) === `undefined`) return cb(new Error(`Missing required data: opts.document`));
+  if (typeof _.get(opts, `saveDocument`) === `undefined`) opts.saveDocument = false;
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isModerator) return cb(null, new Error(`Unauthorized functionnality`));
+  return DocumentsDataObjectsController.all(
+    {
+      user: opts.user,
+      data: {
+        documents: [opts.document._id.toString()],
+        deletedState: [false],
+        limit: 9999
+      }
+    },
+    function (err, res) {
+      if (err) return cb(err);
+      if (res instanceof Error) return cb(null, res);
+      if (!res || !Array.isArray(res.data)) return cb(null, new Error(`DataObjects not found`));
+      let results = [];
+      return async.mapSeries(
+        res.data,
+        function (dataObject, next) {
+          if (dataObject.kind !== `code` && dataObject.kind !== `software`) return next();
+          return Self.getDataObjectsSuggestedProperties(dataObject, function (err, res) {
+            let changes = [];
+            if (err) {
+              results.push({ _id: dataObject._id, name: dataObject.name, modified: changes.length > 0, changes });
+              return next(err);
+            }
+            if (!dataObject.suggestedEntity && res.suggestedEntity) {
+              dataObject.suggestedEntity = res.suggestedEntity;
+              changes.push(`suggestedEntity`);
+            }
+            if (!dataObject.suggestedURL && res.suggestedURL) {
+              dataObject.suggestedURL = res.suggestedURL;
+              changes.push(`suggestedURL`);
+            }
+            if (!dataObject.suggestedRRID && res.suggestedRRID) {
+              dataObject.suggestedRRID = res.suggestedRRID;
+              changes.push(`suggestedRRID`);
+            }
+            results.push({ _id: dataObject._id, name: dataObject.name, ...res, modified: changes.length > 0, changes });
+            if (!opts.saveDocument) return next();
+            return DocumentsDataObjectsController.update(
+              { user: opts.user, dataObject: dataObject, document: opts.document },
+              function (err, res) {
+                return next(err);
+              }
+            );
+          });
+        },
+        function (err) {
+          if (err) return cb(err);
+          return cb(null, results);
+        }
+      );
+    }
+  );
+};
+
+/**
+ * Get dataObjects suggested properties
+ * @param {object} dataObject - JSON containing all data
+ * @param {function} cb - Callback function(err, res) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.getDataObjectsSuggestedProperties = function (dataObject, cb) {
+  if (typeof dataObject.name !== `string` || dataObject.name === ``) return cb(null, {});
+  let customResults = Software.findSoftwareFromCustomList(dataObject.name);
+  if (Array.isArray(customResults) && customResults.length > 0) {
+    let first = customResults.sort(function (a, b) {
+      return b.rating >= a.rating;
+    })[0];
+    return cb(null, {
+      from: `CustomList`,
+      suggestedEntity: first.suggestedEntity,
+      suggestedURL: first.suggestedURL,
+      suggestedRRID: first.suggestedRRID,
+      RRID: first.RRID
+    });
+  }
+  return Scicrunch.searchEntity(
+    {
+      kind: dataObject.kind,
+      entity: dataObject.name
+    },
+    function (err, res) {
+      if (err || res instanceof Error) return cb(null, {});
+      let bestResult = {};
+      // Try to get it using dataObject kind or dataType/subType
+      if (dataObject.kind === `code` || dataObject.kind === `software`) {
+        if (Array.isArray(res.tool) && res.tool.length > 0) bestResult = res.tool[0];
+      } else if (dataObject.dataType === `lab materials` && dataObject.subType === `cell line`) {
+        if (Array.isArray(res.cellLine) && res.cellLine.length > 0) bestResult = res.cellLine[0];
+      } else if (dataObject.dataType === `lab materials` && dataObject.subType === `plasmid`) {
+        if (Array.isArray(res.plasmid) && res.plasmid.length > 0) bestResult = res.plasmid[0];
+      } else if (dataObject.dataType === `lab materials` && dataObject.subType === `organism`) {
+        if (Array.isArray(res.organism) && res.organism.length > 0) bestResult = res.organism[0];
+      } else if (dataObject.dataType === `lab materials` && dataObject.subType === `antibodies`) {
+        if (Array.isArray(res.antibody) && res.antibody.length > 0) bestResult = res.antibody[0];
+      } else if (dataObject.dataType === `lab materials` && dataObject.subType === `tools`) {
+        if (Array.isArray(res.tool) && res.tool.length > 0) bestResult = res.tool[0];
+      }
+      // Default case
+      if (typeof bestResult === `undefined`) {
+        for (let key in res) {
+          if (Array.isArray(res[key]) && res[key].length > 0) bestResult = res[key][0];
+        }
+      }
+      if (Object.keys(bestResult).length > 0) bestResult.from = `SciScore`;
+      return cb(null, bestResult);
     }
   );
 };
@@ -5059,7 +5211,7 @@ Self.delete = function (opts = {}, cb) {
   if (typeof _.get(opts, `user._id`) === `undefined`) return cb(new Error(`Missing required data: opts.user._id`));
   let accessRights = AccountsManager.getAccessRights(opts.user, AccountsManager.match.all);
   if (!accessRights.authenticated && !opts.force) return cb(null, new Error(`Unauthorized functionnality`));
-  return Self.get({ data: { id: opts.data.id }, user: opts.user }, function (err, doc) {
+  return Self.get({ data: { id: opts.data.id, dataObjects: true }, user: opts.user }, function (err, doc) {
     if (err) return cb(err);
     if (doc instanceof Error) return cb(null, doc);
     let actions = [
@@ -5110,7 +5262,13 @@ Self.delete = function (opts = {}, cb) {
       },
       function (callback) {
         return DocumentsDataObjectsController.all(
-          { user: opts.user, data: { documents: [doc._id] } },
+          {
+            user: opts.user,
+            data: {
+              documents: [doc._id],
+              limit: doc.dataObjects.current.length + doc.dataObjects.extracted.length + doc.dataObjects.deleted.length
+            }
+          },
           function (err, res) {
             if (err) return callback(err);
             if (res instanceof Error) return callback(null, res);

@@ -36,6 +36,7 @@ const Settings = new mongoose.Schema(
       mute: { type: Boolean, default: false },
       mergePDFs: { type: Boolean, default: true },
       importDataFromKRT: { type: Boolean, default: true },
+      refreshDataObjectsSuggestedProperties: { type: Boolean, default: true },
       deleteDataObjects: { type: Boolean, default: true }
     }
   },
