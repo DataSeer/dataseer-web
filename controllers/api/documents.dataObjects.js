@@ -723,6 +723,8 @@ Self.all = function (opts = {}, cb) {
   let limit = Params.convertToInteger(opts.data.limit);
   let skip = Params.convertToInteger(opts.data.skip);
   let documents = Params.convertToArray(opts.data.documents, `string`);
+  let extractedState = Params.convertToArray(opts.data.extractedState, `boolean`);
+  let deletedState = Params.convertToArray(opts.data.deletedState, `boolean`);
   let populate = typeof opts.data.populate !== `object` ? {} : opts.data.populate;
   let query = {};
   // Set default value
@@ -730,10 +732,12 @@ Self.all = function (opts = {}, cb) {
   if (typeof documents === `undefined`) documents = [];
   if (typeof limit === `undefined` || limit <= 0) limit = 20;
   if (typeof skip === `undefined` || skip < 0) skip = 0;
+  if (typeof extractedState !== `undefined`) query.extracted = { $in: extractedState };
+  if (typeof deletedState !== `undefined`) query.deleted = { $in: deletedState };
   // Set filters
   if (ids.length > 0) query._id = { $in: ids };
   if (documents.length > 0) query.document = { $in: documents };
-  let params = { ids, limit, skip, documents };
+  let params = { ids, limit, skip, documents, extractedState, deletedState };
   let transaction = DocumentsDataObjects.find(query).skip(skip).limit(limit);
   if (populate.document) transaction.populate(`document`);
   return transaction.exec(function (err, dataObjects) {
