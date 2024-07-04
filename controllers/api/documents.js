@@ -2147,7 +2147,11 @@ Self.refreshKRT = function (opts = {}, cb) {
                     y: krtData.pages.height - item.y,
                     w: item.width,
                     h: item.height,
-                    text: item.cells[columnIndexes[`ResourceName`]].content
+                    text: item.cells
+                      .map(function (e) {
+                        return e.content;
+                      })
+                      .join(`\n`)
                   };
                 });
               let outpout = XML.addSentences(xmlString, newSentences, `krt`);
@@ -4116,7 +4120,7 @@ Self.refreshDataObjectsSuggestedProperties = function (opts = {}, cb) {
       return async.mapSeries(
         res.data,
         function (dataObject, next) {
-          if (dataObject.kind !== `code` && dataObject.kind !== `software`) return next();
+          if (dataObject.kind !== `software`) return next();
           return Self.getDataObjectsSuggestedProperties(dataObject, function (err, res) {
             let changes = [];
             if (err) {
