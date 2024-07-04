@@ -9,7 +9,7 @@
     "DS": "GOOGLE_ID"
   },
   "folders": {
-    "Org": "GOOGLE_ID",
-    "DS": "GOOGLE_ID"
+    "Org": { "default": "GOOGLE_ID" },
+    "DS": { "default": "GOOGLE_ID" }
   }
 }
