@@ -481,7 +481,7 @@ router.put(`/:id/dataObjects/metadata`, function (req, res, next) {
 });
 
 /* POST get changes */
-router.post(`/dataObjects/changes`, function (req, res, next) {
+router.post(`/dataObjects/changes/csv`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
@@ -510,6 +510,35 @@ router.post(`/dataObjects/changes`, function (req, res, next) {
       [`Content-Disposition`, `attachment; filename=changes.csv`]
     ]);
     return res.end(DocumentsController.formatDataObjectsChangesToCSV(result));
+  });
+});
+
+/* POST get changes */
+router.post(`/dataObjects/changes/gSpreadsheets`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  // Init transaction
+  let opts = {
+    data: {
+      documents: Params.convertToArray(req.body.documents, `string`),
+      accounts: {
+        trusted: Params.convertToArray(req.body.trustedAccounts, `string`),
+        untrusted: Params.convertToArray(req.body.untrustedAccounts, `string`)
+      },
+      updatedBefore: Params.convertToDate(req.body.updatedBefore),
+      updatedAfter: Params.convertToDate(req.body.updatedAfter)
+    },
+    user: req.user
+  };
+  return DocumentsController.buildGSpreadsheetsFromDSLogs(opts, function (err, data) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    let isError = data instanceof Error;
+    let result = isError ? data.toString() : data;
+    if (isError) return res.status(404).send(conf.errors.notFound);
+    return res.json({ err: isError, res: result });
   });
 });
 
@@ -1338,36 +1367,6 @@ router.post(`/reports/gSpreadsheets/changes`, function (req, res, next) {
       new: Params.convertToString(req.body.new)
     },
     kind: Params.convertToString(req.body.kind),
-    user: req.user
-  };
-  return DocumentsController.getGSpreadsheetsChanges(opts, function (err, data) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    let isError = data instanceof Error;
-    let result = isError ? data.toString() : data;
-    if (isError) return res.json({ err: isError, res: result });
-    res.writeHead(200, [
-      [`Content-Type`, `text/csv`],
-      [`Content-Disposition`, `attachment; filename=reports.changes.csv`]
-    ]);
-    return res.end(DocumentsController.formatDataObjectsChangesFromReportsToCSV(result));
-    // return res.send(JSON.stringify({ err: isError, res: result }, null, 2));
-  });
-});
-
-/* POST SINGLE Document reports/ BY ID */
-router.get(`/reports/gSpreadsheets/changes`, function (req, res, next) {
-  let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.isAdministrator && !accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
-  // Init transaction
-  let opts = {
-    data: {
-      old: Params.convertToString(req.query.old),
-      new: Params.convertToString(req.query.new)
-    },
-    kind: Params.convertToString(req.query.kind),
     user: req.user
   };
   return DocumentsController.getGSpreadsheetsChanges(opts, function (err, data) {

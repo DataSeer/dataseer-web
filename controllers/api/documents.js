@@ -76,8 +76,8 @@ Self.status = {
  * @param {array} documents - List of documents
  * @returns {buffer} buffer
  */
-Self.buildDataObjectsCSV = function (documents) {
-  return CSV.buildDataObjects(documents);
+Self.buildDataObjectsCSV = function (documents, outpout = `buffer`) {
+  return CSV.buildDataObjects(documents, outpout);
 };
 
 /**
@@ -85,8 +85,8 @@ Self.buildDataObjectsCSV = function (documents) {
  * @param {array} changes - List of changes
  * @returns {buffer} buffer
  */
-Self.formatDataObjectsChangesToCSV = function (changes) {
-  return CSV.formatDataObjectsChangesToCSV(changes);
+Self.formatDataObjectsChangesToCSV = function (changes, outpout = `buffer`) {
+  return CSV.formatDataObjectsChangesToCSV(changes, outpout);
 };
 
 /**
@@ -94,8 +94,8 @@ Self.formatDataObjectsChangesToCSV = function (changes) {
  * @param {array} changes - List of changes
  * @returns {buffer} buffer
  */
-Self.formatDataObjectsHistoriesToCSV = function (changes) {
-  return CSV.formatDataObjectsHistoriesToCSV(changes);
+Self.formatDataObjectsHistoriesToCSV = function (changes, outpout = `buffer`) {
+  return CSV.formatDataObjectsHistoriesToCSV(changes, outpout);
 };
 
 /**
@@ -103,8 +103,8 @@ Self.formatDataObjectsHistoriesToCSV = function (changes) {
  * @param {array} changes - List of changes
  * @returns {buffer} buffer
  */
-Self.formatDataObjectsChangesFromReportsToCSV = function (changes) {
-  return CSV.formatDataObjectsChangesFromReportsToCSV(changes);
+Self.formatDataObjectsChangesFromReportsToCSV = function (changes, outpout = `buffer`) {
+  return CSV.formatDataObjectsChangesFromReportsToCSV(changes, outpout);
 };
 
 /**
@@ -472,6 +472,41 @@ Self.getGSpreadsheetsChanges = function (opts = {}, cb) {
       return cb(null, results);
     }
   );
+};
+
+/**
+ * Get changes of a all dataObjects of a given document
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - User
+ * @param {object} opts.data - JSON object containing all data
+ * @param {array} opts.data.documents - Id of documents
+ * @param {objects} opts.data.accounts - All infos about accounts
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.buildGSpreadsheetsFromDSLogs = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  // Check Access Rights
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  return Self.getDataObjectsChanges(opts, function (err, data) {
+    if (err) return cb(err);
+    if (data instanceof Error) return cb(null, data);
+    let csvData = Self.formatDataObjectsChangesToCSV(data, `array`);
+    let todayDate = new Date().toISOString().slice(0, 10);
+    return GoogleSheets.buildChangesFromDSLogs(
+      {
+        filename: `Changes from DS logs (${todayDate})`,
+        kind: `DS_LOGS`,
+        data: csvData
+      },
+      function (err, spreadsheetId) {
+        if (err) return cb(err);
+        return cb(null, spreadsheetId);
+      }
+    );
+  });
 };
 
 /**
@@ -2112,7 +2147,11 @@ Self.refreshKRT = function (opts = {}, cb) {
                     y: krtData.pages.height - item.y,
                     w: item.width,
                     h: item.height,
-                    text: item.cells[columnIndexes[`ResourceName`]].content
+                    text: item.cells
+                      .map(function (e) {
+                        return e.content;
+                      })
+                      .join(`\n`)
                   };
                 });
               let outpout = XML.addSentences(xmlString, newSentences, `krt`);
@@ -4081,7 +4120,7 @@ Self.refreshDataObjectsSuggestedProperties = function (opts = {}, cb) {
       return async.mapSeries(
         res.data,
         function (dataObject, next) {
-          if (dataObject.kind !== `code` && dataObject.kind !== `software`) return next();
+          if (dataObject.kind !== `software`) return next();
           return Self.getDataObjectsSuggestedProperties(dataObject, function (err, res) {
             let changes = [];
             if (err) {
