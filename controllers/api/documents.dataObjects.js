@@ -28,6 +28,7 @@ let Self = {};
  * @param {object} opts - JSON containing all data
  * @param {object} opts.user - User
  * @param {boolean} opts.isExtracted - Tag this dataObject as extracted
+ * @param {boolean} opts.autoPopulate - AutoPopulate dataObject
  * @param {object} opts.dataObject - DataObject
  * @param {object} opts.document - Document
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
@@ -53,7 +54,7 @@ Self.create = function (opts = {}, cb) {
         // Create DataObject in MongoDB & set fields in the JSON object
         return DocumentsDataObjects.create({}, function (err, res) {
           if (err) return next(err, acc);
-          let dataObject = DataObjects.create(opts.dataObject);
+          let dataObject = DataObjects.create(opts.dataObject, opts.autoPopulate);
           // Override these values
           dataObject._id = res._id.toString();
           dataObject.document = acc.document._id.toString();
@@ -145,6 +146,7 @@ Self.create = function (opts = {}, cb) {
  * @param {object} opts.user - User
  * @param {object} opts.dataObject - DataObject
  * @param {object} opts.document - Document
+ * @param {boolean} opts.autoPopulate - AutoPopulate dataObject
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -169,7 +171,7 @@ Self.update = function (opts = {}, cb) {
           if (err) return next(err, acc);
           if (!item) return next(new Error(`DataObject not found`), acc);
           let save = item.toJSON();
-          let dataObject = DataObjects.create(opts.dataObject);
+          let dataObject = DataObjects.create(opts.dataObject, opts.autoPopulate);
           // Override these values
           dataObject._id = save._id.toString();
           dataObject.dataInstanceId = save.dataInstanceId;
