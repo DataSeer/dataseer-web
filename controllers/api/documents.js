@@ -1478,7 +1478,8 @@ Self.upload = function (opts = {}, cb) {
                       dataObject: item,
                       isExtracted: true,
                       isDeleted: false,
-                      saveDocument: false
+                      saveDocument: false,
+                      autoPopulate: true
                     };
                     d.dataObject.document = acc._id.toString();
                     return d;
@@ -3878,6 +3879,7 @@ Self.updateDataObjectsMetadata = function (opts = {}, cb) {
  * -> item.isExtracted
  * -> item.dataObject
  * -> item.document
+ * -> item.autoPopulate
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -3894,7 +3896,13 @@ Self.addDataObjects = function (opts = {}, cb) {
     [],
     function (acc, item, next) {
       return DocumentsDataObjectsController.create(
-        { user: opts.user, isExtracted: item.isExtracted, dataObject: item.dataObject, document: item.document },
+        {
+          user: opts.user,
+          isExtracted: item.isExtracted,
+          dataObject: item.dataObject,
+          document: item.document,
+          autoPopulate: item.autoPopulate
+        },
         function (err, dataObject) {
           if (err) return next(err, acc);
           if (dataObject instanceof Error) return next(dataObject, acc);
@@ -3931,6 +3939,7 @@ Self.addDataObjects = function (opts = {}, cb) {
  * -> item.isExtracted
  * -> item.dataObject
  * -> item.document
+ * -> item.autoPopulate
  * @param {function} cb - Callback function(err, res) (err: error process OR null)
  * @returns {undefined} undefined
  */
@@ -3947,7 +3956,13 @@ Self.updateDataObjects = function (opts = {}, cb) {
     [],
     function (acc, item, next) {
       return DocumentsDataObjectsController.update(
-        { user: opts.user, isExtracted: item.isExtracted, dataObject: item.dataObject, document: item.document },
+        {
+          user: opts.user,
+          isExtracted: item.isExtracted,
+          dataObject: item.dataObject,
+          document: item.document,
+          autoPopulate: item.autoPopulate
+        },
         function (err, dataObject) {
           if (err) return next(err, acc);
           if (dataObject instanceof Error) return next(dataObject, acc);
