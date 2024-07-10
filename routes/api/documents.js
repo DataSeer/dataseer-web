@@ -362,7 +362,14 @@ router.post(`/:id/dataObjects`, function (req, res, next) {
     if (!req.body.dataObjects || !Array.isArray(req.body.dataObjects))
       return res.json({ err: isError, res: `dataObjects must be an Array` });
     let data = req.body.dataObjects.map(function (item) {
-      return { document: doc, dataObject: item, isExtracted: false, isDeleted: false, saveDocument: true };
+      return {
+        document: doc,
+        dataObject: item,
+        isExtracted: false,
+        isDeleted: false,
+        saveDocument: true,
+        autoPopulate: !(req.body.autoPopulate === false) // true by default on create
+      };
     });
     let opts = { data: data, user: req.user };
     return DocumentsController.addDataObjects(opts, function (err, data) {
@@ -392,7 +399,14 @@ router.put(`/:id/dataObjects`, function (req, res, next) {
     if (!req.body.dataObjects || !Array.isArray(req.body.dataObjects))
       return res.json({ err: isError, res: `dataObjects must be an Array` });
     let data = req.body.dataObjects.map(function (item) {
-      return { document: doc, dataObject: item, isExtracted: false, isDeleted: false, saveDocument: true };
+      return {
+        document: doc,
+        dataObject: item,
+        isExtracted: false,
+        isDeleted: false,
+        saveDocument: true,
+        autoPopulate: !!req.body.autoPopulate // true by default on create
+      };
     });
     let opts = { data: data, user: req.user };
     return DocumentsController.updateDataObjects(opts, function (err, data) {
