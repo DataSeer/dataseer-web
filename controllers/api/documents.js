@@ -2369,7 +2369,7 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
             if (dataObject.kind !== `reagent`) dataObject.source = ``; // Do not use source for dataObject NOT reagent
             dataObject.document = doc._id.toString();
             results.push(dataObject);
-            let softwareFound = Software.findSoftwareFromCustomList(dataObject.name);
+            let softwareFound = Software.findFromCustomList(dataObject.name);
             let isCommandLine = false;
             if (
               Array.isArray(softwareFound) &&
@@ -2523,7 +2523,7 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
                 s.sentences.filter(function (e) {
                   return e.match;
                 }).length > 0;
-              let softwareFound = Software.findSoftwareFromCustomList(s.name);
+              let softwareFound = Software.findFromCustomList(s.name);
               let isCommandLine = false;
               if (
                 Array.isArray(softwareFound) &&
@@ -4181,7 +4181,7 @@ Self.refreshDataObjectsSuggestedProperties = function (opts = {}, cb) {
  */
 Self.getDataObjectsSuggestedProperties = function (dataObject, cb) {
   if (typeof dataObject.name !== `string` || dataObject.name === ``) return cb(null, {});
-  let customResults = Software.findSoftwareFromCustomList(dataObject.name);
+  let customResults = Software.findFromCustomList(dataObject.name);
   if (Array.isArray(customResults) && customResults.length > 0) {
     let first = customResults.sort(function (a, b) {
       return b.rating >= a.rating;
