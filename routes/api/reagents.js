@@ -13,8 +13,10 @@ const async = require(`async`);
 const AccountsManager = require(`../../lib/accounts.js`);
 const Params = require(`../../lib/params.js`);
 const Reagents = require(`../../lib/reagents.js`);
+const Url = require(`../../lib/url.js`);
 
 const conf = require(`../../conf/conf.json`);
+const customListConf = require(`../../conf/reagents.custom.json`);
 
 router.post(`/processText`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
@@ -47,6 +49,12 @@ router.get(`/customList`, function (req, res) {
   let reagents = req.app.get(`Reagents.customList`);
   if (!Array.isArray(reagents)) return res.json([]);
   return res.json(reagents);
+});
+
+router.get(`/customList/source`, function (req, res) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  return res.redirect(Url.build(`/spreadsheets/d/${customListConf.fileId}`, {}, `https://docs.google.com/`));
 });
 
 router.post(`/customList/find`, function (req, res) {
