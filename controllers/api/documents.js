@@ -58,6 +58,8 @@ const Scicrunch = require(`../../lib/scicrunch.js`);
 const conf = require(`../../conf/conf.json`);
 const uploadConf = require(`../../conf/upload.json`);
 const ASAPAuthorsConf = require(`../../conf/authors.ASAP.json`);
+const changesLogsConf = require(`../../conf/changes.logs.json`);
+const changesReportsConf = require(`../../conf/changes.reports.json`);
 const reportsConf = require(`../../conf/reports.json`);
 const bioNLPConf = require(`../../conf/bioNLP.json`);
 const krtRules = require(`../../conf/krt.rules.json`);
@@ -428,8 +430,10 @@ Self.getGSpreadsheetsChanges = function (opts = {}, cb) {
   if (typeof _.get(opts, `data.new`) === `undefined`) return cb(new Error(`Missing required data: opts.data.new`));
   let kind = _.get(opts, `kind`);
   if (typeof kind === `undefined`) return cb(Error(`Missing required data: opts.kind`));
-  if (Object.keys(reportsConf.templates).indexOf(kind) === -1)
-    return cb(Error(`Invalid required data: opts.kind must be ${Object.keys(reportsConf.templates).join(`, `)}`));
+  if (Object.keys(changesReportsConf.templates).indexOf(kind) === -1)
+    return cb(
+      Error(`Invalid required data: opts.kind must be ${Object.keys(changesReportsConf.templates).join(`, `)}`)
+    );
   let accessRights = AccountsManager.getAccessRights(opts.user);
   if (!accessRights.isAdministrator && !accessRights.isModerator)
     return cb(null, new Error(`Unauthorized functionnality`));
@@ -479,34 +483,163 @@ Self.getGSpreadsheetsChanges = function (opts = {}, cb) {
  * @param {object} opts - JSON object containing all data
  * @param {object} opts.user - User
  * @param {object} opts.data - JSON object containing all data
- * @param {array} opts.data.documents - Id of documents
- * @param {objects} opts.data.accounts - All infos about accounts
+ * @param {array} opts.data.kind - Selected organization
  * @param {function} cb - Callback function(err) (err: error process OR null)
  * @returns {undefined} undefined
  */
-Self.buildGSpreadsheetsFromDSLogs = function (opts = {}, cb) {
+Self.buildGSpreadsheetsChanges = function (opts = {}, cb) {
   // Check all required data
   if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts.data, `kind`) === `undefined`) return cb(new Error(`Missing required data: opts.data.kind`));
+  if (typeof _.get(opts.data, `config`) === `undefined`)
+    return cb(new Error(`Missing required data: opts.data.config`));
   // Check Access Rights
   let accessRights = AccountsManager.getAccessRights(opts.user);
   if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
-  return Self.getDataObjectsChanges(opts, function (err, data) {
-    if (err) return cb(err);
-    if (data instanceof Error) return cb(null, data);
-    let csvData = Self.formatDataObjectsChangesToCSV(data, `array`);
-    let todayDate = new Date().toISOString().slice(0, 10);
-    return GoogleSheets.buildChangesFromDSLogs(
-      {
-        filename: `Changes from DS logs (${todayDate})`,
-        kind: `DS_LOGS`,
-        data: csvData
-      },
-      function (err, spreadsheetId) {
+  let config = _.get(opts.data, `config`);
+  let kind = _.get(opts.data, `kind`);
+  if (typeof config === `undefined`) return cb(Error(`Missing required data: opts.config`));
+  if (config !== `DS_LOGS` && config !== `ASAP_REPORTS`)
+    return cb(Error(`Invalid required data: opts.config must be "DS_LOGS" or "ASAP_REPORTS"`));
+  if (config === `DS_LOGS`) return Self.buildGSpreadsheetsChangesFromDSLogs(opts, cb);
+  return Self.buildGSpreadsheetsChangesFromASAPReports(opts, cb);
+};
+
+/**
+ * Get changes of a all dataObjects of a given document
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - User
+ * @param {object} opts.data - JSON object containing all data
+ * @param {array} opts.data.kind - Selected organization
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.buildGSpreadsheetsChangesFromDSLogs = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts.data, `kind`) === `undefined`) return cb(new Error(`Missing required data: opts.data.kind`));
+  // Check Access Rights
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  return GoogleSheets.getChangesConfData(
+    {
+      config: `DS_LOGS`,
+      kind: opts.data.kind
+    },
+    function (err, documents) {
+      if (err) return cb(err);
+      if (documents instanceof Error) return cb(null, documents);
+      let selectedDocuments = documents
+        .filter(function (item) {
+          return item.selected && item._id !== ``;
+        })
+        .map(function (item) {
+          return item._id;
+        });
+      opts.data.documents = selectedDocuments;
+      opts.data.accounts = {
+        trusted: [],
+        untrusted: changesLogsConf.configFiles[opts.data.kind].untrustedAccounts
+      };
+      if (selectedDocuments.length <= 0)
+        return cb(null, new Error(`No document found (at least one documents must be selected)`));
+      return Self.getDataObjectsChanges(opts, function (err, data) {
         if (err) return cb(err);
-        return cb(null, spreadsheetId);
-      }
-    );
-  });
+        if (data instanceof Error) return cb(null, data);
+        let csvData = Self.formatDataObjectsChangesToCSV(data, `array`);
+        let todayDate = new Date().toISOString().slice(0, 10);
+        return GoogleSheets.buildChanges(
+          {
+            filename: `Changes from DS logs (${todayDate})`,
+            config: `DS_LOGS`,
+            kind: opts.data.kind,
+            data: csvData
+          },
+          function (err, spreadsheetId) {
+            if (err) return cb(err);
+            return cb(null, spreadsheetId);
+          }
+        );
+      });
+    }
+  );
+};
+
+/**
+ * Get changes of a all dataObjects of a given document
+ * @param {object} opts - JSON object containing all data
+ * @param {object} opts.user - User
+ * @param {object} opts.data - JSON object containing all data
+ * @param {array} opts.data.kind - Selected kind
+ * @param {function} cb - Callback function(err) (err: error process OR null)
+ * @returns {undefined} undefined
+ */
+Self.buildGSpreadsheetsChangesFromASAPReports = function (opts = {}, cb) {
+  // Check all required data
+  if (typeof _.get(opts, `user`) === `undefined`) return cb(new Error(`Missing required data: opts.user`));
+  if (typeof _.get(opts.data, `kind`) === `undefined`) return cb(new Error(`Missing required data: opts.data.kind`));
+  // Check Access Rights
+  let accessRights = AccountsManager.getAccessRights(opts.user);
+  if (!accessRights.isAdministrator) return cb(null, new Error(`Unauthorized functionnality`));
+  return GoogleSheets.getChangesConfData(
+    {
+      config: `ASAP_REPORTS`,
+      kind: opts.data.kind
+    },
+    function (err, documents) {
+      if (err) return cb(err);
+      if (documents instanceof Error) return cb(null, documents);
+      let selectedDocuments = documents.filter(function (item) {
+        return item.selected && item.hasReport && !item.sameReport;
+      });
+      let data = [];
+      let headers = [];
+      return async.mapSeries(
+        selectedDocuments,
+        function (item, next) {
+          return Self.getGSpreadsheetsChanges(
+            {
+              data: {
+                old: item.old,
+                new: item.new
+              },
+              kind: opts.data.kind,
+              user: opts.user
+            },
+            function (err, res) {
+              if (err) return next(err);
+              if (res instanceof Error) return next(res);
+              let csvData = Self.formatDataObjectsChangesFromReportsToCSV(res, `array`);
+              if (Array.isArray(csvData) && csvData.length > 1) {
+                headers = [csvData[0]];
+                data = data.concat(csvData.slice(1));
+              }
+              return next();
+            }
+          );
+        },
+        function (err) {
+          if (err) return cb(err);
+          if (data instanceof Error) return cb(null, data);
+          if (data.length <= 0)
+            return cb(null, new Error(`No document found (at least one documents must be selected)`));
+          let todayDate = new Date().toISOString().slice(0, 10);
+          return GoogleSheets.buildChanges(
+            {
+              filename: `Changes from ASAP Reports (${todayDate})`,
+              config: `ASAP_REPORTS`,
+              kind: opts.data.kind,
+              data: headers.concat(data)
+            },
+            function (err, spreadsheetId) {
+              if (err) return cb(err);
+              return cb(null, spreadsheetId);
+            }
+          );
+        }
+      );
+    }
+  );
 };
 
 /**

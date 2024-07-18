@@ -21,6 +21,8 @@ const DocumentsController = require(`../../controllers/api/documents.js`);
 
 const conf = require(`../../conf/conf.json`);
 const csvConf = require(`../../conf/csv.json`);
+const changesLogsConf = require(`../../conf/changes.logs.json`);
+const changesReportsConf = require(`../../conf/changes.reports.json`);
 
 /* GET Documents */
 router.get(`/`, function (req, res, next) {
@@ -528,23 +530,18 @@ router.post(`/dataObjects/changes/csv`, function (req, res, next) {
 });
 
 /* POST get changes */
-router.post(`/dataObjects/changes/gSpreadsheets`, function (req, res, next) {
+router.post(`/dataObjects/changes/gSpreadsheets/:kind/:config`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
   // Init transaction
   let opts = {
     data: {
-      documents: Params.convertToArray(req.body.documents, `string`),
-      accounts: {
-        trusted: Params.convertToArray(req.body.trustedAccounts, `string`),
-        untrusted: Params.convertToArray(req.body.untrustedAccounts, `string`)
-      },
-      updatedBefore: Params.convertToDate(req.body.updatedBefore),
-      updatedAfter: Params.convertToDate(req.body.updatedAfter)
+      kind: Params.convertToString(req.params.kind),
+      config: Params.convertToString(req.params.config)
     },
     user: req.user
   };
-  return DocumentsController.buildGSpreadsheetsFromDSLogs(opts, function (err, data) {
+  return DocumentsController.buildGSpreadsheetsChanges(opts, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
@@ -554,6 +551,23 @@ router.post(`/dataObjects/changes/gSpreadsheets`, function (req, res, next) {
     if (isError) return res.status(404).send(conf.errors.notFound);
     return res.json({ err: isError, res: result });
   });
+});
+
+router.get(`/dataObjects/changes/gSpreadsheets/:kind/:config/source`, function (req, res) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
+  let config = Params.convertToString(req.params.config);
+  let kind = Params.convertToString(req.params.kind);
+  if (typeof config === `undefined`) return res.status(404).send(`Missing required data: opts.config`);
+  if (config !== `DS_LOGS` && config !== `ASAP_REPORTS`)
+    return res.status(404).send(`Invalid required data: config must be "DS_LOGS" or "ASAP_REPORTS"`);
+  let changesConf = config === `DS_LOGS` ? changesLogsConf : changesReportsConf;
+  if (Object.keys(changesConf.templates).indexOf(kind) === -1)
+    return res.status(404).send(`Invalid required data: kind must be ${Object.keys(changesConf.templates).join(`, `)}`);
+  if (typeof changesConf.configFiles[kind] === `undefined`) return res.status(404).send(conf.errors.notFound);
+  return res.redirect(
+    Url.build(`/spreadsheets/d/${changesConf.configFiles[kind].spreadsheetId}`, {}, `https://docs.google.com/`)
+  );
 });
 
 /* POST get histories */

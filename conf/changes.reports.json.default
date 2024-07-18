@@ -1,0 +1,19 @@
+{
+  "prefix": "conf - ",
+  "configFiles": {
+    "ORG": {
+      "spreadsheetId": "spreadsheetId",
+      "spreadsheetName": "spreadsheetName",
+      "spreadsheetRange": "spreadsheetRange"
+    }
+  },
+  "permissions": {
+    "ORG": { "default": "writer" }
+  },
+  "templates": {
+    "ORG": "GOOGLE ID"
+  },
+  "folders": {
+    "ORG": { "default": "GOOGLE ID" }
+  }
+}
