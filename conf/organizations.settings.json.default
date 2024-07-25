@@ -4,130 +4,166 @@
     "templates":
     [
       {
-        "label": "AmNat",
+        "actions":
+        {
+          "generate":
+          {
+            "enabled": true,
+            "isDefault": true
+          },
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
+          }
+        },
         "enabled": false,
         "isDefault": false,
+        "label": "AmNat"
+      },
+      {
         "actions":
         {
-          "open":
-          {
-            "enabled": true,
-            "isDefault": false
-          },
           "generate":
           {
             "enabled": true,
             "isDefault": true
+          },
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
           }
-        }
-      },
-      {
-        "label": "ASAP",
+        },
         "enabled": true,
         "isDefault": true,
+        "label": "ASAP"
+      },
+      {
         "actions":
         {
-          "open":
-          {
-            "enabled": true,
-            "isDefault": false
-          },
           "generate":
           {
             "enabled": true,
             "isDefault": true
-          }
-        }
-      },
-      {
-        "label": "ASAP - PPMI",
-        "enabled": true,
-        "isDefault": false,
-        "actions":
-        {
+          },
           "open":
           {
             "enabled": true,
             "isDefault": false
-          },
+          }
+        },
+        "enabled": true,
+        "isDefault": false,
+        "label": "ASAP-PPMI"
+      },
+      {
+        "actions":
+        {
           "generate":
           {
             "enabled": true,
             "isDefault": true
-          }
-        }
-      },
-      {
-        "label": "ASAP - GP2",
-        "enabled": true,
-        "isDefault": false,
-        "actions":
-        {
+          },
           "open":
           {
             "enabled": true,
             "isDefault": false
-          },
-          "generate":
-          {
-            "enabled": true,
-            "isDefault": true
           }
-        }
-      },
-      {
-        "label": "bioRxiv",
+        },
         "enabled": true,
         "isDefault": false,
+        "label": "ASAP-GP2"
+      },
+      {
         "actions":
         {
-          "open":
-          {
-            "enabled": true,
-            "isDefault": true
-          },
           "generate":
           {
             "enabled": false,
             "isDefault": false
-          }
-        }
-      },
-      {
-        "label": "DataSeer Generic",
-        "enabled": true,
-        "isDefault": false,
-        "actions":
-        {
-          "open":
-          {
-            "enabled": true,
-            "isDefault": false
           },
-          "generate":
+          "open":
           {
             "enabled": true,
             "isDefault": true
           }
-        }
-      },
-      {
-        "label": "Universal Journal Report",
+        },
         "enabled": true,
         "isDefault": false,
+        "label": "bioRxiv"
+      },
+      {
         "actions":
         {
-          "open":
-          {
-            "enabled": true,
-            "isDefault": false
-          },
           "generate":
           {
             "enabled": true,
             "isDefault": true
+          },
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
           }
-        }
+        },
+        "enabled": true,
+        "isDefault": false,
+        "label": "DataSeer Generic"
+      },
+      {
+        "actions":
+        {
+          "generate":
+          {
+            "enabled": true,
+            "isDefault": true
+          },
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
+          }
+        },
+        "enabled": true,
+        "isDefault": false,
+        "label": "HHMI"
+      },
+      {
+        "actions":
+        {
+          "generate":
+          {
+            "enabled": true,
+            "isDefault": true
+          },
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
+          }
+        },
+        "enabled": true,
+        "isDefault": false,
+        "label": "MJFF Impact Report"
+      },
+      {
+        "actions":
+        {
+          "generate":
+          {
+            "enabled": true,
+            "isDefault": true
+          },
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
+          }
+        },
+        "enabled": true,
+        "isDefault": false,
+        "label": "Universal Journal Report"
       }
     ]
   }
