@@ -2434,6 +2434,7 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
             krtRules.columnsContentRegExp[`Source`].content,
             krtRules.columnsContentRegExp[`Source`].flags
           );
+          let parentLanguageMapping = {};
           for (let i = 0; i < jsonData.lines.length; i++) {
             let item = jsonData.lines[i];
             if (item.isHeader) continue; // Do not process headers
@@ -2512,26 +2513,65 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
               typeof softwareFound[0].isCommandLine !== `undefined`
             )
               isCommandLine = softwareFound[0].isCommandLine;
-            if (dataObject.kind === `software` && krtRules.createCommandLines && isCommandLine) {
-              let code = DataObjects.create({
-                reuse: false,
-                dataType: `code software`,
-                subType: `custom scripts`,
-                cert: `1`,
-                name: resourceName + ` Code`,
-                URL: URL.filter(function (e) {
-                  return !DOI.includes(e);
-                }).join(` ;`),
-                PID: DOI.join(` ;`),
-                DOI: DOI.join(` ;`),
-                RRID: RRID.join(` ;`),
-                source: source,
-                reuse: false,
-                catalogNumber: [].concat(catalogNumber, CAS, accessionNumber).flat().join(` ;`),
-                comments: additionalInformation,
-                sentences: [sentence]
-              });
-              results.push(code);
+            let parentLanguage = ``;
+            if (
+              Array.isArray(softwareFound) &&
+              softwareFound.length > 0 &&
+              typeof softwareFound[0].parentLanguage !== `undefined`
+            )
+              parentLanguage = softwareFound[0].parentLanguage;
+            if (
+              dataObject.kind === `software` &&
+              krtRules.createCommandLines &&
+              (isCommandLine || parentLanguage !== ``)
+            ) {
+              if (parentLanguage === ``) {
+                let code = DataObjects.create({
+                  reuse: false,
+                  dataType: `code software`,
+                  subType: `custom scripts`,
+                  cert: `1`,
+                  name: resourceName + ` Code`,
+                  URL: URL.filter(function (e) {
+                    return !DOI.includes(e);
+                  }).join(` ;`),
+                  PID: DOI.join(` ;`),
+                  DOI: DOI.join(` ;`),
+                  RRID: RRID.join(` ;`),
+                  source: source,
+                  reuse: false,
+                  catalogNumber: [].concat(catalogNumber, CAS, accessionNumber).flat().join(` ;`),
+                  comments: additionalInformation,
+                  sentences: [sentence]
+                });
+                results.push(code);
+              } else {
+                if (typeof parentLanguageMapping[parentLanguage] === `undefined`)
+                  parentLanguageMapping[parentLanguage] = DataObjects.create({
+                    reuse: false,
+                    dataType: `code software`,
+                    subType: `custom scripts`,
+                    cert: `1`,
+                    name: parentLanguage,
+                    URL: URL.filter(function (e) {
+                      return !DOI.includes(e);
+                    }).join(` ;`),
+                    PID: DOI.join(` ;`),
+                    DOI: DOI.join(` ;`),
+                    RRID: RRID.join(` ;`),
+                    source: source,
+                    reuse: false,
+                    catalogNumber: [].concat(catalogNumber, CAS, accessionNumber).flat().join(` ;`),
+                    comments: additionalInformation,
+                    sentences: [sentence]
+                  });
+                else
+                  parentLanguageMapping[parentLanguage].sentences = parentLanguageMapping[
+                    parentLanguage
+                  ].sentences.concat([sentence]);
+              }
+              let parentLanguages = Object.values(parentLanguageMapping);
+              results = results.concat(parentLanguages);
             }
           }
           return cb(null, results);
@@ -2666,7 +2706,15 @@ Self.extractDataFromSoftcite = function (opts = {}, cb) {
                 typeof softwareFound[0].isCommandLine !== `undefined`
               )
                 isCommandLine = softwareFound[0].isCommandLine;
+              let parentLanguage = ``;
+              if (
+                Array.isArray(softwareFound) &&
+                softwareFound.length > 0 &&
+                typeof softwareFound[0].parentLanguage !== `undefined`
+              )
+                parentLanguage = softwareFound[0].parentLanguage;
               s.isCommandLine = isCommandLine;
+              s.parentLanguage = parentLanguage;
               s.mentions = Object.keys(s.mentions);
               s.alreadyExist =
                 codeAndSoftware.filter(function (e) {
@@ -2944,6 +2992,36 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
     return Self.extractDataFromSoftcite(opts, function (err, software) {
       if (err) return cb(err);
       if (software instanceof Error) return cb(null, software);
+      let parentLanguageMapping = {};
+      for (let i = 0; i < software.length; i++) {
+        if (software[i].parentLanguage !== ``) {
+          if (typeof parentLanguageMapping[software[i].parentLanguage] === `undefined`)
+            parentLanguageMapping[software[i].parentLanguage] = {
+              document: doc,
+              dataObject: DataObjects.create({
+                index: software[i].sentences[0].index,
+                reuse: false,
+                dataType: `code software`,
+                subType: `custom scripts`,
+                cert: `0`,
+                name: software[i].parentLanguage,
+                URL: ``,
+                comments: ``,
+                sentences: software[i].sentences.filter(function (e) {
+                  return e.match;
+                })
+              }),
+              isExtracted: true,
+              isDeleted: false,
+              saveDocument: opts.saveDocument
+            };
+          else
+            parentLanguageMapping[software[i].parentLanguage].sentences = parentLanguageMapping[
+              software[i].parentLanguage
+            ].sentences.concat(software[i].sentences);
+        }
+      }
+      let parentLanguages = Object.values(parentLanguageMapping);
       let softCiteCommandLines = opts.ignoreSoftCiteCommandLines
         ? []
         : software
@@ -2951,6 +3029,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
             if (!item.match) return false;
             if (item.alreadyExist) return false;
             if (!item.isCommandLine) return false;
+            if (item.parentLanguage !== ``) return false;
             return true;
           })
           .map(function (item) {
@@ -3011,7 +3090,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
       return Self.addDataObjects(
         {
           user: opts.user,
-          data: softCiteCommandLines.concat(softCiteSoftware)
+          data: softCiteCommandLines.concat(softCiteSoftware, parentLanguages)
         },
         function (err, res) {
           return cb(err, software);
