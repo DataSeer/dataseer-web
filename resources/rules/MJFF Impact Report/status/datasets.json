@@ -1,0 +1,32 @@
+{
+  "5": {
+    "key": 5,
+    "actionRequired": "Yes",
+    "label": "Cite dataset unique identifier in text"
+  },
+  "4": {
+    "key": 4,
+    "actionRequired": "Yes",
+    "label": "Deposit to appropriate repository and cite PID in text"
+  },
+  "3": {
+    "key": 3,
+    "actionRequired": "Yes",
+    "label": "Verify dataset citation"
+  },
+  "2": {
+    "key": 2,
+    "actionRequired": "Optionnal",
+    "label": "Confirmatory and Quality Control datasets are not required to be included in your dataset upload."
+  },
+  "1": {
+    "key": 1,
+    "actionRequired": "Optionnal",
+    "label": "Not required, but recommended to include the representative image/video files in raw format with dataset upload."
+  },
+  "0": {
+    "key": 0,
+    "actionRequired": "No",
+    "label": "Done - Cited correctly"
+  }
+}

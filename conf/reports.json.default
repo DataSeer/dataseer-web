@@ -6,7 +6,8 @@
     "Universal Journal Report": {"default": "reader" },
     "ASAP": { "default": "reader" },
     "ASAP-PPMI": { "default": "reader" },
-    "ASAP-GP2": { "default": "reader" }
+    "ASAP-GP2": { "default": "reader" },
+    "MJFF Impact Report": { "default": "writer" }
   },
   "folders": {
     "HHMI":  { "default": "folderID" },
@@ -15,7 +16,8 @@
     "Universal Journal Report": { "default": "folderID" },
     "ASAP": { "OrganizationID": "folderID", "default": "folderID" },
     "ASAP-PPMI": { "OrganizationID": "folderID", "default": "folderID" },
-    "ASAP-GP2": { "OrganizationID": "folderID", "default": "folderID" }
+    "ASAP-GP2": { "OrganizationID": "folderID", "default": "folderID" },
+    "MJFF Impact Report": { "OrganizationID": "folderID", "default": "folderID" }
   },
   "templates": {
     "HHMI": "folderID",
@@ -24,7 +26,8 @@
     "Universal Journal Report": "folderID",
     "ASAP": "folderID",
     "ASAP-PPMI": "folderID",
-    "ASAP-GP2": "folderID"
+    "ASAP-GP2": "folderID",
+    "MJFF Impact Report": "folderID"
   },
   "settings": {
     "googleAPI": {
@@ -47,6 +50,9 @@
         "timeout": 500
       },
       "ASAP-GP2": {
+        "timeout": 500
+      },
+      "MJFF Impact Report": {
         "timeout": 500
       }
     },
@@ -99,6 +105,13 @@
         "software": false,
         "materials": false,
         "protocols": false
+      },
+      "MJFF Impact Report": {
+        "datasets": false,
+        "code": false,
+        "software": false,
+        "materials": false,
+        "protocols": false
       }
     },
     "dataObjectsLinks": {
@@ -108,34 +121,38 @@
       "Universal Journal Report": false,
       "ASAP": false,
       "ASAP-PPMI": false,
-      "ASAP-GP2": false
+      "ASAP-GP2": false,
+      "MJFF Impact Report": false
     },
     "ROAS": {
-      "HHMI": false, // n/a
+      "HHMI": false,
       "DataSeer Generic": false,
-      "AmNat": false, // n/a
-      "Universal Journal Report": false, // n/a
-      "ASAP": false, // n/a
-      "ASAP-PPMI": false, // n/a
-      "ASAP-GP2": false // n/a
+      "AmNat": false,
+      "Universal Journal Report": false,
+      "ASAP": false,
+      "ASAP-PPMI": false,
+      "ASAP-GP2": false,
+      "MJFF Impact Report": false
     },
     "OSIS": {
       "HHMI": true,
-      "DataSeer Generic": false, // n/a
-      "AmNat": false, // n/a
-      "Universal Journal Report": false, // n/a
-      "ASAP": false, // n/a
-      "ASAP-PPMI": false, // n/a
-      "ASAP-GP2": false // n/a
+      "DataSeer Generic": false,
+      "AmNat": false,
+      "Universal Journal Report": false,
+      "ASAP": false,
+      "ASAP-PPMI": false,
+      "ASAP-GP2": false,
+      "MJFF Impact Report": true
     },
     "authors": {
       "HHMI": false,
       "DataSeer Generic": false,
-      "AmNat": false, // n/a
-      "Universal Journal Report": false, // n/a
-      "ASAP": false, // n/a
-      "ASAP-PPMI": false, // n/a
-      "ASAP-GP2": false // n/a
+      "AmNat": false,
+      "Universal Journal Report": false,
+      "ASAP": false,
+      "ASAP-PPMI": false,
+      "ASAP-GP2": false,
+      "MJFF Impact Report": false
     }
   },
   "prefix": "prefix of the filename (e.g. 'localhost - ' for localhost, 'dev - ' for development, an empty string for production)"

@@ -44,6 +44,7 @@ const Schema = new mongoose.Schema(
     reuse: { type: Boolean, default: false }, // reuse property
     DOI: { type: String, default: `` }, // DOI
     comments: { type: String, default: `` }, // comments
+    associatedReference: { type: String, default: `` }, // associated reference
     // - "Suggested" properties
     suggestedEntity: { type: String, default: `` },
     suggestedURL: { type: String, default: `` },
