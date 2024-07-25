@@ -6,7 +6,7 @@
     "Universal Journal Report": {"default": "reader" },
     "ASAP": { "default": "reader" },
     "ASAP-PPMI": { "default": "reader" },
-    "ASAP-GP2": { "default": "reader" },,
+    "ASAP-GP2": { "default": "reader" },
     "MJFF Impact Report": { "default": "writer" }
   },
   "folders": {
@@ -142,7 +142,7 @@
       "ASAP": false,
       "ASAP-PPMI": false,
       "ASAP-GP2": false,
-      "MJFF Impact Report": false
+      "MJFF Impact Report": true
     },
     "authors": {
       "HHMI": false,

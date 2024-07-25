@@ -686,10 +686,12 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
               document: {
                 id: data.doc._id.toString(),
                 token: data.doc.token,
+                name: data.doc.name,
                 organizations: data.doc.organizations.map(function (item) {
                   return item._id.toString();
                 })
               },
+              preprint: { url: data.doc.HHMI.preprint, doi: data.doc.HHMI.DOI },
               dataTypesInfo: opts.data.dataTypes,
               metadata: {
                 DAS: data.doc.metadata.DAS,
