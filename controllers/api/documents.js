@@ -3016,9 +3016,9 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
               saveDocument: opts.saveDocument
             };
           else
-            parentLanguageMapping[software[i].parentLanguage].sentences = parentLanguageMapping[
+            parentLanguageMapping[software[i].parentLanguage].dataObject.sentences = parentLanguageMapping[
               software[i].parentLanguage
-            ].sentences.concat(software[i].sentences);
+            ].dataObject.sentences.concat(software[i].sentences);
         }
       }
       let parentLanguages = Object.values(parentLanguageMapping);
