@@ -2994,7 +2994,7 @@ Self.importDataFromSoftcite = function (opts = {}, cb) {
       if (software instanceof Error) return cb(null, software);
       let parentLanguageMapping = {};
       for (let i = 0; i < software.length; i++) {
-        if (software[i].parentLanguage !== ``) {
+        if (software[i].match && software[i].parentLanguage !== ``) {
           if (typeof parentLanguageMapping[software[i].parentLanguage] === `undefined`)
             parentLanguageMapping[software[i].parentLanguage] = {
               document: doc,
