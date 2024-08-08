@@ -40,6 +40,7 @@ const hypothesisRouter = require(`./routes/api/hypothesis.js`);
 const orcidRouter = require(`./routes/api/orcid.js`);
 const softwareRouter = require(`./routes/api/software.js`);
 const reagentsRouter = require(`./routes/api/reagents.js`);
+const identifiersRouter = require(`./routes/api/identifiers.js`);
 const sciscoreRouter = require(`./routes/api/sciscore.js`);
 const scicrunchRouter = require(`./routes/api/scicrunch.js`);
 const chartsRouter = require(`./routes/api/charts.js`);
@@ -70,6 +71,7 @@ const OCR = require(`./lib/ocr.js`);
 const ORCID = require(`./lib/orcid.js`);
 const Software = require(`./lib/software.js`);
 const Reagents = require(`./lib/reagents.js`);
+const Identifiers = require(`./lib/identifiers.js`);
 const DataObjects = require(`./lib/dataObjects.js`);
 // mongoose object
 const mongoose = require(`mongoose`);
@@ -139,6 +141,14 @@ db.once(`open`, function () {
           if (err) return next(err);
           app.set(`Reagents.customList`, data);
           console.log(`Custom reagents list initialized`);
+          return next(err);
+        });
+      },
+      function (next) {
+        return Identifiers.refreshCustomList(function (err, data) {
+          if (err) return next(err);
+          app.set(`Identifiers.customList`, data);
+          console.log(`Custom identifiers list initialized`);
           return next(err);
         });
       },
@@ -280,6 +290,7 @@ db.once(`open`, function () {
       app.use(`/api/orcid`, orcidRouter);
       app.use(`/api/software`, softwareRouter);
       app.use(`/api/reagents`, reagentsRouter);
+      app.use(`/api/identifiers`, identifiersRouter);
       app.use(`/api/sciscore`, sciscoreRouter);
       app.use(`/api/scicrunch`, scicrunchRouter);
       app.use(`/api/charts`, chartsRouter);

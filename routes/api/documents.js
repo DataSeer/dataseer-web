@@ -1477,6 +1477,44 @@ router.get(`/:id/reports/gSpreadsheets/:kind`, function (req, res, next) {
 });
 
 /* GET SINGLE Document reports/ BY ID */
+router.get(`/:id/reports/gSpreadsheets/:kind/latest`, function (req, res, next) {
+  let accessRights = AccountsManager.getAccessRights(req.user);
+  if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
+  return DocumentsController.get({ data: { id: req.params.id }, user: req.user }, function (err, doc) {
+    if (err) {
+      console.log(err);
+      return res.status(500).send(conf.errors.internalServerError);
+    }
+    if (!doc || doc instanceof Error) return res.status(404).send(conf.errors.notFound);
+    const hasDocumentId = Params.convertToBoolean(req.query.hasDocumentId);
+    // Init transaction
+    let opts = {
+      strict: false,
+      data: {
+        reportName: hasDocumentId ? `${doc.name} (${doc._id.toString()})` : doc.name,
+        organizations: doc.organizations.map(function (item) {
+          return item._id.toString();
+        })
+      },
+      kind: req.params.kind,
+      user: req.user
+    };
+    return DocumentsController.getGSpreadsheets(opts, function (err, data) {
+      if (err) {
+        console.log(err);
+        return res.status(500).send(conf.errors.internalServerError);
+      }
+      let isError = data instanceof Error;
+      let result = isError ? data.toString() : data;
+      if (isError) return res.status(404).send(conf.errors.notFound);
+      if (result.length <= 0) res.status(404).send(conf.errors.notFound);
+      let latest = result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+      return res.json({ err: isError, res: latest });
+    });
+  });
+});
+
+/* GET SINGLE Document reports/ BY ID */
 router.get(`/:id/reports/html/default`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
