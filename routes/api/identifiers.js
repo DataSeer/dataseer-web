@@ -81,10 +81,7 @@ router.get(`/customList/isIn`, function (req, res) {
   let data = Identifiers.findFromCustomList(name, { contain: contain, minScore: minScore }).length > 0;
   let isError = data instanceof Error;
   let result = isError ? data.toString() : data;
-  return res.json({
-    err: isError,
-    res: result
-  });
+  return res.send(result);
 });
 
 router.post(`/customList/refresh`, function (req, res, next) {
