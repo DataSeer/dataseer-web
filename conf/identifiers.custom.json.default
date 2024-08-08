@@ -1,0 +1,20 @@
+{
+  "fileId": "File ID of the ASAP authors list",
+  "spreadsheets": [
+    {
+      "tag": "tag",
+      "spreadsheetName": "Spreadsheet name",
+      "spreadsheetRange": "Spreadsheet range"
+    }
+  ],
+  "settings": {
+    "findFromCustomList": {
+      "minRating": 0.70
+    },
+    "extractFromText": {
+      "textLengthCoeff": 0.20,
+      "tokensLengthDelta": 1,
+      "minScore": 0.90
+    }
+  }
+}
