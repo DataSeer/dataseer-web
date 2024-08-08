@@ -679,7 +679,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
       if (data instanceof Error) return cb(null, data);
       return GoogleSheets.buildReport(
         {
-          filename: `${data.doc.name} (${opts.data.id})`,
+          filename: `${data.doc.name}`,
           kind: kind,
           data: [
             {
@@ -850,7 +850,7 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
       if (err) return cb(err);
       return GoogleSheets.buildReport(
         {
-          filename: `${name} (${ids.join(`,`)})`,
+          filename: `${name}`,
           kind: kind,
           data: res
         },
