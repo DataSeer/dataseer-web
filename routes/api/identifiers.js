@@ -72,12 +72,12 @@ router.post(`/customList/find`, function (req, res) {
   });
 });
 
-router.post(`/customList/isIn`, function (req, res) {
+router.get(`/customList/isIn`, function (req, res) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
-  let name = Params.convertToString(req.body.name);
-  let contain = Params.convertToBoolean(req.body.contain);
-  let minScore = new Number(req.body.minScore);
+  let name = Params.convertToString(req.query.name);
+  let contain = Params.convertToBoolean(req.query.contain);
+  let minScore = new Number(req.query.minScore);
   let data = Identifiers.findFromCustomList(name, { contain: contain, minScore: minScore }).length > 0;
   let isError = data instanceof Error;
   let result = isError ? data.toString() : data;
