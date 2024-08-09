@@ -62,7 +62,7 @@ router.post(`/customList/find`, function (req, res) {
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
   let name = Params.convertToString(req.body.name);
   let contain = Params.convertToBoolean(req.body.contain);
-  let minScore = new Number(req.body.minScore);
+  let minScore = parseFloat(req.body.minScore);
   let data = Identifiers.findFromCustomList(name, { minScore, contain });
   let isError = data instanceof Error;
   let result = isError ? data.toString() : data;
@@ -77,7 +77,7 @@ router.get(`/customList/isIn`, function (req, res) {
   if (!accessRights.authenticated) return res.status(401).send(conf.errors.unauthorized);
   let name = Params.convertToString(req.query.name);
   let contain = Params.convertToBoolean(req.query.contain);
-  let minScore = new Number(req.query.minScore);
+  let minScore = parseFloat(req.query.minScore);
   let data = Identifiers.findFromCustomList(name, { contain: contain, minScore: minScore }).length > 0;
   let isError = data instanceof Error;
   let result = isError ? data.toString() : data;
