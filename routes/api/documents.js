@@ -1507,7 +1507,7 @@ router.get(`/:id/reports/gSpreadsheets/:kind/latest`, function (req, res, next) 
       let isError = data instanceof Error;
       let result = isError ? data.toString() : data;
       if (isError) return res.status(404).send(conf.errors.notFound);
-      if (result.length <= 0) res.status(404).send(conf.errors.notFound);
+      if (result.length <= 0) return res.status(404).send(conf.errors.notFound);
       let latest = result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
       return res.json({ err: isError, res: latest });
     });
