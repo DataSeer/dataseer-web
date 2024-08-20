@@ -7,11 +7,10 @@
 const express = require(`express`);
 const router = express.Router();
 
-const DocumentsDatasetsController = require(`../../controllers/api/documents.datasets.js`);
-
 const AccountsManager = require(`../../lib/accounts.js`);
 const Wiki = require(`../../lib/wiki.js`);
 const DataSeerML = require(`../../lib/dataseer-ml.js`);
+const DataObjects = require(`../../lib/dataObjects.js`);
 
 const conf = require(`../../conf/conf.json`);
 
@@ -40,11 +39,11 @@ router.get(`/jsonDataTypes`, function (req, res, next) {
 router.post(`/resyncJsonDataTypes`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
-  return Wiki.getDataTypes(function (err, dataTypes) {
+  return Wiki.getDataTypes({}, function (err, dataTypes) {
     if (err) return next(err);
     else {
       req.app.set(`dataTypes`, dataTypes);
-      DocumentsDatasetsController.refreshDataTypes(dataTypes);
+      DataObjects.refreshDataTypes(dataTypes);
       return res.json(req.app.get(`dataTypes`));
     }
   });

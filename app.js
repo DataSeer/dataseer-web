@@ -109,10 +109,15 @@ db.once(`open`, function () {
         });
       },
       function (next) {
-        return Wiki.getDataTypes(function (err, dataTypes) {
+        return Wiki.getDataTypes({}, function (err, dataTypes) {
           if (err) {
-            console.log(`dataTypes not initalized`);
-            return next(err);
+            console.log(`dataTypes not initalized, use local data instead...`);
+            return Wiki.getDataTypes({ local: true }, function (err, dataTypes) {
+              app.set(`dataTypes`, dataTypes);
+              DataObjects.refreshDataTypes(dataTypes);
+              console.log(`dataTypes initialized with local data`);
+              return next(err);
+            });
           }
           app.set(`dataTypes`, dataTypes);
           DataObjects.refreshDataTypes(dataTypes);
@@ -121,32 +126,60 @@ db.once(`open`, function () {
         });
       },
       function (next) {
-        return ORCID.refreshASAPAuthors(function (err, data) {
-          if (err) return next(err);
+        return ORCID.refreshASAPAuthors({}, function (err, data) {
+          if (err) {
+            console.log(`ASAP authors list not initalized, use local data instead...`);
+            return ORCID.refreshASAPAuthors({ local: true }, function (err, data) {
+              app.set(`ASAP.authors`, data);
+              console.log(`ASAP authors list initialized with local data`);
+              return next(err);
+            });
+          }
           app.set(`ASAP.authors`, data);
           console.log(`ASAP authors list initialized`);
           return next(err);
         });
       },
       function (next) {
-        return Software.refreshCustomList(function (err, data) {
-          if (err) return next(err);
+        return Software.refreshCustomList({}, function (err, data) {
+          if (err) {
+            console.log(`Custom software not initalized, use local data instead...`);
+            return Software.refreshCustomList({ local: true }, function (err, data) {
+              app.set(`Software.customList`, data);
+              console.log(`Custom software list initialized with local data`);
+              return next(err);
+            });
+          }
           app.set(`Software.customList`, data);
           console.log(`Custom software list initialized`);
           return next(err);
         });
       },
       function (next) {
-        return Reagents.refreshCustomList(function (err, data) {
-          if (err) return next(err);
+        return Reagents.refreshCustomList({}, function (err, data) {
+          if (err) {
+            console.log(`Custom reagents not initalized, use local data instead...`);
+            return Reagents.refreshCustomList({ local: true }, function (err, data) {
+              app.set(`Reagents.customList`, data);
+              console.log(`Custom reagents list initialized with local data`);
+              return next(err);
+            });
+          }
           app.set(`Reagents.customList`, data);
           console.log(`Custom reagents list initialized`);
           return next(err);
         });
       },
       function (next) {
-        return Identifiers.refreshCustomList(function (err, data) {
-          if (err) return next(err);
+        return Identifiers.refreshCustomList({}, function (err, data) {
+          if (err) {
+            console.log(`Custom identifiers not initalized, use local data instead...`);
+            return Identifiers.refreshCustomList({ local: true }, function (err, data) {
+              app.set(`Identifiers.customList`, data);
+              console.log(`Custom identifiers list initialized with local data`);
+              return next(err);
+            });
+          }
           app.set(`Identifiers.customList`, data);
           console.log(`Custom identifiers list initialized`);
           return next(err);

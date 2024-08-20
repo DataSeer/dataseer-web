@@ -87,7 +87,7 @@ router.get(`/customList/isIn`, function (req, res) {
 router.post(`/customList/refresh`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
-  return Identifiers.refreshCustomList(function (err, data) {
+  return Identifiers.refreshCustomList({}, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);

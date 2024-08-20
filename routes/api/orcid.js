@@ -40,7 +40,7 @@ router.post(`/ASAP/findAuthor`, function (req, res) {
 router.post(`/ASAP/refreshAuthors`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
-  return ORCID.refreshASAPAuthors(function (err, data) {
+  return ORCID.refreshASAPAuthors({}, function (err, data) {
     if (err) {
       console.log(err);
       return res.status(500).send(conf.errors.internalServerError);
