@@ -72,7 +72,7 @@ router.get(`/:id/changes/untrusted`, function (req, res, next) {
 router.post(`/resyncJsonDataTypes`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
   if (!accessRights.isModerator) return res.status(401).send(conf.errors.unauthorized);
-  return Wiki.getDataTypes(function (err, dataTypes) {
+  return Wiki.getDataTypes({}, function (err, dataTypes) {
     if (err) return next(err);
     else {
       req.app.set(`dataTypes`, dataTypes);
