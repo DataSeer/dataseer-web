@@ -7,6 +7,12 @@ conf/private.key
 
 scripts/conf/*.json
 
+#internal resources
+resources/jsonASAPAuthors.json
+resources/jsonCustomIdentifiersList.json
+resources/jsonCustomReagentsList.json
+resources/jsonCustomSoftwareList.json
+
 # mongodb docker container 
 mongodb/*.yml
 
