@@ -68,7 +68,8 @@ Self.getCodeStatus = function (object) {
   let subType = object.dataType === `other` ? `` : object.subType;
   let nbTest = Self.booleanArrayToNumber(array);
   let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
-  let availableRules = rules.code[subType][nbTest];
+  let availableRules =
+    rules && rules.code[subType] && rules.code[subType][nbTest] ? rules.code[subType][nbTest] : undefined;
   if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
   let key = availableRules[0];
   let customCheck = customChecks.code[subType].check(nbTest, object);
@@ -98,7 +99,8 @@ Self.getSoftwareStatus = function (object) {
   let subType = object.dataType === `other` ? `` : object.subType;
   let nbTest = Self.booleanArrayToNumber(array);
   let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
-  let availableRules = rules.software[subType][nbTest];
+  let availableRules =
+    rules && rules.software[subType] && rules.software[subType][nbTest] ? rules.software[subType][nbTest] : undefined;
   if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
   let key = availableRules[0];
   let customCheck = customChecks.software[subType].check(nbTest, object);
@@ -157,7 +159,10 @@ Self.getProtocolStatus = function (object) {
   let subType = object.dataType === `other` ? `` : object.subType;
   let nbTest = Self.booleanArrayToNumber(array);
   let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
-  let availableRules = rules.protocols[subType][nbTest];
+  let availableRules =
+    rules && rules.protocols[subType] && rules.protocols[subType][nbTest]
+      ? rules.protocols[subType][nbTest]
+      : undefined;
   if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
   let key = availableRules[0];
   let customCheck = customChecks.protocols[subType].check(nbTest, object);
