@@ -56,7 +56,7 @@
     "passport-local-mongoose": "^6.1.0",
     "pdf-lib": "^1.17.1",
     "pdf2pic": "^2.1.4",
-    "pdfjs-dist": "^2.13.216",
+    "pdfjs-dist": "^4.2.67",
     "pug": "^3.0.2",
     "puppeteer": "^20.9.0",
     "remove-accents": "^0.4.4",
