@@ -66,6 +66,7 @@ Self.getCodeStatus = function (object) {
     array.push(object[keys[i]]);
   }
   let subType = object.dataType === `other` ? `` : object.subType;
+  if (typeof rules.code[subType] === `undefined`) subType = ``;
   let nbTest = Self.booleanArrayToNumber(array);
   let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
   let availableRules =
@@ -97,6 +98,7 @@ Self.getSoftwareStatus = function (object) {
     array.push(object[keys[i]]);
   }
   let subType = object.dataType === `other` ? `` : object.subType;
+  if (typeof rules.software[subType] === `undefined`) subType = ``;
   let nbTest = Self.booleanArrayToNumber(array);
   let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
   let availableRules =
@@ -157,6 +159,7 @@ Self.getProtocolStatus = function (object) {
     array.push(object[keys[i]]);
   }
   let subType = object.dataType === `other` ? `` : object.subType;
+  if (typeof rules.protocols[subType] === `undefined`) subType = ``;
   let nbTest = Self.booleanArrayToNumber(array);
   let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
   let availableRules =
