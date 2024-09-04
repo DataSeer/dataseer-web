@@ -5084,6 +5084,7 @@ Self.getSortedDataObjectsInfo = function (doc, dataTypes = {}) {
       : doc.tei && doc.tei.metadata && doc.tei.metadata.mapping
         ? doc.tei.metadata.mapping.object
         : {};
+  let sentencesMetadata = doc.pdf && doc.pdf.metadata && doc.pdf.metadata.sentences ? doc.pdf.metadata.sentences : {};
   let sortSentences = function (a, b) {
     let c = mapping[a.id] ? mapping[a.id] : null,
       d = mapping[b.id] ? mapping[b.id] : null;
@@ -5096,8 +5097,19 @@ Self.getSortedDataObjectsInfo = function (doc, dataTypes = {}) {
     .map(function (item) {
       // sort sentences
       let sentences = item.sentences.sort(sortSentences);
+      let page = ``;
+      if (
+        sentences[0] &&
+        sentences[0].id &&
+        sentencesMetadata[sentences[0].id] &&
+        sentencesMetadata[sentences[0].id].pages
+      ) {
+        let keys = Object.keys(sentencesMetadata[sentences[0].id].pages);
+        page = keys.length > 0 ? keys[0].toString() : ``;
+      }
       let type = DataTypes.getDataTypeInfo(item, dataTypes);
       return Object.assign({}, item.toJSON(), {
+        page,
         type,
         sentences,
         isValid: item.actionRequired && item.actionRequired !== `Yes`

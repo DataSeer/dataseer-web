@@ -145,6 +145,24 @@
         },
         "enabled": true,
         "isDefault": false,
+        "label": "MDAR Report"
+      },
+      {
+        "actions":
+        {
+          "generate":
+          {
+            "enabled": true,
+            "isDefault": true
+          },
+          "open":
+          {
+            "enabled": true,
+            "isDefault": false
+          }
+        },
+        "enabled": true,
+        "isDefault": false,
         "label": "MJFF Impact Report"
       },
       {

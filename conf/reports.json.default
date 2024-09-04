@@ -7,6 +7,7 @@
     "ASAP": { "default": "reader" },
     "ASAP-PPMI": { "default": "reader" },
     "ASAP-GP2": { "default": "reader" },
+    "MDAR Report": { "default": "writer" },
     "MJFF Impact Report": { "default": "writer" }
   },
   "folders": {
@@ -17,6 +18,7 @@
     "ASAP": { "OrganizationID": "folderID", "default": "folderID" },
     "ASAP-PPMI": { "OrganizationID": "folderID", "default": "folderID" },
     "ASAP-GP2": { "OrganizationID": "folderID", "default": "folderID" },
+    "MDAR Report": { "OrganizationID": "folderID", "default": "folderID" },
     "MJFF Impact Report": { "OrganizationID": "folderID", "default": "folderID" }
   },
   "templates": {
@@ -27,6 +29,7 @@
     "ASAP": "folderID",
     "ASAP-PPMI": "folderID",
     "ASAP-GP2": "folderID",
+    "MDAR Report": "folderID",
     "MJFF Impact Report": "folderID"
   },
   "settings": {
@@ -50,6 +53,9 @@
         "timeout": 500
       },
       "ASAP-GP2": {
+        "timeout": 500
+      },
+      "MDAR Report": {
         "timeout": 500
       },
       "MJFF Impact Report": {
@@ -106,6 +112,21 @@
         "materials": false,
         "protocols": false
       },
+      "MDAR Report": {
+        "Antibodies": true,
+        "DNA and RNA sequences": true,
+        "Cell materials": true,
+        "Experimental animals": true,
+        "Plants and microbes": true,
+        "Human research participants": true,
+        "Study Protocol": true,
+        "Laboratory Protocol": true,
+        "Ethics - Humans": true,
+        "Ethics - Animal": true,
+        "Ethics - Filed and Sample": true,
+        "code": true,
+        "datasets": true
+      },
       "MJFF Impact Report": {
         "datasets": false,
         "code": false,
@@ -122,6 +143,7 @@
       "ASAP": false,
       "ASAP-PPMI": false,
       "ASAP-GP2": false,
+      "MDAR Report": false,
       "MJFF Impact Report": false
     },
     "ROAS": {
@@ -132,6 +154,7 @@
       "ASAP": false,
       "ASAP-PPMI": false,
       "ASAP-GP2": false,
+      "MDAR Report": false,
       "MJFF Impact Report": false
     },
     "OSIS": {
@@ -142,6 +165,7 @@
       "ASAP": false,
       "ASAP-PPMI": false,
       "ASAP-GP2": false,
+      "MDAR Report": false,
       "MJFF Impact Report": true
     },
     "authors": {
@@ -152,6 +176,7 @@
       "ASAP": false,
       "ASAP-PPMI": false,
       "ASAP-GP2": false,
+      "MDAR Report": false,
       "MJFF Impact Report": false
     }
   },
