@@ -124,8 +124,9 @@
         "Ethics - Humans": true,
         "Ethics - Animal": true,
         "Ethics - Filed and Sample": true,
+        "datasets": true,
         "code": true,
-        "datasets": true
+        "software": true
       },
       "MJFF Impact Report": {
         "datasets": false,
