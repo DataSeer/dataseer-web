@@ -2439,23 +2439,45 @@ Self.extractDataFromKRT = function (opts = {}, cb) {
             let item = jsonData.lines[i];
             if (item.isHeader) continue; // Do not process headers
             let resourceType =
-              typeof columnIndexes[`ResourceType`] !== `undefined`
+              typeof columnIndexes[`ResourceType`] !== `undefined` &&
+              item.cells &&
+              item.cells[columnIndexes[`ResourceType`]] &&
+              item.cells[columnIndexes[`ResourceType`]].content
                 ? item.cells[columnIndexes[`ResourceType`]].content
                 : ``;
             let resourceName =
-              typeof columnIndexes[`ResourceName`] !== `undefined`
+              typeof columnIndexes[`ResourceName`] !== `undefined` &&
+              item.cells &&
+              item.cells[columnIndexes[`ResourceName`]] &&
+              item.cells[columnIndexes[`ResourceName`]].content
                 ? item.cells[columnIndexes[`ResourceName`]].content
                 : ``;
             let source =
-              typeof columnIndexes[`Source`] !== `undefined` ? item.cells[columnIndexes[`Source`]].content : ``;
+              typeof columnIndexes[`Source`] !== `undefined` &&
+              item.cells &&
+              item.cells[columnIndexes[`Source`]] &&
+              item.cells[columnIndexes[`Source`]].content
+                ? item.cells[columnIndexes[`Source`]].content
+                : ``;
             let identifiers =
-              typeof columnIndexes[`Identifier`] !== `undefined` ? item.cells[columnIndexes[`Identifier`]].content : ``;
+              typeof columnIndexes[`Identifier`] !== `undefined` &&
+              item.cells &&
+              item.cells[columnIndexes[`Identifier`]] &&
+              item.cells[columnIndexes[`Identifier`]].content
+                ? item.cells[columnIndexes[`Identifier`]].content
+                : ``;
             let additionalInformation =
-              typeof columnIndexes[`AdditionalInformation`] !== `undefined`
+              typeof columnIndexes[`AdditionalInformation`] !== `undefined` &&
+              item.cells &&
+              item.cells[columnIndexes[`AdditionalInformation`]] &&
+              item.cells[columnIndexes[`AdditionalInformation`]].content
                 ? item.cells[columnIndexes[`AdditionalInformation`]].content
                 : ``;
             let newReuse =
-              typeof columnIndexes[`NewReuse`] !== `undefined`
+              typeof columnIndexes[`NewReuse`] !== `undefined` &&
+              item.cells &&
+              item.cells[columnIndexes[`NewReuse`]] &&
+              item.cells[columnIndexes[`NewReuse`]].content
                 ? item.cells[columnIndexes[`NewReuse`]].content
                 : undefined;
             // Get dataType, subType and reuse property based on resourceType value (lowerCase)
