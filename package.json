@@ -26,7 +26,7 @@
     "docx-templates": "^4.7.0",
     "ejs": "^3.1.7",
     "errorhandler": "^1.5.1",
-    "express": "^4.18.2",
+    "express": "^4.20.0",
     "express-fileupload": "^1.2.1",
     "fast-levenshtein": "^2.0.6",
     "fontkit": "^2.0.2",
