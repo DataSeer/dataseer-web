@@ -50,7 +50,13 @@ const Schema = new mongoose.Schema(
       value: { type: Boolean, default: false },
       notes: { type: String, default: `` }
     },
+    // Data Availability Statement
     DAS: {
+      sentences: [Sentence],
+      content: { type: String, default: `` }
+    },
+    // Materials Availability Statement
+    MAS: {
       sentences: [Sentence],
       content: { type: String, default: `` }
     },

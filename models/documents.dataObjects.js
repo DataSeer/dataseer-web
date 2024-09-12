@@ -53,6 +53,7 @@ const Schema = new mongoose.Schema(
     issues: { type: Issues, default: null }, // issues property
     // - "Sentences" properties
     sentences: [Sentence], // sentences
+    headSentence: { type: String, default: `` }, // head sentence
     // "Reagents", "Code" & "Software" properties only
     optional: { type: Boolean, default: false }, // optional property
     // "Datasets", Protocols, "Code" & "Software" properties only

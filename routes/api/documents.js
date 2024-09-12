@@ -1601,6 +1601,7 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
       id: req.params.id,
       refreshAuthors: Params.convertToBoolean(req.body.refreshAuthors),
       refreshDAS: Params.convertToBoolean(req.body.refreshDAS),
+      refreshMAS: Params.convertToBoolean(req.body.refreshMAS),
       refreshORCIDsFromAPI: Params.convertToBoolean(req.body.refreshORCIDsFromAPI),
       refreshORCIDsFromASAPList: Params.convertToBoolean(req.body.refreshORCIDsFromASAPList),
       automaticallySetPartOfASAPNetwork: Params.convertToBoolean(req.body.automaticallySetPartOfASAPNetwork),
@@ -1609,6 +1610,7 @@ router.post(`/:id/metadata/reload`, function (req, res, next) {
       ),
       metadata: {
         DAS: req.body.DAS,
+        MAS: req.body.MAS,
         readmeIncluded: req.body.readmeIncluded,
         describesFiles: req.body.describesFiles,
         describesVariables: req.body.describesVariables,

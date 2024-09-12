@@ -66,6 +66,19 @@ Self.create = function (opts = {}, cb) {
         });
       },
       function (acc, next) {
+        // Add headSentence property if needed
+        return DocumentsFilesController.readFile(
+          { data: { id: acc.document.tei._id ? acc.document.tei._id.toString() : acc.document.tei.toString() } },
+          function (err, file) {
+            if (err) return cb(err);
+            let $ = XML.load(file.data.toString(DocumentsFilesController.encoding));
+            let headSentences = XML.getHeadSentences($, { sentences: acc.dataObject.sentences });
+            acc.dataObject.headSentence = headSentences.join(`\n`);
+            return next(null, acc);
+          }
+        );
+      },
+      function (acc, next) {
         // Update TEI file
         return Self.addDataObjectInTEI(
           {
