@@ -695,6 +695,7 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
               dataTypesInfo: opts.data.dataTypes,
               metadata: {
                 DAS: data.doc.metadata.DAS,
+                MAS: data.doc.metadata.MAS,
                 articleTitle: data.doc.metadata.article_title,
                 readmeIncluded: data.doc.metadata.readmeIncluded,
                 describesFiles: data.doc.metadata.describesFiles,
@@ -809,6 +810,7 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
             dataTypesInfo: opts.data.dataTypes,
             metadata: {
               DAS: data.doc.metadata.DAS,
+              MAS: data.doc.metadata.MAS,
               articleTitle: data.doc.metadata.article_title,
               readmeIncluded: data.doc.metadata.readmeIncluded,
               describesFiles: data.doc.metadata.describesFiles,
@@ -1550,6 +1552,7 @@ Self.upload = function (opts = {}, cb) {
                 data: {
                   id: acc._id.toString(),
                   refreshDAS: true,
+                  refreshMAS: true,
                   refreshORCIDsFromAPI: true,
                   refreshORCIDsFromASAPList: true,
                   automaticallySetPartOfASAPNetwork: true,
@@ -3726,6 +3729,7 @@ Self.search = function (opts = {}, cb) {
  * @param {string} opts.data.metadata.pmid - Document metadata pmid
  * @param {object} opts.user - Current user
  * @param {object} opts.refreshDAS - Refresh value of DAS properties (using TEI data)
+ * @param {object} opts.refreshMAS - Refresh value of MAS properties (using TEI data)
  * @param {object} opts.refreshAuthors - Refresh value of authors name property (using TEI data)
  * @param {object} opts.refreshORCIDsFromAPI - Refresh value of authors ORCID property (using ORCID data)
  * @param {object} opts.refreshORCIDsFromASAPList - Refresh value of authors ORCID property (using ASAP List data)
@@ -3752,6 +3756,7 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
       let authors = _.get(metadata, `authors`, []);
       let refreshAuthors = _.get(opts, `data.refreshAuthors`, false);
       let refreshDAS = _.get(opts, `data.refreshDAS`, false);
+      let refreshMAS = _.get(opts, `data.refreshMAS`, false);
       let refreshORCIDsFromAPI = _.get(opts, `data.refreshORCIDsFromAPI`, false);
       let refreshORCIDsFromASAPList = _.get(opts, `data.refreshORCIDsFromASAPList`, false);
       let automaticallySetPartOfASAPNetwork = _.get(opts, `data.automaticallySetPartOfASAPNetwork`, false);
@@ -3799,6 +3804,9 @@ Self.updateOrCreateMetadata = function (opts = {}, cb) {
             }
             if (!refreshDAS) {
               if (metadata && metadata.DAS) _metadata.DAS = metadata.DAS;
+            }
+            if (!refreshMAS) {
+              if (metadata && metadata.MAS) _metadata.MAS = metadata.MAS;
             }
             metadata = Object.assign({}, _metadata);
             return next();
