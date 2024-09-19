@@ -113,6 +113,7 @@
         "protocols": false
       },
       "MDAR Report": {
+        "MAS": true,
         "Antibodies": true,
         "DNA and RNA sequences": true,
         "Cell materials": true,
