@@ -629,23 +629,6 @@ router.post(`/:id/refreshDataObjects`, function (req, res, next) {
   });
 });
 
-/* POST refreshAllDataObjects */
-router.post(`/refreshAllDataObjects`, function (req, res, next) {
-  let accessRights = AccountsManager.getAccessRights(req.user);
-  if (!accessRights.isAdministrator) return res.status(401).send(conf.errors.unauthorized);
-  // Init transaction
-  let opts = { user: req.user };
-  return DocumentsController.refreshAllDataObjects(opts, function (err, data) {
-    if (err) {
-      console.log(err);
-      return res.status(500).send(conf.errors.internalServerError);
-    }
-    let isError = data instanceof Error;
-    let result = isError ? data.toString() : data;
-    return res.json({ err: isError, res: result });
-  });
-});
-
 /* POST importDataObjects */
 router.post(`/:target/importDataObjects/:source`, function (req, res, next) {
   let accessRights = AccountsManager.getAccessRights(req.user);
