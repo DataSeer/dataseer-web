@@ -1,0 +1,17 @@
+{
+  "2": {
+    "key": 2,
+    "actionRequired": "Yes",
+    "label": "Upload code to Zenodo and provide DOI or register tool for an RRID"
+  },
+  "1": {
+    "key": 1,
+    "actionRequired": "Yes",
+    "label": "Verify citation"
+  },
+  "0": {
+    "key": 0,
+    "actionRequired": "No",
+    "label": "Done - Cited correctly"
+  }
+}

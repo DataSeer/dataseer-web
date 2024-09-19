@@ -1,0 +1,32 @@
+{
+  "5": {
+    "key": 5,
+    "actionRequired": "Yes",
+    "label": "Analysis - Data Availability - New - Action Required"
+  },
+  "4": {
+    "key": 4,
+    "actionRequired": "Yes",
+    "label": "Analysis - Data Availability - Reuse - Action Required"
+  },
+  "3": {
+    "key": 3,
+    "actionRequired": "Yes",
+    "label": "Analysis - Data Availability - Action Required - Issue"
+  },
+  "2": {
+    "key": 2,
+    "actionRequired": "Optionnal",
+    "label": "Analysis - Data Availability - No Action Required - Optional (QC)"
+  },
+  "1": {
+    "key": 1,
+    "actionRequired": "Optionnal",
+    "label": "Analysis - Data Availability - No Action Required - Optional (REP)"
+  },
+  "0": {
+    "key": 0,
+    "actionRequired": "No",
+    "label": "Analysis - Data Availability - No Action Required - Done - Shared/Cited"
+  }
+}
