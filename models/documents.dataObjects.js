@@ -56,6 +56,8 @@ const Schema = new mongoose.Schema(
     headSentence: { type: String, default: `` }, // head sentence
     // "Reagents", "Code" & "Software" properties only
     optional: { type: Boolean, default: false }, // optional property
+    // "Datasets" & "Code" & "Software" properties only
+    hasReadMe: { type: Boolean, default: false }, // hasReadMe property
     // "Datasets", Protocols, "Code" & "Software" properties only
     URL: { type: String, default: `` }, // version
     // "Datasets" properties only
