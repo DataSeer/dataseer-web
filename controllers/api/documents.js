@@ -717,6 +717,10 @@ Self.buildGSpreadsheets = function (opts = {}, cb) {
                   url: data.doc.urls.originalFile,
                   label: data.doc.name ? data.doc.name : data.doc._id.toString()
                 },
+                krtFileLink: {
+                  url: `${Url.build(`/api/documents/${opts.data.id}/krt/pdf/content`, {})}`,
+                  label: data.doc.name ? `${data.doc.name} (KRT)` : `${data.doc._id.toString()} (KRT)`
+                },
                 dataseerDomain: Url.build(`/`, {}),
                 acknowledgement: data.doc.metadata.acknowledgement,
                 affiliation: data.doc.metadata.affiliation,
@@ -831,6 +835,10 @@ Self._buildGSpreadsheets = function (opts = {}, cb) {
               originalFileLink: {
                 url: data.doc.urls.originalFile,
                 label: data.doc.name ? data.doc.name : data.doc._id.toString()
+              },
+              krtFileLink: {
+                url: `${Url.build(`/api/documents/${opts.data.id}/krt/pdf/content`, {})}`,
+                label: data.doc.name ? `${data.doc.name} (KRT)` : `${data.doc._id.toString()} (KRT)`
               },
               dataseerDomain: Url.build(`/`, {}),
               acknowledgement: data.doc.metadata.acknowledgement,
