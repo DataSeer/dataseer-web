@@ -180,6 +180,17 @@
       "ASAP-GP2": false,
       "MDAR Report": false,
       "MJFF Impact Report": false
+    },
+    "sentencesCarriageReturnReplace": {
+      "HHMI": "\n",
+      "DataSeer Generic": "\n",
+      "AmNat": "\n",
+      "Universal Journal Report": "\n",
+      "ASAP": " | ",
+      "ASAP-PPMI": " | ",
+      "ASAP-GP2": " | ",
+      "MDAR Report": "\n",
+      "MJFF Impact Report": "\n"
     }
   },
   "prefix": "prefix of the filename (e.g. 'localhost - ' for localhost, 'dev - ' for development, an empty string for production)"
