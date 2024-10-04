@@ -5,11 +5,11 @@
 | **Summary of datasets and Open Science materials associated with article:**
 |
 each item in [{"key":"protocols","label":"Protocol(s)"},{"key":"datasets","label":"Dataset(s)"},{"key":"code","label":"Code"},{"key":"reagents","label":"Reagents/Materials/Lab Resources"}]
-  if(reportData.sortedDatasetsInfos[item.key].length > 0)
-    | - #{`${reportData.sortedDatasetsInfos[item.key].length} ${item.label}`}
+  if(reportData.sortedDataObjectsInfo[item.key].length > 0)
+    | - #{`${reportData.sortedDataObjectsInfo[item.key].length} ${item.label}`}
     |
 
-each dataType in reportData.datasetsSummary
+each dataType in reportData.dataObjectsSummary
   if(dataType.key !== "other" && dataType.key !== "code software" && dataType.key !== "lab materials")
     |
     | **#{dataType.count} #{dataType.type.label} Dataset(s)**
