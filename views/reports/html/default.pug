@@ -94,7 +94,7 @@
     <section>
       <h3>Suggested Data Availability Statement:</h3>
       <table class="report">
-        if reportData.sortedDatasetsInfos.all.length === 0
+        if reportData.sortedDataObjectsInfo.all.length === 0
           <tr class="none">
             <td>None</td>
           </tr>
@@ -104,7 +104,7 @@
             <th>Title</th>
             <th>Stable Identifier</th>
           </tr>
-          each dataset, index in reportData.sortedDatasetsInfos.all
+          each dataset, index in reportData.sortedDataObjectsInfo.all
             <tr class="content">
               if (dataset.type.url)
                 <td>
@@ -136,7 +136,7 @@
       each item in [{"key":"protocols","label": "Protocols", "colspan": 5},{"key":"datasets","label": "Datasets", "colspan": 6},{"key":"code","label": "Code", "colspan": 5},{"key":"reagents","label": "Reagents", "colspan": 5}]
         h3.report #{item.label}:
         table(class="report")
-          if reportData.sortedDatasetsInfos[item.key].length === 0
+          if reportData.sortedDataObjectsInfo[item.key].length === 0
             <tr class="none"><td>None</td></tr>
           else
             <tr class="header">
@@ -151,7 +151,7 @@
               <th>Comments</th>
               <th>Re-Use</th>
             </tr>
-            each dataset, index in reportData.sortedDatasetsInfos[item.key]
+            each dataset, index in reportData.sortedDataObjectsInfo[item.key]
               tr(class="content" id=dataset.id)
                 <td>#{index+1}</td>
                 if dataset.name
@@ -194,7 +194,7 @@
     </section>
     <section>
       <h2>Sharing best practice:</h2>
-      if reportData.sortedDatasetsInfos.all.length === 0
+      if reportData.sortedDataObjectsInfo.all.length === 0
         <label>None</label>
       else
         each item in reportData.bestPractices.data
