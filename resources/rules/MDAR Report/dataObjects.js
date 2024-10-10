@@ -60,27 +60,25 @@ Self.getDatasetStatus = function (object) {
  * @returns {string} The given status
  */
 Self.getCodeStatus = function (object) {
-  let keys = [`issues`, `reuse`, `version`, `URL`, `DOI`, `suggestedEntity`, `suggestedRRID`, `suggestedURL`];
+  // issue reuse URL DOI optional
+  let keys = [`issues`, `reuse`, `URL`, `DOI`, `optional`];
   let array = [];
   for (let i = keys.length - 1; i >= 0; i--) {
     array.push(object[keys[i]]);
   }
-  let subType = object.dataType === `other` ? `` : object.subType;
-  if (typeof rules.code[subType] === `undefined`) subType = ``;
   let nbTest = Self.booleanArrayToNumber(array);
   let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
-  let availableRules =
-    rules && rules.code[subType] && rules.code[subType][nbTest] ? rules.code[subType][nbTest] : undefined;
+  let availableRules = rules.code[nbTest];
   if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
   let key = availableRules[0];
-  let customCheck = customChecks.code[subType].check(nbTest, object);
+  let customCheck = customChecks.code.check(nbTest, object);
   if (availableRules.length > 1 && typeof customCheck === `number` && !isNaN(customCheck)) key = customCheck;
   let result =
-    typeof status.code[subType][key] === `object`
+    typeof status.code[key] === `object`
       ? {
-        status: status.code[subType][key].label,
-        actionRequired: status.code[subType][key].actionRequired,
-        rule: object.kind ? `${object.kind}.${subType}:${nbTest}[${key}]` : nbTest
+        status: status.code[key].label,
+        actionRequired: status.code[key].actionRequired,
+        rule: object.kind ? `${object.kind}:${nbTest}[${key}]` : nbTest
       }
       : defaultResult;
   return result;
@@ -92,27 +90,25 @@ Self.getCodeStatus = function (object) {
  * @returns {string} The given status
  */
 Self.getSoftwareStatus = function (object) {
-  let keys = [`issues`, `reuse`, `version`, `URL`, `RRID`, `suggestedEntity`, `suggestedRRID`, `suggestedURL`];
+  // issue reuse version URL RRID optional
+  let keys = [`issues`, `reuse`, `version`, `URL`, `RRID`, `optional`];
   let array = [];
   for (let i = keys.length - 1; i >= 0; i--) {
     array.push(object[keys[i]]);
   }
-  let subType = object.dataType === `other` ? `` : object.subType;
-  if (typeof rules.software[subType] === `undefined`) subType = ``;
   let nbTest = Self.booleanArrayToNumber(array);
   let defaultResult = { status: `unknow`, actionRequired: `unknow`, rule: `unknow` };
-  let availableRules =
-    rules && rules.software[subType] && rules.software[subType][nbTest] ? rules.software[subType][nbTest] : undefined;
+  let availableRules = rules.software[nbTest];
   if (!Array.isArray(availableRules) || availableRules.length <= 0) return defaultResult;
   let key = availableRules[0];
-  let customCheck = customChecks.software[subType].check(nbTest, object);
+  let customCheck = customChecks.software.check(nbTest, object);
   if (availableRules.length > 1 && typeof customCheck === `number` && !isNaN(customCheck)) key = customCheck;
   let result =
-    typeof status.software[subType][key] === `object`
+    typeof status.software[key] === `object`
       ? {
-        status: status.software[subType][key].label,
-        actionRequired: status.software[subType][key].actionRequired,
-        rule: object.kind ? `${object.kind}.${subType}:${nbTest}[${key}]` : nbTest
+        status: status.software[key].label,
+        actionRequired: status.software[key].actionRequired,
+        rule: object.kind ? `${object.kind}:${nbTest}[${key}]` : nbTest
       }
       : defaultResult;
   return result;

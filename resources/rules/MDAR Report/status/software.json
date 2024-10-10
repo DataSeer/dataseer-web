@@ -1,0 +1,27 @@
+{
+  "4": {
+    "key": 4,
+    "actionRequired": "Yes",
+    "label": "Issue"
+  },
+  "3": {
+    "key": 3,
+    "actionRequired": "Yes",
+    "label": "Reused software"
+  },
+  "2": {
+    "key": 2,
+    "actionRequired": "Yes",
+    "label": "Newly generated software"
+  },
+  "1": {
+    "key": 1,
+    "actionRequired": "No",
+    "label": "Optional"
+  },
+  "0": {
+    "key": 0,
+    "actionRequired": "No",
+    "label": "Done - Shared/Cited"
+  }
+}
