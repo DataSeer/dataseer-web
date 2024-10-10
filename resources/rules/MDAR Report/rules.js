@@ -14,18 +14,8 @@ const mappings = {
     'published protocol': require(`./mappings/protocols.pp.json`),
     'pre-registration': require(`./mappings/protocols.pre-reg.json`)
   },
-  'software': {
-    'custom scripts': require(`./mappings/software.custom-scripts.json`),
-    '': require(`./mappings/software.none.json`),
-    'software package': require(`./mappings/software.software-package.json`),
-    'software': require(`./mappings/software.software.json`)
-  },
-  'code': {
-    'custom scripts': require(`./mappings/code.custom-scripts.json`),
-    '': require(`./mappings/code.none.json`),
-    'software package': require(`./mappings/code.software-package.json`),
-    'software': require(`./mappings/code.software.json`)
-  },
+  'software': require(`./mappings/software.json`),
+  'code': require(`./mappings/code.json`),
   'reagents': require(`./mappings/reagents.json`)
 };
 
@@ -52,22 +42,14 @@ const buildMapping = function (mapping) {
 module.exports = {
   'datasets': buildMapping(mappings.datasets),
   'protocols': {
-    'manufacturer instructions': buildMapping(mappings.protocols[`manufacturer instructions`]),
+    'animal': buildMapping(mappings.protocols[`animal`]),
+    'human': buildMapping(mappings.protocols[`human`]),
+    'collection permit': buildMapping(mappings.protocols[`collection permit`]),
     '': buildMapping(mappings.protocols[``]),
     'published protocol': buildMapping(mappings.protocols[`published protocol`]),
-    'surveys and questionnaires': buildMapping(mappings.protocols[`surveys and questionnaires`])
+    'pre-registration': buildMapping(mappings.protocols[`pre-registration`]),
   },
-  'software': {
-    'custom scripts': buildMapping(mappings.software[`custom scripts`]),
-    '': buildMapping(mappings.software[``]),
-    'software package': buildMapping(mappings.software[`software package`]),
-    'software': buildMapping(mappings.software[`software`])
-  },
-  'code': {
-    'custom scripts': buildMapping(mappings.code[`custom scripts`]),
-    '': buildMapping(mappings.code[``]),
-    'software package': buildMapping(mappings.code[`software package`]),
-    'software': buildMapping(mappings.code[`software`])
-  },
+  'software': buildMapping(mappings.software),
+  'code': buildMapping(mappings.code),
   'reagents': buildMapping(mappings.reagents)
 };

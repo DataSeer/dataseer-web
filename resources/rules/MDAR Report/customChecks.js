@@ -14,17 +14,7 @@ module.exports = {
     'published protocol': require(`./checks/protocols.pp.js`),
     'pre-registration': require(`./checks/protocols.pre-reg.js`)
   },
-  software: {
-    'custom scripts': require(`./checks/software.custom-scripts.js`),
-    '': require(`./checks/software.none.js`),
-    'software package': require(`./checks/software.software-package.js`),
-    'software': require(`./checks/software.software.js`)
-  },
-  code: {
-    'custom scripts': require(`./checks/code.custom-scripts.js`),
-    '': require(`./checks/code.none.js`),
-    'software package': require(`./checks/code.software-package.js`),
-    'software': require(`./checks/code.software.js`)
-  },
+  software: require(`./checks/software.js`),
+  code: require(`./checks/code.js`),
   reagents: require(`./checks/reagents.js`)
 };
